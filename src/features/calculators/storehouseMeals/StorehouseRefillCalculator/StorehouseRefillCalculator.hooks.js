@@ -34,7 +34,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { runStorehouseRefillCalculation } from "./StorehouseRefillCalculator.shim";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./StorehouseRefillCalculator.schema.json").definitions.StorehouseRefillInput} StorehouseRefillInput
@@ -66,7 +66,8 @@ import { emit } from "@/services/eventBus";
  * }} [options]
  */
 export function useStorehouseRefillPlanner(initialInput, options = {}) {
-  const { source = "calculators/storehouseRefill", autoEmitEvents = true } = options;
+  const { source = "calculators/storehouseRefill", autoEmitEvents = true } =
+    options;
 
   const [input, setInput] = useState(
     /** @type {StorehouseRefillInput | null} */ (initialInput || null)
@@ -76,7 +77,9 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
   );
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
-  const [lastRunAt, setLastRunAt] = useState(/** @type {string | null} */ (null));
+  const [lastRunAt, setLastRunAt] = useState(
+    /** @type {string | null} */ (null)
+  );
 
   /**
    * Run the refill planner for the current input.
@@ -85,7 +88,9 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
    */
   const run = useCallback(async () => {
     if (!input) {
-      setError("No storehouse input. Please provide a snapshot before running.");
+      setError(
+        "No storehouse input. Please provide a snapshot before running."
+      );
       return null;
     }
 
@@ -98,7 +103,7 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
         type: "planning.storehouseRefill.requested",
         ts,
         source,
-        data: { input }
+        data: { input },
       });
     }
 
@@ -112,7 +117,7 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
           type: "planning.storehouseRefill.completed",
           ts: new Date().toISOString(),
           source,
-          data: { input, output }
+          data: { input, output },
         });
       }
 
@@ -129,8 +134,8 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
           source,
           data: {
             input,
-            error: err instanceof Error ? err.message : String(err)
-          }
+            error: err instanceof Error ? err.message : String(err),
+          },
         });
       }
 
@@ -147,7 +152,7 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
     isRunning,
     error,
     lastRunAt,
-    run
+    run,
   };
 }
 
@@ -174,7 +179,8 @@ export function useStorehouseRefillPlanner(initialInput, options = {}) {
  * }} [options]
  */
 export function useRefillToShoppingSession(options = {}) {
-  const { source = "calculators/storehouseRefill", autoEmitEvents = true } = options;
+  const { source = "calculators/storehouseRefill", autoEmitEvents = true } =
+    options;
 
   /**
    * @param {StorehouseRefillOutput | null} refill
@@ -188,11 +194,7 @@ export function useRefillToShoppingSession(options = {}) {
     (refill, opts = {}) => {
       if (!refill) return null;
 
-      const {
-        labelOverride,
-        householdId,
-        preferredStoreIds = []
-      } = opts;
+      const { labelOverride, householdId, preferredStoreIds = [] } = opts;
 
       const ts = new Date().toISOString();
 
@@ -204,14 +206,14 @@ export function useRefillToShoppingSession(options = {}) {
         title: labelOverride || "Storehouse Refill Shopping Session",
         source: {
           type: "import",
-          refId: refill.runContext?.sourceRefId || null
+          refId: refill.runContext?.sourceRefId || null,
         },
         meta: {
           kind: "shopping",
           householdId: householdId || refill.runContext?.householdId || null,
           planningHorizonDays: refill.runContext?.planningHorizonDays || null,
           preferredStoreIds,
-          aggregatedRefillSummary: refill.aggregatedRefillSummary || null
+          aggregatedRefillSummary: refill.aggregatedRefillSummary || null,
         },
         lines: lines.map((line) => ({
           itemId: line.itemId,
@@ -223,10 +225,10 @@ export function useRefillToShoppingSession(options = {}) {
           targetQty: line.targetQty,
           refillQty: line.refillQty,
           urgency: line.urgency,
-          notes: line.notes || null
+          notes: line.notes || null,
         })),
         createdAt: ts,
-        updatedAt: ts
+        updatedAt: ts,
       };
 
       if (autoEmitEvents) {
@@ -234,7 +236,7 @@ export function useRefillToShoppingSession(options = {}) {
           type: "planning.storehouseRefill.shoppingSession.created",
           ts,
           source,
-          data: { refill, session }
+          data: { refill, session },
         });
       }
 
@@ -270,7 +272,8 @@ export function useRefillToShoppingSession(options = {}) {
  * }} [options]
  */
 export function useRefillInventorySync(options = {}) {
-  const { source = "calculators/storehouseRefill", autoEmitEvents = true } = options;
+  const { source = "calculators/storehouseRefill", autoEmitEvents = true } =
+    options;
 
   /**
    * @param {StorehouseRefillOutput | null} refill
@@ -292,7 +295,7 @@ export function useRefillInventorySync(options = {}) {
               type: "set",
               itemId: line.itemId,
               newQty: line.targetQty,
-              uom: line.uom
+              uom: line.uom,
             };
           }
 
@@ -301,7 +304,7 @@ export function useRefillInventorySync(options = {}) {
             type: "increment",
             itemId: line.itemId,
             amount: line.refillQty,
-            uom: line.uom
+            uom: line.uom,
           };
         });
 
@@ -310,7 +313,7 @@ export function useRefillInventorySync(options = {}) {
           type: "planning.storehouseRefill.inventoryPatches.derived",
           ts: new Date().toISOString(),
           source,
-          data: { refill, patches, mode }
+          data: { refill, patches, mode },
         });
       }
 
@@ -343,7 +346,7 @@ export function useRefillInventorySync(options = {}) {
   return useMemo(
     () => ({
       deriveInventoryPatches,
-      deriveHairNutritionSubset
+      deriveHairNutritionSubset,
     }),
     [deriveInventoryPatches, deriveHairNutritionSubset]
   );

@@ -205,7 +205,10 @@ const useTimerStore = create(
               ...t,
               status: "complete",
               remaining: 0,
-              meta: { ...(t.meta || {}), completedAt: new Date().toISOString() },
+              meta: {
+                ...(t.meta || {}),
+                completedAt: new Date().toISOString(),
+              },
             };
           }
           return t;
@@ -221,7 +224,9 @@ const useTimerStore = create(
             if (t.id === safeId && t.status === "complete") {
               try {
                 window.dispatchEvent(
-                  new CustomEvent("multitimer:complete", { detail: { timer: t } })
+                  new CustomEvent("multitimer:complete", {
+                    detail: { timer: t },
+                  })
                 );
               } catch {}
             }
@@ -258,7 +263,12 @@ const useTimerStore = create(
           if (t.id !== safeId) return t;
           const remaining = Math.max(0, (t.remaining ?? 0) + add);
           // If it was complete and we added time, put it in paused state so user can start
-          const status = remaining === 0 ? "complete" : t.status === "complete" ? "paused" : t.status;
+          const status =
+            remaining === 0
+              ? "complete"
+              : t.status === "complete"
+              ? "paused"
+              : t.status;
           return {
             ...t,
             remaining,
@@ -318,7 +328,10 @@ const useTimerStore = create(
           return;
         }
         // create new
-        get().createTimer(safeId, label, { dueAt: dueAtIso, meta: { dueAt: dueAtIso } });
+        get().createTimer(safeId, label, {
+          dueAt: dueAtIso,
+          meta: { dueAt: dueAtIso },
+        });
       },
 
       /** Attach metadata (recipe/step/slot/tags). */
@@ -326,7 +339,9 @@ const useTimerStore = create(
         const safeId = String(id ?? "").trim();
         const prev = get().timers || [];
         const next = prev.map((t) =>
-          t.id === safeId ? { ...t, meta: { ...(t.meta || {}), ...(metaPatch || {}) } } : t
+          t.id === safeId
+            ? { ...t, meta: { ...(t.meta || {}), ...(metaPatch || {}) } }
+            : t
         );
         set({ timers: next });
       },
@@ -397,11 +412,43 @@ export const pauseTimer = (id) => useTimerStore.getState().pauseTimer(id);
 export const completeTimer = (id) => useTimerStore.getState().completeTimer(id);
 export const removeTimer = (id) => useTimerStore.getState().removeTimer(id);
 
+/**
+ * getAllTimers
+ * - Backward-compatible export expected by MultiTimerManagerUI.jsx.
+ * - Returns the current timers array (never throws).
+ */
+export function getAllTimers() {
+  try {
+    const s = useTimerStore?.getState?.();
+    return Array.isArray(s?.timers) ? s.timers : [];
+  } catch {
+    return [];
+  }
+}
+
+/** formatTime
+ * - Backward-compatible helper used by UI.
+ * - Accepts seconds; returns "MM:SS" or "H:MM:SS" when >= 1 hour.
+ */
+export function formatTime(seconds) {
+  const total = Math.max(0, Math.floor(Number(seconds || 0)));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  if (h > 0) return `${h}:${pad2(m)}:${pad2(s)}`;
+  return `${pad2(m)}:${pad2(s)}`;
+}
+
 /* Optional helpers (new, backwards-compatible) */
 export const clearAllTimers = () => useTimerStore.getState().clearAll();
-export const addTimeToTimer = (id, seconds) => useTimerStore.getState().addTime(id, seconds);
-export const snoozeTimer = (id, seconds = 300) => useTimerStore.getState().snooze(id, seconds);
+export const addTimeToTimer = (id, seconds) =>
+  useTimerStore.getState().addTime(id, seconds);
+export const snoozeTimer = (id, seconds = 300) =>
+  useTimerStore.getState().snooze(id, seconds);
 export const restartTimer = (id) => useTimerStore.getState().restart(id);
 export const scheduleTimerFor = (id, label, dueAtIso) =>
   useTimerStore.getState().scheduleFor(id, label, dueAtIso);
-export const linkTimerTo = (id, metaPatch) => useTimerStore.getState().attachMeta(id, metaPatch);
+export const linkTimerTo = (id, metaPatch) =>
+  useTimerStore.getState().attachMeta(id, metaPatch);

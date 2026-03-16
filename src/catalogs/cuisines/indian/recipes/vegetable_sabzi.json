@@ -1,0 +1,579 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.cuisines.indian.vegetable_sabzi",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Mixed Vegetable Sabzi",
+    "subtitle": "Quick North-Indian-style dry curry with flexible vegetables + masala",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/vegetable_sabzi.json",
+      "notes": [
+        "Deterministic stovetop sabzi (dry-ish vegetable curry) designed for flexible pantry vegetables.",
+        "Built around cumin bloom + onion-tomato masala + finishing garam masala.",
+        "Works as a weeknight main/side; pairs well with basmati rice or naan."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "vegetable",
+    "mealArchetypes": ["meal.main.vegetable", "meal.side.vegetable"],
+    "servingStyles": ["family_style", "bowl"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.sabzi",
+      "diet.vegetarian",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good",
+      "role.curry_or_dal",
+      "role.veg_side"
+    ]
+  },
+  "summary": "A fast, flexible mixed vegetable sabzi (dry curry) with a classic cumin-onion-tomato masala. Use whatever vegetables you have; finish with garam masala and lemon for brightness.",
+  "keywords": [
+    "sabzi",
+    "subzi",
+    "mixed vegetables",
+    "dry curry",
+    "aloo",
+    "gobi",
+    "bhaji",
+    "weeknight indian"
+  ],
+  "tags": [
+    "cuisine.indian",
+    "dish.sabzi",
+    "diet.vegetarian",
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+  "yield": {
+    "servings": 4,
+    "servingSize": {
+      "value": 1.25,
+      "unit": "cups"
+    },
+    "notes": "Serves 4 as a side or 3–4 as a light main with rice/naan."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 15,
+    "totalMins": 35
+  },
+  "difficulty": 3,
+  "equipment": {
+    "minimum": [
+      "equip.knife",
+      "equip.cutting_board",
+      "equip.skillet",
+      "equip.wooden_spoon"
+    ],
+    "recommended": ["equip.lid", "equip.microplane", "equip.measuring_spoons"],
+    "optional": [
+      {
+        "id": "equip.instant_pot",
+        "label": "Electric pressure cooker",
+        "required": false,
+        "notes": "Not required; sabzi is best sautéed/steam-finished. Use only for potatoes if desired."
+      }
+    ]
+  },
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "fair (potatoes soften); best refrigerated",
+    "weeknightPossible": true
+  },
+  "dietFlags": ["diet.vegetarian"],
+  "allergens": {
+    "contains": [],
+    "mayContain": [],
+    "notes": ["Naturally vegetarian; vegan if cooked in oil (no ghee)."]
+  },
+  "ingredients": [
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil (or ghee)",
+      "role": "role.fat",
+      "amount": {
+        "value": 2,
+        "unit": "tbsp"
+      },
+      "notes": [
+        "Use ghee for richer flavor (not vegan).",
+        "Mustard oil works for a sharper, more traditional profile (heat until smoking, then cool slightly before spices)."
+      ]
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Cumin seeds",
+      "role": "role.spice",
+      "amount": {
+        "value": 1,
+        "unit": "tsp"
+      },
+      "notes": "If using ground cumin, add later with other ground spices to avoid scorching."
+    },
+    {
+      "id": "spice.mustard_seed",
+      "label": "Mustard seeds (optional)",
+      "role": "role.spice",
+      "amount": {
+        "value": 0.5,
+        "unit": "tsp"
+      },
+      "optional": true,
+      "notes": "Adds a South-Indian tempering vibe; skip for a simpler North-Indian profile."
+    },
+    {
+      "id": "ing.onion",
+      "label": "Onion, finely chopped",
+      "role": "role.aromatic",
+      "amount": {
+        "value": 1,
+        "unit": "medium"
+      }
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Ginger, grated",
+      "role": "role.aromatic",
+      "amount": {
+        "value": 1,
+        "unit": "tbsp"
+      }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": {
+        "value": 3,
+        "unit": "cloves"
+      }
+    },
+    {
+      "id": "ing.green_chili",
+      "label": "Green chili, minced (optional)",
+      "role": "role.heat",
+      "amount": {
+        "value": 1,
+        "unit": "each"
+      },
+      "optional": true,
+      "notes": "Adjust to taste; omit for mild."
+    },
+    {
+      "id": "ing.tomato",
+      "label": "Tomatoes, diced (or crushed)",
+      "role": "role.base",
+      "amount": {
+        "value": 1.5,
+        "unit": "cups"
+      },
+      "notes": "Canned diced/crushed tomatoes are fine; reduce a bit longer to remove raw acidity."
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": {
+        "value": 0.5,
+        "unit": "tsp"
+      }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": {
+        "value": 2,
+        "unit": "tsp"
+      }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": {
+        "value": 1,
+        "unit": "tsp"
+      },
+      "notes": "Use more for heat or substitute paprika + pinch cayenne."
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.finish_spice",
+      "amount": {
+        "value": 1,
+        "unit": "tsp"
+      },
+      "notes": "Add near the end to keep aroma fresh."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": {
+        "value": 1.25,
+        "unit": "tsp"
+      },
+      "notes": "Adjust based on salt type and tomato acidity."
+    },
+    {
+      "id": "ing.potato",
+      "label": "Potatoes, peeled and diced (1/2-inch)",
+      "role": "role.vegetable",
+      "amount": {
+        "value": 2,
+        "unit": "cups"
+      },
+      "notes": "Optional but common; provides body. If omitted, reduce steam time."
+    },
+    {
+      "id": "ing.cauliflower",
+      "label": "Cauliflower florets",
+      "role": "role.vegetable",
+      "amount": {
+        "value": 2,
+        "unit": "cups"
+      }
+    },
+    {
+      "id": "ing.carrot",
+      "label": "Carrots, sliced",
+      "role": "role.vegetable",
+      "amount": {
+        "value": 1,
+        "unit": "cup"
+      }
+    },
+    {
+      "id": "ing.green_beans",
+      "label": "Green beans, cut into 1-inch pieces",
+      "role": "role.vegetable",
+      "amount": {
+        "value": 1,
+        "unit": "cup"
+      }
+    },
+    {
+      "id": "ing.green_peas",
+      "label": "Green peas (fresh or frozen)",
+      "role": "role.vegetable",
+      "amount": {
+        "value": 0.75,
+        "unit": "cup"
+      },
+      "optional": true,
+      "notes": "Add near the end so they stay bright."
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "role": "role.liquid",
+      "amount": {
+        "value": 0.25,
+        "unit": "cup"
+      },
+      "notes": "Used to steam-finish vegetables; add more only if pan is drying out."
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice (or amchur)",
+      "role": "role.finish",
+      "amount": {
+        "value": 1,
+        "unit": "tbsp"
+      },
+      "optional": true,
+      "notes": [
+        "Adds brightness and balance. If using amchur, start with 1/2 tsp and adjust."
+      ]
+    },
+    {
+      "id": "herb.cilantro",
+      "label": "Cilantro, chopped",
+      "role": "role.garnish",
+      "amount": {
+        "value": 0.25,
+        "unit": "cup"
+      },
+      "optional": true
+    }
+  ],
+  "methods": [
+    "method.tadka",
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "method.simmer",
+    "method.steam_finish"
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep vegetables and aromatics",
+      "instructions": [
+        "Dice potatoes (if using) and chop cauliflower, carrots, and green beans into similar-size pieces for even cooking.",
+        "Chop onion and mince/grate ginger and garlic. Keep spices measured and ready."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": [
+        "Uniform vegetable size prevents mushy pieces alongside undercooked ones."
+      ]
+    },
+    {
+      "id": "step_02_temper_spices",
+      "title": "Bloom whole spices (tadka)",
+      "instructions": [
+        "Heat oil (or ghee) in a skillet over medium-high heat until shimmering.",
+        "Add cumin seeds (and mustard seeds if using). Let sizzle 15–25 seconds until fragrant and lightly popping."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "timers": [
+        {
+          "label": "Bloom whole spices",
+          "seconds": 20
+        }
+      ],
+      "checks": [
+        "If spices darken immediately, reduce heat—burnt spices turn bitter."
+      ]
+    },
+    {
+      "id": "step_03_onion_base",
+      "title": "Build the onion base",
+      "instructions": [
+        "Add chopped onion and cook 5–7 minutes, stirring, until softened and lightly golden at the edges.",
+        "Add ginger, garlic, and green chili (optional). Cook 45–60 seconds until fragrant."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "timers": [
+        {
+          "label": "Onion sauté",
+          "minutes": 6
+        },
+        {
+          "label": "Ginger/garlic fry",
+          "seconds": 60
+        }
+      ],
+      "checks": [
+        "Cook aromatics just until fragrant—do not brown garlic too hard."
+      ]
+    },
+    {
+      "id": "step_04_masala",
+      "title": "Add tomatoes and ground spices (onion-tomato masala)",
+      "instructions": [
+        "Add tomatoes and stir.",
+        "Add turmeric, coriander, Kashmiri chili powder, and salt.",
+        "Cook 5–8 minutes, stirring, until tomatoes break down and the mixture thickens; oil may separate slightly at the edges."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "timers": [
+        {
+          "label": "Cook masala",
+          "minutes": 7
+        }
+      ],
+      "checks": [
+        "Masala should lose raw tomato smell and become deeper and sweeter.",
+        "If it sticks, add 1–2 tbsp water and scrape the pan (deglaze)."
+      ]
+    },
+    {
+      "id": "step_05_add_veg",
+      "title": "Add vegetables and steam-finish",
+      "instructions": [
+        "Add potatoes (if using), cauliflower, carrots, and green beans. Stir to coat in masala.",
+        "Add 1/4 cup water, cover with a lid, and cook 10–14 minutes, stirring once or twice, until vegetables are tender-crisp.",
+        "If using peas, add them for the last 2–3 minutes."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 12,
+      "timers": [
+        {
+          "label": "Steam vegetables",
+          "minutes": 12
+        },
+        {
+          "label": "Peas finish (optional)",
+          "minutes": 2
+        }
+      ],
+      "checks": [
+        "Potatoes should be fork-tender; cauliflower should hold shape.",
+        "If pan dries out before vegetables cook, add 2–3 tbsp water and re-cover."
+      ]
+    },
+    {
+      "id": "step_06_finish",
+      "title": "Finish with garam masala and lemon",
+      "instructions": [
+        "Turn heat to low.",
+        "Stir in garam masala and cook 30–45 seconds to bloom aroma without scorching.",
+        "Optional: add lemon juice (or amchur) to brighten.",
+        "Taste and adjust salt and heat."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "timers": [
+        {
+          "label": "Finish spices",
+          "seconds": 40
+        }
+      ],
+      "checks": ["Add garam masala late—if cooked too long it loses fragrance."]
+    },
+    {
+      "id": "step_07_serve",
+      "title": "Serve",
+      "instructions": [
+        "Garnish with chopped cilantro (optional).",
+        "Serve hot with basmati rice, naan, or roti. Add a cooling side like raita or cucumber salad if desired."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 0
+    }
+  ],
+  "pairings": {
+    "starches": [
+      "recipes.cuisines.indian.basmati_rice",
+      "recipes.cuisines.indian.naan"
+    ],
+    "sides": ["dish.indian.raita", "dish.indian.kachumber_salad"],
+    "notes": [
+      "Sabzi is a perfect plate component alongside dal or a meat curry.",
+      "For a fuller meal, pair with dal + rice and use sabzi as the vegetable side."
+    ]
+  },
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Cool completely and store airtight.",
+        "Reheat gently with a splash of water in a covered skillet or microwave covered."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freezing is possible, but potatoes soften and can become grainy.",
+        "If you plan to freeze, consider omitting potatoes and using more cauliflower/beans/peas."
+      ]
+    }
+  },
+  "safety": {
+    "notes": [
+      "Cool within 2 hours and refrigerate promptly.",
+      "Reheat to steaming hot; add a splash of water to prevent drying."
+    ]
+  },
+  "variations": [
+    {
+      "id": "var.any_veg_formula",
+      "label": "Any-vegetable formula (SSA flexible sabzi)",
+      "when": {
+        "vegetables": "variable"
+      },
+      "adapt": {
+        "notes": [
+          "Use 5–6 cups total vegetables. Aim for a mix of: firm (potato/sweet potato), medium (cauliflower/broccoli/carrots), quick (peas/spinach).",
+          "Add firm veg first; add quick veg at the end to avoid mush."
+        ],
+        "swapIdeas": [
+          "Add bell pepper strips for sweetness.",
+          "Add spinach at the end until wilted (2 minutes).",
+          "Add zucchini near the end (3–4 minutes) to prevent watery sabzi."
+        ]
+      }
+    },
+    {
+      "id": "var_south_indian_tempering",
+      "label": "South-leaning tempering (curry leaves + mustard)",
+      "when": {
+        "style": "south_leaning"
+      },
+      "adapt": {
+        "notes": [
+          "Use mustard seeds + cumin seeds at start.",
+          "Add 8–10 curry leaves during tadka.",
+          "Optional: add 1/4 tsp hing (asafoetida) if available."
+        ]
+      }
+    },
+    {
+      "id": "var_no_tomato",
+      "label": "No-tomato sabzi",
+      "when": {
+        "tomato": "omit"
+      },
+      "adapt": {
+        "notes": [
+          "Skip tomatoes; add 2 tbsp yogurt (or coconut milk for vegan) after onions.",
+          "Add 1 tsp amchur or 1 tbsp lemon at the end for acidity."
+        ]
+      }
+    },
+    {
+      "id": "var_extra_protein",
+      "label": "Add protein (chickpeas or paneer)",
+      "when": {
+        "protein": "add"
+      },
+      "adapt": {
+        "notes": [
+          "Add 1.5 cups cooked chickpeas with vegetables (great vegan).",
+          "Or add 8 oz paneer cubes near the end, seared separately if desired."
+        ]
+      }
+    }
+  ],
+  "planner": {
+    "roles": [
+      {
+        "role": "role.veg_side",
+        "primary": true
+      },
+      {
+        "role": "role.curry_or_dal",
+        "primary": false
+      }
+    ],
+    "weeknight": {
+      "friendly": true,
+      "notes": [
+        "Prep vegetables ahead for a 20-minute cook.",
+        "Use frozen cauliflower/peas to reduce prep time."
+      ]
+    }
+  },
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.vegetable_sabzi",
+    "aliases": ["sabzi", "subzi", "mixed veg sabzi", "dry curry vegetables"],
+    "index": {
+      "primaryTokens": ["sabzi", "mixed vegetables", "dry curry", "masala"],
+      "secondaryTokens": ["aloo gobi style", "bhaji", "weeknight", "vegetarian"]
+    }
+  },
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

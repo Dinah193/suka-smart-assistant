@@ -1,0 +1,215 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.vanilla_layer_cake",
+    "slug": "vanilla_layer_cake",
+    "name": "Vanilla Layer Cake (Foundation)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "dessert",
+      "cake",
+      "vanilla",
+      "birthday",
+      "celebration",
+      "layer-cake",
+      "stacking",
+      "foundation",
+      "baking",
+      "freezer-friendly"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A dependable, classic vanilla layer cake designed for birthdays and celebration stacking: sturdy enough to layer and frost cleanly, yet tender. Includes guidance for both standard all-purpose flour and fresh-milled flour (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "cake_pan_8in", "label": "Two 8-inch round cake pans" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "hand_mixer_or_stand_mixer", "label": "Hand mixer or stand mixer" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "cooling_rack", "label": "Cooling rack" },
+    {
+      "id": "serrated_knife",
+      "label": "Serrated knife (for leveling)",
+      "optional": true
+    },
+    {
+      "id": "cake_turntable",
+      "label": "Cake turntable (optional)",
+      "optional": true
+    },
+    {
+      "id": "offset_spatula",
+      "label": "Offset spatula (optional)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter, softened",
+      "amount": { "value": 226, "unit": "g" },
+      "notes": "Room temp: pressable but not oily."
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "About 2 cups."
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": "Room temperature helps emulsify."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp."
+    },
+
+    {
+      "id": "flour_ap_option",
+      "label": "All-purpose flour (Option A — use this OR the fresh-milled option)",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "About 3 cups if spooned/leveled; weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — use this OR the AP option)",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "Fresh-milled absorbs more. If batter seems too thick, add 15–45 ml extra milk in small increments."
+    },
+
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp. If using table salt, reduce slightly."
+    },
+    {
+      "id": "milk_whole",
+      "label": "Whole milk",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Room temperature preferred."
+    },
+    {
+      "id": "sour_cream_or_yogurt",
+      "label": "Sour cream or plain full-fat yogurt",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "Moisture + tenderness; helps a sturdy-yet-tender crumb for stacking."
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil (canola/avocado/grapeseed)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Adds moisture and keeps cake soft even when chilled."
+    },
+
+    {
+      "id": "milk_adjustment_optional",
+      "label": "Extra milk (only if needed for fresh-milled flour batter)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is overly thick with fresh-milled flour; up to ~45 ml total depending on flour.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_pan_prep",
+      "title": "Prep pans and oven",
+      "body": "Heat oven to 350°F (175°C). Grease two 8-inch pans, line bottoms with parchment, then lightly grease parchment and dust with flour (or use baking spray)."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the all-purpose flour ingredient OR the fresh-milled flour ingredient (not both). Fresh-milled flour may need a little extra milk to reach a smooth, spreadable batter."
+    },
+    {
+      "id": "step_03_whisk_dry",
+      "title": "Whisk dry ingredients",
+      "body": "In a medium bowl, whisk together your chosen flour, baking powder, and salt. Set aside."
+    },
+    {
+      "id": "step_04_cream_butter_sugar",
+      "title": "Cream butter and sugar for structure",
+      "body": "In a large bowl, beat butter and sugar on medium-high until very light and fluffy, 3–5 minutes. Scrape the bowl well. This step builds the cake’s structure for stacking."
+    },
+    {
+      "id": "step_05_add_eggs",
+      "title": "Add eggs (emulsify)",
+      "body": "Add eggs one at a time, beating 20–30 seconds after each, scraping bowl as needed. Mix in vanilla. The batter should look smooth and creamy; if it curdles slightly, it will come back together once flour is added."
+    },
+    {
+      "id": "step_06_add_oil_sourcream",
+      "title": "Add oil and sour cream/yogurt",
+      "body": "Mix in neutral oil until incorporated. Add sour cream (or yogurt) and mix just until smooth."
+    },
+    {
+      "id": "step_07_alternate_dry_milk",
+      "title": "Alternate dry ingredients and milk",
+      "body": "On low speed, add the dry ingredients in 3 additions alternating with milk in 2 additions (dry → milk → dry → milk → dry). Mix only until just combined. Finish folding by hand to avoid overmixing."
+    },
+    {
+      "id": "step_08_adjust_batter_freshmilled",
+      "title": "Adjust batter if using fresh-milled flour",
+      "body": "If using fresh-milled flour and batter is very thick (hard to spread), add extra milk 15 ml (1 tbsp) at a time until batter is smooth and spreadable (often 15–45 ml total). Batter should ribbon off a spatula and settle slowly."
+    },
+    {
+      "id": "step_09_pan_and_level",
+      "title": "Divide and level for even layers",
+      "body": "Divide batter evenly between pans (use a scale if possible). Smooth tops with a spatula and tap pans gently on the counter to release large air bubbles."
+    },
+    {
+      "id": "step_10_bake",
+      "title": "Bake",
+      "body": "Bake 26–34 minutes, or until tops spring back lightly and a toothpick inserted in the center comes out clean or with a few moist crumbs. Rotate pans halfway if your oven bakes unevenly."
+    },
+    {
+      "id": "step_11_cool",
+      "title": "Cool properly for stacking",
+      "body": "Cool in pans 10 minutes, then turn out onto a rack, peel parchment, and cool completely (at least 60 minutes). Cakes must be fully cool before frosting or stacking."
+    },
+    {
+      "id": "step_12_level_and_chill",
+      "title": "Level and chill (stacking logic)",
+      "body": "For clean stacking: wrap cooled layers and chill 30–60 minutes (or freeze 15–25 minutes) before leveling and frosting. Chilled layers are sturdier and produce fewer crumbs."
+    },
+    {
+      "id": "step_13_stack_baseline",
+      "title": "Stacking baseline",
+      "body": "Place first layer on a board/plate. Spread an even frosting layer (about 1/2 inch / 1.25 cm). Add second layer top-side down for a flatter top. Apply a thin crumb coat, chill 15–20 minutes, then finish frosting."
+    }
+  ],
+  "notes": [
+    "Foundation cake logic: This formula is tuned to be sturdy enough to stack and transport while staying tender (butter + creaming for structure; oil + sour cream for moistness).",
+    "If baking in 9-inch pans: reduce bake time slightly and check early (~22–28 minutes).",
+    "If you need 3 layers: bake the batter in three 8-inch pans (reduce bake time ~3–6 minutes) or split and bake in batches.",
+    "Fresh-milled flour: prefer fine-milled; coarse bran can weaken crumb. Sifting out the largest bran can improve layer strength and tenderness."
+  ],
+  "storage": {
+    "roomTemp": "Unfrosted layers, wrapped airtight: 1 day.",
+    "refrigerator": "Unfrosted layers, wrapped: up to 3 days (bring to room temp before serving).",
+    "freezer": "Unfrosted layers, double-wrapped: up to 2 months. Thaw wrapped at room temperature."
+  }
+}

@@ -72,13 +72,13 @@ vi.mock("@/db", () => {
 });
 
 // Mock hub formatting/sending
-vi.mock("@/services/HubPacketFormatter", () => ({
+vi.mock("@/services/hub/HubPacketFormatter", () => ({
   default: {
     format: vi.fn((payload) => ({ ...payload, formattedForHub: true })),
   },
 }));
 
-vi.mock("@/services/FamilyFundConnector", () => ({
+vi.mock("@/services/hub/FamilyFundConnector", () => ({
   default: {
     send: vi.fn(async () => ({ ok: true })),
   },
@@ -113,8 +113,10 @@ describe("knowledgeGraph service", () => {
     });
 
     // reset hub mocks
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
     HubPacketFormatter.format.mockClear();
     FamilyFundConnector.send.mockClear();
   });
@@ -229,7 +231,9 @@ describe("knowledgeGraph service", () => {
     const calls = emit.mock.calls;
 
     // we should have at least one edge for seasonality
-    const edgeCalls = calls.filter(([, payload]) => payload?.type === "kg.edge.created");
+    const edgeCalls = calls.filter(
+      ([, payload]) => payload?.type === "kg.edge.created"
+    );
     expect(edgeCalls.length).toBeGreaterThan(0);
   });
 
@@ -255,7 +259,8 @@ describe("knowledgeGraph service", () => {
     // @ts-expect-error test env
     const emit = window.__suka.eventBus.emit;
     const edgePayload = emit.mock.calls.find(
-      ([, p]) => p?.type === "kg.edge.created" && p?.data?.to?.includes("yieldCurve"),
+      ([, p]) =>
+        p?.type === "kg.edge.created" && p?.data?.to?.includes("yieldCurve")
     );
 
     // should have created an edge to the yield curve node
@@ -292,7 +297,7 @@ describe("knowledgeGraph service", () => {
           domain: "storehouse",
           householdId: "hh_store",
         }),
-      }),
+      })
     );
   });
 
@@ -338,8 +343,10 @@ describe("knowledgeGraph service", () => {
 
     await knowledgeGraph.upsertFromImport(recipeImport);
 
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
 
     expect(HubPacketFormatter.format).toHaveBeenCalled();
     expect(FamilyFundConnector.send).toHaveBeenCalled();
@@ -353,7 +360,8 @@ describe("knowledgeGraph service", () => {
       },
     });
 
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
     FamilyFundConnector.send.mockImplementationOnce(async () => {
       throw new Error("hub is down");
     });
@@ -364,7 +372,7 @@ describe("knowledgeGraph service", () => {
         ts: new Date().toISOString(),
         source: "test",
         data: { id: "n1" },
-      }),
+      })
     ).resolves.not.toThrow();
   });
 
@@ -387,7 +395,7 @@ describe("knowledgeGraph service", () => {
           title: "Unnamed knowledge",
           domain: "misc",
         }),
-      }),
+      })
     );
   });
 
@@ -413,7 +421,7 @@ describe("knowledgeGraph service", () => {
           to: "node_ingredient_lamb",
           rel: "uses-ingredient",
         }),
-      }),
+      })
     );
   });
 

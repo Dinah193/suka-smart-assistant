@@ -1,0 +1,145 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.sauces.sweet_heat_shawarma_drizzle",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Sweet-Heat Shawarma Drizzle",
+    "tags": [
+      "sauce",
+      "shawarma",
+      "condiment",
+      "sweet_heat",
+      "drizzle",
+      "spicy",
+      "sticky",
+      "quick",
+      "stovetop_optional",
+      "batch_friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "A glossy sweet-heat drizzle for shawarma wraps/bowls: honey + citrus + chili with warm spice."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.honey",
+      "label": "Honey",
+      "amount": { "value": 90, "unit": "g" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": ["About 2 tablespoons."]
+    },
+    {
+      "id": "ing.orange_juice",
+      "label": "Orange juice",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": [
+        "Adds round sweetness; sub: more lemon juice + a bit more honey."
+      ]
+    },
+    {
+      "id": "ing.apple_cider_vinegar",
+      "label": "Apple cider vinegar",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": ["Sub: white vinegar or red wine vinegar."]
+    },
+    {
+      "id": "ing.sambal_oelek",
+      "label": "Chili paste (sambal oelek or similar)",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": [
+        "Adjust to heat tolerance. Sub: hot sauce (reduce liquid elsewhere)."
+      ]
+    },
+    {
+      "id": "ing.red_pepper_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["Optional for extra heat and texture (about 1/2 tsp)."]
+    },
+    {
+      "id": "ing.garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/2 teaspoon. Sub: 1 small grated clove (stronger)."]
+    },
+    {
+      "id": "ing.paprika_smoked",
+      "label": "Smoked paprika",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": [
+        "About 1/2 teaspoon; optional but adds shawarma-friendly warmth."
+      ]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; optional."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; adjust to taste."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": ["Optional; rounds the finish and adds sheen."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Combine",
+      "instructions": [
+        "In a small bowl (no-cook option) or small saucepan (warm option), combine honey, lemon juice, orange juice, apple cider vinegar, chili paste, optional red pepper flakes, garlic powder, smoked paprika, cumin, and salt."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "No-cook drizzle (fastest)",
+      "instructions": [
+        "Whisk vigorously until smooth and glossy.",
+        "Let stand 5 minutes so the chili and spices bloom."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Warm drizzle (best texture)",
+      "instructions": [
+        "Optional: Warm on low heat for 2–4 minutes, stirring constantly. Do not boil.",
+        "Remove from heat and whisk until smooth. This helps the drizzle emulsify and thicken slightly."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Finish",
+      "instructions": [
+        "Whisk in olive oil (optional) for a smoother, rounder finish and extra sheen.",
+        "Taste and adjust: more honey for sweeter, more lemon/vinegar for tangier, more chili for hotter, more salt for pop."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Cool and store",
+      "instructions": [
+        "Cool to room temperature before sealing if you warmed it.",
+        "Store refrigerated in a sealed container or squeeze bottle. Shake/stir before use.",
+        "Use within 2–3 weeks (honey-based drizzles keep well when kept cold and clean)."
+      ]
+    }
+  ]
+}

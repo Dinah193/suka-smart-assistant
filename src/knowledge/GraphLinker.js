@@ -25,7 +25,7 @@
 // - Defensive: return early; do not crash UI or runtime
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.js exists
 // - src/services/hub/HubPacketFormatter.js + src/services/hub/FamilyFundConnector.js exist
 // - src/knowledge/KnowledgeGraph.js exists and can be used to upsert nodes/edges
@@ -44,8 +44,8 @@
 //
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 import knowledgeGraph from "@/knowledge/KnowledgeGraph.js";
 
 // soft imports – these can be absent in light builds
@@ -98,7 +98,10 @@ function namesMatch(a = "", b = "") {
 // fuzzy-ish contains matcher
 function nameContains(a = "", b = "") {
   if (!a || !b) return false;
-  return a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase());
+  return (
+    a.toLowerCase().includes(b.toLowerCase()) ||
+    b.toLowerCase().includes(a.toLowerCase())
+  );
 }
 
 // find inventory item by name/alias/category
@@ -116,8 +119,10 @@ function findInventoryMatch(ing, inventory = []) {
   if (match) return match;
 
   // 3) try alt names
-  match = inventory.find((inv) =>
-    Array.isArray(inv.aliases) && inv.aliases.some((al) => namesMatch(al, name))
+  match = inventory.find(
+    (inv) =>
+      Array.isArray(inv.aliases) &&
+      inv.aliases.some((al) => namesMatch(al, name))
   );
   if (match) return match;
 
@@ -156,7 +161,8 @@ class GraphLinker {
     // first make sure it exists in the KG
     const importNode = await knowledgeGraph.upsertFromImport(normalizedImport);
 
-    const kind = normalizedImport.kind || normalizedImport.__importType || "unknown";
+    const kind =
+      normalizedImport.kind || normalizedImport.__importType || "unknown";
 
     const edges = [];
     const notes = [];
@@ -165,7 +171,11 @@ class GraphLinker {
     switch (kind) {
       case "recipe":
         {
-          const res = await this._linkRecipe(normalizedImport, currentState, importNode);
+          const res = await this._linkRecipe(
+            normalizedImport,
+            currentState,
+            importNode
+          );
           edges.push(...res.edges);
           notes.push(...res.notes);
         }
@@ -174,7 +184,11 @@ class GraphLinker {
       case "cleaning":
       case "cleaningPlan":
         {
-          const res = await this._linkCleaning(normalizedImport, currentState, importNode);
+          const res = await this._linkCleaning(
+            normalizedImport,
+            currentState,
+            importNode
+          );
           edges.push(...res.edges);
           notes.push(...res.notes);
         }
@@ -185,7 +199,11 @@ class GraphLinker {
       case "gardenCare":
       case "harvestPlan":
         {
-          const res = await this._linkGarden(normalizedImport, currentState, importNode);
+          const res = await this._linkGarden(
+            normalizedImport,
+            currentState,
+            importNode
+          );
           edges.push(...res.edges);
           notes.push(...res.notes);
         }
@@ -195,7 +213,11 @@ class GraphLinker {
       case "animalPlan":
       case "butcherySession":
         {
-          const res = await this._linkAnimal(normalizedImport, currentState, importNode);
+          const res = await this._linkAnimal(
+            normalizedImport,
+            currentState,
+            importNode
+          );
           edges.push(...res.edges);
           notes.push(...res.notes);
         }
@@ -205,7 +227,11 @@ class GraphLinker {
       case "storehouseStock":
       case "storehouseGoal":
         {
-          const res = await this._linkStorehouse(normalizedImport, currentState, importNode);
+          const res = await this._linkStorehouse(
+            normalizedImport,
+            currentState,
+            importNode
+          );
           edges.push(...res.edges);
           notes.push(...res.notes);
         }
@@ -213,7 +239,11 @@ class GraphLinker {
 
       case "video":
         {
-          const res = await this._linkVideo(normalizedImport, currentState, importNode);
+          const res = await this._linkVideo(
+            normalizedImport,
+            currentState,
+            importNode
+          );
           edges.push(...res.edges);
           notes.push(...res.notes);
         }
@@ -303,7 +333,9 @@ class GraphLinker {
           });
           edges.push(edge);
         } else {
-          notes.push(`No inventory/storehouse match for ingredient "${ing.name || ing}"`);
+          notes.push(
+            `No inventory/storehouse match for ingredient "${ing.name || ing}"`
+          );
         }
       }
     }
@@ -313,7 +345,8 @@ class GraphLinker {
       if (!meal || !meal.title) continue;
       if (
         imported.title &&
-        (namesMatch(imported.title, meal.title) || nameContains(imported.title, meal.title))
+        (namesMatch(imported.title, meal.title) ||
+          nameContains(imported.title, meal.title))
       ) {
         const mealNode = knowledgeGraph.upsertNode({
           id: meal.id ? `meal:${meal.id}` : undefined,
@@ -453,7 +486,9 @@ class GraphLinker {
       // meal links (e.g., seed "tomato" → meal that uses tomato)
       for (const meal of meals) {
         if (!meal || !Array.isArray(meal.recipes)) continue;
-        const hasCrop = meal.recipes.some((r) => nameContains(r.title || "", seed.name || ""));
+        const hasCrop = meal.recipes.some((r) =>
+          nameContains(r.title || "", seed.name || "")
+        );
         if (hasCrop) {
           const mealNode = knowledgeGraph.upsertNode({
             id: meal.id ? `meal:${meal.id}` : undefined,
@@ -510,7 +545,12 @@ class GraphLinker {
           if (!meal || !Array.isArray(meal.recipes)) continue;
           const usesProtein = meal.recipes.some((r) => {
             const t = (r.title || "").toLowerCase();
-            return t.includes(species) || t.includes("lamb") || t.includes("goat") || t.includes("beef");
+            return (
+              t.includes(species) ||
+              t.includes("lamb") ||
+              t.includes("goat") ||
+              t.includes("beef")
+            );
           });
           if (usesProtein) {
             const mealNode = knowledgeGraph.upsertNode({
@@ -606,7 +646,9 @@ class GraphLinker {
           });
         }
       } else {
-        notes.push(`Storehouse item "${item.item || item.name}" has no inventory match.`);
+        notes.push(
+          `Storehouse item "${item.item || item.name}" has no inventory match.`
+        );
       }
     }
 
@@ -638,7 +680,12 @@ class GraphLinker {
     const lower = title.toLowerCase();
 
     // if video looks like “how to can tomatoes” → link to preservation
-    if (lower.includes("dehydrate") || lower.includes("can ") || lower.includes("canning") || lower.includes("freeze")) {
+    if (
+      lower.includes("dehydrate") ||
+      lower.includes("can ") ||
+      lower.includes("canning") ||
+      lower.includes("freeze")
+    ) {
       const presNode = knowledgeGraph.upsertNode({
         type: "preservation",
         label: "Preservation (from video)",
@@ -657,7 +704,9 @@ class GraphLinker {
         source: "video.linker",
         video: imported,
       });
-      emitEvent("preservation.completed", "knowledge:linker", { video: imported });
+      emitEvent("preservation.completed", "knowledge:linker", {
+        video: imported,
+      });
     }
 
     return { edges, notes };

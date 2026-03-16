@@ -1,0 +1,561 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "file:///src/schemas/ruleset.schema.json",
+  "title": "SSA • Ruleset Schema",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": ["$schema", "schemaVersion", "updatedAt", "meta"],
+
+  "oneOf": [
+    { "$ref": "#/$defs/RuleArrayRuleset" },
+    { "$ref": "#/$defs/CuisineRuleset" }
+  ],
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference used by JSON tooling (may be a relative path in catalogs).",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version of the ruleset contract.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "ISO-8601 date or datetime.",
+      "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+    },
+    "notes": {
+      "type": "array",
+      "description": "Human-readable notes for maintainers.",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+    "globals": { "$ref": "#/$defs/Globals" },
+
+    "rules": {
+      "type": "array",
+      "description": "Ordered rules. Engines should sort by priority descending then evaluate.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Rule" }
+    },
+
+    "normalization": {
+      "description": "Optional top-level normalization (some SSA catalogs put this outside meta).",
+      "anyOf": [
+        { "$ref": "#/$defs/Normalization" },
+        { "type": "object", "additionalProperties": true }
+      ],
+      "default": {}
+    },
+
+    "planner": { "type": "object", "additionalProperties": true },
+    "flavorProfile": { "type": "object", "additionalProperties": true },
+    "ingredientRules": { "type": "object", "additionalProperties": true },
+    "techniqueRules": { "type": "object", "additionalProperties": true },
+    "equipmentRules": { "type": "object", "additionalProperties": true },
+    "adaptation": { "type": "object", "additionalProperties": true }
+  },
+
+  "$defs": {
+    "RuleArrayRuleset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["$schema", "schemaVersion", "updatedAt", "meta", "rules"],
+      "properties": {
+        "$schema": { "$ref": "#/properties/$schema" },
+        "schemaVersion": { "$ref": "#/properties/schemaVersion" },
+        "updatedAt": { "$ref": "#/properties/updatedAt" },
+        "notes": { "$ref": "#/properties/notes" },
+        "meta": { "$ref": "#/$defs/Meta" },
+        "globals": { "$ref": "#/$defs/Globals" },
+        "rules": { "$ref": "#/properties/rules" }
+      }
+    },
+
+    "CuisineRuleset": {
+      "type": "object",
+      "description": "Cuisine-specific ruleset payload used by SSA cuisine planners/adapters (non-array, structured sections).",
+      "additionalProperties": false,
+      "required": ["$schema", "schemaVersion", "updatedAt", "meta"],
+      "properties": {
+        "$schema": { "$ref": "#/properties/$schema" },
+        "schemaVersion": { "$ref": "#/properties/schemaVersion" },
+        "updatedAt": { "$ref": "#/properties/updatedAt" },
+        "notes": { "$ref": "#/properties/notes" },
+        "meta": { "$ref": "#/$defs/Meta" },
+
+        "normalization": { "$ref": "#/properties/normalization" },
+
+        "planner": { "$ref": "#/properties/planner" },
+        "flavorProfile": { "$ref": "#/properties/flavorProfile" },
+        "ingredientRules": { "$ref": "#/properties/ingredientRules" },
+        "techniqueRules": { "$ref": "#/properties/techniqueRules" },
+        "equipmentRules": { "$ref": "#/properties/equipmentRules" },
+        "adaptation": { "$ref": "#/properties/adaptation" },
+
+        "globals": { "$ref": "#/$defs/Globals" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "meta": {
+                "type": "object",
+                "properties": { "type": { "const": "cuisine_ruleset" } },
+                "required": ["type"]
+              }
+            },
+            "required": ["meta"]
+          },
+          "then": {
+            "properties": {
+              "planner": { "type": "object" }
+            }
+          }
+        }
+      ]
+    },
+
+    "Id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "Locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 35
+    },
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+    "Tag": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 60
+    },
+
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "locale"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+
+        "type": {
+          "type": "string",
+          "description": "Ruleset type discriminator. Allows generic rulesets and cuisine-specific rulesets.",
+          "enum": ["ruleset", "cuisine_ruleset"]
+        },
+
+        "domain": {
+          "type": "string",
+          "description": "Logical domain for the ruleset (e.g., cuisines, substitutions, planning, safety).",
+          "minLength": 2,
+          "maxLength": 60,
+          "pattern": "^[^\\u0000-\\u001F]+$"
+        },
+
+        "locale": { "$ref": "#/$defs/Locale" },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "cuisineId": { "$ref": "#/$defs/Id" },
+        "status": { "$ref": "#/$defs/Tag" },
+
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+
+        "scope": { "$ref": "#/$defs/Scope" },
+        "normalization": { "$ref": "#/$defs/Normalization" }
+      }
+    },
+
+    "Scope": {
+      "type": "object",
+      "description": "Where this ruleset applies.",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "global",
+            "cuisine",
+            "dish",
+            "ingredient",
+            "planner",
+            "kitchen",
+            "safety",
+            "user"
+          ]
+        },
+        "cuisineId": { "$ref": "#/$defs/Id" },
+        "dishId": { "$ref": "#/$defs/Id" },
+        "ingredientId": { "$ref": "#/$defs/Id" },
+        "plannerId": { "$ref": "#/$defs/Id" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "cuisine" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["cuisineId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "dish" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["dishId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "ingredient" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["ingredientId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "planner" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["plannerId"] }
+        }
+      ]
+    },
+
+    "Normalization": {
+      "type": "object",
+      "description": "Default text normalization for rule evaluation.",
+      "additionalProperties": false,
+      "required": ["case", "trim", "collapseWhitespace", "stripPunctuation"],
+      "properties": {
+        "case": {
+          "type": "string",
+          "enum": ["lower", "none"],
+          "default": "lower"
+        },
+        "trim": { "type": "boolean", "default": true },
+        "collapseWhitespace": { "type": "boolean", "default": true },
+        "stripPunctuation": { "type": "boolean", "default": true }
+      }
+    },
+
+    "Globals": {
+      "type": "object",
+      "description": "Optional shared constants used by rules.",
+      "additionalProperties": true,
+      "default": {}
+    },
+
+    "Rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "enabled", "priority", "when", "then"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "enabled": { "type": "boolean", "default": true },
+        "priority": {
+          "type": "integer",
+          "description": "Higher priority runs first. Typical range: 0-1000.",
+          "minimum": -100000,
+          "maximum": 100000
+        },
+        "title": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/Text" },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "source": {
+          "type": "string",
+          "description": "Where this rule came from (catalog, user override, import).",
+          "enum": ["catalog", "user", "import", "system"],
+          "default": "catalog"
+        },
+        "stopOnMatch": {
+          "type": "boolean",
+          "description": "If true, engine may stop evaluating lower-priority rules after this one matches.",
+          "default": false
+        },
+        "when": { "$ref": "#/$defs/ConditionGroup" },
+        "then": { "$ref": "#/$defs/ActionGroup" }
+      }
+    },
+
+    "ConditionGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "conditions"],
+      "properties": {
+        "op": { "type": "string", "enum": ["all", "any", "not"] },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              { "$ref": "#/$defs/ConditionGroup" },
+              { "$ref": "#/$defs/Condition" }
+            ]
+          }
+        }
+      }
+    },
+
+    "Condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "eq",
+            "neq",
+            "in",
+            "nin",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "exists",
+            "contains",
+            "matches",
+            "intersects",
+            "hasTag",
+            "lacksTag"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "description": "JSONPath-like selector into the evaluation context (SSA engine-defined).",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[^\\u0000-\\u001F]+$"
+        },
+        "value": {
+          "description": "Value used by eq/neq/gt/gte/lt/lte/contains/hasTag/lacksTag."
+        },
+        "values": {
+          "type": "array",
+          "description": "Values used by in/nin/intersects.",
+          "items": {},
+          "default": []
+        },
+        "caseInsensitive": { "type": "boolean", "default": true },
+        "regex": {
+          "type": "string",
+          "description": "Regex used when type=matches. Keep patterns small for browser safety.",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["eq", "neq", "gt", "gte", "lt", "lte", "contains"]
+              }
+            },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "value"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "enum": ["in", "nin", "intersects"] } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["path", "values"],
+            "properties": { "values": { "minItems": 1 } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "exists" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "matches" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "regex"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "enum": ["hasTag", "lacksTag"] } },
+            "required": ["type"]
+          },
+          "then": { "required": ["value"] }
+        }
+      ]
+    },
+
+    "ActionGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actions"],
+      "properties": {
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Action" }
+        }
+      }
+    },
+
+    "Action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "set",
+            "unset",
+            "push",
+            "remove",
+            "replace",
+            "mapValue",
+            "addTag",
+            "removeTag",
+            "emitEvent",
+            "warn",
+            "block",
+            "scoreAdjust"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "description": "JSONPath-like selector into the target object being modified.",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[^\\u0000-\\u001F]+$"
+        },
+        "value": {
+          "description": "Value used by set/push/replace."
+        },
+        "values": {
+          "type": "array",
+          "description": "Values used by push/remove when operating on lists.",
+          "items": {},
+          "default": []
+        },
+        "map": {
+          "type": "object",
+          "description": "Used by mapValue. Key-value mapping table.",
+          "additionalProperties": {},
+          "default": {}
+        },
+        "event": {
+          "type": "object",
+          "description": "Used by emitEvent.",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": { "$ref": "#/$defs/ShortText" },
+            "payload": {}
+          }
+        },
+        "message": { "$ref": "#/$defs/Text" },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "error"],
+          "default": "warning"
+        },
+        "reason": { "$ref": "#/$defs/Text" },
+        "scoreDelta": { "type": "number", "minimum": -1000, "maximum": 1000 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "enum": ["set", "push", "replace"] } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "value"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "enum": ["unset"] } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "remove" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["path"],
+            "anyOf": [{ "required": ["value"] }, { "required": ["values"] }]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "mapValue" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "map"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "emitEvent" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["event"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "enum": ["warn", "block"] } },
+            "required": ["type"]
+          },
+          "then": { "required": ["message"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "enum": ["addTag", "removeTag"] } },
+            "required": ["type"]
+          },
+          "then": { "required": ["value"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "scoreAdjust" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["scoreDelta"] }
+        }
+      ]
+    }
+  }
+}

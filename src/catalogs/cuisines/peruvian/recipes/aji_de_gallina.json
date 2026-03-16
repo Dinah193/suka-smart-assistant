@@ -1,0 +1,528 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.recipes.aji_de_gallina",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Ají de Gallina",
+    "subtitle": "Creamy Peruvian chicken stew with ají amarillo, walnuts, and bread-thickened sauce",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "SSA canonical home method using poached chicken + ají amarillo cream sauce thickened with bread (or crackers) and nuts.",
+        "Designed for planner adaptation: canned evaporated milk vs half-and-half, walnut vs pecan, gluten-free thickener swap."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Peruvian",
+    "subprofiles": ["cuisines.peruvian", "style.creole", "pepper.aji_amarillo"],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.stew_and_starch",
+      "meal_archetype.dinner",
+      "meal_archetype.make_ahead"
+    ],
+    "servingStyles": ["stew_and_starch", "family_style", "plates"],
+    "plannerTags": [
+      "cuisine.peruvian",
+      "stew",
+      "protein.chicken",
+      "sauce.creamy",
+      "pepper.aji_amarillo",
+      "make_ahead",
+      "batch_friendly",
+      "leftovers_good",
+      "serve_with_rice",
+      "comfort_food"
+    ]
+  },
+
+  "summary": "Classic Peruvian comfort dish: shredded chicken in a creamy ají amarillo sauce thickened with soaked bread and walnuts, served over rice with potatoes and egg.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 with rice + sides. Sauce thickens as it cools—thin with stock if needed."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 35,
+    "totalMins": 70
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": "Possible if using rotisserie chicken and pre-made ají amarillo paste.",
+    "freezerFriendly": "Sauce can be frozen; texture may slightly change but reheats well with stirring."
+  },
+
+  "tasteProfile": {
+    "primary": ["creamy", "savory", "nutty", "pepper_fruity", "garlic"],
+    "heat": {
+      "typical": 2,
+      "range": [1, 4],
+      "note": "Ají amarillo is fruity and medium; adjust paste amount based on brand heat."
+    },
+    "aromatics": ["onion", "garlic"],
+    "umami": ["parmesan (optional)", "stock"],
+    "texture": ["velvety", "thick_sauce"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.stovetop",
+      "equipment.stockpot_or_saucepot",
+      "equipment.skiller_or_saucepan",
+      "equipment.blender",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.whisk"
+    ],
+    "recommended": [
+      "equipment.immersion_blender",
+      "equipment.fine_mesh_strainer",
+      "equipment.kitchen_scale"
+    ],
+    "optional": [
+      {
+        "id": "equipment.rice_cooker",
+        "label": "Rice cooker",
+        "notes": "Helpful to cook rice while sauce simmers."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.contains_dairy",
+    "diet.contains_gluten_optional",
+    "diet.contains_tree_nuts"
+  ],
+  "allergens": {
+    "mayContain": [
+      "allergen.dairy",
+      "allergen.gluten",
+      "allergen.tree_nuts",
+      "allergen.egg"
+    ],
+    "notes": [
+      "Contains dairy (milk/cream + optional cheese), gluten (bread) and tree nuts (walnuts).",
+      "Serve often includes hard-boiled eggs. Adaptations included below."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_thighs_bone_in",
+      "label": "Chicken thighs (bone-in, skin-on) or mixed pieces",
+      "role": "protein",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": "You can substitute 4–5 cups shredded rotisserie chicken to save time."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water (for poaching chicken)",
+      "role": "cooking_liquid",
+      "amount": { "value": 10, "unit": "cups" },
+      "notes": "Use enough to cover chicken."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Season in layers; adjust at the end."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaf",
+      "role": "aromatic",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, chopped",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves, minced",
+      "role": "aromatic",
+      "amount": { "value": 5, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (or mild olive oil)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ingredient.aji_amarillo_paste",
+      "label": "Ají amarillo paste",
+      "role": "heat_flavor",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Start at 2 tbsp if your paste is very hot; increase to 4 tbsp for a stronger ají flavor."
+    },
+    {
+      "id": "ingredient.bread_white",
+      "label": "White bread, torn (crusts optional)",
+      "role": "thickener",
+      "amount": { "value": 4, "unit": "slices" },
+      "notes": "Traditional thickener. Substitute saltines or cooked potato for gluten-free thickening."
+    },
+    {
+      "id": "ingredient.milk_evaporated",
+      "label": "Evaporated milk",
+      "role": "dairy_base",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "Classic shortcut. Substitute half-and-half or whole milk + a splash of cream."
+    },
+    {
+      "id": "ingredient.walnuts",
+      "label": "Walnuts",
+      "role": "nut_thickener",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": "Toast lightly for deeper flavor (optional)."
+    },
+    {
+      "id": "ingredient.parmesan",
+      "label": "Parmesan (finely grated)",
+      "role": "umami",
+      "optional": true,
+      "amount": { "value": 0.33, "unit": "cup" },
+      "notes": "Optional but common in many home versions; adds savoriness."
+    },
+    {
+      "id": "ingredient.chicken_stock_reserved",
+      "label": "Reserved chicken stock (from poaching)",
+      "role": "liquid_adjust",
+      "amount": { "value": 1.5, "unit": "cups" },
+      "notes": "Use to blend sauce and thin to desired consistency."
+    },
+
+    {
+      "id": "ingredient.potatoes_yukon",
+      "label": "Potatoes, peeled and sliced (for serving)",
+      "role": "side",
+      "amount": { "value": 2, "unit": "medium" },
+      "notes": "Usually served with sliced boiled potatoes."
+    },
+    {
+      "id": "ingredient.rice_white_uncooked",
+      "label": "White rice, uncooked (for serving)",
+      "role": "starch",
+      "optional": true,
+      "amount": { "value": 1.5, "unit": "cups" },
+      "notes": "Or 4–5 cups cooked rice."
+    },
+    {
+      "id": "ingredient.eggs",
+      "label": "Eggs, hard-boiled (for serving)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 3, "unit": "each" },
+      "notes": "Typically halved or quartered on top."
+    },
+    {
+      "id": "ingredient.olives_black",
+      "label": "Black olives (for serving)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Classic garnish alongside egg."
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro or parsley, chopped (optional finish)",
+      "role": "herb_finish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken & stock",
+      "items": [
+        "ingredient.chicken_thighs_bone_in",
+        "ingredient.water",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.bay_leaf"
+      ]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Ají cream sauce",
+      "items": [
+        "ingredient.onion_yellow",
+        "ingredient.garlic",
+        "ingredient.oil_neutral",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.bread_white",
+        "ingredient.milk_evaporated",
+        "ingredient.walnuts",
+        "ingredient.parmesan",
+        "ingredient.chicken_stock_reserved"
+      ]
+    },
+    {
+      "id": "group.serving",
+      "label": "For serving",
+      "items": [
+        "ingredient.potatoes_yukon",
+        "ingredient.rice_white_uncooked",
+        "ingredient.eggs",
+        "ingredient.olives_black",
+        "ingredient.cilantro"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_poach_chicken",
+      "title": "Poach the chicken and reserve stock",
+      "instructions": [
+        "Add chicken to a pot and cover with water. Add 1 tsp salt, pepper, and bay leaf (optional).",
+        "Bring to a gentle simmer (not a hard boil). Cook until chicken is cooked through and tender.",
+        "Remove chicken to a plate. Reserve at least 2 cups of the poaching liquid as stock.",
+        "When cool enough to handle, remove skin and bones (if used) and shred chicken into bite-size strands."
+      ],
+      "timers": [{ "label": "Poach chicken (gentle simmer)", "minutes": 20 }],
+      "checks": [
+        "Chicken reaches 165°F / 74°C in the thickest part.",
+        "Stock is reserved before draining."
+      ]
+    },
+    {
+      "id": "step.002_cook_serving_sides",
+      "title": "Cook rice, potatoes, and eggs (optional but classic)",
+      "instructions": [
+        "While chicken cooks or cools, cook rice per your usual method.",
+        "Boil sliced potatoes in salted water until tender; drain and hold warm.",
+        "Hard-boil eggs (optional), cool, peel, and halve or quarter.",
+        "Set out olives for garnish."
+      ],
+      "timers": [
+        { "label": "Rice (stovetop typical)", "minutes": 18 },
+        { "label": "Boil potatoes", "minutes": 12 },
+        { "label": "Hard-boil eggs (from simmer)", "minutes": 10 }
+      ],
+      "checks": [
+        "Potatoes are tender but not falling apart.",
+        "Egg yolks are set to preference."
+      ]
+    },
+    {
+      "id": "step.003_sweat_onion_garlic",
+      "title": "Sweat onion and garlic",
+      "instructions": [
+        "Heat oil in a skillet over medium heat.",
+        "Add chopped onion with a pinch of salt; cook until very soft and translucent (don’t brown heavily).",
+        "Add garlic and cook 30–60 seconds until fragrant."
+      ],
+      "timers": [
+        { "label": "Sweat onion", "minutes": 8 },
+        { "label": "Cook garlic", "seconds": 45 }
+      ],
+      "checks": [
+        "Onion is very soft and sweet-smelling.",
+        "Garlic is fragrant, not browned/bitter."
+      ]
+    },
+    {
+      "id": "step.004_blend_base",
+      "title": "Blend the sauce base (bread + walnuts + milk + ají)",
+      "instructions": [
+        "In a blender, add torn bread, walnuts, evaporated milk, ají amarillo paste, and about 1 cup reserved stock.",
+        "Add the cooked onion-garlic mixture.",
+        "Blend until very smooth and creamy. If too thick to blend, add a splash more stock."
+      ],
+      "checks": [
+        "Mixture is smooth (no visible bread or nut chunks).",
+        "Consistency is pourable but thick (like heavy cream to thin batter)."
+      ]
+    },
+    {
+      "id": "step.005_simmer_thicken",
+      "title": "Simmer the sauce, then add shredded chicken",
+      "instructions": [
+        "Pour blended sauce into a saucepan over medium-low heat.",
+        "Simmer gently, stirring often, until it thickens and loses any raw bread flavor.",
+        "Taste and season with remaining salt as needed. Add pepper to taste.",
+        "Stir in shredded chicken and simmer 3–5 minutes to warm through.",
+        "If using Parmesan, stir in off heat or at very low heat to avoid splitting; thin with stock if needed."
+      ],
+      "timers": [
+        { "label": "Simmer sauce to thicken", "minutes": 10 },
+        { "label": "Warm chicken in sauce", "minutes": 4 }
+      ],
+      "checks": [
+        "Sauce is velvety and coats a spoon.",
+        "Chicken is warmed through and evenly coated.",
+        "Flavor balance: creamy + ají fruitiness + savory."
+      ]
+    },
+    {
+      "id": "step.006_serve",
+      "title": "Serve Ají de Gallina",
+      "instructions": [
+        "Plate with a mound of rice and sliced boiled potatoes.",
+        "Spoon ají de gallina over rice and/or alongside potatoes.",
+        "Garnish with egg and black olives. Sprinkle cilantro or parsley if desired."
+      ],
+      "checks": ["Sauce is hot and creamy.", "Garnishes are ready and fresh."]
+    }
+  ],
+
+  "pairings": {
+    "sides": ["white_rice", "boiled_potatoes", "simple_salad"],
+    "condiments": ["peruvian.aji_verde", "lime_wedges"],
+    "drinks": ["peruvian.chicha_morada", "sparkling_water"]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "4 days",
+      "notes": "Cool quickly and store in an airtight container. Sauce thickens in the fridge."
+    },
+    "freeze": {
+      "duration": "2 months",
+      "notes": "Freeze sauce + chicken together. Thaw overnight and reheat gently with stock to loosen."
+    },
+    "reheat": {
+      "notes": "Reheat gently over low heat, stirring often. Add reserved stock or water to thin to serving consistency."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Poach chicken / shred", "mins": 25 },
+      { "task": "Chop onion/garlic", "mins": 5 },
+      { "task": "Blend sauce base", "mins": 5 },
+      { "task": "Simmer sauce", "mins": 10 },
+      { "task": "Cook rice/potatoes/eggs", "mins": 25 }
+    ],
+    "leftoverUses": [
+      "Serve over quinoa instead of rice",
+      "Stuff into empanadas or turnovers (thicker sauce)",
+      "Use as a creamy topping for roasted potatoes"
+    ],
+    "makeAheadNotes": [
+      "Sauce base can be blended a day ahead and simmered before serving.",
+      "Chicken can be poached/shredded ahead; store with a splash of stock to keep moist."
+    ]
+  },
+
+  "methods": [
+    "technique.poach",
+    "technique.blend",
+    "technique.simmer",
+    "technique.thicken"
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.peruvian",
+    "dishId": "peruvian.aji_de_gallina",
+    "search": {
+      "aliases": [
+        "ají de gallina",
+        "aji de gallina",
+        "peruvian creamy chicken",
+        "aji chicken stew"
+      ],
+      "keywords": [
+        "ají amarillo",
+        "walnuts",
+        "bread thickened",
+        "creamy",
+        "chicken",
+        "rice",
+        "potatoes",
+        "olives",
+        "egg"
+      ]
+    }
+  },
+
+  "notes": [
+    "If your ají amarillo paste is very acidic or salty, reduce vinegar-like sharpness by adding a touch more milk and a pinch of sugar.",
+    "If sauce tastes flat, add a little more salt and a small squeeze of lime at serving (optional).",
+    "Avoid boiling the finished sauce aggressively—gentle heat keeps it smooth and prevents dairy separation."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.rotisserie_shortcut",
+      "label": "Weeknight shortcut (rotisserie chicken)",
+      "when": { "time": ["short"] },
+      "adapt": {
+        "notes": [
+          "Use 4–5 cups shredded rotisserie chicken.",
+          "Use boxed low-sodium chicken stock for blending/thinning.",
+          "Skip poaching step; proceed to sauce steps."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free",
+      "label": "Gluten-free thickener swap",
+      "when": { "diet": ["gluten_free"] },
+      "adapt": {
+        "notes": [
+          "Replace bread with 6–8 gluten-free crackers (or 1 cup cooked potato).",
+          "Blend as usual; simmer to thicken."
+        ]
+      }
+    },
+    {
+      "id": "variation.nut_free",
+      "label": "Nut-free (texture-adjusted)",
+      "when": { "diet": ["nut_free"] },
+      "adapt": {
+        "notes": [
+          "Omit walnuts and add 2 additional slices bread (or extra crackers) for thickness.",
+          "Flavor will be less nutty; add a bit more Parmesan (optional) for depth."
+        ]
+      }
+    },
+    {
+      "id": "variation.dairy_light",
+      "label": "Lighter dairy option",
+      "when": { "preference": ["lighter"] },
+      "adapt": {
+        "notes": [
+          "Use whole milk instead of evaporated milk; add 1 tbsp olive oil for richness.",
+          "Simmer gently; expect slightly thinner sauce."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Poach chicken to 165°F / 74°C and cool promptly before shredding.",
+      "Reheat leftovers to steaming hot; avoid prolonged room-temperature holding."
+    ]
+  }
+}

@@ -1,87 +1,194 @@
 // src/components/meals/MealPlannerDashboard.jsx
 
 import React from "react";
+import { Printer } from "lucide-react";
 import { useMealPlanStore } from "@/store/MealPlanStore";
-import { Printer, Edit3, FileText } from "lucide-react";
 
+/**
+ * SSA • Meal Planner Dashboard
+ * -----------------------------------------------------------------------------
+ * Uses SSA's existing styling system (index.css + SV styles), NOT Tailwind.
+ *
+ * Reads:
+ *   useMealPlanStore().plan (preferred)
+ *   falls back to .mealPlan for legacy
+ *
+ * Expects:
+ *   plan/mealPlan as:
+ *     - envelope: { schedule: {...}, shoppingList: [...], prepTasks: [...] }
+ *     - OR legacy plain schedule object: { "Day 1": [...], "2026-01-10": [...] }
+ */
 export default function MealPlannerDashboard() {
-  const { mealPlan } = useMealPlanStore();
+  // ✅ read the canonical field dashboards expect
+  const plan = useMealPlanStore((s) => s.plan ?? s.mealPlan);
 
-  const sortedDays = Object.keys(mealPlan).sort((a, b) => {
-    const aDay = parseInt(a.replace("Day ", ""));
-    const bDay = parseInt(b.replace("Day ", ""));
-    return aDay - bDay;
+  const envelope = plan && typeof plan === "object" ? plan : null;
+  const schedule =
+    envelope?.schedule && typeof envelope.schedule === "object"
+      ? envelope.schedule
+      : envelope && !envelope.shoppingList && !envelope.prepTasks
+      ? envelope
+      : {};
+
+  const dayKeys = Object.keys(schedule || {});
+  const sortedDays = [...dayKeys].sort((a, b) => {
+    const ax = Date.parse(a);
+    const bx = Date.parse(b);
+    if (!Number.isNaN(ax) && !Number.isNaN(bx)) return ax - bx;
+    const am = String(a).match(/(\d+)/);
+    const bm = String(b).match(/(\d+)/);
+    if (am && bm) return Number(am[1]) - Number(bm[1]);
+    return String(a).localeCompare(String(b));
   });
 
+  const hasAnyMeals =
+    sortedDays.length > 0 &&
+    sortedDays.some(
+      (k) => Array.isArray(schedule[k]) && schedule[k].length > 0
+    );
+
   const handlePrint = () => {
-    const printable = sortedDays
-      .map(
-        (day) =>
-          `${day}:\n` +
-          mealPlan[day].map((r) => `- ${r.name}`).join("\n")
-      )
-      .join("\n\n");
+    const printableContent = [
+      "=== Meal Plan ===",
+      ...sortedDays.map((day) => {
+        const meals = Array.isArray(schedule[day]) ? schedule[day] : [];
+        const lines =
+          meals.length > 0
+            ? meals.map((m) => `  - ${String(m)}`).join("\n")
+            : "  (no meals)";
+        return `${day}\n${lines}`;
+      }),
+      "",
+      "=== Shopping List ===",
+      ...(Array.isArray(envelope?.shoppingList)
+        ? envelope.shoppingList
+        : []
+      ).map((i) => `  - ${String(i)}`),
+      "",
+      "=== Prep Tasks ===",
+      ...(Array.isArray(envelope?.prepTasks) ? envelope.prepTasks : []).map(
+        (t) => `  - ${String(t)}`
+      ),
+      "",
+    ].join("\n");
 
     const win = window.open("", "_blank");
-    win.document.write(`<pre>${printable}</pre>`);
+    if (!win) return;
+    win.document.write(
+      `<pre style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; white-space: pre-wrap;">${printableContent}</pre>`
+    );
     win.document.close();
     win.print();
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl border border-lime-400 shadow-md max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-lime-800">
-          🥗 Meal Planner Dashboard
-        </h2>
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-lime-600 text-white rounded hover:bg-lime-700"
-        >
-          <Printer size={16} />
-          Print Full Plan
-        </button>
+    <div className="sv-card sv-pad">
+      <div
+        className="sv-row sv-wrap"
+        style={{ justifyContent: "space-between", gap: 12 }}
+      >
+        <div>
+          <div className="sv-card-title">Meal Planner Dashboard</div>
+          <div className="sv-muted">
+            Quick view of your current cycle. Print, then jump into prep tasks
+            and procurement.
+          </div>
+        </div>
+
+        <div className="sv-actions">
+          <button
+            className="sv-btn sv-btn--primary"
+            onClick={handlePrint}
+            type="button"
+          >
+            <span className="label">
+              <Printer size={16} style={{ marginRight: 8 }} />
+              Print Full Plan
+            </span>
+          </button>
+        </div>
       </div>
 
-      {sortedDays.length === 0 ? (
-        <p className="text-stone-500 italic">
-          No meal cycle loaded yet. Start by creating one in the Meal Cycle
-          Planner.
-        </p>
+      {!hasAnyMeals ? (
+        <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 800, marginBottom: 6 }}>
+            No meal cycle loaded yet
+          </div>
+          <div className="sv-muted">
+            Start by creating one in <b>Meal Cycle Planner</b>, or generate a
+            draft below.
+          </div>
+          <div className="sv-muted" style={{ marginTop: 8 }}>
+            Cycle synced with Batch Cooking, Prep Tasks & Procurement.
+          </div>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[70vh] overflow-y-scroll pr-2">
-          {sortedDays.map((day) => (
-            <div
-              key={day}
-              className="bg-lime-50 border border-lime-200 rounded-lg p-4 shadow-sm"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-semibold text-lime-800">{day}</h3>
-                <button className="text-sm text-lime-600 hover:underline flex items-center gap-1">
-                  <Edit3 size={14} />
-                  Edit
-                </button>
+        <div style={{ marginTop: 12 }}>
+          <div
+            className="sv-grid-4"
+            style={{
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            }}
+          >
+            {sortedDays.map((day) => {
+              const meals = Array.isArray(schedule[day]) ? schedule[day] : [];
+              return (
+                <div key={day} className="sv-card sv-pad">
+                  <div style={{ fontWeight: 800 }}>{day}</div>
+                  {meals.length ? (
+                    <ul
+                      className="list-disc"
+                      style={{ paddingLeft: 18, marginTop: 6 }}
+                    >
+                      {meals.slice(0, 6).map((m, idx) => (
+                        <li key={idx}>{String(m)}</li>
+                      ))}
+                      {meals.length > 6 ? (
+                        <li>…and {meals.length - 6} more</li>
+                      ) : null}
+                    </ul>
+                  ) : (
+                    <div className="sv-muted" style={{ marginTop: 6 }}>
+                      (no meals)
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {Array.isArray(envelope?.shoppingList) &&
+          envelope.shoppingList.length ? (
+            <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                Shopping List
               </div>
-              {mealPlan[day]?.length > 0 ? (
-                <ul className="list-disc pl-5 text-stone-700 text-sm space-y-1">
-                  {mealPlan[day].map((r) => (
-                    <li key={r.id}>{r.name}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-stone-500 italic text-sm">
-                  No meals assigned yet.
-                </p>
-              )}
+              <ul className="list-disc" style={{ paddingLeft: 18 }}>
+                {envelope.shoppingList.slice(0, 12).map((i, idx) => (
+                  <li key={idx}>{String(i)}</li>
+                ))}
+                {envelope.shoppingList.length > 12 ? (
+                  <li>…and {envelope.shoppingList.length - 12} more</li>
+                ) : null}
+              </ul>
             </div>
-          ))}
+          ) : null}
+
+          {Array.isArray(envelope?.prepTasks) && envelope.prepTasks.length ? (
+            <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>Prep Tasks</div>
+              <ul className="list-disc" style={{ paddingLeft: 18 }}>
+                {envelope.prepTasks.slice(0, 12).map((t, idx) => (
+                  <li key={idx}>{String(t)}</li>
+                ))}
+                {envelope.prepTasks.length > 12 ? (
+                  <li>…and {envelope.prepTasks.length - 12} more</li>
+                ) : null}
+              </ul>
+            </div>
+          ) : null}
         </div>
       )}
-
-      <div className="mt-6 border-t pt-4 text-right text-sm text-stone-500 flex items-center justify-end gap-2">
-        <FileText size={16} />
-        <span>Cycle synced with Batch Cooking, Prep Tasks & Procurement</span>
-      </div>
     </div>
   );
 }

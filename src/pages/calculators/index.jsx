@@ -33,10 +33,10 @@ import calculatorsRegistry, {
   CALCULATOR_DOMAINS,
   getCalculatorsGroupedByDomain,
   listAllCalculators,
-  getCalculatorDomainForNodeId
+  getCalculatorDomainForNodeId,
 } from "../../features/calculators";
 
-import eventBus from "../../services/eventBus";
+import eventBus from "../../services/events/eventBus";
 
 /**
  * Simple metadata for displaying domains in a friendly way on this page.
@@ -48,35 +48,36 @@ const DOMAIN_META = {
     description: "Body-level health, energy, and micronutrient coverage.",
     accentClass: "from-purple-500/10 to-purple-500/5 border-purple-400/40",
     pillClass:
-      "bg-purple-500/10 text-purple-300 ring-1 ring-purple-500/40 border border-purple-500/40"
+      "bg-purple-500/10 text-purple-300 ring-1 ring-purple-500/40 border border-purple-500/40",
   },
   [CALCULATOR_DOMAINS.STOREHOUSE_MEALS]: {
     label: "Storehouse & Meals",
     description: "Pantry depth, meat breakdown, and months of cover.",
     accentClass: "from-amber-500/10 to-amber-500/5 border-amber-400/40",
     pillClass:
-      "bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/40 border border-amber-500/40"
+      "bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/40 border border-amber-500/40",
   },
   [CALCULATOR_DOMAINS.GARDEN]: {
     label: "Garden & Production",
-    description: "Seed viability, harvest projections, and garden-to-storehouse flow.",
+    description:
+      "Seed viability, harvest projections, and garden-to-storehouse flow.",
     accentClass: "from-emerald-500/10 to-emerald-500/5 border-emerald-400/40",
     pillClass:
-      "bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/40 border border-emerald-500/40"
+      "bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/40 border border-emerald-500/40",
   },
   [CALCULATOR_DOMAINS.ANIMALS]: {
     label: "Animals",
     description: "Feed support and livestock-planning helpers.",
     accentClass: "from-sky-500/10 to-sky-500/5 border-sky-400/40",
     pillClass:
-      "bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/40 border border-sky-500/40"
+      "bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/40 border border-sky-500/40",
   },
   [CALCULATOR_DOMAINS.PRESERVATION]: {
     label: "Preservation",
     description: "Plan canning, drying, freezing, and long-term storage.",
     accentClass: "from-rose-500/10 to-rose-500/5 border-rose-400/40",
     pillClass:
-      "bg-rose-500/10 text-rose-300 ring-1 ring-rose-500/40 border border-rose-500/40"
+      "bg-rose-500/10 text-rose-300 ring-1 ring-rose-500/40 border border-rose-500/40",
   },
   [CALCULATOR_DOMAINS.CALENDAR]: {
     label: "Calendar & Rhythm",
@@ -84,7 +85,7 @@ const DOMAIN_META = {
       "Meal coverage, batch density, sabbath & feast alignment, cleaning and garden rhythm.",
     accentClass: "from-cyan-500/10 to-cyan-500/5 border-cyan-400/40",
     pillClass:
-      "bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/40 border border-cyan-500/40"
+      "bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/40 border border-cyan-500/40",
   },
   [CALCULATOR_DOMAINS.STABILITY]: {
     label: "Household Stability",
@@ -92,22 +93,22 @@ const DOMAIN_META = {
       "Income stability, utility resilience, storehouse strength, and external dependency.",
     accentClass: "from-slate-500/10 to-slate-500/5 border-slate-400/40",
     pillClass:
-      "bg-slate-500/10 text-slate-300 ring-1 ring-slate-500/40 border border-slate-500/40"
+      "bg-slate-500/10 text-slate-300 ring-1 ring-slate-500/40 border border-slate-500/40",
   },
   [CALCULATOR_DOMAINS.UTILITIES]: {
     label: "Utilities & Infrastructure",
     description: "Power, water, and other backbone systems.",
     accentClass: "from-indigo-500/10 to-indigo-500/5 border-indigo-400/40",
     pillClass:
-      "bg-indigo-500/10 text-indigo-300 ring-1 ring-indigo-500/40 border border-indigo-500/40"
+      "bg-indigo-500/10 text-indigo-300 ring-1 ring-indigo-500/40 border border-indigo-500/40",
   },
   [CALCULATOR_DOMAINS.OTHER]: {
     label: "Other Tools",
     description: "Miscellaneous calculators that don’t fit other buckets.",
     accentClass: "from-zinc-500/10 to-zinc-500/5 border-zinc-400/40",
     pillClass:
-      "bg-zinc-500/10 text-zinc-300 ring-1 ring-zinc-500/40 border border-zinc-500/40"
-  }
+      "bg-zinc-500/10 text-zinc-300 ring-1 ring-zinc-500/40 border border-zinc-500/40",
+  },
 };
 
 /**
@@ -123,7 +124,7 @@ const DOMAIN_TO_SESSION_DOMAIN = {
   [CALCULATOR_DOMAINS.CALENDAR]: "cleaning",
   [CALCULATOR_DOMAINS.STABILITY]: "storehouse",
   [CALCULATOR_DOMAINS.UTILITIES]: "storehouse",
-  [CALCULATOR_DOMAINS.OTHER]: "storehouse"
+  [CALCULATOR_DOMAINS.OTHER]: "storehouse",
 };
 
 /**
@@ -149,9 +150,9 @@ function requestSessionFromCalculator(calculatorConfig) {
           title: `Plan with ${calculatorConfig.label}`,
           origin: "calculator",
           calculatorId: calculatorConfig.id,
-          nodeId: calculatorConfig.nodeId || null
-        }
-      }
+          nodeId: calculatorConfig.nodeId || null,
+        },
+      },
     });
   } catch {
     // Soft-fail; SessionRunner is an enhancement, not required here.
@@ -296,8 +297,7 @@ const CalculatorsIndexPage = () => {
             {Object.entries(finalGroups).map(([domainId, calculators]) => {
               if (!calculators || calculators.length === 0) return null;
               const meta =
-                DOMAIN_META[domainId] ||
-                DOMAIN_META[CALCULATOR_DOMAINS.OTHER];
+                DOMAIN_META[domainId] || DOMAIN_META[CALCULATOR_DOMAINS.OTHER];
 
               return (
                 <section

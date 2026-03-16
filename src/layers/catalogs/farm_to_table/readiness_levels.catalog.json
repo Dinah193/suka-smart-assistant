@@ -1,0 +1,881 @@
+{
+  "$schema": "../../schemas/farm_to_table/readiness_levels.catalog.schema.json",
+  "catalogId": "farm_to_table.readiness_levels",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T02:30:05Z",
+  "notes": [
+    "Readiness Levels are deterministic capability bands used by SSA to adapt plans to what a household can realistically execute.",
+    "Levels cover: storehouse depth, cooking complexity, preservation methods, equipment, garden/animals maturity, and time bandwidth.",
+    "Planners should use readiness levels to: (1) constrain technique choices, (2) reduce ingredient diversity, (3) choose simpler plate templates, (4) adjust preservation targets, and (5) generate actionable upgrades."
+  ],
+  "enums": {
+    "domains": [
+      "cooking",
+      "storehouse",
+      "preservation",
+      "garden",
+      "animals",
+      "equipment",
+      "time_bandwidth",
+      "nutrition"
+    ],
+    "tiers": ["L0", "L1", "L2", "L3", "L4"],
+    "evidenceTypes": [
+      "self_report",
+      "inventory_scan",
+      "session_history",
+      "purchase_history",
+      "garden_log",
+      "animal_log",
+      "equipment_registry"
+    ],
+    "methodIds": [
+      "preserve.dry_store",
+      "preserve.freeze",
+      "preserve.dehydrate",
+      "preserve.water_bath_can",
+      "preserve.pressure_can",
+      "preserve.culture_ferment",
+      "preserve.pickling",
+      "preserve.root_cellar",
+      "preserve.cure_smoke",
+      "preserve.render",
+      "preserve.clarify"
+    ],
+    "cookMethods": [
+      "assemble",
+      "boil",
+      "saute",
+      "roast",
+      "stew",
+      "braise",
+      "bake",
+      "grill",
+      "fry",
+      "pressure_cook",
+      "slow_cook",
+      "one_pot"
+    ]
+  },
+  "defaults": {
+    "scoring": {
+      "domainWeights": {
+        "cooking": 0.18,
+        "storehouse": 0.18,
+        "preservation": 0.18,
+        "equipment": 0.14,
+        "garden": 0.1,
+        "animals": 0.08,
+        "time_bandwidth": 0.08,
+        "nutrition": 0.06
+      },
+      "tierThresholds": {
+        "L0": {
+          "minScore": 0.0,
+          "maxScore": 0.24
+        },
+        "L1": {
+          "minScore": 0.25,
+          "maxScore": 0.44
+        },
+        "L2": {
+          "minScore": 0.45,
+          "maxScore": 0.64
+        },
+        "L3": {
+          "minScore": 0.65,
+          "maxScore": 0.84
+        },
+        "L4": {
+          "minScore": 0.85,
+          "maxScore": 1.0
+        }
+      }
+    }
+  },
+  "domainRubrics": [
+    {
+      "domain": "cooking",
+      "description": "Ability to execute recipes and sessions with increasing complexity.",
+      "metrics": [
+        {
+          "id": "cook.sessions_per_week",
+          "label": "Cooking sessions per week",
+          "type": "number",
+          "unit": "count",
+          "notes": "From SessionRunner history or self report."
+        },
+        {
+          "id": "cook.methods_supported",
+          "label": "Supported cooking methods",
+          "type": "set",
+          "unit": "",
+          "notes": "Methods household can reliably perform (boil/saute/stew/etc.)."
+        },
+        {
+          "id": "cook.knife_skills",
+          "label": "Knife skills",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "Self report or skill assessment."
+        },
+        {
+          "id": "cook.recipe_reliability",
+          "label": "Recipe reliability",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "How often meals succeed without stress."
+        }
+      ]
+    },
+    {
+      "domain": "storehouse",
+      "description": "Inventory breadth and depth for staple provisioning.",
+      "metrics": [
+        {
+          "id": "storehouse.days_of_staples",
+          "label": "Days of staples on hand",
+          "type": "number",
+          "unit": "days",
+          "notes": "Estimated total days of core staples available (grains/legumes/fats/proteins) given household size."
+        },
+        {
+          "id": "storehouse.variety_index",
+          "label": "Variety index",
+          "type": "number",
+          "unit": "0-1",
+          "notes": "How many categories are covered."
+        },
+        {
+          "id": "storehouse.rotation_habit",
+          "label": "Rotation habit",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "FIFO usage and tracking."
+        }
+      ]
+    },
+    {
+      "domain": "preservation",
+      "description": "Capacity to preserve foods safely and consistently.",
+      "metrics": [
+        {
+          "id": "preserve.methods_enabled",
+          "label": "Enabled preservation methods",
+          "type": "set",
+          "unit": "",
+          "notes": "Freeze, dehydrate, ferment, can, etc."
+        },
+        {
+          "id": "preserve.batch_frequency",
+          "label": "Batch frequency",
+          "type": "number",
+          "unit": "per_month",
+          "notes": "How many preservation batches are completed per month (any enabled method)."
+        },
+        {
+          "id": "preserve.safety_confidence",
+          "label": "Safety confidence",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "Pressure canning knowledge, pH handling."
+        }
+      ]
+    },
+    {
+      "domain": "equipment",
+      "description": "Tools available to execute planned methods.",
+      "metrics": [
+        {
+          "id": "equip.freezer_space",
+          "label": "Freezer space",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "None/small/medium/large."
+        },
+        {
+          "id": "equip.pressure_canner",
+          "label": "Pressure canner",
+          "type": "boolean",
+          "unit": "",
+          "notes": "True if household has a pressure canner suitable for safe low-acid canning."
+        },
+        {
+          "id": "equip.dehydrator",
+          "label": "Dehydrator",
+          "type": "boolean",
+          "unit": "",
+          "notes": "True if household has a dehydrator (or equivalent low-temp drying setup)."
+        },
+        {
+          "id": "equip.ferment_setup",
+          "label": "Fermentation setup",
+          "type": "boolean",
+          "unit": "",
+          "notes": "True if household has jars/weights/airlocks (or reliable workflow) for fermentation."
+        },
+        {
+          "id": "equip.grain_mill",
+          "label": "Grain mill",
+          "type": "boolean",
+          "unit": "",
+          "notes": "True if household can mill whole grains into flour reliably."
+        }
+      ]
+    },
+    {
+      "domain": "garden",
+      "description": "Ability to supply produce from garden/plots.",
+      "metrics": [
+        {
+          "id": "garden.active_beds",
+          "label": "Active beds/containers",
+          "type": "number",
+          "unit": "count",
+          "notes": "Count of active growing spaces (beds/containers) maintained during the current season."
+        },
+        {
+          "id": "garden.harvest_per_month",
+          "label": "Harvest weight per month",
+          "type": "number",
+          "unit": "lb",
+          "notes": "Total harvested produce weight per month (logged or estimated)."
+        },
+        {
+          "id": "garden.success_rate",
+          "label": "Crop success rate",
+          "type": "number",
+          "unit": "0-1",
+          "notes": "Fraction of planted crops that reach usable harvest (0–1)."
+        }
+      ]
+    },
+    {
+      "domain": "animals",
+      "description": "Ability to supply eggs/meat from animals.",
+      "metrics": [
+        {
+          "id": "animals.eggs_per_week",
+          "label": "Eggs per week",
+          "type": "number",
+          "unit": "count",
+          "notes": "Average eggs produced per week across laying animals (seasonally adjusted if needed)."
+        },
+        {
+          "id": "animals.meat_events_per_year",
+          "label": "Butchery events per year",
+          "type": "number",
+          "unit": "count",
+          "notes": "Number of butchery/processing events per year (household-performed or arranged)."
+        },
+        {
+          "id": "animals.care_routine",
+          "label": "Care routine consistency",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "How consistently animal care tasks are completed on schedule (feeding, water, cleaning, health checks)."
+        }
+      ]
+    },
+    {
+      "domain": "time_bandwidth",
+      "description": "Time and staffing to execute plans.",
+      "metrics": [
+        {
+          "id": "time.hours_per_week_food",
+          "label": "Hours per week for food work",
+          "type": "number",
+          "unit": "hours",
+          "notes": "Total weekly hours available for cooking + preservation + provisioning tasks."
+        },
+        {
+          "id": "time.helpers",
+          "label": "Helpers available",
+          "type": "number",
+          "unit": "count",
+          "notes": "Number of people who can reliably help with food work (prep, cooking, cleaning, preserving)."
+        },
+        {
+          "id": "time.stress_level",
+          "label": "Stress level",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "How disruptive cooking/preservation feels."
+        }
+      ]
+    },
+    {
+      "domain": "nutrition",
+      "description": "Ability to hit nutrition targets reliably.",
+      "metrics": [
+        {
+          "id": "nutrient.protein_target_hit",
+          "label": "Protein target reliability",
+          "type": "number",
+          "unit": "0-1",
+          "notes": "How reliably protein targets are hit across a typical week (0–1)."
+        },
+        {
+          "id": "nutrient.veg_servings",
+          "label": "Veg servings per day",
+          "type": "number",
+          "unit": "servings",
+          "notes": "Average daily vegetable servings (fresh/frozen/canned/fermented all count)."
+        },
+        {
+          "id": "nutrient.added_sugar_control",
+          "label": "Added sugar control",
+          "type": "ordinal",
+          "unit": "",
+          "notes": "Degree of control over added sugars (label reading, limiting sweetened beverages, etc.)."
+        }
+      ]
+    }
+  ],
+  "levels": [
+    {
+      "tier": "L0",
+      "label": "L0 • Starter",
+      "shortDescription": "Minimal routines; mostly purchase-based; limited tools; needs simple plans.",
+      "guidance": [
+        "Keep ingredient lists short and repeat staples weekly.",
+        "Prefer assemble/boil/one-pot methods with forgiving timing.",
+        "Use freezer sparingly; focus on dry storage basics."
+      ],
+      "capabilities": {
+        "cooking": {
+          "methods": ["assemble", "boil", "one_pot"],
+          "maxActiveStepsPerSession": 8,
+          "maxConcurrentTimers": 1
+        },
+        "storehouse": {
+          "targetDaysStaples": 7,
+          "targetVarietyIndex": 0.25
+        },
+        "preservation": {
+          "methods": ["preserve.dry_store", "preserve.freeze"],
+          "batchFrequencyPerMonth": 0
+        },
+        "equipment": {
+          "required": ["basic_pots_pans", "knife", "cutting_board"],
+          "optional": ["freezer_small"]
+        },
+        "garden": {
+          "expected": "none_or_small_containers"
+        },
+        "animals": {
+          "expected": "none"
+        },
+        "time_bandwidth": {
+          "hoursPerWeekFoodWork": 3
+        }
+      },
+      "unlocks": {
+        "templates": [
+          "plate.breakfast_eggs_and_starch",
+          "plate.soup_and_bread"
+        ],
+        "cuisines": ["cuisine.aai.core", "cuisine.mediterranean.simple_herb"],
+        "substitutions": {
+          "aggressiveness": "high",
+          "notes": "Allow broad swaps to keep plans feasible."
+        }
+      },
+      "recommendedPlateTemplates": [
+        "plate.breakfast_eggs_and_starch",
+        "plate.soup_and_bread"
+      ],
+      "suggestedUpgrades": [
+        {
+          "id": "upgrade.freezer_space",
+          "label": "Increase freezer space",
+          "domain": "equipment",
+          "impact": "Supports batch cooking and reduces waste."
+        },
+        {
+          "id": "upgrade.pantry_basics",
+          "label": "Build base pantry kit",
+          "domain": "storehouse",
+          "impact": "Enables repeatable meals without frequent shopping."
+        }
+      ],
+      "evidence": [
+        {
+          "type": "self_report",
+          "minConfidence": 0.4
+        },
+        {
+          "type": "inventory_scan",
+          "minConfidence": 0.3
+        }
+      ]
+    },
+    {
+      "tier": "L1",
+      "label": "L1 • Stable Home Cooking",
+      "shortDescription": "Can cook 3–5 meals/week; basic inventory; some freezing; beginning meal rotation.",
+      "guidance": [
+        "Introduce 1 new technique per month (roast, sauté, stew).",
+        "Start a weekly batch (beans, rice, stew) and freeze portions.",
+        "Begin pantry rotation tracking (FIFO)."
+      ],
+      "capabilities": {
+        "cooking": {
+          "methods": ["assemble", "boil", "saute", "roast", "one_pot", "stew"],
+          "maxActiveStepsPerSession": 12,
+          "maxConcurrentTimers": 2
+        },
+        "storehouse": {
+          "targetDaysStaples": 21,
+          "targetVarietyIndex": 0.4
+        },
+        "preservation": {
+          "methods": [
+            "preserve.dry_store",
+            "preserve.freeze",
+            "preserve.dehydrate"
+          ],
+          "batchFrequencyPerMonth": 1
+        },
+        "equipment": {
+          "required": ["basic_pots_pans", "knife", "cutting_board"],
+          "optional": ["freezer_medium", "dehydrator_basic"]
+        },
+        "garden": {
+          "expected": "containers_or_small_bed"
+        },
+        "animals": {
+          "expected": "none_or_eggs_only"
+        },
+        "time_bandwidth": {
+          "hoursPerWeekFoodWork": 6
+        }
+      },
+      "unlocks": {
+        "templates": [
+          "plate.everyday_protein_starch_veg",
+          "plate.curry_and_two"
+        ],
+        "cuisines": [
+          "cuisine.aai.core",
+          "cuisine.aai.southern_stream",
+          "cuisine.aai.caribbean_stream"
+        ],
+        "substitutions": {
+          "aggressiveness": "medium"
+        }
+      },
+      "recommendedPlateTemplates": [
+        "plate.everyday_protein_starch_veg",
+        "plate.curry_and_two",
+        "plate.breakfast_eggs_and_starch"
+      ],
+      "suggestedUpgrades": [
+        {
+          "id": "upgrade.dehydrator",
+          "label": "Add dehydrator",
+          "domain": "equipment",
+          "impact": "Extends garden harvest and reduces freezer load."
+        },
+        {
+          "id": "upgrade.recipe_reliability",
+          "label": "Improve 10 core recipes",
+          "domain": "cooking",
+          "impact": "Reduces stress; improves consistency."
+        }
+      ],
+      "evidence": [
+        {
+          "type": "session_history",
+          "minConfidence": 0.5
+        },
+        {
+          "type": "inventory_scan",
+          "minConfidence": 0.5
+        }
+      ]
+    },
+    {
+      "tier": "L2",
+      "label": "L2 • Batch & Preserve",
+      "shortDescription": "Regular batch cooking; consistent freezer usage; some fermentation/pickling; stronger storehouse.",
+      "guidance": [
+        "Run a weekly preservation session (freeze, dehydrate, ferment, pickle).",
+        "Standardize plate templates by cuisine to reduce decision fatigue.",
+        "Start seasonal planning for garden and bulk buys."
+      ],
+      "capabilities": {
+        "cooking": {
+          "methods": [
+            "assemble",
+            "boil",
+            "saute",
+            "roast",
+            "stew",
+            "braise",
+            "bake",
+            "one_pot",
+            "slow_cook"
+          ],
+          "maxActiveStepsPerSession": 18,
+          "maxConcurrentTimers": 3
+        },
+        "storehouse": {
+          "targetDaysStaples": 45,
+          "targetVarietyIndex": 0.55
+        },
+        "preservation": {
+          "methods": [
+            "preserve.dry_store",
+            "preserve.freeze",
+            "preserve.dehydrate",
+            "preserve.culture_ferment",
+            "preserve.pickling",
+            "preserve.root_cellar"
+          ],
+          "batchFrequencyPerMonth": 2
+        },
+        "equipment": {
+          "required": ["freezer_medium"],
+          "optional": ["ferment_setup", "vacuum_sealer", "root_cellar_space"]
+        },
+        "garden": {
+          "expected": "small_to_medium_beds",
+          "targetHarvestLbPerMonth": 10
+        },
+        "animals": {
+          "expected": "eggs_optional"
+        },
+        "time_bandwidth": {
+          "hoursPerWeekFoodWork": 10
+        }
+      },
+      "unlocks": {
+        "templates": ["plate.preservation_batch_pot"],
+        "cuisines": [
+          "cuisine.aai.west_african_stream",
+          "cuisine.indian.north_masala",
+          "cuisine.caribbean.island_home"
+        ],
+        "substitutions": {
+          "aggressiveness": "low",
+          "notes": "Plans should become more specific; fewer emergency swaps."
+        }
+      },
+      "recommendedPlateTemplates": [
+        "plate.preservation_batch_pot",
+        "plate.curry_and_two",
+        "plate.soup_and_bread"
+      ],
+      "suggestedUpgrades": [
+        {
+          "id": "upgrade.ferment_station",
+          "label": "Dedicated ferment station",
+          "domain": "equipment",
+          "impact": "More consistent ferments; safer workflow."
+        },
+        {
+          "id": "upgrade.bulk_storage",
+          "label": "Bulk storage containers",
+          "domain": "storehouse",
+          "impact": "Supports 60–90 day provisioning targets."
+        }
+      ],
+      "evidence": [
+        {
+          "type": "session_history",
+          "minConfidence": 0.6
+        },
+        {
+          "type": "purchase_history",
+          "minConfidence": 0.5
+        },
+        {
+          "type": "garden_log",
+          "minConfidence": 0.4
+        }
+      ]
+    },
+    {
+      "tier": "L3",
+      "label": "L3 • Homestead Rhythm",
+      "shortDescription": "High reliability; multiple preservation methods; garden provides meaningful share; optional animal products.",
+      "guidance": [
+        "Align garden/animal planning to plate template demand (starches, veg, proteins).",
+        "Pressure-can staples (broths, stews) for shelf stability.",
+        "Maintain a seasonal menu rotation and preserve surplus."
+      ],
+      "capabilities": {
+        "cooking": {
+          "methods": [
+            "assemble",
+            "boil",
+            "saute",
+            "roast",
+            "stew",
+            "braise",
+            "bake",
+            "grill",
+            "fry",
+            "pressure_cook",
+            "slow_cook",
+            "one_pot"
+          ],
+          "maxActiveStepsPerSession": 24,
+          "maxConcurrentTimers": 4
+        },
+        "storehouse": {
+          "targetDaysStaples": 90,
+          "targetVarietyIndex": 0.7
+        },
+        "preservation": {
+          "methods": [
+            "preserve.dry_store",
+            "preserve.freeze",
+            "preserve.dehydrate",
+            "preserve.water_bath_can",
+            "preserve.pressure_can",
+            "preserve.culture_ferment",
+            "preserve.pickling",
+            "preserve.root_cellar"
+          ],
+          "batchFrequencyPerMonth": 4
+        },
+        "equipment": {
+          "required": ["pressure_canner", "freezer_large"],
+          "optional": ["grain_mill", "smoker", "root_cellar_space"]
+        },
+        "garden": {
+          "expected": "medium_to_large_garden",
+          "targetHarvestLbPerMonth": 25
+        },
+        "animals": {
+          "expected": "eggs_or_meat_optional",
+          "notes": "If animals exist, integrate care tasks into weekly plan."
+        },
+        "time_bandwidth": {
+          "hoursPerWeekFoodWork": 14
+        }
+      },
+      "unlocks": {
+        "templates": [
+          "plate.everyday_protein_starch_veg",
+          "plate.preservation_batch_pot",
+          "plate.curry_and_two",
+          "plate.soup_and_bread"
+        ],
+        "cuisines": [
+          "cuisine.aai.core",
+          "cuisine.aai.caribbean_stream",
+          "cuisine.aai.west_african_stream",
+          "cuisine.indian.north_masala"
+        ],
+        "substitutions": {
+          "aggressiveness": "very_low"
+        }
+      },
+      "recommendedPlateTemplates": [
+        "plate.preservation_batch_pot",
+        "plate.everyday_protein_starch_veg"
+      ],
+      "suggestedUpgrades": [
+        {
+          "id": "upgrade.grain_mill",
+          "label": "Add grain mill",
+          "domain": "equipment",
+          "impact": "Supports fresh flour, breadmaking, and resilient provisioning."
+        },
+        {
+          "id": "upgrade.pressure_canning_skills",
+          "label": "Pressure-canning mastery",
+          "domain": "preservation",
+          "impact": "Shelf-stable proteins and soups; reduces freezer dependency."
+        }
+      ],
+      "evidence": [
+        {
+          "type": "equipment_registry",
+          "minConfidence": 0.6
+        },
+        {
+          "type": "session_history",
+          "minConfidence": 0.7
+        },
+        {
+          "type": "inventory_scan",
+          "minConfidence": 0.6
+        },
+        {
+          "type": "garden_log",
+          "minConfidence": 0.6
+        }
+      ]
+    },
+    {
+      "tier": "L4",
+      "label": "L4 • Resilient & Scalable",
+      "shortDescription": "Deep storehouse, robust preservation, mature garden/animals, and stable routines that can scale to guests/feasts.",
+      "guidance": [
+        "Maintain multi-season redundancy: dry store + canned + frozen + fermented.",
+        "Run quarterly audits and rotation; keep SOPs for all methods.",
+        "Plan feast menus and bulk purchases with high confidence."
+      ],
+      "capabilities": {
+        "cooking": {
+          "methods": [
+            "assemble",
+            "boil",
+            "saute",
+            "roast",
+            "stew",
+            "braise",
+            "bake",
+            "grill",
+            "fry",
+            "pressure_cook",
+            "slow_cook",
+            "one_pot"
+          ],
+          "maxActiveStepsPerSession": 30,
+          "maxConcurrentTimers": 6
+        },
+        "storehouse": {
+          "targetDaysStaples": 180,
+          "targetVarietyIndex": 0.85
+        },
+        "preservation": {
+          "methods": [
+            "preserve.dry_store",
+            "preserve.freeze",
+            "preserve.dehydrate",
+            "preserve.water_bath_can",
+            "preserve.pressure_can",
+            "preserve.culture_ferment",
+            "preserve.pickling",
+            "preserve.root_cellar",
+            "preserve.cure_smoke",
+            "preserve.render",
+            "preserve.clarify"
+          ],
+          "batchFrequencyPerMonth": 6
+        },
+        "equipment": {
+          "required": [
+            "pressure_canner",
+            "freezer_large",
+            "dehydrator",
+            "ferment_setup"
+          ],
+          "optional": ["smoker", "cheese_cave", "vacuum_sealer", "grain_mill"]
+        },
+        "garden": {
+          "expected": "large_garden_or_orchard",
+          "targetHarvestLbPerMonth": 50
+        },
+        "animals": {
+          "expected": "eggs_and_meat_possible",
+          "notes": "Butchery/preservation rhythms integrated."
+        },
+        "time_bandwidth": {
+          "hoursPerWeekFoodWork": 18
+        }
+      },
+      "unlocks": {
+        "templates": [
+          "plate.everyday_protein_starch_veg",
+          "plate.preservation_batch_pot",
+          "plate.curry_and_two",
+          "plate.soup_and_bread",
+          "plate.breakfast_eggs_and_starch"
+        ],
+        "cuisines": ["*"],
+        "substitutions": {
+          "aggressiveness": "minimal",
+          "notes": "Only swap when a deliberate optimization is desired."
+        }
+      },
+      "recommendedPlateTemplates": [
+        "plate.preservation_batch_pot",
+        "plate.everyday_protein_starch_veg",
+        "plate.curry_and_two"
+      ],
+      "suggestedUpgrades": [
+        {
+          "id": "upgrade.training_household",
+          "label": "Train household members for redundancy",
+          "domain": "cooking",
+          "impact": "Resilience if primary cook is unavailable."
+        },
+        {
+          "id": "upgrade.audit_rotation",
+          "label": "Quarterly storehouse audit",
+          "domain": "storehouse",
+          "impact": "Minimizes waste; maintains readiness."
+        }
+      ],
+      "evidence": [
+        {
+          "type": "equipment_registry",
+          "minConfidence": 0.7
+        },
+        {
+          "type": "inventory_scan",
+          "minConfidence": 0.7
+        },
+        {
+          "type": "session_history",
+          "minConfidence": 0.7
+        },
+        {
+          "type": "garden_log",
+          "minConfidence": 0.7
+        },
+        {
+          "type": "animal_log",
+          "minConfidence": 0.5
+        }
+      ]
+    }
+  ],
+  "plannerBehaviorByTier": {
+    "L0": {
+      "maxUniqueIngredientsPerWeek": 22,
+      "maxUniqueTechniquesPerWeek": 3,
+      "preservationTargets": {
+        "freezePortionsPerWeek": 2
+      }
+    },
+    "L1": {
+      "maxUniqueIngredientsPerWeek": 30,
+      "maxUniqueTechniquesPerWeek": 4,
+      "preservationTargets": {
+        "freezePortionsPerWeek": 4
+      }
+    },
+    "L2": {
+      "maxUniqueIngredientsPerWeek": 40,
+      "maxUniqueTechniquesPerWeek": 6,
+      "preservationTargets": {
+        "freezePortionsPerWeek": 6,
+        "fermentBatchesPerMonth": 2
+      }
+    },
+    "L3": {
+      "maxUniqueIngredientsPerWeek": 55,
+      "maxUniqueTechniquesPerWeek": 8,
+      "preservationTargets": {
+        "pressureCanJarsPerMonth": 12,
+        "dehydrateBatchesPerMonth": 2
+      }
+    },
+    "L4": {
+      "maxUniqueIngredientsPerWeek": 70,
+      "maxUniqueTechniquesPerWeek": 10,
+      "preservationTargets": {
+        "pressureCanJarsPerMonth": 24,
+        "dehydrateBatchesPerMonth": 4,
+        "cureSmokeBatchesPerMonth": 1
+      }
+    }
+  }
+}

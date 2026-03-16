@@ -27,7 +27,7 @@
  *   - A swap/selector modal (separate UI file) using the candidates list.
  *
  * Contracts
- * - Event bus at src/services/eventBus.js exposing:
+ * - Event bus at src/services/events/eventBus.js exposing:
  *     eventBus.on(type, fn)
  *     eventBus.off(type, fn)
  *     eventBus.emit({ type, ts, source, data })
@@ -70,18 +70,28 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 // featureFlags is available if you want to specialize behavior later.
-import featureFlags from "@/services/featureFlags";
+import featureFlags from "@/config/featureFlags";
 import * as SessionsRepo from "@/data/SessionsRepo";
 
 // Optional guards; each import is wrapped so missing files won't break runtime.
 let sabbathGuard, quietHoursGuard, weatherGuard, inventoryGuard, batteryGuard;
-try { sabbathGuard = require("@/guards/sabbathGuard"); } catch {}
-try { quietHoursGuard = require("@/guards/quietHoursGuard"); } catch {}
-try { weatherGuard = require("@/guards/weatherGuard"); } catch {}
-try { inventoryGuard = require("@/guards/inventoryGuard"); } catch {}
-try { batteryGuard = require("@/guards/batteryGuard"); } catch {}
+try {
+  sabbathGuard = require("@/guards/sabbathGuard");
+} catch {}
+try {
+  quietHoursGuard = require("@/guards/quietHoursGuard");
+} catch {}
+try {
+  weatherGuard = require("@/guards/weatherGuard");
+} catch {}
+try {
+  inventoryGuard = require("@/guards/inventoryGuard");
+} catch {}
+try {
+  batteryGuard = require("@/guards/batteryGuard");
+} catch {}
 
 /** @typedef {import("@/types").Session} Session */
 
@@ -224,25 +234,22 @@ function sanitizeSession(s) {
     title: s.title ? String(s.title) : "",
     source: s.source || { type: "manual", refId: null },
     steps: Array.isArray(s.steps) ? s.steps : [],
-    prefs:
-      s.prefs || {
-        voiceGuidance: false,
-        haptic: true,
-        autoAdvance: false,
-      },
+    prefs: s.prefs || {
+      voiceGuidance: false,
+      haptic: true,
+      autoAdvance: false,
+    },
     status: s.status || "pending",
-    progress:
-      s.progress || {
-        currentStepIndex: 0,
-        elapsedSec: 0,
-        startedAt: null,
-        pausedAt: null,
-      },
-    analytics:
-      s.analytics || {
-        skippedSteps: [],
-        adjustments: [],
-      },
+    progress: s.progress || {
+      currentStepIndex: 0,
+      elapsedSec: 0,
+      startedAt: null,
+      pausedAt: null,
+    },
+    analytics: s.analytics || {
+      skippedSteps: [],
+      adjustments: [],
+    },
     createdAt: s.createdAt || nowISO,
     updatedAt: s.updatedAt || s.createdAt || nowISO,
   });
@@ -313,8 +320,7 @@ function computeDerived() {
   list.push(...sortedPendings);
 
   const viableCount =
-    Number(!!running) +
-    pendingEvaluated.filter((x) => !x.blocked).length;
+    Number(!!running) + pendingEvaluated.filter((x) => !x.blocked).length;
 
   return {
     primary,

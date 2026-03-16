@@ -314,8 +314,8 @@ function InlineMacroCalculator() {
           const util = await import("@/utils/dynImport");
           const { loadFromSrc } = util;
           mealMod = await loadFromSrc([
-            "/src/agents/mealPlanningAgent.js",
-            "/src/agents/mealPlanningAgent.jsx",
+            "/src/agents/mealPlanningShim.js",
+            "/src/agents/mealPlanningShim.jsx",
             "/src/agents/mealPlanningAgent.ts",
             "/src/agents/mealPlanningAgent.tsx",
           ]);

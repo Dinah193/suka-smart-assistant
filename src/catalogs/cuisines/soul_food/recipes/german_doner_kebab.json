@@ -1,0 +1,654 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.soul_food.german_doner_kebab",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "German Döner Kebab",
+    "subtitle": "Street-style shawarma/döner-inspired meat, crunchy salad, and creamy garlic sauce in warm flatbread.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Soul Food (Diaspora Street Foods)",
+      "notes": [
+        "Catalog placement: soul_food as diaspora-friendly street food; flavors pair well with SSA savory profiles (garlic-forward, tangy, crunchy).",
+        "Designed for skillet/oven home method (no vertical rotisserie required).",
+        "Includes optional beef/lamb blend and chicken variant."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "soul_food",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.handheld_wrap",
+      "archetype.street_food",
+      "archetype.weeknight"
+    ],
+    "servingStyles": ["handheld", "family_style", "build_your_own"],
+    "plannerTags": [
+      "cuisine.soul_food",
+      "street_food",
+      "handheld",
+      "build_your_own",
+      "garlic_forward",
+      "weeknight.friendly"
+    ],
+    "subprofiles": ["diaspora.street_food", "garlic_sauce", "spice_warm"]
+  },
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "wrap" },
+    "notes": "Makes 6 large wraps or 8 smaller wraps depending on bread size and filling."
+  },
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 25,
+    "totalMins": 60
+  },
+  "difficulty": "intermediate",
+  "summary": "Home-style German döner kebab: thin-sliced, highly seasoned meat cooked hot for browning, then stuffed into warm flatbread with cabbage salad, tomatoes, onions, and a creamy garlic sauce (plus optional spicy sauce).",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "meat_only",
+    "crowdFriendly": true
+  },
+  "tasteProfile": {
+    "salt": 3,
+    "acid": 3,
+    "sweet": 1,
+    "heat": 1,
+    "umami": 4,
+    "notes": ["garlicky", "tangy", "warm spices", "crunchy fresh veg"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.mixing_bowl",
+      "equipment.skilet_large",
+      "equipment.tongs"
+    ],
+    "recommended": [
+      "equipment.sheet_pan",
+      "equipment.oven",
+      "equipment.microplane",
+      "equipment.instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "equipment.cast_iron_skilet",
+        "label": "Cast iron skillet (optional)",
+        "required": false,
+        "notes": "Best browning for thin slices."
+      },
+      {
+        "id": "equipment.air_fryer",
+        "label": "Air fryer (optional)",
+        "required": false,
+        "notes": "Can crisp pre-cooked meat slices quickly in small batches."
+      }
+    ]
+  },
+  "dietFlags": [],
+  "allergens": [
+    "allergen.dairy_optional",
+    "allergen.gluten_bread",
+    "allergen.egg_optional"
+  ],
+  "ingredientGroups": [
+    {
+      "id": "group.meat_marinade",
+      "label": "Meat + marinade",
+      "items": [
+        "ingredient.beef_steak_strips",
+        "ingredient.lamb_optional",
+        "ingredient.chicken_thighs_optional",
+        "ingredient.onion_grated",
+        "ingredient.garlic",
+        "ingredient.yogurt",
+        "ingredient.lemon_juice",
+        "ingredient.olive_oil",
+        "ingredient.paprika",
+        "ingredient.cumin",
+        "ingredient.coriander",
+        "ingredient.black_pepper",
+        "ingredient.salt",
+        "ingredient.oregano_optional",
+        "ingredient.cayenne_optional"
+      ]
+    },
+    {
+      "id": "group.garlic_sauce",
+      "label": "Creamy garlic sauce",
+      "items": [
+        "ingredient.greek_yogurt",
+        "ingredient.mayo_optional",
+        "ingredient.garlic_sauce_garlic",
+        "ingredient.lemon_juice_sauce",
+        "ingredient.dill_optional",
+        "ingredient.parsley_optional",
+        "ingredient.salt_sauce",
+        "ingredient.black_pepper_sauce"
+      ]
+    },
+    {
+      "id": "group.salad",
+      "label": "Döner salad & toppings",
+      "items": [
+        "ingredient.green_cabbage",
+        "ingredient.red_cabbage_optional",
+        "ingredient.tomato",
+        "ingredient.cucumber_optional",
+        "ingredient.red_onion",
+        "ingredient.pickles_optional",
+        "ingredient.vinegar",
+        "ingredient.sugar_optional",
+        "ingredient.salt_salad",
+        "ingredient.black_pepper_salad"
+      ]
+    },
+    {
+      "id": "group.bread",
+      "label": "Bread & assembly",
+      "items": [
+        "ingredient.pita_or_flatbread",
+        "ingredient.butter_optional",
+        "ingredient.hot_sauce_optional",
+        "ingredient.harissa_optional"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.beef_steak_strips",
+      "label": "Beef steak (sirloin/flank), sliced very thin",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": [
+        "For easiest slicing: freeze 20–30 minutes, then slice thin across the grain.",
+        "Alternative: use shaved steak if available."
+      ]
+    },
+    {
+      "id": "ingredient.lamb_optional",
+      "label": "Ground or thin-sliced lamb (optional, for beef-lamb blend)",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "lb" },
+      "optional": true,
+      "notes": "If using lamb, reduce beef to 1 lb for a 50/50 blend."
+    },
+    {
+      "id": "ingredient.chicken_thighs_optional",
+      "label": "Boneless skinless chicken thighs, thin-sliced (optional chicken variant)",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "optional": true,
+      "notes": "Use instead of beef for chicken döner."
+    },
+
+    {
+      "id": "ingredient.onion_grated",
+      "label": "Onion, grated (with juices)",
+      "role": "marinade",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Classic döner trick: grated onion tenderizes and perfumes the meat."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, finely minced",
+      "role": "marinade",
+      "amount": { "value": 5, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.yogurt",
+      "label": "Plain yogurt (marinade base)",
+      "role": "marinade",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Use full-fat for best texture."
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Lemon juice",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (sweet)",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.coriander",
+      "label": "Ground coriander",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adjust for your salt level; taste the cooked meat for final balance."
+    },
+    {
+      "id": "ingredient.oregano_optional",
+      "label": "Dried oregano (optional)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cayenne_optional",
+      "label": "Cayenne pepper (optional)",
+      "role": "heat",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional for gentle heat; keep mild for kid-friendly."
+    },
+
+    {
+      "id": "ingredient.greek_yogurt",
+      "label": "Greek yogurt (for sauce)",
+      "role": "sauce",
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.mayo_optional",
+      "label": "Mayonnaise (optional, for richer sauce)",
+      "role": "sauce",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": "Skip for a lighter yogurt-only sauce."
+    },
+    {
+      "id": "ingredient.garlic_sauce_garlic",
+      "label": "Garlic, microplaned (for sauce)",
+      "role": "sauce",
+      "amount": { "value": 2, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.lemon_juice_sauce",
+      "label": "Lemon juice (for sauce)",
+      "role": "sauce",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.dill_optional",
+      "label": "Fresh dill, chopped (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt_sauce",
+      "label": "Salt (for sauce)",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper_sauce",
+      "label": "Black pepper (for sauce)",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.green_cabbage",
+      "label": "Green cabbage, shredded",
+      "role": "topping",
+      "amount": { "value": 3, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.red_cabbage_optional",
+      "label": "Red cabbage, shredded (optional)",
+      "role": "topping",
+      "amount": { "value": 2, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.tomato",
+      "label": "Tomatoes, diced",
+      "role": "topping",
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.cucumber_optional",
+      "label": "Cucumber, diced (optional)",
+      "role": "topping",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.red_onion",
+      "label": "Red onion, thin-sliced",
+      "role": "topping",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.pickles_optional",
+      "label": "Pickles, sliced (optional)",
+      "role": "topping",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": "German-style döner often includes pickles or pepperoncini-style tang."
+    },
+
+    {
+      "id": "ingredient.vinegar",
+      "label": "White vinegar or apple cider vinegar (for cabbage quick-toss)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.sugar_optional",
+      "label": "Sugar (optional, for cabbage quick-toss)",
+      "role": "balance",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt_salad",
+      "label": "Salt (for salad)",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper_salad",
+      "label": "Black pepper (for salad)",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.pita_or_flatbread",
+      "label": "Pita, lavash, or flatbread",
+      "role": "wrap",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Use sturdy bread that can hold juicy fillings."
+    },
+    {
+      "id": "ingredient.butter_optional",
+      "label": "Butter (optional, for toasting bread)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.hot_sauce_optional",
+      "label": "Hot sauce (optional)",
+      "role": "finish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.harissa_optional",
+      "label": "Harissa or spicy red sauce (optional)",
+      "role": "finish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "A common döner add-on: spicy sauce layered with garlic sauce."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.slice_prep",
+      "title": "Slice and prep components",
+      "activeMins": 12,
+      "instructions": [
+        "If using beef: chill briefly (20–30 minutes in freezer) for easier thin slicing, then slice across the grain.",
+        "Grate onion (collect juices). Mince garlic.",
+        "Shred cabbages; dice tomatoes (and optional cucumber); thin-slice red onion.",
+        "Set up a build station: meat, sauce, salad, and breads."
+      ],
+      "checks": ["Meat sliced thin", "Veg prepped", "Build station ready"]
+    },
+    {
+      "id": "step.marinade",
+      "title": "Marinate the meat",
+      "activeMins": 8,
+      "handsOffMins": 15,
+      "instructions": [
+        "In a bowl, combine grated onion (with juices), minced garlic, yogurt, lemon juice, olive oil, paprika, cumin, coriander, black pepper, salt, and optional oregano/cayenne.",
+        "Add sliced beef (or chicken). Toss thoroughly to coat.",
+        "Marinate at least 15 minutes (or up to overnight in the fridge)."
+      ],
+      "timers": [{ "label": "Minimum marinade", "minutes": 15 }],
+      "checks": ["Meat evenly coated", "Marinating started"]
+    },
+    {
+      "id": "step.make_sauce",
+      "title": "Make creamy garlic sauce",
+      "activeMins": 6,
+      "instructions": [
+        "In a bowl, whisk Greek yogurt with optional mayo until smooth.",
+        "Add microplaned garlic, lemon juice, salt, black pepper, and optional dill/parsley.",
+        "Taste: it should be boldly garlicky and tangy. Chill until serving."
+      ],
+      "checks": ["Sauce balanced", "Sauce chilled (optional)"]
+    },
+    {
+      "id": "step.quick_salad",
+      "title": "Quick-toss cabbage salad",
+      "activeMins": 6,
+      "instructions": [
+        "In a large bowl, toss shredded cabbage (green and optional red) with vinegar, salt, black pepper, and optional sugar.",
+        "Massage briefly (30–45 seconds) to soften slightly while keeping crunch.",
+        "Fold in diced tomatoes and sliced red onion (and optional cucumber/pickles) just before serving for best texture."
+      ],
+      "checks": ["Cabbage lightly softened", "Crunch retained"]
+    },
+    {
+      "id": "step.cook_meat",
+      "title": "Cook meat hot for browning",
+      "activeMins": 12,
+      "instructions": [
+        "Heat a large skillet over medium-high until very hot.",
+        "Cook meat in batches in a single layer (do not overcrowd) so it sears and browns.",
+        "Let it sit 1–2 minutes before stirring, then flip/toss until cooked through and browned at edges.",
+        "Transfer cooked batches to a plate; keep warm while finishing remaining meat."
+      ],
+      "timers": [
+        { "label": "Batch sear (first side)", "minutes": 2 },
+        { "label": "Finish batch", "minutes": 3 }
+      ],
+      "checks": ["Browned edges", "Cooked through (165°F chicken)"],
+      "temperature": {
+        "type": "internal_optional",
+        "value": 165,
+        "unit": "F",
+        "notes": "Use thermometer for chicken; for beef, cook to desired doneness (thin slices cook quickly)."
+      }
+    },
+    {
+      "id": "step.warm_bread",
+      "title": "Warm the bread",
+      "activeMins": 5,
+      "instructions": [
+        "Warm pita/flatbread in a dry skillet, oven, or microwave briefly until pliable.",
+        "Optional: brush with butter and toast lightly for extra flavor."
+      ],
+      "checks": ["Bread warm and pliable"]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble döner kebabs",
+      "activeMins": 8,
+      "instructions": [
+        "Spread garlic sauce on warm bread.",
+        "Pile on hot meat, then add cabbage salad and tomatoes/onions (plus optional cucumber/pickles).",
+        "Add optional spicy sauce or hot sauce.",
+        "Fold/roll tightly; serve immediately."
+      ],
+      "checks": ["Balanced meat/salad/sauce", "Wrap holds together"]
+    }
+  ],
+  "methods": [
+    "method.marinade",
+    "method.sear",
+    "method.quick_pickle_toss",
+    "method.assemble"
+  ],
+  "pairings": {
+    "serveWith": [
+      "fries",
+      "simple_salad",
+      "pickled_vegetables",
+      "sparkling_water",
+      "mint_tea"
+    ],
+    "sauces": ["garlic_sauce", "spicy_red_sauce"]
+  },
+  "storage": {
+    "fridge": {
+      "duration": "3 days",
+      "notes": [
+        "Store meat, sauce, and salad separately for best texture.",
+        "Reheat meat in a hot skillet to re-crisp edges."
+      ]
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": [
+        "Freeze cooked meat only (not salad/sauce).",
+        "Thaw overnight and re-crisp in a skillet."
+      ]
+    }
+  },
+  "safety": {
+    "notes": [
+      "If using chicken, ensure internal temperature reaches 165°F.",
+      "Cool cooked meat quickly before refrigerating; store in airtight containers."
+    ]
+  },
+  "planner": {
+    "batchNotes": [
+      "Great for build-your-own nights: set out meat + toppings + sauces buffet-style.",
+      "For meal prep: portion meat and sauce; keep cabbage separate to avoid sogginess."
+    ],
+    "scaling": {
+      "notes": [
+        "Scale linearly; cooking time increases mainly due to batches for proper browning.",
+        "Use two skillets or sheet-pan broil method for large batches."
+      ]
+    },
+    "sheetPanMethod": [
+      "Spread marinated meat on a sheet pan in a single layer.",
+      "Broil 6–10 minutes, tossing once, until browned; watch closely to prevent burning."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation.chicken_doner",
+      "label": "Chicken döner",
+      "when": { "protein": "chicken" },
+      "adapt": {
+        "notes": [
+          "Use boneless thighs for juicier texture.",
+          "Cook to 165°F; slice thin and sear hard for browned edges."
+        ]
+      }
+    },
+    {
+      "id": "variation.beef_lamb_blend",
+      "label": "Beef + lamb blend",
+      "when": { "protein": "beef_lamb" },
+      "adapt": {
+        "notes": [
+          "Use 1 lb beef + 1 lb lamb.",
+          "Lamb adds classic döner richness; keep garlic sauce extra tangy to balance."
+        ]
+      }
+    },
+    {
+      "id": "variation.kid_friendly",
+      "label": "Kid-friendly mild",
+      "when": { "audience": "kids" },
+      "adapt": {
+        "notes": [
+          "Omit cayenne and spicy sauce; serve hot sauce on the side for adults.",
+          "Add a little extra yogurt in the marinade to soften spice edges."
+        ]
+      }
+    },
+    {
+      "id": "variation.low_carb_bowl",
+      "label": "Low-carb bowl",
+      "when": { "diet": "low_carb" },
+      "adapt": {
+        "notes": [
+          "Skip bread; serve meat over cabbage salad with extra sauce.",
+          "Add cucumber and pickles for crunch."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.soul_food",
+    "recipeTagDefaults": [
+      "cuisine.soul_food",
+      "street_food",
+      "handheld",
+      "garlic_forward",
+      "build_your_own"
+    ],
+    "ingredientIds": [
+      "ingredient.beef_steak_strips",
+      "ingredient.onion_grated",
+      "ingredient.garlic",
+      "ingredient.greek_yogurt",
+      "ingredient.green_cabbage",
+      "ingredient.pita_or_flatbread"
+    ],
+    "equipmentIds": ["equipment.skilet_large"],
+    "methodIds": ["method.marinade", "method.sear", "method.assemble"],
+    "search": {
+      "keywords": [
+        "doner",
+        "döner",
+        "doner kebab",
+        "kebab wrap",
+        "shawarma style",
+        "garlic sauce wrap",
+        "street kebab"
+      ],
+      "aliases": [
+        "German doner",
+        "German döner kebab",
+        "doner wrap",
+        "shawarma wrap"
+      ]
+    }
+  }
+}

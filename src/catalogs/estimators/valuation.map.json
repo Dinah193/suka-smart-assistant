@@ -1,0 +1,405 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "estimators.valuation_map",
+    "type": "catalog",
+    "domain": "estimators",
+    "locale": "en-US",
+    "name": "Valuation Map",
+    "label": "Valuation Map",
+    "subtitle": "Deterministic food valuation map (unit/portion assumptions) for SSA estimators",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/estimators/valuation.map.json",
+      "notes": [
+        "Deterministic fallback valuation map used by SSA estimators when item-level prices are unknown.",
+        "Values are directional estimates and should be replaced by user price history whenever available.",
+        "Engines may compute valuations by: (a) explicit itemId match, (b) tag/category match, (c) macro-based basket estimation."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "global",
+    "module": "estimators.valuation",
+    "locales": ["en-US"]
+  },
+  "defaults": {
+    "currency": "USD",
+    "basis": "usd_per_unit",
+    "rounding": { "mode": "round", "precision": 2 },
+    "fallbacks": {
+      "usdPer1000Calories": 1.75,
+      "usdPer100gProtein": 3.5,
+      "usdPerServingProduce": 0.75,
+      "usdPerTbspFat": 0.18
+    },
+    "portionStandards": {
+      "produceServingG": 80,
+      "grainServingDryG": 45,
+      "legumeServingDryG": 50,
+      "meatServingG": 113,
+      "fishServingG": 113,
+      "dairyServingMl": 240,
+      "fatServingTbsp": 1,
+      "breadSliceG": 30,
+      "eggEachG": 50
+    }
+  },
+  "items": [
+    {
+      "id": "valuation.meta",
+      "label": "Valuation Map Metadata",
+      "group": "meta",
+      "rank": 0,
+      "status": "active",
+      "tags": ["estimator.valuation", "meta", "rules"],
+      "profile": {
+        "matchOrder": [
+          "exact.itemId",
+          "exact.canonicalId",
+          "tag.match.any",
+          "category.match",
+          "macro.fallback"
+        ],
+        "notes": [
+          "Engines should treat this as deterministic, but always allow user overrides.",
+          "Use tag-matching when components are abstract (e.g., 'component.protein')."
+        ]
+      }
+    },
+
+    {
+      "id": "valuation.tag_defaults",
+      "label": "Default Valuations by Tag (USD per unit/portion)",
+      "group": "tags",
+      "rank": 10,
+      "status": "active",
+      "tags": ["estimator.valuation", "defaults", "tags"],
+      "profile": {
+        "currency": "USD",
+        "entries": [
+          {
+            "match": { "tagsAny": ["category.grains"] },
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.25,
+            "portion": { "label": "1 serving dry grains", "g": 45 },
+            "notes": [
+              "Approx. $0.11 per 45g serving; varies by rice/pasta/flour."
+            ]
+          },
+          {
+            "match": { "tagsAny": ["category.legumes"] },
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.3,
+            "portion": { "label": "1 serving dry legumes", "g": 50 },
+            "notes": ["Dry beans/lentils; cooked yield not modeled here."]
+          },
+          {
+            "match": { "tagsAny": ["category.produce"] },
+            "unit": { "kind": "serving", "unit": "serving", "basis": 1 },
+            "usd": 0.75,
+            "portion": { "label": "produce serving", "g": 80 },
+            "notes": [
+              "Used when produce is tracked by servings rather than weight."
+            ]
+          },
+          {
+            "match": { "tagsAny": ["category.meat"] },
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 1.2,
+            "portion": { "label": "4 oz meat serving", "g": 113 },
+            "notes": [
+              "Blended average across beef/poultry/pork; user pricing preferred."
+            ]
+          },
+          {
+            "match": { "tagsAny": ["category.seafood"] },
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 1.5,
+            "portion": { "label": "4 oz fish serving", "g": 113 }
+          },
+          {
+            "match": { "tagsAny": ["category.dairy"] },
+            "unit": { "kind": "volume", "unit": "ml", "basis": 240 },
+            "usd": 0.6,
+            "portion": { "label": "1 cup dairy", "ml": 240 }
+          },
+          {
+            "match": { "tagsAny": ["category.fats"] },
+            "unit": { "kind": "volume", "unit": "tbsp", "basis": 1 },
+            "usd": 0.18,
+            "portion": { "label": "1 tbsp fat", "tbsp": 1 }
+          },
+          {
+            "match": { "tagsAny": ["category.spices"] },
+            "unit": { "kind": "volume", "unit": "tsp", "basis": 1 },
+            "usd": 0.08,
+            "portion": { "label": "1 tsp spice", "tsp": 1 },
+            "notes": [
+              "Spices vary; used mostly for basket-estimation and substitution scoring."
+            ]
+          },
+          {
+            "match": { "tagsAny": ["category.bakery"] },
+            "unit": { "kind": "serving", "unit": "serving", "basis": 1 },
+            "usd": 1.25,
+            "portion": { "label": "bakery serving", "g": 60 },
+            "notes": [
+              "Covers bread/pastries; overridden by specific bread slice/item entries."
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "valuation.common_items",
+      "label": "Common Item Valuations (USD per unit)",
+      "group": "items",
+      "rank": 20,
+      "status": "active",
+      "tags": ["estimator.valuation", "common", "items"],
+      "profile": {
+        "currency": "USD",
+        "entries": [
+          {
+            "itemId": "ingredients.eggs.large",
+            "unit": { "kind": "each", "unit": "each", "basis": 1 },
+            "usd": 0.3,
+            "portion": { "label": "1 large egg", "g": 50 },
+            "tags": ["category.protein", "category.eggs"]
+          },
+          {
+            "itemId": "ingredients.rice.long_grain",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.22,
+            "portion": { "label": "1 serving dry rice", "g": 45 },
+            "tags": ["category.grains", "staple.rice"]
+          },
+          {
+            "itemId": "ingredients.pasta.dry",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.28,
+            "portion": { "label": "1 serving dry pasta", "g": 56 },
+            "tags": ["category.grains", "staple.pasta"]
+          },
+          {
+            "itemId": "ingredients.flour.all_purpose",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.18,
+            "portion": { "label": "1 cup flour", "g": 120 },
+            "tags": ["category.grains", "staple.flour"]
+          },
+          {
+            "itemId": "ingredients.beans.black_dry",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.3,
+            "portion": { "label": "1 serving dry beans", "g": 50 },
+            "tags": ["category.legumes", "staple.beans"]
+          },
+          {
+            "itemId": "ingredients.lentils.dry",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.32,
+            "portion": { "label": "1 serving dry lentils", "g": 50 },
+            "tags": ["category.legumes", "staple.lentils"]
+          },
+          {
+            "itemId": "ingredients.oats.rolled",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.3,
+            "portion": { "label": "1/2 cup oats", "g": 40 },
+            "tags": ["category.grains", "staple.oats"]
+          },
+          {
+            "itemId": "ingredients.oil.olive",
+            "unit": { "kind": "volume", "unit": "tbsp", "basis": 1 },
+            "usd": 0.22,
+            "portion": { "label": "1 tbsp olive oil", "tbsp": 1 },
+            "tags": ["category.fats", "fat.oil"]
+          },
+          {
+            "itemId": "ingredients.oil.neutral",
+            "unit": { "kind": "volume", "unit": "tbsp", "basis": 1 },
+            "usd": 0.12,
+            "portion": { "label": "1 tbsp neutral oil", "tbsp": 1 },
+            "tags": ["category.fats", "fat.oil"]
+          },
+          {
+            "itemId": "ingredients.sugar.granulated",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.2,
+            "portion": { "label": "1 cup sugar", "g": 200 },
+            "tags": ["category.sweeteners", "staple.sugar"]
+          },
+          {
+            "itemId": "ingredients.salt.kosher",
+            "unit": { "kind": "volume", "unit": "tsp", "basis": 1 },
+            "usd": 0.01,
+            "portion": { "label": "1 tsp salt", "tsp": 1 },
+            "tags": ["category.spices", "staple.salt"]
+          },
+          {
+            "itemId": "ingredients.milk.whole",
+            "unit": { "kind": "volume", "unit": "ml", "basis": 240 },
+            "usd": 0.55,
+            "portion": { "label": "1 cup milk", "ml": 240 },
+            "tags": ["category.dairy"]
+          },
+          {
+            "itemId": "ingredients.cheese.cheddar",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 1.1,
+            "portion": { "label": "1 oz cheese", "g": 28 },
+            "tags": ["category.dairy", "category.cheese"]
+          },
+          {
+            "itemId": "ingredients.chicken.thighs_boneless_skinless",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 0.95,
+            "portion": { "label": "4 oz chicken", "g": 113 },
+            "tags": ["category.meat", "protein.chicken"]
+          },
+          {
+            "itemId": "ingredients.ground_beef.80_20",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 1.15,
+            "portion": { "label": "4 oz ground beef", "g": 113 },
+            "tags": ["category.meat", "protein.beef"]
+          },
+          {
+            "itemId": "ingredients.goat.meat",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 1.35,
+            "portion": { "label": "4 oz goat", "g": 113 },
+            "tags": ["category.meat", "protein.goat"]
+          },
+          {
+            "itemId": "ingredients.lamb.meat",
+            "unit": { "kind": "mass", "unit": "g", "basis": 100 },
+            "usd": 1.55,
+            "portion": { "label": "4 oz lamb", "g": 113 },
+            "tags": ["category.meat", "protein.lamb"]
+          }
+        ],
+        "notes": [
+          "Item IDs here are canonical placeholders; map to your SSA ingredient catalog IDs as needed.",
+          "If you have a unified ingredients catalog, align these ids to that catalog to enable exact matching."
+        ]
+      }
+    },
+
+    {
+      "id": "valuation.bakery_portions",
+      "label": "Bakery Portion Valuations (USD per portion)",
+      "group": "bakery",
+      "rank": 30,
+      "status": "active",
+      "tags": ["estimator.valuation", "bakery", "portions"],
+      "profile": {
+        "currency": "USD",
+        "entries": [
+          {
+            "match": { "tagsAny": ["bakery.bread", "role.bread"] },
+            "unit": { "kind": "portion", "unit": "slice", "basis": 1 },
+            "usd": 0.18,
+            "portion": { "label": "1 slice bread", "g": 30 },
+            "notes": ["Used when bread is tracked by slices."]
+          },
+          {
+            "match": { "tagsAny": ["bakery.quickbread", "bakery.muffins"] },
+            "unit": { "kind": "portion", "unit": "each", "basis": 1 },
+            "usd": 1.1,
+            "portion": { "label": "1 muffin", "g": 95 }
+          },
+          {
+            "match": { "tagsAny": ["bakery.cookies"] },
+            "unit": { "kind": "portion", "unit": "each", "basis": 1 },
+            "usd": 0.45,
+            "portion": { "label": "1 cookie", "g": 25 }
+          },
+          {
+            "match": { "tagsAny": ["bakery.cake", "bakery.sheet_cake"] },
+            "unit": { "kind": "portion", "unit": "slice", "basis": 1 },
+            "usd": 1.75,
+            "portion": { "label": "1 slice cake", "g": 110 }
+          },
+          {
+            "match": { "tagsAny": ["bakery.pie"] },
+            "unit": { "kind": "portion", "unit": "slice", "basis": 1 },
+            "usd": 2.0,
+            "portion": { "label": "1 slice pie", "g": 130 }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "valuation.macro_fallbacks",
+      "label": "Macro Fallback Valuations (USD per macro unit)",
+      "group": "macro",
+      "rank": 40,
+      "status": "active",
+      "tags": ["estimator.valuation", "fallback", "macro"],
+      "profile": {
+        "currency": "USD",
+        "usdPer": {
+          "calories": { "basis": 1000, "usd": 1.75 },
+          "proteinG": { "basis": 100, "usd": 3.5 },
+          "carbG": { "basis": 100, "usd": 0.9 },
+          "fatG": { "basis": 100, "usd": 1.8 },
+          "fiberG": { "basis": 25, "usd": 0.75 }
+        },
+        "notes": [
+          "Used only when an item has macro estimates but no price and no tag/category mapping is found.",
+          "Carb/fat costs are heuristic; adjust with user pricing when possible."
+        ]
+      }
+    },
+
+    {
+      "id": "valuation.unit_conversions_hints",
+      "label": "Unit Conversion Hints (engine-facing)",
+      "group": "engine_hints",
+      "rank": 90,
+      "status": "active",
+      "tags": ["estimator.valuation", "engine", "hints"],
+      "profile": {
+        "canonicalMassUnit": "g",
+        "canonicalVolumeUnit": "ml",
+        "volumeToMassAssumptions": [
+          {
+            "id": "density.water_like",
+            "label": "Water-like density",
+            "appliesToTagsAny": ["density.water_like"],
+            "gPerMl": 1.0
+          },
+          {
+            "id": "density.oil",
+            "label": "Cooking oils",
+            "appliesToTagsAny": ["fat.oil", "density.oil"],
+            "gPerMl": 0.92
+          },
+          {
+            "id": "density.flour",
+            "label": "All-purpose flour",
+            "appliesToTagsAny": ["staple.flour", "density.flour"],
+            "gPerMl": 0.53
+          },
+          {
+            "id": "density.sugar",
+            "label": "Granulated sugar",
+            "appliesToTagsAny": ["staple.sugar", "density.sugar"],
+            "gPerMl": 0.85
+          }
+        ],
+        "notes": [
+          "These hints allow estimators to convert between volume and mass when users enter amounts inconsistently.",
+          "Prefer direct price-per-unit sources when available; this is for deterministic estimation only."
+        ]
+      }
+    }
+  ]
+}

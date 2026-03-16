@@ -23,10 +23,10 @@
 //   { type, ts, source, data }
 //
 // ASSUMPTIONS (all defensive):
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatInventoryUpdateForHub
-// - src/services/FamilyFundConnector.js
+// - src/services/hub/HubPacketFormatter.js → formatInventoryUpdateForHub
+// - src/services/hub/FamilyFundConnector.js
 // - src/services/inventory/InventoryService.js → getAll, upsert, adjust, bulkAdjust
 // - src/services/inventory/InventoryStore.js → optional Dexie-backed store
 //
@@ -40,10 +40,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatInventoryUpdateForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatInventoryUpdateForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let InventoryService = null;
 let InventoryStore = null;
@@ -100,10 +100,22 @@ function InventoryDashboard() {
     init();
 
     // listen for events that affect inventory UI
-    const offInvUpdate = eventBus?.on?.("inventory.updated", handleInventoryUpdated);
-    const offGarden = eventBus?.on?.("garden.harvest.logged", handleGardenHarvestLogged);
-    const offAnimal = eventBus?.on?.("animal.session.executed", handleAnimalExecuted);
-    const offPres = eventBus?.on?.("preservation.completed", handlePreservationCompleted);
+    const offInvUpdate = eventBus?.on?.(
+      "inventory.updated",
+      handleInventoryUpdated
+    );
+    const offGarden = eventBus?.on?.(
+      "garden.harvest.logged",
+      handleGardenHarvestLogged
+    );
+    const offAnimal = eventBus?.on?.(
+      "animal.session.executed",
+      handleAnimalExecuted
+    );
+    const offPres = eventBus?.on?.(
+      "preservation.completed",
+      handlePreservationCompleted
+    );
     const offStorehouse = eventBus?.on?.("storehouse.low", handleStorehouseLow);
 
     return () => {
@@ -131,9 +143,21 @@ function InventoryDashboard() {
 
   const filteredItems = useMemo(() => {
     return (items || []).filter((it) => {
-      if (filterCategory !== "all" && (it.category || "general") !== filterCategory) return false;
-      if (filterLocation !== "all" && (it.location || "Pantry") !== filterLocation) return false;
-      if (search && !((it.name || "").toLowerCase().includes(search.toLowerCase()))) return false;
+      if (
+        filterCategory !== "all" &&
+        (it.category || "general") !== filterCategory
+      )
+        return false;
+      if (
+        filterLocation !== "all" &&
+        (it.location || "Pantry") !== filterLocation
+      )
+        return false;
+      if (
+        search &&
+        !(it.name || "").toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
       return true;
     });
   }, [items, filterCategory, filterLocation, search]);
@@ -411,7 +435,10 @@ function InventoryDashboard() {
 
   function renderQuickAdd() {
     return (
-      <form className="flex flex-wrap gap-2 items-center mb-4" onSubmit={handleQuickAdd}>
+      <form
+        className="flex flex-wrap gap-2 items-center mb-4"
+        onSubmit={handleQuickAdd}
+      >
         <input
           type="text"
           className="border rounded px-2 py-1 text-sm"
@@ -467,20 +494,31 @@ function InventoryDashboard() {
     if (!incoming.length) return null;
     return (
       <div className="border rounded p-3 bg-white/50 mb-4">
-        <h3 className="font-semibold mb-2">Incoming (from garden / animal / preservation)</h3>
+        <h3 className="font-semibold mb-2">
+          Incoming (from garden / animal / preservation)
+        </h3>
         <div className="flex gap-2 flex-wrap">
           {incoming.map((inc) => (
-            <div key={inc.id} className="border rounded p-2 bg-white flex items-center gap-2">
+            <div
+              key={inc.id}
+              className="border rounded p-2 bg-white flex items-center gap-2"
+            >
               <div>
                 <div className="font-medium">{inc.name}</div>
                 <div className="text-xs text-gray-500">
                   {inc.qty} {inc.unit} • {inc.source}
                 </div>
               </div>
-              <button className="btn-xs btn-primary" onClick={() => handleIncomingAccept(inc)}>
+              <button
+                className="btn-xs btn-primary"
+                onClick={() => handleIncomingAccept(inc)}
+              >
                 Accept
               </button>
-              <button className="btn-xs" onClick={() => handleIncomingReject(inc)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleIncomingReject(inc)}
+              >
                 Dismiss
               </button>
             </div>
@@ -497,7 +535,10 @@ function InventoryDashboard() {
         <h3 className="font-semibold mb-2">Low / needs attention</h3>
         <div className="flex flex-wrap gap-2">
           {lowItems.map((it) => (
-            <div key={it.id} className="border rounded p-2 bg-white flex items-center gap-2">
+            <div
+              key={it.id}
+              className="border rounded p-2 bg-white flex items-center gap-2"
+            >
               <div>
                 <div className="font-medium">{it.name}</div>
                 <div className="text-xs text-gray-500">
@@ -525,7 +566,9 @@ function InventoryDashboard() {
                 className="btn-xs"
                 onClick={() =>
                   emitEvent("grocerylist.add.request", {
-                    items: [{ name: it.name, qty: it.min - it.qty, unit: it.unit }],
+                    items: [
+                      { name: it.name, qty: it.min - it.qty, unit: it.unit },
+                    ],
                   })
                 }
               >
@@ -540,12 +583,19 @@ function InventoryDashboard() {
 
   function renderInventoryGrid() {
     if (!filteredItems.length) {
-      return <p className="text-xs text-gray-500">No inventory items match your filters.</p>;
+      return (
+        <p className="text-xs text-gray-500">
+          No inventory items match your filters.
+        </p>
+      );
     }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {filteredItems.map((it) => (
-          <div key={it.id} className="border rounded p-2 bg-white flex gap-2 justify-between">
+          <div
+            key={it.id}
+            className="border rounded p-2 bg-white flex gap-2 justify-between"
+          >
             <div>
               <div className="font-medium">{it.name}</div>
               <div className="text-xs text-gray-500">
@@ -558,10 +608,16 @@ function InventoryDashboard() {
               </div>
             </div>
             <div className="flex flex-col gap-1 items-end">
-              <button className="btn-xs" onClick={() => handleAdjustQty(it.id, +1)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleAdjustQty(it.id, +1)}
+              >
                 +1
               </button>
-              <button className="btn-xs" onClick={() => handleAdjustQty(it.id, -1)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleAdjustQty(it.id, -1)}
+              >
                 -1
               </button>
             </div>
@@ -626,7 +682,10 @@ async function upsertInventoryItem(item) {
       await InventoryService.upsert(item);
       return;
     } catch (e) {
-      console.warn("[InventoryDashboard] InventoryService.upsert failed, trying store…", e);
+      console.warn(
+        "[InventoryDashboard] InventoryService.upsert failed, trying store…",
+        e
+      );
     }
   }
   if (InventoryStore && typeof InventoryStore.upsert === "function") {

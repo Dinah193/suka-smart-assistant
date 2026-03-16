@@ -1,0 +1,342 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.callaloo",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Callaloo",
+    "subtitle": "Creamy coconut greens with okra + aromatics (Trini/Jamaican-style options)",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from common Trinidadian callaloo and Jamaican callaloo/greens patterns, using spinach as a widely available stand-in.",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": [
+      "trini_tobago",
+      "jamaican",
+      "eastern_caribbean",
+      "guyanese"
+    ],
+    "category": "side",
+    "mealArchetypes": ["greens_simmered_in_coconut", "veg_side"],
+    "servingStyles": ["family_style", "plated_meals", "holiday_feasts"],
+    "plannerTags": ["caribbean", "greens", "okra", "coconut", "side", "one_pot"]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "A staple greens side. Can be served thick like stew or looser like soup."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "totalMins": 35,
+    "handsOffMins": 15
+  },
+
+  "difficulty": 1,
+
+  "nutritionHints": {
+    "fiberForward": true,
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": false
+  },
+
+  "tasteProfile": {
+    "heatTypical": 1,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 1,
+    "sourness": 0,
+    "saltiness": 2,
+    "umami": 2,
+    "signature": [
+      "coconut",
+      "thyme",
+      "scallion",
+      "garlic",
+      "greens",
+      "okra_thickening"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "medium_pot_with_lid",
+      "cutting_board",
+      "chef_knife",
+      "immersion_blender"
+    ],
+    "minimum": ["pot_with_lid", "stovetop"],
+    "optional": ["blender", "fine_mesh_strainer"]
+  },
+
+  "dietFlags": ["vegan", "vegetarian", "gluten_free", "dairy_free"],
+  "allergens": ["coconut"],
+
+  "ingredients": [
+    {
+      "id": "spinach",
+      "label": "Spinach (fresh or frozen)",
+      "amount": { "value": 12, "unit": "oz" },
+      "role": "veg",
+      "notes": "Spinach is a common substitute where dasheen leaves are hard to find."
+    },
+    {
+      "id": "okra",
+      "label": "Okra (sliced)",
+      "amount": { "value": 2, "unit": "cup" },
+      "role": "veg",
+      "notes": "Provides classic callaloo thickness."
+    },
+    {
+      "id": "onion",
+      "label": "Onion (diced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "aromatic"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic (minced)",
+      "amount": { "value": 4, "unit": "clove" },
+      "role": "aromatic"
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (chopped)",
+      "amount": { "value": 3, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "thyme",
+      "label": "Thyme (fresh sprigs) or dried",
+      "amount": { "value": 4, "unit": "sprig" },
+      "role": "herb",
+      "notes": "If dried: 1 1/2 tsp."
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "fat"
+    },
+    {
+      "id": "coconut_milk",
+      "label": "Coconut milk",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "role": "liquid"
+    },
+    {
+      "id": "water_or_stock",
+      "label": "Water or vegetable stock",
+      "amount": { "value": 1.0, "unit": "cup" },
+      "role": "liquid",
+      "notes": "Add more for a soupier callaloo."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "seasoning"
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "seasoning"
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (whole)",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "heat",
+      "optional": true,
+      "notes": "Keep whole for aroma; remove before blending."
+    },
+    {
+      "id": "crab_or_smoked_meat",
+      "label": "Crab or smoked meat (optional)",
+      "amount": { "value": 8, "unit": "oz" },
+      "role": "protein",
+      "optional": true,
+      "notes": "Traditional in many versions (crab, salted pigtail, smoked turkey). Omit for vegan."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "acid",
+      "optional": true,
+      "notes": "Optional finish to brighten."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "saute_aromatics",
+      "title": "Sauté aromatics",
+      "domain": "cooking",
+      "activeMins": 6,
+      "instructions": [
+        "Heat oil in a pot over medium heat.",
+        "Add onion and cook 3–4 minutes until softened.",
+        "Add garlic and scallions; cook 30–60 seconds until fragrant."
+      ],
+      "inputs": {
+        "ingredients": ["neutral_oil", "onion", "garlic", "scallion"],
+        "equipment": ["pot_with_lid", "stovetop", "spoon"]
+      }
+    },
+    {
+      "id": "simmer_base",
+      "title": "Simmer greens + okra",
+      "domain": "cooking",
+      "activeMins": 5,
+      "handsOffMins": 12,
+      "instructions": [
+        "Add coconut milk and water/stock; stir.",
+        "Add thyme and optional whole Scotch bonnet.",
+        "Add okra and bring to a gentle simmer.",
+        "Simmer 8–10 minutes until okra starts to soften and thicken the liquid.",
+        "Add spinach (in batches if needed) and simmer 3–5 minutes until wilted (or warmed through if frozen)."
+      ],
+      "timers": [{ "label": "Simmer", "mins": 12 }],
+      "inputs": {
+        "ingredients": [
+          "coconut_milk",
+          "water_or_stock",
+          "thyme",
+          "scotch_bonnet",
+          "okra",
+          "spinach"
+        ],
+        "equipment": ["pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "optional_meat",
+      "title": "Optional: add crab/smoked meat",
+      "domain": "cooking",
+      "activeMins": 3,
+      "instructions": [
+        "If using crab or smoked meat, add it now and simmer 3–5 minutes to warm through and season the pot."
+      ],
+      "inputs": {
+        "ingredients": ["crab_or_smoked_meat"],
+        "equipment": ["pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "blend_and_season",
+      "title": "Blend (optional) + season",
+      "domain": "cooking",
+      "activeMins": 5,
+      "instructions": [
+        "Remove thyme stems and any whole Scotch bonnet (if used).",
+        "For classic Trinidad-style texture: use an immersion blender to lightly blend—leave some texture (do not puree completely).",
+        "For Jamaican-style greens: skip blending and keep it more leafy.",
+        "Season with salt and black pepper to taste.",
+        "Optional: finish with a small splash of lime juice."
+      ],
+      "inputs": {
+        "ingredients": ["salt", "black_pepper", "lime_juice"],
+        "equipment": ["immersion_blender"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "mains": [
+      "caribbean.stewed_chicken",
+      "caribbean.curry_chicken",
+      "caribbean.jerk_chicken",
+      "caribbean.braised_oxtail",
+      "caribbean.stewed_fish"
+    ],
+    "starches": [
+      "caribbean.rice_and_peas",
+      "rice",
+      "dumplings",
+      "boiled_provisions"
+    ],
+    "condiments": ["pepper_sauce", "lime_juice"],
+    "drinks": ["caribbean.sorrel_drink", "ginger_beer"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.callaloo.dasheen_leaf",
+      "label": "Dasheen Leaf Callaloo (more traditional)",
+      "when": { "hasIngredientsAll": ["dasheen_leaves"] },
+      "adapt": {
+        "notes": "Replace spinach with chopped dasheen leaves. Simmer a few minutes longer until tender."
+      }
+    },
+    {
+      "id": "caribbean.callaloo.soupier",
+      "label": "Soupier Callaloo",
+      "when": { "preference": { "texture": "soupy" } },
+      "adapt": {
+        "notes": "Increase water/stock by 1 cup and reduce blending."
+      }
+    },
+    {
+      "id": "caribbean.callaloo.thicker",
+      "label": "Thicker Callaloo",
+      "when": { "preference": { "texture": "thick" } },
+      "adapt": {
+        "notes": "Add 1 extra cup okra and blend slightly more."
+      }
+    },
+    {
+      "id": "caribbean.callaloo.low_heat",
+      "label": "Low Heat Version",
+      "when": { "tasteMaxHeat": 1 },
+      "adapt": {
+        "reduceHeat": true,
+        "notes": "Skip Scotch bonnet entirely, or keep whole and remove early."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 3,
+      "notes": "Reheat gently; coconut milk can separate if boiled hard."
+    },
+    "freezer": {
+      "safeMonths": 0,
+      "notes": "Not recommended—greens + coconut texture can degrade."
+    },
+    "reheat": {
+      "methods": ["stovetop_simmer", "microwave"],
+      "notes": "Warm gently; add a splash of water/stock if thickened."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": ["Chop onion/garlic/scallions", "Slice okra", "Wash greens"],
+      "makeAhead": ["Pre-chop aromatics", "Pre-slice okra"]
+    }
+  }
+}

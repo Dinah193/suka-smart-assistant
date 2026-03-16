@@ -1,0 +1,725 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.recipes.mixed_shawarma_platter",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Mixed Shawarma Platter",
+    "subtitle": "Chicken + beef + lamb shawarma with rice or fries, salad, pickles, and sauce (home-kitchen friendly)",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Designed for a platter spread: proteins + base + salad + pickles + sauces.",
+        "Cook methods include sheet-pan and skillet; no vertical spit required."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": [
+      "shawarma",
+      "street_food",
+      "platter",
+      "family_style",
+      "meal_prep"
+    ],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.platters",
+      "meal_archetype.bowls",
+      "meal_archetype.family_style"
+    ],
+    "servingStyles": ["family_style", "platter", "buffet", "plates"],
+    "plannerTags": [
+      "shawarma",
+      "mixed_protein",
+      "chicken",
+      "beef",
+      "lamb",
+      "sheet_pan",
+      "skillet_fast",
+      "crowd_friendly",
+      "meal_prep",
+      "party_food"
+    ]
+  },
+
+  "summary": "A full mixed shawarma platter: chicken, beef, and lamb cooked hot for browned edges and served with rice or fries, chopped salad, pickles, and both tahini + garlic sauce.",
+
+  "yield": {
+    "servings": 8,
+    "notes": "Serves 8 as a platter spread, or 10–12 as part of a larger table with other sides."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 75,
+    "totalMins": 120
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": false,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "primary": [
+      "savory",
+      "garlic",
+      "lemon_bright",
+      "warm_spice",
+      "caramelized_edges"
+    ],
+    "heat": {
+      "typical": 1,
+      "range": [0, 3],
+      "note": "Optional Aleppo/cayenne for heat."
+    },
+    "texture": ["juicy", "browned_edges", "tender"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.bowls",
+      "equipment.measuring_spoons",
+      "equipment.sheet_pans",
+      "equipment.skillet_or_cast_iron"
+    ],
+    "recommended": [
+      "equipment.wire_racks",
+      "equipment.tongs",
+      "equipment.instant_read_thermometer",
+      "equipment.rice_cooker"
+    ],
+    "optional": [
+      {
+        "id": "equipment.grill",
+        "label": "Grill",
+        "notes": "Best browning + smoke; great for batch cooking."
+      },
+      {
+        "id": "equipment.air_fryer",
+        "label": "Air fryer",
+        "notes": "Helpful for crisping fries or reheating proteins."
+      }
+    ]
+  },
+
+  "dietFlags": [],
+  "allergens": {
+    "notes": [
+      "Tahini sauce contains sesame.",
+      "If serving with pita, note wheat/gluten."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_thighs_boneless_skinless",
+      "label": "Chicken thighs, boneless/skinless (thin strips)",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": "Thighs stay juicy and are ideal for shawarma."
+    },
+    {
+      "id": "ingredient.beef_sirloin_or_flank",
+      "label": "Beef sirloin or flank steak (thin strips, across the grain)",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": "Slice thinly across the grain for tenderness."
+    },
+    {
+      "id": "ingredient.lamb_shoulder_or_leg",
+      "label": "Lamb shoulder or leg (thin strips, across the grain)",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": "Shoulder is most forgiving; leg is leaner—avoid overcooking."
+    },
+
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": "Split between marinades + optional salad dressing."
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Lemon juice (fresh)",
+      "role": "acid",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": "Split between marinades + optional finishing squeeze."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 18, "unit": "clove" },
+      "notes": "Yes, it’s a lot—this is platter-scale shawarma."
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, grated or very finely minced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" }
+    },
+
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.coriander_ground",
+      "label": "Ground coriander",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (sweet or smoked)",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.turmeric_ground",
+      "label": "Ground turmeric",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adds classic shawarma color; especially good for chicken."
+    },
+    {
+      "id": "ingredient.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.allspice_ground",
+      "label": "Ground allspice",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cardamom_ground",
+      "label": "Ground cardamom",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.clove_ground",
+      "label": "Ground cloves",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.sumac",
+      "label": "Ground sumac",
+      "role": "tangy_spice",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Highly recommended for that bright shawarma-shop finish."
+    },
+    {
+      "id": "ingredient.aleppo_pepper",
+      "label": "Aleppo pepper or crushed red pepper",
+      "role": "heat",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.vinegar",
+      "label": "White vinegar or apple cider vinegar",
+      "role": "acid_support",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ingredient.rice_long_grain",
+      "label": "Long-grain rice (base option)",
+      "role": "base",
+      "optional": true,
+      "amount": { "value": 3, "unit": "cup" },
+      "notes": "Cook separately per your preferred method (rice cooker/stovetop)."
+    },
+    {
+      "id": "ingredient.fries",
+      "label": "Fries (base option)",
+      "role": "base",
+      "optional": true,
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": "Use oven fries, air fryer fries, or store-bought frozen."
+    },
+
+    {
+      "id": "ingredient.romaine",
+      "label": "Romaine lettuce, chopped",
+      "role": "salad",
+      "optional": true,
+      "amount": { "value": 2, "unit": "head" }
+    },
+    {
+      "id": "ingredient.tomatoes",
+      "label": "Tomatoes, diced",
+      "role": "salad",
+      "optional": true,
+      "amount": { "value": 4, "unit": "each" }
+    },
+    {
+      "id": "ingredient.cucumber",
+      "label": "Cucumber, diced",
+      "role": "salad",
+      "optional": true,
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.red_onion",
+      "label": "Red onion, thinly sliced (salad/garnish)",
+      "role": "salad",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "each" }
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Parsley, chopped",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.mint",
+      "label": "Mint, chopped",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+
+    {
+      "id": "ingredient.pickled_turnips",
+      "label": "Pickled turnips (or pickles)",
+      "role": "pickle",
+      "optional": true,
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.pickles",
+      "label": "Dill pickles, sliced (optional backup)",
+      "role": "pickle",
+      "optional": true,
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+
+    {
+      "id": "ingredient.tahini_sauce",
+      "label": "Tahini sauce (to serve)",
+      "role": "sauce",
+      "optional": true,
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.garlic_sauce",
+      "label": "Garlic sauce / toum (to serve)",
+      "role": "sauce",
+      "optional": true,
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.pita",
+      "label": "Pita or flatbread (optional for wraps)",
+      "role": "serving",
+      "optional": true,
+      "amount": { "value": 10, "unit": "each" }
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.proteins",
+      "label": "Proteins",
+      "items": [
+        "ingredient.chicken_thighs_boneless_skinless",
+        "ingredient.beef_sirloin_or_flank",
+        "ingredient.lamb_shoulder_or_leg"
+      ]
+    },
+    {
+      "id": "group.shawarma_base_marinade",
+      "label": "Shawarma base marinade (split across three bowls)",
+      "items": [
+        "ingredient.olive_oil",
+        "ingredient.lemon_juice",
+        "ingredient.garlic",
+        "ingredient.onion_yellow",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.cumin_ground",
+        "ingredient.coriander_ground",
+        "ingredient.paprika",
+        "ingredient.turmeric_ground",
+        "ingredient.cinnamon_ground",
+        "ingredient.allspice_ground",
+        "ingredient.cardamom_ground",
+        "ingredient.clove_ground",
+        "ingredient.sumac",
+        "ingredient.aleppo_pepper",
+        "ingredient.vinegar"
+      ]
+    },
+    {
+      "id": "group.bases",
+      "label": "Base options",
+      "items": [
+        "ingredient.rice_long_grain",
+        "ingredient.fries",
+        "ingredient.pita"
+      ]
+    },
+    {
+      "id": "group.salad_pickles_sauces",
+      "label": "Salad + pickles + sauces",
+      "items": [
+        "ingredient.romaine",
+        "ingredient.tomatoes",
+        "ingredient.cucumber",
+        "ingredient.red_onion",
+        "ingredient.parsley",
+        "ingredient.mint",
+        "ingredient.pickled_turnips",
+        "ingredient.pickles",
+        "ingredient.tahini_sauce",
+        "ingredient.garlic_sauce"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_prep_proteins",
+      "title": "Prep: slice proteins thinly",
+      "instructions": [
+        "Slice chicken thighs into thin strips (about 1/4-inch).",
+        "Slice beef and lamb thinly across the grain (freeze 20 minutes first if needed for clean slices).",
+        "Keep proteins separate so each can be marinated and cooked to its ideal doneness."
+      ],
+      "timers": [
+        { "label": "Optional quick chill (beef/lamb)", "minutes": 20 },
+        { "label": "Slice proteins", "minutes": 20 }
+      ],
+      "checks": [
+        "Beef/lamb sliced across grain",
+        "Even thickness for fast browning"
+      ]
+    },
+    {
+      "id": "step.002_make_base_marinade",
+      "title": "Make the shawarma base marinade",
+      "instructions": [
+        "In a large bowl, whisk olive oil, lemon juice, garlic, and grated onion.",
+        "Stir in salt, pepper, cumin, coriander, paprika, turmeric, cinnamon, and allspice.",
+        "Add optional cardamom, clove, sumac, Aleppo pepper, and vinegar. Mix thoroughly.",
+        "Divide the marinade into 3 bowls: 1 for chicken, 1 for beef, 1 for lamb."
+      ],
+      "timers": [{ "label": "Mix and divide marinade", "minutes": 10 }],
+      "checks": ["Marinade is fully mixed", "Evenly divided into three bowls"]
+    },
+    {
+      "id": "step.003_marinate_all",
+      "title": "Marinate chicken, beef, and lamb",
+      "instructions": [
+        "Add each protein to its bowl and toss to coat well.",
+        "Cover and refrigerate at least 45 minutes (ideal 2–6 hours).",
+        "If marinating overnight, prefer chicken; keep beef/lamb to 6–10 hours max for best texture (thin slicing helps)."
+      ],
+      "timers": [
+        { "label": "Minimum marinate", "minutes": 45 },
+        { "label": "Ideal marinate", "minutes": 240 }
+      ],
+      "checks": ["Proteins are evenly coated", "Marinating in refrigerator"]
+    },
+    {
+      "id": "step.004_choose_cook_path",
+      "title": "Choose your cook path (sheet-pan or skillet)",
+      "instructions": [
+        "Sheet-pan (best for volume): Use 450°F oven, spread proteins on separate pans (or separate zones) so they brown instead of steam.",
+        "Skillet (best browning): Sear in batches over high heat; keep the pan hot and avoid crowding.",
+        "You can combine methods: oven for chicken + skillet for beef/lamb, depending on stove/oven space."
+      ],
+      "checks": [
+        "Plan avoids crowding",
+        "Separate proteins to control doneness"
+      ]
+    },
+    {
+      "id": "step.005_sheet_pan_method",
+      "title": "Cook proteins (sheet-pan method)",
+      "instructions": [
+        "Heat oven to 450°F; place racks in upper and middle positions.",
+        "Line 2–3 sheet pans (or use racks). Spread each protein in a single layer. Do not overcrowd—use extra pans if needed.",
+        "Roast 10–14 minutes total, rotating pans halfway. Check doneness early to avoid overcooking.",
+        "Optional: Broil 1–2 minutes at the end for extra char (watch closely).",
+        "Rest proteins 3 minutes before serving."
+      ],
+      "timers": [
+        { "label": "Preheat oven", "minutes": 10 },
+        { "label": "Roast proteins", "minutes": 12 },
+        { "label": "Optional broil", "minutes": 2 },
+        { "label": "Rest", "minutes": 3 }
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 450,
+        "unit": "F",
+        "notes": "High heat is key to browned edges. Avoid steaming by spreading out."
+      },
+      "checks": [
+        "Edges browned and fragrant",
+        "Chicken cooked through",
+        "Beef/lamb not overcooked (thin slices go fast)"
+      ]
+    },
+    {
+      "id": "step.006_skillet_method",
+      "title": "Cook proteins (skillet method)",
+      "instructions": [
+        "Heat a cast-iron or heavy skillet over high heat until very hot.",
+        "Cook chicken in batches: 2–3 minutes per side until browned and cooked through.",
+        "Cook beef in batches: 60–90 seconds per side for browning (thin strips cook quickly).",
+        "Cook lamb in batches: 60–90 seconds per side until browned edges appear.",
+        "Rest all proteins 2–3 minutes before serving."
+      ],
+      "timers": [
+        { "label": "Skillet chicken (total batches)", "minutes": 12 },
+        { "label": "Skillet beef (total batches)", "minutes": 10 },
+        { "label": "Skillet lamb (total batches)", "minutes": 10 },
+        { "label": "Rest", "minutes": 3 }
+      ],
+      "checks": [
+        "Pan remains hot (batches, not crowding)",
+        "Browning achieved, not simmered in juices"
+      ]
+    },
+    {
+      "id": "step.007_make_salad_pickles",
+      "title": "Build the platter salad + pickles",
+      "instructions": [
+        "Chop romaine, dice tomatoes and cucumbers, and slice red onion.",
+        "Toss with a pinch of salt and a squeeze of lemon (optional drizzle of olive oil).",
+        "Set out pickled turnips (or pickles) in a bowl for easy grabbing."
+      ],
+      "timers": [{ "label": "Salad + pickles", "minutes": 12 }],
+      "checks": [
+        "Salad is crisp and lightly seasoned",
+        "Pickles ready for serving"
+      ]
+    },
+    {
+      "id": "step.008_prepare_base",
+      "title": "Prepare base (rice or fries)",
+      "instructions": [
+        "Rice option: Cook long-grain rice using your preferred method (rice cooker recommended).",
+        "Fries option: Bake/air fry fries until crisp; keep hot for serving.",
+        "You can serve both for a full platter spread."
+      ],
+      "timers": [
+        { "label": "Rice cook time (typical)", "minutes": 25 },
+        { "label": "Fries bake/air fry (typical)", "minutes": 20 }
+      ],
+      "checks": ["Rice fluffy (not wet)", "Fries crisp (not soggy)"]
+    },
+    {
+      "id": "step.009_assemble_platter",
+      "title": "Assemble the mixed shawarma platter",
+      "instructions": [
+        "On a large platter or sheet pan: spread rice and/or fries as the base (optional).",
+        "Pile chicken, beef, and lamb in separate sections (or stripe them across for visual impact).",
+        "Add salad and pickles along the edges.",
+        "Serve with tahini sauce and garlic sauce; garnish with parsley/mint; add extra lemon wedges.",
+        "Optional: Warm pita for wrap-building at the table."
+      ],
+      "checks": [
+        "Sauces served separately for customizable plates",
+        "Bright element included (lemon/sumac/pickles)"
+      ]
+    },
+    {
+      "id": "step.010_finish_taste",
+      "title": "Finish to taste (shawarma-shop brightness)",
+      "instructions": [
+        "Taste a piece of each protein.",
+        "If it needs brightness: squeeze lemon and sprinkle sumac.",
+        "If it needs salt: add a pinch of kosher salt.",
+        "If it needs heat: add Aleppo/cayenne or serve hot sauce."
+      ],
+      "checks": ["Balanced: rich + bright + salty + sauce"]
+    }
+  ],
+
+  "pairings": {
+    "classic": [
+      "lev.garlic_sauce_toum",
+      "lev.tahini_sauce",
+      "lev.pickled_turnips",
+      "lev.tomato_cucumber_salad",
+      "lev.hummus",
+      "lev.pita"
+    ],
+    "ssa_household_friendly": [
+      "herb_rice",
+      "oven_fries",
+      "quick_slaw_lemon_garlic",
+      "roasted_peppers_onions"
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "4 days",
+      "notes": "Store proteins separately from salad/pickles. Reheat in a hot skillet for best texture."
+    },
+    "freeze": {
+      "duration": "2 months",
+      "notes": "Freeze cooked proteins flat in bags. Reheat thawed in skillet or hot oven."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Slice proteins", "mins": 20 },
+      { "task": "Mix and divide marinade", "mins": 10 },
+      { "task": "Marinate (hands-off)", "mins": 0 },
+      { "task": "Cook proteins (sheet-pan or skillet)", "mins": 30 },
+      { "task": "Salad + pickles", "mins": 12 },
+      { "task": "Base (rice/fries)", "mins": 25 },
+      { "task": "Assemble platter", "mins": 8 }
+    ],
+    "weeknightTips": [
+      "Marinate the night before; cook on sheet pans for fastest serving.",
+      "Cook proteins ahead and re-crisp in a skillet when guests arrive."
+    ],
+    "scalingNotes": [
+      "Avoid overcrowding: volume requires multiple pans or batches.",
+      "For parties: double sauces and pickles—those disappear first."
+    ]
+  },
+
+  "methods": [
+    "technique.slice_thin",
+    "technique.marinade",
+    "technique.roast_high_heat",
+    "technique.sear_hot_fast",
+    "technique.platter_service"
+  ],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "mixed shawarma platter",
+        "shawarma platter",
+        "chicken beef lamb shawarma",
+        "shawarma party platter",
+        "shawarma buffet"
+      ],
+      "keywords": [
+        "shawarma",
+        "garlic",
+        "lemon",
+        "cumin",
+        "coriander",
+        "paprika",
+        "turmeric",
+        "sumac",
+        "tahini",
+        "toum",
+        "pickles"
+      ]
+    },
+    "normalization": {
+      "notes": [
+        "Uses SSA-style ingredient IDs; map via ingredient alias catalogs if your IDs differ.",
+        "If you maintain separate protein-specific recipes, this platter can link to them in UI as a composite meal."
+      ]
+    }
+  },
+
+  "notes": [
+    "If you want a stronger 'rotisserie' vibe at home: broil briefly for char, then finish with lemon + sumac.",
+    "Best platter layout: keep sauces and pickles separate so textures stay crisp.",
+    "For a kid-friendly table: keep heat optional and offer sauces on the side."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.two_protein",
+      "label": "Two-protein platter (simpler)",
+      "when": { "constraints": ["simplify"] },
+      "adapt": {
+        "notes": [
+          "Pick 2 proteins (chicken + beef or chicken + lamb).",
+          "Increase salad and base portions to keep the platter full."
+        ]
+      }
+    },
+    {
+      "id": "variation.grill",
+      "label": "Grilled mixed shawarma platter",
+      "when": { "equipment": ["equipment.grill"] },
+      "adapt": {
+        "notes": [
+          "Skewer strips or use grill basket.",
+          "Grill hot and fast to brown; rest 3 minutes; slice and serve.",
+          "Finish with lemon + sumac for maximum aroma."
+        ]
+      }
+    },
+    {
+      "id": "variation.fries_only",
+      "label": "Street-style platter (fries base)",
+      "when": { "preferences": ["street_style"] },
+      "adapt": {
+        "notes": [
+          "Serve proteins over fries with garlic sauce and pickles (messy and delicious).",
+          "Add chopped salad on the side to keep fries crisp."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Marinate in the refrigerator.",
+      "Discard any marinade that contacted raw meat unless boiled.",
+      "Cook chicken thoroughly; avoid cross-contamination between raw and cooked proteins.",
+      "Use separate tongs/plates for raw vs cooked proteins."
+    ]
+  }
+}

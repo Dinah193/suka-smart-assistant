@@ -48,8 +48,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "../../../services/eventBus";
-import { featureFlags } from "../../../services/featureFlags";
+import eventBus from "../../../services/events/eventBus";
+import { featureFlags } from "../../../config/featureFlags";
 
 /**
  * @typedef {Object} SessionStep
@@ -192,7 +192,10 @@ function isGuardEnabled(settings) {
   if (typeof fromSettings === "boolean") return fromSettings;
 
   try {
-    if (featureFlags && Object.prototype.hasOwnProperty.call(featureFlags, "equipmentGuard")) {
+    if (
+      featureFlags &&
+      Object.prototype.hasOwnProperty.call(featureFlags, "equipmentGuard")
+    ) {
       return !!featureFlags.equipmentGuard;
     }
   } catch {
@@ -240,15 +243,22 @@ function normalizeRequiredEquipment(step, session, settings) {
 
   // Heuristic: temp targets / probe doneness implies thermometer.
   const needThermo =
-    (typeof step?.metadata?.tempTargetF === "number" && step.metadata.tempTargetF > 0) ||
+    (typeof step?.metadata?.tempTargetF === "number" &&
+      step.metadata.tempTargetF > 0) ||
     step?.metadata?.donenessCue === "probeTemp";
 
-  if (needThermo && !base.some((k) => normalizeKey(k, null, settings) === "thermometer")) {
+  if (
+    needThermo &&
+    !base.some((k) => normalizeKey(k, null, settings) === "thermometer")
+  ) {
     base.push("thermometer");
   }
 
   // If voice guidance: require TTS capability (Web Speech API).
-  if (session?.prefs?.voiceGuidance && !base.some((k) => normalizeKey(k, null, settings) === "tts")) {
+  if (
+    session?.prefs?.voiceGuidance &&
+    !base.some((k) => normalizeKey(k, null, settings) === "tts")
+  ) {
     base.push("tts");
   }
 
@@ -263,12 +273,18 @@ function normalizeRequiredEquipment(step, session, settings) {
  * @returns {SessionStep|null}
  */
 function resolveStep(session, stepIndex) {
-  if (!session || !Array.isArray(session.steps) || session.steps.length === 0) return null;
-  if (typeof stepIndex === "number" && stepIndex >= 0 && stepIndex < session.steps.length) {
+  if (!session || !Array.isArray(session.steps) || session.steps.length === 0)
+    return null;
+  if (
+    typeof stepIndex === "number" &&
+    stepIndex >= 0 &&
+    stepIndex < session.steps.length
+  ) {
     return session.steps[stepIndex];
   }
   const idx =
-    Number.isFinite(session?.progress?.currentStepIndex) && session.progress.currentStepIndex >= 0
+    Number.isFinite(session?.progress?.currentStepIndex) &&
+    session.progress.currentStepIndex >= 0
       ? session.progress.currentStepIndex
       : 0;
   return session.steps[idx] || null;
@@ -315,8 +331,10 @@ function normalizeKey(raw, registry, settings) {
  */
 async function hasFromRegistryOrAssume(key, registry, settings) {
   // Assume common tools if configured (timer/thermometer/scale).
-  const isCommon = settings.commonTools.includes(key) ||
-                   (settings.assumeCommonTools && (key === "thermometer" || key === "kitchenScale"));
+  const isCommon =
+    settings.commonTools.includes(key) ||
+    (settings.assumeCommonTools &&
+      (key === "thermometer" || key === "kitchenScale"));
 
   if (registry && typeof registry.has === "function") {
     try {
@@ -336,13 +354,18 @@ async function hasFromRegistryOrAssume(key, registry, settings) {
  */
 function formatKeyForUI(key) {
   switch (key) {
-    case "kitchenScale": return "Kitchen Scale";
-    case "tts": return "Text-to-Speech (Voice)";
+    case "kitchenScale":
+      return "Kitchen Scale";
+    case "tts":
+      return "Text-to-Speech (Voice)";
     case "bt": // rarely used because aliasMap normalizes this to bluetooth
-    case "bluetooth": return "Bluetooth";
+    case "bluetooth":
+      return "Bluetooth";
     default:
       // Title-case fallback
-      return key.replace(/(^\w|[_-]\w)/g, (m) => m.replace(/[_-]/, " ").toUpperCase());
+      return key.replace(/(^\w|[_-]\w)/g, (m) =>
+        m.replace(/[_-]/, " ").toUpperCase()
+      );
   }
 }
 
@@ -353,7 +376,12 @@ function safeId(session) {
 function safeEmitDebug(type, data) {
   try {
     if (eventBus && typeof eventBus.emit === "function") {
-      eventBus.emit({ type, ts: new Date().toISOString(), source: "equipmentGuard", data });
+      eventBus.emit({
+        type,
+        ts: new Date().toISOString(),
+        source: "equipmentGuard",
+        data,
+      });
     }
   } catch {
     // no-op
@@ -403,7 +431,10 @@ const capabilityCheckers = {
   /** Vibration support (for haptic cues on mobile) */
   async vibrate() {
     try {
-      return typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
+      return (
+        typeof navigator !== "undefined" &&
+        typeof navigator.vibrate === "function"
+      );
     } catch {
       return false;
     }

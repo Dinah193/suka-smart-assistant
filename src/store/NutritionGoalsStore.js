@@ -457,3 +457,25 @@ export const useNutritionActions = () =>
     }),
     shallow
   );
+
+/* -------------------------------------------------------------------------- */
+/* Compatibility exports (used by NutritionStore facade)                        */
+/* -------------------------------------------------------------------------- */
+
+// Aliases expected by src/store/NutritionStore.js
+export const useNutritionGoals = useNutritionGoalsStore;
+export const useStore = useNutritionGoalsStore;
+export const useNutritionStore = useNutritionGoalsStore;
+
+// Provide a default export so `import * as StoreModule` facades can access it.
+const NutritionGoalsModule = {
+  useNutritionGoalsStore,
+  useNutritionGoals,
+  useNutritionStore,
+  useStore,
+  // handy selectors
+  useNutritionProfiles,
+  useNutritionActions,
+};
+
+export default NutritionGoalsModule;

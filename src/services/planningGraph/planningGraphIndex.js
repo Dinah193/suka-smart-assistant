@@ -23,7 +23,7 @@
  *   • planningGraph.index.cache.hit
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import { loadPlanningGraph } from "@/services/planningGraph/planningGraphLoader";
 
 /**
@@ -248,8 +248,7 @@ function safeNormalizeEdge(raw, idx, allNodes) {
       ? raw.id
       : `edge:${from || "?"}->${to || "?"}#${idx}`;
 
-  const weight =
-    typeof raw.weight === "number" ? raw.weight : undefined;
+  const weight = typeof raw.weight === "number" ? raw.weight : undefined;
 
   const edge = {
     id,

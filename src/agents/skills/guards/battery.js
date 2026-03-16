@@ -28,7 +28,7 @@
  *   suggestions. The SessionRunner + guards system chooses how to respond.
  */
 
-import { emit } from '../../../services/eventBus';
+import { emit } from "../../../services/events/eventBus";
 
 /**
  * Normalized snapshot of battery state.
@@ -84,18 +84,18 @@ import { emit } from '../../../services/eventBus';
  * @returns {Promise<BatterySnapshot|null>}
  */
 export async function readBatterySnapshot() {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
     // Probably SSR / Node; no battery info.
     return null;
   }
 
   try {
     // Most modern browsers expose navigator.getBattery() → Promise<BatteryManager>
-    if (typeof navigator.getBattery === 'function') {
+    if (typeof navigator.getBattery === "function") {
       // @ts-ignore (BatteryManager is not in the default TS lib)
       const battery = await navigator.getBattery();
 
-      const level = typeof battery.level === 'number' ? battery.level : 1;
+      const level = typeof battery.level === "number" ? battery.level : 1;
       const charging = !!battery.charging;
       const chargingTime = Number.isFinite(battery.chargingTime)
         ? battery.chargingTime
@@ -111,7 +111,7 @@ export async function readBatterySnapshot() {
         chargingTime,
         dischargingTime,
         saverMode: detectBatterySaver(),
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
 
       safeEmitBatterySnapshotRead(snapshot);
@@ -125,17 +125,17 @@ export async function readBatterySnapshot() {
       chargingTime: null,
       dischargingTime: null,
       saverMode: detectBatterySaver(),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     });
 
     safeEmitBatterySnapshotRead(snapshot, [
-      'navigator.getBattery is not supported; assuming full battery.'
+      "navigator.getBattery is not supported; assuming full battery.",
     ]);
     return snapshot;
   } catch (err) {
     // If the API throws, log and return null
     safeEmitBatterySnapshotRead(null, [
-      `Battery API threw an error; battery unknown. (${String(err)})`
+      `Battery API threw an error; battery unknown. (${String(err)})`,
     ]);
     return null;
   }
@@ -159,25 +159,25 @@ export function evaluateBatteryPolicy(snapshot, options = {}) {
   /** @type {BatteryEvaluationResult} */
   const base = {
     isSafe: true,
-    decision: 'allow',
-    reasonCode: 'ok',
+    decision: "allow",
+    reasonCode: "ok",
     suggestions: [],
     warnings: [],
-    snapshot: snapshot || null
+    snapshot: snapshot || null,
   };
 
   const criticalThreshold =
-    typeof options.criticalThreshold === 'number'
+    typeof options.criticalThreshold === "number"
       ? clamp01(options.criticalThreshold)
       : 0.05;
 
   const lowThreshold =
-    typeof options.lowThreshold === 'number'
+    typeof options.lowThreshold === "number"
       ? clamp01(options.lowThreshold)
       : 0.15;
 
   const treatSaverAsLow =
-    typeof options.treatSaverAsLow === 'boolean'
+    typeof options.treatSaverAsLow === "boolean"
       ? options.treatSaverAsLow
       : true;
 
@@ -185,10 +185,12 @@ export function evaluateBatteryPolicy(snapshot, options = {}) {
     const res = {
       ...base,
       isSafe: true,
-      decision: 'warn',
-      reasonCode: 'unknown',
-      warnings: ['Battery state is unknown; proceeding but monitoring is recommended.'],
-      snapshot: null
+      decision: "warn",
+      reasonCode: "unknown",
+      warnings: [
+        "Battery state is unknown; proceeding but monitoring is recommended.",
+      ],
+      snapshot: null,
     };
     safeEmitBatteryEvaluated(res);
     return res;
@@ -199,42 +201,42 @@ export function evaluateBatteryPolicy(snapshot, options = {}) {
   const charging = snapshot.charging;
 
   /** @type {'allow'|'warn'|'block'} */
-  let decision = 'allow';
+  let decision = "allow";
   /** @type {'ok'|'low'|'critical'|'unknown'} */
-  let reasonCode = 'ok';
+  let reasonCode = "ok";
   /** @type {string[]} */
   const suggestions = [];
   /** @type {string[]} */
   const warnings = [];
 
   if (level <= criticalThreshold && !charging) {
-    decision = 'block';
-    reasonCode = 'critical';
+    decision = "block";
+    reasonCode = "critical";
     suggestions.push(
-      'Battery is critically low; plug in your device before continuing.',
-      'Consider pausing or aborting this session to avoid abrupt interruption.'
+      "Battery is critically low; plug in your device before continuing.",
+      "Consider pausing or aborting this session to avoid abrupt interruption."
     );
   } else if (level <= lowThreshold && !charging) {
-    decision = 'warn';
-    reasonCode = 'low';
+    decision = "warn";
+    reasonCode = "low";
     suggestions.push(
-      'Battery is low; consider plugging in or shortening this session.',
-      'If this session contains long timers, you may want to pause until you can charge.'
+      "Battery is low; consider plugging in or shortening this session.",
+      "If this session contains long timers, you may want to pause until you can charge."
     );
   }
 
   // If battery saver / low-power mode is active, at least warn.
   if (treatSaverAsLow && saverMode) {
-    if (decision === 'allow') {
-      decision = 'warn';
-      reasonCode = 'low';
+    if (decision === "allow") {
+      decision = "warn";
+      reasonCode = "low";
     }
     suggestions.push(
-      'Battery saver mode is active; to prevent interruptions, consider plugging in before long sessions.'
+      "Battery saver mode is active; to prevent interruptions, consider plugging in before long sessions."
     );
   }
 
-  const isSafe = decision !== 'block';
+  const isSafe = decision !== "block";
 
   const result = {
     ...base,
@@ -243,7 +245,7 @@ export function evaluateBatteryPolicy(snapshot, options = {}) {
     reasonCode,
     suggestions,
     warnings,
-    snapshot
+    snapshot,
   };
 
   safeEmitBatteryEvaluated(result);
@@ -276,7 +278,7 @@ export function toGuardBatteryEnv(input) {
   if (!input) {
     return {
       batteryLevel: null,
-      batterySaverEnabled: false
+      batterySaverEnabled: false,
     };
   }
 
@@ -288,7 +290,7 @@ export function toGuardBatteryEnv(input) {
     const snapshot = evalResult.snapshot;
     return {
       batteryLevel: snapshot ? clamp01(snapshot.level) : null,
-      batterySaverEnabled: snapshot ? !!snapshot.saverMode : false
+      batterySaverEnabled: snapshot ? !!snapshot.saverMode : false,
     };
   }
 
@@ -297,7 +299,7 @@ export function toGuardBatteryEnv(input) {
   const snapshot = /** @type any */ (input);
   return {
     batteryLevel: clamp01(snapshot.level),
-    batterySaverEnabled: !!snapshot.saverMode
+    batterySaverEnabled: !!snapshot.saverMode,
   };
 }
 
@@ -317,13 +319,16 @@ export function toGuardBatteryEnv(input) {
  * @returns {boolean|null}  True/false if we can guess; null if unknown.
  */
 function detectBatterySaver() {
-  if (typeof navigator === 'undefined') return null;
+  if (typeof navigator === "undefined") return null;
 
   // Data Saver is not exactly battery saver, but it often correlates with
   // “trying to conserve resources,” which is good enough as a soft signal.
   // @ts-ignore
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (connection && typeof connection.saveData === 'boolean') {
+  const connection =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
+  if (connection && typeof connection.saveData === "boolean") {
     return connection.saveData;
   }
 
@@ -366,15 +371,15 @@ function clamp01(n) {
  */
 function safeEmitBatterySnapshotRead(snapshot, warnings = []) {
   try {
-    if (typeof emit !== 'function') return;
+    if (typeof emit !== "function") return;
     emit({
-      type: 'battery.snapshot.read',
+      type: "battery.snapshot.read",
       ts: new Date().toISOString(),
-      source: 'guards.battery',
+      source: "guards.battery",
       data: {
         snapshot,
-        warnings
-      }
+        warnings,
+      },
     });
   } catch (_err) {
     // Never crash because of eventBus; swallow errors.
@@ -396,12 +401,12 @@ function safeEmitBatterySnapshotRead(snapshot, warnings = []) {
  */
 function safeEmitBatteryEvaluated(result) {
   try {
-    if (typeof emit !== 'function') return;
+    if (typeof emit !== "function") return;
     emit({
-      type: 'battery.evaluated',
+      type: "battery.evaluated",
       ts: new Date().toISOString(),
-      source: 'guards.battery',
-      data: result
+      source: "guards.battery",
+      data: result,
     });
   } catch (_err) {
     // Swallow errors; battery policy must never crash the app.

@@ -20,10 +20,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import SoilAmendmentCalculatorView from "@/features/calculators/gardenAnimal/SoilAmendmentCalculator.view";
+import SoilAmendmentCalculatorView from "@/features/calculators/gardenAnimal/SoilAmendmentCalculator/SoilAmendmentCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.soilAmendment";
 
@@ -222,7 +222,9 @@ function SoilAmendmentSummaryCard({
 
   const labelSeason = seasonLabel || "Season not set";
   const labelLocation =
-    locationLabel && zone ? `${locationLabel} · Zone ${zone}` : locationLabel || (zone ? `Zone ${zone}` : "Location not set");
+    locationLabel && zone
+      ? `${locationLabel} · Zone ${zone}`
+      : locationLabel || (zone ? `Zone ${zone}` : "Location not set");
 
   const materialCount = Array.isArray(materials) ? materials.length : 0;
 
@@ -239,9 +241,10 @@ function SoilAmendmentSummaryCard({
             Soil Amendment Summary &amp; Next Steps
           </h2>
           <p className="text-xs text-slate-400 mt-0.5 max-w-xl">
-            SSA balances your soil test or target N-P-K with compost, manure, and
-            organic fertilizers so you know exactly what to add per bed, when to
-            add it, and how it affects your storehouse and purchase list.
+            SSA balances your soil test or target N-P-K with compost, manure,
+            and organic fertilizers so you know exactly what to add per bed,
+            when to add it, and how it affects your storehouse and purchase
+            list.
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 text-[10px] text-slate-300">
@@ -419,14 +422,10 @@ export default function SoilAmendmentCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.gardenAnimal.soil-amendment",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.soil-amendment",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -444,8 +443,7 @@ export default function SoilAmendmentCalculatorPage() {
           typeof calcResult.locationLabel === "string"
             ? calcResult.locationLabel
             : undefined,
-        zone:
-          typeof calcResult.zone === "string" ? calcResult.zone : undefined,
+        zone: typeof calcResult.zone === "string" ? calcResult.zone : undefined,
         totalAreaSqFt:
           typeof calcResult.totalAreaSqFt === "number"
             ? calcResult.totalAreaSqFt
@@ -477,9 +475,7 @@ export default function SoilAmendmentCalculatorPage() {
         materials: Array.isArray(calcResult.materials)
           ? calcResult.materials
           : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         applicationTiming:
           typeof calcResult.applicationTiming === "string"

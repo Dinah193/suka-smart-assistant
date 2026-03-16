@@ -1,0 +1,2130 @@
+{
+  "$schema": "./cuisines.catalog.schema.json",
+  "catalogId": "farm_to_table.cuisines",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T02:05:53Z",
+  "notes": [
+    "Cuisine profiles are deterministic rule-sets used by SSA planners to bias ingredient, technique, and preservation choices.",
+    "This catalog is intentionally compatible with browser-safe planning: no Node dependencies, pure JSON, stable IDs."
+  ],
+  "enums": {
+    "heatLevels": [
+      "none",
+      "mild",
+      "medium",
+      "hot",
+      "very_hot"
+    ],
+    "saltiness": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "sweetness": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "acidity": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "fatness": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "umami": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "textureFocus": [
+      "crisp",
+      "tender",
+      "creamy",
+      "chewy",
+      "brothy",
+      "saucy",
+      "fried_crunch"
+    ],
+    "mealRoles": [
+      "main",
+      "side",
+      "starch",
+      "vegetable",
+      "salad",
+      "soup_stew",
+      "bread",
+      "sauce",
+      "condiment",
+      "breakfast",
+      "snack",
+      "dessert",
+      "drink"
+    ],
+    "serviceStyles": [
+      "family_style",
+      "plated",
+      "buffet",
+      "packed_meal"
+    ],
+    "seasonBias": [
+      "spring",
+      "summer",
+      "fall",
+      "winter",
+      "all"
+    ],
+    "dietTags": [
+      "omnivore",
+      "pescatarian",
+      "vegetarian",
+      "vegan",
+      "gluten_free",
+      "dairy_free",
+      "egg_free",
+      "low_carb",
+      "low_sodium"
+    ]
+  },
+  "spiceLexicon": [
+    {
+      "id": "spice.salt",
+      "label": "Salt",
+      "type": "base"
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black pepper",
+      "type": "base"
+    },
+    {
+      "id": "spice.garlic",
+      "label": "Garlic",
+      "type": "aromatic"
+    },
+    {
+      "id": "spice.onion",
+      "label": "Onion",
+      "type": "aromatic"
+    },
+    {
+      "id": "spice.ginger",
+      "label": "Ginger",
+      "type": "aromatic"
+    },
+    {
+      "id": "spice.scallion",
+      "label": "Scallion",
+      "type": "aromatic"
+    },
+    {
+      "id": "spice.thyme",
+      "label": "Thyme",
+      "type": "herb"
+    },
+    {
+      "id": "spice.oregano",
+      "label": "Oregano",
+      "type": "herb"
+    },
+    {
+      "id": "spice.bay_leaf",
+      "label": "Bay leaf",
+      "type": "herb"
+    },
+    {
+      "id": "spice.parsley",
+      "label": "Parsley",
+      "type": "herb"
+    },
+    {
+      "id": "spice.cilantro",
+      "label": "Cilantro",
+      "type": "herb"
+    },
+    {
+      "id": "spice.rosemary",
+      "label": "Rosemary",
+      "type": "herb"
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Cumin",
+      "type": "warm"
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Coriander",
+      "type": "warm"
+    },
+    {
+      "id": "spice.allspice",
+      "label": "Allspice",
+      "type": "warm"
+    },
+    {
+      "id": "spice.cinnamon",
+      "label": "Cinnamon",
+      "type": "sweet_warm"
+    },
+    {
+      "id": "spice.nutmeg",
+      "label": "Nutmeg",
+      "type": "sweet_warm"
+    },
+    {
+      "id": "spice.paprika",
+      "label": "Paprika",
+      "type": "peppery"
+    },
+    {
+      "id": "spice.smoked_paprika",
+      "label": "Smoked paprika",
+      "type": "smoky"
+    },
+    {
+      "id": "spice.chili_powder",
+      "label": "Chili powder",
+      "type": "heat"
+    },
+    {
+      "id": "spice.cayenne",
+      "label": "Cayenne",
+      "type": "heat"
+    },
+    {
+      "id": "spice.scotch_bonnet",
+      "label": "Scotch bonnet",
+      "type": "heat"
+    },
+    {
+      "id": "spice.habanero",
+      "label": "Habanero",
+      "type": "heat"
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Turmeric",
+      "type": "earthy"
+    },
+    {
+      "id": "spice.curry_powder",
+      "label": "Curry powder",
+      "type": "blend"
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "type": "blend"
+    },
+    {
+      "id": "spice.berbere",
+      "label": "Berbere",
+      "type": "blend"
+    },
+    {
+      "id": "spice.ras_el_hanout",
+      "label": "Ras el hanout",
+      "type": "blend"
+    },
+    {
+      "id": "spice.sesame",
+      "label": "Sesame",
+      "type": "nutty"
+    },
+    {
+      "id": "spice.mustard",
+      "label": "Mustard",
+      "type": "sharp"
+    },
+    {
+      "id": "spice.vinegar",
+      "label": "Vinegar",
+      "type": "acid"
+    },
+    {
+      "id": "spice.lime",
+      "label": "Lime",
+      "type": "acid"
+    },
+    {
+      "id": "spice.lemon",
+      "label": "Lemon",
+      "type": "acid"
+    },
+    {
+      "id": "spice.tomato",
+      "label": "Tomato",
+      "type": "umami"
+    },
+    {
+      "id": "spice.soy_sauce",
+      "label": "Soy sauce",
+      "type": "umami"
+    },
+    {
+      "id": "spice.fish_sauce",
+      "label": "Fish sauce",
+      "type": "umami"
+    },
+    {
+      "id": "spice.coconut_milk",
+      "label": "Coconut milk",
+      "type": "fat_sweet"
+    },
+    {
+      "id": "spice.butter",
+      "label": "Butter/ghee",
+      "type": "fat"
+    },
+    {
+      "id": "spice.olive_oil",
+      "label": "Olive oil",
+      "type": "fat"
+    },
+    {
+      "id": "spice.palm_oil",
+      "label": "Palm oil",
+      "type": "fat"
+    },
+    {
+      "id": "spice.smoke",
+      "label": "Smoke",
+      "type": "smoky"
+    }
+  ],
+  "techniqueLexicon": [
+    {
+      "id": "tech.saute",
+      "label": "Sauté"
+    },
+    {
+      "id": "tech.braise",
+      "label": "Braise"
+    },
+    {
+      "id": "tech.stew",
+      "label": "Stew"
+    },
+    {
+      "id": "tech.roast",
+      "label": "Roast"
+    },
+    {
+      "id": "tech.grill",
+      "label": "Grill"
+    },
+    {
+      "id": "tech.fry",
+      "label": "Fry"
+    },
+    {
+      "id": "tech.smoke",
+      "label": "Smoke"
+    },
+    {
+      "id": "tech.cure",
+      "label": "Cure"
+    },
+    {
+      "id": "tech.ferment",
+      "label": "Ferment"
+    },
+    {
+      "id": "tech.pickling",
+      "label": "Pickle"
+    },
+    {
+      "id": "tech.bake",
+      "label": "Bake"
+    },
+    {
+      "id": "tech.flatbread",
+      "label": "Flatbread"
+    },
+    {
+      "id": "tech.steam",
+      "label": "Steam"
+    },
+    {
+      "id": "tech.boil",
+      "label": "Boil"
+    },
+    {
+      "id": "tech.pressure_cook",
+      "label": "Pressure cook"
+    },
+    {
+      "id": "tech.dehydrate",
+      "label": "Dehydrate"
+    },
+    {
+      "id": "tech.mill_grain",
+      "label": "Mill grain"
+    },
+    {
+      "id": "tech.make_sauce",
+      "label": "Make sauce"
+    },
+    {
+      "id": "tech.slow_cook",
+      "label": "Slow cook"
+    },
+    {
+      "id": "tech.one_pot",
+      "label": "One-pot"
+    }
+  ],
+  "preservationPreferencesLexicon": [
+    {
+      "id": "preserve.dry_store",
+      "label": "Dry storage"
+    },
+    {
+      "id": "preserve.freeze",
+      "label": "Freezing"
+    },
+    {
+      "id": "preserve.dehydrate",
+      "label": "Dehydrating"
+    },
+    {
+      "id": "preserve.water_bath_can",
+      "label": "Water-bath canning"
+    },
+    {
+      "id": "preserve.pressure_can",
+      "label": "Pressure canning"
+    },
+    {
+      "id": "preserve.culture_ferment",
+      "label": "Culturing/Fermentation"
+    },
+    {
+      "id": "preserve.pickling",
+      "label": "Pickling"
+    },
+    {
+      "id": "preserve.root_cellar",
+      "label": "Root cellar"
+    },
+    {
+      "id": "preserve.cure_smoke",
+      "label": "Curing/Smoking"
+    },
+    {
+      "id": "preserve.render",
+      "label": "Rendering"
+    },
+    {
+      "id": "preserve.clarify",
+      "label": "Clarifying"
+    }
+  ],
+  "cuisineFamilies": [
+    {
+      "id": "family.aai",
+      "label": "African-American Israelite (AAI) Streams",
+      "description": "AAI is a synthesis family that can express Southern, Caribbean, West African, Mediterranean and Levant influences under SSA constraints."
+    },
+    {
+      "id": "family.indian",
+      "label": "Indian Subcontinent",
+      "description": "Profiles emphasizing layered spices, aromatics, curry gravies, dals, breads, and rice."
+    },
+    {
+      "id": "family.caribbean",
+      "label": "Caribbean",
+      "description": "Profiles emphasizing allspice/pimento, thyme, Scotch bonnet heat, citrus acids, and smoke/char."
+    },
+    {
+      "id": "family.west_african",
+      "label": "West African",
+      "description": "Profiles emphasizing tomato-pepper stews, ginger/garlic/onion aromatics, and palm oil/groundnut richness."
+    },
+    {
+      "id": "family.mediterranean",
+      "label": "Mediterranean",
+      "description": "Profiles emphasizing olive oil, herbs, lemon, garlic, and simple roasting/grilling."
+    },
+    {
+      "id": "family.levant",
+      "label": "Levant / Middle East",
+      "description": "Profiles emphasizing sumac-like acidity, herbs, sesame/tahini, grilled meats, legumes, and flatbreads."
+    },
+    {
+      "id": "family.southern_us",
+      "label": "Southern US",
+      "description": "Profiles emphasizing flour/cornmeal breads, fried/slow-cooked meats, greens, beans, and comfort gravies."
+    }
+  ],
+  "profiles": [
+    {
+      "id": "cuisine.aai.core",
+      "label": "AAI • Core House Style",
+      "familyId": "family.aai",
+      "description": "Balanced AAI baseline: comfort-forward, herb/spice aware, supports beans, grains, garden veg, and mixed preservation.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "medium",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "medium",
+        "fatness": "medium",
+        "umami": "medium",
+        "textureFocus": [
+          "tender",
+          "saucy",
+          "fried_crunch"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.onion",
+            "weight": 0.22
+          },
+          {
+            "id": "spice.garlic",
+            "weight": 0.22
+          },
+          {
+            "id": "spice.scallion",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.ginger",
+            "weight": 0.06
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.thyme",
+            "weight": 0.14
+          },
+          {
+            "id": "spice.oregano",
+            "weight": 0.08
+          },
+          {
+            "id": "spice.parsley",
+            "weight": 0.06
+          },
+          {
+            "id": "spice.bay_leaf",
+            "weight": 0.06
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.cumin",
+            "weight": 0.08
+          },
+          {
+            "id": "spice.coriander",
+            "weight": 0.05
+          },
+          {
+            "id": "spice.allspice",
+            "weight": 0.05
+          },
+          {
+            "id": "spice.paprika",
+            "weight": 0.08
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.chili_powder",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.cayenne",
+            "weight": 0.06
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.vinegar",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.lemon",
+            "weight": 0.06
+          },
+          {
+            "id": "spice.lime",
+            "weight": 0.06
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.14
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.olive_oil",
+            "weight": 0.12
+          },
+          {
+            "id": "spice.butter",
+            "weight": 0.08
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.stew",
+          "weight": 0.18
+        },
+        {
+          "id": "tech.braise",
+          "weight": 0.16
+        },
+        {
+          "id": "tech.roast",
+          "weight": 0.12
+        },
+        {
+          "id": "tech.fry",
+          "weight": 0.1
+        },
+        {
+          "id": "tech.bake",
+          "weight": 0.1
+        },
+        {
+          "id": "tech.one_pot",
+          "weight": 0.1
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.rice_white",
+            "weight": 0.14
+          },
+          {
+            "id": "grain.cornmeal",
+            "weight": 0.12
+          },
+          {
+            "id": "grain.wheat_berries",
+            "weight": 0.1
+          },
+          {
+            "id": "starch.potato",
+            "weight": 0.08
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.16
+          },
+          {
+            "id": "protein.beef",
+            "weight": 0.12
+          },
+          {
+            "id": "protein.lamb",
+            "weight": 0.1
+          },
+          {
+            "id": "protein.eggs",
+            "weight": 0.1
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.onion",
+            "weight": 0.1
+          },
+          {
+            "id": "veg.garlic",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.cabbage",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.tomato",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.okra",
+            "weight": 0.06
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.freeze",
+          "weight": 0.2
+        },
+        {
+          "id": "preserve.pressure_can",
+          "weight": 0.18
+        },
+        {
+          "id": "preserve.dehydrate",
+          "weight": 0.1
+        },
+        {
+          "id": "preserve.culture_ferment",
+          "weight": 0.12
+        },
+        {
+          "id": "preserve.root_cellar",
+          "weight": 0.1
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house"
+      ],
+      "dietTags": [
+        "omnivore"
+      ]
+    },
+    {
+      "id": "cuisine.aai.caribbean_stream",
+      "label": "AAI • Caribbean Stream",
+      "familyId": "family.caribbean",
+      "description": "AAI Caribbean leaning: pimento/allspice + thyme, citrus acids, Scotch bonnet heat, bright slaws and stews.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "hot",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "high",
+        "fatness": "medium",
+        "umami": "medium",
+        "textureFocus": [
+          "tender",
+          "crisp",
+          "brothy"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.scallion",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.garlic",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.onion",
+            "weight": 0.14
+          },
+          {
+            "id": "spice.ginger",
+            "weight": 0.08
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.thyme",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.parsley",
+            "weight": 0.06
+          },
+          {
+            "id": "spice.bay_leaf",
+            "weight": 0.06
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.allspice",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.cumin",
+            "weight": 0.06
+          },
+          {
+            "id": "spice.coriander",
+            "weight": 0.05
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.scotch_bonnet",
+            "weight": 0.16
+          },
+          {
+            "id": "spice.cayenne",
+            "weight": 0.05
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.lime",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.vinegar",
+            "weight": 0.1
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.08
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.olive_oil",
+            "weight": 0.1
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.stew",
+          "weight": 0.2
+        },
+        {
+          "id": "tech.grill",
+          "weight": 0.14
+        },
+        {
+          "id": "tech.roast",
+          "weight": 0.12
+        },
+        {
+          "id": "tech.pickling",
+          "weight": 0.1
+        },
+        {
+          "id": "tech.one_pot",
+          "weight": 0.1
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.rice_white",
+            "weight": 0.18
+          },
+          {
+            "id": "grain.cornmeal",
+            "weight": 0.14
+          },
+          {
+            "id": "starch.potato",
+            "weight": 0.06
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.18
+          },
+          {
+            "id": "protein.beef",
+            "weight": 0.1
+          },
+          {
+            "id": "protein.fish",
+            "weight": 0.08
+          },
+          {
+            "id": "protein.eggs",
+            "weight": 0.06
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.cabbage",
+            "weight": 0.12
+          },
+          {
+            "id": "veg.onion",
+            "weight": 0.1
+          },
+          {
+            "id": "veg.garlic",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.tomato",
+            "weight": 0.08
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.pickling",
+          "weight": 0.18
+        },
+        {
+          "id": "preserve.freeze",
+          "weight": 0.18
+        },
+        {
+          "id": "preserve.dehydrate",
+          "weight": 0.08
+        },
+        {
+          "id": "preserve.cure_smoke",
+          "weight": 0.1
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house",
+        "kit.caribbean"
+      ],
+      "dietTags": []
+    },
+    {
+      "id": "cuisine.aai.west_african_stream",
+      "label": "AAI • West African Stream",
+      "familyId": "family.west_african",
+      "description": "AAI West African leaning: tomato-pepper stews, ginger/garlic/onion base, smoky heat, rich oils, and rice/tubers.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "hot",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "medium",
+        "fatness": "high",
+        "umami": "high",
+        "textureFocus": [
+          "saucy",
+          "tender",
+          "chewy"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.onion",
+            "weight": 0.2
+          },
+          {
+            "id": "spice.garlic",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.ginger",
+            "weight": 0.14
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.bay_leaf",
+            "weight": 0.06
+          },
+          {
+            "id": "spice.thyme",
+            "weight": 0.08
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.cumin",
+            "weight": 0.06
+          },
+          {
+            "id": "spice.coriander",
+            "weight": 0.05
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.cayenne",
+            "weight": 0.12
+          },
+          {
+            "id": "spice.chili_powder",
+            "weight": 0.1
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.lime",
+            "weight": 0.08
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.18
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.palm_oil",
+            "weight": 0.16
+          },
+          {
+            "id": "spice.olive_oil",
+            "weight": 0.06
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.stew",
+          "weight": 0.24
+        },
+        {
+          "id": "tech.braise",
+          "weight": 0.14
+        },
+        {
+          "id": "tech.one_pot",
+          "weight": 0.14
+        },
+        {
+          "id": "tech.smoke",
+          "weight": 0.08
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.rice_white",
+            "weight": 0.18
+          },
+          {
+            "id": "starch.potato",
+            "weight": 0.08
+          },
+          {
+            "id": "grain.cornmeal",
+            "weight": 0.1
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.14
+          },
+          {
+            "id": "protein.beef",
+            "weight": 0.1
+          },
+          {
+            "id": "protein.fish",
+            "weight": 0.1
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.tomato",
+            "weight": 0.14
+          },
+          {
+            "id": "veg.onion",
+            "weight": 0.1
+          },
+          {
+            "id": "veg.garlic",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.okra",
+            "weight": 0.08
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.pressure_can",
+          "weight": 0.22
+        },
+        {
+          "id": "preserve.freeze",
+          "weight": 0.18
+        },
+        {
+          "id": "preserve.dehydrate",
+          "weight": 0.1
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house",
+        "kit.west_african"
+      ],
+      "dietTags": []
+    },
+    {
+      "id": "cuisine.aai.southern_stream",
+      "label": "AAI • Southern Stream",
+      "familyId": "family.southern_us",
+      "description": "AAI Southern leaning: cornmeal breads, slow-cooked meats/beans, greens, frying and baking.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "medium",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "low",
+        "fatness": "high",
+        "umami": "medium",
+        "textureFocus": [
+          "fried_crunch",
+          "tender",
+          "creamy"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.onion",
+            "weight": 0.22
+          },
+          {
+            "id": "spice.garlic",
+            "weight": 0.14
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.thyme",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.bay_leaf",
+            "weight": 0.08
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.paprika",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.black_pepper",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.cumin",
+            "weight": 0.04
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.cayenne",
+            "weight": 0.05
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.vinegar",
+            "weight": 0.1
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.08
+          },
+          {
+            "id": "spice.smoke",
+            "weight": 0.08
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.butter",
+            "weight": 0.14
+          },
+          {
+            "id": "spice.lard",
+            "weight": 0.12
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.fry",
+          "weight": 0.22
+        },
+        {
+          "id": "tech.slow_cook",
+          "weight": 0.18
+        },
+        {
+          "id": "tech.braise",
+          "weight": 0.16
+        },
+        {
+          "id": "tech.bake",
+          "weight": 0.12
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.cornmeal",
+            "weight": 0.2
+          },
+          {
+            "id": "starch.potato",
+            "weight": 0.1
+          },
+          {
+            "id": "grain.rice_white",
+            "weight": 0.08
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.16
+          },
+          {
+            "id": "protein.beef",
+            "weight": 0.12
+          },
+          {
+            "id": "protein.eggs",
+            "weight": 0.1
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.cabbage",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.onion",
+            "weight": 0.1
+          },
+          {
+            "id": "veg.tomato",
+            "weight": 0.06
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.freeze",
+          "weight": 0.2
+        },
+        {
+          "id": "preserve.pressure_can",
+          "weight": 0.18
+        },
+        {
+          "id": "preserve.dehydrate",
+          "weight": 0.08
+        },
+        {
+          "id": "preserve.cure_smoke",
+          "weight": 0.12
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house"
+      ],
+      "dietTags": []
+    },
+    {
+      "id": "cuisine.indian.north_masala",
+      "label": "Indian • North (Masala / Curry Gravies)",
+      "familyId": "family.indian",
+      "description": "Layered spice gravies, aromatics, rice + breads, finishing spices.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "medium",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "medium",
+        "fatness": "medium",
+        "umami": "medium",
+        "textureFocus": [
+          "saucy",
+          "tender"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.onion",
+            "weight": 0.2
+          },
+          {
+            "id": "spice.garlic",
+            "weight": 0.14
+          },
+          {
+            "id": "spice.ginger",
+            "weight": 0.14
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.cilantro",
+            "weight": 0.1
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.cumin",
+            "weight": 0.12
+          },
+          {
+            "id": "spice.coriander",
+            "weight": 0.12
+          },
+          {
+            "id": "spice.turmeric",
+            "weight": 0.1
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.cayenne",
+            "weight": 0.06
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.lemon",
+            "weight": 0.08
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.1
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.butter",
+            "weight": 0.12
+          },
+          {
+            "id": "spice.olive_oil",
+            "weight": 0.06
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.saute",
+          "weight": 0.14
+        },
+        {
+          "id": "tech.stew",
+          "weight": 0.2
+        },
+        {
+          "id": "tech.braise",
+          "weight": 0.14
+        },
+        {
+          "id": "tech.flatbread",
+          "weight": 0.12
+        },
+        {
+          "id": "tech.one_pot",
+          "weight": 0.08
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.rice_white",
+            "weight": 0.2
+          },
+          {
+            "id": "grain.wheat_flour_whole",
+            "weight": 0.14
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.14
+          },
+          {
+            "id": "protein.eggs",
+            "weight": 0.08
+          },
+          {
+            "id": "protein.lentils",
+            "weight": 0.12
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.onion",
+            "weight": 0.1
+          },
+          {
+            "id": "veg.tomato",
+            "weight": 0.1
+          },
+          {
+            "id": "veg.garlic",
+            "weight": 0.08
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.dehydrate",
+          "weight": 0.1
+        },
+        {
+          "id": "preserve.freeze",
+          "weight": 0.16
+        },
+        {
+          "id": "preserve.pressure_can",
+          "weight": 0.14
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house",
+        "kit.indian"
+      ],
+      "dietTags": [
+        "omnivore"
+      ]
+    },
+    {
+      "id": "cuisine.caribbean.island_home",
+      "label": "Caribbean • Island Home",
+      "familyId": "family.caribbean",
+      "description": "Island home cooking: stews, citrus, herbs, hot peppers, rice + breads/sides.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "hot",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "high",
+        "fatness": "medium",
+        "umami": "medium",
+        "textureFocus": [
+          "brothy",
+          "crisp",
+          "tender"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.scallion",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.garlic",
+            "weight": 0.16
+          },
+          {
+            "id": "spice.onion",
+            "weight": 0.12
+          },
+          {
+            "id": "spice.ginger",
+            "weight": 0.08
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.thyme",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.parsley",
+            "weight": 0.06
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.allspice",
+            "weight": 0.16
+          },
+          {
+            "id": "spice.cumin",
+            "weight": 0.06
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.scotch_bonnet",
+            "weight": 0.16
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.lime",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.vinegar",
+            "weight": 0.08
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.06
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.olive_oil",
+            "weight": 0.08
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.stew",
+          "weight": 0.2
+        },
+        {
+          "id": "tech.grill",
+          "weight": 0.14
+        },
+        {
+          "id": "tech.pickling",
+          "weight": 0.1
+        },
+        {
+          "id": "tech.roast",
+          "weight": 0.1
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.rice_white",
+            "weight": 0.18
+          },
+          {
+            "id": "grain.cornmeal",
+            "weight": 0.12
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.18
+          },
+          {
+            "id": "protein.fish",
+            "weight": 0.12
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.cabbage",
+            "weight": 0.12
+          },
+          {
+            "id": "veg.onion",
+            "weight": 0.08
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.pickling",
+          "weight": 0.18
+        },
+        {
+          "id": "preserve.freeze",
+          "weight": 0.16
+        },
+        {
+          "id": "preserve.cure_smoke",
+          "weight": 0.1
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house",
+        "kit.caribbean"
+      ],
+      "dietTags": []
+    },
+    {
+      "id": "cuisine.mediterranean.simple_herb",
+      "label": "Mediterranean • Simple Herb & Lemon",
+      "familyId": "family.mediterranean",
+      "description": "Olive oil, garlic, herbs, lemon, roasting/grilling, and garden vegetables.",
+      "seasonBias": "all",
+      "defaults": {
+        "heatLevel": "mild",
+        "serviceStyles": [
+          "family_style",
+          "plated"
+        ],
+        "mealRoles": [
+          "main",
+          "side",
+          "starch",
+          "vegetable",
+          "sauce"
+        ]
+      },
+      "flavorTargets": {
+        "saltiness": "medium",
+        "sweetness": "low",
+        "acidity": "high",
+        "fatness": "medium",
+        "umami": "medium",
+        "textureFocus": [
+          "crisp",
+          "tender"
+        ]
+      },
+      "signature": {
+        "aromatics": [
+          {
+            "id": "spice.garlic",
+            "weight": 0.18
+          },
+          {
+            "id": "spice.onion",
+            "weight": 0.1
+          }
+        ],
+        "herbs": [
+          {
+            "id": "spice.oregano",
+            "weight": 0.14
+          },
+          {
+            "id": "spice.rosemary",
+            "weight": 0.1
+          },
+          {
+            "id": "spice.parsley",
+            "weight": 0.1
+          }
+        ],
+        "warmSpices": [
+          {
+            "id": "spice.black_pepper",
+            "weight": 0.1
+          }
+        ],
+        "heatSpices": [
+          {
+            "id": "spice.chili_powder",
+            "weight": 0.04
+          }
+        ],
+        "acids": [
+          {
+            "id": "spice.lemon",
+            "weight": 0.18
+          }
+        ],
+        "umamiBoosters": [
+          {
+            "id": "spice.tomato",
+            "weight": 0.1
+          }
+        ],
+        "fats": [
+          {
+            "id": "spice.olive_oil",
+            "weight": 0.2
+          }
+        ]
+      },
+      "techniqueBias": [
+        {
+          "id": "tech.roast",
+          "weight": 0.18
+        },
+        {
+          "id": "tech.grill",
+          "weight": 0.18
+        },
+        {
+          "id": "tech.saute",
+          "weight": 0.1
+        },
+        {
+          "id": "tech.bake",
+          "weight": 0.1
+        }
+      ],
+      "ingredientBias": {
+        "starches": [
+          {
+            "id": "grain.wheat_berries",
+            "weight": 0.1
+          },
+          {
+            "id": "grain.rice_white",
+            "weight": 0.1
+          },
+          {
+            "id": "starch.potato",
+            "weight": 0.1
+          }
+        ],
+        "proteins": [
+          {
+            "id": "protein.chicken",
+            "weight": 0.12
+          },
+          {
+            "id": "protein.fish",
+            "weight": 0.12
+          },
+          {
+            "id": "protein.eggs",
+            "weight": 0.08
+          }
+        ],
+        "vegetables": [
+          {
+            "id": "veg.tomato",
+            "weight": 0.12
+          },
+          {
+            "id": "veg.onion",
+            "weight": 0.08
+          },
+          {
+            "id": "veg.garlic",
+            "weight": 0.06
+          },
+          {
+            "id": "veg.cabbage",
+            "weight": 0.04
+          }
+        ]
+      },
+      "avoidTags": [],
+      "preservationBias": [
+        {
+          "id": "preserve.dehydrate",
+          "weight": 0.14
+        },
+        {
+          "id": "preserve.freeze",
+          "weight": 0.14
+        },
+        {
+          "id": "preserve.water_bath_can",
+          "weight": 0.12
+        }
+      ],
+      "substitutions": [],
+      "pantryKits": [
+        "kit.base_house"
+      ],
+      "dietTags": []
+    }
+  ],
+  "pantryKits": [
+    {
+      "id": "kit.base_house",
+      "label": "Base House Pantry",
+      "description": "Core items that support most SSA cooking and preservation flows.",
+      "items": [
+        {
+          "componentId": "preserve_input.salt",
+          "minOnHand": 5,
+          "unit": "lb"
+        },
+        {
+          "componentId": "pantry.vinegar_apple_cider",
+          "minOnHand": 2,
+          "unit": "qt"
+        },
+        {
+          "componentId": "baking.yeast_active_dry",
+          "minOnHand": 8,
+          "unit": "oz"
+        },
+        {
+          "componentId": "baking.baking_powder",
+          "minOnHand": 16,
+          "unit": "oz"
+        },
+        {
+          "componentId": "sweetener.sugar_cane",
+          "minOnHand": 10,
+          "unit": "lb"
+        },
+        {
+          "componentId": "fat.olive_oil",
+          "minOnHand": 2,
+          "unit": "l"
+        },
+        {
+          "componentId": "spice.black_pepper",
+          "minOnHand": 8,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.cumin_ground",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.curry_powder",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.thyme_dried",
+          "minOnHand": 2,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.paprika",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.cinnamon_ground",
+          "minOnHand": 4,
+          "unit": "oz"
+        }
+      ]
+    },
+    {
+      "id": "kit.caribbean",
+      "label": "Caribbean Pantry Kit",
+      "description": "Signature Caribbean spices and acids to support curry/j*** seasoning, stews, and bright sides.",
+      "items": [
+        {
+          "componentId": "spice.allspice_ground",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.thyme_dried",
+          "minOnHand": 2,
+          "unit": "oz"
+        },
+        {
+          "componentId": "pantry.vinegar_apple_cider",
+          "minOnHand": 1,
+          "unit": "qt"
+        },
+        {
+          "componentId": "spice.curry_powder",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.cumin_ground",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.black_pepper",
+          "minOnHand": 4,
+          "unit": "oz"
+        }
+      ]
+    },
+    {
+      "id": "kit.indian",
+      "label": "Indian Pantry Kit",
+      "description": "Core Indian masala spices and staples for curries, dals, rice, and flatbreads.",
+      "items": [
+        {
+          "componentId": "spice.cumin_ground",
+          "minOnHand": 6,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.coriander",
+          "minOnHand": 6,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.turmeric",
+          "minOnHand": 6,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.curry_powder",
+          "minOnHand": 6,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.garam_masala",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.cayenne",
+          "minOnHand": 2,
+          "unit": "oz"
+        }
+      ]
+    },
+    {
+      "id": "kit.west_african",
+      "label": "West African Pantry Kit",
+      "description": "Core stew base and richness components.",
+      "items": [
+        {
+          "componentId": "spice.smoked_paprika",
+          "minOnHand": 4,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.cayenne",
+          "minOnHand": 2,
+          "unit": "oz"
+        },
+        {
+          "componentId": "spice.ginger",
+          "minOnHand": 1,
+          "unit": "lb"
+        },
+        {
+          "componentId": "spice.garlic",
+          "minOnHand": 10,
+          "unit": "head"
+        },
+        {
+          "componentId": "spice.tomato",
+          "minOnHand": 6,
+          "unit": "lb"
+        }
+      ]
+    }
+  ],
+  "substitutionRules": [
+    {
+      "id": "sub.curry_base_indian_vs_caribbean",
+      "label": "Curry base: Indian vs Caribbean",
+      "description": "Map similar 'curry' intent into cuisine-specific aromatics, acids, and heat.",
+      "when": {
+        "intentTags": [
+          "curry",
+          "stew",
+          "gravy"
+        ],
+        "componentGroupsAny": [
+          "spice.curry_blend",
+          "spice.curry_powder"
+        ]
+      },
+      "then": {
+        "prefer": {
+          "indian": {
+            "addSpices": [
+              "spice.garam_masala",
+              "spice.turmeric",
+              "spice.coriander",
+              "spice.cumin"
+            ],
+            "addAromatics": [
+              "spice.ginger",
+              "spice.garlic",
+              "spice.onion"
+            ],
+            "addAcids": [
+              "spice.lemon"
+            ],
+            "fatOption": [
+              "spice.butter",
+              "spice.olive_oil"
+            ],
+            "notes": "Layer spices; finish with garam masala; balance with yogurt or ghee if desired."
+          },
+          "caribbean": {
+            "addSpices": [
+              "spice.allspice",
+              "spice.thyme",
+              "spice.curry_powder"
+            ],
+            "addAromatics": [
+              "spice.scallion",
+              "spice.garlic",
+              "spice.onion"
+            ],
+            "addAcids": [
+              "spice.lime",
+              "spice.vinegar"
+            ],
+            "heatOption": [
+              "spice.scotch_bonnet"
+            ],
+            "notes": "Use pimento/allspice + thyme; Scotch bonnet heat; brighten with lime."
+          }
+        }
+      }
+    },
+    {
+      "id": "sub.starch_indian_rice_naan_vs_caribbean_rice_cornbread",
+      "label": "Starches: Indian (rice+naan) vs Caribbean (rice+cornbread)",
+      "description": "Guide starch pairing for curry/stew meals.",
+      "when": {
+        "intentTags": [
+          "curry",
+          "stew"
+        ]
+      },
+      "then": {
+        "prefer": {
+          "indian": {
+            "starches": [
+              "grain.rice_white_long",
+              "grain.wheat_flour_whole"
+            ],
+            "notes": "Rice plus flatbread; flour for naan/roti."
+          },
+          "caribbean": {
+            "starches": [
+              "grain.rice_white_long",
+              "grain.cornmeal"
+            ],
+            "notes": "Rice plus cornmeal bread/festival style."
+          }
+        }
+      }
+    }
+  ],
+  "overlap": {
+    "techniquesShared": [
+      {
+        "tech": "tech.stew",
+        "cuisines": [
+          "cuisine.aai.core",
+          "cuisine.aai.caribbean_stream",
+          "cuisine.aai.west_african_stream",
+          "cuisine.indian.north_masala",
+          "cuisine.caribbean.island_home"
+        ]
+      },
+      {
+        "tech": "tech.grill",
+        "cuisines": [
+          "cuisine.aai.caribbean_stream",
+          "cuisine.caribbean.island_home",
+          "cuisine.mediterranean.simple_herb"
+        ]
+      },
+      {
+        "tech": "tech.braise",
+        "cuisines": [
+          "cuisine.aai.core",
+          "cuisine.aai.west_african_stream",
+          "cuisine.aai.southern_stream",
+          "cuisine.indian.north_masala"
+        ]
+      },
+      {
+        "tech": "tech.pickling",
+        "cuisines": [
+          "cuisine.aai.caribbean_stream",
+          "cuisine.caribbean.island_home"
+        ]
+      }
+    ]
+  }
+}

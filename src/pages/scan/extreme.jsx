@@ -58,10 +58,10 @@
 //     3) Commit inventory + emit events + optional Hub export
 
 import React, { useCallback, useMemo, useState } from "react";
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../services/featureFlags";
-import HubPacketFormatter from "../../services/hub/HubPacketFormatter";
-import FamilyFundConnector from "../../services/hub/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "../../config/featureFlags";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * @typedef {"meals"|"storehouse"|"preservation"|"garden"|"animals"|"other"} DomainHint

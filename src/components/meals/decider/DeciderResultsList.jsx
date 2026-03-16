@@ -1,15 +1,27 @@
 // src/components/meals/decider/DeciderResultsList.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 
 /* ------------------------------- Defensive deps ------------------------------- */
 let Icons = {};
-try { Icons = require("lucide-react"); } catch {}
+try {
+  Icons = require("lucide-react");
+} catch {}
 
 let eventBus = null;
-try { eventBus = require("@/services/eventBus").eventBus || null; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus || null;
+} catch {}
 
 let automation = null;
-try { automation = require("@/services/automation/runtime").automation || null; } catch {}
+try {
+  automation = require("@/services/automation/runtime").automation || null;
+} catch {}
 
 let useMealPlanStore = () => null;
 try {
@@ -34,7 +46,8 @@ try {
 } catch {}
 
 /* --------------------------------- Utilities --------------------------------- */
-const clamp = (n, a = 0, b = 100) => Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
+const clamp = (n, a = 0, b = 100) =>
+  Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
 const cx = (...xs) => xs.filter(Boolean).join(" ");
 const groupBy = (items, fn) =>
   (items || []).reduce((acc, it) => {
@@ -44,7 +57,11 @@ const groupBy = (items, fn) =>
   }, {});
 const fmtMoney = (v) =>
   typeof v === "number" && !Number.isNaN(v)
-    ? v.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 })
+    ? v.toLocaleString(undefined, {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2,
+      })
     : "—";
 
 /* --------------------------------- Skeletons --------------------------------- */
@@ -86,16 +103,28 @@ const ResultCard = ({
   const cost = item?.budget?.estCost;
 
   const badgeTone =
-    score >= 85 ? "bg-emerald-600" :
-    score >= 70 ? "bg-green-600" :
-    score >= 55 ? "bg-yellow-600" :
-    score >= 40 ? "bg-orange-600" : "bg-rose-600";
+    score >= 85
+      ? "bg-emerald-600"
+      : score >= 70
+      ? "bg-green-600"
+      : score >= 55
+      ? "bg-yellow-600"
+      : score >= 40
+      ? "bg-orange-600"
+      : "bg-rose-600";
 
   const handleSelect = () => {
     onSelect?.(item);
     try {
-      eventBus?.emit?.("meals.decider.result.selected", { id: item?.id, householdId, ts: Date.now() });
-      automation?.runTemplate?.("meals.decider.result.selected", { decision: item, householdId });
+      eventBus?.emit?.("meals.decider.result.selected", {
+        id: item?.id,
+        householdId,
+        ts: Date.now(),
+      });
+      automation?.runTemplate?.("meals.decider.result.selected", {
+        decision: item,
+        householdId,
+      });
       store?.setActiveDecision?.(item); // optional
     } catch {}
   };
@@ -115,27 +144,45 @@ const ResultCard = ({
               {item?.title || "Meal"}
             </button>
             {item?.pinned ? (
-              <span title="Pinned" className="inline-flex items-center text-[10px] px-1 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded">
+              <span
+                title="Pinned"
+                className="inline-flex items-center text-[10px] px-1 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded"
+              >
                 <Pin className="w-3 h-3 mr-1" /> Pinned
               </span>
             ) : null}
             {item?.locked ? (
-              <span title="Locked" className="inline-flex items-center text-[10px] px-1 py-0.5 bg-gray-100 text-gray-700 border border-gray-200 rounded">
+              <span
+                title="Locked"
+                className="inline-flex items-center text-[10px] px-1 py-0.5 bg-gray-100 text-gray-700 border border-gray-200 rounded"
+              >
                 <Lock className="w-3 h-3 mr-1" /> Locked
               </span>
             ) : null}
           </div>
           <div className="text-xs text-gray-600 mt-0.5">
-            {item?.slot ? <span className="mr-2">Slot: <span className="font-medium">{item.slot}</span></span> : null}
+            {item?.slot ? (
+              <span className="mr-2">
+                Slot: <span className="font-medium">{item.slot}</span>
+              </span>
+            ) : null}
             {item?.date ? <span className="mr-2">• {item.date}</span> : null}
-            {typeof cost === "number" ? <span className="mr-2">• Est {fmtMoney(cost)}</span> : null}
-            {Number.isFinite(invPct) ? <span className="mr-2">• {invPct}% on-hand</span> : null}
-            {item?.calendar?.feastDay ? <span className="text-blue-700">• {item.calendar.feastDay}</span> : null}
+            {typeof cost === "number" ? (
+              <span className="mr-2">• Est {fmtMoney(cost)}</span>
+            ) : null}
+            {Number.isFinite(invPct) ? (
+              <span className="mr-2">• {invPct}% on-hand</span>
+            ) : null}
+            {item?.calendar?.feastDay ? (
+              <span className="text-blue-700">• {item.calendar.feastDay}</span>
+            ) : null}
           </div>
         </div>
 
         {/* quick score */}
-        <div className={`shrink-0 inline-flex items-center gap-2 text-white ${badgeTone} px-2.5 py-1 rounded-full`}>
+        <div
+          className={`shrink-0 inline-flex items-center gap-2 text-white ${badgeTone} px-2.5 py-1 rounded-full`}
+        >
           <span className="text-xs">Score</span>
           <span className="font-semibold text-sm">{score}</span>
         </div>
@@ -157,7 +204,10 @@ const ResultCard = ({
           </span>
         ) : null}
         {(item?.tags || []).slice(0, 5).map((t) => (
-          <span key={t} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded border bg-gray-50">
+          <span
+            key={t}
+            className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded border bg-gray-50"
+          >
             <Tag className="w-3 h-3" /> {t}
           </span>
         ))}
@@ -178,16 +228,24 @@ const ResultCard = ({
       <div className="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="lg:col-span-2">
           {DeciderQuickActions ? (
-            <DeciderQuickActions decision={item} householdId={householdId} dense={dense} />
+            <DeciderQuickActions
+              decision={item}
+              householdId={householdId}
+              dense={dense}
+            />
           ) : (
-            <div className="text-xs text-gray-500 border rounded p-3">Quick actions unavailable.</div>
+            <div className="text-xs text-gray-500 border rounded p-3">
+              Quick actions unavailable.
+            </div>
           )}
         </div>
         <div className="lg:col-span-1 flex items-start justify-end">
           {DeciderExplainBadge ? (
             <DeciderExplainBadge decision={item} size="sm" />
           ) : (
-            <div className="text-xs text-gray-500 border rounded p-3">Explanation unavailable.</div>
+            <div className="text-xs text-gray-500 border rounded p-3">
+              Explanation unavailable.
+            </div>
           )}
         </div>
       </div>
@@ -198,8 +256,12 @@ const ResultCard = ({
 /* --------------------------- Group Header Component --------------------------- */
 const GroupHeader = ({ title, count }) => (
   <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-y py-1.5 px-2 mb-2 flex items-center justify-between">
-    <div className="text-xs font-semibold tracking-wide uppercase text-gray-600">{title}</div>
-    <div className="text-[11px] text-gray-500">{count} result{count === 1 ? "" : "s"}</div>
+    <div className="text-xs font-semibold tracking-wide uppercase text-gray-600">
+      {title}
+    </div>
+    <div className="text-[11px] text-gray-500">
+      {count} result{count === 1 ? "" : "s"}
+    </div>
   </div>
 );
 
@@ -213,7 +275,8 @@ const EmptyState = ({ onRetry }) => {
       </div>
       <div className="font-semibold">No matching meals (yet)</div>
       <p className="text-sm text-gray-600 mt-1">
-        Try loosening filters, switching presets, or importing a few new recipes in <span className="font-medium">Collect</span>.
+        Try loosening filters, switching presets, or importing a few new recipes
+        in <span className="font-medium">Collect</span>.
       </p>
       <div className="mt-3 flex items-center justify-center gap-2">
         <button
@@ -264,9 +327,12 @@ const DeciderResultsList = ({
     if (!onLoadMore || !canLoadMore) return;
     const el = loadMoreRef.current;
     if (!el) return;
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) onLoadMore();
-    }, { root: null, threshold: 0.1 });
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) onLoadMore();
+      },
+      { root: null, threshold: 0.1 }
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [onLoadMore, canLoadMore]);
@@ -274,21 +340,31 @@ const DeciderResultsList = ({
   // Event: first paint
   useEffect(() => {
     try {
-      eventBus?.emit?.("meals.decider.results.rendered", { count: items.length, ts: Date.now() });
-      automation?.runTemplate?.("meals.decider.results.rendered", { count: items.length });
+      eventBus?.emit?.("meals.decider.results.rendered", {
+        count: items.length,
+        ts: Date.now(),
+      });
+      automation?.runTemplate?.("meals.decider.results.rendered", {
+        count: items.length,
+      });
     } catch {}
   }, [items.length]);
 
   const groups = useMemo(() => {
     if (!items?.length || groupMode === "none") return null;
-    if (groupMode === "slot") return groupBy(items, (x) => x.slot || "Unslotted");
-    if (groupMode === "day") return groupBy(items, (x) => x.date || "Unscheduled");
+    if (groupMode === "slot")
+      return groupBy(items, (x) => x.slot || "Unslotted");
+    if (groupMode === "day")
+      return groupBy(items, (x) => x.date || "Unscheduled");
     return null;
   }, [items, groupMode]);
 
   const flat = useMemo(() => {
     if (!groups) return items;
-    return Object.entries(groups).flatMap(([k, arr]) => [{ __group: true, key: k, count: arr.length }, ...arr]);
+    return Object.entries(groups).flatMap(([k, arr]) => [
+      { __group: true, key: k, count: arr.length },
+      ...arr,
+    ]);
   }, [groups, items]);
 
   /* ------------------------------- Virtual sizes ------------------------------ */
@@ -314,13 +390,19 @@ const DeciderResultsList = ({
   if (loading && (!items || items.length === 0)) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <CardSkeleton key={i} />
+        ))}
       </div>
     );
   }
 
   if (!loading && (!items || items.length === 0)) {
-    return <EmptyState onRetry={() => eventBus?.emit?.("meals.decider.results.refresh")} />;
+    return (
+      <EmptyState
+        onRetry={() => eventBus?.emit?.("meals.decider.results.refresh")}
+      />
+    );
   }
 
   /* ----------- Virtualized list (if available) or graceful grid fallback ------ */
@@ -340,7 +422,10 @@ const DeciderResultsList = ({
               return (
                 <div style={style} className="flex items-center justify-center">
                   {canLoadMore ? (
-                    <div ref={loadMoreRef} className="text-xs text-gray-600 border rounded px-3 py-2 bg-white/70">
+                    <div
+                      ref={loadMoreRef}
+                      className="text-xs text-gray-600 border rounded px-3 py-2 bg-white/70"
+                    >
                       Loading more…
                     </div>
                   ) : null}
@@ -357,7 +442,12 @@ const DeciderResultsList = ({
             }
             return (
               <div style={style} className="p-2">
-                <ResultCard item={row} onSelect={onSelect} householdId={householdId} dense={dense} />
+                <ResultCard
+                  item={row}
+                  onSelect={onSelect}
+                  householdId={householdId}
+                  dense={dense}
+                />
               </div>
             );
           }}
@@ -376,7 +466,13 @@ const DeciderResultsList = ({
               <GroupHeader title={k} count={arr.length} />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {arr.map((x) => (
-                  <ResultCard key={x.id || x.title} item={x} onSelect={onSelect} householdId={householdId} dense={dense} />
+                  <ResultCard
+                    key={x.id || x.title}
+                    item={x}
+                    onSelect={onSelect}
+                    householdId={householdId}
+                    dense={dense}
+                  />
                 ))}
               </div>
             </section>
@@ -385,7 +481,13 @@ const DeciderResultsList = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {items.map((x) => (
-            <ResultCard key={x.id || x.title} item={x} onSelect={onSelect} householdId={householdId} dense={dense} />
+            <ResultCard
+              key={x.id || x.title}
+              item={x}
+              onSelect={onSelect}
+              householdId={householdId}
+              dense={dense}
+            />
           ))}
         </div>
       )}

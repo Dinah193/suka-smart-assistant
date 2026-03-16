@@ -17,7 +17,7 @@ let eventBus = {
   emit: (...a) => console.debug("[StationChipRow:eventBus.emit]", ...a),
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -38,7 +38,12 @@ try {
 const isoNow = () => new Date().toISOString();
 
 function emitEvent(type, data = {}) {
-  const payload = { type, ts: isoNow(), source: "components.cooking.StationChipRow", data };
+  const payload = {
+    type,
+    ts: isoNow(),
+    source: "components.cooking.StationChipRow",
+    data,
+  };
   eventBus.emit?.(type, payload);
   return payload;
 }
@@ -63,23 +68,27 @@ function normalizeStations(stations = []) {
       const key = String(s.key ?? s.id ?? s.label ?? `station-${i}`).trim();
       const label = String(s.label ?? s.name ?? key).trim();
       if (!key || !label) return null;
-      return { key, label, count: Number.isFinite(s.count) ? Number(s.count) : undefined };
+      return {
+        key,
+        label,
+        count: Number.isFinite(s.count) ? Number(s.count) : undefined,
+      };
     })
     .filter(Boolean);
 }
 
 /* ------------------------------- component ------------------------------- */
 export default function StationChipRow({
-  stations,                // array of { key, label, count? }
-  value = "all",           // current selected key ("all" | station.key)
-  onChange,                // fn(nextKey)
-  includeAll = true,       // show the "All" chip
-  compact = false,         // slightly smaller paddings
-  showCounts = true,       // render small numeric badges when provided
-  room = null,             // optional rtc/WS room context for envelopes
-  sessionId = null,        // optional session context
-  hubSync = false,         // also attempt hub export if familyFundMode
-  onControlSend = null,    // optional: upstream real-time envelope sender
+  stations, // array of { key, label, count? }
+  value = "all", // current selected key ("all" | station.key)
+  onChange, // fn(nextKey)
+  includeAll = true, // show the "All" chip
+  compact = false, // slightly smaller paddings
+  showCounts = true, // render small numeric badges when provided
+  room = null, // optional rtc/WS room context for envelopes
+  sessionId = null, // optional session context
+  hubSync = false, // also attempt hub export if familyFundMode
+  onControlSend = null, // optional: upstream real-time envelope sender
   "aria-label": ariaLabel = "Filter by station",
 }) {
   const list = useMemo(() => normalizeStations(stations), [stations]);
@@ -99,7 +108,12 @@ export default function StationChipRow({
       sessionId,
       selectedKey: key,
     };
-    eventBus.emit?.("play.control", { type: "play.control", ts: env.ts, source: "StationChipRow", data: env });
+    eventBus.emit?.("play.control", {
+      type: "play.control",
+      ts: env.ts,
+      source: "StationChipRow",
+      data: env,
+    });
     try {
       onControlSend?.(env);
     } catch {}
@@ -110,7 +124,11 @@ export default function StationChipRow({
     if (key === selectedKey) return;
     vibrate();
     sendEnvelope(key);
-    const e = emitEvent("play.station.filter.changed", { sessionId, room, selectedKey: key });
+    const e = emitEvent("play.station.filter.changed", {
+      sessionId,
+      room,
+      selectedKey: key,
+    });
     try {
       onChange?.(key);
     } catch (err) {
@@ -153,7 +171,9 @@ export default function StationChipRow({
         >
           <span className="sv-strong">{s.label}</span>
           {showCounts && Number.isFinite(s.count) ? (
-            <span className="sv-badge" style={{ marginLeft: 8 }}>{s.count}</span>
+            <span className="sv-badge" style={{ marginLeft: 8 }}>
+              {s.count}
+            </span>
           ) : null}
         </button>
       ))}

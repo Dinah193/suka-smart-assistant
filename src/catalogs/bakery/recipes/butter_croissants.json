@@ -1,0 +1,224 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.butter_croissants",
+    "slug": "butter_croissants",
+    "name": "Butter Croissants (Laminated Dough Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "advanced",
+    "tags": [
+      "bakery",
+      "croissants",
+      "laminated-dough",
+      "viennoiserie",
+      "butter",
+      "advanced-baking",
+      "baseline",
+      "freezer-friendly",
+      "make-ahead"
+    ],
+    "allergens": ["wheat", "dairy"],
+    "description": "A production-minded laminated dough baseline for classic butter croissants. Includes a clear 2-day workflow (mix → bulk → chill → laminate → shape → proof → bake). Supports either commercial bread flour/AP blend or fine fresh-milled flour (choose one). Fresh-milled flour can reduce extensibility; expect slightly lower loft unless sifted and well-hydrated."
+  },
+  "equipment": [
+    { "id": "stand_mixer", "label": "Stand mixer (recommended) or hand-knead" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    {
+      "id": "kitchen_scale",
+      "label": "Kitchen scale (required for lamination consistency)"
+    },
+    { "id": "rolling_pin", "label": "Rolling pin" },
+    { "id": "bench_scraper", "label": "Bench scraper" },
+    { "id": "ruler", "label": "Ruler (recommended)" },
+    { "id": "sheet_pan", "label": "Sheet pans" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "plastic_wrap", "label": "Plastic wrap or reusable wrap" },
+    {
+      "id": "thermometer_instant",
+      "label": "Instant-read thermometer (recommended)"
+    },
+    { "id": "oven", "label": "Oven" },
+    { "id": "pastry_brush", "label": "Pastry brush" }
+  ],
+  "ingredients": [
+    {
+      "id": "milk_whole",
+      "label": "Whole milk, cold",
+      "amount": { "value": 250, "unit": "ml" },
+      "notes": "Cold liquids help keep dough temperature low."
+    },
+    {
+      "id": "water_cold",
+      "label": "Cold water",
+      "amount": { "value": 50, "unit": "ml" },
+      "notes": "Used to tune hydration; adjust slightly based on flour absorption."
+    },
+    {
+      "id": "yeast_instant",
+      "label": "Instant yeast",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 2 1/4 tsp. Active dry can be used; bloom first."
+    },
+    {
+      "id": "sugar",
+      "label": "Granulated sugar",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 3/4 tsp."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR the fresh-milled option): bread flour",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "Bread flour improves extensibility and lift. Optionally substitute 50–100 g with all-purpose for slightly more tenderness."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR the commercial option): fine-milled, sifted (high extraction)",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "For best lamination, sift out the coarsest bran. Fresh-milled absorbs more and can reduce extensibility; consider +15–30 ml extra water if dough feels stiff after initial mix."
+    },
+
+    {
+      "id": "butter_in_dough",
+      "label": "Unsalted butter, softened (in dough)",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "Adds tenderness and flavor."
+    },
+
+    {
+      "id": "butter_lamination",
+      "label": "European-style butter (82%+ fat), cold but pliable (lamination block)",
+      "amount": { "value": 280, "unit": "g" },
+      "notes": "Higher-fat butter laminates better. Keep it cool and pliable (about 55–60°F / 13–16°C)."
+    },
+
+    {
+      "id": "egg_wash_egg",
+      "label": "Egg (for egg wash)",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "egg_wash_milk",
+      "label": "Milk or cream (for egg wash)",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_plan_timeline",
+      "title": "Plan the 2-day workflow (baseline)",
+      "body": "Day 1: mix dough → short bulk → chill overnight. Day 2: laminate (3 turns) → rest → roll/cut/shape → proof → bake. Keep everything cold; lamination fails if butter melts into dough."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled option (not both). Fresh-milled flour should be fine-milled and sifted for best lamination. Hydration may need slight adjustment."
+    },
+    {
+      "id": "step_03_mix_dough",
+      "title": "Mix the détrempe (base dough)",
+      "body": "In mixer bowl, combine flour, sugar, salt, and yeast. Add cold milk and cold water. Mix on low until a shaggy dough forms, then mix 3–5 minutes until smoother (not fully developed like bread). Add softened butter and mix 1–2 minutes until incorporated. Dough should be smooth and slightly tacky, not wet."
+    },
+    {
+      "id": "step_04_adjust_hydration",
+      "title": "Adjust hydration (especially for fresh-milled)",
+      "body": "If dough feels stiff/dry, add 15 ml cold water at a time (up to ~30 ml) until pliable. If too sticky, add 10–20 g flour. Goal: dough that rolls without tearing after chilling."
+    },
+    {
+      "id": "step_05_short_bulk",
+      "title": "Short bulk fermentation",
+      "body": "Form dough into a rectangle, place in a lightly oiled bowl, cover, and rest at room temperature 45–60 minutes (it should puff slightly, not double)."
+    },
+    {
+      "id": "step_06_chill_overnight",
+      "title": "Chill overnight (structure + cold handling)",
+      "body": "Press dough into a flat rectangle (~20x25 cm / 8x10 in), wrap tightly, and refrigerate 8–16 hours. Cold dough is essential for lamination."
+    },
+    {
+      "id": "step_07_prepare_butter_block",
+      "title": "Prepare the butter block",
+      "body": "Place cold lamination butter between parchment and pound/roll into a rectangle about 18x20 cm (7x8 in), even thickness. Chill until pliable but cool (it should bend without cracking)."
+    },
+    {
+      "id": "step_08_enclose_butter",
+      "title": "Enclose butter (lock-in)",
+      "body": "Roll chilled dough to about 30x20 cm (12x8 in). Place butter block on one half, fold dough over to fully enclose, sealing edges. Dough and butter should be similar firmness to avoid butter breakage or smearing."
+    },
+    {
+      "id": "step_09_first_turn",
+      "title": "Lamination: Turn 1 (single fold / letter fold)",
+      "body": "Roll the butter-locked dough into a long rectangle (~60x20 cm / 24x8 in), keeping edges straight. Brush off excess flour. Fold into thirds like a letter. Wrap and chill 20–30 minutes."
+    },
+    {
+      "id": "step_10_second_turn",
+      "title": "Lamination: Turn 2",
+      "body": "Rotate dough 90° (keep track of orientation). Roll again to ~60x20 cm, fold into thirds. Wrap and chill 20–30 minutes."
+    },
+    {
+      "id": "step_11_third_turn",
+      "title": "Lamination: Turn 3",
+      "body": "Repeat once more: roll to ~60x20 cm, fold into thirds. Wrap and chill at least 45–60 minutes before shaping (or refrigerate up to 24 hours)."
+    },
+    {
+      "id": "step_12_roll_final_sheet",
+      "title": "Roll final sheet for cutting",
+      "body": "Roll dough into a large rectangle about 55x30 cm (22x12 in), ~4 mm thick. Keep it even and square the edges with a ruler/bench scraper."
+    },
+    {
+      "id": "step_13_cut_triangles",
+      "title": "Cut croissant triangles",
+      "body": "Cut long triangles: base about 9–10 cm (3.5–4 in) wide and length about 22–25 cm (9–10 in). For more dramatic shape, cut a small 1–2 cm slit in the center of each base."
+    },
+    {
+      "id": "step_14_shape",
+      "title": "Shape croissants",
+      "body": "Gently stretch each triangle lengthwise slightly, then roll from base to tip without crushing layers. Place on parchment-lined sheet pans with the tip tucked underneath."
+    },
+    {
+      "id": "step_15_proof",
+      "title": "Proof (critical for honeycomb)",
+      "body": "Proof at 75–80°F (24–27°C) with moderate humidity until noticeably puffy and jiggly, 2–3.5 hours. Do not proof too hot or butter will melt. Croissants should wobble when tray is shaken and layers will look slightly separated."
+    },
+    {
+      "id": "step_16_egg_wash_optional",
+      "title": "Egg wash (optional)",
+      "body": "Whisk egg with milk/cream. Brush lightly over croissants, avoiding pooling on cut edges (can seal layers)."
+    },
+    {
+      "id": "step_17_bake",
+      "title": "Bake",
+      "body": "Heat oven to 400°F (205°C). Bake 10 minutes, then reduce to 375°F (190°C) and bake 8–14 minutes more until deep golden brown. Rotate pans as needed. Fully baked croissants feel light for their size and have a crisp shell."
+    },
+    {
+      "id": "step_18_cool",
+      "title": "Cool",
+      "body": "Cool on a rack at least 20 minutes. Croissants finish setting as steam redistributes; cutting too early can compress the interior."
+    }
+  ],
+  "notes": [
+    "Temperature logic: Dough and butter must stay cool and similar firmness. If butter cracks (too cold), let rest 3–5 minutes. If butter smears (too warm), chill immediately.",
+    "Fresh-milled flour: For best results, sift out coarse bran and allow longer rests between turns. Expect slightly less loft vs commercial bread flour unless your fresh-milled is very fine and high-protein.",
+    "Make-ahead/freezer: Shape croissants, freeze on tray until firm, then bag airtight. To bake from frozen: thaw/proof overnight in refrigerator then finish proof at room temp until jiggly, then bake.",
+    "Baseline lamination: 3 single turns is a standard croissant baseline. Edge/center and turn variants (double turns) can be added later."
+  ],
+  "storage": {
+    "roomTemp": "Best same day. Store loosely covered up to 1 day; re-crisp in 325°F (163°C) oven 5–8 minutes.",
+    "freezer": "Baked croissants freeze up to 1 month; reheat from frozen at 325°F (163°C) 10–15 minutes. Unbaked shaped croissants freeze up to 2 months."
+  }
+}

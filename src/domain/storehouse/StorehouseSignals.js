@@ -41,10 +41,10 @@
 // - overrideThresholds(fn) to calculate min/max per item
 // -----------------------------------------------------------------------------
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatStorehouseSignalForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatStorehouseSignalForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let StorehousePlanStore = null;
 
@@ -120,7 +120,10 @@ async function handleInventoryUpdated(payload) {
 
   const changedItems = deltas.map((d) => ({
     name: d.item,
-    qtyChange: d.direction === "decrement" ? -1 * (Number(d.qty) || 0) : Number(d.qty) || 0,
+    qtyChange:
+      d.direction === "decrement"
+        ? -1 * (Number(d.qty) || 0)
+        : Number(d.qty) || 0,
     unit: d.unit || "ea",
     location: d.location || "Pantry",
   }));
@@ -230,7 +233,9 @@ async function evaluateAgainstPlan(changedItems, from) {
     if (!planItem) continue;
 
     // current qty is planItem.currentQty + delta
-    const current = clampToZero((Number(planItem.currentQty) || 0) + (Number(ch.qtyChange) || 0));
+    const current = clampToZero(
+      (Number(planItem.currentQty) || 0) + (Number(ch.qtyChange) || 0)
+    );
     const target = Number(planItem.targetQty) || 0;
     const unit = ch.unit || planItem.unit || "ea";
 
@@ -298,7 +303,9 @@ async function evaluateRaw(rawItems, from) {
     const planItem = findPlanItem(it.name, it.zone);
     if (!planItem) continue;
 
-    const current = clampToZero((Number(planItem.currentQty) || 0) + (Number(it.current) || 0));
+    const current = clampToZero(
+      (Number(planItem.currentQty) || 0) + (Number(it.current) || 0)
+    );
     const target = Number(planItem.targetQty) || 0;
     const unit = it.unit || planItem.unit || "ea";
 
@@ -354,7 +361,10 @@ async function evaluateRaw(rawItems, from) {
 // -----------------------------------------------------------------------------
 
 async function loadLatestPlan() {
-  if (StorehousePlanStore && typeof StorehousePlanStore.loadLatest === "function") {
+  if (
+    StorehousePlanStore &&
+    typeof StorehousePlanStore.loadLatest === "function"
+  ) {
     try {
       const plan = await StorehousePlanStore.loadLatest();
       return plan || { items: [] };
@@ -374,7 +384,9 @@ function findPlanItem(name, zone) {
   // 1. by name + zone
   let item =
     _plan.items.find(
-      (it) => normalizeName(it.name) === n && (!z || (it.zone || "").toLowerCase() === z)
+      (it) =>
+        normalizeName(it.name) === n &&
+        (!z || (it.zone || "").toLowerCase() === z)
     ) || null;
 
   // 2. by name only
@@ -388,7 +400,10 @@ function findPlanItem(name, zone) {
 function calculateThresholds(planItem) {
   if (_thresholdOverride) {
     const custom = _thresholdOverride(planItem);
-    if (custom && (typeof custom.min === "number" || typeof custom.max === "number")) {
+    if (
+      custom &&
+      (typeof custom.min === "number" || typeof custom.max === "number")
+    ) {
       return {
         min: typeof custom.min === "number" ? custom.min : defaultMin(planItem),
         max: typeof custom.max === "number" ? custom.max : defaultMax(planItem),

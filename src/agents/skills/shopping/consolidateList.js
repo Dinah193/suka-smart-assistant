@@ -23,7 +23,7 @@
  *  - SessionRunner will keep running in the background across navigation.
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /* -------------------------------------------------------------------------- */
 /*                    Optional inventory.lookup skill hook                    */
@@ -58,7 +58,9 @@ async function getInventoryLookup() {
       }
     }
 
-    console.warn("[shopping.consolidateList] inventory.lookup not found; proceeding without on-hand adjustments.");
+    console.warn(
+      "[shopping.consolidateList] inventory.lookup not found; proceeding without on-hand adjustments."
+    );
     return null;
   })();
 
@@ -156,14 +158,20 @@ export async function consolidateShoppingList(
       return {
         items: [],
         groups: { byStore: {}, byCategory: {}, byDomain: {} },
-        meta: { sourceCounts: { ingredient: ingredientNeeds.length || 0, supply: supplyNeeds.length || 0 } },
+        meta: {
+          sourceCounts: {
+            ingredient: ingredientNeeds.length || 0,
+            supply: supplyNeeds.length || 0,
+          },
+        },
       };
     }
 
     // Optional domain filter
-    const filteredNeeds = domainFilter && domainFilter.length
-      ? allNeeds.filter((n) => !n.domain || domainFilter.includes(n.domain))
-      : allNeeds;
+    const filteredNeeds =
+      domainFilter && domainFilter.length
+        ? allNeeds.filter((n) => !n.domain || domainFilter.includes(n.domain))
+        : allNeeds;
 
     // Normalize & consolidate
     const normalizedNeeds = normalizeUnits
@@ -240,7 +248,11 @@ export async function consolidateShoppingList(
     consolidatedItems = consolidatedItems.filter((item) => item.toBuyQty > 0);
 
     // Optional item cap
-    if (typeof maxItems === "number" && maxItems > 0 && consolidatedItems.length > maxItems) {
+    if (
+      typeof maxItems === "number" &&
+      maxItems > 0 &&
+      consolidatedItems.length > maxItems
+    ) {
       consolidatedItems = consolidatedItems.slice(0, maxItems);
     }
 
@@ -317,7 +329,8 @@ export function buildShoppingSteps(plan, options = {}) {
       id: makeId("shopstep"),
       title: "Complete Shopping Run",
       desc: summary,
-      durationSec: defaultDurationSec * Math.max(1, Math.ceil(plan.items.length / 10)),
+      durationSec:
+        defaultDurationSec * Math.max(1, Math.ceil(plan.items.length / 10)),
       blockers: ["inventory", "weather", "quietHours", "sabbath"],
       metadata: {
         type: "shoppingRun",
@@ -342,7 +355,8 @@ export function buildShoppingSteps(plan, options = {}) {
         id: makeId("shopstep"),
         title: `Shop at ${label}`,
         desc: summary,
-        durationSec: defaultDurationSec * Math.max(1, Math.ceil(items.length / 10)),
+        durationSec:
+          defaultDurationSec * Math.max(1, Math.ceil(items.length / 10)),
         blockers: ["inventory", "weather", "quietHours", "sabbath"],
         metadata: {
           type: "shoppingStoreChunk",
@@ -363,7 +377,8 @@ export function buildShoppingSteps(plan, options = {}) {
         id: makeId("shopstep"),
         title: `Shopping: ${label}`,
         desc: summary,
-        durationSec: defaultDurationSec * Math.max(1, Math.ceil(items.length / 10)),
+        durationSec:
+          defaultDurationSec * Math.max(1, Math.ceil(items.length / 10)),
         blockers: ["inventory", "weather", "quietHours", "sabbath"],
         metadata: {
           type: "shoppingCategoryChunk",
@@ -384,7 +399,8 @@ export function buildShoppingSteps(plan, options = {}) {
         id: makeId("shopstep"),
         title: `Shopping for ${label}`,
         desc: summary,
-        durationSec: defaultDurationSec * Math.max(1, Math.ceil(items.length / 10)),
+        durationSec:
+          defaultDurationSec * Math.max(1, Math.ceil(items.length / 10)),
         blockers: ["inventory", "weather", "quietHours", "sabbath"],
         metadata: {
           type: "shoppingDomainChunk",
@@ -423,7 +439,11 @@ export async function consolidateAndBuildShoppingSession(
   consolidateOptions = {},
   stepOptions = {}
 ) {
-  const plan = await consolidateShoppingList(ingredientNeeds, supplyNeeds, consolidateOptions);
+  const plan = await consolidateShoppingList(
+    ingredientNeeds,
+    supplyNeeds,
+    consolidateOptions
+  );
   const steps = buildShoppingSteps(plan, stepOptions);
   return { plan, steps };
 }
@@ -456,7 +476,9 @@ async function applyInventoryAdjustments(items) {
     null;
 
   if (typeof lookupFn !== "function") {
-    console.warn("[shopping.consolidateList] inventory lookup module missing lookupMany/fastInventoryLookup.");
+    console.warn(
+      "[shopping.consolidateList] inventory lookup module missing lookupMany/fastInventoryLookup."
+    );
     for (const item of items) {
       item.onHandQty = 0;
       item.toBuyQty = Math.max(0, item.totalNeededQty);
@@ -492,7 +514,10 @@ async function applyInventoryAdjustments(items) {
       }
     }
   } catch (err) {
-    console.warn("[shopping.consolidateList] inventory-aware adjustment failed:", err);
+    console.warn(
+      "[shopping.consolidateList] inventory-aware adjustment failed:",
+      err
+    );
     for (const item of items) {
       item.onHandQty = item.onHandQty || 0;
       item.toBuyQty = Math.max(0, item.totalNeededQty - item.onHandQty);
@@ -549,9 +574,15 @@ function safeNeedCopy(need) {
  * @returns {string}
  */
 function makeConsolidationKey(need) {
-  const name = String(need.name || "").toLowerCase().trim();
-  const unit = String(need.unit || "").toLowerCase().trim();
-  const category = String(need.category || "").toLowerCase().trim();
+  const name = String(need.name || "")
+    .toLowerCase()
+    .trim();
+  const unit = String(need.unit || "")
+    .toLowerCase()
+    .trim();
+  const category = String(need.category || "")
+    .toLowerCase()
+    .trim();
   return `${name}::${unit}::${category}`;
 }
 
@@ -563,7 +594,11 @@ function makeConsolidationKey(need) {
 function inferCategoryFromName(need) {
   const n = String(need.name || "").toLowerCase();
 
-  if (/lettuce|spinach|greens|apple|banana|tomato|onion|carrot|pepper|fruit|vegetable/.test(n)) {
+  if (
+    /lettuce|spinach|greens|apple|banana|tomato|onion|carrot|pepper|fruit|vegetable/.test(
+      n
+    )
+  ) {
     return "produce";
   }
   if (/beef|chicken|pork|lamb|goat|duck|turkey|sausage|fish/.test(n)) {
@@ -591,7 +626,9 @@ function inferCategoryFromName(need) {
  * @returns {string}
  */
 function normalizeUnitToken(unit) {
-  const u = String(unit || "").toLowerCase().trim();
+  const u = String(unit || "")
+    .toLowerCase()
+    .trim();
 
   if (!u) return "";
 
@@ -624,7 +661,10 @@ function groupItems(items) {
   const byDomain = {};
 
   for (const item of items) {
-    const stores = item.storeHints && item.storeHints.length ? item.storeHints : ["_default"];
+    const stores =
+      item.storeHints && item.storeHints.length
+        ? item.storeHints
+        : ["_default"];
     for (const store of stores) {
       const key = store || "_default";
       if (!byStore[key]) byStore[key] = [];
@@ -635,7 +675,8 @@ function groupItems(items) {
     if (!byCategory[categoryKey]) byCategory[categoryKey] = [];
     byCategory[categoryKey].push(item);
 
-    const domains = item.domains && item.domains.length ? item.domains : ["general"];
+    const domains =
+      item.domains && item.domains.length ? item.domains : ["general"];
     for (const d of domains) {
       const dk = d || "general";
       if (!byDomain[dk]) byDomain[dk] = [];
@@ -705,7 +746,10 @@ function safeNumber(v) {
  * @returns {string}
  */
 function makeId(prefix = "id") {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
@@ -735,7 +779,11 @@ function indexByNameAndUnit(rows) {
  * @returns {string}
  */
 function makeNameUnitKey(name, unit) {
-  return `${String(name || "").toLowerCase().trim()}::${String(unit || "").toLowerCase().trim()}`;
+  return `${String(name || "")
+    .toLowerCase()
+    .trim()}::${String(unit || "")
+    .toLowerCase()
+    .trim()}`;
 }
 
 /**

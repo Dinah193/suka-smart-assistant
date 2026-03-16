@@ -105,3 +105,73 @@ export function isReminderDueSoon(targetTime, withinMinutes = 15) {
   const diff = (target - now) / 60000;
   return diff >= 0 && diff <= withinMinutes;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Missing-export compatibility helpers (used by template builders)            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Convert a Date (or date-like) to local YYYY-MM-DD.
+ */
+export function toLocalISODate(dateLike = new Date()) {
+  const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Convert a Date (or date-like) to local ISO date-time string without timezone.
+ * Format: YYYY-MM-DDTHH:mm:ss
+ */
+export function toLocalISODateTime(dateLike = new Date()) {
+  const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return `${y}-${m}-${day}T${hh}:${mm}:${ss}`;
+}
+
+export function addDays(dateLike, days = 0) {
+  const d = dateLike instanceof Date ? new Date(dateLike) : new Date(dateLike);
+  d.setDate(d.getDate() + Number(days || 0));
+  return d;
+}
+
+export function addHours(dateLike, hours = 0) {
+  const d = dateLike instanceof Date ? new Date(dateLike) : new Date(dateLike);
+  d.setHours(d.getHours() + Number(hours || 0));
+  return d;
+}
+
+export function addMinutesToNow(minutes = 0) {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + Number(minutes || 0));
+  return d;
+}
+
+/**
+ * Set a local time on a given date (or today), returning a new Date.
+ */
+export function setLocalTime(dateLike, hh = 0, mm = 0, ss = 0) {
+  const base = dateLike ? new Date(dateLike) : new Date();
+  base.setHours(Number(hh || 0), Number(mm || 0), Number(ss || 0), 0);
+  return base;
+}
+
+/**
+ * Return a coarse local time-of-day bucket.
+ */
+export function getTimeOfDay(dateLike = new Date()) {
+  const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  const h = d.getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  if (h < 21) return "evening";
+  return "night";
+}
+

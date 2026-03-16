@@ -21,8 +21,12 @@ import React, { useId, useMemo } from "react";
 // ----------------------------- Soft Imports ---------------------------------
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
-} catch { /* optional */ }
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
+} catch {
+  /* optional */
+}
 
 // ------------------------------ Utilities -----------------------------------
 const nowISO = () => new Date().toISOString();
@@ -32,7 +36,8 @@ function emit(type, source, data) {
     eventBus?.emit?.(type, payload);
     window?.dispatchEvent?.(new CustomEvent(type, { detail: payload }));
   } catch (e) {
-    if (process.env.NODE_ENV !== "production") console.debug("[AccessibleField] emit failed:", e);
+    if (process.env.NODE_ENV !== "production")
+      console.debug("[AccessibleField] emit failed:", e);
   }
   return payload;
 }
@@ -110,7 +115,9 @@ export default function AccessibleField({
 }) {
   if (!label) {
     if (process.env.NODE_ENV !== "production") {
-      console.warn("[AccessibleField] Missing `label` prop — a11y may fail audits.");
+      console.warn(
+        "[AccessibleField] Missing `label` prop — a11y may fail audits."
+      );
     }
   }
 
@@ -129,7 +136,9 @@ export default function AccessibleField({
     "w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 outline-none ring-0 " +
     "placeholder-stone-400 focus:border-lime-600 focus:ring-2 focus:ring-lime-500/40 " +
     (disabled ? "opacity-60 cursor-not-allowed " : "") +
-    (error ? "border-rose-400 focus:border-rose-500 focus:ring-rose-400/40 " : "");
+    (error
+      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-400/40 "
+      : "");
 
   const Label = (
     <label
@@ -142,7 +151,11 @@ export default function AccessibleField({
       )}
     >
       {label}
-      {required ? <span aria-hidden="true" className="ml-0.5 align-super text-rose-600">*</span> : null}
+      {required ? (
+        <span aria-hidden="true" className="ml-0.5 align-super text-rose-600">
+          *
+        </span>
+      ) : null}
     </label>
   );
 
@@ -188,7 +201,16 @@ export default function AccessibleField({
     Control = <select {...commonProps}>{children}</select>;
   } else {
     // 'input' (default)
-    Control = <input {...commonProps} type={type} pattern={pattern} min={min} max={max} step={step} />;
+    Control = (
+      <input
+        {...commonProps}
+        type={type}
+        pattern={pattern}
+        min={min}
+        max={max}
+        step={step}
+      />
+    );
   }
 
   return (
@@ -214,7 +236,8 @@ function getValueSnapshot(event, as) {
   try {
     const t = event?.target;
     if (as === "select") {
-      if (t?.multiple) return Array.from(t.selectedOptions || []).map((o) => o.value);
+      if (t?.multiple)
+        return Array.from(t.selectedOptions || []).map((o) => o.value);
       return t?.value;
     }
     if (t?.type === "checkbox") return !!t.checked;

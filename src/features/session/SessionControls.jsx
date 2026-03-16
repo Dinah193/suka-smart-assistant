@@ -10,7 +10,7 @@
  *   to callbacks provided by the parent (e.g., SessionRunner) to keep a single source of truth.
  *
  * Contracts honored:
- * - Event payload shape for UI signals: { type, ts, source, data } via src/services/eventBus.js.
+ * - Event payload shape for UI signals: { type, ts, source, data } via src/services/events/eventBus.js.
  * - Prefs: uses session.prefs.haptic to vibrate on button click where supported.
  * - Accessibility: labeled buttons, keyboard shortcuts (opt-in) with Space/N/P/Escape.
  *
@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 // --- Defensive imports for SSA services ------------------------------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus.js").default;
+  eventBus = require("../../services/events/eventBus.js").default;
 } catch {
   eventBus = { emit: () => {} };
 }
@@ -69,8 +69,20 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.15)",
     color: "#cfe6ff",
   },
-  meta: { display: "flex", gap: 8, alignItems: "center", opacity: 0.85, fontSize: 12 },
-  progressWrap: { width: 140, height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 8, overflow: "hidden" },
+  meta: {
+    display: "flex",
+    gap: 8,
+    alignItems: "center",
+    opacity: 0.85,
+    fontSize: 12,
+  },
+  progressWrap: {
+    width: 140,
+    height: 6,
+    background: "rgba(255,255,255,0.06)",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
   progressBar: (pct) => ({
     width: `${Math.min(100, Math.max(0, pct))}%`,
     height: "100%",
@@ -84,15 +96,24 @@ const isoNow = () => new Date().toISOString();
 
 function emitUi(action, data = {}) {
   try {
-    eventBus.emit({ type: "session.ui.click", ts: isoNow(), source: "SessionControls", data: { action, ...data } });
-  } catch { /* noop */ }
+    eventBus.emit({
+      type: "session.ui.click",
+      ts: isoNow(),
+      source: "SessionControls",
+      data: { action, ...data },
+    });
+  } catch {
+    /* noop */
+  }
 }
 
 function vibrateMaybe(enabled, pattern = [6, 12, 6]) {
   try {
     if (!enabled) return;
     navigator.vibrate?.(pattern);
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
 }
 
 function formatHMS(totalSeconds = 0) {
@@ -129,7 +150,9 @@ function useMediaSession(enabled, handlers, metadata) {
           navigator.mediaSession.setActionHandler("nexttrack", null);
         } catch {}
       };
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }, [enabled, handlers, metadata]);
 }
 
@@ -141,10 +164,19 @@ function useHotkeys(enabled, map) {
     if (!enabled) return;
     const onKey = (e) => {
       const k = e.key;
-      if (k === " " || e.code === "Space") { e.preventDefault(); mapRef.current.onSpace?.(); }
-      else if (k?.toLowerCase() === "n") { e.preventDefault(); mapRef.current.onN?.(); }
-      else if (k?.toLowerCase() === "p") { e.preventDefault(); mapRef.current.onP?.(); }
-      else if (k === "Escape") { e.preventDefault(); mapRef.current.onEsc?.(); }
+      if (k === " " || e.code === "Space") {
+        e.preventDefault();
+        mapRef.current.onSpace?.();
+      } else if (k?.toLowerCase() === "n") {
+        e.preventDefault();
+        mapRef.current.onN?.();
+      } else if (k?.toLowerCase() === "p") {
+        e.preventDefault();
+        mapRef.current.onP?.();
+      } else if (k === "Escape") {
+        e.preventDefault();
+        mapRef.current.onEsc?.();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -201,9 +233,18 @@ export default function SessionControls({
   const total = session?.steps?.length || 0;
   const haptic = !!session?.prefs?.haptic;
 
-  const stepLabel = useMemo(() => (total ? `${idx + 1}/${total}` : "—"), [idx, total]);
-  const progressPct = useMemo(() => (total ? (idx / total) * 100 : 0), [idx, total]);
-  const elapsed = useMemo(() => formatHMS(session?.progress?.elapsedSec || 0), [session?.progress?.elapsedSec]);
+  const stepLabel = useMemo(
+    () => (total ? `${idx + 1}/${total}` : "—"),
+    [idx, total]
+  );
+  const progressPct = useMemo(
+    () => (total ? (idx / total) * 100 : 0),
+    [idx, total]
+  );
+  const elapsed = useMemo(
+    () => formatHMS(session?.progress?.elapsedSec || 0),
+    [session?.progress?.elapsedSec]
+  );
 
   // Media Session — optional (Runner usually wires this globally)
   useMediaSession(
@@ -227,13 +268,19 @@ export default function SessionControls({
   // Button click wrappers (emit UI + vibrate)
   const handleStartOrPause = () => {
     vibrateMaybe(haptic, [12]);
-    emitUi(paused ? "resume" : running ? "pause" : "start", { id: session?.id });
+    emitUi(paused ? "resume" : running ? "pause" : "start", {
+      id: session?.id,
+    });
     if (!running && !paused) onStart?.();
     else onTogglePause?.();
   };
   const handleNext = () => {
     vibrateMaybe(haptic, [6, 8]);
-    emitUi("next", { id: session?.id, from: idx, to: Math.min(idx + 1, total - 1) });
+    emitUi("next", {
+      id: session?.id,
+      from: idx,
+      to: Math.min(idx + 1, total - 1),
+    });
     onNext?.();
   };
   const handlePrev = () => {
@@ -265,7 +312,13 @@ export default function SessionControls({
             ...(running ? styles.btnPrimary : {}),
           }}
           onClick={handleStartOrPause}
-          aria-label={running ? "Pause session" : paused ? "Resume session" : "Start session"}
+          aria-label={
+            running
+              ? "Pause session"
+              : paused
+              ? "Resume session"
+              : "Start session"
+          }
           title="Space"
         >
           {running ? "Pause" : paused ? "Resume" : "Start"}
@@ -300,11 +353,18 @@ export default function SessionControls({
       <div style={styles.cluster}>
         {showProgress ? (
           <>
-            <div aria-label="elapsed time" style={{ fontVariantNumeric: "tabular-nums", opacity: 0.9 }}>{elapsed}</div>
+            <div
+              aria-label="elapsed time"
+              style={{ fontVariantNumeric: "tabular-nums", opacity: 0.9 }}
+            >
+              {elapsed}
+            </div>
             <div style={styles.progressWrap} aria-label="step progress">
               <div style={styles.progressBar(progressPct)} />
             </div>
-            <div aria-label="step position" style={{ opacity: 0.85 }}>{stepLabel}</div>
+            <div aria-label="step position" style={{ opacity: 0.85 }}>
+              {stepLabel}
+            </div>
           </>
         ) : null}
       </div>
@@ -315,9 +375,15 @@ export default function SessionControls({
           <div style={styles.meta}>
             <span>Source:</span>
             <span style={styles.pill}>{session?.source?.type || "manual"}</span>
-            {session?.source?.refId ? <span style={styles.pill}>ref: {session.source.refId}</span> : null}
-            {session?.domain ? <span style={styles.pill}>{session.domain}</span> : null}
-            {session?.status ? <span style={styles.pill}>{session.status}</span> : null}
+            {session?.source?.refId ? (
+              <span style={styles.pill}>ref: {session.source.refId}</span>
+            ) : null}
+            {session?.domain ? (
+              <span style={styles.pill}>{session.domain}</span>
+            ) : null}
+            {session?.status ? (
+              <span style={styles.pill}>{session.status}</span>
+            ) : null}
           </div>
         ) : null}
 
@@ -347,7 +413,10 @@ export default function SessionControls({
 
         <button
           type="button"
-          style={{ ...styles.btn, ...(status === "running" ? styles.btnDisabled : null) }}
+          style={{
+            ...styles.btn,
+            ...(status === "running" ? styles.btnDisabled : null),
+          }}
           onClick={onClose}
           aria-label="Close session"
           title="Esc"

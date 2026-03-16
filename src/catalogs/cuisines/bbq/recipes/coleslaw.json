@@ -1,0 +1,268 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.coleslaw",
+    "type": "recipe",
+    "name": "BBQ Cole Slaw (Creamy + Tangy, Cookout Classic)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Classic BBQ side: crisp cabbage + creamy tang dressing.",
+        "Designed to pair with brisket, ribs, pulled pork, smoked chicken, and sausages.",
+        "Includes a vinegar-forward variation for Carolina-style plates."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "side",
+    "mealArchetypes": ["cookout", "potluck", "family_style"],
+    "servingStyles": ["bbq_plate", "buffet", "side_dish", "sandwich_topping"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "side.salad",
+      "cold_side",
+      "cookout",
+      "potluck",
+      "make_ahead",
+      "no_cook"
+    ]
+  },
+  "yield": {
+    "servings": 10,
+    "notes": "About 10 side servings (roughly 3/4 cup each) or 12 smaller servings for topping sandwiches."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 60,
+    "totalMins": 80
+  },
+  "difficulty": "beginner",
+  "equipment": {
+    "minimum": ["equipment.mixing_bowl", "equipment.whisk", "equipment.knife"],
+    "recommended": [
+      "equipment.cut_board",
+      "equipment.box_grater",
+      "equipment.mandoline_optional",
+      "equipment.kitchen_scale_optional"
+    ],
+    "optional": ["equipment.food_processor"]
+  },
+  "dietFlags": ["vegetarian", "gluten_free"],
+  "allergens": ["eggs"],
+  "ingredients": [
+    {
+      "id": "ingredients.green_cabbage",
+      "label": "Green cabbage, finely shredded",
+      "qty": 2,
+      "unit": "lb",
+      "notes": "About 1 medium head. Shred thin for best texture.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.red_cabbage",
+      "label": "Red cabbage, finely shredded (optional)",
+      "qty": 0.5,
+      "unit": "lb",
+      "notes": "Adds color and crunch. Use more green cabbage if skipping.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.carrots",
+      "label": "Carrots, grated or julienned",
+      "qty": 2,
+      "unit": "each",
+      "notes": "About 1 cup grated.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.onion",
+      "label": "Onion, very finely minced (optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Use sweet onion or scallions for a softer bite.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.mayonnaise",
+      "label": "Mayonnaise",
+      "qty": 0.75,
+      "unit": "cup",
+      "notes": "Start with 3/4 cup; you can add more after chilling if needed.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "For tang. White vinegar works if needed.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.sugar",
+      "label": "Sugar",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Balances vinegar. Increase to 2 tbsp for a sweeter slaw.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.mustard",
+      "label": "Yellow mustard",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Optional, but classic in BBQ slaw.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.celery_seed",
+      "label": "Celery seed",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Key deli-style slaw note.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Kosher salt",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Used for salting cabbage and in dressing; adjust to taste.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.milk",
+      "label": "Milk or buttermilk (optional, to loosen dressing)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Add only if you want a thinner dressing.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.lemon_juice",
+      "label": "Lemon juice (optional)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Brightens; optional if vinegar is enough.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.hot_sauce",
+      "label": "Hot sauce (optional)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Adds subtle heat; optional.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.shred",
+      "title": "Shred cabbage and prep vegetables",
+      "body": "Shred green cabbage (and red cabbage if using) very thin. Grate carrots. Mince onion/scallions if using. Add everything to a large bowl.",
+      "timers": []
+    },
+    {
+      "id": "step.salt_draw",
+      "title": "Lightly salt cabbage (optional but recommended)",
+      "body": "Sprinkle 1/2 tsp of the salt over the cabbage mixture and toss. Let sit 10–15 minutes to draw out a bit of moisture (improves crunch). If a lot of liquid collects, you can drain it or blot lightly—do not fully wring dry.",
+      "timers": [{ "label": "Salt rest", "mins": 15 }]
+    },
+    {
+      "id": "step.dressing",
+      "title": "Whisk the dressing",
+      "body": "In a small bowl, whisk mayonnaise, vinegar, sugar (if using), mustard (if using), celery seed (if using), black pepper, remaining salt (start with 1/2 tsp), and optional lemon juice/hot sauce. If you want a thinner dressing, whisk in milk/buttermilk 1 tbsp at a time.",
+      "timers": []
+    },
+    {
+      "id": "step.combine",
+      "title": "Toss slaw and chill",
+      "body": "Pour dressing over the cabbage mixture and toss thoroughly until evenly coated. Cover and refrigerate at least 1 hour (best 2–4 hours) for flavors to meld. Taste and adjust: add vinegar for tang, sugar for sweetness, salt/pepper as needed.",
+      "timers": [{ "label": "Chill (minimum)", "mins": 60 }]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "body": "Serve cold as a side with BBQ plates, or pile onto pulled pork sandwiches, BBQ chicken sandwiches, or hot links. Stir before serving—slaw can weep a little as it sits.",
+      "timers": []
+    }
+  ],
+  "pairings": {
+    "mains": [
+      {
+        "id": "cuisines.bbq.recipes.smoked_brisket",
+        "label": "Smoked Brisket"
+      },
+      { "id": "cuisines.bbq.recipes.bbq_ribs", "label": "BBQ Ribs" },
+      { "id": "cuisines.bbq.recipes.pulled_pork", "label": "Pulled Pork" },
+      {
+        "id": "cuisines.bbq.recipes.smoked_chicken",
+        "label": "Smoked Chicken"
+      },
+      { "id": "cuisines.bbq.recipes.bbq_sausage", "label": "BBQ Sausage" }
+    ],
+    "sides": [
+      { "id": "cuisines.bbq.recipes.baked_beans", "label": "BBQ Baked Beans" },
+      { "id": "dishes.bbq.cornbread", "label": "Cornbread" },
+      { "id": "dishes.bbq.mac_and_cheese", "label": "Mac and Cheese" },
+      { "id": "dishes.bbq.pickles_onions", "label": "Pickles + Onions" }
+    ]
+  },
+  "storage": {
+    "refrigerate": {
+      "instructions": "Keep refrigerated in a sealed container. Stir before serving.",
+      "maxDays": 3
+    },
+    "notes": "Cole slaw is best within 24–48 hours for maximum crunch; it softens over time."
+  },
+  "planner": {
+    "batchable": true,
+    "makeAhead": true,
+    "serveModes": [
+      {
+        "id": "serveMode.side_dish",
+        "label": "Side Dish",
+        "notes": "Serve 3/4 cup per person as a side."
+      },
+      {
+        "id": "serveMode.sandwich_topping",
+        "label": "Sandwich Topping",
+        "notes": "Serve on pulled pork/chicken sandwiches for crunch + tang."
+      },
+      {
+        "id": "serveMode.bbq_plate",
+        "label": "BBQ Plate",
+        "notes": "Pairs best with rich smoked meats; tang balances fat."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "style",
+      "notes": [
+        "Carolina vinegar slaw (no mayo): replace mayo with 1/3 cup oil, increase vinegar to 1/4 cup, add 1–2 tbsp sugar, and season with salt/pepper + red pepper flakes. Chill 1–2 hours.",
+        "Sweeter deli slaw: increase sugar to 2 tbsp and add 1–2 tbsp milk to loosen dressing.",
+        "Heat: add jalapeño mince or extra hot sauce; keep it subtle so it complements smoked meats."
+      ]
+    },
+    {
+      "kind": "texture",
+      "notes": [
+        "For extra crisp slaw: salt-rest cabbage, then drain excess liquid before dressing.",
+        "For finer texture: use a food processor slicing disk (pulse carefully to avoid mush)."
+      ]
+    }
+  ]
+}

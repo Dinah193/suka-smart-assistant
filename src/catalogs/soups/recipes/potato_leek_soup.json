@@ -1,0 +1,311 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.potato_leek_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Potato Leek Soup",
+    "subtitle": "Creamy classic (or dairy-free) • straightforward, cozy bowl",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "SSA baseline: simple ingredient list, optional dairy-free finish, freezer-friendly (best frozen without dairy)."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "comfort",
+      "vegetarian",
+      "stovetop",
+      "simple",
+      "freezer-friendly",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl", "mug"],
+    "plannerTags": ["potato leek soup", "creamy", "vegetarian", "simple soup"]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~10–12 cups depending on thickness."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 30,
+    "totalMins": 50
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon",
+      "ladle"
+    ],
+    "recommended": [
+      "immersion blender (or countertop blender)",
+      "fine mesh strainer (optional for silky texture)"
+    ],
+    "optional": ["kitchen scale"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["dairy"],
+
+  "signals": {
+    "vegetarian": true,
+    "quick": false,
+    "freezerFriendly": true,
+    "useWhatYouHave": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "richness": "medium",
+    "aromatics": "leek-forward",
+    "notes": "Soft, creamy potato base with sweet onion-leek aroma. Finish with cream or dairy-free option."
+  },
+
+  "ingredients": [
+    {
+      "id": "butter_or_oil",
+      "label": "Butter or olive oil",
+      "role": "cook",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons. Butter adds classic richness."
+    },
+    {
+      "id": "leeks",
+      "label": "Leeks, cleaned and sliced (white + light green parts)",
+      "role": "aromatic",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 3 medium leeks. Clean thoroughly—sand hides between layers."
+    },
+    {
+      "id": "onion_optional",
+      "label": "Yellow onion, diced (optional)",
+      "role": "aromatic",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Adds depth if leeks are small or mild."
+    },
+    {
+      "id": "garlic_optional",
+      "label": "Garlic, minced (optional)",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 cloves."
+    },
+    {
+      "id": "potatoes",
+      "label": "Potatoes, peeled and diced",
+      "role": "base",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "Yukon Gold for buttery texture; Russet for extra creamy body."
+    },
+    {
+      "id": "broth",
+      "label": "Vegetable broth (or chicken broth if not strict vegetarian), low-sodium preferred",
+      "role": "liquid",
+      "amount": { "value": 1200, "unit": "g" },
+      "notes": "About 5 cups."
+    },
+    {
+      "id": "water_optional",
+      "label": "Water (optional, to adjust thickness)",
+      "role": "liquid",
+      "amount": { "value": 300, "unit": "g" },
+      "optional": true,
+      "notes": "Add as needed during simmer or after blending."
+    },
+    {
+      "id": "bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "thyme_optional",
+      "label": "Fresh thyme sprigs or dried thyme (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon dried or 3–4 sprigs."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start with ~1 teaspoon; adjust at end based on broth."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "heavy_cream_optional",
+      "label": "Heavy cream (optional creamy finish)",
+      "role": "finish",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. Add after blending."
+    },
+    {
+      "id": "milk_optional",
+      "label": "Whole milk (optional lighter finish)",
+      "role": "finish",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "About 3/4–1 cup. Warm gently; avoid hard boil."
+    },
+    {
+      "id": "coconut_milk_optional",
+      "label": "Unsweetened coconut milk (optional dairy-free finish)",
+      "role": "finish",
+      "amount": { "value": 160, "unit": "g" },
+      "optional": true,
+      "notes": "About 2/3 cup. Choose unsweetened; adds subtle sweetness."
+    },
+    {
+      "id": "olive_oil_finish_optional",
+      "label": "Extra-virgin olive oil (optional dairy-free richness)",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "Drizzle in after blending if not using coconut milk."
+    },
+    {
+      "id": "chives_optional",
+      "label": "Chives or green onions, sliced (optional for serving)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "lemon_optional",
+      "label": "Lemon juice (optional, brightness)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 teaspoons to taste."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Prep and soften leeks",
+      "instructions": [
+        "Clean leeks thoroughly: slice lengthwise, rinse between layers, then slice into half-moons.",
+        "Melt butter (or heat oil) in a pot over medium heat.",
+        "Add leeks (and onion if using). Cook 10–12 minutes, stirring, until soft and sweet but not browned.",
+        "Add garlic (if using) and cook 30 seconds."
+      ],
+      "activeMins": 15,
+      "timers": [
+        { "label": "Cook leeks/onion", "mins": 11 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Simmer potatoes until tender",
+      "instructions": [
+        "Add diced potatoes, broth, bay leaf (optional), thyme (optional), salt, and pepper.",
+        "Bring to a gentle simmer, then reduce heat and simmer 18–25 minutes until potatoes are very tender."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 22,
+      "timers": [{ "label": "Simmer potatoes", "mins": 22 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Blend to desired texture",
+      "instructions": [
+        "Remove bay leaf and thyme sprigs if used.",
+        "Blend with an immersion blender until smooth (or leave slightly chunky if you prefer).",
+        "If using a countertop blender, blend in batches and vent the lid carefully."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_04",
+      "title": "Finish: creamy or dairy-free",
+      "instructions": [
+        "Choose a finish option:",
+        "• Creamy: stir in heavy cream OR milk and warm gently (do not hard-boil).",
+        "• Dairy-free: stir in coconut milk OR drizzle in extra-virgin olive oil for richness.",
+        "Adjust thickness with a little water or broth if needed.",
+        "Taste and adjust salt/pepper; add a small squeeze of lemon juice (optional) for brightness."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_05",
+      "title": "Serve",
+      "instructions": [
+        "Serve hot. Garnish with chives/green onions if desired.",
+        "Pairs well with crusty bread, biscuits, or grilled cheese."
+      ],
+      "activeMins": 2
+    }
+  ],
+
+  "planner": {
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "freezerPortionSizeCups": 2,
+      "bestPractices": [
+        "Freeze best before adding dairy (cream/milk). Add dairy when reheating for best texture.",
+        "Cool quickly; portion into flat freezer bags or containers."
+      ]
+    },
+    "useWhatYouHaveLogic": {
+      "notes": "If no leeks: substitute onion (300g) + a pinch of celery seed (optional). If no potatoes: use cauliflower (different texture) or add white beans for body."
+    },
+    "pairingLogic": {
+      "classicPair": "Crusty bread or grilled cheese",
+      "otherPairings": [
+        "focaccia",
+        "dinner rolls",
+        "buttermilk biscuits",
+        "salad"
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 5 days. Soup thickens when chilled; loosen with broth/water on reheat.",
+    "freezer": "Freeze up to 3 months (prefer freezing without dairy).",
+    "reheat": "Reheat gently to a simmer, stirring often; avoid boiling hard after adding dairy."
+  },
+
+  "notes": [
+    "Do not brown the leeks—keeping them soft preserves the classic sweet flavor.",
+    "For an extra-silky soup, strain after blending (optional) or blend longer.",
+    "If using fresh milled flour bread alongside this soup, toast slices for structure and a better dunk."
+  ],
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions. No disallowed 'toppings' property used."
+  }
+}

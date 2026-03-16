@@ -1,0 +1,303 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.dinner_rolls",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Soft Dinner Rolls",
+    "subtitle": "Tender, fluffy, buttery • everyday rolls • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Classic soft pull-apart dinner rolls. Works as 12 standard rolls or 18 smaller rolls. Includes fresh-milled guidance, make-ahead, and freezer notes."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "rolls",
+    "subprofiles": ["soft rolls", "enriched", "pull-apart", "buttery"],
+    "mealArchetypes": ["side bread", "holiday bread", "sandwich rolls"],
+    "servingStyles": ["pull-apart pan rolls", "individual rolls"],
+    "plannerTags": [
+      "dinner rolls",
+      "soft",
+      "buttery",
+      "pull-apart",
+      "freezer-friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 12,
+    "servingSize": { "value": 1, "unit": "roll" },
+    "notes": "Makes 12 standard rolls (9x13 pan) or 18 smaller rolls (same dough, smaller portions)."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 155,
+    "totalMins": 190
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "baking pan (9x13 recommended)", "oven"],
+    "recommended": [
+      "scale",
+      "stand mixer (dough hook)",
+      "bench scraper",
+      "instant-read thermometer"
+    ],
+    "optional": ["pastry brush", "parchment paper", "proofing box"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "milk", "egg"],
+
+  "signals": {
+    "enrichedDough": true,
+    "softBread": true,
+    "freezerFriendly": true,
+    "batchFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "low",
+    "saltiness": "moderate",
+    "richness": "medium",
+    "texture": "fluffy-tender",
+    "notes": "Soft crumb, buttery finish, ideal for sopping gravies or making small sandwiches."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "Flour (bread flour preferred; or all-purpose; or fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 480, "unit": "g" },
+      "notes": "Bread flour gives taller rolls; all-purpose yields softer, slightly less chewy rolls."
+    },
+    {
+      "id": "milk",
+      "label": "Milk, warm (95–105°F / 35–40°C)",
+      "role": "hydration",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup. Warm—not hot."
+    },
+    {
+      "id": "yeast",
+      "label": "Instant yeast (or active dry yeast)",
+      "role": "leavening",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 2 1/4 teaspoons. If using active dry, bloom in warm milk (see steps)."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar",
+      "role": "sweetener",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons. Helps browning and softness."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 9, "unit": "g" },
+      "notes": "About 1 1/2 teaspoons."
+    },
+    {
+      "id": "egg",
+      "label": "Large egg",
+      "role": "enrichment",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Adds tenderness and structure."
+    },
+    {
+      "id": "butter",
+      "label": "Unsalted butter, softened (for dough)",
+      "role": "enrichment",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 4 tablespoons."
+    },
+    {
+      "id": "butter_finish",
+      "label": "Unsalted butter, melted (for brushing after baking)",
+      "role": "finish",
+      "amount": { "value": 28, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 tablespoons. Optional but highly recommended."
+    },
+    {
+      "id": "oil_optional",
+      "label": "Neutral oil (for bowl/pan, optional)",
+      "role": "prep",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "flaky_salt_optional",
+      "label": "Flaky salt (optional topping)",
+      "role": "finish",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Optional: bloom active dry yeast (if using)",
+      "instructions": [
+        "If using active dry yeast, stir yeast and a pinch of sugar into the warm milk (use from recipe milk).",
+        "Rest 5–10 minutes until foamy. If using instant yeast, skip blooming."
+      ],
+      "handsOffMins": 8,
+      "timers": [{ "label": "Bloom yeast (optional)", "mins": 8 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Mix the dough",
+      "instructions": [
+        "In a large bowl (or mixer bowl), combine flour, sugar, salt, and (if using instant) yeast.",
+        "Add warm milk, egg, and softened butter.",
+        "Mix until a shaggy dough forms and no dry flour remains."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step_03",
+      "title": "Knead until smooth and elastic",
+      "instructions": [
+        "Knead until dough is smooth, elastic, and slightly tacky.",
+        "Stand mixer: 6–8 minutes on low to medium-low with dough hook.",
+        "By hand: 10–12 minutes kneading.",
+        "If dough is very sticky, add flour 5–10g at a time (avoid adding too much—soft dough makes soft rolls)."
+      ],
+      "activeMins": 10
+    },
+    {
+      "id": "step_04",
+      "title": "First rise (bulk)",
+      "instructions": [
+        "Place dough in a lightly oiled bowl, cover, and rise until doubled, 60–90 minutes depending on room temperature."
+      ],
+      "handsOffMins": 75,
+      "timers": [{ "label": "Bulk rise", "mins": 75 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Divide and shape",
+      "instructions": [
+        "Grease a 9x13 pan (or line with parchment).",
+        "Turn dough onto a lightly floured surface and gently deflate.",
+        "Divide into 12 equal pieces (~70–75g each) for standard rolls, OR 18 pieces (~48–52g each) for smaller rolls.",
+        "Shape each piece into a smooth ball by pinching seams underneath and rolling lightly against the surface.",
+        "Arrange rolls evenly spaced in the pan."
+      ],
+      "activeMins": 15
+    },
+    {
+      "id": "step_06",
+      "title": "Final proof",
+      "instructions": [
+        "Cover and proof until rolls are very puffy and touching or nearly touching, 45–75 minutes.",
+        "The dough should spring back slowly when gently pressed."
+      ],
+      "handsOffMins": 60,
+      "timers": [{ "label": "Final proof", "mins": 60 }]
+    },
+    {
+      "id": "step_07",
+      "title": "Bake",
+      "instructions": [
+        "Heat oven to 375°F (190°C).",
+        "Bake 18–22 minutes (12-roll batch) until golden brown.",
+        "For smaller 18-roll batch: start checking at 15–18 minutes.",
+        "Internal temp target: 190–200°F (88–93°C)."
+      ],
+      "handsOffMins": 20,
+      "timers": [
+        { "label": "Bake (12 rolls)", "mins": 20 },
+        { "label": "Bake (18 rolls)", "mins": 17 }
+      ]
+    },
+    {
+      "id": "step_08",
+      "title": "Brush with butter and serve",
+      "instructions": [
+        "Immediately brush hot rolls with melted butter (optional but recommended).",
+        "Optional: sprinkle lightly with flaky salt while butter is still wet.",
+        "Cool 10 minutes before serving for best texture."
+      ],
+      "handsOffMins": 10,
+      "timers": [{ "label": "Cool briefly", "mins": 10 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour can work well in rolls but may need slightly more liquid and/or a blend for maximum fluffiness.",
+    "guidelines": [
+      "For the softest rolls: use 70% fresh milled flour + 30% bread flour (same total flour weight).",
+      "If using 100% fresh milled (unsifted), consider sifting out some bran and/or adding 10–25g more milk if dough feels stiff after mixing.",
+      "Fresh milled dough may benefit from a 10-minute rest after initial mixing (before kneading) to hydrate fully.",
+      "Avoid adding lots of extra flour during kneading—soft dough = soft rolls."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 0,
+      "rangeAddBackG": [0, 25]
+    }
+  },
+
+  "variations": [
+    {
+      "name": "Honey butter rolls",
+      "change": "Replace sugar with 40g honey. Reduce milk by ~10g. Brush finished rolls with honey-butter (butter + honey).",
+      "notes": "Slight sweetness and extra shine."
+    },
+    {
+      "name": "Garlic herb rolls",
+      "change": "Brush baked rolls with garlic-herb butter (melted butter + garlic + parsley).",
+      "notes": "Perfect with soups and stews."
+    },
+    {
+      "name": "Whole wheat blend",
+      "change": "Replace 150g of the flour with whole wheat flour (or fresh milled). Add +10–20g milk if needed.",
+      "notes": "More hearty flavor, still soft."
+    }
+  ],
+
+  "storage": {
+    "counter": "Store airtight up to 3 days. Rewarm briefly for best softness.",
+    "freezer": "Freeze cooled rolls up to 2 months. Thaw at room temp; warm in 300°F (150°C) oven for 8–12 minutes.",
+    "reheat": "Wrap in foil and warm in 300°F (150°C) oven, or microwave briefly (texture best with oven)."
+  },
+
+  "notes": [
+    "If rolls are browning too quickly, tent loosely with foil for the last 5–7 minutes.",
+    "If rolls feel dense, increase proof time (final proof especially) or ensure yeast is fresh and milk wasn’t too hot.",
+    "For pull-apart softness, bake rolls close together in a pan rather than spaced apart on a sheet."
+  ],
+
+  "pairings": {
+    "serveWith": ["stews", "soups", "roasts", "gravy", "butter and honey"],
+    "useFor": ["mini sandwiches", "sliders"]
+  },
+
+  "links": {
+    "related": [
+      "breads/recipes/buttermilk_biscuits",
+      "breads/recipes/sandwich_bread_white",
+      "breads/recipes/cornbread_skillet"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions."
+  }
+}

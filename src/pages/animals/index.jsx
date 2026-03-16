@@ -251,8 +251,8 @@ async function loadInventoryMonitor() {
  * - "../../services/events/eventBus"
  *
  * Keep legacy fallbacks:
- * - "../../services/eventBus.js"
- * - "@/services/eventBus.js"
+ * - "../../services/events/eventBus.js"
+ * - "@/services/events/eventBus.js"
  */
 async function loadEventBusOrShim() {
   const mod = await tryImport([
@@ -260,9 +260,9 @@ async function loadEventBusOrShim() {
     "../../services/events/eventBus",
     "../../services/events/eventBus.js",
     "../../../services/events/eventBus",
-    "../../services/eventBus.js",
-    "../../../services/eventBus.js",
-    "@/services/eventBus.js",
+    "../../services/events/eventBus.js",
+    "../../../services/events/eventBus.js",
+    "@/services/events/eventBus.js",
   ]);
 
   const candidate =
@@ -543,19 +543,19 @@ async function ensureHubDepsLoaded() {
   try {
     const [ffMod, fmtMod, connMod] = await Promise.all([
       tryImport([
-        "@/services/featureFlags",
-        "../../services/featureFlags",
-        "../../../services/featureFlags",
+        "@/config/featureFlags",
+        "../../config/featureFlags",
+        "../../../config/featureFlags",
       ]),
       tryImport([
         "@/services/hub/HubPacketFormatter",
-        "../../services/hub/HubPacketFormatter",
-        "../../../services/hub/HubPacketFormatter",
+        "@/services/hub/HubPacketFormatter",
+        "@/services/hub/HubPacketFormatter",
       ]),
       tryImport([
         "@/services/hub/FamilyFundConnector",
-        "../../services/hub/FamilyFundConnector",
-        "../../../services/hub/FamilyFundConnector",
+        "@/services/hub/FamilyFundConnector",
+        "@/services/hub/FamilyFundConnector",
       ]),
     ]);
 

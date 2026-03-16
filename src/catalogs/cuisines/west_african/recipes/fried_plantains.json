@@ -1,0 +1,268 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.fried_plantains",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.fried_plantains",
+    "label": "Fried Plantains",
+    "altLabels": ["Dodo", "Fried Ripe Plantain"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["Nigeria", "Ghana", "West Africa"],
+    "tags": [
+      "west_african",
+      "side",
+      "snacks",
+      "street_food",
+      "plantain",
+      "fry_shallow_optional",
+      "quick",
+      "weeknight_friendly"
+    ]
+  },
+  "summary": {
+    "oneLine": "Sweet-savory ripe plantain slices fried until golden and caramelized; served as a side or snack.",
+    "notes": [
+      "Ripe plantains (yellow with black spots) yield the classic sweet caramelized flavor.",
+      "Green plantains can also be fried for a starchy savory version; SSA adaptations include both."
+    ]
+  },
+  "yields": {
+    "servings": 4,
+    "servingSizeNote": "Side/snack portions."
+  },
+  "time": {
+    "totalMinutes": 20,
+    "activeMinutes": 18,
+    "restMinutes": 2
+  },
+  "difficulty": "beginner",
+  "servingStyles": ["snacks", "plates", "grill_and_sides"],
+  "plannerHints": {
+    "batchFriendly": false,
+    "leftoversFriendly": false,
+    "weeknightBias": "high",
+    "mealArchetypeId": "archetype_fritter_or_cake"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Oil absorption varies by temperature and ripeness; SSA nutrition pipeline should estimate from oil and plantain quantities."
+    ]
+  },
+  "allergens": {
+    "mayContain": [],
+    "commonTriggers": [],
+    "notes": [
+      "Typically allergen-light; ensure frying oil matches household preferences (e.g., peanut oil restrictions if any)."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pan_skillet", "label": "Skillet or frying pan", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "tongs", "label": "Tongs or fork", "qty": 1 },
+      {
+        "id": "paper_towels",
+        "label": "Paper towels or rack for draining",
+        "qty": 1
+      }
+    ],
+    "optional": [
+      {
+        "id": "thermometer_instant",
+        "label": "Instant thermometer (oil temp)",
+        "qty": 1
+      },
+      { "id": "wire_rack", "label": "Wire rack (crisper drain)", "qty": 1 }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "plantain",
+      "label": "Ripe plantains",
+      "qty": 3,
+      "unit": "count",
+      "role": "starch",
+      "notes": [
+        "Best ripeness: yellow with black spots for sweet caramelization.",
+        "For savory fried plantains, use greener plantains (see adaptation)."
+      ]
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral frying oil",
+      "qty": 0.5,
+      "unit": "cup",
+      "role": "fat",
+      "notes": [
+        "Use enough to shallow-fry (about 1/4–1/2 inch depth). Adjust based on pan size."
+      ]
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 0.5,
+      "unit": "tsp",
+      "role": "seasoning",
+      "optional": true,
+      "notes": ["Optional; many households lightly salt after frying."]
+    },
+    {
+      "id": "pepper_black_optional",
+      "label": "Black pepper (optional)",
+      "qty": 0.25,
+      "unit": "tsp",
+      "role": "seasoning",
+      "optional": true
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "fry_shallow_optional",
+    "drain",
+    "season_to_taste"
+  ],
+  "steps": [
+    {
+      "id": "step.prep_plantains",
+      "title": "Peel and slice plantains",
+      "body": "Peel plantains and slice into 1/4–1/2 inch rounds or diagonal slices (bias-cut). Pat dry if very moist.",
+      "timeMinutes": 6,
+      "timers": [{ "label": "Prep plantains", "seconds": 360 }],
+      "hazards": []
+    },
+    {
+      "id": "step.heat_oil",
+      "title": "Heat oil for shallow-frying",
+      "body": "Add oil to skillet (about 1/4–1/2 inch deep). Heat over medium to medium-high until shimmering. Target oil temperature ~350°F / 175°C if using a thermometer. A small piece of plantain should sizzle immediately.",
+      "timeMinutes": 4,
+      "timers": [{ "label": "Heat oil", "seconds": 240 }],
+      "hazards": [
+        {
+          "type": "burn",
+          "message": "Hot oil can cause serious burns—keep children away, avoid splashing, and use long tongs."
+        }
+      ],
+      "checks": [
+        "Oil shimmers and sizzles with a test piece",
+        "Not smoking (too hot)"
+      ]
+    },
+    {
+      "id": "step.fry_first_side",
+      "title": "Fry until golden (first side)",
+      "body": "Place plantain slices in a single layer (do not crowd). Fry 2–3 minutes until edges deepen to golden-brown and caramelize.",
+      "timeMinutes": 4,
+      "timers": [{ "label": "Fry first side", "seconds": 150 }],
+      "hazards": [
+        {
+          "type": "splatter",
+          "message": "Oil may splatter—lower heat slightly if vigorous popping occurs."
+        }
+      ],
+      "checks": ["Golden-brown edges", "Surface caramelizing (ripe plantains)"]
+    },
+    {
+      "id": "step.flip_and_finish",
+      "title": "Flip and finish frying",
+      "body": "Flip slices and fry 2–3 minutes more until golden-brown on both sides and tender throughout. Adjust heat to prevent burning—ripe plantains caramelize quickly.",
+      "timeMinutes": 4,
+      "timers": [{ "label": "Fry second side", "seconds": 150 }],
+      "hazards": [],
+      "checks": [
+        "Both sides golden-brown",
+        "Tender when pressed lightly with tongs"
+      ]
+    },
+    {
+      "id": "step.drain_and_season",
+      "title": "Drain and season",
+      "body": "Transfer to paper towels or a wire rack to drain for 1–2 minutes. Season lightly with salt (and optional black pepper) while warm. Serve immediately.",
+      "timeMinutes": 2,
+      "timers": [{ "label": "Drain", "seconds": 90 }],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve as a side with jollof rice, stews, and grilled meats.",
+      "Serve as a snack with pepper sauce or a simple tomato-onion relish if desired."
+    ],
+    "garnishes": ["pepper_sauce_optional"],
+    "storage": {
+      "refrigeratorDays": 1,
+      "freezerDays": 0,
+      "reheatNotes": [
+        "Best eaten fresh. If needed, reheat in a hot skillet or air fryer to restore crisp edges."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "color": "golden_brown_caramelized",
+      "texture": "tender_inside_lightly_crisp_edges"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["plantain"],
+        "useInstead": ["banana_optional"],
+        "notes": "Bananas can fry but are much softer/sweeter; reduce time and handle gently."
+      },
+      {
+        "whenMissing": ["oil_neutral"],
+        "useInstead": ["oil_groundnut_peanut_optional", "oil_canola_optional"],
+        "notes": "Use a high-smoke-point oil for frying."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["tongs"],
+        "doInstead": "Use a fork or slotted spoon carefully; avoid puncturing too much (can increase oil absorption)."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "peanut",
+        "avoid": ["oil_groundnut_peanut_optional"],
+        "notes": "Use neutral oil instead of peanut oil when peanut allergen is active."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Ripe plantains should caramelize to golden-brown without burning.",
+      "Oil should be hot enough to sizzle; too cool makes plantains greasy.",
+      "Do not crowd the pan; it drops oil temp and softens texture."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Plantains are greasy",
+        "likelyCause": "Oil temperature too low or pan overcrowded",
+        "fix": "Heat oil properly, fry in batches, and drain on a rack/paper towels."
+      },
+      {
+        "problem": "Plantains burned outside but raw inside",
+        "likelyCause": "Oil temperature too high or slices too thick",
+        "fix": "Lower heat and slice thinner; fry a bit longer at moderate heat."
+      },
+      {
+        "problem": "Not sweet/caramelized",
+        "likelyCause": "Plantains not ripe enough",
+        "fix": "Use yellow-with-black-spots plantains for classic sweet fried plantain."
+      }
+    ]
+  }
+}

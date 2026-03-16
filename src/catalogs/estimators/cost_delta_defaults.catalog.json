@@ -1,0 +1,297 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "estimators.cost_delta_defaults",
+    "type": "catalog",
+    "domain": "estimators",
+    "locale": "en-US",
+    "name": "Cost Delta Defaults",
+    "label": "Cost Delta Defaults",
+    "subtitle": "Default cost deltas and adjustment factors used by SSA estimators and planners",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/estimators/cost_delta_defaults.catalog.json",
+      "notes": [
+        "Deterministic default multipliers/deltas used by SSA estimators when exact prices are unknown.",
+        "Used by EstimateEngine/ProvisioningTargetEngine as a fallback until user prices or store data exist.",
+        "All values are conservative and intended to be user-overridable."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "global",
+    "module": "estimators.cost_delta",
+    "locales": ["en-US"]
+  },
+  "defaults": {
+    "currency": "USD",
+    "precision": 2,
+    "rounding": {
+      "mode": "round",
+      "precision": 2
+    },
+    "assumptions": {
+      "baselineSource": "source.grocery",
+      "baselineQuality": "quality.standard",
+      "baselineReadiness": "readiness.ready_to_cook"
+    }
+  },
+  "items": [
+    {
+      "id": "costdelta.sources.baseline_weights",
+      "label": "Source Baseline Weights",
+      "group": "sources",
+      "rank": 0,
+      "status": "active",
+      "tags": [
+        "estimator.cost_delta",
+        "costdelta.sources",
+        "defaults",
+        "farm_to_table"
+      ],
+      "notes": "Relative cost deltas compared to baseline source.grocery. Negative means cheaper than baseline, positive means more expensive.",
+      "profile": {
+        "baseline": "source.grocery",
+        "currency": "USD",
+        "deltasPct": {
+          "source.garden": -0.35,
+          "source.animals": -0.2,
+          "source.preservation": -0.1,
+          "source.pantry": -0.08,
+          "source.bulk_store": -0.12,
+          "source.local_market": 0.05,
+          "source.grocery": 0.0,
+          "source.restaurant": 0.8
+        },
+        "notes": [
+          "Garden and animals assume sunk costs are not fully amortized here; treat as marginal food cost delta.",
+          "Restaurant includes labor/overhead; use only for 'eat out' comparisons.",
+          "Engines may combine this with readiness and quality adjustments."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.readiness.baseline_weights",
+      "label": "Readiness Baseline Weights",
+      "group": "readiness",
+      "rank": 10,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.readiness", "defaults"],
+      "notes": "Relative cost multipliers by readiness/processing level. Intended to model convenience costs.",
+      "profile": {
+        "multipliers": {
+          "readiness.whole": 0.85,
+          "readiness.raw": 0.9,
+          "readiness.ready_to_cook": 1.0,
+          "readiness.prepped": 1.1,
+          "readiness.ready_to_eat": 1.25,
+          "readiness.frozen_prepared": 1.35,
+          "readiness.shelf_stable_prepared": 1.2
+        },
+        "notes": [
+          "Whole/raw are typically cheaper but require more labor/time.",
+          "Prepared/frozen prepared tend to cost more due to processing and packaging."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.quality.baseline_weights",
+      "label": "Quality Baseline Weights",
+      "group": "quality",
+      "rank": 20,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.quality", "defaults"],
+      "notes": "Relative cost multipliers by quality tier.",
+      "profile": {
+        "multipliers": {
+          "quality.economy": 0.9,
+          "quality.standard": 1.0,
+          "quality.premium": 1.2,
+          "quality.artisan": 1.35,
+          "quality.organic": 1.25,
+          "quality.pasture_raised": 1.3,
+          "quality.grass_fed": 1.35
+        },
+        "notes": [
+          "Premium/organic/grass-fed deltas vary widely by region; treat as placeholders.",
+          "Engines should prefer user price history when available."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.waste_and_shrink.defaults",
+      "label": "Waste & Shrink Defaults",
+      "group": "waste",
+      "rank": 30,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.waste", "defaults"],
+      "notes": "Default waste/shrink percentages by category. Used to inflate purchase quantities and true-cost estimates.",
+      "profile": {
+        "wastePctByCategory": {
+          "category.produce": 0.15,
+          "category.herbs": 0.2,
+          "category.meat": 0.08,
+          "category.seafood": 0.1,
+          "category.dairy": 0.07,
+          "category.grains": 0.03,
+          "category.legumes": 0.03,
+          "category.fats": 0.02,
+          "category.spices": 0.02,
+          "category.bakery": 0.12,
+          "category.frozen": 0.04,
+          "category.canned": 0.02
+        },
+        "notes": [
+          "Produce/herbs waste includes spoilage and trim.",
+          "Meat waste includes bone/trim depending on cut; butchery can shift this significantly."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.cooking_energy.defaults",
+      "label": "Cooking Energy Defaults",
+      "group": "energy",
+      "rank": 40,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.energy", "defaults"],
+      "notes": "Rough energy-cost deltas by cooking method, for comparing scratch vs convenience or method substitutions. Units are USD per hour-equivalent.",
+      "profile": {
+        "currency": "USD",
+        "assumptions": {
+          "electricityUsdPerKwh": 0.16,
+          "gasUsdPerTherm": 1.4
+        },
+        "usdPerHourByMethod": {
+          "method.stovetop": 0.2,
+          "method.oven": 0.35,
+          "method.air_fryer": 0.18,
+          "method.slow_cooker": 0.1,
+          "method.instant_pot": 0.15,
+          "method.grill": 0.3,
+          "method.smoker": 0.4,
+          "method.dehydrator": 0.25
+        },
+        "notes": [
+          "These are directional; engines should not treat as bill-accurate unless user energy rates are known.",
+          "Useful for tradeoff explanations: 'slow cooker is lower energy per hour than oven'."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.labor_time.defaults",
+      "label": "Labor Time Value Defaults",
+      "group": "labor",
+      "rank": 50,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.labor", "defaults"],
+      "notes": "Default imputed value of time used for 'true cost' comparisons (scratch vs convenience).",
+      "profile": {
+        "currency": "USD",
+        "usdPerHour": 18.0,
+        "modes": {
+          "none": 0.0,
+          "low": 10.0,
+          "standard": 18.0,
+          "high": 30.0
+        },
+        "notes": [
+          "Set to 'none' for pure cash-outlay mode.",
+          "Engines can compute totalCost = cashCost + laborHours * usdPerHour when enabled."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.bulk_purchase.discounts",
+      "label": "Bulk Purchase Discount Defaults",
+      "group": "bulk",
+      "rank": 60,
+      "status": "active",
+      "tags": [
+        "estimator.cost_delta",
+        "costdelta.bulk",
+        "defaults",
+        "storehouse"
+      ],
+      "notes": "Default discount multipliers based on bulk purchase size. Intended for storehouse planning and provisioning targets.",
+      "profile": {
+        "discountPctBySize": {
+          "bulk.none": 0.0,
+          "bulk.small": 0.05,
+          "bulk.medium": 0.1,
+          "bulk.large": 0.15,
+          "bulk.wholesale": 0.22
+        },
+        "notes": [
+          "Discounts vary by item; apply selectively (staples > perishables).",
+          "Combine with storage constraints and waste buffers."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.substitution.penalties",
+      "label": "Substitution Penalties/Bonuses",
+      "group": "substitutions",
+      "rank": 70,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.substitutions", "defaults"],
+      "notes": "Default score/cost nudges when swapping components. Used by substitution engines when multiple candidates exist.",
+      "profile": {
+        "scoreAdjust": {
+          "preserve_role": 10,
+          "preserve_cuisine_hint": 6,
+          "preserve_readiness": 4,
+          "cross_role_swap": -12,
+          "allergen_risk_unknown": -25,
+          "diet_flag_unknown": -15
+        },
+        "costDeltaPct": {
+          "cross_role_swap": 0.08,
+          "higher_readiness": 0.12,
+          "lower_readiness": -0.06,
+          "premium_quality": 0.15,
+          "economy_quality": -0.08
+        },
+        "notes": [
+          "ScoreAdjust is used for ranking when costs are equal/unknown.",
+          "costDeltaPct is used to approximate cash differences when no prices exist."
+        ]
+      }
+    },
+
+    {
+      "id": "costdelta.category.multipliers",
+      "label": "Category Multipliers (Relative)",
+      "group": "categories",
+      "rank": 80,
+      "status": "active",
+      "tags": ["estimator.cost_delta", "costdelta.categories", "defaults"],
+      "notes": "Relative cost multipliers by broad category. Helps estimate baskets from calories/macros when item-level pricing is missing.",
+      "profile": {
+        "multipliers": {
+          "category.grains": 0.85,
+          "category.legumes": 0.9,
+          "category.produce": 1.05,
+          "category.meat": 1.3,
+          "category.seafood": 1.45,
+          "category.dairy": 1.1,
+          "category.fats": 1.0,
+          "category.spices": 1.2,
+          "category.bakery": 1.15,
+          "category.beverages": 1.05
+        },
+        "notes": [
+          "Meat/seafood cost multipliers reflect common US pricing; user prices should override."
+        ]
+      }
+    }
+  ]
+}

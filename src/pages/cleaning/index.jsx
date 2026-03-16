@@ -263,7 +263,7 @@ function getPlansTableSafe() {
 /* Agents worker client (soft import)                                         */
 /* -------------------------------------------------------------------------- */
 
-function createAgentsClient() {
+function createshimsClient() {
   let worker = null;
 
   try {
@@ -1536,7 +1536,7 @@ export default function CleaningPage() {
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
-    const client = createAgentsClient();
+    const client = createshimsClient();
     clientRef.current = client;
 
     const off1 = client.onProgress((d) =>

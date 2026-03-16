@@ -1,0 +1,342 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.enchiladas.rojas",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chicken Enchiladas Rojas",
+    "subtitle": "Corn-tortilla enchiladas baked in a mild red chile sauce with optional cheese",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "main",
+    "mealArchetypes": ["archetype.enchilada", "archetype.casserole"],
+    "servingStyles": ["plated", "family_style"],
+    "plannerTags": [
+      "course.main",
+      "batch.friendly",
+      "leftovers.good",
+      "weekend_or_weeknight"
+    ]
+  },
+  "summary": "Classic baked enchiladas rojas with a simple red chile sauce and a flexible chicken filling. Designed for SSA planning: batch-friendly, scales well, and reheats beautifully.",
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "enchiladas" },
+    "notes": "Makes about 12 enchiladas. Adjust tortilla count for larger pans."
+  },
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 25,
+    "totalMins": 60
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+  "tasteProfile": {
+    "savory": 4,
+    "spicy": 2,
+    "acidic": 2,
+    "rich": 2
+  },
+  "equipment": {
+    "minimum": ["equipment.skillet", "equipment.baking_dish", "equipment.oven"],
+    "recommended": ["equipment.blender", "equipment.comal"],
+    "optional": [
+      {
+        "id": "equipment.stock_pot",
+        "label": "Stock Pot",
+        "notes": "Helpful for poaching/shredding chicken"
+      },
+      {
+        "id": "equipment.fine_strainer",
+        "label": "Fine Strainer",
+        "notes": "Optional for extra-smooth sauce"
+      }
+    ]
+  },
+  "dietFlags": [],
+  "allergens": ["allergen.gluten", "allergen.dairy"],
+  "ingredients": [
+    {
+      "id": "ingredient.corn_tortilla",
+      "label": "Corn tortillas",
+      "role": "starch.tortilla",
+      "amount": { "value": 12, "unit": "each" },
+      "notes": "6-inch tortillas work best"
+    },
+
+    {
+      "id": "ingredient.chicken_cooked_shredded",
+      "label": "Cooked shredded chicken",
+      "role": "protein",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Rotisserie chicken works well"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "medium" },
+      "notes": "Finely diced (divide: filling + sauce)"
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "cloves" },
+      "notes": "Minced (divide: filling + sauce)"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.oregano_mexican",
+      "label": "Mexican oregano (or oregano)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Adjust to taste; sauce + filling"
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "For sautéing + softening tortillas"
+    },
+
+    {
+      "id": "ingredient.chile_powder",
+      "label": "Chili powder",
+      "role": "spice.sauce",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Or use a mix of guajillo/ancho for deeper flavor"
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "base.sauce",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Adds body; optional"
+    },
+    {
+      "id": "ingredient.chicken_broth",
+      "label": "Chicken broth (or stock)",
+      "role": "liquid.sauce",
+      "amount": { "value": 2, "unit": "cups" }
+    },
+    {
+      "id": "ingredient.vinegar_apple_cider",
+      "label": "Apple cider vinegar (or lime juice)",
+      "role": "acid.sauce",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.cheddar_shredded",
+      "label": "Shredded cheese (cheddar/monterey jack blend)",
+      "role": "topping",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true,
+      "notes": "Omit for dairy-free"
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Fresh cilantro",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime",
+      "role": "acid.garnish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Cut into wedges"
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Filling",
+      "items": [
+        "ingredient.chicken_cooked_shredded",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.cumin_ground",
+        "ingredient.oregano_mexican",
+        "ingredient.salt",
+        "ingredient.black_pepper",
+        "ingredient.oil_neutral"
+      ]
+    },
+    {
+      "label": "Red Enchilada Sauce (Quick)",
+      "items": [
+        "ingredient.oil_neutral",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.chile_powder",
+        "ingredient.tomato_paste",
+        "ingredient.chicken_broth",
+        "ingredient.vinegar_apple_cider",
+        "ingredient.salt"
+      ]
+    },
+    {
+      "label": "Assembly & Finish",
+      "items": [
+        "ingredient.corn_tortilla",
+        "ingredient.cheddar_shredded",
+        "ingredient.cilantro",
+        "ingredient.lime"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.preheat",
+      "title": "Preheat and prep pan",
+      "activeMins": 5,
+      "body": "Heat oven to 375°F (190°C). Lightly oil a 9x13-inch baking dish."
+    },
+    {
+      "id": "step.make_sauce",
+      "title": "Make quick red enchilada sauce",
+      "activeMins": 12,
+      "body": "In a saucepan, heat 1 tbsp oil over medium heat. Sauté half the onion (about half) until soft, then add half the garlic and cook 30 seconds. Stir in chili powder (and tomato paste if using) for 30–60 seconds. Whisk in broth gradually. Simmer 5–7 minutes until slightly thickened; season with salt and a small splash of vinegar/lime if desired.",
+      "timers": [
+        { "label": "Sauté onions", "minutes": 4 },
+        { "label": "Simmer sauce", "minutes": 6 }
+      ],
+      "checks": [
+        "Sauce is smooth and pourable",
+        "Chili powder is bloomed (no raw taste)"
+      ]
+    },
+    {
+      "id": "step.make_filling",
+      "title": "Season the chicken filling",
+      "activeMins": 10,
+      "body": "In a skillet, heat 1 tbsp oil over medium heat. Sauté remaining onion until soft, add remaining garlic for 30 seconds. Add shredded chicken, cumin, Mexican oregano, salt, and pepper. Stir until hot and well seasoned. If dry, add a splash of broth or a few spoonfuls of sauce.",
+      "timers": [{ "label": "Warm and season filling", "minutes": 6 }],
+      "checks": ["Filling tastes seasoned on its own"]
+    },
+    {
+      "id": "step.soften_tortillas",
+      "title": "Soften tortillas",
+      "activeMins": 6,
+      "body": "Warm tortillas briefly so they bend without cracking. Option A: heat on a dry comal 15–20 seconds per side. Option B: lightly oil a skillet and warm each tortilla quickly. Keep covered so they stay pliable.",
+      "timers": [{ "label": "Per tortilla (per side)", "minutes": 1 }]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble enchiladas",
+      "activeMins": 12,
+      "body": "Spread a thin layer of sauce in the bottom of the baking dish. Fill each tortilla with chicken, roll tightly, and place seam-side down. Pour remaining sauce over the top. Add cheese if using."
+    },
+    {
+      "id": "step.bake",
+      "title": "Bake",
+      "activeMins": 2,
+      "handsOffMins": 20,
+      "body": "Bake 18–22 minutes until bubbling and heated through. If using cheese, it should be melted and lightly browned at edges.",
+      "timers": [{ "label": "Bake", "minutes": 20 }],
+      "checks": ["Center is hot", "Sauce is bubbling around edges"]
+    },
+    {
+      "id": "step.finish",
+      "title": "Rest and serve",
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "body": "Rest 5 minutes. Serve with cilantro and lime wedges. Optional sides: arroz rojo, beans, salad."
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.verdes",
+      "label": "Enchiladas Verdes",
+      "notes": "Swap the red sauce for salsa verde (tomatillo-based). Keep filling the same or add sautéed poblano."
+    },
+    {
+      "id": "variation.cheese_beans",
+      "label": "Cheese & Bean Enchiladas",
+      "notes": "Replace chicken with a mix of refried beans and cheese (or dairy-free cheese)."
+    },
+    {
+      "id": "variation.dairy_free",
+      "label": "Dairy-Free",
+      "notes": "Omit cheese or use a dairy-free substitute. Add avocado slices or extra salsa for richness."
+    },
+    {
+      "id": "variation.more_heat",
+      "label": "Spicier Rojas",
+      "notes": "Add chipotle in adobo or a pinch of cayenne to the sauce; garnish with sliced jalapeño."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Cool and refrigerate covered for up to 4 days.",
+    "freezing": "Freeze fully assembled (unbaked or baked) for up to 2 months. Thaw overnight before baking/reheating.",
+    "reheat": "Reheat covered at 350°F (175°C) until hot; add a splash of broth/sauce if dry."
+  },
+  "safety": {
+    "notes": [
+      "Cool cooked enchiladas within 2 hours before refrigerating.",
+      "Reheat leftovers to steaming hot throughout."
+    ]
+  },
+  "pairings": {
+    "sides": [
+      "mexican.arroz_rojo",
+      "mexican.frijoles_refritos",
+      "mexican.elote"
+    ],
+    "salsas": ["mexican.pico_de_gallo", "mexican.salsa_roja"],
+    "drinks": ["mexican.horchata", "mexican.agua_fresca_jamaica"]
+  },
+  "planner": {
+    "preferredFor": ["family_dinner", "batch_cooking", "meal_prep"],
+    "scalesWell": true,
+    "leftoversPlan": "Portion into single-meal containers with rice/beans for grab-and-go."
+  },
+  "methods": ["technique.sauté", "technique.simmer", "technique.bake"],
+  "compat": {
+    "dishId": "mexican.enchiladas_rojas",
+    "aliases": ["enchiladas", "enchiladas rojas", "red enchiladas"]
+  },
+  "notes": [
+    "Canonical SSA enchiladas baseline: quick sauce + flexible filling + bake.",
+    "If you maintain a strict corn-only policy, ensure chili powder is gluten-free (some blends contain anti-caking agents).",
+    "For deeper flavor, replace chili powder with toasted dried guajillo/ancho chiles blended with broth, then simmer."
+  ]
+}

@@ -18,8 +18,8 @@
  */
 
 import { useMemo, useCallback } from "react";
-import { emit as emitEvent } from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 
 // Hub helpers are optional; wrap in try/catch so this file is safe if they move.
 let HubPacketFormatter;
@@ -85,14 +85,14 @@ export function useBiblicalOfferingStudyPlans(output, options) {
         "offerings",
         "overview",
         output.offeringType || "offering",
-        "torah-study"
+        "torah-study",
       ],
       createdAt: nowIso,
       meta: {
         summary: output.canonicalSummary?.briefExplanation || "",
         recommendedAudience: "household-all-ages",
-        fromCalculator: "biblical-offering-calculator"
-      }
+        fromCalculator: "biblical-offering-calculator",
+      },
     });
 
     // Plan 2: Animal patterns (if any)
@@ -109,7 +109,7 @@ export function useBiblicalOfferingStudyPlans(output, options) {
           "animals",
           "husbandry",
           "meat",
-          output.offeringType || "offering"
+          output.offeringType || "offering",
         ],
         createdAt: nowIso,
         meta: {
@@ -117,9 +117,9 @@ export function useBiblicalOfferingStudyPlans(output, options) {
           suggestedActivities: [
             "compare permitted animals by age/sex",
             "map offerings to current livestock or potential acquisitions",
-            "discuss why defects are disallowed"
-          ]
-        }
+            "discuss why defects are disallowed",
+          ],
+        },
       });
     }
 
@@ -141,16 +141,16 @@ export function useBiblicalOfferingStudyPlans(output, options) {
           "drink",
           "breadmaking",
           "wine",
-          output.offeringType || "offering"
+          output.offeringType || "offering",
         ],
         createdAt: nowIso,
         meta: {
           grainDrinkPatterns: output.grainDrinkPatterns,
           suggestedActivities: [
             "connect grain offerings to breadmaking sessions",
-            "study firstfruits and libations as celebration of provision"
-          ]
-        }
+            "study firstfruits and libations as celebration of provision",
+          ],
+        },
       });
     }
 
@@ -167,8 +167,8 @@ export function useBiblicalOfferingStudyPlans(output, options) {
         createdAt: nowIso,
         meta: {
           prompts: output.studyPrompts,
-          recommendedUse: "family-evening-discussion-or-class"
-        }
+          recommendedUse: "family-evening-discussion-or-class",
+        },
       });
     }
 
@@ -198,7 +198,7 @@ export function useOfferingCalendarEvents(output, options) {
   const {
     startDate,
     intervalDays = 7,
-    calendarId = "household-scripture"
+    calendarId = "household-scripture",
   } = options || {};
 
   return useMemo(() => {
@@ -222,7 +222,7 @@ export function useOfferingCalendarEvents(output, options) {
         description:
           output.canonicalSummary?.briefExplanation ||
           "Overview of this offering, its heart posture, and anchor passages.",
-        scriptures: output.canonicalSummary?.coreScriptures || []
+        scriptures: output.canonicalSummary?.coreScriptures || [],
       })
     );
 
@@ -236,7 +236,7 @@ export function useOfferingCalendarEvents(output, options) {
           anchorDate,
           description:
             "Study animals associated with this offering—species, age, sex, and defect rules.",
-          scriptures: output.canonicalSummary?.coreScriptures || []
+          scriptures: output.canonicalSummary?.coreScriptures || [],
         })
       );
     }
@@ -254,7 +254,7 @@ export function useOfferingCalendarEvents(output, options) {
           anchorDate,
           description:
             "Explore grain and drink elements—measures, oils, and how they picture provision.",
-          scriptures: output.canonicalSummary?.coreScriptures || []
+          scriptures: output.canonicalSummary?.coreScriptures || [],
         })
       );
     }
@@ -269,7 +269,7 @@ export function useOfferingCalendarEvents(output, options) {
           anchorDate,
           description:
             "Work through reflection questions and journal or discuss the heart posture of this offering.",
-          scriptures: output.canonicalSummary?.coreScriptures || []
+          scriptures: output.canonicalSummary?.coreScriptures || [],
         })
       );
     }
@@ -303,30 +303,32 @@ export function useOfferingStudySessionLauncher(output) {
       domain: "storehouse",
       title:
         output.canonicalSummary?.label ||
-        `Offering Study Session – ${capitalize(output.offeringType || "offering")}`,
+        `Offering Study Session – ${capitalize(
+          output.offeringType || "offering"
+        )}`,
       source: {
         type: "manual",
-        refId: null
+        refId: null,
       },
       steps,
       prefs: {
         voiceGuidance: true,
         haptic: false,
-        autoAdvance: false
+        autoAdvance: false,
       },
       status: "pending",
       progress: {
         currentStepIndex: 0,
         elapsedSec: 0,
         startedAt: null,
-        pausedAt: null
+        pausedAt: null,
       },
       analytics: {
         skippedSteps: [],
-        adjustments: []
+        adjustments: [],
       },
       createdAt: nowIso,
-      updatedAt: nowIso
+      updatedAt: nowIso,
     };
 
     try {
@@ -334,7 +336,7 @@ export function useOfferingStudySessionLauncher(output) {
         type: "session.created",
         ts: nowIso,
         source: "calculators/calendar/BiblicalOfferingCalculator/hooks",
-        data: { session }
+        data: { session },
       });
 
       exportOfferingStudyToHubIfEnabled(output, session);
@@ -384,8 +386,14 @@ function capitalize(value) {
  * }} opts
  */
 function createOfferingEvent(opts) {
-  const { calendarId, baseTitle, anchorDate, offsetDays, description, scriptures } =
-    opts;
+  const {
+    calendarId,
+    baseTitle,
+    anchorDate,
+    offsetDays,
+    description,
+    scriptures,
+  } = opts;
 
   const start = new Date(anchorDate.getTime());
   start.setDate(start.getDate() + offsetDays);
@@ -403,8 +411,8 @@ function createOfferingEvent(opts) {
     description,
     meta: {
       type: "offering-study",
-      scriptures
-    }
+      scriptures,
+    },
   };
 }
 
@@ -423,15 +431,15 @@ function buildStudySessionStepsFromResult(result) {
   steps.push({
     id: createEphemeralId("step/open"),
     title: "Open in Prayer & Intent",
-    desc:
-      "Gather your household, open in prayer, and state the intent of this study: to understand this offering and its heart posture.",
+    desc: "Gather your household, open in prayer, and state the intent of this study: to understand this offering and its heart posture.",
     durationSec: 5 * 60,
     blockers: ["quietHours"],
     metadata: {
       tempTargetF: 0,
       donenessCue: "timer",
-      cueNotes: "Short opening segment. Can be extended if family discussion is flowing."
-    }
+      cueNotes:
+        "Short opening segment. Can be extended if family discussion is flowing.",
+    },
   });
 
   // Step 2 – Read anchor scriptures
@@ -451,8 +459,8 @@ function buildStudySessionStepsFromResult(result) {
       tempTargetF: 0,
       donenessCue: "timer",
       cueNotes:
-        "Take turns reading aloud. Invite older children or adults to read longer sections."
-    }
+        "Take turns reading aloud. Invite older children or adults to read longer sections.",
+    },
   });
 
   // Step 3 – Walk through animal patterns (optional)
@@ -460,16 +468,15 @@ function buildStudySessionStepsFromResult(result) {
     steps.push({
       id: createEphemeralId("step/animals"),
       title: "Observe Animal Patterns",
-      desc:
-        "Review which animals are used in this offering. Discuss age, sex, and defect rules and why they might matter.",
+      desc: "Review which animals are used in this offering. Discuss age, sex, and defect rules and why they might matter.",
       durationSec: 10 * 60,
       blockers: [],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Optionally connect this to current or future livestock plans using SSA's animal tools."
-      }
+          "Optionally connect this to current or future livestock plans using SSA's animal tools.",
+      },
     });
   }
 
@@ -481,16 +488,15 @@ function buildStudySessionStepsFromResult(result) {
     steps.push({
       id: createEphemeralId("step/grain-drink"),
       title: "Review Grain & Drink Elements",
-      desc:
-        "Look at the grain and drink measures. Compare them to your family’s bread, oil, and drink usage.",
+      desc: "Look at the grain and drink measures. Compare them to your family’s bread, oil, and drink usage.",
       durationSec: 10 * 60,
       blockers: [],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Optionally schedule a breadmaking or grape-juice making session as a follow-up."
-      }
+          "Optionally schedule a breadmaking or grape-juice making session as a follow-up.",
+      },
     });
   }
 
@@ -499,16 +505,15 @@ function buildStudySessionStepsFromResult(result) {
     steps.push({
       id: createEphemeralId("step/reflection"),
       title: "Reflection & Response",
-      desc:
-        "Choose 2–3 reflection questions from the list and discuss or journal responses as a household.",
+      desc: "Choose 2–3 reflection questions from the list and discuss or journal responses as a household.",
       durationSec: 15 * 60,
       blockers: [],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Keep it gentle and open. The goal is understanding and heart posture, not interrogation."
-      }
+          "Keep it gentle and open. The goal is understanding and heart posture, not interrogation.",
+      },
     });
   }
 
@@ -516,16 +521,15 @@ function buildStudySessionStepsFromResult(result) {
   steps.push({
     id: createEphemeralId("step/close"),
     title: "Close & Plan a Small Next Step",
-    desc:
-      "Close in prayer, then pick one small next step: a reminder, a study note, or a practice to remember what you’ve learned.",
+    desc: "Close in prayer, then pick one small next step: a reminder, a study note, or a practice to remember what you’ve learned.",
     durationSec: 5 * 60,
     blockers: [],
     metadata: {
       tempTargetF: 0,
       donenessCue: "timer",
       cueNotes:
-        "You might schedule another study, add a note to SSA, or link this offering to a future feast preparation session."
-    }
+        "You might schedule another study, add a note to SSA, or link this offering to a future feast preparation session.",
+    },
   });
 
   return steps;
@@ -548,12 +552,12 @@ function exportOfferingStudyToHubIfEnabled(output, session) {
       offeringType: output.offeringType,
       canonicalSummary: output.canonicalSummary,
       createdSessionId: session?.id || null,
-      createdAt: session?.createdAt || new Date().toISOString()
+      createdAt: session?.createdAt || new Date().toISOString(),
     };
 
     const packet = HubPacketFormatter.format({
       kind: "offering.study-session",
-      payload
+      payload,
     });
 
     FamilyFundConnector.send(packet);

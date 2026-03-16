@@ -31,9 +31,12 @@
  *   const nextVersion = registerFavoritesSchedulesMigration(db);
  */
 
-let eventBus = { emit: (...a) => console.debug("[db:migration:fav-sched:eventBus.emit]", ...a), on: () => () => {} };
+let eventBus = {
+  emit: (...a) => console.debug("[db:migration:fav-sched:eventBus.emit]", ...a),
+  on: () => () => {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -45,8 +48,8 @@ try {
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
 try {
-  HubPacketFormatter = require("@/hub/HubPacketFormatter");
-  FamilyFundConnector = require("@/hub/FamilyFundConnector");
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
 } catch {}
 
 const nowISO = () => new Date().toISOString();
@@ -63,11 +66,14 @@ async function exportToHubIfEnabled(summary) {
     if (!featureFlags?.familyFundMode) return;
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet =
-      (HubPacketFormatter.formatDbMigration && HubPacketFormatter.formatDbMigration(summary)) ||
-      (HubPacketFormatter.format && HubPacketFormatter.format({ kind: "db.migration", ...summary })) ||
+      (HubPacketFormatter.formatDbMigration &&
+        HubPacketFormatter.formatDbMigration(summary)) ||
+      (HubPacketFormatter.format &&
+        HubPacketFormatter.format({ kind: "db.migration", ...summary })) ||
       null;
     if (!packet) return;
-    await (FamilyFundConnector.send?.(packet) || FamilyFundConnector.post?.(packet));
+    await (FamilyFundConnector.send?.(packet) ||
+      FamilyFundConnector.post?.(packet));
   } catch {
     // fail silently by design
   }
@@ -139,7 +145,9 @@ async function seedFromGeneric(tx) {
     const all = await fav.toArray().catch(() => []);
     for (const r of all) {
       const domain = String(r.domain || "").toLowerCase();
-      const isDraft = String(r.kind || "").toLowerCase().includes("draft");
+      const isDraft = String(r.kind || "")
+        .toLowerCase()
+        .includes("draft");
       if (!isDraft) continue;
       const storeName =
         domain === "cooking"
@@ -154,7 +162,11 @@ async function seedFromGeneric(tx) {
       if (!storeName) continue;
       try {
         await tx.table(storeName).put({
-          id: r.id || `fav_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`,
+          id:
+            r.id ||
+            `fav_${Date.now().toString(36)}_${Math.random()
+              .toString(36)
+              .slice(2)}`,
           targetId: String(r.targetId || ""),
           title: r.title || undefined,
           tags: r.tags || undefined,
@@ -188,7 +200,11 @@ async function seedFromGeneric(tx) {
       if (!storeName) continue;
       try {
         await tx.table(storeName).put({
-          id: r.id || `tpl_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`,
+          id:
+            r.id ||
+            `tpl_${Date.now().toString(36)}_${Math.random()
+              .toString(36)
+              .slice(2)}`,
           title: r.title || "",
           rrule: r.rrule || "",
           tzid: r.tzid || undefined,
@@ -222,7 +238,9 @@ async function seedFromGeneric(tx) {
  */
 function registerFavoritesSchedulesMigration(db) {
   if (!db || typeof db.version !== "function") {
-    throw new Error("registerFavoritesSchedulesMigration: expected a Dexie instance.");
+    throw new Error(
+      "registerFavoritesSchedulesMigration: expected a Dexie instance."
+    );
   }
 
   // Dexie verno may be float; bump to the next integer for safety.
@@ -244,14 +262,24 @@ function registerFavoritesSchedulesMigration(db) {
           await tx.table(name).limit(0).toArray();
           created.push(name);
         } catch (err) {
-          emit("db.migration.table.error", { name, message: err?.message || String(err) });
+          emit("db.migration.table.error", {
+            name,
+            message: err?.message || String(err),
+          });
         }
       }
 
       // Seed from generic tables if present
       const seeding = await seedFromGeneric(tx).catch((err) => {
-        emit("db.migration.seed.error", { message: err?.message || String(err) });
-        return { seededFavorites: 0, seededSchedules: 0, startedAt: nowISO(), finishedAt: nowISO() };
+        emit("db.migration.seed.error", {
+          message: err?.message || String(err),
+        });
+        return {
+          seededFavorites: 0,
+          seededSchedules: 0,
+          startedAt: nowISO(),
+          finishedAt: nowISO(),
+        };
       });
 
       const finishedAt = nowISO();

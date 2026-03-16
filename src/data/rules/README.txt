@@ -153,7 +153,7 @@ Draft-07 note:
 Events Emitted by Engines (downstream; shown here for reference)
 ============================================================
 When rules trigger insertions/modifications, domain engines should emit events
-via src/services/eventBus.js with consistent payload:
+via src/services/events/eventBus.js with consistent payload:
 
 { type, ts, source, data }
 - type: string (e.g., "automation.rule.applied", "inventory.updated")

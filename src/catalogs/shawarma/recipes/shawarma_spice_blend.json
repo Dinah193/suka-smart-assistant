@@ -1,0 +1,354 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.recipes.shawarma_spice_blend",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Shawarma Spice Blend",
+    "subtitle": "Warm, aromatic Levantine-style spice mix for chicken, beef, lamb, veggies, and sauces",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Salt-free by default so it can be used flexibly (dry rub, marinades, sauces).",
+        "Scaled for a jar batch; includes optional heat and citrusy sumac."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "spice_blend", "pantry", "batch_prep"],
+    "category": "component",
+    "mealArchetypes": [
+      "meal_archetype.condiments",
+      "meal_archetype.components"
+    ],
+    "servingStyles": ["batch", "jar", "prep"],
+    "plannerTags": [
+      "shawarma",
+      "spice_blend",
+      "pantry",
+      "batch_friendly",
+      "marinade_base",
+      "dry_rub",
+      "toum_friendly",
+      "tahini_friendly"
+    ]
+  },
+
+  "summary": "A classic shawarma-style spice blend: cumin-coriander backbone with paprika, turmeric, warm baking spices, and optional sumac/heat. Use as a dry rub or stir into oil + lemon for a quick marinade.",
+
+  "yield": {
+    "servings": 24,
+    "servingSize": { "value": 1, "unit": "tbsp" },
+    "notes": "Makes about 1 1/2 cups (24 tbsp). Adjust batch size as needed."
+  },
+
+  "time": {
+    "activeMins": 10,
+    "handsOffMins": 0,
+    "totalMins": 10
+  },
+
+  "difficulty": 1,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "primary": [
+      "warm_spice",
+      "savory",
+      "aromatic",
+      "earthy",
+      "citrusy_optional"
+    ],
+    "heat": {
+      "typical": 0,
+      "range": [0, 3],
+      "note": "Add Aleppo/cayenne to taste."
+    }
+  },
+
+  "equipment": {
+    "minimum": ["equipment.bowl", "equipment.spoon", "equipment.jar_with_lid"],
+    "recommended": ["equipment.funnel", "equipment.label_maker"],
+    "optional": [
+      {
+        "id": "equipment.spice_grinder",
+        "label": "Spice grinder",
+        "notes": "Optional: grind whole spices fresh for maximum aroma."
+      },
+      {
+        "id": "equipment.fine_mesh_sieve",
+        "label": "Fine-mesh sieve",
+        "notes": "Optional: sift if you want an ultra-smooth blend."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.vegan",
+    "diet.vegetarian",
+    "diet.dairy_free",
+    "diet.gluten_free"
+  ],
+  "allergens": {
+    "notes": [
+      "Most spices are allergen-light, but always check for cross-contact warnings (especially paprika/chili powders)."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice_backbone",
+      "amount": { "value": 6, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.coriander_ground",
+      "label": "Ground coriander",
+      "role": "spice_backbone",
+      "amount": { "value": 6, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (sweet; smoked optional)",
+      "role": "body_color",
+      "amount": { "value": 6, "unit": "tbsp" },
+      "notes": "Use half smoked paprika if you like a deeper, BBQ-like note."
+    },
+    {
+      "id": "ingredient.turmeric_ground",
+      "label": "Ground turmeric",
+      "role": "color_earth",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.garlic_powder",
+      "label": "Garlic powder",
+      "role": "savory",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "If you prefer, swap for granulated garlic."
+    },
+    {
+      "id": "ingredient.onion_powder",
+      "label": "Onion powder",
+      "role": "savory",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional, but gives a more 'shop' style rub."
+    },
+
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.allspice_ground",
+      "label": "Ground allspice",
+      "role": "warm_spice",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "role": "warm_spice",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.cardamom_ground",
+      "label": "Ground cardamom",
+      "role": "floral_warm",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true,
+      "notes": "Use 1 tsp if you want it more subtle."
+    },
+    {
+      "id": "ingredient.clove_ground",
+      "label": "Ground cloves",
+      "role": "warm_spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Potent—keep it light."
+    },
+    {
+      "id": "ingredient.nutmeg_ground",
+      "label": "Ground nutmeg",
+      "role": "warm_spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.sumac",
+      "label": "Ground sumac",
+      "role": "citrus_tang",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Adds bright tang; optional but highly recommended for a shawarma finish."
+    },
+    {
+      "id": "ingredient.aleppo_pepper",
+      "label": "Aleppo pepper (or mild chili flakes)",
+      "role": "heat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional heat. For hotter blend, use 1 tbsp cayenne instead."
+    },
+    {
+      "id": "ingredient.cayenne",
+      "label": "Cayenne pepper",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Only if you want the blend to have a built-in kick."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_mix",
+      "title": "Mix the spice blend",
+      "instructions": [
+        "Add all spices to a bowl.",
+        "Whisk thoroughly until the color and texture are uniform.",
+        "Optional: sift for a smoother blend."
+      ],
+      "timers": [{ "label": "Mix spices", "minutes": 5 }],
+      "checks": ["Even color", "No clumps of paprika/garlic powder"]
+    },
+    {
+      "id": "step.002_jar_label",
+      "title": "Jar and label",
+      "instructions": [
+        "Transfer the blend to a clean, dry jar with a tight-fitting lid.",
+        "Label with name and date.",
+        "Store in a cool, dark place."
+      ],
+      "timers": [{ "label": "Jar and label", "minutes": 5 }],
+      "checks": ["Jar is dry", "Date labeled"]
+    },
+    {
+      "id": "step.003_how_to_use",
+      "title": "How to use (quick formulas)",
+      "instructions": [
+        "Dry rub (per 1 lb meat): 1 to 1 1/2 tbsp blend + 1 tsp kosher salt + 1 tbsp oil (optional). Rest 15–30 minutes, then cook hot.",
+        "Quick marinade (per 2 lb meat): 3 tbsp blend + 2 tsp kosher salt + 1/4 cup oil + 3 tbsp lemon juice + 3–4 minced garlic cloves. Marinate 45 min–6 hours.",
+        "Veg roast: Toss vegetables with 1 tbsp blend + 1/2 tsp salt + 1 tbsp oil per sheet pan; roast at 425–450°F.",
+        "Sauce booster: Stir 1–2 tsp blend into tahini sauce, yogurt sauce, or toum for instant shawarma flavor."
+      ],
+      "checks": [
+        "Salt is added separately in usage formulas (blend is salt-free)"
+      ]
+    }
+  ],
+
+  "storage": {
+    "pantry": {
+      "duration": "6 months",
+      "notes": "Best flavor within 3 months. Keep dry and tightly sealed."
+    },
+    "freezer": {
+      "duration": "12 months",
+      "notes": "Freezing extends aroma retention. Bring to room temp before opening to avoid condensation."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Mix shawarma spice blend", "mins": 10 },
+      { "task": "Label jar + store", "mins": 2 }
+    ],
+    "batchNotes": [
+      "Make a double batch if your household does shawarma weekly.",
+      "Keep a small shaker jar in the everyday spice drawer and the bulk jar in pantry storage."
+    ]
+  },
+
+  "methods": ["technique.mix", "technique.pantry_prep", "technique.batch_prep"],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "shawarma seasoning",
+        "shawarma rub",
+        "shawarma spice mix",
+        "middle eastern spice blend",
+        "levantine spice blend"
+      ],
+      "keywords": [
+        "cumin",
+        "coriander",
+        "paprika",
+        "turmeric",
+        "allspice",
+        "cinnamon",
+        "sumac",
+        "aleppo",
+        "toum",
+        "tahini"
+      ]
+    },
+    "normalization": {
+      "notes": [
+        "If your ingredient IDs differ, map using ingredient aliases (e.g., paprika_smoked vs paprika).",
+        "If omitting sumac, add brightness later with lemon juice + a finishing sprinkle of sumac at serving."
+      ]
+    }
+  },
+
+  "notes": [
+    "Salt-free by design: salt varies by meat cut, cooking method, and dietary needs.",
+    "If you can, grind whole cumin/coriander fresh: 2 parts cumin seed : 2 parts coriander seed, toasted lightly, then ground and mixed with remaining spices.",
+    "If your paprika is old or dull, your blend will taste flat—fresh paprika matters here."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.shop_style",
+      "label": "Shawarma-shop style (more savory)",
+      "when": { "preferences": ["more_savory"] },
+      "adapt": {
+        "notes": [
+          "Include onion powder (2 tbsp) and garlic powder (increase to 4 tbsp).",
+          "Add 1 tbsp ground ginger for extra warmth."
+        ]
+      }
+    },
+    {
+      "id": "variation.low_heat",
+      "label": "No-heat family blend",
+      "when": { "preferences": ["kid_friendly"] },
+      "adapt": {
+        "notes": [
+          "Omit Aleppo and cayenne.",
+          "Serve heat separately (hot sauce or chili flakes at the table)."
+        ]
+      }
+    },
+    {
+      "id": "variation.lamb_forward",
+      "label": "Lamb-forward blend",
+      "when": { "protein": ["lamb"] },
+      "adapt": {
+        "notes": [
+          "Increase allspice to 2 tbsp and add 1 tbsp dried oregano.",
+          "Add 1 tsp ground rosemary (optional) for a piney lamb-friendly note."
+        ]
+      }
+    }
+  ]
+}

@@ -16,10 +16,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import CostPerServingCalculatorView from "@/features/calculators/storehouseMeals/CostPerServingCalculator.view";
+import CostPerServingCalculatorView from "@/features/calculators/storehouseMeals/CostPerServingCalculator/CostPerServingCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.costPerServing";
 
@@ -191,9 +191,7 @@ function CostPerServingSummaryCard({ result, onCreatePlan }) {
         <div className="flex flex-col">
           <span className="text-slate-400 mb-0.5">Range (min → max)</span>
           <span className="text-slate-50 font-semibold">
-            {min || max
-              ? `$${min.toFixed(2)} → $${max.toFixed(2)}`
-              : "—"}
+            {min || max ? `$${min.toFixed(2)} → $${max.toFixed(2)}` : "—"}
           </span>
         </div>
       </div>
@@ -325,14 +323,10 @@ export default function CostPerServingCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.cost-per-serving",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.cost-per-serving",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -370,9 +364,7 @@ export default function CostPerServingCalculatorPage() {
         ingredients: Array.isArray(calcResult.ingredients)
           ? calcResult.ingredients
           : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };

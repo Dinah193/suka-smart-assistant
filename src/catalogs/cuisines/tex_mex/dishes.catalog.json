@@ -1,0 +1,1098 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "SSA canonical Tex-Mex dish browse catalog.",
+    "IDs and tags follow ^[a-z0-9_.-]+$.",
+    "Indexes are precomputed for fast deterministic planner/search lookups."
+  ],
+
+  "meta": {
+    "id": "cuisines.tex_mex.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Tex-Mex • Dishes",
+    "cuisineId": "cuisines.tex_mex",
+    "status": "canonical",
+    "description": "Dish entries used by SSA planners and UI browse for Tex-Mex (Texas + Mexican-American borderlands style).",
+    "version": "1.0.0",
+    "author": "SSA Catalogs",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "notes": [
+      "Focus: tortillas, beans, rice, roasted chiles, cumin-forward seasonings, melty cheese, seared meats, salsas."
+    ]
+  },
+
+  "description": "Tex-Mex dish catalog for planners, search, and UI browse. Includes tacos, burritos, fajitas, chili, enchiladas, rice/beans sides, queso/salsa, and bowl-style plates.",
+  "tags": [
+    "cuisine.tex_mex",
+    "region.north_america",
+    "profile.weeknight_friendly",
+    "profile.batch_friendly"
+  ],
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "texmex.tacos.carne_asada",
+      "label": "Carne Asada Tacos",
+      "aka": ["Steak Tacos", "Asada Tacos"],
+      "subprofiles": ["texmex.subprofile.street_style"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 45, "handsOffMins": 20 },
+      "servingStyles": ["street_food", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.taco_plate"],
+      "signals": {
+        "batchFriendly": "medium",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "low"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.beef.skirt_steak",
+            "ingredient.beef.flank_steak"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.tortilla.corn", "ingredient.tortilla.flour"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.onion.white", "ingredient.cilantro"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.salsa.pico_de_gallo",
+            "ingredient.salsa.roja",
+            "ingredient.salsa.verde"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.lime",
+            "ingredient.avocado",
+            "ingredient.cheese.cotija"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.grill", "method.sear", "method.marinade"],
+      "equipmentRecommended": [
+        "equipment.grill",
+        "equipment.cast_iron_skillet",
+        "equipment.tongs"
+      ],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef.skirt_steak",
+        "ingredient.tortilla.corn",
+        "ingredient.lime",
+        "ingredient.garlic",
+        "ingredient.cumin",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": ["diet.high_protein"],
+      "plannerTags": [
+        "texmex.tacos",
+        "weeknight",
+        "grill",
+        "meal.main",
+        "leftovers.good"
+      ]
+    },
+
+    {
+      "id": "texmex.tacos.chicken",
+      "label": "Seasoned Chicken Tacos",
+      "aka": ["Chicken Tacos", "Tex-Mex Chicken Tacos"],
+      "subprofiles": ["texmex.subprofile.family_style"],
+      "category": "main",
+      "difficulty": 1,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 30, "handsOffMins": 10 },
+      "servingStyles": ["family_style", "street_food"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.taco_plate"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "medium"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken.thigh", "ingredient.chicken.breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.tortilla.flour", "ingredient.tortilla.corn"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.salsa.pico_de_gallo",
+            "ingredient.salsa.roja",
+            "ingredient.sour_cream"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.lettuce",
+            "ingredient.onion.white",
+            "ingredient.tomato"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.cheese.cheddar",
+            "ingredient.lime",
+            "ingredient.cilantro"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.saute", "method.sear"],
+      "equipmentRecommended": ["equipment.skillet", "equipment.tongs"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken.thigh",
+        "ingredient.cumin",
+        "ingredient.chili_powder",
+        "ingredient.garlic",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": ["diet.high_protein"],
+      "plannerTags": [
+        "texmex.tacos",
+        "weeknight",
+        "meal.main",
+        "batch.friendly"
+      ]
+    },
+
+    {
+      "id": "texmex.burrito.beef_and_bean",
+      "label": "Beef & Bean Burritos",
+      "aka": ["Beef Burritos", "Bean Burritos (with beef)"],
+      "subprofiles": ["texmex.subprofile.family_style"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 45, "handsOffMins": 10 },
+      "servingStyles": ["street_food", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.handheld_wrap"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef.ground", "ingredient.beef.shredded"],
+          "chooseOne": true
+        },
+        {
+          "role": "legume",
+          "items": ["ingredient.beans.pinto", "ingredient.beans.black"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.tortilla.flour_large"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.rice.white", "ingredient.rice.spanish_style"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.salsa.roja", "ingredient.enchilada_sauce.red"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.cheese.cheddar",
+            "ingredient.sour_cream",
+            "ingredient.avocado"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.saute", "method.simmer", "method.wrap"],
+      "equipmentRecommended": ["equipment.skillet", "equipment.saucepan"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.tortilla.flour_large",
+        "ingredient.beef.ground",
+        "ingredient.beans.pinto",
+        "ingredient.cumin",
+        "ingredient.chili_powder",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": [
+        "texmex.burrito",
+        "freezer.friendly",
+        "batch.friendly",
+        "meal.main"
+      ]
+    },
+
+    {
+      "id": "texmex.fajitas.chicken_or_steak",
+      "label": "Chicken or Steak Fajitas",
+      "aka": ["Fajitas", "Skillet Fajitas"],
+      "subprofiles": ["texmex.subprofile.skillet_style"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.fajita_plate"],
+      "signals": {
+        "batchFriendly": "medium",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "low"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken.thigh", "ingredient.beef.skirt_steak"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.bell_pepper", "ingredient.onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.tortilla.flour", "ingredient.tortilla.corn"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.salsa.pico_de_gallo", "ingredient.sour_cream"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.lime", "ingredient.cilantro"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.sear", "method.saute"],
+      "equipmentRecommended": [
+        "equipment.cast_iron_skillet",
+        "equipment.tongs"
+      ],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.bell_pepper",
+        "ingredient.onion",
+        "ingredient.lime",
+        "ingredient.cumin",
+        "ingredient.chili_powder"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": ["diet.high_protein"],
+      "plannerTags": ["texmex.fajitas", "weeknight", "meal.main", "one_pan"]
+    },
+
+    {
+      "id": "texmex.enchiladas.chicken",
+      "label": "Chicken Enchiladas (Red Sauce)",
+      "aka": ["Red Enchiladas", "Chicken Enchiladas"],
+      "subprofiles": ["texmex.subprofile.baked"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 60, "handsOffMins": 30 },
+      "servingStyles": ["plated_meals", "family_style", "holiday_feasts"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.baked_casserole"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken.shredded"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.tortilla.corn", "ingredient.tortilla.flour"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.enchilada_sauce.red"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": [
+            "ingredient.cheese.monterey_jack",
+            "ingredient.cheese.cheddar"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.cilantro",
+            "ingredient.onion.green",
+            "ingredient.sour_cream"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.bake", "method.assemble", "method.simmer"],
+      "equipmentRecommended": ["equipment.baking_dish", "equipment.saucepan"],
+      "equipmentMinimum": [
+        "equipment.baking_dish",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.enchilada_sauce.red",
+        "ingredient.tortilla.corn",
+        "ingredient.chicken.shredded",
+        "ingredient.cheese.monterey_jack"
+      ],
+      "allergens": ["allergen.dairy", "allergen.gluten"],
+      "dietFlags": [],
+      "plannerTags": [
+        "texmex.enchiladas",
+        "freezer.friendly",
+        "batch.friendly",
+        "meal.main",
+        "bake"
+      ]
+    },
+
+    {
+      "id": "texmex.chili.texas_style",
+      "label": "Texas-Style Chili (No Beans)",
+      "aka": ["Texas Chili", "Chili Con Carne (Texas style)"],
+      "subprofiles": ["texmex.subprofile.chili_house"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 25, "totalMins": 120, "handsOffMins": 90 },
+      "servingStyles": ["one_pot", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.chili_bowl"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef.chuck", "ingredient.beef.ground"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": [
+            "ingredient.chili_powder",
+            "ingredient.cumin",
+            "ingredient.oregano"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "items": ["ingredient.tomato.paste", "ingredient.beef.stock"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.onion.white",
+            "ingredient.cheese.cheddar",
+            "ingredient.sour_cream"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.braise", "method.simmer"],
+      "equipmentRecommended": ["equipment.dutch_oven", "equipment.heavy_pot"],
+      "equipmentMinimum": [
+        "equipment.heavy_pot",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef.chuck",
+        "ingredient.chili_powder",
+        "ingredient.cumin",
+        "ingredient.garlic",
+        "ingredient.beef.stock"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.high_protein"],
+      "plannerTags": [
+        "texmex.chili",
+        "one_pot",
+        "freezer.friendly",
+        "batch.friendly",
+        "meal.main"
+      ]
+    },
+
+    {
+      "id": "texmex.chili.bean_and_beef",
+      "label": "Bean & Beef Chili",
+      "aka": ["Chili with Beans", "Tex-Mex Chili"],
+      "subprofiles": ["texmex.subprofile.family_style"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 75, "handsOffMins": 55 },
+      "servingStyles": ["one_pot", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.chili_bowl"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef.ground"],
+          "chooseOne": false
+        },
+        {
+          "role": "legume",
+          "items": ["ingredient.beans.pinto", "ingredient.beans.kidney"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": [
+            "ingredient.tomato.diced",
+            "ingredient.tomato.paste",
+            "ingredient.beef.stock"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.chili_powder", "ingredient.cumin"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.cheese.cheddar", "ingredient.onion.green"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.saute", "method.simmer"],
+      "equipmentRecommended": ["equipment.heavy_pot"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef.ground",
+        "ingredient.beans.pinto",
+        "ingredient.chili_powder",
+        "ingredient.cumin",
+        "ingredient.tomato.diced"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": [
+        "texmex.chili",
+        "one_pot",
+        "batch.friendly",
+        "freezer.friendly",
+        "meal.main"
+      ]
+    },
+
+    {
+      "id": "texmex.salsa.pico_de_gallo",
+      "label": "Pico de Gallo",
+      "aka": ["Fresh Salsa", "Salsa Fresca"],
+      "subprofiles": ["texmex.subprofile.street_style"],
+      "category": "condiment",
+      "difficulty": 1,
+      "heatTypical": 2,
+      "time": { "activeMins": 10, "totalMins": 10, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "street_food", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.condiment"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "low"
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.tomato",
+            "ingredient.onion.white",
+            "ingredient.jalapeno"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.cilantro",
+            "ingredient.lime",
+            "ingredient.salt"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.chop", "method.mix"],
+      "equipmentRecommended": ["equipment.chef_knife", "equipment.mixing_bowl"],
+      "equipmentMinimum": ["equipment.knife", "equipment.cutting_board"],
+      "ingredientsCore": [
+        "ingredient.tomato",
+        "ingredient.onion.white",
+        "ingredient.cilantro",
+        "ingredient.lime",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "plannerTags": [
+        "texmex.salsa",
+        "condiment",
+        "weeknight",
+        "batch.friendly"
+      ]
+    },
+
+    {
+      "id": "texmex.queso.cheese_dip",
+      "label": "Queso Dip",
+      "aka": ["Chile Con Queso", "Cheese Dip"],
+      "subprofiles": ["texmex.subprofile.party_food"],
+      "category": "condiment",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "street_food", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.condiment"],
+      "signals": {
+        "batchFriendly": "medium",
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": "low"
+      },
+      "coreComponents": [
+        {
+          "role": "fat",
+          "items": [
+            "ingredient.cheese.velveeta_style",
+            "ingredient.cheese.american",
+            "ingredient.cheese.monterey_jack"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.green_chiles", "ingredient.jalapeno"],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "items": ["ingredient.milk", "ingredient.evaporated_milk"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.melt", "method.simmer"],
+      "equipmentRecommended": ["equipment.saucepan", "equipment.whisk"],
+      "equipmentMinimum": ["equipment.saucepan"],
+      "ingredientsCore": [
+        "ingredient.cheese.monterey_jack",
+        "ingredient.green_chiles",
+        "ingredient.milk"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.vegetarian"],
+      "plannerTags": ["texmex.queso", "condiment", "snacks", "party"]
+    },
+
+    {
+      "id": "texmex.rice.spanish_rice",
+      "label": "Spanish Rice (Tex-Mex Red Rice)",
+      "aka": ["Mexican Rice (Tex-Mex)", "Red Rice"],
+      "subprofiles": ["texmex.subprofile.family_style"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 30, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.rice_side"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "medium"
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.rice.long_grain"],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "items": [
+            "ingredient.tomato.paste",
+            "ingredient.chicken.stock",
+            "ingredient.onion"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cumin", "ingredient.garlic", "ingredient.salt"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.toast", "method.simmer"],
+      "equipmentRecommended": ["equipment.saucepan", "equipment.lid"],
+      "equipmentMinimum": ["equipment.saucepan"],
+      "ingredientsCore": [
+        "ingredient.rice.long_grain",
+        "ingredient.tomato.paste",
+        "ingredient.chicken.stock",
+        "ingredient.cumin"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free", "diet.vegetarian"],
+      "plannerTags": ["texmex.rice", "side", "batch.friendly", "weeknight"]
+    },
+
+    {
+      "id": "texmex.beans.refried",
+      "label": "Refried Beans",
+      "aka": ["Frijoles Refritos", "Mashed Beans"],
+      "subprofiles": ["texmex.subprofile.family_style"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 45, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.bean_side"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.beans.pinto"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": [
+            "ingredient.lard",
+            "ingredient.oil.neutral",
+            "ingredient.butter"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cumin", "ingredient.garlic", "ingredient.salt"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer", "method.mash", "method.saute"],
+      "equipmentRecommended": ["equipment.pot", "equipment.masher"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.beans.pinto",
+        "ingredient.cumin",
+        "ingredient.garlic",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free", "diet.vegetarian"],
+      "plannerTags": [
+        "texmex.beans",
+        "side",
+        "batch.friendly",
+        "freezer.friendly"
+      ]
+    },
+
+    {
+      "id": "texmex.nachos.loaded",
+      "label": "Loaded Nachos",
+      "aka": ["Nachos", "Supreme Nachos"],
+      "subprofiles": ["texmex.subprofile.party_food"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 10 },
+      "servingStyles": ["snacks", "street_food", "family_style"],
+      "mealArchetypes": ["cuisines.tex_mex.archetype.party_tray"],
+      "signals": {
+        "batchFriendly": "medium",
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": "low"
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.tortilla_chips"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.beef.ground",
+            "ingredient.chicken.shredded",
+            "ingredient.beans.black"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": [
+            "ingredient.cheese.cheddar",
+            "ingredient.cheese.monterey_jack"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.tomato",
+            "ingredient.jalapeno",
+            "ingredient.onion.green"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.salsa.pico_de_gallo",
+            "ingredient.sour_cream",
+            "ingredient.guacamole"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.bake", "method.assemble"],
+      "equipmentRecommended": ["equipment.sheet_pan", "equipment.oven"],
+      "equipmentMinimum": ["equipment.sheet_pan", "equipment.oven"],
+      "ingredientsCore": [
+        "ingredient.tortilla_chips",
+        "ingredient.cheese.cheddar",
+        "ingredient.salsa.pico_de_gallo"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": ["texmex.nachos", "snacks", "party", "weeknight"]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.tex_mex": [
+        "texmex.tacos.carne_asada",
+        "texmex.tacos.chicken",
+        "texmex.burrito.beef_and_bean",
+        "texmex.fajitas.chicken_or_steak",
+        "texmex.enchiladas.chicken",
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef",
+        "texmex.salsa.pico_de_gallo",
+        "texmex.queso.cheese_dip",
+        "texmex.rice.spanish_rice",
+        "texmex.beans.refried",
+        "texmex.nachos.loaded"
+      ]
+    },
+
+    "byArchetype": {
+      "cuisines.tex_mex.archetype.taco_plate": [
+        "texmex.tacos.carne_asada",
+        "texmex.tacos.chicken"
+      ],
+      "cuisines.tex_mex.archetype.handheld_wrap": [
+        "texmex.burrito.beef_and_bean"
+      ],
+      "cuisines.tex_mex.archetype.fajita_plate": [
+        "texmex.fajitas.chicken_or_steak"
+      ],
+      "cuisines.tex_mex.archetype.baked_casserole": [
+        "texmex.enchiladas.chicken"
+      ],
+      "cuisines.tex_mex.archetype.chili_bowl": [
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef"
+      ],
+      "cuisines.tex_mex.archetype.condiment": [
+        "texmex.salsa.pico_de_gallo",
+        "texmex.queso.cheese_dip"
+      ],
+      "cuisines.tex_mex.archetype.rice_side": ["texmex.rice.spanish_rice"],
+      "cuisines.tex_mex.archetype.bean_side": ["texmex.beans.refried"],
+      "cuisines.tex_mex.archetype.party_tray": ["texmex.nachos.loaded"]
+    },
+
+    "aliasIndex": {
+      "carne asada tacos": "texmex.tacos.carne_asada",
+      "steak tacos": "texmex.tacos.carne_asada",
+      "asada tacos": "texmex.tacos.carne_asada",
+
+      "chicken tacos": "texmex.tacos.chicken",
+      "tex-mex chicken tacos": "texmex.tacos.chicken",
+
+      "beef burritos": "texmex.burrito.beef_and_bean",
+      "bean burritos (with beef)": "texmex.burrito.beef_and_bean",
+      "beef and bean burritos": "texmex.burrito.beef_and_bean",
+
+      "fajitas": "texmex.fajitas.chicken_or_steak",
+      "skillet fajitas": "texmex.fajitas.chicken_or_steak",
+
+      "chicken enchiladas": "texmex.enchiladas.chicken",
+      "red enchiladas": "texmex.enchiladas.chicken",
+
+      "texas chili": "texmex.chili.texas_style",
+      "chili con carne (texas style)": "texmex.chili.texas_style",
+      "chili with beans": "texmex.chili.bean_and_beef",
+      "tex-mex chili": "texmex.chili.bean_and_beef",
+
+      "pico de gallo": "texmex.salsa.pico_de_gallo",
+      "fresh salsa": "texmex.salsa.pico_de_gallo",
+      "salsa fresca": "texmex.salsa.pico_de_gallo",
+
+      "queso dip": "texmex.queso.cheese_dip",
+      "chile con queso": "texmex.queso.cheese_dip",
+      "cheese dip": "texmex.queso.cheese_dip",
+
+      "spanish rice (tex-mex red rice)": "texmex.rice.spanish_rice",
+      "mexican rice (tex-mex)": "texmex.rice.spanish_rice",
+      "red rice": "texmex.rice.spanish_rice",
+
+      "refried beans": "texmex.beans.refried",
+      "frijoles refritos": "texmex.beans.refried",
+      "mashed beans": "texmex.beans.refried",
+
+      "loaded nachos": "texmex.nachos.loaded",
+      "nachos": "texmex.nachos.loaded",
+      "supreme nachos": "texmex.nachos.loaded"
+    },
+
+    "keywordIndex": {
+      "taco": ["texmex.tacos.carne_asada", "texmex.tacos.chicken"],
+      "tacos": ["texmex.tacos.carne_asada", "texmex.tacos.chicken"],
+      "burrito": ["texmex.burrito.beef_and_bean"],
+      "burritos": ["texmex.burrito.beef_and_bean"],
+      "fajita": ["texmex.fajitas.chicken_or_steak"],
+      "fajitas": ["texmex.fajitas.chicken_or_steak"],
+      "enchilada": ["texmex.enchiladas.chicken"],
+      "enchiladas": ["texmex.enchiladas.chicken"],
+      "chili": ["texmex.chili.texas_style", "texmex.chili.bean_and_beef"],
+      "chile": ["texmex.chili.texas_style", "texmex.queso.cheese_dip"],
+      "salsa": ["texmex.salsa.pico_de_gallo"],
+      "pico": ["texmex.salsa.pico_de_gallo"],
+      "queso": ["texmex.queso.cheese_dip"],
+      "rice": ["texmex.rice.spanish_rice"],
+      "beans": ["texmex.beans.refried", "texmex.chili.bean_and_beef"],
+      "nachos": ["texmex.nachos.loaded"]
+    },
+
+    "tagIndex": {
+      "cuisine.tex_mex": [
+        "texmex.tacos.carne_asada",
+        "texmex.tacos.chicken",
+        "texmex.burrito.beef_and_bean",
+        "texmex.fajitas.chicken_or_steak",
+        "texmex.enchiladas.chicken",
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef",
+        "texmex.salsa.pico_de_gallo",
+        "texmex.queso.cheese_dip",
+        "texmex.rice.spanish_rice",
+        "texmex.beans.refried",
+        "texmex.nachos.loaded"
+      ],
+
+      "meal.main": [
+        "texmex.tacos.carne_asada",
+        "texmex.tacos.chicken",
+        "texmex.burrito.beef_and_bean",
+        "texmex.fajitas.chicken_or_steak",
+        "texmex.enchiladas.chicken",
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef",
+        "texmex.nachos.loaded"
+      ],
+
+      "side": ["texmex.rice.spanish_rice", "texmex.beans.refried"],
+      "condiment": ["texmex.salsa.pico_de_gallo", "texmex.queso.cheese_dip"],
+
+      "weeknight": [
+        "texmex.tacos.carne_asada",
+        "texmex.tacos.chicken",
+        "texmex.burrito.beef_and_bean",
+        "texmex.fajitas.chicken_or_steak",
+        "texmex.salsa.pico_de_gallo",
+        "texmex.queso.cheese_dip",
+        "texmex.rice.spanish_rice",
+        "texmex.beans.refried",
+        "texmex.nachos.loaded"
+      ],
+
+      "batch.friendly": [
+        "texmex.tacos.chicken",
+        "texmex.burrito.beef_and_bean",
+        "texmex.enchiladas.chicken",
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef",
+        "texmex.salsa.pico_de_gallo",
+        "texmex.rice.spanish_rice",
+        "texmex.beans.refried"
+      ],
+
+      "freezer.friendly": [
+        "texmex.burrito.beef_and_bean",
+        "texmex.enchiladas.chicken",
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef",
+        "texmex.beans.refried"
+      ],
+
+      "party": ["texmex.queso.cheese_dip", "texmex.nachos.loaded"],
+      "snacks": [
+        "texmex.salsa.pico_de_gallo",
+        "texmex.queso.cheese_dip",
+        "texmex.nachos.loaded"
+      ],
+
+      "texmex.tacos": ["texmex.tacos.carne_asada", "texmex.tacos.chicken"],
+      "texmex.burrito": ["texmex.burrito.beef_and_bean"],
+      "texmex.fajitas": ["texmex.fajitas.chicken_or_steak"],
+      "texmex.enchiladas": ["texmex.enchiladas.chicken"],
+      "texmex.chili": [
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef"
+      ],
+      "texmex.salsa": ["texmex.salsa.pico_de_gallo"],
+      "texmex.queso": ["texmex.queso.cheese_dip"],
+      "texmex.rice": ["texmex.rice.spanish_rice"],
+      "texmex.beans": ["texmex.beans.refried"],
+      "texmex.nachos": ["texmex.nachos.loaded"]
+    }
+  },
+
+  "source": {
+    "kind": "catalog",
+    "name": "SSA Canonical Cuisines",
+    "notes": [
+      "Constructed for SSA deterministic planning and browse experience."
+    ]
+  },
+
+  "defaults": {
+    "cuisineId": "cuisines.tex_mex",
+    "plannerTags": ["cuisine.tex_mex"]
+  },
+
+  "groups": [
+    {
+      "id": "texmex.group.mains",
+      "label": "Mains",
+      "items": [
+        "texmex.tacos.carne_asada",
+        "texmex.tacos.chicken",
+        "texmex.burrito.beef_and_bean",
+        "texmex.fajitas.chicken_or_steak",
+        "texmex.enchiladas.chicken",
+        "texmex.chili.texas_style",
+        "texmex.chili.bean_and_beef",
+        "texmex.nachos.loaded"
+      ]
+    },
+    {
+      "id": "texmex.group.sides",
+      "label": "Sides",
+      "items": ["texmex.rice.spanish_rice", "texmex.beans.refried"]
+    },
+    {
+      "id": "texmex.group.condiments",
+      "label": "Condiments",
+      "items": ["texmex.salsa.pico_de_gallo", "texmex.queso.cheese_dip"]
+    }
+  ]
+}

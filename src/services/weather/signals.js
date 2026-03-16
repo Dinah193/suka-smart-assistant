@@ -44,7 +44,6 @@
 //
 // -----------------------------------------------------------------------------
 
-
 /* --------------------------------- Imports --------------------------------- */
 let eventBus, Events;
 try {
@@ -53,7 +52,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -64,7 +63,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -75,13 +76,15 @@ try {
 
 let provider = null;
 try {
-  provider = require("@/services/weather/provider").default || require("@/services/weather/provider");
+  provider =
+    require("@/services/weather/provider").default ||
+    require("@/services/weather/provider");
 } catch {}
 
 /* ------------------------------- Configuration ----------------------------- */
 const DEFAULT_THRESHOLDS = {
   // Temperature (°C)
-  heat_caution: 30,           // outdoor cooking/animals: caution threshold
+  heat_caution: 30, // outdoor cooking/animals: caution threshold
   heat_danger: 35,
   cold_caution: 5,
   frost: 0.5,
@@ -91,9 +94,9 @@ const DEFAULT_THRESHOLDS = {
   wind_danger: 40,
   gust_danger: 55,
   // Rain / Precipitation
-  precip_mm_caution: 3,       // per-hour
+  precip_mm_caution: 3, // per-hour
   precip_mm_heavy: 10,
-  pop_caution: 50,            // probability of precipitation (percent)
+  pop_caution: 50, // probability of precipitation (percent)
   // UV
   uv_caution: 6,
   uv_high: 8,
@@ -108,7 +111,12 @@ const DEFAULT_LOCATION = () => {
   // Fallback if caller doesn't pass location
   try {
     const cfg = require("@/config/app").default || require("@/config/app");
-    if (cfg?.location?.lat && cfg?.location?.lon) return { lat: cfg.location.lat, lon: cfg.location.lon, tz: cfg.location.tz };
+    if (cfg?.location?.lat && cfg?.location?.lon)
+      return {
+        lat: cfg.location.lat,
+        lon: cfg.location.lon,
+        tz: cfg.location.tz,
+      };
   } catch {}
   return { lat: 0, lon: 0 }; // safe default (equator, prime meridian)
 };
@@ -116,8 +124,8 @@ const DEFAULT_LOCATION = () => {
 /* ---------------------------------- State ---------------------------------- */
 const _cache = new Map(); // key -> { ts, window, location, domain, signals, summary, expires }
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const MIN_CALL_GAP_MS = 10 * 1000;   // debouncing back-to-back identical queries
-const _lastCall = new Map();         // simple rate limit
+const MIN_CALL_GAP_MS = 10 * 1000; // debouncing back-to-back identical queries
+const _lastCall = new Map(); // simple rate limit
 
 let _initialized = false;
 
@@ -137,38 +145,57 @@ export async function initWeatherSignals() {
   });
 
   // When engines request sessions, enrich with weather signals (emit advisory)
-  eventBus.on(Events?.COOKING_REQUEST_SESSION || "cooking/requestSession", ({ data }) => {
-    autoAnnotateIfOutdoor(data, "cooking");
-  }, { priority: -1 });
+  eventBus.on(
+    Events?.COOKING_REQUEST_SESSION || "cooking/requestSession",
+    ({ data }) => {
+      autoAnnotateIfOutdoor(data, "cooking");
+    },
+    { priority: -1 }
+  );
 
-  eventBus.on(Events?.CLEANING_REQUEST_SESSION || "cleaning/requestSession", ({ data }) => {
-    autoAnnotateIfOutdoor(data, "cleaning");
-  }, { priority: -1 });
+  eventBus.on(
+    Events?.CLEANING_REQUEST_SESSION || "cleaning/requestSession",
+    ({ data }) => {
+      autoAnnotateIfOutdoor(data, "cleaning");
+    },
+    { priority: -1 }
+  );
 
   // Garden & Animals often outdoors
-  eventBus.on(Events?.GARDEN_PLAN_GENERATE_REQ || "garden/plan.generate.requested", ({ data }) => {
-    const time = readWindowFrom(data);
-    if (!time) return;
-    getSignalsForWindow({ ...time, domain: "garden" }).then((res) => {
-      emit("weather/signalsReady", res);
-    }).catch(() => {});
-  }, { priority: -1 });
+  eventBus.on(
+    Events?.GARDEN_PLAN_GENERATE_REQ || "garden/plan.generate.requested",
+    ({ data }) => {
+      const time = readWindowFrom(data);
+      if (!time) return;
+      getSignalsForWindow({ ...time, domain: "garden" })
+        .then((res) => {
+          emit("weather/signalsReady", res);
+        })
+        .catch(() => {});
+    },
+    { priority: -1 }
+  );
 
   // On session approval, run signals and emit for that specific session window
   eventBus.on(Events?.SESSION_APPROVED || "session/approved", ({ data }) => {
     const time = readWindowFrom(data);
     if (!time) return;
     const domain = data?.session?.domain || data?.domain;
-    getSignalsForWindow({ ...time, domain }).then((res) => {
-      emit("weather/signalsReady", { ...res, sessionId: data?.session?.id || data?.id });
-      if (shouldToastFor(res.signals)) {
-        emit(Events?.UI_TOAST || "ui/toast", {
-          variant: "info",
-          title: "Weather considerations",
-          message: res.summary || "Upcoming weather may affect your plan.",
+    getSignalsForWindow({ ...time, domain })
+      .then((res) => {
+        emit("weather/signalsReady", {
+          ...res,
+          sessionId: data?.session?.id || data?.id,
         });
-      }
-    }).catch(() => {});
+        if (shouldToastFor(res.signals)) {
+          emit(Events?.UI_TOAST || "ui/toast", {
+            variant: "info",
+            title: "Weather considerations",
+            message: res.summary || "Upcoming weather may affect your plan.",
+          });
+        }
+      })
+      .catch(() => {});
   });
 }
 
@@ -180,7 +207,8 @@ export async function initWeatherSignals() {
 export async function getSignalsForWindow(args) {
   const startISO = firstISO(args?.startISO, args?.start);
   const endISO = firstISO(args?.endISO, args?.end);
-  if (!isISO(startISO) || !isISO(endISO)) throw new Error("weather/signals: invalid window");
+  if (!isISO(startISO) || !isISO(endISO))
+    throw new Error("weather/signals: invalid window");
 
   const domain = String(args?.domain || "general");
   const location = normalizeLocation(args?.location) || DEFAULT_LOCATION();
@@ -191,7 +219,7 @@ export async function getSignalsForWindow(args) {
     s: truncateIsoToHour(startISO),
     e: truncateIsoToHour(endISO),
     d: domain,
-    loc: [location.lat, location.lon].map(n => +n.toFixed(3)),
+    loc: [location.lat, location.lon].map((n) => +n.toFixed(3)),
     u: units,
     th: thresholdsHash(),
   });
@@ -210,7 +238,12 @@ export async function getSignalsForWindow(args) {
   if (cached && cached.expires > now) return cached;
 
   const th = getThresholds();
-  const fc = await fetchForecastRangeSafe({ startISO, endISO, location, units });
+  const fc = await fetchForecastRangeSafe({
+    startISO,
+    endISO,
+    location,
+    units,
+  });
   const signals = computeSignals(fc?.points || [], th, { domain, units });
   const summary = summarizeSignals(signals, domain);
   const result = {
@@ -245,14 +278,20 @@ function computeSignals(points, th, { domain, units }) {
 
   // Aggregate metrics across the window
   const agg = {
-    maxTempC: -Infinity, minTempC: +Infinity,
-    maxWindKph: 0, maxGustKph: 0,
-    totalPrecipMm: 0, popMax: 0,
-    uvMax: 0, rhMax: 0,
-    frostHits: 0, freezeHits: 0,
+    maxTempC: -Infinity,
+    minTempC: +Infinity,
+    maxWindKph: 0,
+    maxGustKph: 0,
+    totalPrecipMm: 0,
+    popMax: 0,
+    uvMax: 0,
+    rhMax: 0,
+    frostHits: 0,
+    freezeHits: 0,
     lightningProbMax: 0,
     hours: points.length,
-    first: points[0]?.ts, last: points[points.length - 1]?.ts,
+    first: points[0]?.ts,
+    last: points[points.length - 1]?.ts,
   };
   for (const p of points) {
     const tC = num(p.tempC);
@@ -266,60 +305,186 @@ function computeSignals(points, th, { domain, units }) {
     agg.rhMax = Math.max(agg.rhMax, safe(num(p.relHum)));
     agg.frostHits += tC <= th.frost ? 1 : 0;
     agg.freezeHits += tC <= th.freeze ? 1 : 0;
-    agg.lightningProbMax = Math.max(agg.lightningProbMax, safe(num(p.lightningProb)));
+    agg.lightningProbMax = Math.max(
+      agg.lightningProbMax,
+      safe(num(p.lightningProb))
+    );
   }
 
   const signals = [];
 
   // Heat / Cold / Frost
   if (agg.maxTempC >= th.heat_danger) {
-    signals.push(makeSig("danger", "heat", `Danger heat (${fmtTemp(agg.maxTempC, units)})`, agg, recsHeat(domain)));
+    signals.push(
+      makeSig(
+        "danger",
+        "heat",
+        `Danger heat (${fmtTemp(agg.maxTempC, units)})`,
+        agg,
+        recsHeat(domain)
+      )
+    );
   } else if (agg.maxTempC >= th.heat_caution) {
-    signals.push(makeSig("caution", "heat", `Heat caution (${fmtTemp(agg.maxTempC, units)})`, agg, recsHeat(domain)));
+    signals.push(
+      makeSig(
+        "caution",
+        "heat",
+        `Heat caution (${fmtTemp(agg.maxTempC, units)})`,
+        agg,
+        recsHeat(domain)
+      )
+    );
   }
   if (agg.minTempC <= th.freeze) {
-    signals.push(makeSig("danger", "cold", `Freeze risk (${fmtTemp(agg.minTempC, units)})`, agg, recsFreeze(domain)));
+    signals.push(
+      makeSig(
+        "danger",
+        "cold",
+        `Freeze risk (${fmtTemp(agg.minTempC, units)})`,
+        agg,
+        recsFreeze(domain)
+      )
+    );
   } else if (agg.minTempC <= th.frost) {
-    signals.push(makeSig("caution", "frost", `Frost possible (${fmtTemp(agg.minTempC, units)})`, agg, recsFrost(domain)));
+    signals.push(
+      makeSig(
+        "caution",
+        "frost",
+        `Frost possible (${fmtTemp(agg.minTempC, units)})`,
+        agg,
+        recsFrost(domain)
+      )
+    );
   } else if (agg.minTempC <= th.cold_caution) {
-    signals.push(makeSig("caution", "cold", `Cold conditions (${fmtTemp(agg.minTempC, units)})`, agg, recsCold(domain)));
+    signals.push(
+      makeSig(
+        "caution",
+        "cold",
+        `Cold conditions (${fmtTemp(agg.minTempC, units)})`,
+        agg,
+        recsCold(domain)
+      )
+    );
   }
 
   // Wind / Gust
   if (agg.maxGustKph >= th.gust_danger || agg.maxWindKph >= th.wind_danger) {
-    signals.push(makeSig("danger", "wind", `High winds (${Math.round(agg.maxWindKph)} kph gust ${Math.round(agg.maxGustKph)} kph)`, agg, recsWind(domain)));
+    signals.push(
+      makeSig(
+        "danger",
+        "wind",
+        `High winds (${Math.round(agg.maxWindKph)} kph gust ${Math.round(
+          agg.maxGustKph
+        )} kph)`,
+        agg,
+        recsWind(domain)
+      )
+    );
   } else if (agg.maxWindKph >= th.wind_caution) {
-    signals.push(makeSig("caution", "wind", `Windy (${Math.round(agg.maxWindKph)} kph)`, agg, recsWind(domain)));
+    signals.push(
+      makeSig(
+        "caution",
+        "wind",
+        `Windy (${Math.round(agg.maxWindKph)} kph)`,
+        agg,
+        recsWind(domain)
+      )
+    );
   }
 
   // Rain / Mud
   const avgPerHour = agg.totalPrecipMm / Math.max(1, agg.hours);
   if (avgPerHour >= th.precip_mm_heavy || agg.popMax >= 80) {
-    signals.push(makeSig("danger", "rain", `Heavy rain likely (avg ${avgPerHour.toFixed(1)} mm/h, POP ${Math.round(agg.popMax)}%)`, agg, recsRain(domain, true)));
+    signals.push(
+      makeSig(
+        "danger",
+        "rain",
+        `Heavy rain likely (avg ${avgPerHour.toFixed(1)} mm/h, POP ${Math.round(
+          agg.popMax
+        )}%)`,
+        agg,
+        recsRain(domain, true)
+      )
+    );
     if (domain === "garden" || domain === "animals") {
-      signals.push(makeSig("caution", "mud", `Mud risk after heavy rain`, agg, recsMud(domain)));
+      signals.push(
+        makeSig(
+          "caution",
+          "mud",
+          `Mud risk after heavy rain`,
+          agg,
+          recsMud(domain)
+        )
+      );
     }
-  } else if (avgPerHour >= th.precip_mm_caution || agg.popMax >= th.pop_caution) {
-    signals.push(makeSig("caution", "rain", `Rain possible (avg ${avgPerHour.toFixed(1)} mm/h, POP ${Math.round(agg.popMax)}%)`, agg, recsRain(domain, false)));
+  } else if (
+    avgPerHour >= th.precip_mm_caution ||
+    agg.popMax >= th.pop_caution
+  ) {
+    signals.push(
+      makeSig(
+        "caution",
+        "rain",
+        `Rain possible (avg ${avgPerHour.toFixed(1)} mm/h, POP ${Math.round(
+          agg.popMax
+        )}%)`,
+        agg,
+        recsRain(domain, false)
+      )
+    );
   }
 
   // UV
   if (agg.uvMax >= th.uv_high) {
-    signals.push(makeSig("danger", "uv", `Very high UV (${agg.uvMax})`, agg, recsUV(domain)));
+    signals.push(
+      makeSig(
+        "danger",
+        "uv",
+        `Very high UV (${agg.uvMax})`,
+        agg,
+        recsUV(domain)
+      )
+    );
   } else if (agg.uvMax >= th.uv_caution) {
-    signals.push(makeSig("caution", "uv", `High UV (${agg.uvMax})`, agg, recsUV(domain)));
+    signals.push(
+      makeSig("caution", "uv", `High UV (${agg.uvMax})`, agg, recsUV(domain))
+    );
   }
 
   // Humidity
   if (agg.rhMax >= th.humidity_high && agg.maxTempC >= th.heat_caution) {
-    signals.push(makeSig("caution", "humidity", `Humid & hot (RH ${Math.round(agg.rhMax)}%)`, agg, recsHumidity(domain)));
+    signals.push(
+      makeSig(
+        "caution",
+        "humidity",
+        `Humid & hot (RH ${Math.round(agg.rhMax)}%)`,
+        agg,
+        recsHumidity(domain)
+      )
+    );
   }
 
   // Lightning
   if (agg.lightningProbMax >= th.lightning_prob_high) {
-    signals.push(makeSig("danger", "lightning", `Electrical storm risk (${Math.round(agg.lightningProbMax)}%)`, agg, recsLightning(domain)));
+    signals.push(
+      makeSig(
+        "danger",
+        "lightning",
+        `Electrical storm risk (${Math.round(agg.lightningProbMax)}%)`,
+        agg,
+        recsLightning(domain)
+      )
+    );
   } else if (agg.lightningProbMax >= th.lightning_prob_caution) {
-    signals.push(makeSig("caution", "lightning", `Lightning possible (${Math.round(agg.lightningProbMax)}%)`, agg, recsLightning(domain)));
+    signals.push(
+      makeSig(
+        "caution",
+        "lightning",
+        `Lightning possible (${Math.round(agg.lightningProbMax)}%)`,
+        agg,
+        recsLightning(domain)
+      )
+    );
   }
 
   // Include time bounds on signals (window bounds)
@@ -333,14 +498,19 @@ function computeSignals(points, th, { domain, units }) {
 
 function summarizeSignals(signals, domain) {
   if (!signals.length) return "No significant weather issues expected.";
-  const worst = signals.reduce((a, b) => rank(b.severity) > rank(a.severity) ? b : a, signals[0]);
-  const dangerCount = signals.filter(s => s.severity === "danger").length;
-  const cautionCount = signals.filter(s => s.severity === "caution").length;
+  const worst = signals.reduce(
+    (a, b) => (rank(b.severity) > rank(a.severity) ? b : a),
+    signals[0]
+  );
+  const dangerCount = signals.filter((s) => s.severity === "danger").length;
+  const cautionCount = signals.filter((s) => s.severity === "caution").length;
   const parts = [];
   if (dangerCount) parts.push(`${dangerCount} danger`);
   if (cautionCount) parts.push(`${cautionCount} caution`);
   const noun = parts.length ? parts.join(" & ") : `${signals.length} advisory`;
-  return `${capitalize(domain)}: ${noun}${worst?.type ? ` (notably ${worst.type})` : ""}.`;
+  return `${capitalize(domain)}: ${noun}${
+    worst?.type ? ` (notably ${worst.type})` : ""
+  }.`;
 }
 
 /* ------------------------------ Event wiring ------------------------------- */
@@ -348,22 +518,28 @@ function autoAnnotateIfOutdoor(data, domain) {
   const time = readWindowFrom(data);
   if (!time) return;
   // Heuristic: if explicit "outdoor" flag or domain implies outdoor (garden/animals)
-  const isOutdoor = data?.outdoor === true || data?.meta?.outdoor === true || domain === "garden" || domain === "animals";
+  const isOutdoor =
+    data?.outdoor === true ||
+    data?.meta?.outdoor === true ||
+    domain === "garden" ||
+    domain === "animals";
   if (!isOutdoor) return;
-  getSignalsForWindow({ ...time, domain }).then((res) => {
-    emit("weather/signalsReady", res);
-    if (shouldToastFor(res.signals)) {
-      emit(Events?.UI_TOAST || "ui/toast", {
-        variant: "info",
-        title: "Weather considerations",
-        message: res.summary || "Upcoming weather may affect your plan.",
-      });
-    }
-  }).catch(() => {});
+  getSignalsForWindow({ ...time, domain })
+    .then((res) => {
+      emit("weather/signalsReady", res);
+      if (shouldToastFor(res.signals)) {
+        emit(Events?.UI_TOAST || "ui/toast", {
+          variant: "info",
+          title: "Weather considerations",
+          message: res.summary || "Upcoming weather may affect your plan.",
+        });
+      }
+    })
+    .catch(() => {});
 }
 
 function shouldToastFor(signals = []) {
-  return signals.some(s => s.severity === "danger") || signals.length >= 2;
+  return signals.some((s) => s.severity === "danger") || signals.length >= 2;
 }
 
 /* ------------------------------- Provider I/O ------------------------------ */
@@ -378,7 +554,9 @@ async function fetchForecastRangeSafe({ startISO, endISO, location, units }) {
       units, // "metric" | "imperial"
     });
     // Defensive normalization
-    const points = Array.isArray(fc?.points) ? fc.points.filter(p => isISO(p?.ts)) : [];
+    const points = Array.isArray(fc?.points)
+      ? fc.points.filter((p) => isISO(p?.ts))
+      : [];
     return { points, source: fc?.source || "unknown" };
   } catch {
     return { points: [], source: "error" };
@@ -392,7 +570,9 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const pkt = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(pkt);
-  } catch {/* fail-silent */}
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* --------------------------------- Helpers --------------------------------- */
@@ -407,19 +587,32 @@ function getThresholds() {
 }
 function thresholdsHash() {
   const t = getThresholds();
-  return Object.values(t).map(v => String(v)).join(",");
+  return Object.values(t)
+    .map((v) => String(v))
+    .join(",");
 }
 
 function readWindowFrom(data) {
-  const s = firstISO(data?.start, data?.time?.start, data?.window?.startISO, data?.startISO);
-  const e = firstISO(data?.end, data?.time?.end, data?.window?.endISO, data?.endISO);
+  const s = firstISO(
+    data?.start,
+    data?.time?.start,
+    data?.window?.startISO,
+    data?.startISO
+  );
+  const e = firstISO(
+    data?.end,
+    data?.time?.end,
+    data?.window?.endISO,
+    data?.endISO
+  );
   if (!isISO(s) || !isISO(e)) return null;
   return { startISO: s, endISO: e };
 }
 
 function normalizeLocation(loc) {
   if (!loc || typeof loc !== "object") return null;
-  const lat = Number(loc.lat), lon = Number(loc.lon);
+  const lat = Number(loc.lat),
+    lon = Number(loc.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   return { lat, lon, tz: loc.tz, elevation: loc.elevation };
 }
@@ -440,83 +633,130 @@ function makeSig(severity, type, label, agg, recs) {
       uvMax: Math.round(agg.uvMax),
       rhMax: Math.round(agg.rhMax),
       lightningProbMax: Math.round(agg.lightningProbMax),
-    }
+    },
   };
 }
 
 function recsHeat(domain) {
-  const base = ["Hydrate often", "Schedule earlier/later", "Provide shade/rest"];
-  if (domain === "animals") base.push("Top off water troughs", "Avoid transport/handling mid-day");
-  if (domain === "garden") base.push("Mulch & deep water morning", "Protect tender plants");
-  if (domain === "cooking") base.push("Move grill to shade", "Shorten outdoor burners time");
+  const base = [
+    "Hydrate often",
+    "Schedule earlier/later",
+    "Provide shade/rest",
+  ];
+  if (domain === "animals")
+    base.push("Top off water troughs", "Avoid transport/handling mid-day");
+  if (domain === "garden")
+    base.push("Mulch & deep water morning", "Protect tender plants");
+  if (domain === "cooking")
+    base.push("Move grill to shade", "Shorten outdoor burners time");
   return base;
 }
 function recsCold(domain) {
   const base = ["Layer clothing", "Shorten exposure time"];
-  if (domain === "animals") base.push("Check bedding", "Heat lamps (safely) for chicks");
+  if (domain === "animals")
+    base.push("Check bedding", "Heat lamps (safely) for chicks");
   if (domain === "garden") base.push("Delay sowing warm-season crops");
-  if (domain === "cooking") base.push("Pre-warm equipment", "Wind baffle for burners");
+  if (domain === "cooking")
+    base.push("Pre-warm equipment", "Wind baffle for burners");
   return base;
 }
 function recsFrost(domain) {
-  const base = ["Cover tender plants", "Drain hoses", "Bring containers inside"];
-  if (domain === "animals") base.push("Wrap exposed pipes", "Heated buckets if possible");
+  const base = [
+    "Cover tender plants",
+    "Drain hoses",
+    "Bring containers inside",
+  ];
+  if (domain === "animals")
+    base.push("Wrap exposed pipes", "Heated buckets if possible");
   return base;
 }
 function recsFreeze(domain) {
   const base = ["Protect plumbing", "Avoid washing tasks outdoors"];
-  if (domain === "animals") base.push("Check waterers for ice", "Increase calories in feed");
-  if (domain === "garden") base.push("Harvest vulnerable produce before freeze");
+  if (domain === "animals")
+    base.push("Check waterers for ice", "Increase calories in feed");
+  if (domain === "garden")
+    base.push("Harvest vulnerable produce before freeze");
   return base;
 }
 function recsWind(domain) {
   const base = ["Secure loose items", "Avoid ladder work"];
-  if (domain === "cooking") base.push("Windbreak for flame", "Avoid high-heat searing outdoors");
-  if (domain === "garden") base.push("Stake fragile plants", "Delay spraying (drift)");
+  if (domain === "cooking")
+    base.push("Windbreak for flame", "Avoid high-heat searing outdoors");
+  if (domain === "garden")
+    base.push("Stake fragile plants", "Delay spraying (drift)");
   return base;
 }
 function recsRain(domain, heavy) {
-  const base = heavy ? ["Expect runoff", "Avoid electrical tools outdoors"] : ["Have tarps ready"];
-  if (domain === "garden") base.push(heavy ? "Delay tilling or harvest" : "Plan raised bed access");
+  const base = heavy
+    ? ["Expect runoff", "Avoid electrical tools outdoors"]
+    : ["Have tarps ready"];
+  if (domain === "garden")
+    base.push(heavy ? "Delay tilling or harvest" : "Plan raised bed access");
   if (domain === "animals") base.push("Check shelter dryness", "Elevate feed");
-  if (domain === "cooking") base.push("Move grill under cover", "Dry fuel storage");
+  if (domain === "cooking")
+    base.push("Move grill under cover", "Dry fuel storage");
   return base;
 }
 function recsMud(domain) {
-  const base = ["Plan alternate paths", "Use boards/gravel on high-traffic areas"];
+  const base = [
+    "Plan alternate paths",
+    "Use boards/gravel on high-traffic areas",
+  ];
   if (domain === "animals") base.push("Bedding refresh", "Hoof health check");
   return base;
 }
-function recsUV() { return ["Sunscreen", "Hats & sleeves", "Schedule morning/late PM"]; }
+function recsUV() {
+  return ["Sunscreen", "Hats & sleeves", "Schedule morning/late PM"];
+}
 function recsHumidity(domain) {
   const base = ["Reduce exertion", "Extra hydration"];
-  if (domain === "cooking") base.push("Watch dehydration time (smoker/dehydrator)");
+  if (domain === "cooking")
+    base.push("Watch dehydration time (smoker/dehydrator)");
   return base;
 }
 function recsLightning(domain) {
-  const base = ["Seek shelter", "Stop field work", "Avoid trees & metal equipment"];
+  const base = [
+    "Seek shelter",
+    "Stop field work",
+    "Avoid trees & metal equipment",
+  ];
   if (domain === "cooking") base.push("Do not grill during lightning nearby");
   return base;
 }
 
 /* -------------------------------- Small utils ------------------------------ */
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
-function firstISO(...vals) { return vals.find(isISO) || null; }
-function num(n) { return Number.isFinite(n) ? n : 0; }
-function safe(n) { return Number.isFinite(n) ? n : 0; }
-function round(n, d = 0) { const p = Math.pow(10, d); return Math.round(n * p) / p; }
-function rank(sev) { return sev === "danger" ? 3 : sev === "caution" ? 2 : 1; }
-function capitalize(s) { return String(s || "").replace(/^\w/, c => c.toUpperCase()); }
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
+function firstISO(...vals) {
+  return vals.find(isISO) || null;
+}
+function num(n) {
+  return Number.isFinite(n) ? n : 0;
+}
+function safe(n) {
+  return Number.isFinite(n) ? n : 0;
+}
+function round(n, d = 0) {
+  const p = Math.pow(10, d);
+  return Math.round(n * p) / p;
+}
+function rank(sev) {
+  return sev === "danger" ? 3 : sev === "caution" ? 2 : 1;
+}
+function capitalize(s) {
+  return String(s || "").replace(/^\w/, (c) => c.toUpperCase());
+}
 function fmtTemp(c, units) {
   if (units === "imperial") {
-    const f = c * 9/5 + 32;
+    const f = (c * 9) / 5 + 32;
     return `${Math.round(f)}°F`;
   }
   return `${Math.round(c)}°C`;
 }
 function truncateIsoToHour(iso) {
   const d = new Date(iso);
-  d.setUTCMinutes(0,0,0);
+  d.setUTCMinutes(0, 0, 0);
   return d.toISOString();
 }
 

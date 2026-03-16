@@ -1,0 +1,409 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.okra_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.okra_soup",
+    "label": "Okra Soup",
+    "altLabels": ["Okro Soup", "West African Okra Stew"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["Nigeria", "Ghana", "West Africa"],
+    "tags": [
+      "west_african",
+      "soup",
+      "stew",
+      "stew_and_starch",
+      "okra",
+      "one_pot",
+      "quick",
+      "weeknight_friendly"
+    ]
+  },
+  "summary": {
+    "oneLine": "A savory okra-forward soup with aromatics and optional seafood umami; served with rice, yam, or swallow.",
+    "notes": [
+      "Okra soup texture can be 'draw' (stringy/thick) or more stew-like depending on chop size and simmer time.",
+      "This SSA baseline supports both: chop finely for more draw, larger pieces for a chunkier soup."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Soup/stew servings (served with starch)."
+  },
+  "time": {
+    "totalMinutes": 60,
+    "activeMinutes": 25,
+    "restMinutes": 5
+  },
+  "difficulty": "beginner",
+  "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+  "plannerHints": {
+    "batchFriendly": false,
+    "leftoversFriendly": true,
+    "weeknightBias": "high",
+    "mealArchetypeId": "archetype_stew_with_starch"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Okra soup is typically lighter than egusi/groundnut; final nutrition depends on protein choice and oil amount."
+    ]
+  },
+  "allergens": {
+    "mayContain": [],
+    "commonTriggers": [],
+    "notes": [
+      "Many versions use fish/crayfish/dried shrimp for umami—apply household fish/shellfish allergy rules.",
+      "If using stock cubes, ensure household ingredient/allergen preferences are applied."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pot_lidded", "label": "Lidded pot / soup pot", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "spoon_wooden", "label": "Wooden spoon", "qty": 1 },
+      { "id": "measuring_cups", "label": "Measuring cups", "qty": 1 }
+    ],
+    "optional": [
+      {
+        "id": "blender",
+        "label": "Blender (optional for pepper base)",
+        "qty": 1
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "okra",
+      "label": "Okra",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "veg",
+      "notes": [
+        "Chop finely for more 'draw' thickness; larger pieces for chunkier texture."
+      ]
+    },
+    {
+      "id": "onion_yellow",
+      "label": "Yellow onion",
+      "qty": 1,
+      "unit": "count",
+      "role": "aromatic"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic",
+      "qty": 3,
+      "unit": "clove",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "pepper_hot_scotch_bonnet_optional",
+      "label": "Scotch bonnet (or habanero)",
+      "qty": 1,
+      "unit": "count",
+      "role": "heat",
+      "optional": true,
+      "notes": ["Use half for medium heat."]
+    },
+    {
+      "id": "pepper_bell_optional",
+      "label": "Bell pepper (optional)",
+      "qty": 1,
+      "unit": "count",
+      "role": "base",
+      "optional": true
+    },
+    {
+      "id": "tomato_optional",
+      "label": "Tomatoes (optional)",
+      "qty": 2,
+      "unit": "count",
+      "role": "base",
+      "optional": true,
+      "notes": ["Some okra soups are tomato-light; keep optional."]
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil",
+      "qty": 3,
+      "unit": "tbsp",
+      "role": "fat",
+      "notes": ["Increase to 1/4 cup for richer stew-like versions."]
+    },
+    {
+      "id": "stock_chicken_or_beef_optional",
+      "label": "Chicken or beef stock",
+      "qty": 5,
+      "unit": "cup",
+      "role": "liquid",
+      "optional": true,
+      "notes": ["Or use water plus seasoning."]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "qty": 2,
+      "unit": "cup",
+      "role": "liquid",
+      "notes": ["Total liquid depends on desired thickness and okra draw."]
+    },
+
+    {
+      "id": "seasoning_stock_cube_optional",
+      "label": "Stock cube / seasoning cube",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 1.5,
+      "unit": "tsp",
+      "role": "seasoning",
+      "notes": ["Start lower if using salted stock/cubes; adjust at end."]
+    },
+    {
+      "id": "pepper_black",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+
+    {
+      "id": "fish_dried_smoked_optional",
+      "label": "Smoked dried fish (optional)",
+      "qty": 1,
+      "unit": "count",
+      "role": "protein",
+      "optional": true,
+      "notes": ["Optional; remove bones; apply fish allergen rules."]
+    },
+    {
+      "id": "dried_crayfish_optional",
+      "label": "Ground dried crayfish (optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Optional; shellfish allergen."]
+    },
+    {
+      "id": "shrimp_dried_optional",
+      "label": "Dried shrimp (optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Optional; shellfish allergen."]
+    },
+
+    {
+      "id": "beef_generic",
+      "label": "Beef (optional)",
+      "qty": 1,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": ["If using raw beef, simmer until tender before adding okra."]
+    },
+    {
+      "id": "goat",
+      "label": "Goat meat (optional)",
+      "qty": 1,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+    {
+      "id": "chicken_generic",
+      "label": "Chicken pieces (optional)",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+
+    {
+      "id": "leafy_greens_spinach_optional",
+      "label": "Spinach (optional)",
+      "qty": 4,
+      "unit": "cup",
+      "role": "greens",
+      "optional": true,
+      "notes": ["Optional finishing greens; add at the end."]
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "saute",
+    "stew",
+    "season_to_taste",
+    "rest"
+  ],
+  "steps": [
+    {
+      "id": "step.choose_protein_path",
+      "title": "Choose your protein path (optional)",
+      "body": "Okra soup can be made with seafood umami (dried fish/crayfish/shrimp) and/or with meat (beef/goat/chicken). Choose what fits household preferences and allergens.",
+      "timeMinutes": 2,
+      "timers": [],
+      "hazards": []
+    },
+    {
+      "id": "step.cook_meat_if_needed",
+      "title": "Cook meat until tender (if using meat)",
+      "body": "If using beef/goat/chicken: add to pot with some stock/water, onion, salt (light), and seasoning cube (optional). Simmer until tender (chicken 20–30 min; beef/goat 35–55 min). Reserve broth. If not using meat, skip.",
+      "timeMinutes": 40,
+      "timers": [
+        { "label": "Simmer meat (chicken)", "seconds": 1500 },
+        { "label": "Simmer meat (beef/goat)", "seconds": 2700 }
+      ],
+      "hazards": []
+    },
+    {
+      "id": "step.saute_aromatics",
+      "title": "Sauté aromatics",
+      "body": "Heat oil over medium heat. Add chopped onion (and garlic/ginger if using). Cook 3–4 minutes until fragrant. If using tomatoes/bell pepper, add and cook 5–7 minutes to soften and lightly reduce.",
+      "timeMinutes": 10,
+      "timers": [
+        { "label": "Sauté aromatics", "seconds": 240 },
+        { "label": "Cook optional tomato/pepper", "seconds": 420 }
+      ],
+      "hazards": []
+    },
+    {
+      "id": "step.add_liquid_and_umami",
+      "title": "Add broth/stock and umami builders",
+      "body": "Add reserved broth (or stock/water). Add dried fish/crayfish/dried shrimp (optional) if allowed by household allergies. Bring to a gentle simmer and taste for seasoning.",
+      "timeMinutes": 6,
+      "timers": [{ "label": "Bring to gentle simmer", "seconds": 360 }],
+      "hazards": []
+    },
+    {
+      "id": "step.add_okra",
+      "title": "Add okra and simmer briefly",
+      "body": "Stir in chopped okra. Simmer 8–12 minutes, stirring occasionally. For more 'draw' thickness, simmer slightly longer and stir more; for a fresher okra bite, keep simmer shorter.",
+      "timeMinutes": 12,
+      "timers": [{ "label": "Simmer okra", "seconds": 600 }],
+      "hazards": []
+    },
+    {
+      "id": "step.finish_and_rest",
+      "title": "Finish with optional greens, adjust, rest",
+      "body": "If using spinach, add and simmer 2 minutes until wilted. Taste and adjust salt/pepper. Turn off heat and rest 5 minutes before serving.",
+      "timeMinutes": 7,
+      "timers": [
+        { "label": "Wilt greens", "seconds": 120 },
+        { "label": "Rest", "seconds": 300 }
+      ],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve with rice, yam, plantain, or swallow (fufu/eba) based on household preference.",
+      "Optional: serve pepper sauce on the side for extra heat."
+    ],
+    "garnishes": ["pepper_sauce_optional", "lime_optional"],
+    "storage": {
+      "refrigeratorDays": 3,
+      "freezerDays": 60,
+      "reheatNotes": [
+        "Reheat gently; okra texture may soften and 'draw' may increase after chilling.",
+        "Add a splash of water/stock if overly thick."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "okraTexture": "tender_with_light_draw",
+      "soupBody": "light_to_medium_thick",
+      "heatLevel": "medium_default"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["pepper_hot_scotch_bonnet_optional"],
+        "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+        "notes": "Habanero is closest in fruity heat; start small and adjust."
+      },
+      {
+        "whenMissing": ["stock_chicken_or_beef_optional"],
+        "useInstead": ["water"],
+        "notes": "Use more aromatics and careful seasoning; simmer a bit longer for depth."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["blender"],
+        "doInstead": "Chop tomatoes/peppers/onion finely and sauté longer to soften; a rustic texture is acceptable."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "fish",
+        "avoid": [
+          "fish_dried_smoked_optional",
+          "dried_crayfish_optional",
+          "shrimp_dried_optional"
+        ],
+        "notes": "Use stock and seasoning for umami; do not add seafood-based boosters."
+      },
+      {
+        "ifAllergenActive": "shellfish",
+        "avoid": ["dried_crayfish_optional", "shrimp_dried_optional"],
+        "notes": "Crayfish/dried shrimp are shellfish triggers."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Okra should be tender; draw level depends on preference.",
+      "Soup should simmer gently; over-boiling can dull flavor and change texture.",
+      "Seafood umami builders are optional and must respect allergen preferences."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Okra soup is too slimy",
+        "likelyCause": "Okra overcooked or stirred aggressively for too long",
+        "fix": "Simmer shorter; stir gently; use larger okra pieces; serve sooner."
+      },
+      {
+        "problem": "Soup is too thin",
+        "likelyCause": "Too much liquid or not enough okra",
+        "fix": "Simmer uncovered 5–10 minutes; add more chopped okra; reduce added liquid next time."
+      },
+      {
+        "problem": "Flavor is flat",
+        "likelyCause": "Under-seasoned broth or missing umami",
+        "fix": "Adjust salt carefully; add stock cube (if allowed); simmer a bit longer; consider smoked fish only if allergens allow."
+      }
+    ]
+  }
+}

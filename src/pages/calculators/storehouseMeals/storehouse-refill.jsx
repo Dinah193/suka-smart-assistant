@@ -17,10 +17,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import StorehouseRefillCalculatorView from "@/features/calculators/storehouseMeals/StorehouseRefillCalculator.view";
+import StorehouseRefillCalculatorView from "@/features/calculators/storehouseMeals/StorehouseRefillCalculator/StorehouseRefillCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.storehouseRefill";
 
@@ -129,7 +129,8 @@ function StorehouseRefillSummaryCard({ result, onCreatePlan }) {
   const coverageLabel = useMemo(() => {
     const days = Number(result.estimatedDaysCoverageAfterRefill || 0);
     if (!days) return "Coverage after refill: to be estimated.";
-    if (days < 7) return `Only about ${days} days of coverage even after refill.`;
+    if (days < 7)
+      return `Only about ${days} days of coverage even after refill.`;
     if (days < 30) return `Roughly ${days} days of coverage after refill.`;
     return `About ${days} days of coverage after refill – great buffer.`;
   }, [result.estimatedDaysCoverageAfterRefill]);
@@ -184,9 +185,7 @@ function StorehouseRefillSummaryCard({ result, onCreatePlan }) {
           <span className="text-slate-400 mb-0.5">Need Refill</span>
           <span className="text-slate-50 font-semibold">
             {itemsNeedingRefill || 0}
-            {totalItems
-              ? ` / ${totalItems}`
-              : ""}
+            {totalItems ? ` / ${totalItems}` : ""}
           </span>
         </div>
         <div className="flex flex-col">
@@ -295,14 +294,10 @@ export default function StorehouseRefillCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.storehouse-refill",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.storehouse-refill",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -330,9 +325,7 @@ export default function StorehouseRefillCalculatorPage() {
             : undefined,
         overallPriority: calcResult.overallPriority,
         items: Array.isArray(calcResult.items) ? calcResult.items : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };

@@ -22,11 +22,11 @@
 // - It allows user-owned favorites (recurring requirement).
 //
 // ASSUMED FILES / SERVICES
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatCleaningPlanForHub
-// - src/services/FamilyFundConnector.js
-// - src/services/import/ImportIntelligenceService.js → getRecentImports({...})
+// - src/services/hub/HubPacketFormatter.js → formatCleaningPlanForHub
+// - src/services/hub/FamilyFundConnector.js
+// - src/services/imports/ImportIntelligenceService.js → getRecentImports({...})
 // - src/services/cleaning/CleaningSuggestionService.js → suggestCleaningFromIntelligence(...)
 // - src/services/cleaning/CleaningPlanStore.js → saveCleaningPlan / loadLatestCleaningPlan
 //
@@ -34,12 +34,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatCleaningPlanForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatCleaningPlanForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
-import { getRecentImports } from "../../services/import/ImportIntelligenceService";
+import { getRecentImports } from "../../services/imports/ImportIntelligenceService";
 import { suggestCleaningFromIntelligence } from "../../services/cleaning/CleaningSuggestionService";
 import {
   saveCleaningPlan,
@@ -95,8 +95,14 @@ function CleaningPlanner() {
     // listen to imports and inventory updates (some cleaning is triggered by inventory/storehouse)
     const offImport = eventBus?.on?.("import.parsed", handleImportParsed);
     const offInv = eventBus?.on?.("inventory.updated", handleInventoryUpdated);
-    const offGarden = eventBus?.on?.("garden.harvest.logged", handleGardenEvent);
-    const offPres = eventBus?.on?.("preservation.completed", handlePreservationEvent);
+    const offGarden = eventBus?.on?.(
+      "garden.harvest.logged",
+      handleGardenEvent
+    );
+    const offPres = eventBus?.on?.(
+      "preservation.completed",
+      handlePreservationEvent
+    );
 
     return () => {
       alive = false;
@@ -181,7 +187,10 @@ function CleaningPlanner() {
         setSuggestions((prev) => [...autoTasks, ...prev]);
       }
     } catch (e) {
-      console.warn("[CleaningPlanner] preservation.completed handler failed", e);
+      console.warn(
+        "[CleaningPlanner] preservation.completed handler failed",
+        e
+      );
     }
   }
 
@@ -262,7 +271,9 @@ function CleaningPlanner() {
   function renderToolbar() {
     return (
       <div className="ssa-cleaning-toolbar flex gap-3 mb-4 items-center">
-        <h2 className="text-xl font-semibold">Cleaning &amp; Decluttering Planner</h2>
+        <h2 className="text-xl font-semibold">
+          Cleaning &amp; Decluttering Planner
+        </h2>
         <div className="flex gap-2">
           <button
             className={viewMode === "zones" ? "btn-primary" : "btn-secondary"}
@@ -277,7 +288,9 @@ function CleaningPlanner() {
             List
           </button>
           <button
-            className={viewMode === "sessions" ? "btn-primary" : "btn-secondary"}
+            className={
+              viewMode === "sessions" ? "btn-primary" : "btn-secondary"
+            }
             onClick={() => setViewMode("sessions")}
           >
             Sessions
@@ -308,17 +321,26 @@ function CleaningPlanner() {
     if (!suggestions.length) return null;
     return (
       <div className="ssa-cleaning-suggestions mb-4">
-        <h3 className="font-semibold mb-2">Suggestions (from imports, harvests, preservation)</h3>
+        <h3 className="font-semibold mb-2">
+          Suggestions (from imports, harvests, preservation)
+        </h3>
         <div className="flex flex-wrap gap-2">
           {suggestions.map((s) => (
-            <div key={s.id || s.title} className="card p-2 rounded border bg-white">
+            <div
+              key={s.id || s.title}
+              className="card p-2 rounded border bg-white"
+            >
               <div className="font-medium">{s.title}</div>
               {s.tags && s.tags.length ? (
-                <div className="text-xs text-gray-500 mb-1">{s.tags.join(" • ")}</div>
+                <div className="text-xs text-gray-500 mb-1">
+                  {s.tags.join(" • ")}
+                </div>
               ) : null}
               <button
                 className="btn-xs btn-primary"
-                onClick={() => handleAddItemFromSuggestion(s, s.zone || "Unassigned")}
+                onClick={() =>
+                  handleAddItemFromSuggestion(s, s.zone || "Unassigned")
+                }
               >
                 Add to plan
               </button>
@@ -403,12 +425,17 @@ function CleaningPlanner() {
 
   function renderListView() {
     if (!planItems.length) {
-      return <p className="text-gray-500 text-sm">No cleaning tasks planned yet.</p>;
+      return (
+        <p className="text-gray-500 text-sm">No cleaning tasks planned yet.</p>
+      );
     }
     return (
       <div className="flex flex-col gap-2">
         {planItems.map((item) => (
-          <div key={item.id} className="border rounded p-2 flex items-center justify-between">
+          <div
+            key={item.id}
+            className="border rounded p-2 flex items-center justify-between"
+          >
             <div>
               <div className="font-medium">{item.title}</div>
               <div className="text-xs text-gray-500">
@@ -449,9 +476,10 @@ function CleaningPlanner() {
       <div className="border rounded p-3 bg-white/50">
         <h3 className="font-semibold mb-2">Session view</h3>
         <p className="text-xs text-gray-600 mb-2">
-          This shows how your cleaning plan would be sent to the CleaningSessionEngine /
-          CleaningSessionEngine.js. The engine handles sequencing, quiet-hours guard, Sabbath guard,
-          and priority/day-of-week logic.
+          This shows how your cleaning plan would be sent to the
+          CleaningSessionEngine / CleaningSessionEngine.js. The engine handles
+          sequencing, quiet-hours guard, Sabbath guard, and priority/day-of-week
+          logic.
         </p>
         <pre className="bg-gray-100 rounded p-2 text-xs overflow-x-auto">
           {JSON.stringify(
@@ -539,7 +567,14 @@ async function safeLoadLatestCleaningPlan() {
 async function safeGetRecentImports() {
   try {
     const imports = await getRecentImports({
-      domains: ["cleaning", "declutter", "garden", "animal", "storehouse", "video"],
+      domains: [
+        "cleaning",
+        "declutter",
+        "garden",
+        "animal",
+        "storehouse",
+        "video",
+      ],
       limit: 40,
     });
     return imports;
@@ -554,7 +589,10 @@ function safeSuggestCleaningFromIntelligence(intel, opts) {
     const res = suggestCleaningFromIntelligence(intel, opts);
     return Array.isArray(res) ? res : [];
   } catch (e) {
-    console.warn("[CleaningPlanner] safeSuggestCleaningFromIntelligence failed", e);
+    console.warn(
+      "[CleaningPlanner] safeSuggestCleaningFromIntelligence failed",
+      e
+    );
     return [];
   }
 }

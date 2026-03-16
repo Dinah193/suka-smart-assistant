@@ -29,29 +29,29 @@
  * - For ephemeral runtime overrides (e.g., “tonight go mild spice”), use setRuntimeOverride().
  */
 
-import eventBus from 'src/services/eventBus.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
-const SOURCE = 'PreferenceAdapter';
+const SOURCE = "PreferenceAdapter";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // In-memory state (runtime overrides do not persist)
 
 const RUNTIME_OVERRIDES = {}; // deep path -> value
-const SCHEMAS = new Map();    // domain -> schema object
+const SCHEMAS = new Map(); // domain -> schema object
 const NORMALIZERS = new Map(); // key -> fn(value)=>normalized
 
 // Built-in canonical keys & defaults (forward-looking; safe, minimal)
 const DEFAULTS = {
   core: {
-    locale: 'en-US',
-    units: 'metric', // 'us-customary'
+    locale: "en-US",
+    units: "metric", // 'us-customary'
     dietary: {
       vegetarian: false,
       vegan: false,
-      halal: false,     // informational; engines should not infer sensitive attrs on their own
-      kosher: false,    // informational
-      allergies: [],    // ['peanut','tree-nut','gluten','shellfish','dairy','egg','soy','sesame']
-      dislikes: [],     // ['cilantro', 'anchovy']
+      halal: false, // informational; engines should not infer sensitive attrs on their own
+      kosher: false, // informational
+      allergies: [], // ['peanut','tree-nut','gluten','shellfish','dairy','egg','soy','sesame']
+      dislikes: [], // ['cilantro', 'anchovy']
       sodiumLimitMgPerDay: null,
       sugarLimitGPerDay: null,
     },
@@ -59,25 +59,26 @@ const DEFAULTS = {
   recipe: {
     doneness: {
       // per protein type; engines can map ingredients → proteinKey
-      beef: 'medium', // 'rare'|'medium-rare'|'medium'|'medium-well'|'well'
-      chicken: 'well', // safety-first default
-      pork: 'medium',
-      lamb: 'medium',
-      fish: 'just-done',
-      egg: 'set',
+      beef: "medium", // 'rare'|'medium-rare'|'medium'|'medium-well'|'well'
+      chicken: "well", // safety-first default
+      pork: "medium",
+      lamb: "medium",
+      fish: "just-done",
+      egg: "set",
     },
-    spiceTolerance: 'medium', // 'low'|'medium'|'high'
-    oilPreference: 'neutral', // 'neutral'|'olive'|'butter'|'ghee'
-    preferredCuisines: [],    // ranking/whitelist
-    avoidMethods: [],         // ['deep-fry', 'sous-vide']
+    spiceTolerance: "medium", // 'low'|'medium'|'high'
+    oilPreference: "neutral", // 'neutral'|'olive'|'butter'|'ghee'
+    preferredCuisines: [], // ranking/whitelist
+    avoidMethods: [], // ['deep-fry', 'sous-vide']
   },
   cleaning: {
-    scentFamily: 'unscented', // 'unscented'|'citrus'|'floral'|'wood'|'fresh'
+    scentFamily: "unscented", // 'unscented'|'citrus'|'floral'|'wood'|'fresh'
     bleachAllowed: false,
     ammoniaAllowed: false,
     petSafeOnly: true,
     sanitizerContactMin: 10,
-    surfaces: {                // per-surface preferences
+    surfaces: {
+      // per-surface preferences
       hardwood: { waterMinimize: true },
       stone: { acidAvoid: true },
     },
@@ -85,7 +86,7 @@ const DEFAULTS = {
   garden: {
     organicOnly: true,
     pollinatorSafe: true,
-    wateringWindow: ['06:00', '09:00'], // for engines to schedule watering
+    wateringWindow: ["06:00", "09:00"], // for engines to schedule watering
     composting: { enabled: true },
   },
   animal: {
@@ -95,87 +96,95 @@ const DEFAULTS = {
   },
   preservation: {
     jarSizeDefaultMl: 500,
-    pectinPreferred: 'low-sugar', // 'regular'|'low-sugar'|'none'
+    pectinPreferred: "low-sugar", // 'regular'|'low-sugar'|'none'
   },
 };
 
 // Register minimal schemas (keys marked as optional to allow extension)
-registerSchema('core', {
-  type: 'object',
+registerSchema("core", {
+  type: "object",
   properties: {
-    locale: { type: 'string' },
-    units: { enum: ['metric', 'us-customary'] },
+    locale: { type: "string" },
+    units: { enum: ["metric", "us-customary"] },
     dietary: {
-      type: 'object',
+      type: "object",
       properties: {
-        vegetarian: { type: 'boolean' },
-        vegan: { type: 'boolean' },
-        halal: { type: 'boolean' },
-        kosher: { type: 'boolean' },
-        allergies: { type: 'array' },
-        dislikes: { type: 'array' },
-        sodiumLimitMgPerDay: { type: ['number', 'null'] },
-        sugarLimitGPerDay: { type: ['number', 'null'] },
+        vegetarian: { type: "boolean" },
+        vegan: { type: "boolean" },
+        halal: { type: "boolean" },
+        kosher: { type: "boolean" },
+        allergies: { type: "array" },
+        dislikes: { type: "array" },
+        sodiumLimitMgPerDay: { type: ["number", "null"] },
+        sugarLimitGPerDay: { type: ["number", "null"] },
       },
     },
   },
 });
 
-registerSchema('recipe', {
-  type: 'object',
+registerSchema("recipe", {
+  type: "object",
   properties: {
-    doneness: { type: 'object' },
-    spiceTolerance: { enum: ['low', 'medium', 'high'] },
-    oilPreference: { enum: ['neutral', 'olive', 'butter', 'ghee'] },
-    preferredCuisines: { type: 'array' },
-    avoidMethods: { type: 'array' },
+    doneness: { type: "object" },
+    spiceTolerance: { enum: ["low", "medium", "high"] },
+    oilPreference: { enum: ["neutral", "olive", "butter", "ghee"] },
+    preferredCuisines: { type: "array" },
+    avoidMethods: { type: "array" },
   },
 });
 
-registerSchema('cleaning', {
-  type: 'object',
+registerSchema("cleaning", {
+  type: "object",
   properties: {
-    scentFamily: { enum: ['unscented', 'citrus', 'floral', 'wood', 'fresh'] },
-    bleachAllowed: { type: 'boolean' },
-    ammoniaAllowed: { type: 'boolean' },
-    petSafeOnly: { type: 'boolean' },
-    sanitizerContactMin: { type: 'number' },
-    surfaces: { type: 'object' },
+    scentFamily: { enum: ["unscented", "citrus", "floral", "wood", "fresh"] },
+    bleachAllowed: { type: "boolean" },
+    ammoniaAllowed: { type: "boolean" },
+    petSafeOnly: { type: "boolean" },
+    sanitizerContactMin: { type: "number" },
+    surfaces: { type: "object" },
   },
 });
 
-registerSchema('garden', {
-  type: 'object',
+registerSchema("garden", {
+  type: "object",
   properties: {
-    organicOnly: { type: 'boolean' },
-    pollinatorSafe: { type: 'boolean' },
-    wateringWindow: { type: 'array' }, // [startHH:mm, endHH:mm]
-    composting: { type: 'object' },
+    organicOnly: { type: "boolean" },
+    pollinatorSafe: { type: "boolean" },
+    wateringWindow: { type: "array" }, // [startHH:mm, endHH:mm]
+    composting: { type: "object" },
   },
 });
 
-registerSchema('animal', {
-  type: 'object',
+registerSchema("animal", {
+  type: "object",
   properties: {
-    feedBrandsPreferred: { type: 'array' },
-    treatsLimitPerDay: { type: 'number' },
-    rawFoodAllowed: { type: 'boolean' },
+    feedBrandsPreferred: { type: "array" },
+    treatsLimitPerDay: { type: "number" },
+    rawFoodAllowed: { type: "boolean" },
   },
 });
 
-registerSchema('preservation', {
-  type: 'object',
+registerSchema("preservation", {
+  type: "object",
   properties: {
-    jarSizeDefaultMl: { type: 'number' },
-    pectinPreferred: { enum: ['regular', 'low-sugar', 'none'] },
+    jarSizeDefaultMl: { type: "number" },
+    pectinPreferred: { enum: ["regular", "low-sugar", "none"] },
   },
 });
 
 // Example normalizers (callers may add more at runtime)
-registerNormalizer('core.units', (v) => (v === 'imperial' ? 'us-customary' : v));
-registerNormalizer('recipe.spiceTolerance', (v) => oneOf(v, ['low', 'medium', 'high'], 'medium'));
-registerNormalizer('cleaning.scentFamily', (v) =>
-  mapAlias(v, { none: 'unscented', no: 'unscented', fragranceFree: 'unscented' })
+registerNormalizer("core.units", (v) =>
+  v === "imperial" ? "us-customary" : v
+);
+registerNormalizer("recipe.spiceTolerance", (v) =>
+  oneOf(v, ["low", "medium", "high"], "medium")
+);
+registerNormalizer("cleaning.scentFamily", (v) =>
+  mapAlias(v, {
+    none: "unscented",
+    no: "unscented",
+    fragranceFree: "unscented",
+  })
 );
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -194,22 +203,23 @@ registerNormalizer('cleaning.scentFamily', (v) =>
 export async function load() {
   const sources = [];
   try {
-    const household = await softImport('src/config/householdPrefs.js');
-    const user = await softImport('src/config/userPrefs.js');
+    const household = await softImport("src/config/householdPrefs.js");
+    const user = await softImport("src/config/userPrefs.js");
     const store =
-      (await softImport('src/services/preferences/PreferencesStore.js')) ||
-      (await softImport('src/domain/preferences/PreferencesStore.js'));
+      (await softImport("src/services/preferences/PreferencesStore.js")) ||
+      (await softImport("src/domain/preferences/PreferencesStore.js"));
 
     const storePrefs =
       (store?.getAll && (await tryCall(() => store.getAll()))) ||
-      (store?.default?.getAll && (await tryCall(() => store.default.getAll()))) ||
+      (store?.default?.getAll &&
+        (await tryCall(() => store.default.getAll()))) ||
       null;
 
     const merged = deepMerge(
       {},
       DEFAULTS,
-      household ? (household.default || household) : null,
-      user ? (user.default || user) : null,
+      household ? household.default || household : null,
+      user ? user.default || user : null,
       storePrefs || null,
       overridesAsTree(RUNTIME_OVERRIDES)
     );
@@ -218,17 +228,24 @@ export async function load() {
     const normalized = normalizeAll(merged);
     const { ok, errors } = validateAll(normalized);
 
-    emit('prefs.loaded', { ok, errorCount: errors.length, sources: buildSourcesList(household, user, storePrefs) });
+    emit("prefs.loaded", {
+      ok,
+      errorCount: errors.length,
+      sources: buildSourcesList(household, user, storePrefs),
+    });
 
     if (!ok) {
-      emit('prefs.error', { reason: 'VALIDATION', errors: errors.slice(0, 5) });
+      emit("prefs.error", { reason: "VALIDATION", errors: errors.slice(0, 5) });
       // still return normalized prefs; engines can proceed with best-effort
     }
 
     sources.push(...buildSourcesList(household, user, storePrefs));
     return { ok, prefs: normalized, sources };
   } catch (err) {
-    emit('prefs.error', { reason: 'LOAD', message: err?.message || 'load failed' });
+    emit("prefs.error", {
+      reason: "LOAD",
+      message: err?.message || "load failed",
+    });
     return { ok: false, prefs: { ...DEFAULTS }, sources };
   }
 }
@@ -246,46 +263,60 @@ export async function load() {
  * @returns {{ domain: string, applied: object, advisories: string[] }}
  */
 export function resolveForImport({ item, prefs }) {
-  const domain = (item?.domain || '').toLowerCase();
+  const domain = (item?.domain || "").toLowerCase();
   const advisories = [];
 
   if (!prefs || !domain) {
-    return { domain, applied: {}, advisories: ['No prefs or domain provided'] };
+    return { domain, applied: {}, advisories: ["No prefs or domain provided"] };
   }
 
   let applied = {};
   switch (domain) {
-    case 'recipe': {
+    case "recipe": {
       const proteinKey = inferProtein(item);
-      const doneness = pick(prefs.recipe?.doneness, proteinKey) || prefs.recipe?.doneness?.beef || 'medium';
-      const spiceLevel = prefs.recipe?.spiceTolerance || 'medium';
-      const avoidMethods = Array.isArray(prefs.recipe?.avoidMethods) ? prefs.recipe.avoidMethods : [];
+      const doneness =
+        pick(prefs.recipe?.doneness, proteinKey) ||
+        prefs.recipe?.doneness?.beef ||
+        "medium";
+      const spiceLevel = prefs.recipe?.spiceTolerance || "medium";
+      const avoidMethods = Array.isArray(prefs.recipe?.avoidMethods)
+        ? prefs.recipe.avoidMethods
+        : [];
 
       // Allergy advisories
-      const allergens = Array.isArray(prefs.core?.dietary?.allergies) ? prefs.core.dietary.allergies : [];
+      const allergens = Array.isArray(prefs.core?.dietary?.allergies)
+        ? prefs.core.dietary.allergies
+        : [];
       const ingredientHits = (item.items || [])
-        .map((x) => String(x?.name || '').toLowerCase())
-        .filter((n) => allergens.some((a) => n.includes(String(a).toLowerCase())));
-      if (ingredientHits.length) advisories.push(`Allergen flagged: ${ingredientHits.join(', ')}`);
+        .map((x) => String(x?.name || "").toLowerCase())
+        .filter((n) =>
+          allergens.some((a) => n.includes(String(a).toLowerCase()))
+        );
+      if (ingredientHits.length)
+        advisories.push(`Allergen flagged: ${ingredientHits.join(", ")}`);
 
       // Method advisories
-      const methodHits =
-        (item.methods || []).filter((m) => avoidMethods.some((am) => String(m).toLowerCase().includes(String(am).toLowerCase())));
-      if (methodHits.length) advisories.push(`Method discouraged: ${methodHits.join(', ')}`);
+      const methodHits = (item.methods || []).filter((m) =>
+        avoidMethods.some((am) =>
+          String(m).toLowerCase().includes(String(am).toLowerCase())
+        )
+      );
+      if (methodHits.length)
+        advisories.push(`Method discouraged: ${methodHits.join(", ")}`);
 
       applied = {
         doneness,
         spiceTolerance: spiceLevel,
-        oilPreference: prefs.recipe?.oilPreference || 'neutral',
+        oilPreference: prefs.recipe?.oilPreference || "neutral",
         avoidMethods,
         saltLimit: prefs.core?.dietary?.sodiumLimitMgPerDay || null,
       };
       break;
     }
 
-    case 'cleaning': {
+    case "cleaning": {
       applied = {
-        scentFamily: prefs.cleaning?.scentFamily || 'unscented',
+        scentFamily: prefs.cleaning?.scentFamily || "unscented",
         bleachAllowed: !!prefs.cleaning?.bleachAllowed,
         ammoniaAllowed: !!prefs.cleaning?.ammoniaAllowed,
         petSafeOnly: !!prefs.cleaning?.petSafeOnly,
@@ -293,22 +324,24 @@ export function resolveForImport({ item, prefs }) {
         surfaces: prefs.cleaning?.surfaces || {},
       };
       if (applied.bleachAllowed && applied.ammoniaAllowed) {
-        advisories.push('Never mix bleach and ammonia.');
+        advisories.push("Never mix bleach and ammonia.");
       }
       break;
     }
 
-    case 'garden': {
+    case "garden": {
       applied = {
         organicOnly: !!prefs.garden?.organicOnly,
         pollinatorSafe: !!prefs.garden?.pollinatorSafe,
-        wateringWindow: Array.isArray(prefs.garden?.wateringWindow) ? prefs.garden.wateringWindow : null,
+        wateringWindow: Array.isArray(prefs.garden?.wateringWindow)
+          ? prefs.garden.wateringWindow
+          : null,
         composting: prefs.garden?.composting || { enabled: true },
       };
       break;
     }
 
-    case 'animal': {
+    case "animal": {
       applied = {
         feedBrandsPreferred: prefs.animal?.feedBrandsPreferred || [],
         treatsLimitPerDay: toInt(prefs.animal?.treatsLimitPerDay, 2),
@@ -317,10 +350,10 @@ export function resolveForImport({ item, prefs }) {
       break;
     }
 
-    case 'preservation': {
+    case "preservation": {
       applied = {
         jarSizeDefaultMl: toInt(prefs.preservation?.jarSizeDefaultMl, 500),
-        pectinPreferred: prefs.preservation?.pectinPreferred || 'low-sugar',
+        pectinPreferred: prefs.preservation?.pectinPreferred || "low-sugar",
       };
       break;
     }
@@ -331,7 +364,7 @@ export function resolveForImport({ item, prefs }) {
     }
   }
 
-  emit('prefs.resolved', { domain, appliedKeys: Object.keys(applied) });
+  emit("prefs.resolved", { domain, appliedKeys: Object.keys(applied) });
   return { domain, applied, advisories };
 }
 
@@ -351,7 +384,7 @@ export function get(prefs, path, fallback = undefined) {
  * @param {any} value
  */
 export function setRuntimeOverride(path, value) {
-  if (!path || typeof path !== 'string') return;
+  if (!path || typeof path !== "string") return;
   RUNTIME_OVERRIDES[path] = value;
 }
 
@@ -361,7 +394,7 @@ export function setRuntimeOverride(path, value) {
  * @param {object} schema
  */
 export function registerSchema(domain, schema) {
-  if (!domain || typeof schema !== 'object') return;
+  if (!domain || typeof schema !== "object") return;
   SCHEMAS.set(String(domain).toLowerCase(), schema);
 }
 
@@ -371,7 +404,7 @@ export function registerSchema(domain, schema) {
  * @param {(value:any)=>any} fn
  */
 export function registerNormalizer(key, fn) {
-  if (!key || typeof fn !== 'function') return;
+  if (!key || typeof fn !== "function") return;
   NORMALIZERS.set(key, fn);
 }
 
@@ -414,12 +447,12 @@ function validateAll(prefs) {
 
 // Very small schema validator (type/enums/objects/arrays only)
 function validateAgainstSchema(value, schema, path, errors) {
-  if (!schema || typeof schema !== 'object') return true;
+  if (!schema || typeof schema !== "object") return true;
 
   // enum
   if (schema.enum) {
     if (!schema.enum.includes(value)) {
-      errors.push(`${path}: expected one of ${schema.enum.join(', ')}`);
+      errors.push(`${path}: expected one of ${schema.enum.join(", ")}`);
       return false;
     }
     return true;
@@ -428,7 +461,7 @@ function validateAgainstSchema(value, schema, path, errors) {
   // type union
   if (Array.isArray(schema.type)) {
     if (!schema.type.some((t) => matchesType(value, t))) {
-      errors.push(`${path}: expected type ${schema.type.join('|')}`);
+      errors.push(`${path}: expected type ${schema.type.join("|")}`);
       return false;
     }
   } else if (schema.type) {
@@ -439,7 +472,12 @@ function validateAgainstSchema(value, schema, path, errors) {
   }
 
   // object properties
-  if (schema.type === 'object' && schema.properties && value && typeof value === 'object') {
+  if (
+    schema.type === "object" &&
+    schema.properties &&
+    value &&
+    typeof value === "object"
+  ) {
     for (const [k, sub] of Object.entries(schema.properties)) {
       if (value[k] === undefined) continue; // optional by default
       validateAgainstSchema(value[k], sub, `${path}/${k}`, errors);
@@ -447,15 +485,15 @@ function validateAgainstSchema(value, schema, path, errors) {
   }
 
   // arrays: light validation
-  if (schema.type === 'array' && Array.isArray(value)) {
+  if (schema.type === "array" && Array.isArray(value)) {
     // pass (no item type enforcement for brevity)
   }
   return true;
 }
 
 function matchesType(value, t) {
-  if (t === 'null') return value === null;
-  if (t === 'array') return Array.isArray(value);
+  if (t === "null") return value === null;
+  if (t === "array") return Array.isArray(value);
   return typeof value === t;
 }
 
@@ -463,14 +501,17 @@ function matchesType(value, t) {
 // Domain helpers
 
 function inferProtein(item) {
-  const names = (item.items || []).map((x) => String(x?.name || '').toLowerCase());
-  if (names.some((n) => /chicken|turkey|poultry/.test(n))) return 'chicken';
-  if (names.some((n) => /beef|steak|ground beef|brisket/.test(n))) return 'beef';
-  if (names.some((n) => /pork|ham|bacon/.test(n))) return 'pork';
-  if (names.some((n) => /lamb|mutton/.test(n))) return 'lamb';
-  if (names.some((n) => /salmon|cod|tilapia|fish|tuna/.test(n))) return 'fish';
-  if (names.some((n) => /egg/.test(n))) return 'egg';
-  return 'beef';
+  const names = (item.items || []).map((x) =>
+    String(x?.name || "").toLowerCase()
+  );
+  if (names.some((n) => /chicken|turkey|poultry/.test(n))) return "chicken";
+  if (names.some((n) => /beef|steak|ground beef|brisket/.test(n)))
+    return "beef";
+  if (names.some((n) => /pork|ham|bacon/.test(n))) return "pork";
+  if (names.some((n) => /lamb|mutton/.test(n))) return "lamb";
+  if (names.some((n) => /salmon|cod|tilapia|fish|tuna/.test(n))) return "fish";
+  if (names.some((n) => /egg/.test(n))) return "egg";
+  return "beef";
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -478,7 +519,7 @@ function inferProtein(item) {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: new Date().toISOString(),
       source: SOURCE,
@@ -508,7 +549,7 @@ async function tryCall(fn) {
 
 function pathGet(obj, path, fallback) {
   if (!obj || !path) return fallback;
-  const segs = String(path).split('.');
+  const segs = String(path).split(".");
   let cur = obj;
   for (const s of segs) {
     if (cur == null) return fallback;
@@ -518,11 +559,11 @@ function pathGet(obj, path, fallback) {
 }
 
 function pathSet(obj, path, value) {
-  const segs = String(path).split('.');
+  const segs = String(path).split(".");
   let cur = obj;
   for (let i = 0; i < segs.length - 1; i += 1) {
     const k = segs[i];
-    if (!cur[k] || typeof cur[k] !== 'object') cur[k] = {};
+    if (!cur[k] || typeof cur[k] !== "object") cur[k] = {};
     cur = cur[k];
   }
   cur[segs[segs.length - 1]] = value;
@@ -530,10 +571,10 @@ function pathSet(obj, path, value) {
 
 function deepMerge(target, ...sources) {
   for (const src of sources) {
-    if (!src || typeof src !== 'object') continue;
+    if (!src || typeof src !== "object") continue;
     for (const [k, v] of Object.entries(src)) {
-      if (v && typeof v === 'object' && !Array.isArray(v)) {
-        if (!target[k] || typeof target[k] !== 'object') target[k] = {};
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        if (!target[k] || typeof target[k] !== "object") target[k] = {};
         deepMerge(target[k], v);
       } else {
         target[k] = Array.isArray(v) ? v.slice() : v;
@@ -544,17 +585,17 @@ function deepMerge(target, ...sources) {
 }
 
 function deepClone(v) {
-  if (v && typeof v === 'object') return JSON.parse(JSON.stringify(v));
+  if (v && typeof v === "object") return JSON.parse(JSON.stringify(v));
   return v;
 }
 
 function oneOf(v, list, fallback) {
-  const s = String(v || '').toLowerCase();
+  const s = String(v || "").toLowerCase();
   return list.includes(s) ? s : fallback;
 }
 
 function mapAlias(v, map) {
-  const s = String(v || '').toLowerCase();
+  const s = String(v || "").toLowerCase();
   return map[s] || s;
 }
 

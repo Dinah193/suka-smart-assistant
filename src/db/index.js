@@ -96,13 +96,13 @@ async function exportToHubIfEnabled(payload) {
         "@/connectors/HubPacketFormatter.js",
         "src/connectors/HubPacketFormatter.js",
         "@/services/hub/HubPacketFormatter.js",
-        "@/services/HubPacketFormatter.js",
+        "@/services/hub/HubPacketFormatter.js",
       ]),
       loadOptionalModule([
         "@/connectors/FamilyFundConnector.js",
         "src/connectors/FamilyFundConnector.js",
         "@/services/hub/FamilyFundConnector.js",
-        "@/services/FamilyFundConnector.js",
+        "@/services/hub/FamilyFundConnector.js",
       ]),
     ]);
 

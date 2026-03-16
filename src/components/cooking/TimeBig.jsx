@@ -20,9 +20,11 @@ import React, { useMemo, useCallback, useEffect, useRef } from "react";
  */
 
 // ---------- Shared glue (safe-requiring) ----------
-let eventBus = { emit: (...a) => console.debug("[TimeBig:eventBus.emit]", ...a) };
+let eventBus = {
+  emit: (...a) => console.debug("[TimeBig:eventBus.emit]", ...a),
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -42,7 +44,12 @@ try {
 const isoNow = () => new Date().toISOString();
 
 function emitEvent(type, data = {}) {
-  const payload = { type, ts: isoNow(), source: "components.cooking.TimeBig", data };
+  const payload = {
+    type,
+    ts: isoNow(),
+    source: "components.cooking.TimeBig",
+    data,
+  };
   eventBus.emit?.(type, payload);
   return payload;
 }
@@ -79,7 +86,7 @@ function preferredLabel(label, fallback = "Timer") {
 export default function TimeBig({
   timer, // { id, label, running, remainingSeconds, totalSeconds, station }
   onToggle, // () => void   // you keep the state machine
-  onReset,  // () => void
+  onReset, // () => void
   // Context for events + realtime
   sessionId = null,
   stepId = null,
@@ -132,7 +139,12 @@ export default function TimeBig({
         },
         ...extra,
       };
-      eventBus.emit?.("play.control", { type: "play.control", ts: env.ts, source: "TimeBig", data: env });
+      eventBus.emit?.("play.control", {
+        type: "play.control",
+        ts: env.ts,
+        source: "TimeBig",
+        data: env,
+      });
       try {
         onControlSend?.(env);
       } catch {}
@@ -161,7 +173,18 @@ export default function TimeBig({
       console.warn("[TimeBig] onToggle error:", err);
     }
     if (hubSync) exportToHubIfEnabled(e);
-  }, [disabled, running, sendEnvelope, sessionId, room, stepId, station, timer, onToggle, hubSync]);
+  }, [
+    disabled,
+    running,
+    sendEnvelope,
+    sessionId,
+    room,
+    stepId,
+    station,
+    timer,
+    onToggle,
+    hubSync,
+  ]);
 
   const handleReset = useCallback(() => {
     if (disabled) return;
@@ -180,7 +203,17 @@ export default function TimeBig({
       console.warn("[TimeBig] onReset error:", err);
     }
     if (hubSync) exportToHubIfEnabled(e);
-  }, [disabled, sendEnvelope, sessionId, room, stepId, station, timer, onReset, hubSync]);
+  }, [
+    disabled,
+    sendEnvelope,
+    sessionId,
+    room,
+    stepId,
+    station,
+    timer,
+    onReset,
+    hubSync,
+  ]);
 
   // Space/Enter toggles; R resets (focus on widget)
   useEffect(() => {
@@ -201,7 +234,11 @@ export default function TimeBig({
   }, [handleToggle, handleReset]);
 
   // Sizes
-  const sizeClass = compact ? "sv-timerBig--sm" : emphasize ? "sv-timerBig--xl" : "sv-timerBig--md";
+  const sizeClass = compact
+    ? "sv-timerBig--sm"
+    : emphasize
+    ? "sv-timerBig--xl"
+    : "sv-timerBig--md";
 
   return (
     <div
@@ -220,7 +257,9 @@ export default function TimeBig({
     >
       {/* Left slot (optional) */}
       <div className="sv-timerBig__left" aria-hidden={!renderLeft}>
-        {typeof renderLeft === "function" ? renderLeft({ running, seconds }) : renderLeft}
+        {typeof renderLeft === "function"
+          ? renderLeft({ running, seconds })
+          : renderLeft}
       </div>
 
       {/* Main time */}
@@ -250,7 +289,10 @@ export default function TimeBig({
       </div>
 
       {/* Controls */}
-      <div className="sv-timerBig__controls" style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+      <div
+        className="sv-timerBig__controls"
+        style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
+      >
         <button
           type="button"
           className="sv-btn sv-btn--outline"
@@ -263,7 +305,9 @@ export default function TimeBig({
         </button>
         <button
           type="button"
-          className={`sv-btn ${running ? "sv-btn--outline" : "sv-btn--primary"}`}
+          className={`sv-btn ${
+            running ? "sv-btn--outline" : "sv-btn--primary"
+          }`}
           onClick={handleToggle}
           disabled={disabled}
           aria-pressed={running}
@@ -273,7 +317,9 @@ export default function TimeBig({
           {running ? "⏸ Pause" : "▶ Start"}
         </button>
         {/* Right slot (optional) */}
-        {typeof renderRight === "function" ? renderRight({ running, seconds }) : renderRight}
+        {typeof renderRight === "function"
+          ? renderRight({ running, seconds })
+          : renderRight}
       </div>
     </div>
   );

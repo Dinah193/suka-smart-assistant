@@ -1,0 +1,458 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "cuisine.west_african",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "West African",
+    "regionHints": ["West Africa", "Sahel", "Gulf of Guinea"],
+    "countryHints": [
+      "Nigeria",
+      "Ghana",
+      "Senegal",
+      "Sierra Leone",
+      "Liberia",
+      "Côte d’Ivoire",
+      "Benin",
+      "Togo",
+      "Gambia",
+      "Guinea",
+      "Mali",
+      "Burkina Faso",
+      "Niger"
+    ]
+  },
+  "plannerDefaults": {
+    "servingStyles": [
+      "family_style",
+      "one_pot",
+      "stew_and_starch",
+      "grill_and_sides"
+    ],
+    "weeknightBias": "one_pot",
+    "leftoversStrategy": "planned",
+    "batchCookingBias": "high",
+    "spiceHeatDefault": "medium",
+    "saltinessDefault": "medium",
+    "sournessDefault": "low",
+    "sweetnessDefault": "low",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": [
+      "oil_neutral",
+      "oil_palm_red_optional",
+      "oil_groundnut_peanut_optional"
+    ],
+    "primaryStarches": [
+      "rice_white_longgrain",
+      "rice_jollof_style_longgrain",
+      "yam",
+      "cassava",
+      "plantain",
+      "millet",
+      "sorghum",
+      "cornmeal"
+    ],
+    "primaryProteins": [
+      "chicken_generic",
+      "goat",
+      "beef_generic",
+      "fish_generic",
+      "egg_chicken",
+      "beans_black_eyed_pea",
+      "beans_cowpea",
+      "peanut"
+    ],
+    "defaultMealArchetypes": [
+      "archetype_stew_with_starch",
+      "archetype_rice_pot",
+      "archetype_grilled_protein_with_sauce",
+      "archetype_fritter_or_cake",
+      "archetype_breakfast_porridge"
+    ]
+  },
+  "flavorSystem": {
+    "signatureNotes": [
+      "tomato-pepper-onion base (blended or chopped)",
+      "smoky dried fish/stock depth (where culturally used)",
+      "peanut/groundnut richness",
+      "leafy greens in soups (spinach, cassava leaves, bitterleaf, etc.)",
+      "fermented notes (iru/dawadawa, ogiri, fermented corn/cassava where used)"
+    ],
+    "aromaticsCore": [
+      "onion_yellow",
+      "garlic",
+      "ginger",
+      "pepper_hot_scotch_bonnet",
+      "pepper_hot_habanero",
+      "pepper_bell"
+    ],
+    "spiceCore": [
+      "pepper_black",
+      "spice_curry_powder_west_african_style",
+      "spice_thyme_dried",
+      "spice_bay_leaf",
+      "spice_nutmeg_ground_optional",
+      "spice_clove_ground_optional",
+      "spice_allspice_ground_optional"
+    ],
+    "umamiBuilders": [
+      "seasoning_stock_cube_optional",
+      "seasoning_msg_optional",
+      "fish_dried_smoked_optional",
+      "shrimp_dried_optional",
+      "fermented_locust_beans_iru_optional"
+    ],
+    "acidOptions": ["lemon", "lime", "vinegar_apple_cider_optional"],
+    "sweetBalanceOptions": ["onion_sweet", "tomato", "bell_pepper"],
+    "heatOptions": [
+      "pepper_hot_scotch_bonnet",
+      "pepper_hot_habanero",
+      "pepper_red_flakes"
+    ]
+  },
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Starter pantry enabling core dishes (jollof-style rice, pepper stew, basic soups).",
+      "items": [
+        "rice_white_longgrain",
+        "tomato",
+        "tomato_paste",
+        "onion_yellow",
+        "garlic",
+        "ginger",
+        "pepper_bell",
+        "pepper_hot_scotch_bonnet_optional",
+        "oil_neutral",
+        "salt",
+        "pepper_black",
+        "spice_thyme_dried",
+        "stock_chicken_or_beef_optional"
+      ]
+    },
+    "tier1_core": {
+      "description": "Expands authenticity and range (groundnut soups, more stews, grills).",
+      "items": [
+        "peanut",
+        "beans_black_eyed_pea",
+        "plantain",
+        "yam",
+        "cassava_optional",
+        "leafy_greens_spinach",
+        "fish_dried_smoked_optional",
+        "shrimp_dried_optional",
+        "oil_palm_red_optional",
+        "spice_curry_powder_west_african_style",
+        "spice_bay_leaf",
+        "spice_nutmeg_ground_optional"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Deep pantry for traditional soups/sauces and regional variants.",
+      "items": [
+        "fermented_locust_beans_iru_optional",
+        "ogiri_optional",
+        "bitterleaf_optional",
+        "cassava_leaf_optional",
+        "okra",
+        "egusi_melon_seed_optional",
+        "fonio_optional",
+        "millet",
+        "sorghum",
+        "tamarind_optional",
+        "dried_crayfish_optional"
+      ]
+    }
+  },
+  "techniquesEmphasis": {
+    "primary": [
+      "prep_mise_en_place",
+      "saute",
+      "stew",
+      "braise",
+      "reduce",
+      "season_to_taste",
+      "rest"
+    ],
+    "common": [
+      "deglaze",
+      "sear",
+      "roast",
+      "grill_optional",
+      "fry_shallow_optional"
+    ],
+    "notes": [
+      "Many dishes build flavor by slowly cooking down a tomato-pepper-onion base until oil separates or color deepens (varies by recipe).",
+      "Pepper blends may be raw-blended then cooked down; emphasize food safety and simmering time."
+    ]
+  },
+  "dishArchetypes": [
+    {
+      "id": "archetype_stew_with_starch",
+      "label": "Stew/Soup + Starch",
+      "description": "A richly seasoned stew or soup served with a starch (rice, fufu, yam, plantain).",
+      "commonExamples": [
+        "pepper stew with rice",
+        "groundnut soup with rice or fufu",
+        "okra soup with swallow"
+      ],
+      "defaults": {
+        "starchOptions": [
+          "rice_white_longgrain",
+          "yam",
+          "plantain",
+          "cassava_fufu_optional",
+          "cornmeal_fufu_optional"
+        ],
+        "proteinOptions": [
+          "chicken_generic",
+          "goat",
+          "beef_generic",
+          "fish_generic",
+          "beans_black_eyed_pea"
+        ],
+        "greensOptions": ["leafy_greens_spinach", "okra", "bitterleaf_optional"]
+      }
+    },
+    {
+      "id": "archetype_rice_pot",
+      "label": "One-Pot Rice",
+      "description": "Seasoned rice cooked in a tomato/pepper base with stock and aromatics.",
+      "commonExamples": ["jollof-style rice", "tomato rice", "party rice"],
+      "defaults": {
+        "riceOptions": ["rice_white_longgrain"],
+        "proteinOptions": [
+          "chicken_generic",
+          "beef_generic",
+          "fish_generic",
+          "egg_chicken_optional"
+        ],
+        "sideOptions": [
+          "plantain_fried_optional",
+          "salad_simple_optional",
+          "coleslaw_optional"
+        ]
+      }
+    },
+    {
+      "id": "archetype_grilled_protein_with_sauce",
+      "label": "Grilled Protein + Pepper Sauce",
+      "description": "Grilled or roasted meat/fish served with a spicy pepper sauce and simple sides.",
+      "commonExamples": [
+        "suya-style beef (regional)",
+        "grilled fish with pepper sauce"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "beef_generic",
+          "goat",
+          "chicken_generic",
+          "fish_generic"
+        ],
+        "sauceOptions": ["pepper_sauce_raw_optional", "pepper_sauce_cooked"],
+        "sideOptions": [
+          "rice_white_longgrain",
+          "plantain",
+          "salad_simple_optional"
+        ]
+      }
+    },
+    {
+      "id": "archetype_fritter_or_cake",
+      "label": "Fritter/Cake",
+      "description": "Fried or pan-cooked cakes/fritters (bean, plantain, corn, etc.).",
+      "commonExamples": ["bean fritters (akara-style)", "plantain fritters"],
+      "defaults": {
+        "baseOptions": ["beans_black_eyed_pea", "plantain", "cornmeal"],
+        "pairings": ["pepper_sauce_optional", "stew_optional"]
+      }
+    },
+    {
+      "id": "archetype_breakfast_porridge",
+      "label": "Porridge / Pap",
+      "description": "Warm porridge made from corn/millet/sorghum or other grains, often lightly sweetened or served with sides.",
+      "commonExamples": ["corn pap (ogi/akamu-style)", "millet porridge"],
+      "defaults": {
+        "grainOptions": ["cornmeal", "millet", "sorghum"],
+        "pairings": ["milk_optional", "peanut_optional", "fruit_optional"]
+      }
+    }
+  ],
+  "ingredientPreferences": {
+    "preferred": [
+      "tomato",
+      "tomato_paste",
+      "onion_yellow",
+      "garlic",
+      "ginger",
+      "pepper_bell",
+      "pepper_hot_scotch_bonnet_optional",
+      "peanut",
+      "beans_black_eyed_pea",
+      "plantain",
+      "yam",
+      "okra",
+      "leafy_greens_spinach"
+    ],
+    "optional_traditional": [
+      "oil_palm_red_optional",
+      "fish_dried_smoked_optional",
+      "dried_crayfish_optional",
+      "fermented_locust_beans_iru_optional",
+      "egusi_melon_seed_optional",
+      "bitterleaf_optional",
+      "cassava_leaf_optional"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid_excess_sugar",
+        "label": "Avoid excess sweetness",
+        "reason": "Most savory dishes should not taste sweet; sweetness should come naturally from onions/peppers."
+      }
+    ]
+  },
+  "substitutionGuidance": [
+    {
+      "id": "sub_scotch_bonnet",
+      "whenMissing": ["pepper_hot_scotch_bonnet"],
+      "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+      "notes": "Habanero is the closest heat/fruity profile; adjust quantity carefully."
+    },
+    {
+      "id": "sub_red_palm_oil",
+      "whenMissing": ["oil_palm_red"],
+      "useInstead": ["oil_neutral", "oil_olive_optional"],
+      "notes": "Red palm oil adds color and distinctive flavor; neutral oil keeps profile lighter."
+    },
+    {
+      "id": "sub_iru_dawadawa",
+      "whenMissing": ["fermented_locust_beans_iru"],
+      "useInstead": [
+        "seasoning_stock_cube_optional",
+        "fish_dried_smoked_optional"
+      ],
+      "notes": "Use sparingly; keep umami balanced."
+    },
+    {
+      "id": "sub_smoked_fish",
+      "whenMissing": ["fish_dried_smoked"],
+      "useInstead": [
+        "stock_chicken_or_beef_optional",
+        "seasoning_msg_optional"
+      ],
+      "notes": "Smoked fish adds deep savory smoke; compensate with stock and careful seasoning."
+    }
+  ],
+  "mealTemplates": [
+    {
+      "id": "template_weeknight_jollof_style",
+      "label": "Weeknight Tomato Pepper Rice + Protein + Quick Veg",
+      "archetypeId": "archetype_rice_pot",
+      "components": [
+        { "role": "starch", "ingredientIds": ["rice_white_longgrain"] },
+        {
+          "role": "base",
+          "ingredientIds": [
+            "tomato",
+            "tomato_paste",
+            "onion_yellow",
+            "pepper_bell",
+            "garlic",
+            "ginger"
+          ]
+        },
+        {
+          "role": "protein",
+          "ingredientIds": ["chicken_generic", "beef_generic", "fish_generic"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "leafy_greens_spinach",
+            "okra",
+            "cabbage_green_optional"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Blend or finely chop base; cook down until aromatic before adding rice/stock."
+      ]
+    },
+    {
+      "id": "template_groundnut_soup",
+      "label": "Groundnut Soup + Rice/Yam",
+      "archetypeId": "archetype_stew_with_starch",
+      "components": [
+        {
+          "role": "stew_base",
+          "ingredientIds": [
+            "onion_yellow",
+            "garlic",
+            "ginger",
+            "tomato_optional",
+            "pepper_hot_scotch_bonnet_optional"
+          ]
+        },
+        {
+          "role": "thickener",
+          "ingredientIds": ["peanut"],
+          "notes": "Use peanut butter or ground peanuts if available."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": ["chicken_generic", "goat", "beef_generic"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["rice_white_longgrain", "yam", "plantain"],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Simmer gently to prevent splitting; adjust with stock/water for desired thickness."
+      ]
+    }
+  ],
+  "safetyNotes": [
+    {
+      "id": "safety_pepper_handling",
+      "label": "Hot pepper disclosed handling",
+      "notes": [
+        "Use gloves when handling very hot peppers; avoid touching eyes/face.",
+        "Ventilate kitchen when blending/cooking peppers."
+      ]
+    },
+    {
+      "id": "safety_fish_shellfish",
+      "label": "Fish/shellfish allergen awareness",
+      "notes": [
+        "Dried fish/crayfish are common in some soups; ensure allergen preferences are applied before planning."
+      ]
+    }
+  ],
+  "searchHints": {
+    "keywords": [
+      "jollof",
+      "pepper stew",
+      "groundnut soup",
+      "akara",
+      "suya",
+      "okra soup",
+      "red palm oil",
+      "dawadawa",
+      "iru",
+      "egusi"
+    ],
+    "commonAlternateNames": [
+      "groundnut soup = peanut soup",
+      "ogi/akamu = corn pap",
+      "dawadawa/iru = fermented locust beans"
+    ]
+  }
+}

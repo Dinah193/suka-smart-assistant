@@ -42,7 +42,7 @@ try {
 } catch {
   try {
     // eslint-disable-next-line global-require
-    featureFlags = require("../../config/featureFlags.json");
+    featureFlags = require("@/config/featureFlags.json");
     featureFlags = featureFlags?.default || featureFlags || {};
   } catch {
     featureFlags = {};

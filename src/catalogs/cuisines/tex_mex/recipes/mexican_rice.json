@@ -1,0 +1,463 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.mexican_rice",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Mexican Rice (Tex-Mex)",
+    "subtitle": "Toasty long-grain rice simmered in tomato broth with onion, garlic, and warm spices.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Built for consistency: toast rice → blend/simmer with tomato broth.",
+        "Includes optional peas/carrots (restaurant-style), and an oven-bake fallback."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "side",
+    "mealArchetypes": ["archetype.side", "archetype.starch", "archetype.base"],
+    "servingStyles": ["family_style", "bowls", "plates", "street_food"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "side.rice",
+      "starch.base",
+      "batch.friendly",
+      "weeknight.friendly",
+      "freezer.optional"
+    ],
+    "subprofiles": [
+      "texmex.beans_rice",
+      "texmex.tomato_garlic",
+      "texmex.cumin_forward"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 0.75, "unit": "cup" },
+    "notes": "Makes about 4 to 4 1/2 cups cooked rice."
+  },
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 25,
+    "totalMins": 40
+  },
+  "difficulty": "beginner",
+  "summary": "Fluffy, savory Mexican-style rice with a toasted base and tomato broth. A foundational Tex-Mex side for tacos, enchiladas, fajitas, bowls, and more.",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "onePotFriendly": true
+  },
+  "tasteProfile": {
+    "salt": 2,
+    "acid": 1,
+    "sweet": 1,
+    "heat": 0,
+    "umami": 2,
+    "notes": ["toasty", "tomato", "garlic_onion", "warm_spices"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.saucepan_with_lid",
+      "equipment.wooden_spoon",
+      "equipment.measuring_cups",
+      "equipment.measuring_spoons"
+    ],
+    "recommended": [
+      "equipment.fine_mesh_strainer",
+      "equipment.blender",
+      "equipment.kettle"
+    ],
+    "optional": [
+      {
+        "id": "equipment.oven_safe_skillet_or_dish",
+        "label": "Oven-safe covered dish (oven-bake method)",
+        "required": false,
+        "notes": "Useful if you prefer oven rice for hands-off reliability."
+      }
+    ]
+  },
+  "dietFlags": ["diet.vegetarian", "diet.vegan_optional", "diet.gluten_free"],
+  "allergens": [],
+  "ingredientGroups": [
+    {
+      "id": "group.rice_fat",
+      "label": "Rice + fat",
+      "items": [
+        "ingredient.long_grain_white_rice",
+        "ingredient.neutral_oil",
+        "ingredient.lard",
+        "ingredient.butter"
+      ]
+    },
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics",
+      "items": ["ingredient.onion", "ingredient.garlic"]
+    },
+    {
+      "id": "group.tomato_broth",
+      "label": "Tomato broth",
+      "items": [
+        "ingredient.tomato_sauce",
+        "ingredient.tomato_paste",
+        "ingredient.chicken_broth",
+        "ingredient.vegetable_broth",
+        "ingredient.water"
+      ]
+    },
+    {
+      "id": "group.seasoning",
+      "label": "Seasoning",
+      "items": [
+        "ingredient.cumin",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.bouillon_powder"
+      ]
+    },
+    {
+      "id": "group.optional_add_ins",
+      "label": "Optional add-ins",
+      "items": [
+        "ingredient.frozen_peas",
+        "ingredient.carrot_diced",
+        "ingredient.cilantro"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.long_grain_white_rice",
+      "label": "Long-grain white rice",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Rinse if desired; some cooks skip rinsing to keep more toasted flavor."
+    },
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil (or lard)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Lard adds classic flavor; oil keeps it vegetarian/vegan."
+    },
+    {
+      "id": "ingredient.lard",
+      "label": "Lard (optional, traditional)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.butter",
+      "label": "Butter (optional, richness)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional; use instead of part of the oil for richer rice."
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "About 1/2 medium onion."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.tomato_sauce",
+      "label": "Tomato sauce",
+      "role": "tomato_base",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "8 oz can is 1 cup; use half and save the rest for sauce or soup."
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "tomato_base",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional for deeper tomato color/flavor; reduce tomato sauce slightly if using a lot."
+    },
+    {
+      "id": "ingredient.chicken_broth",
+      "label": "Chicken broth (or vegetable broth)",
+      "role": "liquid",
+      "amount": { "value": 3, "unit": "cup" },
+      "notes": "Warm broth helps keep rice fluffy."
+    },
+    {
+      "id": "ingredient.vegetable_broth",
+      "label": "Vegetable broth (optional swap)",
+      "role": "liquid",
+      "amount": { "value": 3, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.bouillon_powder",
+      "label": "Chicken bouillon powder (optional)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adds restaurant-style savoriness; adjust salt if using."
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Keep subtle; Tex-Mex rice is typically not heavily spiced."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Start with 1 tsp; broth/bouillon saltiness varies."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.frozen_peas",
+      "label": "Frozen peas (optional)",
+      "role": "veg",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.carrot_diced",
+      "label": "Carrot, small diced (optional)",
+      "role": "veg",
+      "amount": { "value": 0.33, "unit": "cup" },
+      "optional": true,
+      "notes": "Dice small so it softens during the simmer."
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.option_rinse",
+      "title": "Optional: rinse and drain the rice",
+      "activeMins": 3,
+      "instructions": [
+        "If you prefer less starch, rinse rice in a fine-mesh strainer under cool water until it runs mostly clear.",
+        "Drain well to avoid splattering when toasting."
+      ],
+      "checks": ["Rice drained well (if rinsed)"]
+    },
+    {
+      "id": "step.toast_rice",
+      "title": "Toast the rice",
+      "activeMins": 8,
+      "instructions": [
+        "Heat oil (or lard) in a saucepan over medium heat.",
+        "Add rice and stir constantly until most grains look lightly golden and smell nutty, 5–7 minutes.",
+        "Don’t rush this step; the toast is the key to non-mushy Mexican rice."
+      ],
+      "timers": [{ "label": "Toast rice", "minutes": 6 }],
+      "checks": ["Rice lightly golden; nutty aroma; no burnt spots"]
+    },
+    {
+      "id": "step.saute_aromatics",
+      "title": "Sauté onion and garlic",
+      "activeMins": 4,
+      "instructions": [
+        "Stir in diced onion and cook 2–3 minutes until softened.",
+        "Add garlic and cook 30–60 seconds until fragrant."
+      ],
+      "timers": [{ "label": "Cook onion", "minutes": 2 }],
+      "checks": ["Onion softened; garlic fragrant, not browned"]
+    },
+    {
+      "id": "step.build_tomato_broth",
+      "title": "Build the tomato broth",
+      "activeMins": 3,
+      "instructions": [
+        "Stir in tomato paste (if using) and cook 30 seconds to remove raw taste.",
+        "Add tomato sauce, broth, bouillon (optional), cumin (optional), salt, and pepper.",
+        "Stir well and bring to a gentle boil."
+      ],
+      "timers": [{ "label": "Bring to boil", "minutes": 2 }],
+      "checks": ["Liquid simmering gently; seasoning dissolved"]
+    },
+    {
+      "id": "step.simmer",
+      "title": "Cover and simmer until rice is tender",
+      "activeMins": 1,
+      "handsOffMins": 18,
+      "instructions": [
+        "Reduce heat to low, cover tightly, and simmer 18 minutes without lifting the lid.",
+        "If using diced carrots, add them now (they’ll soften as the rice cooks).",
+        "If adding peas, you can add them at the end (see next step) to keep them bright."
+      ],
+      "timers": [{ "label": "Simmer rice (lid on)", "minutes": 18 }],
+      "checks": ["Rice tender; liquid absorbed"]
+    },
+    {
+      "id": "step.rest_fluff",
+      "title": "Rest, then fluff",
+      "activeMins": 3,
+      "handsOffMins": 8,
+      "instructions": [
+        "Remove from heat and keep covered for 8–10 minutes (this finishes steaming).",
+        "If using peas, sprinkle them on top during the rest so they warm through.",
+        "Fluff gently with a fork and taste for salt."
+      ],
+      "timers": [{ "label": "Rest rice (off heat)", "minutes": 8 }],
+      "checks": ["Rice fluffy; grains separate; seasoning balanced"]
+    },
+    {
+      "id": "step.oven_method",
+      "title": "Oven-bake method (optional, very reliable)",
+      "activeMins": 8,
+      "handsOffMins": 25,
+      "instructions": [
+        "Preheat oven to 350°F.",
+        "Toast rice and sauté aromatics in an oven-safe covered dish or skillet.",
+        "Add tomato sauce + broth + seasonings, bring to a brief simmer, cover, then bake 25 minutes.",
+        "Rest covered 10 minutes, then fluff."
+      ],
+      "checks": ["Oven rice fluffy; not wet at bottom"]
+    }
+  ],
+  "methods": [
+    "method.toast",
+    "method.saute",
+    "method.simmer",
+    "method.rest",
+    "method.fluff"
+  ],
+  "pairings": {
+    "bestWith": [
+      "recipes.tex_mex.tacos",
+      "recipes.tex_mex.enchiladas",
+      "recipes.tex_mex.fajitas",
+      "recipes.tex_mex.refried_beans",
+      "recipes.tex_mex.chipotle_sauce"
+    ],
+    "alsoGreatWith": [
+      "burrito_bowls",
+      "nachos",
+      "quesadillas",
+      "grilled_chicken",
+      "steak"
+    ]
+  },
+  "storage": {
+    "fridge": {
+      "duration": "4 days",
+      "notes": [
+        "Cool quickly and store airtight.",
+        "Reheat with 1–2 tbsp water per cup; cover to steam."
+      ]
+    },
+    "freezer": {
+      "duration": "1-2 months",
+      "notes": [
+        "Freeze in flat portions for quick thawing.",
+        "Texture is best if reheated covered with a splash of water."
+      ]
+    }
+  },
+  "safety": {
+    "notes": [
+      "Cool cooked rice quickly and refrigerate within 2 hours.",
+      "Reheat until steaming hot; avoid holding warm rice for long periods."
+    ]
+  },
+  "planner": {
+    "batchPrep": [
+      "Double the recipe for meal prep: portion into 1-cup containers.",
+      "Pairs naturally with refried beans for fast bowls and taco nights."
+    ],
+    "scaling": {
+      "notes": [
+        "If scaling up, use a wider pot for even toasting and a tight-fitting lid for simmer.",
+        "For very large batches, oven-bake method is the most consistent."
+      ]
+    }
+  },
+  "variations": [
+    {
+      "id": "variation.restaurant_style",
+      "label": "Restaurant-style (bouillon + slightly redder)",
+      "when": { "preference": "restaurant_style" },
+      "adapt": {
+        "notes": [
+          "Add bouillon powder and a touch more tomato paste.",
+          "Use 1/4 tsp cumin max to keep flavor classic and not overly spiced."
+        ]
+      }
+    },
+    {
+      "id": "variation.vegetable_rice",
+      "label": "Vegetable Mexican rice",
+      "when": { "add_ins": "peas_carrots" },
+      "adapt": {
+        "notes": [
+          "Add 1/3 cup small-diced carrots during simmer.",
+          "Add 1/2 cup peas during rest to keep them bright."
+        ]
+      }
+    },
+    {
+      "id": "variation.vegan",
+      "label": "Vegan Mexican rice",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "notes": [
+          "Use neutral oil and vegetable broth.",
+          "Skip chicken bouillon (or use vegan bouillon)."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": ["cuisine.tex_mex", "side.rice", "starch.base"],
+    "ingredientIds": [
+      "ingredient.long_grain_white_rice",
+      "ingredient.tomato_sauce",
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.chicken_broth"
+    ],
+    "methodIds": ["method.toast", "method.simmer", "method.rest"],
+    "equipmentIds": ["equipment.saucepan_with_lid"],
+    "search": {
+      "keywords": [
+        "mexican rice",
+        "spanish rice",
+        "arroz rojo",
+        "tex mex rice",
+        "tomato rice"
+      ],
+      "aliases": ["arroz", "arroz rojo", "spanish rice"]
+    }
+  }
+}

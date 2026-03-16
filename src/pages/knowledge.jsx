@@ -68,11 +68,11 @@ let FamilyFundConnector = null;
 try {
   // new paths
   HubPacketFormatter =
-    require("@/services/HubPacketFormatter.js").default ??
-    require("@/services/HubPacketFormatter").default;
+    require("@/services/hub/HubPacketFormatter.js").default ??
+    require("@/services/hub/HubPacketFormatter").default;
   FamilyFundConnector =
-    require("@/services/FamilyFundConnector.js").default ??
-    require("@/services/FamilyFundConnector").default;
+    require("@/services/hub/FamilyFundConnector.js").default ??
+    require("@/services/hub/FamilyFundConnector").default;
 } catch {
   try {
     // legacy hub/* paths
@@ -85,7 +85,7 @@ try {
 
 let bus = null;
 try {
-  bus = require("@/services/eventBus").default;
+  bus = require("@/services/events/eventBus").default;
 } catch {
   // optional
 }
@@ -135,11 +135,32 @@ function setFavsLocal(next) {
 
 // ----------------------------- Reference panels catalog --------------------------
 const PANELS = [
-  { id: "eventCatalog", title: "Event Catalog", blurb: "Envelope schema + domain events for automation and analytics." },
-  { id: "yieldCurves", title: "Yield Curves", blurb: "Meat/preservation yield curves for butchery and planning." },
-  { id: "inventoryRules", title: "Substitutions & Inventory Rules", blurb: "Torah-clean substitutions, units, and mapping rules." },
-  { id: "importSettings", title: "Import Settings", blurb: "Web Share/iOS/Bookmarklet/Scanner and post-import behavior." },
-  { id: "docs", title: "How-to & Docs", blurb: "Guides: batch cooking, garden care, preservation, animal workflows." },
+  {
+    id: "eventCatalog",
+    title: "Event Catalog",
+    blurb: "Envelope schema + domain events for automation and analytics.",
+  },
+  {
+    id: "yieldCurves",
+    title: "Yield Curves",
+    blurb: "Meat/preservation yield curves for butchery and planning.",
+  },
+  {
+    id: "inventoryRules",
+    title: "Substitutions & Inventory Rules",
+    blurb: "Torah-clean substitutions, units, and mapping rules.",
+  },
+  {
+    id: "importSettings",
+    title: "Import Settings",
+    blurb: "Web Share/iOS/Bookmarklet/Scanner and post-import behavior.",
+  },
+  {
+    id: "docs",
+    title: "How-to & Docs",
+    blurb:
+      "Guides: batch cooking, garden care, preservation, animal workflows.",
+  },
 ];
 
 // ----------------------------------- Tools catalog --------------------------------
@@ -174,7 +195,8 @@ const TOOLS_CATALOG = [
 const ARTICLES = [
   {
     id: "how-suka-works",
-    title: "How Suka Works: Imports → Intelligence → Automation → Hub (optional)",
+    title:
+      "How Suka Works: Imports → Intelligence → Automation → Hub (optional)",
     tags: ["overview", "architecture", "automation"],
     panel: "docs",
   },
@@ -215,19 +237,54 @@ function buildReverseIntent(domain) {
   const ts = new Date().toISOString();
   switch (domain) {
     case "meals":
-      return { domain, intent: "reverse.from.recipes_or_macros", ts, params: { targetServings: "week", considerInventory: true } };
+      return {
+        domain,
+        intent: "reverse.from.recipes_or_macros",
+        ts,
+        params: { targetServings: "week", considerInventory: true },
+      };
     case "cleaning":
-      return { domain, intent: "reverse.from.declutter_goals", ts, params: { scope: "whole_home", respectGuards: true } };
+      return {
+        domain,
+        intent: "reverse.from.declutter_goals",
+        ts,
+        params: { scope: "whole_home", respectGuards: true },
+      };
     case "garden":
-      return { domain, intent: "reverse.from.harvest_targets", ts, params: { season: "current", planPreservation: true } };
+      return {
+        domain,
+        intent: "reverse.from.harvest_targets",
+        ts,
+        params: { season: "current", planPreservation: true },
+      };
     case "animals":
-      return { domain, intent: "reverse.from.cut_targets", ts, params: { proteinGoalLbs: 40, includeBreeding: true } };
+      return {
+        domain,
+        intent: "reverse.from.cut_targets",
+        ts,
+        params: { proteinGoalLbs: 40, includeBreeding: true },
+      };
     case "preservation":
-      return { domain, intent: "reverse.from.store_or_harvest_inflow", ts, params: { queueFrom: ["harvests", "bulkBuys"] } };
+      return {
+        domain,
+        intent: "reverse.from.store_or_harvest_inflow",
+        ts,
+        params: { queueFrom: ["harvests", "bulkBuys"] },
+      };
     case "storehouse":
-      return { domain, intent: "reverse.from.pantry_targets", ts, params: { reconcileWithInventory: true } };
+      return {
+        domain,
+        intent: "reverse.from.pantry_targets",
+        ts,
+        params: { reconcileWithInventory: true },
+      };
     case "couponing":
-      return { domain, intent: "reverse.from.shopping_targets", ts, params: { stackCoupons: true, storeMatchups: true } };
+      return {
+        domain,
+        intent: "reverse.from.shopping_targets",
+        ts,
+        params: { stackCoupons: true, storeMatchups: true },
+      };
     default:
       return { domain: "unknown", intent: "noop", ts, params: {} };
   }
@@ -235,7 +292,9 @@ function buildReverseIntent(domain) {
 
 // ----------------------------------- UI atoms ------------------------------------
 function Pill({ children }) {
-  return <span className="px-2 py-0.5 rounded-full border text-xs">{children}</span>;
+  return (
+    <span className="px-2 py-0.5 rounded-full border text-xs">{children}</span>
+  );
 }
 
 function Section({ title, children, subtitle }) {
@@ -271,20 +330,23 @@ export default function KnowledgeBasePage() {
         )
       : ARTICLES;
     // Sort: favorites first, then title
-    return base
-      .slice()
-      .sort((a, b) => {
-        const af = favs.includes(a.id) ? -1 : 1;
-        const bf = favs.includes(b.id) ? -1 : 1;
-        return af - bf || a.title.localeCompare(b.title);
-      });
+    return base.slice().sort((a, b) => {
+      const af = favs.includes(a.id) ? -1 : 1;
+      const bf = favs.includes(b.id) ? -1 : 1;
+      return af - bf || a.title.localeCompare(b.title);
+    });
   }, [query, favs]);
 
   const toggleFav = useCallback((id) => {
     setFavs((curr) => {
-      const next = curr.includes(id) ? curr.filter((x) => x !== id) : [...curr, id];
+      const next = curr.includes(id)
+        ? curr.filter((x) => x !== id)
+        : [...curr, id];
       setFavsLocal(next);
-      emit("knowledge.article.favorite.toggle", { id, active: !curr.includes(id) });
+      emit("knowledge.article.favorite.toggle", {
+        id,
+        active: !curr.includes(id),
+      });
       return next;
     });
   }, []);
@@ -350,8 +412,9 @@ export default function KnowledgeBasePage() {
       <div className="mb-4">
         <h1 className="text-2xl font-semibold">Household Knowledge Base</h1>
         <p className="text-sm text-base-content/70">
-          Reference data, tools, and guides that power imports, intelligence, automation,
-          and (optionally) Hub export. Everything here is safe to open offline.
+          Reference data, tools, and guides that power imports, intelligence,
+          automation, and (optionally) Hub export. Everything here is safe to
+          open offline.
         </p>
       </div>
 
@@ -363,29 +426,36 @@ export default function KnowledgeBasePage() {
         <div className="prose max-w-none text-sm">
           <ul className="list-disc pl-5">
             <li>
-              <strong>Imports:</strong> Recipes, cleaning routines, seeds/packets, animal
-              cut sheets, videos/how-to, pricebooks & coupons. Routed by ImportRouter →
-              normalized into structured records.
+              <strong>Imports:</strong> Recipes, cleaning routines,
+              seeds/packets, animal cut sheets, videos/how-to, pricebooks &
+              coupons. Routed by ImportRouter → normalized into structured
+              records.
             </li>
             <li>
-              <strong>Intelligence:</strong> Substitutions, unit mapping, yield curves,
-              equipment, seasonality, and ingredient patterns are applied.
+              <strong>Intelligence:</strong> Substitutions, unit mapping, yield
+              curves, equipment, seasonality, and ingredient patterns are
+              applied.
             </li>
             <li>
-              <strong>Automation:</strong> Engines schedule sessions and emit events like{" "}
-              <code>inventory.updated</code>, <code>meal.executed</code>,{" "}
-              <code>garden.harvest.logged</code>, and <code>preservation.completed</code>.
-              Guards (Sabbath, Quiet Hours, Weather) are respected.
+              <strong>Automation:</strong> Engines schedule sessions and emit
+              events like <code>inventory.updated</code>,{" "}
+              <code>meal.executed</code>, <code>garden.harvest.logged</code>,
+              and <code>preservation.completed</code>. Guards (Sabbath, Quiet
+              Hours, Weather) are respected.
             </li>
             <li>
               <strong>Hub export (optional):</strong> If{" "}
-              <code>featureFlags.familyFundMode</code> is true, envelopes are formatted
-              and sent best-effort to the Suka Village Family Fund Hub.
+              <code>featureFlags.familyFundMode</code> is true, envelopes are
+              formatted and sent best-effort to the Suka Village Family Fund
+              Hub.
             </li>
           </ul>
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
-          <button className="btn btn-outline rounded-2xl" onClick={simulateImportEvent}>
+          <button
+            className="btn btn-outline rounded-2xl"
+            onClick={simulateImportEvent}
+          >
             Simulate import.parsed
           </button>
           <button
@@ -436,7 +506,10 @@ export default function KnowledgeBasePage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button className="btn btn-ghost rounded-2xl" onClick={() => setQuery("")}>
+        <button
+          className="btn btn-ghost rounded-2xl"
+          onClick={() => setQuery("")}
+        >
           Clear
         </button>
       </div>
@@ -493,20 +566,27 @@ export default function KnowledgeBasePage() {
       {/* Reverse generation triggers */}
       <h2 className="text-lg font-semibold mt-8 mb-2">Reverse Generation</h2>
       <p className="text-sm text-base-content/70 mb-3">
-        Start from goals/targets and let engines compute the best path back to actions.
+        Start from goals/targets and let engines compute the best path back to
+        actions.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {["meals", "cleaning", "garden", "animals", "preservation", "storehouse", "couponing"].map(
-          (d) => (
-            <button
-              key={d}
-              className="btn rounded-2xl border"
-              onClick={() => requestReverse(d)}
-            >
-              Reverse-generate: {d}
-            </button>
-          )
-        )}
+        {[
+          "meals",
+          "cleaning",
+          "garden",
+          "animals",
+          "preservation",
+          "storehouse",
+          "couponing",
+        ].map((d) => (
+          <button
+            key={d}
+            className="btn rounded-2xl border"
+            onClick={() => requestReverse(d)}
+          >
+            Reverse-generate: {d}
+          </button>
+        ))}
       </div>
 
       {/* Quick links */}
@@ -544,13 +624,17 @@ export default function KnowledgeBasePage() {
         </button>
         <button
           className="btn btn-ghost btn-sm rounded-2xl"
-          onClick={() => openQuickLink(ROUTES.storehouse, "storehouse.autoFill")}
+          onClick={() =>
+            openQuickLink(ROUTES.storehouse, "storehouse.autoFill")
+          }
         >
           Storehouse Auto-Fill
         </button>
         <button
           className="btn btn-ghost btn-sm rounded-2xl"
-          onClick={() => openQuickLink(ROUTES.preservation, "preservation.queue")}
+          onClick={() =>
+            openQuickLink(ROUTES.preservation, "preservation.queue")
+          }
         >
           Preservation Queue
         </button>

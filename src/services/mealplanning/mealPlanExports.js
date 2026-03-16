@@ -24,32 +24,63 @@ export const mealPlanExports = {
 
     switch (format) {
       case "ics": {
-        const ics = buildPlanICS(plan, { tz, includeTimers: !!options.includeTimers });
-        return await saveFile({ data: ics, filename: icsName(plan), mime: "text/calendar" });
+        const ics = buildPlanICS(plan, {
+          tz,
+          includeTimers: !!options.includeTimers,
+        });
+        return await saveFile({
+          data: ics,
+          filename: icsName(plan),
+          mime: "text/calendar",
+        });
       }
       case "csv:shopping": {
-        const csv = buildShoppingCSV(plan, { passoverMode: !!prefs?.calendar?.passoverMode });
-        return await saveFile({ data: csv, filename: shoppingName(plan), mime: "text/csv" });
+        const csv = buildShoppingCSV(plan, {
+          passoverMode: !!prefs?.calendar?.passoverMode,
+        });
+        return await saveFile({
+          data: csv,
+          filename: shoppingName(plan),
+          mime: "text/csv",
+        });
       }
       case "csv:plan": {
         const csv = buildPlanCSV(plan);
-        return await saveFile({ data: csv, filename: `${fileSafe(plan)}-plan.csv`, mime: "text/csv" });
+        return await saveFile({
+          data: csv,
+          filename: `${fileSafe(plan)}-plan.csv`,
+          mime: "text/csv",
+        });
       }
       case "md": {
         const md = await buildPlanMarkdown(plan, { prefs });
-        return await saveFile({ data: md, filename: `${fileSafe(plan)}.md`, mime: "text/markdown" });
+        return await saveFile({
+          data: md,
+          filename: `${fileSafe(plan)}.md`,
+          mime: "text/markdown",
+        });
       }
       case "json": {
         const json = JSON.stringify(plan, null, 2);
-        return await saveFile({ data: json, filename: `${fileSafe(plan)}.json`, mime: "application/json" });
+        return await saveFile({
+          data: json,
+          filename: `${fileSafe(plan)}.json`,
+          mime: "application/json",
+        });
       }
       case "pdf:labels": {
         const blob = await buildLabelsPDF(plan, { prefs });
-        return await saveBlob({ blob, filename: `${fileSafe(plan)}-labels.pdf` });
+        return await saveBlob({
+          blob,
+          filename: `${fileSafe(plan)}-labels.pdf`,
+        });
       }
       case "pdf:summary": {
         const blob = await buildPlanSummaryPDF(plan, { prefs });
-        return await saveBlob({ blob, filename: `${fileSafe(plan)}-summary.pdf` });
+        return await saveBlob({
+          blob,
+          filename: `${fileSafe(plan)}-summary.pdf`,
+        });
       }
       default:
         throw new Error(`Unsupported export format: ${format}`);
@@ -63,20 +94,34 @@ export const mealPlanExports = {
     const draft = await BatchDrafts.getById(draftId);
     if (!draft) throw new Error("Batch draft not found");
     const ics = await buildBatchICS(draft, { tz });
-    return await saveFile({ data: ics, filename: `${fileSafe({ weekStartISO: draft.dateSuggested })}-batch.ics`, mime: "text/calendar" });
+    return await saveFile({
+      data: ics,
+      filename: `${fileSafe({ weekStartISO: draft.dateSuggested })}-batch.ics`,
+      mime: "text/calendar",
+    });
   },
 
   /** Quick helpers used by NBA buttons */
   async exportGroceryCSV(plan) {
     const prefs = usePreferencesStore.getState?.() || {};
-    const csv = buildShoppingCSV(plan, { passoverMode: !!prefs?.calendar?.passoverMode });
-    return await saveFile({ data: csv, filename: shoppingName(plan), mime: "text/csv" });
+    const csv = buildShoppingCSV(plan, {
+      passoverMode: !!prefs?.calendar?.passoverMode,
+    });
+    return await saveFile({
+      data: csv,
+      filename: shoppingName(plan),
+      mime: "text/csv",
+    });
   },
   async exportMarkdown(plan) {
     const prefs = usePreferencesStore.getState?.() || {};
     const md = await buildPlanMarkdown(plan, { prefs });
-    return await saveFile({ data: md, filename: `${fileSafe(plan)}.md`, mime: "text/markdown" });
-  }
+    return await saveFile({
+      data: md,
+      filename: `${fileSafe(plan)}.md`,
+      mime: "text/markdown",
+    });
+  },
 };
 
 /* ----------------------------------------------------------------------------
@@ -88,7 +133,7 @@ function buildPlanICS(plan, { tz, includeTimers } = {}) {
     "VERSION:2.0",
     "PRODID:-//Suka Smart Assistant//Meal Plan//EN",
     `X-WR-CALNAME:Suka Meal Plan`,
-    `X-WR-TIMEZONE:${tz}`
+    `X-WR-TIMEZONE:${tz}`,
   ];
 
   const sab = sabbathGuard?.window?.() || null;
@@ -106,20 +151,24 @@ function buildPlanICS(plan, { tz, includeTimers } = {}) {
       if (slot.tags?.length) notes.push(`Tags: ${slot.tags.join(", ")}`);
       if (includeTimers && slot?.timers?.steps?.length) {
         notes.push("Timers:");
-        slot.timers.steps.forEach(s => notes.push(`- ${s.label} (${s.minutes}m)`));
+        slot.timers.steps.forEach((s) =>
+          notes.push(`- ${s.label} (${s.minutes}m)`)
+        );
       }
       if (sab && isWithin(start, sab.from, sab.to)) {
         notes.push("⛔ Sabbath window – keep cooking simple/low-touch.");
       }
 
-      lines.push(...eventBlock({
-        tz,
-        uid: `suka-${plan.id}-${day.dateISO}-${mk}`,
-        title,
-        start,
-        end,
-        description: notes.join("\\n")
-      }));
+      lines.push(
+        ...eventBlock({
+          tz,
+          uid: `suka-${plan.id}-${day.dateISO}-${mk}`,
+          title,
+          start,
+          end,
+          description: notes.join("\\n"),
+        })
+      );
     }
   }
 
@@ -129,13 +178,13 @@ function buildPlanICS(plan, { tz, includeTimers } = {}) {
 
 async function buildBatchICS(draft, { tz }) {
   const recipes = await Recipes.all();
-  const map = Object.fromEntries(recipes.map(r => [r.id, r]));
+  const map = Object.fromEntries(recipes.map((r) => [r.id, r]));
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Suka Smart Assistant//Batch Session//EN",
     `X-WR-CALNAME:Suka Batch Session`,
-    `X-WR-TIMEZONE:${tz}`
+    `X-WR-TIMEZONE:${tz}`,
   ];
 
   const baseStart = toDateLocal(draft.dateSuggested, "batch");
@@ -144,22 +193,25 @@ async function buildBatchICS(draft, { tz }) {
   for (const block of draft.timers || []) {
     const r = map[block.recipeId];
     const title = safeICS(`Batch: ${r?.title || "Recipe"}`);
-    const minutes = (block.steps || []).reduce((a, b) => a + (b.minutes || 0), 0) || 45;
+    const minutes =
+      (block.steps || []).reduce((a, b) => a + (b.minutes || 0), 0) || 45;
     const start = new Date(cursor);
     const end = new Date(cursor.getTime() + minutes * 60 * 1000);
 
     const desc = ["Steps:"]
-      .concat((block.steps || []).map(s => `- ${s.label} (${s.minutes}m)`))
+      .concat((block.steps || []).map((s) => `- ${s.label} (${s.minutes}m)`))
       .join("\\n");
 
-    lines.push(...eventBlock({
-      tz,
-      uid: `suka-batch-${draft.id}-${block.recipeId}`,
-      title,
-      start,
-      end,
-      description: desc
-    }));
+    lines.push(
+      ...eventBlock({
+        tz,
+        uid: `suka-batch-${draft.id}-${block.recipeId}`,
+        title,
+        start,
+        end,
+        description: desc,
+      })
+    );
 
     cursor = new Date(end.getTime() + 10 * 60 * 1000); // 10 min buffer
   }
@@ -177,7 +229,7 @@ function eventBlock({ tz, uid, title, start, end, description }) {
     `DTEND;TZID=${tz}:${toICSDate(end)}`,
     `SUMMARY:${title}`,
     ...(description ? foldICS(`DESCRIPTION:${description}`) : []),
-    "END:VEVENT"
+    "END:VEVENT",
   ];
 }
 
@@ -200,7 +252,7 @@ function buildShoppingCSV(plan, { passoverMode } = {}) {
 
       for (const ing of r.ingredients) {
         // Respect Passover mode by tagging/flagging items with chametz-y tags
-        const isChametz = (ing.tags || []).some(t => restrictedTags.has(t));
+        const isChametz = (ing.tags || []).some((t) => restrictedTags.has(t));
         if (passoverMode && isChametz) continue;
 
         rows.push([
@@ -209,12 +261,12 @@ function buildShoppingCSV(plan, { passoverMode } = {}) {
           csvSafe(ing.name || ""),
           csvSafe(scaleQty(ing.qty, slot.servings)),
           csvSafe(ing.aisle || ""),
-          csvSafe(isChametz ? "Restricted during Passover" : (ing.note || ""))
+          csvSafe(isChametz ? "Restricted during Passover" : ing.note || ""),
         ]);
       }
     }
   }
-  return rows.map(r => r.join(",")).join("\n");
+  return rows.map((r) => r.join(",")).join("\n");
 }
 
 function buildPlanCSV(plan) {
@@ -231,7 +283,7 @@ function buildPlanCSV(plan) {
       csvSafe(resolveRecipeName(day.meals.snack?.recipeId)),
     ]);
   }
-  return rows.map(r => r.join(",")).join("\n");
+  return rows.map((r) => r.join(",")).join("\n");
 }
 
 /* ----------------------------------------------------------------------------
@@ -244,7 +296,8 @@ async function buildPlanMarkdown(plan, { prefs } = {}) {
   lines.push(`# Weekly Meal Plan`);
   lines.push(`**Household:** ${prefs?.householdName || "—"}  `);
   lines.push(`**Week Starting:** ${plan.weekStartISO}`);
-  if (prefs?.calendar?.passoverMode) lines.push(`> Passover mode is **ON** (chametz filtered).\n`);
+  if (prefs?.calendar?.passoverMode)
+    lines.push(`> Passover mode is **ON** (chametz filtered).\n`);
 
   for (const d of plan.days) {
     lines.push(`\n## ${d.dateISO}`);
@@ -257,7 +310,9 @@ async function buildPlanMarkdown(plan, { prefs } = {}) {
       if (slot?.tags?.length) lines.push(`- _Tags:_ ${slot.tags.join(", ")}`);
       if (slot?.timers?.steps?.length) {
         lines.push(`- _Timers:_`);
-        slot.timers.steps.forEach(s => lines.push(`  - ${s.label} (${s.minutes}m)`));
+        slot.timers.steps.forEach((s) =>
+          lines.push(`  - ${s.label} (${s.minutes}m)`)
+        );
       }
     }
 
@@ -269,18 +324,22 @@ async function buildPlanMarkdown(plan, { prefs } = {}) {
   // Grocery appendix
   lines.push(`\n---\n## Grocery List\n`);
   lines.push("- Group items by aisle when shopping.");
-  const csv = buildShoppingCSV(plan, { passoverMode: !!prefs?.calendar?.passoverMode });
+  const csv = buildShoppingCSV(plan, {
+    passoverMode: !!prefs?.calendar?.passoverMode,
+  });
   const parsed = parseCSV(csv);
   const body = parsed.slice(1); // without header
   const byAisle = {};
-  body.forEach(r => {
+  body.forEach((r) => {
     const aisle = r[4] || "Other";
     (byAisle[aisle] ||= []).push(`${r[2]} — ${r[3]}`);
   });
-  Object.keys(byAisle).sort().forEach(aisle => {
-    lines.push(`\n### ${aisle}`);
-    byAisle[aisle].forEach(item => lines.push(`- ${item}`));
-  });
+  Object.keys(byAisle)
+    .sort()
+    .forEach((aisle) => {
+      lines.push(`\n### ${aisle}`);
+      byAisle[aisle].forEach((item) => lines.push(`- ${item}`));
+    });
 
   return lines.join("\n");
 }
@@ -303,13 +362,18 @@ async function buildLabelsPDF(plan, { prefs } = {}) {
         date: d.dateISO,
         meal: cap(mk),
         servings: slot.servings || 1,
-        tags: (slot.tags || []).slice(0, 4).join(", ")
+        tags: (slot.tags || []).slice(0, 4).join(", "),
       });
     }
   }
   return minimalPdfFromText({
     title: `${prefs?.householdName || "Household"} — Meal Labels`,
-    lines: labels.map(l => `${l.date} • ${l.meal}\n${l.title}\nServings: ${l.servings}${l.tags ? `\nTags: ${l.tags}` : ""}`)
+    lines: labels.map(
+      (l) =>
+        `${l.date} • ${l.meal}\n${l.title}\nServings: ${l.servings}${
+          l.tags ? `\nTags: ${l.tags}` : ""
+        }`
+    ),
   });
 }
 
@@ -339,7 +403,7 @@ function minimalPdfFromText({ title, lines }) {
   const fontSize = 12;
   const margin = 50;
   const lineHeight = 16;
-  const pageWidth = 595;  // A4 width pt
+  const pageWidth = 595; // A4 width pt
   const pageHeight = 842; // A4 height pt
 
   const content = [];
@@ -360,7 +424,7 @@ function minimalPdfFromText({ title, lines }) {
   content.push("q", "BT", `/F1 ${fontSize} Tf`, "50 792 Td");
   addLine(title);
   addLine(" ");
-  lines.forEach(l => addLine(l));
+  lines.forEach((l) => addLine(l));
 
   // PDF assembly
   const objects = [];
@@ -371,11 +435,15 @@ function minimalPdfFromText({ title, lines }) {
     objects.push(str);
   };
 
-  const contentStream = `<< /Length ${content.join("\n").length} >>\nstream\n${content.join("\n")}\nendstream`;
-  const fontObj = "2 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n";
+  const contentStream = `<< /Length ${
+    content.join("\n").length
+  } >>\nstream\n${content.join("\n")}\nendstream`;
+  const fontObj =
+    "2 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n";
   const contentsObj = `3 0 obj\n${contentStream}\nendobj\n`;
   const pageObj = `4 0 obj\n<< /Type /Page /Parent 1 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Contents 3 0 R /Resources << /Font << /F1 2 0 R >> >> >>\nendobj\n`;
-  const pagesObj = "1 0 obj\n<< /Type /Pages /Kids [4 0 R] /Count 1 >>\nendobj\n";
+  const pagesObj =
+    "1 0 obj\n<< /Type /Pages /Kids [4 0 R] /Count 1 >>\nendobj\n";
   const catalogObj = "5 0 obj\n<< /Type /Catalog /Pages 1 0 R >>\nendobj\n";
 
   // Order matters for xref offsets:
@@ -393,7 +461,9 @@ function minimalPdfFromText({ title, lines }) {
     const off = (xref[i] + "%PDF-1.4\n".length).toString().padStart(10, "0");
     pdf += `${off} 00000 n \n`;
   }
-  pdf += `trailer\n<< /Size ${xref.length + 1} /Root 5 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  pdf += `trailer\n<< /Size ${
+    xref.length + 1
+  } /Root 5 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
 
   return new Blob([pdf], { type: "application/pdf" });
 }
@@ -411,7 +481,9 @@ function fileSafe(plan) {
   const start = plan.weekStartISO?.slice(0, 10) || "plan";
   return `mealplan-${start}`;
 }
-function cap(s) { return (s || "").charAt(0).toUpperCase() + (s || "").slice(1); }
+function cap(s) {
+  return (s || "").charAt(0).toUpperCase() + (s || "").slice(1);
+}
 
 function toDateLocal(dateISO, bucket) {
   // breakfast: 08:00, lunch: 12:00, dinner: 18:00, snack: 15:00, batch: 09:00
@@ -466,15 +538,26 @@ function scaleQty(qty, servings = 1) {
 
 function parseCSV(text) {
   // simple CSV parse (no quoted commas nesting beyond basics)
-  return text.split("\n").map(line => {
+  return text.split("\n").map((line) => {
     const out = [];
     let cur = "";
     let inside = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
-      if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; continue; }
-      if (ch === '"') { inside = !inside; continue; }
-      if (ch === "," && !inside) { out.push(cur); cur = ""; continue; }
+      if (ch === '"' && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+        continue;
+      }
+      if (ch === '"') {
+        inside = !inside;
+        continue;
+      }
+      if (ch === "," && !inside) {
+        out.push(cur);
+        cur = "";
+        continue;
+      }
       cur += ch;
     }
     out.push(cur);
@@ -501,7 +584,9 @@ function resolveRecipeName(id) {
 export async function primeRecipeCache() {
   try {
     const all = await Recipes.all();
-    globalThis.__SUKA_RECIPE_CACHE = Object.fromEntries(all.map(r => [r.id, r]));
+    globalThis.__SUKA_RECIPE_CACHE = Object.fromEntries(
+      all.map((r) => [r.id, r])
+    );
   } catch (e) {
     logger.warn("[mealPlanExports] primeRecipeCache failed", e);
   }
@@ -533,8 +618,10 @@ async function saveBlob({ blob, filename }) {
 
   // Node path (dev server / exports folder)
   try {
-    const fs = await import("fs");
-    const path = await import("path");
+    // Indirect dynamic import keeps browser bundlers from resolving Node core modules.
+    const dynamicImport = new Function("s", "return import(s)");
+    const fs = await dynamicImport("node:fs");
+    const path = await dynamicImport("node:path");
     const dir = path.resolve(process.cwd(), "exports");
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const filePath = path.join(dir, filename);
@@ -557,29 +644,29 @@ export function exportActionsForNBA(plan) {
       label: "Export Grocery CSV",
       icon: "download",
       intent: "export",
-      payload: { planId: plan.id, format: "csv:shopping" }
+      payload: { planId: plan.id, format: "csv:shopping" },
     },
     {
       id: "export_calendar_ics",
       label: "Export Calendar (ICS)",
       icon: "calendar",
       intent: "export",
-      payload: { planId: plan.id, format: "ics" }
+      payload: { planId: plan.id, format: "ics" },
     },
     {
       id: "export_md",
       label: "Export Markdown",
       icon: "file-text",
       intent: "export",
-      payload: { planId: plan.id, format: "md" }
+      payload: { planId: plan.id, format: "md" },
     },
     {
       id: "export_labels_pdf",
       label: "Print Labels (PDF)",
       icon: "printer",
       intent: "export",
-      payload: { planId: plan.id, format: "pdf:labels" }
-    }
+      payload: { planId: plan.id, format: "pdf:labels" },
+    },
   ];
 }
 

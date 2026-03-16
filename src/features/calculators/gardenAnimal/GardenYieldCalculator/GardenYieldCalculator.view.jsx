@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { runGardenYieldCalculatorShim } from "./GardenYieldCalculator.shim";
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 /**
  * GardenYieldCalculatorView
@@ -19,7 +19,7 @@ import eventBus from "@/services/eventBus";
 export default function GardenYieldCalculatorView({
   initialPayload,
   onPayloadChange,
-  onResult
+  onResult,
 }) {
   const [payload, setPayload] = useState(() =>
     initialPayload && typeof initialPayload === "object"
@@ -50,8 +50,8 @@ export default function GardenYieldCalculatorView({
       totalPreservationBatches: 0,
       busiestWeekStartDate: null,
       busiestWeekTotalYield: 0,
-      notes: ""
-    }
+      notes: "",
+    },
   };
 
   const yieldEstimates = outputs.yieldEstimates || [];
@@ -91,7 +91,7 @@ export default function GardenYieldCalculatorView({
     try {
       const next = await runGardenYieldCalculatorShim(payload, {
         eventBus,
-        featureFlags: { familyFundMode: false }
+        featureFlags: { familyFundMode: false },
       });
       setResult(next);
       setPayload(next);
@@ -110,8 +110,8 @@ export default function GardenYieldCalculatorView({
       ...payload,
       inputs: {
         ...payload.inputs,
-        ...partial
-      }
+        ...partial,
+      },
     };
     setPayload(next);
     if (onPayloadChange) onPayloadChange(next);
@@ -123,7 +123,7 @@ export default function GardenYieldCalculatorView({
       [field]:
         field === "lossFactor" || field === "laborHoursPerUnit"
           ? toNumber(value, assumptions[field] || 0)
-          : value
+          : value,
     };
     updateInputs({ assumptions: nextAssumptions });
   }
@@ -138,7 +138,7 @@ export default function GardenYieldCalculatorView({
         field === "plantsPerFoot" ||
         field === "expectedYieldPerPlant"
           ? toNumber(value, "")
-          : value
+          : value,
     };
     updateInputs({ crops: nextCrops });
   }
@@ -157,8 +157,8 @@ export default function GardenYieldCalculatorView({
         targetUse: "mixed",
         successionCount: 1,
         preservationRatio: "",
-        notes: ""
-      }
+        notes: "",
+      },
     ];
     updateInputs({ crops: nextCrops });
   }
@@ -181,7 +181,7 @@ export default function GardenYieldCalculatorView({
           type: "session.requested",
           ts,
           source: "calculators/garden/GardenYieldCalculator.view",
-          data: { session }
+          data: { session },
         });
       }
     } catch (err) {
@@ -205,7 +205,7 @@ export default function GardenYieldCalculatorView({
           type: "session.requested",
           ts,
           source: "calculators/garden/GardenYieldCalculator.view",
-          data: { session }
+          data: { session },
         });
       }
     } catch (err) {
@@ -220,7 +220,9 @@ export default function GardenYieldCalculatorView({
     <div className="ssa-calculator-card">
       <header className="ssa-calculator-header">
         <div>
-          <h2 className="ssa-calculator-title">Garden Yield & Harvest Planner</h2>
+          <h2 className="ssa-calculator-title">
+            Garden Yield & Harvest Planner
+          </h2>
           <p className="ssa-calculator-subtitle">
             Estimate per-crop yields, see your busiest harvest weeks, and plan
             preservation batches that feed directly into SSA garden sessions.
@@ -241,7 +243,9 @@ export default function GardenYieldCalculatorView({
             type="button"
             className="ssa-button-primary"
             disabled={!nextHarvestWeek}
-            onClick={() => nextHarvestWeek && handleLaunchHarvestWeekSession(nextHarvestWeek)}
+            onClick={() =>
+              nextHarvestWeek && handleLaunchHarvestWeekSession(nextHarvestWeek)
+            }
           >
             Harvest Now
           </button>
@@ -497,8 +501,7 @@ export default function GardenYieldCalculatorView({
         <div className="ssa-summary-item">
           <span className="ssa-summary-label">Total Expected Yield</span>
           <span className="ssa-summary-value">
-            {summary.totalExpectedYield ?? 0}{" "}
-            {summary.yieldUnit || "lbs"}
+            {summary.totalExpectedYield ?? 0} {summary.yieldUnit || "lbs"}
           </span>
         </div>
         <div className="ssa-summary-item">
@@ -512,8 +515,7 @@ export default function GardenYieldCalculatorView({
             <span className="ssa-summary-label">Busiest Week</span>
             <span className="ssa-summary-value">
               {summary.busiestWeekStartDate} (
-              {summary.busiestWeekTotalYield ?? 0}{" "}
-              {summary.yieldUnit || "lbs"})
+              {summary.busiestWeekTotalYield ?? 0} {summary.yieldUnit || "lbs"})
             </span>
           </div>
         )}
@@ -670,8 +672,8 @@ export default function GardenYieldCalculatorView({
                             key={c.cropId || c.cropName}
                             className="ssa-badge-muted"
                           >
-                            {c.cropName || c.cropId}:{" "}
-                            {Math.round(c.yield)} {week.yieldUnit}
+                            {c.cropName || c.cropId}: {Math.round(c.yield)}{" "}
+                            {week.yieldUnit}
                           </span>
                         ))}
                     </div>
@@ -679,9 +681,7 @@ export default function GardenYieldCalculatorView({
                       <button
                         type="button"
                         className="ssa-button-secondary ssa-button-xs"
-                        onClick={() =>
-                          handleLaunchHarvestWeekSession(week)
-                        }
+                        onClick={() => handleLaunchHarvestWeekSession(week)}
                       >
                         Run Harvest Session
                       </button>
@@ -723,8 +723,7 @@ export default function GardenYieldCalculatorView({
                       </span>
                       <span className="ssa-cell-sub">
                         Batch size: {group.idealBatchSize} {group.yieldUnit} ·
-                        Batches:{" "}
-                        {group.expectedBatchCount.toFixed(1)}
+                        Batches: {group.expectedBatchCount.toFixed(1)}
                       </span>
                     </div>
                     {Array.isArray(group.linkedHarvestWindows) &&
@@ -738,9 +737,7 @@ export default function GardenYieldCalculatorView({
                       <button
                         type="button"
                         className="ssa-button-secondary ssa-button-xs"
-                        onClick={() =>
-                          handleLaunchPreservationSession(group)
-                        }
+                        onClick={() => handleLaunchPreservationSession(group)}
                       >
                         Plan Preservation Session
                       </button>
@@ -765,7 +762,7 @@ function getDefaultPayload() {
   return {
     context: {
       nodeKey: "gardenYield",
-      version: "1.0.0"
+      version: "1.0.0",
     },
     inputs: {
       crops: [],
@@ -773,7 +770,7 @@ function getDefaultPayload() {
       harvestWindows: [],
       storehouseTargets: {
         year: now.getFullYear(),
-        targetsByCrop: []
+        targetsByCrop: [],
       },
       assumptions: {
         lossFactor: 0.15,
@@ -784,11 +781,11 @@ function getDefaultPayload() {
           dehydrating: 8,
           fermenting: 8,
           rootCellar: 12,
-          unit: "lbs"
-        }
-      }
+          unit: "lbs",
+        },
+      },
     },
-    outputs: null
+    outputs: null,
   };
 }
 
@@ -804,44 +801,40 @@ function buildHarvestSessionFromWeek(weekBucket) {
     {
       id: `${stepIdBase}-plan`,
       title: "Review harvest plan",
-      desc:
-        "Review which crops to harvest this week and confirm containers, tools, and helpers.",
+      desc: "Review which crops to harvest this week and confirm containers, tools, and helpers.",
       durationSec: 10 * 60,
       blockers: ["inventory", "weather"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: "Check tools, crates, and shade setup."
-      }
+        cueNotes: "Check tools, crates, and shade setup.",
+      },
     },
     {
       id: `${stepIdBase}-harvest`,
       title: "Harvest crops",
-      desc:
-        "Harvest listed crops, keeping produce shaded and cool. Sort as you go for fresh use vs. preservation.",
+      desc: "Harvest listed crops, keeping produce shaded and cool. Sort as you go for fresh use vs. preservation.",
       durationSec: 45 * 60,
       blockers: ["weather"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes:
-          "Aim to complete all harvest tasks for this week bucket."
-      }
+        cueNotes: "Aim to complete all harvest tasks for this week bucket.",
+      },
     },
     {
       id: `${stepIdBase}-post`,
       title: "Post-harvest handling",
-      desc:
-        "Rinse (if appropriate), dry, and stage produce for refrigeration or preservation batches.",
+      desc: "Rinse (if appropriate), dry, and stage produce for refrigeration or preservation batches.",
       durationSec: 25 * 60,
       blockers: [],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Label containers with crop name and date for easier tracking."
-      }
-    }
+          "Label containers with crop name and date for easier tracking.",
+      },
+    },
   ];
 
   return {
@@ -850,27 +843,27 @@ function buildHarvestSessionFromWeek(weekBucket) {
     title,
     source: {
       type: "gardenPlan",
-      refId: weekBucket.weekStartDate || null
+      refId: weekBucket.weekStartDate || null,
     },
     steps,
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -888,45 +881,42 @@ function buildPreservationSessionFromGroup(group) {
     {
       id: `${stepIdBase}-prep`,
       title: "Prep produce and equipment",
-      desc:
-        "Wash, trim, and portion produce. Set up jars, lids, freezer bags, dehydrator trays, or other equipment.",
+      desc: "Wash, trim, and portion produce. Set up jars, lids, freezer bags, dehydrator trays, or other equipment.",
       durationSec: 30 * 60,
       blockers: ["inventory", "equipment"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Double-check lids, seals, and equipment condition before starting."
-      }
+          "Double-check lids, seals, and equipment condition before starting.",
+      },
     },
     {
       id: `${stepIdBase}-process`,
       title: "Run preservation process",
-      desc:
-        "Follow your chosen method and recipe to complete the preservation batches for this crop.",
+      desc: "Follow your chosen method and recipe to complete the preservation batches for this crop.",
       durationSec: 60 * 60,
       blockers: ["inventory", "equipment", "weather"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Adjust processing time and pressure for altitude and jar size as needed."
-      }
+          "Adjust processing time and pressure for altitude and jar size as needed.",
+      },
     },
     {
       id: `${stepIdBase}-finish`,
       title: "Cool, label, and store",
-      desc:
-        "Allow jars or containers to cool, label each with crop, method, and date, then move to long-term storage.",
+      desc: "Allow jars or containers to cool, label each with crop, method, and date, then move to long-term storage.",
       durationSec: 20 * 60,
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "Verify seals or closures before moving to pantry, freezer, or root cellar."
-      }
-    }
+          "Verify seals or closures before moving to pantry, freezer, or root cellar.",
+      },
+    },
   ];
 
   return {
@@ -935,27 +925,27 @@ function buildPreservationSessionFromGroup(group) {
     title,
     source: {
       type: "gardenPlan",
-      refId: group.batchGroupId || null
+      refId: group.batchGroupId || null,
     },
     steps,
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 }
 

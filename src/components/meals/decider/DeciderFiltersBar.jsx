@@ -3,13 +3,19 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 /* ------------------------------- Defensive deps ------------------------------- */
 let Icons = {};
-try { Icons = require("lucide-react"); } catch {}
+try {
+  Icons = require("lucide-react");
+} catch {}
 
 let eventBus = null;
-try { eventBus = require("@/services/eventBus").eventBus || null; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus || null;
+} catch {}
 
 let automation = null;
-try { automation = require("@/services/automation/runtime").automation || null; } catch {}
+try {
+  automation = require("@/services/automation/runtime").automation || null;
+} catch {}
 
 let useMealPlanStore = () => null;
 try {
@@ -24,7 +30,8 @@ try {
 } catch {}
 
 /* --------------------------------- Utilities --------------------------------- */
-const clamp = (n, a = 0, b = 100) => Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
+const clamp = (n, a = 0, b = 100) =>
+  Math.max(a, Math.min(b, Number.isFinite(n) ? n : a));
 const toInt = (v, fallback = 0) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
@@ -44,7 +51,16 @@ const DEFAULTS = {
   rangeDays: 7,
   mealSlots: ["breakfast", "lunch", "dinner"], // user-selectable
   diet: [], // e.g., ["dairy-free","gluten-free","no-pork"]
-  macros: { kcalMin: 0, kcalMax: 1200, proteinMin: 0, proteinMax: 120, carbsMin: 0, carbsMax: 200, fatMin: 0, fatMax: 80 },
+  macros: {
+    kcalMin: 0,
+    kcalMax: 1200,
+    proteinMin: 0,
+    proteinMax: 120,
+    carbsMin: 0,
+    carbsMax: 200,
+    fatMin: 0,
+    fatMax: 80,
+  },
   budget: { maxPerMeal: 999, mode: "any" }, // any | under | target
   inventory: { minMatchPct: 0, pantryFirst: false },
   calendar: { sabbathGuard: true, feastDayOnly: false, busyDayOnly: false },
@@ -60,7 +76,11 @@ const PRESETS = [
     apply: (f) => ({
       ...f,
       inventory: { ...f.inventory, minMatchPct: 60, pantryFirst: true },
-      budget: { ...f.budget, mode: "under", maxPerMeal: Math.min(f.budget.maxPerMeal || 999, 6) },
+      budget: {
+        ...f.budget,
+        mode: "under",
+        maxPerMeal: Math.min(f.budget.maxPerMeal || 999, 6),
+      },
       sort: { by: "inventory", dir: "desc" },
     }),
   },
@@ -111,7 +131,8 @@ const PRESETS = [
 ];
 
 /* ------------------------------ Local persistence ---------------------------- */
-const STATE_KEY = (householdId = "default") => `decider.filters.v1.${householdId}`;
+const STATE_KEY = (householdId = "default") =>
+  `decider.filters.v1.${householdId}`;
 
 const loadState = (householdId) => {
   try {
@@ -151,7 +172,10 @@ const DeciderFiltersBar = ({
   showTags = true,
 }) => {
   const store = useMealPlanStore ? useMealPlanStore() : null;
-  const initial = useMemo(() => value || loadState(householdId) || DEFAULTS, [value, householdId]);
+  const initial = useMemo(
+    () => value || loadState(householdId) || DEFAULTS,
+    [value, householdId]
+  );
   const [filters, setFilters] = useState(initial);
   const [expanded, setExpanded] = useState(false);
 
@@ -159,8 +183,13 @@ const DeciderFiltersBar = ({
     () =>
       debounce((next) => {
         try {
-          eventBus?.emit?.("meals.decider.filters.changed", { filters: next, ts: Date.now() });
-          automation?.runTemplate?.("meals.decider.filters.changed", { filters: next });
+          eventBus?.emit?.("meals.decider.filters.changed", {
+            filters: next,
+            ts: Date.now(),
+          });
+          automation?.runTemplate?.("meals.decider.filters.changed", {
+            filters: next,
+          });
         } catch {}
         onChange?.(next);
       }, 300),
@@ -187,7 +216,9 @@ const DeciderFiltersBar = ({
   /* --------------------------------- Handlers --------------------------------- */
   const patch = (path, v) => {
     setFilters((prev) => {
-      const next = structuredClone ? structuredClone(prev) : JSON.parse(JSON.stringify(prev));
+      const next = structuredClone
+        ? structuredClone(prev)
+        : JSON.parse(JSON.stringify(prev));
       // tiny path setter
       const parts = path.split(".");
       let cur = next;
@@ -204,14 +235,20 @@ const DeciderFiltersBar = ({
     setFilters(next);
     onApply?.(next);
     try {
-      eventBus?.emit?.("meals.decider.filters.preset", { id: p, filters: next });
+      eventBus?.emit?.("meals.decider.filters.preset", {
+        id: p,
+        filters: next,
+      });
     } catch {}
   };
 
   const applyNow = () => {
     onApply?.(filters);
     try {
-      eventBus?.emit?.("meals.decider.filters.applied", { filters, ts: Date.now() });
+      eventBus?.emit?.("meals.decider.filters.applied", {
+        filters,
+        ts: Date.now(),
+      });
     } catch {}
   };
 
@@ -263,7 +300,11 @@ const DeciderFiltersBar = ({
 
   /* ---------------------------------- Render ---------------------------------- */
   return (
-    <div className={`rounded-2xl border ${compact ? "p-3" : "p-4"} bg-white/80 backdrop-blur`}>
+    <div
+      className={`rounded-2xl border ${
+        compact ? "p-3" : "p-4"
+      } bg-white/80 backdrop-blur`}
+    >
       {/* Top row: search + quick selectors */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-2 px-3 py-2 rounded-md border flex-1 min-w-[220px]">
@@ -284,7 +325,16 @@ const DeciderFiltersBar = ({
             onChange={(e) => {
               const tf = e.target.value;
               patch("timeframe", tf);
-              patch("rangeDays", tf === "week" ? 7 : tf === "two_weeks" ? 14 : tf === "month" ? 30 : filters.rangeDays);
+              patch(
+                "rangeDays",
+                tf === "week"
+                  ? 7
+                  : tf === "two_weeks"
+                  ? 14
+                  : tf === "month"
+                  ? 30
+                  : filters.rangeDays
+              );
             }}
           >
             <option value="week">Week (7)</option>
@@ -298,7 +348,9 @@ const DeciderFiltersBar = ({
               min={1}
               className="w-16 text-sm border rounded px-2 py-1 ml-2"
               value={filters.rangeDays}
-              onChange={(e) => patch("rangeDays", clamp(toInt(e.target.value, 7), 1, 90))}
+              onChange={(e) =>
+                patch("rangeDays", clamp(toInt(e.target.value, 7), 1, 90))
+              }
               title="Number of days"
             />
           ) : null}
@@ -313,7 +365,11 @@ const DeciderFiltersBar = ({
         >
           <Filter className="w-4 h-4" />
           Filters
-          <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`w-4 h-4 transition-transform ${
+              expanded ? "rotate-180" : ""
+            }`}
+          />
         </button>
 
         <button
@@ -346,7 +402,11 @@ const DeciderFiltersBar = ({
                   <button
                     key={slot}
                     type="button"
-                    className={`px-2.5 py-1.5 rounded-full border text-xs ${active ? "bg-gray-900 text-white border-gray-900" : "hover:bg-gray-50"}`}
+                    className={`px-2.5 py-1.5 rounded-full border text-xs ${
+                      active
+                        ? "bg-gray-900 text-white border-gray-900"
+                        : "hover:bg-gray-50"
+                    }`}
                     onClick={() => {
                       const set = new Set(filters.mealSlots);
                       active ? set.delete(slot) : set.add(slot);
@@ -375,7 +435,11 @@ const DeciderFiltersBar = ({
                   <button
                     key={d}
                     type="button"
-                    className={`px-2 py-1.5 rounded-full border text-[11px] ${active ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "hover:bg-gray-50"}`}
+                    className={`px-2 py-1.5 rounded-full border text-[11px] ${
+                      active
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                        : "hover:bg-gray-50"
+                    }`}
                     onClick={() => {
                       const set = new Set(filters.diet);
                       active ? set.delete(d) : set.add(d);
@@ -399,7 +463,12 @@ const DeciderFiltersBar = ({
                   max={100}
                   className="w-20 border rounded px-2 py-1 text-sm"
                   value={filters.inventory.minMatchPct}
-                  onChange={(e) => patch("inventory.minMatchPct", clamp(toInt(e.target.value, 0), 0, 100))}
+                  onChange={(e) =>
+                    patch(
+                      "inventory.minMatchPct",
+                      clamp(toInt(e.target.value, 0), 0, 100)
+                    )
+                  }
                 />
               </Labeled>
               <Labeled label="Pantry first">
@@ -407,7 +476,9 @@ const DeciderFiltersBar = ({
                   type="checkbox"
                   className="w-4 h-4"
                   checked={!!filters.inventory.pantryFirst}
-                  onChange={(e) => patch("inventory.pantryFirst", !!e.target.checked)}
+                  onChange={(e) =>
+                    patch("inventory.pantryFirst", !!e.target.checked)
+                  }
                 />
               </Labeled>
             </div>
@@ -433,7 +504,12 @@ const DeciderFiltersBar = ({
                   min={0}
                   className="w-24 border rounded px-2 py-1 text-sm"
                   value={filters.budget.maxPerMeal}
-                  onChange={(e) => patch("budget.maxPerMeal", Math.max(0, toInt(e.target.value, 0)))}
+                  onChange={(e) =>
+                    patch(
+                      "budget.maxPerMeal",
+                      Math.max(0, toInt(e.target.value, 0))
+                    )
+                  }
                 />
               </Labeled>
             </div>
@@ -447,7 +523,12 @@ const DeciderFiltersBar = ({
                   type="number"
                   className="border rounded px-2 py-1"
                   value={filters.macros.kcalMin}
-                  onChange={(e) => patch("macros.kcalMin", Math.max(0, toInt(e.target.value, 0)))}
+                  onChange={(e) =>
+                    patch(
+                      "macros.kcalMin",
+                      Math.max(0, toInt(e.target.value, 0))
+                    )
+                  }
                 />
               </Labeled>
               <Labeled label="Calories max">
@@ -455,7 +536,15 @@ const DeciderFiltersBar = ({
                   type="number"
                   className="border rounded px-2 py-1"
                   value={filters.macros.kcalMax}
-                  onChange={(e) => patch("macros.kcalMax", Math.max(filters.macros.kcalMin, toInt(e.target.value, 1200)))}
+                  onChange={(e) =>
+                    patch(
+                      "macros.kcalMax",
+                      Math.max(
+                        filters.macros.kcalMin,
+                        toInt(e.target.value, 1200)
+                      )
+                    )
+                  }
                 />
               </Labeled>
               <Labeled label="Protein min (g)">
@@ -463,7 +552,12 @@ const DeciderFiltersBar = ({
                   type="number"
                   className="border rounded px-2 py-1"
                   value={filters.macros.proteinMin}
-                  onChange={(e) => patch("macros.proteinMin", Math.max(0, toInt(e.target.value, 0)))}
+                  onChange={(e) =>
+                    patch(
+                      "macros.proteinMin",
+                      Math.max(0, toInt(e.target.value, 0))
+                    )
+                  }
                 />
               </Labeled>
               <Labeled label="Protein max (g)">
@@ -471,7 +565,15 @@ const DeciderFiltersBar = ({
                   type="number"
                   className="border rounded px-2 py-1"
                   value={filters.macros.proteinMax}
-                  onChange={(e) => patch("macros.proteinMax", Math.max(filters.macros.proteinMin, toInt(e.target.value, 120)))}
+                  onChange={(e) =>
+                    patch(
+                      "macros.proteinMax",
+                      Math.max(
+                        filters.macros.proteinMin,
+                        toInt(e.target.value, 120)
+                      )
+                    )
+                  }
                 />
               </Labeled>
               <Labeled label="Carbs max (g)">
@@ -479,7 +581,15 @@ const DeciderFiltersBar = ({
                   type="number"
                   className="border rounded px-2 py-1"
                   value={filters.macros.carbsMax}
-                  onChange={(e) => patch("macros.carbsMax", Math.max(filters.macros.carbsMin, toInt(e.target.value, 200)))}
+                  onChange={(e) =>
+                    patch(
+                      "macros.carbsMax",
+                      Math.max(
+                        filters.macros.carbsMin,
+                        toInt(e.target.value, 200)
+                      )
+                    )
+                  }
                 />
               </Labeled>
               <Labeled label="Fat max (g)">
@@ -487,7 +597,12 @@ const DeciderFiltersBar = ({
                   type="number"
                   className="border rounded px-2 py-1"
                   value={filters.macros.fatMax}
-                  onChange={(e) => patch("macros.fatMax", Math.max(filters.macros.fatMin, toInt(e.target.value, 80)))}
+                  onChange={(e) =>
+                    patch(
+                      "macros.fatMax",
+                      Math.max(filters.macros.fatMin, toInt(e.target.value, 80))
+                    )
+                  }
                 />
               </Labeled>
             </div>
@@ -501,7 +616,9 @@ const DeciderFiltersBar = ({
                   type="checkbox"
                   className="w-4 h-4"
                   checked={!!filters.calendar.sabbathGuard}
-                  onChange={(e) => patch("calendar.sabbathGuard", !!e.target.checked)}
+                  onChange={(e) =>
+                    patch("calendar.sabbathGuard", !!e.target.checked)
+                  }
                 />
               </Labeled>
               <Labeled label="Feast day only">
@@ -509,7 +626,9 @@ const DeciderFiltersBar = ({
                   type="checkbox"
                   className="w-4 h-4"
                   checked={!!filters.calendar.feastDayOnly}
-                  onChange={(e) => patch("calendar.feastDayOnly", !!e.target.checked)}
+                  onChange={(e) =>
+                    patch("calendar.feastDayOnly", !!e.target.checked)
+                  }
                 />
               </Labeled>
               <Labeled label="Busy-day simple meals">
@@ -517,11 +636,14 @@ const DeciderFiltersBar = ({
                   type="checkbox"
                   className="w-4 h-4"
                   checked={!!filters.calendar.busyDayOnly}
-                  onChange={(e) => patch("calendar.busyDayOnly", !!e.target.checked)}
+                  onChange={(e) =>
+                    patch("calendar.busyDayOnly", !!e.target.checked)
+                  }
                 />
               </Labeled>
               <div className="text-[11px] text-gray-600">
-                If your Israelite calendar is configured to start months at the <em>full moon</em>, feast day matching will follow that.
+                If your Israelite calendar is configured to start months at the{" "}
+                <em>full moon</em>, feast day matching will follow that.
               </div>
             </div>
           </Section>
@@ -530,7 +652,11 @@ const DeciderFiltersBar = ({
           {showTags ? (
             <Section title="Tags" icon={Tag}>
               {TaggingPanel ? (
-                <TaggingPanel value={filters.tags} onChange={(v) => patch("tags", v)} compact />
+                <TaggingPanel
+                  value={filters.tags}
+                  onChange={(v) => patch("tags", v)}
+                  compact
+                />
               ) : (
                 <input
                   className="w-full border rounded px-2 py-2 text-sm"

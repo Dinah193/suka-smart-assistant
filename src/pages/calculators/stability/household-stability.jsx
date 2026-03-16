@@ -29,13 +29,9 @@
 //       informational modal specific to this calculator.
 // -----------------------------------------------------------------------------
 
-import React, {
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import React, { useCallback, useMemo, useState } from "react";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * @typedef {Object} StabilityInputs
@@ -119,11 +115,7 @@ function computeStabilityScores(inputs) {
   );
 
   const overall =
-    (foodScore +
-      cleaningScore +
-      productionScore +
-      timeScore +
-      financeScore) /
+    (foodScore + cleaningScore + productionScore + timeScore + financeScore) /
     5;
 
   return {
@@ -174,7 +166,10 @@ function requestNextSession(domainHints) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[HouseholdStability] Failed to emit session.requestNext", err);
+    console.error(
+      "[HouseholdStability] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -268,9 +263,11 @@ function ScoreBadge({ score }) {
   let bg = "bg-slate-800 text-slate-100 border-slate-600";
 
   if (score < 20) bg = "bg-rose-900/50 text-rose-100 border-rose-500/60";
-  else if (score < 40) bg = "bg-amber-900/40 text-amber-100 border-amber-500/70";
+  else if (score < 40)
+    bg = "bg-amber-900/40 text-amber-100 border-amber-500/70";
   else if (score < 60) bg = "bg-sky-900/40 text-sky-100 border-sky-500/70";
-  else if (score < 80) bg = "bg-emerald-900/40 text-emerald-100 border-emerald-500/70";
+  else if (score < 80)
+    bg = "bg-emerald-900/40 text-emerald-100 border-emerald-500/70";
   else bg = "bg-emerald-700/40 text-emerald-50 border-emerald-300/80";
 
   return (
@@ -478,7 +475,9 @@ function HouseholdStabilityCalculatorPage() {
                   step="1"
                   className="w-full accent-emerald-400"
                   value={cleaningScore}
-                  onChange={(e) => setCleaningScore(parseInt(e.target.value, 10))}
+                  onChange={(e) =>
+                    setCleaningScore(parseInt(e.target.value, 10))
+                  }
                 />
                 <div className="flex items-center justify-between text-[11px] text-slate-500">
                   <span>0 = chaotic / reactive</span>
@@ -615,8 +614,8 @@ function HouseholdStabilityCalculatorPage() {
                     onChange={(e) => setSavingsMonths(e.target.value)}
                   />
                   <p className="text-[11px] text-slate-500">
-                    Even 0.5–1 month is a good start. Set it honestly—this is for
-                    you, not for show.
+                    Even 0.5–1 month is a good start. Set it honestly—this is
+                    for you, not for show.
                   </p>
                 </div>
               </div>
@@ -773,9 +772,9 @@ function HouseholdStabilityCalculatorPage() {
                   </div>
                   <ScoreBar score={scores.financeScore} />
                   <p className="mt-1 text-[11px] text-slate-400">
-                    High debt and low savings make shocks harder. Use
-                    storehouse sessions to shift spending toward staples and
-                    savings while still eating well.
+                    High debt and low savings make shocks harder. Use storehouse
+                    sessions to shift spending toward staples and savings while
+                    still eating well.
                   </p>
                 </div>
               </div>
@@ -788,8 +787,8 @@ function HouseholdStabilityCalculatorPage() {
                   Stability over time in the Family Fund Hub
                 </p>
                 <p>
-                  As you run sessions from this dashboard, their analytics can be
-                  aggregated in the Hub to show how your scores change by
+                  As you run sessions from this dashboard, their analytics can
+                  be aggregated in the Hub to show how your scores change by
                   season, year, and major life events.
                 </p>
               </div>

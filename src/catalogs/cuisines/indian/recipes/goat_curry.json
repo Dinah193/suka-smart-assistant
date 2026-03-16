@@ -1,0 +1,600 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.goat_curry",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Indian Goat Curry",
+    "subtitle": "Slow-simmered (or pressure-cooked) goat in a deep onion-tomato masala",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/goat_curry.json",
+      "notes": [
+        "Canonical baseline goat curry (North-Indian style).",
+        "Designed for deterministic adaptation: pressure-cooker optional path, tadka/bloom-spices, onion-tomato masala, finish-acid balance.",
+        "Goat benefits from longer cook time; pressure cooker provides weeknight feasibility."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "main",
+    "mealArchetypes": ["meal.main.curry"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.goat_curry",
+      "role.curry_or_dal",
+      "batch.friendly",
+      "leftovers.good",
+      "freezer.friendly",
+      "spice.forward",
+      "long_simmer"
+    ]
+  },
+
+  "summary": "A foundational Indian goat curry built on a deeply browned onion-tomato masala with warm spices. Slow-simmer until tender, or use a pressure cooker for faster tenderness. Finish with lemon (and optional yogurt) to balance richness.",
+
+  "keywords": [
+    "goat curry",
+    "mutton curry",
+    "indian goat",
+    "masala",
+    "bhuna",
+    "slow simmer",
+    "pressure cooker",
+    "instant pot"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.goat_curry",
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "method.simmer",
+    "batch.friendly",
+    "leftovers.good",
+    "freezer.friendly"
+  ],
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.25, "unit": "cups" },
+    "notes": "Serves 6 as a main with rice/flatbread; 8 with sides."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 95,
+    "totalMins": 130
+  },
+
+  "difficulty": 4,
+
+  "equipment": {
+    "minimum": [
+      "equip.heavy_pot_or_dutch_oven",
+      "equip.knife",
+      "equip.cutting_board"
+    ],
+    "recommended": ["equip.spice_grinder", "equip.instant_read_thermometer"],
+    "optional": [
+      {
+        "id": "equip.pressure_cooker",
+        "label": "Pressure cooker / Instant Pot",
+        "required": false,
+        "notes": "Recommended for faster tenderness (35–45 minutes under pressure), then reduce sauce."
+      }
+    ]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "yes (freeze after cooling; finish acid after reheating for best brightness)",
+    "weeknightPossible": false
+  },
+
+  "tasteProfile": {
+    "heat": 2,
+    "aroma": [
+      "warm_spices",
+      "toasted_cumin",
+      "ginger_garlic",
+      "caramelized_onion"
+    ],
+    "balance": ["savory", "tomato_tang", "bright_finish_acid"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": {
+    "contains": ["allergen.dairy_optional"],
+    "mayContain": [],
+    "notes": [
+      "Dairy is optional if finishing with yogurt or ghee.",
+      "Use oil only + skip yogurt (or use dairy-free yogurt) to keep dairy-free."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "grp.protein",
+      "label": "Protein",
+      "items": ["ing.goat_stew_meat_bone_in"]
+    },
+    {
+      "id": "grp.aromatics",
+      "label": "Aromatics",
+      "items": ["ing.onion", "ing.garlic", "ing.ginger", "ing.green_chili"]
+    },
+    {
+      "id": "grp.spices_whole",
+      "label": "Whole Spices (optional but recommended)",
+      "items": [
+        "spice.cumin_seed",
+        "spice.cardamom",
+        "spice.clove",
+        "spice.cinnamon"
+      ]
+    },
+    {
+      "id": "grp.spices_ground",
+      "label": "Ground Spices",
+      "items": [
+        "spice.cumin",
+        "spice.coriander",
+        "spice.turmeric",
+        "spice.kashmiri_chili",
+        "spice.black_pepper",
+        "spice.garam_masala"
+      ]
+    },
+    {
+      "id": "grp.masalabase",
+      "label": "Masala Base + Liquid",
+      "items": ["ing.tomato_crushed", "ing.goat_stock_or_water"]
+    },
+    {
+      "id": "grp.finish",
+      "label": "Finish",
+      "items": ["ing.lemon", "ing.cilantro", "ing.yogurt_plain"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.goat_stew_meat_bone_in",
+      "label": "Goat stew meat (bone-in preferred)",
+      "role": "role.protein",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": [
+        "Bone-in adds body to the gravy.",
+        "If using boneless, reduce cook time slightly and monitor tenderness."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 2.25, "unit": "tsp" },
+      "notes": "Season in layers; final adjustment at the end."
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Avocado, grapeseed, sunflower, or canola."
+    },
+    {
+      "id": "ing.ghee",
+      "label": "Ghee",
+      "role": "role.fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional; classic richness. Use all oil to keep dairy-free."
+    },
+    {
+      "id": "spice.cumin_seed",
+      "label": "Cumin seeds",
+      "role": "role.whole_spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional but recommended for a more aromatic base."
+    },
+    {
+      "id": "spice.cardamom",
+      "label": "Green cardamom pods",
+      "role": "role.whole_spice",
+      "amount": { "value": 4, "unit": "pods" },
+      "optional": true
+    },
+    {
+      "id": "spice.clove",
+      "label": "Whole cloves",
+      "role": "role.whole_spice",
+      "amount": { "value": 4, "unit": "cloves" },
+      "optional": true
+    },
+    {
+      "id": "spice.cinnamon",
+      "label": "Cinnamon stick",
+      "role": "role.whole_spice",
+      "amount": { "value": 1, "unit": "small_stick" },
+      "optional": true,
+      "notes": "About a 2-inch piece."
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onions, thinly sliced",
+      "role": "role.aromatic",
+      "amount": { "value": 2, "unit": "large" },
+      "notes": "About 4 cups sliced; browning these is key."
+    },
+    {
+      "id": "ing.green_chili",
+      "label": "Green chili, slit (optional)",
+      "role": "role.heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Serrano or Thai chili; omit for mild."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 7, "unit": "cloves" }
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": "Or use ginger-garlic paste."
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 2.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 2.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adjust heat; Kashmiri is more color than burn."
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black pepper",
+      "role": "role.spice",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "ing.tomato_crushed",
+      "label": "Crushed tomatoes",
+      "role": "role.masalabase",
+      "amount": { "value": 28, "unit": "oz" },
+      "notes": "Or 6–8 ripe tomatoes, blended."
+    },
+    {
+      "id": "ing.goat_stock_or_water",
+      "label": "Water or stock",
+      "role": "role.liquid",
+      "amount": { "value": 2.5, "unit": "cups" },
+      "notes": [
+        "Use enough to barely cover for stovetop braise; reduce/add as needed.",
+        "Pressure-cooker path uses slightly less to prevent thin sauce."
+      ]
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.finish_spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Add near the end for best aroma."
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt (optional)",
+      "role": "role.finish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": [
+        "Optional for a slightly creamy tang.",
+        "Temper and add off-heat to prevent curdling."
+      ]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.finish_acid",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": "Add at end; can substitute lime, amchur, or a small tamarind splash."
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Cilantro, chopped",
+      "role": "role.garnish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "method.braise",
+    "method.simmer"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep and salt the goat",
+      "instructions": [
+        "Trim any large, hard pieces of fat/sinew from the goat (do not remove all connective tissue).",
+        "Season goat with 1.5 tsp of the salt and let sit 10 minutes while you prep aromatics.",
+        "Slice onions; mince garlic; grate ginger; slit chili if using."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 0
+    },
+    {
+      "id": "step_02_whole_spice_bloom",
+      "title": "Bloom whole spices (optional but recommended)",
+      "instructions": [
+        "Heat a heavy pot over medium heat.",
+        "Add oil (and ghee if using).",
+        "If using whole spices: add cumin seeds, cardamom, cloves, and cinnamon; stir 20–30 seconds until fragrant."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Bloom whole spices", "seconds": 30 }],
+      "checks": [
+        "Spices should be fragrant, not scorched; lower heat if needed."
+      ]
+    },
+    {
+      "id": "step_03_brown_onions",
+      "title": "Deeply brown the onions",
+      "instructions": [
+        "Add sliced onions and a pinch of salt.",
+        "Cook 15–20 minutes, stirring often, until onions are deeply golden to light brown.",
+        "If onions start sticking, add 1–2 tbsp water and scrape up browned bits (fond)."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Brown onions", "minutes": 18 }],
+      "checks": [
+        "Onions should be deeply golden; this builds the curry’s depth and body.",
+        "Avoid burning—use medium/medium-low and deglaze as needed."
+      ]
+    },
+    {
+      "id": "step_04_aromatics_and_ground_spices",
+      "title": "Add aromatics and bloom ground spices",
+      "instructions": [
+        "Add green chili (if using), garlic, and ginger; cook 60 seconds until fragrant.",
+        "Add ground cumin, coriander, turmeric, Kashmiri chili, and black pepper.",
+        "Stir constantly 20–30 seconds to bloom spices without burning."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Bloom ground spices", "seconds": 30 }],
+      "checks": ["Spices should smell toasted and aromatic, not bitter."]
+    },
+    {
+      "id": "step_05_masala_reduce",
+      "title": "Cook down the tomato masala",
+      "instructions": [
+        "Add crushed tomatoes and stir well.",
+        "Simmer uncovered 10–15 minutes, stirring occasionally, until thick and darker, with oil separating at the edges.",
+        "This removes raw tomato flavor and concentrates the masala."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 9,
+      "timers": [{ "label": "Reduce masala", "minutes": 12 }],
+      "checks": [
+        "Masala should be thick enough that it does not look watery.",
+        "Oil separation at the edges is a good doneness cue."
+      ]
+    },
+    {
+      "id": "step_06_sear_goat_in_masala",
+      "title": "Coat and sear the goat in the masala",
+      "instructions": [
+        "Add goat and stir to coat thoroughly.",
+        "Cook 6–8 minutes, stirring, to lightly sear the goat and marry it with the masala."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Sear goat in masala", "minutes": 7 }]
+    },
+    {
+      "id": "step_07_braise_stovetop",
+      "title": "Braise until tender (stovetop path)",
+      "instructions": [
+        "Add water/stock and bring to a gentle simmer.",
+        "Reduce heat to low, cover, and simmer 75–105 minutes, stirring every 15–20 minutes.",
+        "Add small splashes of water if the sauce gets too thick before the goat is tender."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 85,
+      "timers": [{ "label": "Simmer goat until tender", "minutes": 90 }],
+      "checks": [
+        "Goat is done when it is fork-tender and connective tissue has softened.",
+        "Keep the simmer gentle; rapid boiling can toughen meat."
+      ]
+    },
+    {
+      "id": "step_08_pressure_cooker_option",
+      "title": "Pressure cooker option (Instant Pot path)",
+      "instructions": [
+        "If using a pressure cooker: after searing goat in the masala, add 2.0 cups water/stock (slightly less than stovetop).",
+        "Lock lid and cook on High Pressure 35–45 minutes (older goat may need 50 minutes).",
+        "Natural release 10–15 minutes, then quick release remaining pressure.",
+        "Switch to sauté mode and simmer uncovered to reduce sauce to desired thickness."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 45,
+      "timers": [
+        { "label": "High pressure cook", "minutes": 40 },
+        { "label": "Natural release", "minutes": 12 }
+      ],
+      "checks": [
+        "Sauce may be thinner after pressure cooking—reduce uncovered.",
+        "If goat isn’t tender, pressure cook 8–10 minutes more."
+      ]
+    },
+    {
+      "id": "step_09_finish_balance",
+      "title": "Finish, balance, and serve",
+      "instructions": [
+        "When goat is tender, uncover and simmer 5–10 minutes to thicken sauce if needed.",
+        "Stir in garam masala and simmer 1 minute.",
+        "Turn off heat. Add lemon juice.",
+        "Optional yogurt finish (anti-curdle): temper yogurt with a few spoonfuls of hot curry liquid, then stir in off-heat.",
+        "Taste and adjust salt, heat, and acidity. Garnish with cilantro if using."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 2,
+      "timers": [{ "label": "Finish + balance", "minutes": 5 }],
+      "checks": [
+        "Add yogurt off-heat to prevent curdling.",
+        "If curry tastes heavy, add a touch more lemon or a pinch of salt."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "dish.indian.basmati_rice",
+      "dish.indian.jeera_rice",
+      "dish.indian.roti",
+      "dish.indian.naan"
+    ],
+    "coolingSides": ["dish.indian.raita", "dish.indian.kachumber_salad"],
+    "condiments": ["dish.indian.mango_pickle", "dish.indian.mint_chutney"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Cool quickly; store covered.",
+        "Goat curry tastes even better the next day."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 3,
+      "notes": [
+        "Freeze after cooling; thaw overnight in fridge.",
+        "Reheat gently; add lemon after reheating for best brightness."
+      ]
+    }
+  },
+
+  "planner": {
+    "roles": {
+      "main": "role.curry_or_dal",
+      "starch": "role.rice_or_flatbread",
+      "coolingSide": "role.raita_or_salad",
+      "condiment": "role.pickle_or_chutney"
+    },
+    "leftoversPlan": [
+      "Day 2: serve over rice with cucumber-onion salad.",
+      "Day 3: reduce sauce and serve as a hearty curry wrap with flatbread."
+    ],
+    "batchNotes": [
+      "Excellent for batch cooking; flavor improves overnight.",
+      "Freeze portions for future quick meals; finish acid after reheating."
+    ]
+  },
+
+  "safety": {
+    "notes": [
+      "Goat is safe when cooked through; tenderness requires time/pressure for collagen breakdown.",
+      "Cool leftovers within 2 hours; reheat until steaming hot.",
+      "If using yogurt, add off-heat and avoid boiling after adding."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.kashmiri_leaning",
+      "label": "Kashmiri-leaning (warm and aromatic)",
+      "when": { "preference": "aromatic_over_hot" },
+      "adapt": {
+        "notes": [
+          "Emphasize whole spices (cardamom, clove, cinnamon).",
+          "Keep chili mild; add extra garam masala at the end."
+        ]
+      }
+    },
+    {
+      "id": "var.south_indian_coconut",
+      "label": "Coconut variation (South-leaning)",
+      "when": { "preference": "coconut_finish" },
+      "adapt": {
+        "swap": [{ "from": "ing.yogurt_plain", "to": "ing.coconut_milk" }],
+        "notes": [
+          "Replace yogurt with 3/4 cup coconut milk at the end.",
+          "Optional: add curry leaves if available."
+        ]
+      }
+    },
+    {
+      "id": "var.weeknight_pressure",
+      "label": "Weeknight pressure-cooker focus",
+      "when": { "constraint": "time_under_75" },
+      "adapt": {
+        "notes": [
+          "Use the pressure-cooker option for tenderness.",
+          "Use crushed tomatoes (not fresh) and reduce sauce on sauté after pressure."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.goat_curry",
+    "aliases": ["mutton curry", "goat masala", "indian goat curry"],
+    "index": {
+      "primaryTokens": ["goat", "curry", "masala", "indian"],
+      "secondaryTokens": [
+        "garam masala",
+        "turmeric",
+        "cumin",
+        "coriander",
+        "bhuna"
+      ]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

@@ -35,7 +35,7 @@
  *         ctx: { currentQty, targetQty, neededQty, baseScore }
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /* -------------------------------------------------------------------------- */
 /*                         Optional shortageDetect hook                       */
@@ -85,11 +85,7 @@ async function getDb() {
   if (_dbPromise) return _dbPromise;
 
   _dbPromise = (async () => {
-    const candidates = [
-      "@/services/db",
-      "@/db",
-      "@/data/db",
-    ];
+    const candidates = ["@/services/db", "@/db", "@/data/db"];
 
     for (const path of candidates) {
       try {
@@ -188,7 +184,10 @@ export function registerPriorityRule(pattern, rule) {
 }
 
 /* Seed: simple staples priority bump */
-registerPriorityRule(/flour|rice|bean(s)?|lentil(s)?|oil|salt|sugar|yeast/i, () => 15);
+registerPriorityRule(
+  /flour|rice|bean(s)?|lentil(s)?|oil|salt|sugar|yeast/i,
+  () => 15
+);
 
 /* -------------------------------------------------------------------------- */
 /*                               Public API                                   */
@@ -255,7 +254,10 @@ export async function analyzeRestockNeeds(options = {}) {
   if (consultShortageDetect) {
     try {
       const shortageDetect = await getShortageDetect();
-      if (shortageDetect && typeof shortageDetect.detectShortages === "function") {
+      if (
+        shortageDetect &&
+        typeof shortageDetect.detectShortages === "function"
+      ) {
         const res = await shortageDetect.detectShortages(rows, { domain });
         if (res && Array.isArray(res.shortages)) {
           shortageHintsById = res.shortages.reduce((acc, s) => {
@@ -267,7 +269,10 @@ export async function analyzeRestockNeeds(options = {}) {
         }
       }
     } catch (err) {
-      console.warn("[storehouse.restockAdvisor] shortageDetect consult failed:", err);
+      console.warn(
+        "[storehouse.restockAdvisor] shortageDetect consult failed:",
+        err
+      );
     }
   }
 
@@ -336,10 +341,19 @@ export function buildRestockSteps(recommendations = [], options = {}) {
   } = options;
 
   const steps = recommendations.map((rec) => {
-    const { item, neededQty, currentQty, targetQty, priorityBand, priorityScore, reasons } = rec;
+    const {
+      item,
+      neededQty,
+      currentQty,
+      targetQty,
+      priorityBand,
+      priorityScore,
+      reasons,
+    } = rec;
     const name = item?.name || item?.label || "Item";
     const unit = item?.unit || "";
-    const qtyLabel = neededQty > 0 ? `${neededQty} ${unit}`.trim() : "Check on-hand stock";
+    const qtyLabel =
+      neededQty > 0 ? `${neededQty} ${unit}`.trim() : "Check on-hand stock";
 
     const title = `${labelPrefix} ${name}`;
     const descParts = [
@@ -389,8 +403,13 @@ export function buildRestockSteps(recommendations = [], options = {}) {
  * @param {any} stepOptions
  * @returns {Promise<{ recommendations:RestockRecommendation[], steps:any[], scanned:number }>}
  */
-export async function scanAndBuildRestock(analysisOptions = {}, stepOptions = {}) {
-  const { recommendations, scanned } = await analyzeRestockNeeds(analysisOptions);
+export async function scanAndBuildRestock(
+  analysisOptions = {},
+  stepOptions = {}
+) {
+  const { recommendations, scanned } = await analyzeRestockNeeds(
+    analysisOptions
+  );
   const steps = buildRestockSteps(recommendations, stepOptions);
   return { recommendations, steps, scanned };
 }
@@ -473,7 +492,11 @@ function scoreItemRestockNeed(item, ctx) {
       reasons.push("Less than 1 day of coverage");
     } else if (coverageDays < daysAhead) {
       baseScore += 15;
-      reasons.push(`Coverage (${coverageDays.toFixed(1)} days) is less than planning window (${daysAhead} days)`);
+      reasons.push(
+        `Coverage (${coverageDays.toFixed(
+          1
+        )} days) is less than planning window (${daysAhead} days)`
+      );
     }
   }
 
@@ -638,8 +661,9 @@ function isCleaningCategory(item) {
   const cat = String(item.category || "").toLowerCase();
 
   return (
-    /cleaner|detergent|bleach|ammonia|disinfectant|soap|sanitizer/i.test(name) ||
-    /cleaning|laundry|household/i.test(cat)
+    /cleaner|detergent|bleach|ammonia|disinfectant|soap|sanitizer/i.test(
+      name
+    ) || /cleaning|laundry|household/i.test(cat)
   );
 }
 

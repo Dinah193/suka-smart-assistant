@@ -17,10 +17,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import RecipeScalingCalculatorView from "@/features/calculators/storehouseMeals/RecipeScalingCalculator.view";
+import RecipeScalingCalculatorView from "@/features/calculators/storehouseMeals/RecipeScalingCalculator/RecipeScalingCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.recipeScaling";
 
@@ -128,8 +128,8 @@ function RecipeScalingSummaryCard({ result, onUseInSession }) {
             Scaling Summary
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Keep your recipe aligned with real household size, storehouse
-            goals, and batch cooking plans.
+            Keep your recipe aligned with real household size, storehouse goals,
+            and batch cooking plans.
           </p>
         </div>
         <span className="text-[10px] px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-slate-200 whitespace-nowrap">
@@ -228,14 +228,10 @@ export default function RecipeScalingCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.recipe-scaling",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.recipe-scaling",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -260,9 +256,7 @@ export default function RecipeScalingCalculatorPage() {
           typeof calcResult.ingredientsAdjusted === "number"
             ? calcResult.ingredientsAdjusted
             : undefined,
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };
@@ -300,9 +294,9 @@ export default function RecipeScalingCalculatorPage() {
               Recipe Scaling Calculator
             </h1>
             <p className="mt-1 text-sm text-slate-400 max-w-2xl">
-              Scale recipes up or down to match your real household size,
-              batch goals, and storehouse plans. SSA will keep the math,
-              ingredients, and sessions aligned behind the scenes.
+              Scale recipes up or down to match your real household size, batch
+              goals, and storehouse plans. SSA will keep the math, ingredients,
+              and sessions aligned behind the scenes.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">

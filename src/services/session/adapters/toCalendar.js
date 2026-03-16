@@ -44,7 +44,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -56,20 +56,36 @@ try {
 let householdCalendar = null;
 let deviceCalendar = null;
 let personCalendar = null;
-try { householdCalendar = require("@/services/calendar/householdCalendar").default || require("@/services/calendar/householdCalendar"); } catch {}
-try { deviceCalendar = require("@/services/calendar/deviceCalendar").default || require("@/services/calendar/deviceCalendar"); } catch {}
-try { personCalendar = require("@/services/calendar/personCalendar").default || require("@/services/calendar/personCalendar"); } catch {}
+try {
+  householdCalendar =
+    require("@/services/calendar/householdCalendar").default ||
+    require("@/services/calendar/householdCalendar");
+} catch {}
+try {
+  deviceCalendar =
+    require("@/services/calendar/deviceCalendar").default ||
+    require("@/services/calendar/deviceCalendar");
+} catch {}
+try {
+  personCalendar =
+    require("@/services/calendar/personCalendar").default ||
+    require("@/services/calendar/personCalendar");
+} catch {}
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
 try {
   HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
   FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 /* ---------------------------------- API ------------------------------------ */
 /** Initialize event glue for writing calendar holds */
@@ -78,7 +94,9 @@ export function initCalendarWriter() {
   if (eventBus?.respond) {
     eventBus.respond("adapter/calendar/write", async (payload) => {
       try {
-        const { session, opts } = payload?.session ? payload : { session: payload, opts: {} };
+        const { session, opts } = payload?.session
+          ? payload
+          : { session: payload, opts: {} };
         const res = await writeHoldsForSession(session, opts);
         return { ok: true, ...res };
       } catch (e) {
@@ -88,47 +106,60 @@ export function initCalendarWriter() {
   }
 
   // When a session is approved, write its holds
-  eventBus.on(Events?.SESSION_APPROVED || "session/approved", async ({ data }) => {
-    const session = data?.session || data;
-    try {
-      const res = await writeHoldsForSession(session, { emitToast: true });
-      emit(Events?.SCHEDULE_SAVED || "schedule/saved", {
-        kind: "session",
-        sessionId: session?.id,
-        holds: res?.holds || [],
-      });
-      exportToHubIfEnabled({
-        type: "schedule/saved",
-        ts: new Date().toISOString(),
-        source: "adapter.calendar",
-        data: { sessionId: session?.id, holds: res?.holds || [] },
-      });
-    } catch (e) {
-      emit(Events?.SESSION_ERROR || "session/error", {
-        domain: session?.domain || "general",
-        error: String(e?.message || e),
-        input: safeSmall(session),
-      });
-    }
-  }, { priority: 1 });
-
-  // When a session is discarded, try to remove its holds
-  eventBus.on(Events?.SESSION_DISCARDED || "session/discarded", async ({ data }) => {
-    const sessionId = data?.sessionId || data?.id || data?.session?.id;
-    if (!sessionId) return;
-    try {
-      const removed = await deleteHoldsForSession(sessionId);
-      if (removed?.count > 0) {
-        emit(Events?.SCHEDULE_DELETED || "schedule/deleted", { sessionId, ...removed });
+  eventBus.on(
+    Events?.SESSION_APPROVED || "session/approved",
+    async ({ data }) => {
+      const session = data?.session || data;
+      try {
+        const res = await writeHoldsForSession(session, { emitToast: true });
+        emit(Events?.SCHEDULE_SAVED || "schedule/saved", {
+          kind: "session",
+          sessionId: session?.id,
+          holds: res?.holds || [],
+        });
         exportToHubIfEnabled({
-          type: "schedule/deleted",
+          type: "schedule/saved",
           ts: new Date().toISOString(),
           source: "adapter.calendar",
-          data: { sessionId, ...removed },
+          data: { sessionId: session?.id, holds: res?.holds || [] },
+        });
+      } catch (e) {
+        emit(Events?.SESSION_ERROR || "session/error", {
+          domain: session?.domain || "general",
+          error: String(e?.message || e),
+          input: safeSmall(session),
         });
       }
-    } catch {/* silent */}
-  }, { priority: 1 });
+    },
+    { priority: 1 }
+  );
+
+  // When a session is discarded, try to remove its holds
+  eventBus.on(
+    Events?.SESSION_DISCARDED || "session/discarded",
+    async ({ data }) => {
+      const sessionId = data?.sessionId || data?.id || data?.session?.id;
+      if (!sessionId) return;
+      try {
+        const removed = await deleteHoldsForSession(sessionId);
+        if (removed?.count > 0) {
+          emit(Events?.SCHEDULE_DELETED || "schedule/deleted", {
+            sessionId,
+            ...removed,
+          });
+          exportToHubIfEnabled({
+            type: "schedule/deleted",
+            ts: new Date().toISOString(),
+            source: "adapter.calendar",
+            data: { sessionId, ...removed },
+          });
+        }
+      } catch {
+        /* silent */
+      }
+    },
+    { priority: 1 }
+  );
 }
 
 /**
@@ -140,7 +171,10 @@ export function initCalendarWriter() {
 export async function writeHoldsForSession(session = {}, opts = {}) {
   const s = normalizeSession(session);
   const wnd = resolveWindow(s);
-  if (!wnd) throw new Error("calendar/write: session needs a start or a window with duration");
+  if (!wnd)
+    throw new Error(
+      "calendar/write: session needs a start or a window with duration"
+    );
 
   // Primary household hold
   const hold = buildHouseholdHold(s, wnd);
@@ -170,9 +204,15 @@ export async function writeHoldsForSession(session = {}, opts = {}) {
  */
 export async function deleteHoldsForSession(sessionId) {
   let removed = 0;
-  try { removed += await tryDelete(householdCalendar, sessionId) || 0; } catch {}
-  try { removed += await tryDelete(deviceCalendar, sessionId) || 0; } catch {}
-  try { removed += await tryDelete(personCalendar, sessionId) || 0; } catch {}
+  try {
+    removed += (await tryDelete(householdCalendar, sessionId)) || 0;
+  } catch {}
+  try {
+    removed += (await tryDelete(deviceCalendar, sessionId)) || 0;
+  } catch {}
+  try {
+    removed += (await tryDelete(personCalendar, sessionId)) || 0;
+  } catch {}
   return { count: removed };
 }
 
@@ -182,11 +222,22 @@ function normalizeSession(x = {}) {
   // { id, domain, title, location, durationMin, window?, meta?, equipment?, rolesNeeded? }
   const title = String(x.title || "Household Session");
   const domain = String(x.domain || "general");
-  const durationMin = clamp(num(x.durationMin) || num(x.meta?.durationMin), 5, 12 * 60);
-  const window = isWindow(x.window) ? x.window : {
-    startISO: firstISO(x.plannedStart, x.startISO, x.time?.start, x.meta?.plannedStart),
-    endISO: firstISO(x.deadline, x.endISO, x.time?.end, x.meta?.deadline),
-  };
+  const durationMin = clamp(
+    num(x.durationMin) || num(x.meta?.durationMin),
+    5,
+    12 * 60
+  );
+  const window = isWindow(x.window)
+    ? x.window
+    : {
+        startISO: firstISO(
+          x.plannedStart,
+          x.startISO,
+          x.time?.start,
+          x.meta?.plannedStart
+        ),
+        endISO: firstISO(x.deadline, x.endISO, x.time?.end, x.meta?.deadline),
+      };
   const equipment = Array.isArray(x.equipment) ? x.equipment : [];
   const roles = Array.isArray(x.rolesNeeded) ? x.rolesNeeded : [];
   return {
@@ -215,9 +266,13 @@ function resolveWindow(s) {
   const durMs = (s.durationMin || 0) * 60000;
 
   if (start && end) {
-    const a = Date.parse(start), b = Date.parse(end);
+    const a = Date.parse(start),
+      b = Date.parse(end);
     if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return null;
-    return { startISO: new Date(a).toISOString(), endISO: new Date(b).toISOString() };
+    return {
+      startISO: new Date(a).toISOString(),
+      endISO: new Date(b).toISOString(),
+    };
   }
   if (start && durMs > 0) {
     const e = new Date(Date.parse(start) + durMs).toISOString();
@@ -255,14 +310,16 @@ function buildHouseholdHold(s, wnd) {
 
 async function upsertHouseholdHold(hold) {
   // Try a few method names to be compatible with our calendar service
-  if (!householdCalendar) throw new Error("household calendar service unavailable");
+  if (!householdCalendar)
+    throw new Error("household calendar service unavailable");
   if (typeof householdCalendar.upsertHold === "function") {
     return await householdCalendar.upsertHold(hold);
   }
   if (typeof householdCalendar.createHold === "function") {
     // createHold should be idempotent per hold.id; if it throws "exists", try update
-    try { return await householdCalendar.createHold(hold); }
-    catch {
+    try {
+      return await householdCalendar.createHold(hold);
+    } catch {
       if (typeof householdCalendar.updateHold === "function") {
         return await householdCalendar.updateHold(hold.id, hold);
       }
@@ -277,7 +334,7 @@ async function upsertHouseholdHold(hold) {
 
 async function reserveDevicesIfPossible(s, wnd, parentHoldId) {
   if (!deviceCalendar) return [];
-  const eq = (s.equipment || []).filter(e => e?.kind || e?.deviceId);
+  const eq = (s.equipment || []).filter((e) => e?.kind || e?.deviceId);
   if (!eq.length) return [];
   const results = [];
   for (const e of eq) {
@@ -301,14 +358,16 @@ async function reserveDevicesIfPossible(s, wnd, parentHoldId) {
       } else if (typeof deviceCalendar.createHold === "function") {
         results.push(await deviceCalendar.createHold(hold));
       }
-    } catch {/* skip one device and continue */}
+    } catch {
+      /* skip one device and continue */
+    }
   }
   return results;
 }
 
 async function reservePeopleIfPossible(s, wnd, parentHoldId) {
   if (!personCalendar) return [];
-  const roles = (s.roles || s.rolesNeeded || []).filter(r => r?.role);
+  const roles = (s.roles || s.rolesNeeded || []).filter((r) => r?.role);
   if (!roles.length) return [];
   const results = [];
   for (const r of roles) {
@@ -332,7 +391,9 @@ async function reservePeopleIfPossible(s, wnd, parentHoldId) {
       } else if (typeof personCalendar.createHold === "function") {
         results.push(await personCalendar.createHold(hold));
       }
-    } catch {/* skip one role and continue */}
+    } catch {
+      /* skip one role and continue */
+    }
   }
   return results;
 }
@@ -344,11 +405,17 @@ async function tryDelete(cal, sessionId) {
     const out = await cal.removeBySession(sessionId);
     return out?.count || 0;
   }
-  if (typeof cal.findBySession === "function" && typeof cal.deleteHold === "function") {
+  if (
+    typeof cal.findBySession === "function" &&
+    typeof cal.deleteHold === "function"
+  ) {
     const arr = await cal.findBySession(sessionId);
     let n = 0;
-    for (const h of (arr || [])) {
-      try { await cal.deleteHold(h.id); n++; } catch {}
+    for (const h of arr || []) {
+      try {
+        await cal.deleteHold(h.id);
+        n++;
+      } catch {}
     }
     return n;
   }
@@ -368,7 +435,9 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const pkt = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(pkt);
-  } catch { /* fail-silent */ }
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* --------------------------------- Utils ----------------------------------- */
@@ -377,23 +446,37 @@ function makeHoldId(scope, sessionId, suffix) {
   return suffix ? `${scope}:${base}:${String(suffix)}` : `${scope}:${base}`;
 }
 
-function isWindow(w) { return !!(w && (isISO(w.startISO) || isISO(w.endISO))); }
+function isWindow(w) {
+  return !!(w && (isISO(w.startISO) || isISO(w.endISO)));
+}
 
-function firstISO(...vals) { return vals.find(isISO) || undefined; }
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
+function firstISO(...vals) {
+  return vals.find(isISO) || undefined;
+}
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
 
-function num(n) { return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined; }
+function num(n) {
+  return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined;
+}
 function clamp(n, lo, hi) {
   const x = Number.isFinite(n) ? n : lo;
   return Math.max(lo, Math.min(hi, x));
 }
-function toTitle(s) { return String(s || "").replace(/\b\w/g, c => c.toUpperCase()); }
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function toTitle(s) {
+  return String(s || "").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+function genId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function safeSmall(obj) {
   try {
     const s = JSON.stringify(obj);
     return s && s.length > 2000 ? s.slice(0, 2000) + "…" : s;
-  } catch { return "[unserializable]"; }
+  } catch {
+    return "[unserializable]";
+  }
 }
 
 /* --------------------------------- Exports --------------------------------- */

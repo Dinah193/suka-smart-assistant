@@ -1,0 +1,186 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.marinades.beef_shawarma_marinade",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Beef Shawarma Marinade",
+    "tags": [
+      "marinade",
+      "shawarma",
+      "beef",
+      "middle_eastern",
+      "spice_blend",
+      "citrus",
+      "garlic_forward",
+      "make_ahead",
+      "batch_friendly",
+      "grill",
+      "oven",
+      "stovetop"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Classic beef shawarma marinade: warm spices + garlic + citrus, balanced for roast, grill, or pan."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": ["About 3 tablespoons."]
+    },
+    {
+      "id": "ing.vinegar.red_wine",
+      "label": "Red wine vinegar",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Sub: apple cider vinegar or white vinegar."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": ["About 5–6 medium cloves."]
+    },
+    {
+      "id": "ing.onion",
+      "label": "Onion, finely grated (or very finely minced)",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": [
+        "About 1 small onion. Grating creates juice that tenderizes and flavors the beef.",
+        "If you hate onion texture, strain the pulp and use just the juice."
+      ]
+    },
+    {
+      "id": "ing.tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": ["About 1 tablespoon; optional but adds depth and color."]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.paprika_smoked",
+      "label": "Smoked paprika",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional for smoky depth."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/2 teaspoon."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; classic shawarma warmth."]
+    },
+    {
+      "id": "ing.clove_ground",
+      "label": "Ground cloves",
+      "amount": { "value": 0.3, "unit": "g" },
+      "notes": ["About 1/8 teaspoon; use lightly (very strong)."]
+    },
+    {
+      "id": "ing.cardamom_ground",
+      "label": "Ground cardamom",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; optional but very authentic."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 3/4 teaspoon; increase if you like pepper bite."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": [
+        "About 1 3/4 teaspoons. This is a marinade for ~1.3–1.8 kg (3–4 lb) beef.",
+        "If you will salt again before cooking, reduce to 7 g."
+      ]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Brown sugar (or honey)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": [
+        "Optional: helps browning and balances acidity (about 2 teaspoons).",
+        "Sub: 10 g honey."
+      ]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["Optional for heat (about 1/2 teaspoon)."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Build the marinade",
+      "instructions": [
+        "In a bowl, whisk together olive oil, lemon juice, vinegar, grated garlic, grated onion, and optional tomato paste until smooth.",
+        "Whisk in all spices (cumin, coriander, paprika, smoked paprika, allspice, cinnamon, cloves, optional cardamom), black pepper, salt, optional sugar/honey, and optional chili flakes."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Marinate the beef",
+      "instructions": [
+        "Add beef (sliced steak, strips, or thin-cut roast pieces) to a zip bag or covered container.",
+        "Pour marinade over beef and massage to coat evenly.",
+        "Refrigerate: minimum 2 hours; ideal 8–24 hours for best flavor."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Cooking guidance (notes)",
+      "instructions": [
+        "For best shawarma texture, slice beef thinly across the grain.",
+        "High-heat methods work best: hot skillet, grill, or hot oven/roast.",
+        "Pat excess marinade off the surface if it’s very wet to improve browning."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Food safety",
+      "instructions": [
+        "Marinate in the refrigerator (not on the counter).",
+        "Discard used marinade that touched raw meat, or bring it to a full boil before using as a sauce."
+      ]
+    }
+  ]
+}

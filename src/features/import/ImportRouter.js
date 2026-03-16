@@ -49,32 +49,35 @@ async function safeImport(promiseFactory, fallback = null) {
 /* -------------------------------------------------------------------------- */
 async function getCooking() {
   if (!cookingServicePromise) {
-    cookingServicePromise = import("@/services/cooking/CookingSessionService").then((m) =>
-      m.getCookingSessionService()
-    );
+    cookingServicePromise = import(
+      "@/services/cooking/CookingSessionService"
+    ).then((m) => m.getCookingSessionService());
   }
   return cookingServicePromise;
 }
 async function getInventory() {
   if (!inventoryServicePromise) {
-    inventoryServicePromise = import("@/services/inventory/InventorySessionService").then((m) =>
-      m.getInventorySessionService()
-    );
+    inventoryServicePromise = import(
+      "@/services/inventory/InventorySessionService"
+    ).then((m) => m.getInventorySessionService());
   }
   return inventoryServicePromise;
 }
 async function getGarden() {
   if (!gardenServicePromise) {
-    gardenServicePromise = import("@/services/gardening/GardenSessionService").then((m) =>
-      m.getGardenSessionService()
-    );
+    gardenServicePromise = import(
+      "@/services/gardening/GardenSessionService"
+    ).then((m) => m.getGardenSessionService());
   }
   return gardenServicePromise;
 }
-async function getGardenCare() {
+async function getGardenSession() {
   if (!gardenCareServicePromise) {
     gardenCareServicePromise = safeImport(
-      () => import("@/services/gardening/GardenCareService").then((m) => m.getGardenCareService()),
+      () =>
+        import("@/services/gardening/GardenSessionService").then((m) =>
+          m.getGardenSessionService()
+        ),
       null
     );
   }
@@ -83,7 +86,10 @@ async function getGardenCare() {
 async function getGardenHarvest() {
   if (!gardenHarvestServicePromise) {
     gardenHarvestServicePromise = safeImport(
-      () => import("@/services/gardening/HarvestSessionService").then((m) => m.getHarvestSessionService()),
+      () =>
+        import("@/services/gardening/HarvestSessionService").then((m) =>
+          m.getHarvestSessionService()
+        ),
       null
     );
   }
@@ -91,17 +97,17 @@ async function getGardenHarvest() {
 }
 async function getAnimals() {
   if (!animalServicePromise) {
-    animalServicePromise = import("@/services/animals/AnimalSessionService").then((m) =>
-      m.getAnimalSessionService()
-    );
+    animalServicePromise = import(
+      "@/services/animals/AnimalSessionService"
+    ).then((m) => m.getAnimalSessionService());
   }
   return animalServicePromise;
 }
 async function getCleaning() {
   if (!cleaningServicePromise) {
-    cleaningServicePromise = import("@/services/cleaning/CleaningSessionService").then((m) =>
-      m.getCleaningSessionService()
-    );
+    cleaningServicePromise = import(
+      "@/services/cleaning/CleaningSessionService"
+    ).then((m) => m.getCleaningSessionService());
   }
   return cleaningServicePromise;
 }
@@ -109,7 +115,10 @@ async function getStorehouse() {
   if (!storehouseServicePromise) {
     // optional: a service that handles storehouse goals/stock
     storehouseServicePromise = safeImport(
-      () => import("@/services/storehouse/StorehouseService").then((m) => m.getStorehouseService()),
+      () =>
+        import("@/services/StorehouseService").then((m) =>
+          m.getStorehouseService()
+        ),
       null
     );
   }
@@ -119,7 +128,10 @@ async function getMealPlanner() {
   if (!mealPlanServicePromise) {
     // optional: a service that handles meal plans directly
     mealPlanServicePromise = safeImport(
-      () => import("@/services/meals/MealPlanService").then((m) => m.getMealPlanService()),
+      () =>
+        import("@/services/MealPlanService").then((m) =>
+          m.getMealPlanService()
+        ),
       null
     );
   }
@@ -127,13 +139,18 @@ async function getMealPlanner() {
 }
 async function getAutomation() {
   if (!automationPromise) {
-    automationPromise = import("@/services/automation/runtime").then((m) => m.automation);
+    automationPromise = import("@/services/automation/runtime").then(
+      (m) => m.automation
+    );
   }
   return automationPromise;
 }
 async function getImportAnalytics() {
   if (!importAnalyticsPromise) {
-    importAnalyticsPromise = safeImport(() => import("@/services/importAnalyticsService").then((m) => m.default), null);
+    importAnalyticsPromise = safeImport(
+      () => import("@/services/importAnalyticsService").then((m) => m.default),
+      null
+    );
   }
   return importAnalyticsPromise;
 }
@@ -141,7 +158,8 @@ async function getImportAnalytics() {
 /* -------------------------------------------------------------------------- */
 /* helpers                                                                    */
 /* -------------------------------------------------------------------------- */
-const genId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const genId = () =>
+  Math.random().toString(36).slice(2) + Date.now().toString(36);
 const toArray = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 const safe = (v, d = {}) => (v && typeof v === "object" ? v : d);
 
@@ -172,7 +190,11 @@ function normalizeImport(raw = {}) {
     const pins = toArray(raw.items);
 
     const recipes = pins
-      .filter((p) => p?.contentType === "recipe" || /recipe|meal|dinner|lunch|breakfast/i.test(p?.title || ""))
+      .filter(
+        (p) =>
+          p?.contentType === "recipe" ||
+          /recipe|meal|dinner|lunch|breakfast/i.test(p?.title || "")
+      )
       .map((p) => ({
         id: p.id || genId(),
         title: p.title || "Imported Pinterest Recipe",
@@ -191,7 +213,9 @@ function normalizeImport(raw = {}) {
       }));
 
     const gardenCare = pins
-      .filter((p) => /water|weed|fertiliz|pest|prune|mulch|trellis/i.test(p?.title || ""))
+      .filter((p) =>
+        /water|weed|fertiliz|pest|prune|mulch|trellis/i.test(p?.title || "")
+      )
       .map((p) => ({
         id: p.id || genId(),
         task: p.title || "Garden Care Task",
@@ -200,7 +224,9 @@ function normalizeImport(raw = {}) {
       }));
 
     const gardenHarvest = pins
-      .filter((p) => /harvest|pick|preserv|canning|freez|dehydrat/i.test(p?.title || ""))
+      .filter((p) =>
+        /harvest|pick|preserv|canning|freez|dehydrat/i.test(p?.title || "")
+      )
       .map((p) => ({
         id: p.id || genId(),
         crop: p.title || "Imported Harvest Item",
@@ -215,12 +241,21 @@ function normalizeImport(raw = {}) {
     const hasHarvest = gardenHarvest.length > 0;
 
     return {
-      kind: hasRecipes && (hasSeeds || hasCare || hasHarvest) ? "mixed" : hasRecipes ? "recipes" : "garden",
+      kind:
+        hasRecipes && (hasSeeds || hasCare || hasHarvest)
+          ? "mixed"
+          : hasRecipes
+          ? "recipes"
+          : "garden",
       recipes,
       gardenSeeds,
       gardenCare,
       gardenHarvest,
-      source: { type: "pinterest.board", url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: "pinterest.board",
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
@@ -232,22 +267,32 @@ function normalizeImport(raw = {}) {
     raw.site === "loveandlemons" ||
     raw.sourceType === "recipe.site"
   ) {
-    const recipes = toArray(raw.recipes || raw.items || raw.recipe).map((r) => ({
-      id: r.id || genId(),
-      title: r.title || r.name || "Imported Recipe",
-      ingredients: r.ingredients || [],
-      steps: r.steps || r.directions || [],
-      sourceUrl: r.url || raw.sourceUrl || null,
-    }));
+    const recipes = toArray(raw.recipes || raw.items || raw.recipe).map(
+      (r) => ({
+        id: r.id || genId(),
+        title: r.title || r.name || "Imported Recipe",
+        ingredients: r.ingredients || [],
+        steps: r.steps || r.directions || [],
+        sourceUrl: r.url || raw.sourceUrl || null,
+      })
+    );
     return {
       kind: "recipes",
       recipes,
-      source: { type: "recipe.site", url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: "recipe.site",
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
   // meal plan import (explicit)
-  if (raw.type === "meal-plan" || raw.kind === "mealPlan" || Array.isArray(raw.days)) {
+  if (
+    raw.type === "meal-plan" ||
+    raw.kind === "mealPlan" ||
+    Array.isArray(raw.days)
+  ) {
     return {
       kind: "meal-plan",
       mealPlan: {
@@ -255,12 +300,20 @@ function normalizeImport(raw = {}) {
         title: raw.title || "Imported Meal Plan",
         days: toArray(raw.days),
       },
-      source: { type: raw.type || "meal-plan", url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type || "meal-plan",
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
   // scan-compare-trust → inventory
-  if (raw.type === "scan" || raw.type === "scan-cart" || raw.type === "scan-circular") {
+  if (
+    raw.type === "scan" ||
+    raw.type === "scan-cart" ||
+    raw.type === "scan-circular"
+  ) {
     const items = toArray(raw.items || raw.products || raw.lines);
     return {
       kind: "inventory",
@@ -274,12 +327,20 @@ function normalizeImport(raw = {}) {
         price: it.price || null,
         tags: it.tags || [],
       })),
-      source: { type: raw.type, url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type,
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
   // seed pack / garden plan
-  if (raw.type === "seed-pack" || raw.type === "garden-plan" || raw.type === "garden-seeds") {
+  if (
+    raw.type === "seed-pack" ||
+    raw.type === "garden-plan" ||
+    raw.type === "garden-seeds"
+  ) {
     const seeds = toArray(raw.items || raw.seeds).map((s) => ({
       id: s.id || genId(),
       name: s.name || s.title || "Imported Seed",
@@ -290,7 +351,11 @@ function normalizeImport(raw = {}) {
     return {
       kind: "garden",
       gardenSeeds: seeds,
-      source: { type: raw.type, url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type,
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
@@ -311,12 +376,20 @@ function normalizeImport(raw = {}) {
     return {
       kind: "garden-care",
       gardenCare: care,
-      source: { type: raw.type, url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type,
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
   // garden harvest
-  if (raw.type === "garden-harvest" || raw.type === "harvest-log" || raw.type === "garden-yield") {
+  if (
+    raw.type === "garden-harvest" ||
+    raw.type === "harvest-log" ||
+    raw.type === "garden-yield"
+  ) {
     const harvest = toArray(raw.items || raw.harvest).map((h) => ({
       id: h.id || genId(),
       crop: h.crop || h.name || h.title || "Harvest Item",
@@ -328,7 +401,11 @@ function normalizeImport(raw = {}) {
     return {
       kind: "garden-harvest",
       gardenHarvest: harvest,
-      source: { type: raw.type, url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type,
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
@@ -339,7 +416,9 @@ function normalizeImport(raw = {}) {
     raw.kind === "storehouseStockPlan" ||
     raw.grocerySections
   ) {
-    const sections = toArray(raw.grocerySections || raw.sections || raw.items).map((sec) => ({
+    const sections = toArray(
+      raw.grocerySections || raw.sections || raw.items
+    ).map((sec) => ({
       id: sec.id || genId(),
       name: sec.name || sec.section || "Section",
       items: toArray(sec.items).map((it) => ({
@@ -356,7 +435,11 @@ function normalizeImport(raw = {}) {
         title: raw.title || "Imported Storehouse Stock Plan",
         sections,
       },
-      source: { type: raw.type || "storehouse-stock-plan", url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type || "storehouse-stock-plan",
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
@@ -378,7 +461,11 @@ function normalizeImport(raw = {}) {
         location: p.location || "freezer",
         role: p.role || raw.type,
       })),
-      source: { type: raw.type, url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type,
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
@@ -399,14 +486,22 @@ function normalizeImport(raw = {}) {
     return {
       kind: "cleaning",
       cleaningSets: sets,
-      source: { type: raw.type, url: raw.sourceUrl || null, meta: raw.meta || {} },
+      source: {
+        type: raw.type,
+        url: raw.sourceUrl || null,
+        meta: raw.meta || {},
+      },
     };
   }
 
   // fallback
   return {
     kind: "unknown",
-    source: { type: raw.type || "unknown", url: raw.sourceUrl || null, meta: raw.meta || {} },
+    source: {
+      type: raw.type || "unknown",
+      url: raw.sourceUrl || null,
+      meta: raw.meta || {},
+    },
     raw,
   };
 }
@@ -442,7 +537,12 @@ class ImportRouter {
         userOwned: !!opts.asFavorite,
         planId: opts.planId || null,
         scheduleId: opts.schedule ? `sch_${genId()}` : null,
-        source: normalized.source?.url || normalized.source?.type || raw.sourceUrl || raw.type || "unknown",
+        source:
+          normalized.source?.url ||
+          normalized.source?.type ||
+          raw.sourceUrl ||
+          raw.type ||
+          "unknown",
       });
     }
 
@@ -478,19 +578,28 @@ class ImportRouter {
 
       case "garden-care":
         result = wantsReverse
-          ? await this._routeGardenCareReverse(normalized, { label, ...opts })
-          : await this._routeGardenCare(normalized, { label, ...opts });
+          ? await this._routeGardenSessionReverse(normalized, {
+              label,
+              ...opts,
+            })
+          : await this._routeGardenSession(normalized, { label, ...opts });
         break;
 
       case "garden-harvest":
         result = wantsReverse
-          ? await this._routeGardenHarvestReverse(normalized, { label, ...opts })
+          ? await this._routeGardenHarvestReverse(normalized, {
+              label,
+              ...opts,
+            })
           : await this._routeGardenHarvest(normalized, { label, ...opts });
         break;
 
       case "storehouse-stock-plan":
         result = wantsReverse
-          ? await this._routeStorehouseStockReverse(normalized, { label, ...opts })
+          ? await this._routeStorehouseStockReverse(normalized, {
+              label,
+              ...opts,
+            })
           : await this._routeStorehouseStock(normalized, { label, ...opts });
         break;
 
@@ -549,12 +658,14 @@ class ImportRouter {
 
   _titleFrom(normalized, raw) {
     if (raw?.title) return raw.title;
-    if (normalized?.source?.type === "pinterest.board") return "Imported Pinterest Board";
+    if (normalized?.source?.type === "pinterest.board")
+      return "Imported Pinterest Board";
     if (normalized?.source?.type === "recipe.site") return "Imported Recipes";
     if (normalized?.kind === "inventory") return "Scanned Items → Inventory";
     if (normalized?.kind === "garden-care") return "Imported Garden Care Tasks";
     if (normalized?.kind === "garden-harvest") return "Imported Garden Harvest";
-    if (normalized?.kind === "storehouse-stock-plan") return "Imported Storehouse Stock Plan";
+    if (normalized?.kind === "storehouse-stock-plan")
+      return "Imported Storehouse Stock Plan";
     if (normalized?.kind === "meal-plan") return "Imported Meal Plan";
     return "Imported Content";
   }
@@ -579,7 +690,11 @@ class ImportRouter {
 
     if (opts.asFavorite && mealPlanner?.saveSessionAsFavorite) {
       await mealPlanner.saveSessionAsFavorite(session);
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "meal-planner" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "meal-planner",
+      });
     }
 
     if (opts.schedule) {
@@ -611,10 +726,17 @@ class ImportRouter {
 
     if (opts.asFavorite) {
       await inventory.saveSessionAsFavorite(invSession);
-      auto.saveFavoriteSession({ id: invSession.id, label: invSession.label, domain: "inventory" });
+      auto.saveFavoriteSession({
+        id: invSession.id,
+        label: invSession.label,
+        domain: "inventory",
+      });
     }
 
-    emitBus("import.inventory.created", { session: invSession, source: normalized.source });
+    emitBus("import.inventory.created", {
+      session: invSession,
+      source: normalized.source,
+    });
     return { ok: true, domain: "inventory", session: invSession, normalized };
   }
 
@@ -634,7 +756,11 @@ class ImportRouter {
 
     if (opts.asFavorite) {
       await cooking.saveSessionAsFavorite(session);
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "cooking" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "cooking",
+      });
     }
 
     if (opts.schedule) {
@@ -673,12 +799,26 @@ class ImportRouter {
     if (opts.asFavorite) {
       await cooking.saveSessionAsFavorite(cookSession);
       await inventory.saveSessionAsFavorite(invSession);
-      auto.saveFavoriteSession({ id: cookSession.id, label: cookSession.label, domain: "cooking" });
-      auto.saveFavoriteSession({ id: invSession.id, label: invSession.label, domain: "inventory" });
+      auto.saveFavoriteSession({
+        id: cookSession.id,
+        label: cookSession.label,
+        domain: "cooking",
+      });
+      auto.saveFavoriteSession({
+        id: invSession.id,
+        label: invSession.label,
+        domain: "inventory",
+      });
     }
 
-    emitBus("import.cooking.created", { session: cookSession, source: normalized.source });
-    emitBus("import.inventory.created", { session: invSession, source: normalized.source });
+    emitBus("import.cooking.created", {
+      session: cookSession,
+      source: normalized.source,
+    });
+    emitBus("import.inventory.created", {
+      session: invSession,
+      source: normalized.source,
+    });
 
     return {
       ok: true,
@@ -695,14 +835,21 @@ class ImportRouter {
     const inventory = await getInventory();
     const auto = await getAutomation();
 
-    const session = await inventory.createSessionFromScans(toArray(normalized.inventoryItems), {
-      label: opts.label || "Scanned Items → Inventory",
-      meta: { imported: true, source: normalized.source },
-    });
+    const session = await inventory.createSessionFromScans(
+      toArray(normalized.inventoryItems),
+      {
+        label: opts.label || "Scanned Items → Inventory",
+        meta: { imported: true, source: normalized.source },
+      }
+    );
 
     if (opts.asFavorite) {
       await inventory.saveSessionAsFavorite(session);
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "inventory" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "inventory",
+      });
     }
 
     if (opts.schedule) {
@@ -728,16 +875,28 @@ class ImportRouter {
     const items = toArray(normalized.inventoryItems);
 
     const cookSession = await cooking.createSessionFromReverse(
-      { fromInventory: items.map((it) => ({ ...it, reason: "imported/on-hand" })) },
+      {
+        fromInventory: items.map((it) => ({
+          ...it,
+          reason: "imported/on-hand",
+        })),
+      },
       { label: opts.label || "On-hand Items → Cook / Preserve" }
     );
 
     if (opts.asFavorite) {
       await cooking.saveSessionAsFavorite(cookSession);
-      auto.saveFavoriteSession({ id: cookSession.id, label: cookSession.label, domain: "cooking" });
+      auto.saveFavoriteSession({
+        id: cookSession.id,
+        label: cookSession.label,
+        domain: "cooking",
+      });
     }
 
-    emitBus("import.cooking.created", { session: cookSession, source: normalized.source });
+    emitBus("import.cooking.created", {
+      session: cookSession,
+      source: normalized.source,
+    });
     return { ok: true, domain: "cooking", session: cookSession, normalized };
   }
 
@@ -758,7 +917,11 @@ class ImportRouter {
 
     if (opts.asFavorite) {
       await garden.saveSessionAsFavorite(session);
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "garden" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "garden",
+      });
     }
 
     if (opts.schedule) {
@@ -802,12 +965,26 @@ class ImportRouter {
     if (opts.asFavorite) {
       await inventory.saveSessionAsFavorite(invSession);
       await cooking.saveSessionAsFavorite(cookSession);
-      auto.saveFavoriteSession({ id: invSession.id, label: invSession.label, domain: "inventory" });
-      auto.saveFavoriteSession({ id: cookSession.id, label: cookSession.label, domain: "cooking" });
+      auto.saveFavoriteSession({
+        id: invSession.id,
+        label: invSession.label,
+        domain: "inventory",
+      });
+      auto.saveFavoriteSession({
+        id: cookSession.id,
+        label: cookSession.label,
+        domain: "cooking",
+      });
     }
 
-    emitBus("import.inventory.created", { session: invSession, source: normalized.source });
-    emitBus("import.cooking.created", { session: cookSession, source: normalized.source });
+    emitBus("import.inventory.created", {
+      session: invSession,
+      source: normalized.source,
+    });
+    emitBus("import.cooking.created", {
+      session: cookSession,
+      source: normalized.source,
+    });
 
     return {
       ok: true,
@@ -820,8 +997,8 @@ class ImportRouter {
   /* ------------------------------------------------------------------------ */
   /* Garden CARE (forward)                                                     */
   /* ------------------------------------------------------------------------ */
-  async _routeGardenCare(normalized, opts) {
-    const gardenCare = await getGardenCare();
+  async _routeGardenSession(normalized, opts) {
+    const gardenCare = await getGardenSession();
     const garden = await getGarden();
     const auto = await getAutomation();
     const tasks = toArray(normalized.gardenCare);
@@ -851,7 +1028,11 @@ class ImportRouter {
       } else if (garden?.saveSessionAsFavorite) {
         await garden.saveSessionAsFavorite(session);
       }
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "garden-care" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "garden-care",
+      });
     }
 
     if (opts.schedule) {
@@ -864,14 +1045,17 @@ class ImportRouter {
       });
     }
 
-    emitBus("import.gardenCare.created", { session, source: normalized.source });
+    emitBus("import.gardenCare.created", {
+      session,
+      source: normalized.source,
+    });
     return { ok: true, domain: "garden-care", session, normalized };
   }
 
   /* ------------------------------------------------------------------------ */
   /* Garden CARE (reverse)                                                     */
   /* ------------------------------------------------------------------------ */
-  async _routeGardenCareReverse(normalized, opts) {
+  async _routeGardenSessionReverse(normalized, opts) {
     const auto = await getAutomation();
     const careTasks = toArray(normalized.gardenCare);
 
@@ -885,7 +1069,10 @@ class ImportRouter {
       });
     }
 
-    emitBus("import.gardenCare.reverse", { tasks: careTasks, source: normalized.source });
+    emitBus("import.gardenCare.reverse", {
+      tasks: careTasks,
+      source: normalized.source,
+    });
     return { ok: true, domain: "garden-care", tasks: careTasks, normalized };
   }
 
@@ -924,12 +1111,24 @@ class ImportRouter {
     if (opts.asFavorite) {
       if (harvestSession && harvestService?.saveSessionAsFavorite) {
         await harvestService.saveSessionAsFavorite(harvestSession);
-        auto.saveFavoriteSession({ id: harvestSession.id, label: harvestSession.label, domain: "garden-harvest" });
+        auto.saveFavoriteSession({
+          id: harvestSession.id,
+          label: harvestSession.label,
+          domain: "garden-harvest",
+        });
       }
       await inventory.saveSessionAsFavorite(invSession);
       await cooking.saveSessionAsFavorite(cookSession);
-      auto.saveFavoriteSession({ id: invSession.id, label: invSession.label, domain: "inventory" });
-      auto.saveFavoriteSession({ id: cookSession.id, label: cookSession.label, domain: "cooking" });
+      auto.saveFavoriteSession({
+        id: invSession.id,
+        label: invSession.label,
+        domain: "inventory",
+      });
+      auto.saveFavoriteSession({
+        id: cookSession.id,
+        label: cookSession.label,
+        domain: "cooking",
+      });
     }
 
     if (opts.schedule) {
@@ -952,7 +1151,11 @@ class ImportRouter {
     return {
       ok: true,
       domain: ["garden-harvest", "inventory", "cooking"],
-      sessions: { harvest: harvestSession, inventory: invSession, cooking: cookSession },
+      sessions: {
+        harvest: harvestSession,
+        inventory: invSession,
+        cooking: cookSession,
+      },
       normalized,
     };
   }
@@ -979,12 +1182,20 @@ class ImportRouter {
         meta: { imported: true, source: normalized.source },
       });
     } else {
-      session = { id: stockPlan.id, label: stockPlan.title, sections: stockPlan.sections };
+      session = {
+        id: stockPlan.id,
+        label: stockPlan.title,
+        sections: stockPlan.sections,
+      };
     }
 
     if (opts.asFavorite && storehouse?.saveSessionAsFavorite) {
       await storehouse.saveSessionAsFavorite(session);
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "storehouse" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "storehouse",
+      });
     }
 
     if (opts.schedule) {
@@ -997,7 +1208,10 @@ class ImportRouter {
       });
     }
 
-    emitBus("import.storehouse-stock.created", { session, source: normalized.source });
+    emitBus("import.storehouse-stock.created", {
+      session,
+      source: normalized.source,
+    });
     return { ok: true, domain: "storehouse", session, normalized };
   }
 
@@ -1018,7 +1232,10 @@ class ImportRouter {
       });
     }
 
-    emitBus("import.storehouse-stock.reverse", { stockPlan, source: normalized.source });
+    emitBus("import.storehouse-stock.reverse", {
+      stockPlan,
+      source: normalized.source,
+    });
     return { ok: true, domain: "storehouse", stockPlan, normalized };
   }
 
@@ -1030,10 +1247,13 @@ class ImportRouter {
     const inventory = await getInventory();
     const auto = await getAutomation();
 
-    const animalSession = await animals.createSessionFromProducts(toArray(normalized.animalEntries), {
-      label: opts.label || "Imported Animal Entries",
-      meta: { imported: true, source: normalized.source },
-    });
+    const animalSession = await animals.createSessionFromProducts(
+      toArray(normalized.animalEntries),
+      {
+        label: opts.label || "Imported Animal Entries",
+        meta: { imported: true, source: normalized.source },
+      }
+    );
 
     const invSession = await inventory.createSessionFromReverse(
       { animalProducts: toArray(normalized.animalEntries) },
@@ -1043,8 +1263,16 @@ class ImportRouter {
     if (opts.asFavorite) {
       await animals.saveSessionAsFavorite(animalSession);
       await inventory.saveSessionAsFavorite(invSession);
-      auto.saveFavoriteSession({ id: animalSession.id, label: animalSession.label, domain: "animals" });
-      auto.saveFavoriteSession({ id: invSession.id, label: invSession.label, domain: "inventory" });
+      auto.saveFavoriteSession({
+        id: animalSession.id,
+        label: animalSession.label,
+        domain: "animals",
+      });
+      auto.saveFavoriteSession({
+        id: invSession.id,
+        label: invSession.label,
+        domain: "inventory",
+      });
     }
 
     emitBus("import.animals.created", {
@@ -1075,10 +1303,17 @@ class ImportRouter {
 
     if (opts.asFavorite) {
       await cooking.saveSessionAsFavorite(cookSession);
-      auto.saveFavoriteSession({ id: cookSession.id, label: cookSession.label, domain: "cooking" });
+      auto.saveFavoriteSession({
+        id: cookSession.id,
+        label: cookSession.label,
+        domain: "cooking",
+      });
     }
 
-    emitBus("import.cooking.created", { session: cookSession, source: normalized.source });
+    emitBus("import.cooking.created", {
+      session: cookSession,
+      source: normalized.source,
+    });
     return { ok: true, domain: "cooking", session: cookSession, normalized };
   }
 
@@ -1099,7 +1334,11 @@ class ImportRouter {
 
     if (opts.asFavorite) {
       await cleaning.saveSessionAsFavorite(session);
-      auto.saveFavoriteSession({ id: session.id, label: session.label || session.id, domain: "cleaning" });
+      auto.saveFavoriteSession({
+        id: session.id,
+        label: session.label || session.id,
+        domain: "cleaning",
+      });
     }
 
     if (opts.schedule) {
@@ -1123,24 +1362,38 @@ class ImportRouter {
     const results = {};
     // recipes
     if (toArray(normalized.recipes).length) {
-      results.recipes = await this._routeRecipes({ ...normalized, kind: "recipes" }, { ...opts });
+      results.recipes = await this._routeRecipes(
+        { ...normalized, kind: "recipes" },
+        { ...opts }
+      );
     }
     // seeds/plan
     if (toArray(normalized.gardenSeeds).length) {
-      results.garden = await this._routeGarden({ ...normalized, kind: "garden" }, { ...opts });
+      results.garden = await this._routeGarden(
+        { ...normalized, kind: "garden" },
+        { ...opts }
+      );
     }
     // care
     if (toArray(normalized.gardenCare).length) {
-      results.gardenCare = await this._routeGardenCare({ ...normalized, kind: "garden-care" }, { ...opts });
+      results.gardenCare = await this._routeGardenSession(
+        { ...normalized, kind: "garden-care" },
+        { ...opts }
+      );
     }
     // harvest
     if (toArray(normalized.gardenHarvest).length) {
-      results.gardenHarvest = await this._routeGardenHarvest({ ...normalized, kind: "garden-harvest" }, { ...opts });
+      results.gardenHarvest = await this._routeGardenHarvest(
+        { ...normalized, kind: "garden-harvest" },
+        { ...opts }
+      );
     }
 
     return {
       ok: true,
-      domain: ["cooking", "garden", "garden-care", "garden-harvest"].filter(Boolean),
+      domain: ["cooking", "garden", "garden-care", "garden-harvest"].filter(
+        Boolean
+      ),
       sessions: {
         cooking: results.recipes?.session,
         garden: results.garden?.session,

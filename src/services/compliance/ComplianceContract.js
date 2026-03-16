@@ -41,7 +41,7 @@
 
 /* ---------------------------------- Imports ---------------------------------- */
 
-import { emitEvent } from "../eventBus";
+import { emitEvent } from "../events/eventBus";
 
 /* --------------------------------- Constants --------------------------------- */
 

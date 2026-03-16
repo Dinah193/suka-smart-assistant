@@ -22,11 +22,11 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import {
   normalizeMicronutrientInput,
-  calculateMicronutrientTargets
+  calculateMicronutrientTargets,
 } from "./MicronutrientCalculator.shim";
 
 /**
@@ -39,7 +39,7 @@ const DEFAULT_INPUT = {
     sex: "unspecified", // "female" | "male" | "unspecified"
     ageYears: "",
     pregnancyStatus: "none", // "none" | "trimester1" | "trimester2" | "trimester3"
-    lactationStatus: "none" // "none" | "lactating0to6m" | "lactating7to12m"
+    lactationStatus: "none", // "none" | "lactating0to6m" | "lactating7to12m"
   },
   unitSystem: "imperial", // "imperial" | "metric"
   healthFocus: {
@@ -48,35 +48,35 @@ const DEFAULT_INPUT = {
     immuneSupport: false,
     heartHealth: false,
     brainHealth: false,
-    metabolicHealth: false
+    metabolicHealth: false,
   },
   constraints: {
     kidneyIssues: false,
     liverIssues: false,
     limitSodium: false,
     limitAddedSugar: false,
-    limitSaturatedFat: false
+    limitSaturatedFat: false,
   },
   dietaryPattern: {
     primaryPattern: "omnivore", // "omnivore" | "pescatarian" | "vegetarian" | "vegan"
     avoidsPork: true, // SSA default preference
     avoidsShellfish: true,
     avoidsDairy: false,
-    avoidsGluten: false
+    avoidsGluten: false,
   },
   rounding: {
     gramsDecimals: 1,
     milligramsDecimals: 0,
-    microgramsDecimals: 0
+    microgramsDecimals: 0,
   },
   ssaIntegration: {
     autosaveProfile: false,
     allowLinkToMealPlanner: true,
-    allowLinkToInventoryGaps: true
+    allowLinkToInventoryGaps: true,
   },
   meta: {
     // reserved for planner/runtime metadata; kept opaque here
-  }
+  },
 };
 
 const MODULE_SOURCE = "features/calculators/health/MicronutrientCalculator";
@@ -150,7 +150,7 @@ function emitCalculatorEvent(type, payload) {
       type,
       ts: new Date().toISOString(),
       source: MODULE_SOURCE,
-      data: payload
+      data: payload,
     });
   } catch (err) {
     // Fails silently; calculators should never crash the app.
@@ -223,7 +223,7 @@ export function useMicronutrientCalculator() {
     setLastRunAt(null);
 
     emitCalculatorEvent("calculator.micronutrient.reset", {
-      nodeId: NODE_ID
+      nodeId: NODE_ID,
     });
   }, []);
 
@@ -233,7 +233,7 @@ export function useMicronutrientCalculator() {
       setErrors(validationErrors);
       emitCalculatorEvent("calculator.micronutrient.validationFailed", {
         nodeId: NODE_ID,
-        errors: validationErrors
+        errors: validationErrors,
       });
       return;
     }
@@ -254,18 +254,18 @@ export function useMicronutrientCalculator() {
         input: normalized,
         result: calcResult,
         ranAt: now,
-        familyFundMode: !!familyFundMode
+        familyFundMode: !!familyFundMode,
       });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[MicronutrientCalculator] Calculation failed", err);
       setErrors({
-        _global: "Something went wrong while calculating. Please try again."
+        _global: "Something went wrong while calculating. Please try again.",
       });
 
       emitCalculatorEvent("calculator.micronutrient.error", {
         nodeId: NODE_ID,
-        error: String(err)
+        error: String(err),
       });
     } finally {
       setIsCalculating(false);
@@ -304,8 +304,8 @@ export function useMicronutrientCalculator() {
         "MealPlanner",
         "GardenPlanner",
         "AnimalPlanner",
-        "StorehouseInventory"
-      ]
+        "StorehouseInventory",
+      ],
     });
   }, [input, result, lastRunAt]);
 
@@ -319,6 +319,6 @@ export function useMicronutrientCalculator() {
     handleToggle,
     handleSubmit,
     handleReset,
-    handleNextStepsClick
+    handleNextStepsClick,
   };
 }

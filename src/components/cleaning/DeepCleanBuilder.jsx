@@ -9,8 +9,20 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Check, Trash2, Save, Play, CalendarPlus, Plus, MoveUp, MoveDown,
-  Undo2, Redo2, Sparkles, Wrench, Shield, Info
+  Check,
+  Trash2,
+  Save,
+  Play,
+  CalendarPlus,
+  Plus,
+  MoveUp,
+  MoveDown,
+  Undo2,
+  Redo2,
+  Sparkles,
+  Wrench,
+  Shield,
+  Info,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,21 +30,33 @@ import { v4 as uuidv4 } from "uuid";
 let eventBus = { emit: () => {}, on: () => () => {} };
 let automation = { queue: () => {}, invoke: async () => {} };
 let CleaningPlanManager = null;
-let PreferencesStore = { getState: () => ({ timezone: "America/New_York", sabbathAware: true }) };
-let deepCleanCadenceToRRULE = (x) => "RRULE:FREQ=YEARLY;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
+let PreferencesStore = {
+  getState: () => ({ timezone: "America/New_York", sabbathAware: true }),
+};
+let deepCleanCadenceToRRULE = (x) =>
+  "RRULE:FREQ=YEARLY;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
 let materializeStrategy = async () => ({ tasks: [] });
 
 (async () => {
-  try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-  try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-  try { ({ default: CleaningPlanManager } = await import("@/managers/CleaningPlanManager")); } catch {}
+  try {
+    ({ eventBus } = await import("@/services/events/eventBus"));
+  } catch {}
+  try {
+    ({ automation } = await import("@/services/automation/runtime"));
+  } catch {}
+  try {
+    ({ default: CleaningPlanManager } = await import(
+      "@/managers/CleaningPlanManager"
+    ));
+  } catch {}
   try {
     const s = await import("@/data/organizingStrategies");
-    deepCleanCadenceToRRULE = s?.deepCleanCadenceToRRULE || deepCleanCadenceToRRULE;
+    deepCleanCadenceToRRULE =
+      s?.deepCleanCadenceToRRULE || deepCleanCadenceToRRULE;
     materializeStrategy = s?.materializeStrategy || materializeStrategy;
   } catch {}
   try {
-    const p = await import("@/stores/preferences");
+    const p = await import("@/store/PreferencesStore");
     PreferencesStore = p?.usePreferencesStore || PreferencesStore;
   } catch {}
 })();
@@ -40,37 +64,160 @@ let materializeStrategy = async () => ({ tasks: [] });
 /* --------------------------------- Presets --------------------------------- */
 const DEEP_CLEAN_PRESETS = {
   Kitchen: [
-    { name: "Inside oven (racks, door, seals)", area: "kitchen", estMinutes: 30, tools: ["Gloves", "Scraper"], supplies: ["Degreaser"], cadence: "quarterly", priority: 3, tags: ["grease", "appliance"] },
-    { name: "Fridge deep clean (shelves, seals)", area: "kitchen", estMinutes: 30, tools: ["Towel"], supplies: ["Disinfectant"], cadence: "monthly", priority: 3, tags: ["appliance"] },
-    { name: "Under appliances sweep & mop", area: "kitchen", estMinutes: 20, tools: ["Scrub Brush"], supplies: ["Floor Cleaner"], cadence: "bi-annual", priority: 2, tags: ["floor"] },
+    {
+      name: "Inside oven (racks, door, seals)",
+      area: "kitchen",
+      estMinutes: 30,
+      tools: ["Gloves", "Scraper"],
+      supplies: ["Degreaser"],
+      cadence: "quarterly",
+      priority: 3,
+      tags: ["grease", "appliance"],
+    },
+    {
+      name: "Fridge deep clean (shelves, seals)",
+      area: "kitchen",
+      estMinutes: 30,
+      tools: ["Towel"],
+      supplies: ["Disinfectant"],
+      cadence: "monthly",
+      priority: 3,
+      tags: ["appliance"],
+    },
+    {
+      name: "Under appliances sweep & mop",
+      area: "kitchen",
+      estMinutes: 20,
+      tools: ["Scrub Brush"],
+      supplies: ["Floor Cleaner"],
+      cadence: "bi-annual",
+      priority: 2,
+      tags: ["floor"],
+    },
   ],
   Bathroom: [
-    { name: "Grout scrub & reseal check", area: "bath", estMinutes: 35, tools: ["Grout Brush"], supplies: ["Baking Soda", "Vinegar"], cadence: "bi-annual", priority: 3, tags: ["grout"] },
-    { name: "Toilet base disinfect + hinges", area: "bath", estMinutes: 10, tools: ["Rag"], supplies: ["Bleach"], cadence: "monthly", priority: 2, tags: ["disinfect"] },
-    { name: "Exhaust fan cover clean", area: "bath", estMinutes: 10, tools: ["Screwdriver"], supplies: ["All-purpose Cleaner"], cadence: "quarterly", priority: 2, tags: ["vent"] },
+    {
+      name: "Grout scrub & reseal check",
+      area: "bath",
+      estMinutes: 35,
+      tools: ["Grout Brush"],
+      supplies: ["Baking Soda", "Vinegar"],
+      cadence: "bi-annual",
+      priority: 3,
+      tags: ["grout"],
+    },
+    {
+      name: "Toilet base disinfect + hinges",
+      area: "bath",
+      estMinutes: 10,
+      tools: ["Rag"],
+      supplies: ["Bleach"],
+      cadence: "monthly",
+      priority: 2,
+      tags: ["disinfect"],
+    },
+    {
+      name: "Exhaust fan cover clean",
+      area: "bath",
+      estMinutes: 10,
+      tools: ["Screwdriver"],
+      supplies: ["All-purpose Cleaner"],
+      cadence: "quarterly",
+      priority: 2,
+      tags: ["vent"],
+    },
   ],
   Bedroom: [
-    { name: "Vacuum under bed", area: "bedrooms", estMinutes: 10, tools: ["Vacuum"], supplies: [], cadence: "quarterly", priority: 2, tags: [] },
-    { name: "Baseboards wipe", area: "bedrooms", estMinutes: 12, tools: ["Cloth"], supplies: ["Dusting Spray"], cadence: "quarterly", priority: 2, tags: ["baseboards"] },
-    { name: "Mattress rotate & vacuum", area: "bedrooms", estMinutes: 20, tools: ["Vacuum"], supplies: [], cadence: "quarterly", priority: 2, tags: ["mattress"] },
+    {
+      name: "Vacuum under bed",
+      area: "bedrooms",
+      estMinutes: 10,
+      tools: ["Vacuum"],
+      supplies: [],
+      cadence: "quarterly",
+      priority: 2,
+      tags: [],
+    },
+    {
+      name: "Baseboards wipe",
+      area: "bedrooms",
+      estMinutes: 12,
+      tools: ["Cloth"],
+      supplies: ["Dusting Spray"],
+      cadence: "quarterly",
+      priority: 2,
+      tags: ["baseboards"],
+    },
+    {
+      name: "Mattress rotate & vacuum",
+      area: "bedrooms",
+      estMinutes: 20,
+      tools: ["Vacuum"],
+      supplies: [],
+      cadence: "quarterly",
+      priority: 2,
+      tags: ["mattress"],
+    },
   ],
   LivingRoom: [
-    { name: "Vacuum behind furniture", area: "living", estMinutes: 12, tools: ["Vacuum"], supplies: [], cadence: "quarterly", priority: 2, tags: [] },
-    { name: "Ceiling fan blades clean", area: "living", estMinutes: 10, tools: ["Step Stool", "Duster"], supplies: [], cadence: "quarterly", priority: 2, tags: ["fan"] },
-    { name: "Window tracks & sills", area: "living", estMinutes: 15, tools: ["Cloth"], supplies: ["Glass Cleaner"], cadence: "bi-annual", priority: 2, tags: ["windows"] },
+    {
+      name: "Vacuum behind furniture",
+      area: "living",
+      estMinutes: 12,
+      tools: ["Vacuum"],
+      supplies: [],
+      cadence: "quarterly",
+      priority: 2,
+      tags: [],
+    },
+    {
+      name: "Ceiling fan blades clean",
+      area: "living",
+      estMinutes: 10,
+      tools: ["Step Stool", "Duster"],
+      supplies: [],
+      cadence: "quarterly",
+      priority: 2,
+      tags: ["fan"],
+    },
+    {
+      name: "Window tracks & sills",
+      area: "living",
+      estMinutes: 15,
+      tools: ["Cloth"],
+      supplies: ["Glass Cleaner"],
+      cadence: "bi-annual",
+      priority: 2,
+      tags: ["windows"],
+    },
   ],
 };
 
 /* --------------------------------- Utilities --------------------------------- */
 const TZ = () => {
-  try { return PreferencesStore.getState()?.timezone || "America/New_York"; } catch { return "America/New_York"; }
+  try {
+    return PreferencesStore.getState()?.timezone || "America/New_York";
+  } catch {
+    return "America/New_York";
+  }
 };
 const SABBATH_AWARE = () => {
-  try { return !!PreferencesStore.getState()?.sabbathAware; } catch { return true; }
+  try {
+    return !!PreferencesStore.getState()?.sabbathAware;
+  } catch {
+    return true;
+  }
 };
-const isSabbathApprox = (d = new Date(), tz = "America/New_York", aware = true) => {
+const isSabbathApprox = (
+  d = new Date(),
+  tz = "America/New_York",
+  aware = true
+) => {
   if (!aware) return false;
-  const dow = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: tz }).format(d);
+  const dow = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: tz,
+  }).format(d);
   return dow === "Sat";
 };
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -79,10 +226,16 @@ const uid = () => uuidv4();
 /* -------------------------------- Persistence -------------------------------- */
 const LKEY = "suka:deep-clean-builder:v1";
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(LKEY) || "null"); } catch { return null; }
+  try {
+    return JSON.parse(localStorage.getItem(LKEY) || "null");
+  } catch {
+    return null;
+  }
 }
 function saveState(state) {
-  try { localStorage.setItem(LKEY, JSON.stringify(state)); } catch {}
+  try {
+    localStorage.setItem(LKEY, JSON.stringify(state));
+  } catch {}
 }
 
 /* ------------------------------- Undo/Redo Hook ------------------------------- */
@@ -92,7 +245,11 @@ function useHistory(initial) {
   const value = stack[i];
   const canUndo = i > 0;
   const canRedo = i < stack.length - 1;
-  const set = (next) => { const arr = stack.slice(0, i + 1).concat([next]); setStack(arr); setI(arr.length - 1); };
+  const set = (next) => {
+    const arr = stack.slice(0, i + 1).concat([next]);
+    setStack(arr);
+    setI(arr.length - 1);
+  };
   const undo = () => canUndo && setI(i - 1);
   const redo = () => canRedo && setI(i + 1);
   return { value, set, undo, redo, canUndo, canRedo };
@@ -105,7 +262,9 @@ export default function DeepCleanBuilder() {
   const sabbathAware = useMemo(() => SABBATH_AWARE(), []);
   const sabbathActive = isSabbathApprox(new Date(), tz, sabbathAware);
 
-  const [selectedArea, setSelectedArea] = useState(persisted?.selectedArea || "Kitchen");
+  const [selectedArea, setSelectedArea] = useState(
+    persisted?.selectedArea || "Kitchen"
+  );
   const history = useHistory(persisted?.tasks || []);
   const tasks = history.value;
 
@@ -120,10 +279,22 @@ export default function DeepCleanBuilder() {
   useEffect(() => {
     const onKey = (e) => {
       const k = e.key.toLowerCase();
-      if ((e.ctrlKey || e.metaKey) && k === "s") { e.preventDefault(); handleSave(); }
+      if ((e.ctrlKey || e.metaKey) && k === "s") {
+        e.preventDefault();
+        handleSave();
+      }
       if (!e.repeat && k === "g") handleGenerateRoutine();
-      if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); history.undo(); }
-      if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); history.redo(); }
+      if ((e.ctrlKey || e.metaKey) && k === "z") {
+        e.preventDefault();
+        history.undo();
+      }
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        (k === "y" || (k === "z" && e.shiftKey))
+      ) {
+        e.preventDefault();
+        history.redo();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -140,7 +311,7 @@ export default function DeepCleanBuilder() {
         name: p.name,
         area: p.area,
         estMinutes: p.estMinutes,
-        cadence: p.cadence,              // monthly/quarterly/bi-annual/annual/weekly/daily
+        cadence: p.cadence, // monthly/quarterly/bi-annual/annual/weekly/daily
         priority: p.priority || 2,
         sabbathBlocked: true,
         tools: p.tools || [],
@@ -148,7 +319,10 @@ export default function DeepCleanBuilder() {
         tags: p.tags || [],
       }));
     history.set([...(tasks || []), ...newOnes]);
-    eventBus.emit("ui:toast", { type: "success", message: `Added ${newOnes.length} ${selectedArea} task(s).` });
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: `Added ${newOnes.length} ${selectedArea} task(s).`,
+    });
   };
 
   const addCustomTask = () => {
@@ -197,7 +371,9 @@ export default function DeepCleanBuilder() {
   const injectStrategy = async (strategyId) => {
     setBusy(true);
     try {
-      const res = await materializeStrategy(strategyId, { blockOnSabbath: true });
+      const res = await materializeStrategy(strategyId, {
+        blockOnSabbath: true,
+      });
       const xs = (res?.tasks || []).map((t) => ({
         id: t.id || uid(),
         name: t.title,
@@ -211,10 +387,16 @@ export default function DeepCleanBuilder() {
         tags: t.meta?.tags || [],
       }));
       history.set([...(tasks || []), ...xs]);
-      eventBus.emit("ui:toast", { type: "success", message: "Added strategy tasks. Edit as needed." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Added strategy tasks. Edit as needed.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not add strategy tasks." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not add strategy tasks.",
+      });
     } finally {
       setBusy(false);
     }
@@ -241,22 +423,27 @@ export default function DeepCleanBuilder() {
   };
 
   const scheduleCadences = (planTasks) => {
-    planTasks.filter((t) => !!t.cadence).forEach((t) => {
-      const rrule = deepCleanCadenceToRRULE(t.cadence);
-      eventBus.emit("calendar:create:rrule", {
-        title: `Deep Clean: ${t.title}`,
-        area: t.area,
-        rrule,
-        tz,
-        meta: { source: "deep-clean-builder", cadence: t.cadence },
+    planTasks
+      .filter((t) => !!t.cadence)
+      .forEach((t) => {
+        const rrule = deepCleanCadenceToRRULE(t.cadence);
+        eventBus.emit("calendar:create:rrule", {
+          title: `Deep Clean: ${t.title}`,
+          area: t.area,
+          rrule,
+          tz,
+          meta: { source: "deep-clean-builder", cadence: t.cadence },
+        });
       });
-    });
   };
 
   const handleGenerateRoutine = () => {
     const planTasks = buildPlanTasks();
     if (!planTasks.length) {
-      eventBus.emit("ui:toast", { type: "warning", message: "Add at least one task before generating." });
+      eventBus.emit("ui:toast", {
+        type: "warning",
+        message: "Add at least one task before generating.",
+      });
       return;
     }
     if (CleaningPlanManager?.createAdhocPlan) {
@@ -264,13 +451,22 @@ export default function DeepCleanBuilder() {
         const plan = CleaningPlanManager.createAdhocPlan({
           title: `${name} (Deep Clean)`,
           tasks: planTasks,
-          meta: { source: "DeepCleanBuilder", createdAt: new Date().toISOString() },
+          meta: {
+            source: "DeepCleanBuilder",
+            createdAt: new Date().toISOString(),
+          },
         });
-        eventBus.emit("cleaning:plan:created", { planId: plan?.id, source: "deep-clean-builder" });
+        eventBus.emit("cleaning:plan:created", {
+          planId: plan?.id,
+          source: "deep-clean-builder",
+        });
         eventBus.emit("ui:navigate", { to: "/tier2/household/cleaning/live" });
       } catch (e) {
         console.error(e);
-        eventBus.emit("ui:toast", { type: "error", message: "Could not create plan." });
+        eventBus.emit("ui:toast", {
+          type: "error",
+          message: "Could not create plan.",
+        });
       }
     }
     scheduleCadences(planTasks);
@@ -279,19 +475,27 @@ export default function DeepCleanBuilder() {
     if (planTasks.some((t) => (t.meta?.tags || []).includes("paper-inbox"))) {
       automation.queue?.("UI:Nudge", {
         message: "Pin a weekly ‘Paper Inbox Zero’ block on your calendar?",
-        actions: [{ label: "Open Calendar", event: "ui:navigate", to: "/calendar" }],
+        actions: [
+          { label: "Open Calendar", event: "ui:navigate", to: "/calendar" },
+        ],
       });
     }
     if (planTasks.some((t) => (t.meta?.tags || []).includes("harvest"))) {
       automation.queue?.("Inventory:SyncFromHarvestLog", { mode: "append" });
     }
 
-    eventBus.emit("ui:toast", { type: "success", message: "Routine generated. Live Session is ready." });
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: "Routine generated. Live Session is ready.",
+    });
   };
 
   const handleSave = () => {
     saveState({ selectedArea, tasks, name });
-    eventBus.emit("ui:toast", { type: "success", message: "Deep Clean saved." });
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: "Deep Clean saved.",
+    });
   };
 
   /* --------------------------------- Summaries -------------------------------- */
@@ -315,8 +519,12 @@ export default function DeepCleanBuilder() {
           <h2 className="text-lg font-semibold">Deep Clean Builder</h2>
         </div>
         <div className="flex items-center gap-2">
-          <button className="btn" onClick={handleSave}><Save className="w-4 h-4 mr-1" /> Save</button>
-          <button className="btn btn-primary" onClick={handleGenerateRoutine}><Play className="w-4 h-4 mr-1" /> Generate Routine</button>
+          <button className="btn" onClick={handleSave}>
+            <Save className="w-4 h-4 mr-1" /> Save
+          </button>
+          <button className="btn btn-primary" onClick={handleGenerateRoutine}>
+            <Play className="w-4 h-4 mr-1" /> Generate Routine
+          </button>
         </div>
       </div>
 
@@ -324,25 +532,54 @@ export default function DeepCleanBuilder() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="p-3 rounded-xl border">
           <label className="text-xs text-gray-500">Routine name</label>
-          <input className="w-full border rounded-lg px-3 py-2 mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Quarterly Deep Clean Focus" />
+          <input
+            className="w-full border rounded-lg px-3 py-2 mt-1"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., Quarterly Deep Clean Focus"
+          />
         </div>
 
         <div className="p-3 rounded-xl border">
           <div className="text-xs text-gray-500">Area presets</div>
           <div className="flex gap-2 mt-1">
-            <select className="border rounded-lg px-3 py-2 flex-1" value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)}>
-              {Object.keys(DEEP_CLEAN_PRESETS).map((area) => <option key={area} value={area}>{area}</option>)}
+            <select
+              className="border rounded-lg px-3 py-2 flex-1"
+              value={selectedArea}
+              onChange={(e) => setSelectedArea(e.target.value)}
+            >
+              {Object.keys(DEEP_CLEAN_PRESETS).map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
             </select>
-            <button className="btn" onClick={addPresetTasks}><Plus className="w-4 h-4" /></button>
+            <button className="btn" onClick={addPresetTasks}>
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
-          <p className="text-[11px] text-gray-500 mt-1">Adds unique tasks from the selected area.</p>
+          <p className="text-[11px] text-gray-500 mt-1">
+            Adds unique tasks from the selected area.
+          </p>
         </div>
 
         <div className="p-3 rounded-xl border">
           <div className="text-xs text-gray-500 mb-1">Strategy shortcuts</div>
           <div className="flex flex-wrap gap-2">
-            <button className="btn" disabled={busy} onClick={() => injectStrategy("bug-shield-perimeter")}><Shield className="w-4 h-4 mr-1" /> Bug-Shield</button>
-            <button className="btn" disabled={busy} onClick={() => injectStrategy("appliance-care")}><Wrench className="w-4 h-4 mr-1" /> Appliance Care</button>
+            <button
+              className="btn"
+              disabled={busy}
+              onClick={() => injectStrategy("bug-shield-perimeter")}
+            >
+              <Shield className="w-4 h-4 mr-1" /> Bug-Shield
+            </button>
+            <button
+              className="btn"
+              disabled={busy}
+              onClick={() => injectStrategy("appliance-care")}
+            >
+              <Wrench className="w-4 h-4 mr-1" /> Appliance Care
+            </button>
           </div>
         </div>
       </div>
@@ -352,9 +589,14 @@ export default function DeepCleanBuilder() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 text-gray-700">
             <Info className="w-4 h-4" />
-            <span className="text-sm">Add tasks, set cadences, then Generate Routine. Sabbath guard skips blocked tasks if active.</span>
+            <span className="text-sm">
+              Add tasks, set cadences, then Generate Routine. Sabbath guard
+              skips blocked tasks if active.
+            </span>
           </div>
-          <button className="btn" onClick={addCustomTask}><Plus className="w-4 h-4 mr-1" /> Add Task</button>
+          <button className="btn" onClick={addCustomTask}>
+            <Plus className="w-4 h-4 mr-1" /> Add Task
+          </button>
         </div>
 
         {tasks.length === 0 ? (
@@ -371,7 +613,9 @@ export default function DeepCleanBuilder() {
                     <input
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={t.name}
-                      onChange={(e) => updateTask(t.id, { name: e.target.value })}
+                      onChange={(e) =>
+                        updateTask(t.id, { name: e.target.value })
+                      }
                       placeholder={`Task ${idx + 1}`}
                     />
                   </div>
@@ -380,10 +624,22 @@ export default function DeepCleanBuilder() {
                     <select
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={t.area}
-                      onChange={(e) => updateTask(t.id, { area: e.target.value })}
+                      onChange={(e) =>
+                        updateTask(t.id, { area: e.target.value })
+                      }
                     >
-                      {["kitchen", "bath", "bedrooms", "living", "laundry", "entry", "storehouse"].map((a) => (
-                        <option key={a} value={a}>{a}</option>
+                      {[
+                        "kitchen",
+                        "bath",
+                        "bedrooms",
+                        "living",
+                        "laundry",
+                        "entry",
+                        "storehouse",
+                      ].map((a) => (
+                        <option key={a} value={a}>
+                          {a}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -394,7 +650,15 @@ export default function DeepCleanBuilder() {
                       min={5}
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={t.estMinutes}
-                      onChange={(e) => updateTask(t.id, { estMinutes: clamp(Number(e.target.value || 5), 5, 180) })}
+                      onChange={(e) =>
+                        updateTask(t.id, {
+                          estMinutes: clamp(
+                            Number(e.target.value || 5),
+                            5,
+                            180
+                          ),
+                        })
+                      }
                     />
                   </div>
                   <div className="col-span-6 md:col-span-2">
@@ -402,7 +666,9 @@ export default function DeepCleanBuilder() {
                     <select
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={t.cadence || ""}
-                      onChange={(e) => updateTask(t.id, { cadence: e.target.value || null })}
+                      onChange={(e) =>
+                        updateTask(t.id, { cadence: e.target.value || null })
+                      }
                     >
                       <option value="">— None —</option>
                       <option value="daily">Daily</option>
@@ -414,7 +680,11 @@ export default function DeepCleanBuilder() {
                     </select>
                     {t.cadence && (
                       <p className="text-[11px] text-gray-500 mt-1">
-                        Schedules: {deepCleanCadenceToRRULE(t.cadence).replace("RRULE:", "")}
+                        Schedules:{" "}
+                        {deepCleanCadenceToRRULE(t.cadence).replace(
+                          "RRULE:",
+                          ""
+                        )}
                       </p>
                     )}
                   </div>
@@ -423,27 +693,53 @@ export default function DeepCleanBuilder() {
                     <select
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={t.priority}
-                      onChange={(e) => updateTask(t.id, { priority: clamp(Number(e.target.value || 2), 1, 3) })}
+                      onChange={(e) =>
+                        updateTask(t.id, {
+                          priority: clamp(Number(e.target.value || 2), 1, 3),
+                        })
+                      }
                     >
-                      {[1,2,3].map((x) => <option key={x} value={x}>{x}</option>)}
+                      {[1, 2, 3].map((x) => (
+                        <option key={x} value={x}>
+                          {x}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div className="col-span-12 md:col-span-4">
-                    <label className="text-xs text-gray-500">Tools (comma-separated)</label>
+                    <label className="text-xs text-gray-500">
+                      Tools (comma-separated)
+                    </label>
                     <input
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={(t.tools || []).join(", ")}
-                      onChange={(e) => updateTask(t.id, { tools: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })}
+                      onChange={(e) =>
+                        updateTask(t.id, {
+                          tools: e.target.value
+                            .split(",")
+                            .map((x) => x.trim())
+                            .filter(Boolean),
+                        })
+                      }
                       placeholder="Gloves, Scraper"
                     />
                   </div>
                   <div className="col-span-12 md:col-span-4">
-                    <label className="text-xs text-gray-500">Supplies (comma-separated)</label>
+                    <label className="text-xs text-gray-500">
+                      Supplies (comma-separated)
+                    </label>
                     <input
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={(t.supplies || []).join(", ")}
-                      onChange={(e) => updateTask(t.id, { supplies: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })}
+                      onChange={(e) =>
+                        updateTask(t.id, {
+                          supplies: e.target.value
+                            .split(",")
+                            .map((x) => x.trim())
+                            .filter(Boolean),
+                        })
+                      }
                       placeholder="Degreaser, Bleach"
                     />
                   </div>
@@ -452,30 +748,64 @@ export default function DeepCleanBuilder() {
                     <input
                       className="w-full border rounded-lg px-3 py-2 mt-1"
                       value={(t.tags || []).join(", ")}
-                      onChange={(e) => updateTask(t.id, { tags: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })}
+                      onChange={(e) =>
+                        updateTask(t.id, {
+                          tags: e.target.value
+                            .split(",")
+                            .map((x) => x.trim())
+                            .filter(Boolean),
+                        })
+                      }
                       placeholder="appliance, grout"
                     />
                   </div>
 
                   <div className="col-span-12 md:col-span-3">
-                    <label className="text-xs text-gray-500">Sabbath Block</label>
+                    <label className="text-xs text-gray-500">
+                      Sabbath Block
+                    </label>
                     <div className="mt-1">
                       <button
-                        className={`px-3 py-2 rounded-lg border ${t.sabbathBlocked ? "bg-gray-900 text-white" : "bg-white"}`}
-                        onClick={() => updateTask(t.id, { sabbathBlocked: !t.sabbathBlocked })}
+                        className={`px-3 py-2 rounded-lg border ${
+                          t.sabbathBlocked
+                            ? "bg-gray-900 text-white"
+                            : "bg-white"
+                        }`}
+                        onClick={() =>
+                          updateTask(t.id, {
+                            sabbathBlocked: !t.sabbathBlocked,
+                          })
+                        }
                       >
                         {t.sabbathBlocked ? "Blocked" : "Allowed"}
                       </button>
                       {sabbathActive && t.sabbathBlocked && (
-                        <span className="ml-2 text-[11px] text-amber-600">Active now</span>
+                        <span className="ml-2 text-[11px] text-amber-600">
+                          Active now
+                        </span>
                       )}
                     </div>
                   </div>
 
                   <div className="col-span-12 md:col-span-3 flex items-end gap-2">
-                    <button className="btn" onClick={() => moveTask(t.id, -1)} disabled={idx === 0}><MoveUp className="w-4 h-4" /></button>
-                    <button className="btn" onClick={() => moveTask(t.id, +1)} disabled={idx === tasks.length - 1}><MoveDown className="w-4 h-4" /></button>
-                    <button className="btn btn-danger" onClick={() => removeTask(t.id)}>
+                    <button
+                      className="btn"
+                      onClick={() => moveTask(t.id, -1)}
+                      disabled={idx === 0}
+                    >
+                      <MoveUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={() => moveTask(t.id, +1)}
+                      disabled={idx === tasks.length - 1}
+                    >
+                      <MoveDown className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => removeTask(t.id)}
+                    >
                       <Trash2 className="w-4 h-4 mr-1" /> Remove
                     </button>
                   </div>
@@ -490,17 +820,27 @@ export default function DeepCleanBuilder() {
       {tasks.length > 0 && (
         <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-200">
           <h4 className="font-semibold text-yellow-800 mb-2">Prep Summary</h4>
-          <p className="text-sm"><strong>Tools:</strong> {summary.tools.join(", ") || "None"}</p>
-          <p className="text-sm"><strong>Supplies:</strong> {summary.supplies.join(", ") || "None"}</p>
+          <p className="text-sm">
+            <strong>Tools:</strong> {summary.tools.join(", ") || "None"}
+          </p>
+          <p className="text-sm">
+            <strong>Supplies:</strong> {summary.supplies.join(", ") || "None"}
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button className="btn btn-primary" onClick={handleGenerateRoutine}>
               <Play className="w-4 h-4 mr-1" /> Generate Routine
             </button>
-            <button className="btn" onClick={() => {
-              const planTasks = buildPlanTasks();
-              scheduleCadences(planTasks);
-              eventBus.emit("ui:toast", { type: "success", message: "Cadence items scheduled." });
-            }}>
+            <button
+              className="btn"
+              onClick={() => {
+                const planTasks = buildPlanTasks();
+                scheduleCadences(planTasks);
+                eventBus.emit("ui:toast", {
+                  type: "success",
+                  message: "Cadence items scheduled.",
+                });
+              }}
+            >
               <CalendarPlus className="w-4 h-4 mr-1" /> Schedule Cadence
             </button>
             <button className="btn" onClick={handleSave}>
@@ -513,8 +853,12 @@ export default function DeepCleanBuilder() {
                 const blob = new Blob([data], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
-                a.href = url; a.download = `${name.replace(/\s+/g, "-").toLowerCase()}-deep-clean.json`;
-                a.click(); URL.revokeObjectURL(url);
+                a.href = url;
+                a.download = `${name
+                  .replace(/\s+/g, "-")
+                  .toLowerCase()}-deep-clean.json`;
+                a.click();
+                URL.revokeObjectURL(url);
               }}
             >
               <Check className="w-4 h-4 mr-1" /> Export JSON
@@ -526,8 +870,13 @@ export default function DeepCleanBuilder() {
       {/* Footer helper */}
       <div className="mt-3 p-3 rounded-xl border bg-white">
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="text-gray-600 flex items-center gap-1"><Undo2 className="w-4 h-4" /> Undo/Redo available</span>
-          <span className="text-gray-600 flex items-center gap-1"><Sparkles className="w-4 h-4" /> Use cadences for Deep Clean Focus per task</span>
+          <span className="text-gray-600 flex items-center gap-1">
+            <Undo2 className="w-4 h-4" /> Undo/Redo available
+          </span>
+          <span className="text-gray-600 flex items-center gap-1">
+            <Sparkles className="w-4 h-4" /> Use cadences for Deep Clean Focus
+            per task
+          </span>
         </div>
       </div>
 

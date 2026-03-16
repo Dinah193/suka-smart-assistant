@@ -33,7 +33,7 @@
 // - Forward-thinking: adding a new import type = add to DOMAIN_HANDLERS below.
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists and exposes a simple .emit(eventObj)
+// - src/services/events/eventBus.js exists and exposes a simple .emit(eventObj)
 // - src/config/featureFlags.js (or .json) exists and can be required here
 // - src/services/hub/HubPacketFormatter.js & src/services/hub/FamilyFundConnector.js
 //   both exist and can be *soft-required* (fail silently if missing)
@@ -48,39 +48,37 @@
 //
 // -----------------------------------------------------------------------------
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 // Shared event bus (app-level, event-driven SSA)
-const eventBus = safeRequire('../../services/eventBus', {
+const eventBus = safeRequire("../../services/events/eventBus", {
   emit: () => {},
 });
 
 // Feature flags (SSA owns data; Hub is optional)
-const featureFlags = safeRequire('../../config/featureFlags', {
+const featureFlags = safeRequire("../../config/featureFlags", {
   familyFundMode: false,
 });
 
 // ImportService – high-level orchestrator for imports
-const ImportService = safeRequire('../../features/import/ImportService', null);
+const ImportService = safeRequire("../../features/import/ImportService", null);
 
 // Optional: automation runtime on the server side (if present)
 // so imports can immediately become actionable sessions
-const automationRuntime = safeRequire('../../services/automation/runtime', {
+const automationRuntime = safeRequire("../../services/automation/runtime", {
   dispatch: () => {},
   scheduleFromImport: () => {},
 });
 
 // Optional Hub connectors
-const HubPacketFormatter = safeRequire(
-  '../../services/hub/HubPacketFormatter',
-  { format: () => null }
-);
+const HubPacketFormatter = safeRequire("@/services/hub/HubPacketFormatter", {
+  format: () => null,
+});
 
-const FamilyFundConnector = safeRequire(
-  '../../services/hub/FamilyFundConnector',
-  { send: async () => {} }
-);
+const FamilyFundConnector = safeRequire("@/services/hub/FamilyFundConnector", {
+  send: async () => {},
+});
 
 // -----------------------------------------------------------------------------
 // Soft require helper
@@ -138,7 +136,7 @@ const DOMAIN_HANDLERS = {
     // normalized.data should contain recipe, ingredients, equipment, steps...
     // Emit meal-planning friendly event
     const events = [
-      emitEvent('import.parsed.recipe', 'server:import:recipe', normalized),
+      emitEvent("import.parsed.recipe", "server:import:recipe", normalized),
     ];
 
     // If it produced a meal session or inventory delta, we’ll return them
@@ -146,14 +144,14 @@ const DOMAIN_HANDLERS = {
 
     if (normalized.generated && normalized.generated.sessions) {
       householdMutations.push({
-        kind: 'session.generated',
+        kind: "session.generated",
         sessions: normalized.generated.sessions,
       });
     }
 
     if (normalized.inventory && normalized.inventory.updated) {
       householdMutations.push({
-        kind: 'inventory.updated',
+        kind: "inventory.updated",
         items: normalized.inventory.updated,
       });
     }
@@ -163,13 +161,13 @@ const DOMAIN_HANDLERS = {
 
   cleaning: async (normalized) => {
     const events = [
-      emitEvent('import.parsed.cleaning', 'server:import:cleaning', normalized),
+      emitEvent("import.parsed.cleaning", "server:import:cleaning", normalized),
     ];
 
     const householdMutations = [];
     if (normalized.generated && normalized.generated.sessions) {
       householdMutations.push({
-        kind: 'cleaning.session.generated',
+        kind: "cleaning.session.generated",
         sessions: normalized.generated.sessions,
       });
     }
@@ -179,13 +177,13 @@ const DOMAIN_HANDLERS = {
 
   garden: async (normalized) => {
     const events = [
-      emitEvent('import.parsed.garden', 'server:import:garden', normalized),
+      emitEvent("import.parsed.garden", "server:import:garden", normalized),
     ];
 
     const householdMutations = [];
     if (normalized.generated && normalized.generated.gardenTasks) {
       householdMutations.push({
-        kind: 'garden.tasks.generated',
+        kind: "garden.tasks.generated",
         tasks: normalized.generated.gardenTasks,
       });
     }
@@ -193,7 +191,7 @@ const DOMAIN_HANDLERS = {
     // If import contained seed → storehouse or inventory seeding, reflect it
     if (normalized.inventory && normalized.inventory.plantables) {
       householdMutations.push({
-        kind: 'inventory.updated',
+        kind: "inventory.updated",
         items: normalized.inventory.plantables,
       });
     }
@@ -203,20 +201,20 @@ const DOMAIN_HANDLERS = {
 
   animal: async (normalized) => {
     const events = [
-      emitEvent('import.parsed.animal', 'server:import:animal', normalized),
+      emitEvent("import.parsed.animal", "server:import:animal", normalized),
     ];
 
     const householdMutations = [];
     if (normalized.generated && normalized.generated.animalSessions) {
       householdMutations.push({
-        kind: 'animal.session.generated',
+        kind: "animal.session.generated",
         sessions: normalized.generated.animalSessions,
       });
     }
 
     if (normalized.inventory && normalized.inventory.cuts) {
       householdMutations.push({
-        kind: 'inventory.updated',
+        kind: "inventory.updated",
         items: normalized.inventory.cuts,
       });
     }
@@ -227,8 +225,8 @@ const DOMAIN_HANDLERS = {
   storehouse: async (normalized) => {
     const events = [
       emitEvent(
-        'import.parsed.storehouse',
-        'server:import:storehouse',
+        "import.parsed.storehouse",
+        "server:import:storehouse",
         normalized
       ),
     ];
@@ -236,7 +234,7 @@ const DOMAIN_HANDLERS = {
     const householdMutations = [];
     if (normalized.generated && normalized.generated.storehouseGoals) {
       householdMutations.push({
-        kind: 'storehouse.goals.updated',
+        kind: "storehouse.goals.updated",
         goals: normalized.generated.storehouseGoals,
       });
     }
@@ -247,7 +245,7 @@ const DOMAIN_HANDLERS = {
   video: async (normalized) => {
     // video/how-to imports create *context intelligence* more than sessions
     const events = [
-      emitEvent('import.parsed.video', 'server:import:video', normalized),
+      emitEvent("import.parsed.video", "server:import:video", normalized),
     ];
     return { events, householdMutations: [] };
   },
@@ -257,46 +255,46 @@ const DOMAIN_HANDLERS = {
 // POST /api/import
 // Receives raw import payloads from extensions / bookmarklet / mobile / partners
 // -----------------------------------------------------------------------------
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const raw = req.body;
 
   // 1. Basic guard
-  if (!raw || typeof raw !== 'object') {
-    emitEvent('import.invalid', 'server:import', { reason: 'no body' });
+  if (!raw || typeof raw !== "object") {
+    emitEvent("import.invalid", "server:import", { reason: "no body" });
     return res.status(400).json({
       ok: false,
-      error: 'Invalid import: body required.',
+      error: "Invalid import: body required.",
     });
   }
 
   // 2. Add server metadata
   const receivedAt = new Date().toISOString();
-  const source = raw.source || 'external';
+  const source = raw.source || "external";
   const importId = raw.id || `imp_${Date.now()}`;
 
   const baseCtx = {
     id: importId,
     receivedAt,
     ip: req.ip,
-    ua: req.headers['user-agent'] || '',
+    ua: req.headers["user-agent"] || "",
   };
 
-  emitEvent('import.received', 'server:import', {
+  emitEvent("import.received", "server:import", {
     ...baseCtx,
     source,
-    rawType: raw.type || 'unknown',
+    rawType: raw.type || "unknown",
   });
 
   // 3. Normalize via ImportService (central SSA logic)
-  if (!ImportService || typeof ImportService.process !== 'function') {
+  if (!ImportService || typeof ImportService.process !== "function") {
     // If the ImportService is not available, we still record the import
-    emitEvent('import.failed', 'server:import', {
+    emitEvent("import.failed", "server:import", {
       ...baseCtx,
-      reason: 'ImportService not available',
+      reason: "ImportService not available",
     });
     return res.status(503).json({
       ok: false,
-      error: 'ImportService is temporarily unavailable.',
+      error: "ImportService is temporarily unavailable.",
     });
   }
 
@@ -306,18 +304,18 @@ router.post('/', async (req, res) => {
       source,
       server: true,
       ip: req.ip,
-      ua: req.headers['user-agent'] || '',
+      ua: req.headers["user-agent"] || "",
       // tell ImportService we want multi-domain support
-      allow: ['recipe', 'cleaning', 'garden', 'animal', 'storehouse', 'video'],
+      allow: ["recipe", "cleaning", "garden", "animal", "storehouse", "video"],
     });
   } catch (err) {
-    emitEvent('import.failed', 'server:import', {
+    emitEvent("import.failed", "server:import", {
       ...baseCtx,
       error: err.message,
     });
     return res.status(500).json({
       ok: false,
-      error: 'Import could not be processed.',
+      error: "Import could not be processed.",
       details: err.message,
     });
   }
@@ -332,13 +330,13 @@ router.post('/', async (req, res) => {
   // }
 
   if (!normalized || !normalized.kind) {
-    emitEvent('import.failed', 'server:import', {
+    emitEvent("import.failed", "server:import", {
       ...baseCtx,
-      reason: 'normalized missing kind',
+      reason: "normalized missing kind",
     });
     return res.status(422).json({
       ok: false,
-      error: 'Normalized import did not specify a kind.',
+      error: "Normalized import did not specify a kind.",
     });
   }
 
@@ -348,7 +346,7 @@ router.post('/', async (req, res) => {
   if (!handler) {
     // Forward-thinking: unknown domain → still emit, still return OK,
     // just don’t apply domain-specific logic
-    emitEvent('import.parsed.unknown', 'server:import', {
+    emitEvent("import.parsed.unknown", "server:import", {
       ...baseCtx,
       normalized,
     });
@@ -364,7 +362,7 @@ router.post('/', async (req, res) => {
   try {
     domainResult = await handler(normalized);
   } catch (err) {
-    emitEvent('import.failed', 'server:import', {
+    emitEvent("import.failed", "server:import", {
       ...baseCtx,
       error: err.message,
       domain,
@@ -381,17 +379,20 @@ router.post('/', async (req, res) => {
   if (domainResult && Array.isArray(domainResult.householdMutations)) {
     for (const mutation of domainResult.householdMutations) {
       // Emit domain-level event
-      emitEvent(mutation.kind, 'server:import', mutation);
+      emitEvent(mutation.kind, "server:import", mutation);
 
       // Export to Hub (optional)
       await exportToHubIfEnabled({
         mutation,
-        source: 'server:import',
+        source: "server:import",
         at: new Date().toISOString(),
       });
 
       // Automation: tell runtime we have something new to schedule
-      if (automationRuntime && typeof automationRuntime.scheduleFromImport === 'function') {
+      if (
+        automationRuntime &&
+        typeof automationRuntime.scheduleFromImport === "function"
+      ) {
         try {
           await automationRuntime.scheduleFromImport({
             mutation,
@@ -421,12 +422,13 @@ router.post('/', async (req, res) => {
 // OPTIONAL: GET /api/import/health
 // quick health check to see if ImportService + eventBus are alive
 // -----------------------------------------------------------------------------
-router.get('/health', (req, res) => {
-  const healthy = !!ImportService && typeof ImportService.process === 'function';
+router.get("/health", (req, res) => {
+  const healthy =
+    !!ImportService && typeof ImportService.process === "function";
   return res.json({
     ok: healthy,
-    importService: healthy ? 'available' : 'missing',
-    eventBus: !!eventBus ? 'available' : 'missing',
+    importService: healthy ? "available" : "missing",
+    eventBus: !!eventBus ? "available" : "missing",
     ts: new Date().toISOString(),
   });
 });

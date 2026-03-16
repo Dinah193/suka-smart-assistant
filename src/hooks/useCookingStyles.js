@@ -5,7 +5,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CookingPrefsStore } from "@/store/CookingPrefsStore";
-import { generateStyle, approveStyleDraft, startPlanRun, learnFromFeedback, buildChecklist } from "@/agents/cookingStylesAgent";
+import {
+  generateStyle,
+  approveStyleDraft,
+  startPlanRun,
+  learnFromFeedback,
+  buildChecklist,
+} from "@/agents/shims/cookingStylesShim.js";
 import { automation } from "@/services/automation/runtime";
 
 /* -------------------------------------------------------------------------- */
@@ -37,14 +43,21 @@ export function useCookingStyles({
   autoGenerate = true,
   debounceMs = 280,
 } = {}) {
-  const key = useMemo(() => `${(cuisine || "").trim()}::${(dish || "").trim()}`, [cuisine, dish]);
+  const key = useMemo(
+    () => `${(cuisine || "").trim()}::${(dish || "").trim()}`,
+    [cuisine, dish]
+  );
 
   // Reactive state
   const [status, setStatus] = useState(STATUS.IDLE);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null); // full template output (interactive plan JSON)
-  const [variant, setVariant] = useState(() => loadSessionVariant(key, initialVariant));
-  const [branchId, setBranchId] = useState(() => loadSessionBranch(key, initialBranchId));
+  const [variant, setVariant] = useState(() =>
+    loadSessionVariant(key, initialVariant)
+  );
+  const [branchId, setBranchId] = useState(() =>
+    loadSessionBranch(key, initialBranchId)
+  );
   const [lastUpdated, setLastUpdated] = useState(null);
 
   // Concurrency / lifecycle guards
@@ -56,7 +69,10 @@ export function useCookingStyles({
   const getPrefs = useCallback(() => CookingPrefsStore.get(), []);
 
   // Derived: plan steps for current variant/branch
-  const steps = useMemo(() => pickPlanSteps(data, variant, branchId), [data, variant, branchId]);
+  const steps = useMemo(
+    () => pickPlanSteps(data, variant, branchId),
+    [data, variant, branchId]
+  );
 
   /* ------------------------------------------------------------------------ */
   /* Generate (SWR: serve cache, then refresh)                                */
@@ -75,7 +91,8 @@ export function useCookingStyles({
         setLastUpdated(cached.ts);
         setStatus(STATUS.OK);
         // Revalidate in the background (refreshing) if stale-ish
-        if (!fresh) revalidateInBackground(key, { cuisine, dish, reason: "stale" });
+        if (!fresh)
+          revalidateInBackground(key, { cuisine, dish, reason: "stale" });
         return { ok: true, fromCache: true };
       }
 
@@ -102,7 +119,8 @@ export function useCookingStyles({
         });
 
         // Latest-wins: ignore old responses
-        if (!mounted.current || reqId !== pendingReq.current.id) return { ok: false, stale: true };
+        if (!mounted.current || reqId !== pendingReq.current.id)
+          return { ok: false, stale: true };
 
         CACHE.set(key, { data: res, ts: Date.now() });
         setData(res);
@@ -112,10 +130,15 @@ export function useCookingStyles({
 
         return { ok: true, data: res };
       } catch (err) {
-        if (!mounted.current || reqId !== pendingReq.current.id) return { ok: false, stale: true };
+        if (!mounted.current || reqId !== pendingReq.current.id)
+          return { ok: false, stale: true };
         setError(err);
         setStatus(STATUS.ERROR);
-        automation.emit("styles/error", { cuisine, dish, error: String(err?.message || err) });
+        automation.emit("styles/error", {
+          cuisine,
+          dish,
+          error: String(err?.message || err),
+        });
         return { ok: false, error: err };
       }
     },
@@ -180,7 +203,11 @@ export function useCookingStyles({
     const offApprove = automation.on("styles/approve", (p) => {
       if (p?.cuisine === cuisine && p?.dish === dish && data) {
         approveStyleDraft({ cuisine, dish, data, variant, branchId });
-        automation.emit("toast/show", { kind: "success", title: "Plan ready", message: "Timers scheduled." });
+        automation.emit("toast/show", {
+          kind: "success",
+          title: "Plan ready",
+          message: "Timers scheduled.",
+        });
       }
     });
     const offStart = automation.on("styles/start", (p) => {
@@ -189,7 +216,11 @@ export function useCookingStyles({
       }
     });
 
-    return () => { offHover(); offApprove(); offStart(); };
+    return () => {
+      offHover();
+      offApprove();
+      offStart();
+    };
   }, [cuisine, dish, data, variant, branchId, key]);
 
   /* ------------------------------------------------------------------------ */
@@ -198,14 +229,25 @@ export function useCookingStyles({
   const submitFeedback = useCallback(
     async ({ rating, notes = "", deltas = {} }) => {
       try {
-        await learnFromFeedback({ cuisine, dish, rating, notes, deltas, chosenVariant: variant });
+        await learnFromFeedback({
+          cuisine,
+          dish,
+          rating,
+          notes,
+          deltas,
+          chosenVariant: variant,
+        });
         // Invalidate cache & refresh
         CACHE.delete(key);
         automation.emit("styles/learned", { cuisine, dish, rating });
         generate({ force: true, reason: "feedback" });
         return { ok: true };
       } catch (err) {
-        automation.emit("styles/feedbackError", { cuisine, dish, error: String(err?.message || err) });
+        automation.emit("styles/feedbackError", {
+          cuisine,
+          dish,
+          error: String(err?.message || err),
+        });
         return { ok: false, error: err };
       }
     },
@@ -217,8 +259,11 @@ export function useCookingStyles({
   /* ------------------------------------------------------------------------ */
   const cards = useMemo(() => buildUiCards(data), [data]);
   const checklist = useMemo(() => {
-    try { return data ? buildChecklist(data, variant, branchId) : []; }
-    catch { return []; }
+    try {
+      return data ? buildChecklist(data, variant, branchId) : [];
+    } catch {
+      return [];
+    }
   }, [data, variant, branchId]);
   const timers = useMemo(() => stepsToTimers(steps), [steps]);
 
@@ -232,20 +277,24 @@ export function useCookingStyles({
     lastUpdated,
 
     // data
-    data,          // full interactive plan JSON
-    steps,         // flat array of steps for current variant/branch
-    cards,         // quick cards for your raised-card UI
-    checklist,     // readable steps (label, duration, cues)
-    timers,        // ready for MultiTimerManager
+    data, // full interactive plan JSON
+    steps, // flat array of steps for current variant/branch
+    cards, // quick cards for your raised-card UI
+    checklist, // readable steps (label, duration, cues)
+    timers, // ready for MultiTimerManager
 
     // selection
-    variant, setVariant,
-    branchId, setBranchId,
+    variant,
+    setVariant,
+    branchId,
+    setBranchId,
 
     // actions
-    generate,               // regenerate (force) with reasons
-    approve: () => data && approveStyleDraft({ cuisine, dish, data, variant, branchId }),
-    start:   () => data && startPlanRun({ cuisine, dish, data, variant, branchId }),
+    generate, // regenerate (force) with reasons
+    approve: () =>
+      data && approveStyleDraft({ cuisine, dish, data, variant, branchId }),
+    start: () =>
+      data && startPlanRun({ cuisine, dish, data, variant, branchId }),
     submitFeedback,
 
     // cache helpers
@@ -259,7 +308,11 @@ export function useCookingStyles({
 /* -------------------------------------------------------------------------- */
 async function revalidateInBackground(key, { cuisine, dish, reason }) {
   try {
-    const out = await generateStyle({ cuisine, dish, now: new Date().toISOString() });
+    const out = await generateStyle({
+      cuisine,
+      dish,
+      now: new Date().toISOString(),
+    });
     if (out?.ok) {
       CACHE.set(key, { data: out.data, ts: Date.now() });
       automation.emit("styles/refreshed", { cuisine, dish, reason });
@@ -302,7 +355,9 @@ function pickPlanSteps(data, variant = "house", branchId = null) {
   if (!branchId) return base;
 
   // append matching branch steps; future: splice by deps if present
-  const branches = (data?.branches || []).filter((b) => (b.appliesTo || "").includes(variant));
+  const branches = (data?.branches || []).filter((b) =>
+    (b.appliesTo || "").includes(variant)
+  );
   const match = branches.find((b) => b.id === branchId);
   return match ? [...base, ...(match.steps || [])] : base;
 }
@@ -340,17 +395,33 @@ function buildUiCards(data) {
   }
 
   const v = data?.variants || {};
-  const variants = ["orthodox", "house", "quick"].filter((k) => v[k]).map((k) => ({
-    key: k, title: v[k].title, summary: v[k].summary,
-  }));
-  if (variants.length) cards.push({ kind: "variants", title: "Variants", items: variants });
+  const variants = ["orthodox", "house", "quick"]
+    .filter((k) => v[k])
+    .map((k) => ({
+      key: k,
+      title: v[k].title,
+      summary: v[k].summary,
+    }));
+  if (variants.length)
+    cards.push({ kind: "variants", title: "Variants", items: variants });
 
-  if ((data?.safety || []).length) cards.push({ kind: "safety", title: "Safety", items: data.safety.slice(0, 5) });
+  if ((data?.safety || []).length)
+    cards.push({
+      kind: "safety",
+      title: "Safety",
+      items: data.safety.slice(0, 5),
+    });
 
   const anchors = data?.shopping?.anchors || [];
-  const swaps = (data?.shopping?.swaps || []).map((s) => `${s.for} → ${s.try} (${s.why})`);
+  const swaps = (data?.shopping?.swaps || []).map(
+    (s) => `${s.for} → ${s.try} (${s.why})`
+  );
   if (anchors.length || swaps.length) {
-    cards.push({ kind: "shopping", title: "Shopping", items: [...anchors.slice(0, 4), ...swaps.slice(0, 4)] });
+    cards.push({
+      kind: "shopping",
+      title: "Shopping",
+      items: [...anchors.slice(0, 4), ...swaps.slice(0, 4)],
+    });
   }
 
   return cards;
@@ -362,14 +433,26 @@ function buildUiCards(data) {
 const VKEY = "suka.cooking.variant.";
 const BKEY = "suka.cooking.branch.";
 function loadSessionVariant(key, fallback) {
-  try { return sessionStorage.getItem(VKEY + key) || fallback; } catch { return fallback; }
+  try {
+    return sessionStorage.getItem(VKEY + key) || fallback;
+  } catch {
+    return fallback;
+  }
 }
 function saveSessionVariant(key, val) {
-  try { sessionStorage.setItem(VKEY + key, String(val ?? "")); } catch {}
+  try {
+    sessionStorage.setItem(VKEY + key, String(val ?? ""));
+  } catch {}
 }
 function loadSessionBranch(key, fallback) {
-  try { return sessionStorage.getItem(BKEY + key) || fallback; } catch { return fallback; }
+  try {
+    return sessionStorage.getItem(BKEY + key) || fallback;
+  } catch {
+    return fallback;
+  }
 }
 function saveSessionBranch(key, val) {
-  try { sessionStorage.setItem(BKEY + key, String(val ?? "")); } catch {}
+  try {
+    sessionStorage.setItem(BKEY + key, String(val ?? ""));
+  } catch {}
 }

@@ -12,13 +12,19 @@
 //
 // Inspirations: Linear (clean actions), Notion (simple sections), FarmOS (domain cues)
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { format, parseISO } from "date-fns";
 
 // ---------------- Defensive service/context imports ----------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus").default;
+  eventBus = require("../../services/events/eventBus").default;
 } catch {
   eventBus = {
     emit: (...args) => console.debug("[FeedWaterPanel:eventBus.emit]", ...args),
@@ -28,7 +34,8 @@ try {
 
 let SettingsContext;
 try {
-  SettingsContext = require("../../components/context/SettingsContext").SettingsContext;
+  SettingsContext =
+    require("../../components/context/SettingsContext").SettingsContext;
 } catch {
   SettingsContext = React.createContext({
     sabbathGuard: false,
@@ -64,7 +71,10 @@ try {
 }
 
 // ---------------- Utilities ----------------
-const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }) => {
+const withinSabbath = (
+  now = new Date(),
+  window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }
+) => {
   const dow = now.getDay();
   const hr = now.getHours();
   if (dow === window.startDow && hr >= window.startHour) return true;
@@ -73,13 +83,55 @@ const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, 
 };
 
 const speciesDefaults = {
-  sheep:   { rationType: "perHead", perHead: 2.5, unit: "lb", dmPct: 90, waterGalPerHead: 1.5 }, // maintenance hay (lb)
-  goat:    { rationType: "perHead", perHead: 2.5, unit: "lb", dmPct: 90, waterGalPerHead: 2.0 },
-  cattle:  { rationType: "dmPctBW", dmPctBW: 2.2, unit: "%BW", dmPct: 90, waterGalPerHead: 10 },
-  horse:   { rationType: "dmPctBW", dmPctBW: 2.0, unit: "%BW", dmPct: 90, waterGalPerHead: 8 },
-  pig:     { rationType: "perHead", perHead: 5.0, unit: "lb", dmPct: 90, waterGalPerHead: 3.5 },
-  chicken: { rationType: "perHead", perHead: 0.25, unit: "lb", dmPct: 90, waterGalPerHead: 0.1 },
-  duck:    { rationType: "perHead", perHead: 0.3, unit: "lb", dmPct: 90, waterGalPerHead: 0.2 },
+  sheep: {
+    rationType: "perHead",
+    perHead: 2.5,
+    unit: "lb",
+    dmPct: 90,
+    waterGalPerHead: 1.5,
+  }, // maintenance hay (lb)
+  goat: {
+    rationType: "perHead",
+    perHead: 2.5,
+    unit: "lb",
+    dmPct: 90,
+    waterGalPerHead: 2.0,
+  },
+  cattle: {
+    rationType: "dmPctBW",
+    dmPctBW: 2.2,
+    unit: "%BW",
+    dmPct: 90,
+    waterGalPerHead: 10,
+  },
+  horse: {
+    rationType: "dmPctBW",
+    dmPctBW: 2.0,
+    unit: "%BW",
+    dmPct: 90,
+    waterGalPerHead: 8,
+  },
+  pig: {
+    rationType: "perHead",
+    perHead: 5.0,
+    unit: "lb",
+    dmPct: 90,
+    waterGalPerHead: 3.5,
+  },
+  chicken: {
+    rationType: "perHead",
+    perHead: 0.25,
+    unit: "lb",
+    dmPct: 90,
+    waterGalPerHead: 0.1,
+  },
+  duck: {
+    rationType: "perHead",
+    perHead: 0.3,
+    unit: "lb",
+    dmPct: 90,
+    waterGalPerHead: 0.2,
+  },
 };
 
 function round2(n) {
@@ -91,20 +143,33 @@ function calcRation({ species, headcount, avgBWlb, custom }) {
   const use = { ...d, ...(custom || {}) };
   if (use.rationType === "dmPctBW") {
     const dm = (use.dmPctBW / 100) * avgBWlb; // lb DM per head
-    const asFed = dm / (use.dmPct / 100);     // lb as-fed per head
-    return { perHeadLb: round2(asFed), totalLb: round2(asFed * headcount), unit: "lb" };
+    const asFed = dm / (use.dmPct / 100); // lb as-fed per head
+    return {
+      perHeadLb: round2(asFed),
+      totalLb: round2(asFed * headcount),
+      unit: "lb",
+    };
   }
   // perHead
-  return { perHeadLb: round2(use.perHead), totalLb: round2(use.perHead * headcount), unit: "lb" };
+  return {
+    perHeadLb: round2(use.perHead),
+    totalLb: round2(use.perHead * headcount),
+    unit: "lb",
+  };
 }
 
 function calcWater({ species, headcount, weatherF }) {
-  const base = (speciesDefaults[species?.toLowerCase?.()] || speciesDefaults.sheep).waterGalPerHead;
+  const base = (
+    speciesDefaults[species?.toLowerCase?.()] || speciesDefaults.sheep
+  ).waterGalPerHead;
   // very simple adjustment: +50% if > 90F, +25% if 80-90F
   let mult = 1;
   if (weatherF >= 90) mult = 1.5;
   else if (weatherF >= 80) mult = 1.25;
-  return { perHeadGal: round2(base * mult), totalGal: round2(base * mult * headcount) };
+  return {
+    perHeadGal: round2(base * mult),
+    totalGal: round2(base * mult * headcount),
+  };
 }
 
 const SUBDOMAIN = {
@@ -114,15 +179,16 @@ const SUBDOMAIN = {
 
 // ---------------- Component ----------------
 export default function FeedWaterPanel({
-  herds = [],   // [{id, group:"ewes", species:"sheep", pen:"A", headcount:34, avgBWlb:150}]
-  waterers = [],// [{id, pen:"A", type:"trough|nipple|bucket", capacityGal:100}]
+  herds = [], // [{id, group:"ewes", species:"sheep", pen:"A", headcount:34, avgBWlb:150}]
+  waterers = [], // [{id, pen:"A", type:"trough|nipple|bucket", capacityGal:100}]
   shortages = [], // optional preload shortages -> [{name, domain:"animal", qty, unit}]
 }) {
-  const { sabbathGuard, sabbathWindow, allowWelfareDuringSabbath, climate } = React.useContext(SettingsContext);
+  const { sabbathGuard, sabbathWindow, allowWelfareDuringSabbath, climate } =
+    React.useContext(SettingsContext);
   const { recordMilestone } = useMilestoneState();
 
   const [query, setQuery] = useState("");
-  const [selection, setSelection] = useState(() => new Set());       // herd IDs and waterer IDs
+  const [selection, setSelection] = useState(() => new Set()); // herd IDs and waterer IDs
   const [shorts, setShorts] = useState(shortages);
   const [store, setStore] = useState("Local Co-op");
 
@@ -142,7 +208,9 @@ export default function FeedWaterPanel({
     const q = query.trim().toLowerCase();
     return (herds || []).filter((h) => {
       if (!q) return true;
-      const hay = [h.group, h.species, h.pen, String(h.headcount)].join(" ").toLowerCase();
+      const hay = [h.group, h.species, h.pen, String(h.headcount)]
+        .join(" ")
+        .toLowerCase();
       return hay.includes(q);
     });
   }, [herds, query]);
@@ -151,17 +219,28 @@ export default function FeedWaterPanel({
     const q = query.trim().toLowerCase();
     return (waterers || []).filter((w) => {
       if (!q) return true;
-      const hay = [w.pen, w.type, String(w.capacityGal)].join(" ").toLowerCase();
+      const hay = [w.pen, w.type, String(w.capacityGal)]
+        .join(" ")
+        .toLowerCase();
       return hay.includes(q);
     });
   }, [waterers, query]);
 
   const shortagesCount = shorts.length;
-  const feedShortage = shorts.filter((s) => /hay|feed|grain|pellet|corn|alfalfa/i.test(s.name || "")).length;
-  const mineralShortage = shorts.filter((s) => /mineral|salt/i.test(s.name || "")).length;
-  const medShortage = shorts.filter((s) => /electrolyte|deworm|antibiotic|vaccine/i.test(s.name || "")).length;
+  const feedShortage = shorts.filter((s) =>
+    /hay|feed|grain|pellet|corn|alfalfa/i.test(s.name || "")
+  ).length;
+  const mineralShortage = shorts.filter((s) =>
+    /mineral|salt/i.test(s.name || "")
+  ).length;
+  const medShortage = shorts.filter((s) =>
+    /electrolyte|deworm|antibiotic|vaccine/i.test(s.name || "")
+  ).length;
 
-  const disabledBySabbath = sabbathGuard && withinSabbath(new Date(), sabbathWindow) && !allowWelfareDuringSabbath;
+  const disabledBySabbath =
+    sabbathGuard &&
+    withinSabbath(new Date(), sabbathWindow) &&
+    !allowWelfareDuringSabbath;
 
   // --------------- Actions ---------------
   const toggleSelect = (kind, id) =>
@@ -179,14 +258,32 @@ export default function FeedWaterPanel({
     for (const h of filteredHerds) {
       const key = `herd:${h.id}`;
       if (!selection.has(key)) continue;
-      const r = calcRation({ species: h.species, headcount: h.headcount, avgBWlb: h.avgBWlb });
+      const r = calcRation({
+        species: h.species,
+        headcount: h.headcount,
+        avgBWlb: h.avgBWlb,
+      });
       const title = `Feed ${h.group} • ${r.totalLb} lb`;
-      tasks.push(buildTask({ title, subdomain: SUBDOMAIN.FEED, pen: h.pen, group: h.group, estMinutes: 10 }));
+      tasks.push(
+        buildTask({
+          title,
+          subdomain: SUBDOMAIN.FEED,
+          pen: h.pen,
+          group: h.group,
+          estMinutes: 10,
+        })
+      );
     }
     if (!tasks.length) return;
     eventBus.emit("tasks.addMany", { tasks });
-    eventBus.emit("ui.toast", { variant: "success", message: `Added ${tasks.length} feed task(s)` });
-    recordMilestone?.({ key: "animal_feed_tasks_add", meta: { count: tasks.length } });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: `Added ${tasks.length} feed task(s)`,
+    });
+    recordMilestone?.({
+      key: "animal_feed_tasks_add",
+      meta: { count: tasks.length },
+    });
   };
 
   const addWaterTasks = () => {
@@ -195,12 +292,25 @@ export default function FeedWaterPanel({
       const key = `waterer:${w.id}`;
       if (!selection.has(key)) continue;
       const title = `Check water • Pen ${w.pen}`;
-      tasks.push(buildTask({ title, subdomain: SUBDOMAIN.WATER, pen: w.pen, estMinutes: 5 }));
+      tasks.push(
+        buildTask({
+          title,
+          subdomain: SUBDOMAIN.WATER,
+          pen: w.pen,
+          estMinutes: 5,
+        })
+      );
     }
     if (!tasks.length) return;
     eventBus.emit("tasks.addMany", { tasks });
-    eventBus.emit("ui.toast", { variant: "success", message: `Added ${tasks.length} water task(s)` });
-    recordMilestone?.({ key: "animal_water_tasks_add", meta: { count: tasks.length } });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: `Added ${tasks.length} water task(s)`,
+    });
+    recordMilestone?.({
+      key: "animal_water_tasks_add",
+      meta: { count: tasks.length },
+    });
   };
 
   const quickAddShortagesToGrocery = () => {
@@ -215,9 +325,19 @@ export default function FeedWaterPanel({
       aisle: "Animal Feed",
       store,
     }));
-    eventBus.emit("grocery.addItems", { items, store, at: new Date().toISOString() });
-    eventBus.emit("ui.toast", { variant: "success", message: `Added ${items.length} item(s) to Grocery` });
-    recordMilestone?.({ key: "animal_shortages_to_grocery", meta: { count: items.length } });
+    eventBus.emit("grocery.addItems", {
+      items,
+      store,
+      at: new Date().toISOString(),
+    });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: `Added ${items.length} item(s) to Grocery`,
+    });
+    recordMilestone?.({
+      key: "animal_shortages_to_grocery",
+      meta: { count: items.length },
+    });
   };
 
   const jumpToGrocery = () => {
@@ -238,7 +358,8 @@ export default function FeedWaterPanel({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Feed & Water</h1>
           <p className="text-gray-600">
-            Batch-create chores, check waterers, and bridge shortages. Weather {weatherNow?.tempF ?? "—"}°F.
+            Batch-create chores, check waterers, and bridge shortages. Weather{" "}
+            {weatherNow?.tempF ?? "—"}°F.
           </p>
         </div>
 
@@ -274,7 +395,11 @@ export default function FeedWaterPanel({
 
       {/* Shortages glance */}
       <section className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <InfoCard label="Animal shortages" value={shortagesCount} tone={shortagesCount ? "amber" : "slate"} />
+        <InfoCard
+          label="Animal shortages"
+          value={shortagesCount}
+          tone={shortagesCount ? "amber" : "slate"}
+        />
         <InfoCard label="Feed/grain" value={feedShortage} />
         <InfoCard label="Minerals/salt" value={mineralShortage} />
         <InfoCard label="Meds/electrolytes" value={medShortage} />
@@ -304,7 +429,10 @@ export default function FeedWaterPanel({
           >
             Add shortages to Grocery
           </button>
-          <WelfareBadge enabled={allowWelfareDuringSabbath} sabbathGuard={sabbathGuard} />
+          <WelfareBadge
+            enabled={allowWelfareDuringSabbath}
+            sabbathGuard={sabbathGuard}
+          />
         </div>
       </div>
 
@@ -313,7 +441,9 @@ export default function FeedWaterPanel({
         {/* Herds / Feed */}
         <div className="lg:col-span-2 rounded-2xl border p-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-gray-500">Feed — Herds</h2>
+            <h2 className="text-sm font-medium uppercase tracking-wider text-gray-500">
+              Feed — Herds
+            </h2>
             <button
               type="button"
               onClick={addFeedTasks}
@@ -323,7 +453,11 @@ export default function FeedWaterPanel({
                   ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                   : "bg-gray-900 text-white border-black hover:opacity-90",
               ].join(" ")}
-              title={disabledBySabbath ? "Sabbath guard active (welfare override disabled)" : "Create feed tasks"}
+              title={
+                disabledBySabbath
+                  ? "Sabbath guard active (welfare override disabled)"
+                  : "Create feed tasks"
+              }
               disabled={disabledBySabbath}
             >
               Create feed tasks
@@ -334,20 +468,31 @@ export default function FeedWaterPanel({
             {filteredHerds.length ? (
               filteredHerds.map((h) => {
                 const sel = selection.has(`herd:${h.id}`);
-                const ration = calcRation({ species: h.species, headcount: h.headcount, avgBWlb: h.avgBWlb });
+                const ration = calcRation({
+                  species: h.species,
+                  headcount: h.headcount,
+                  avgBWlb: h.avgBWlb,
+                });
                 return (
                   <li key={h.id} className="rounded-xl border p-3 bg-white">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 truncate">{h.group}</h3>
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {h.group}
+                          </h3>
                           <Badge>{(h.species || "").toLowerCase()}</Badge>
                           <Badge>Pen {h.pen}</Badge>
                           <Badge>{h.headcount} head</Badge>
                         </div>
                         <div className="mt-1 text-sm text-gray-600 flex flex-wrap gap-3">
-                          <span>Ration: <strong>{ration.totalLb} lb</strong> ({ration.perHeadLb} lb/head)</span>
-                          {Number(h.avgBWlb) ? <span>• BW ~ {h.avgBWlb} lb</span> : null}
+                          <span>
+                            Ration: <strong>{ration.totalLb} lb</strong> (
+                            {ration.perHeadLb} lb/head)
+                          </span>
+                          {Number(h.avgBWlb) ? (
+                            <span>• BW ~ {h.avgBWlb} lb</span>
+                          ) : null}
                         </div>
                       </div>
 
@@ -367,8 +512,16 @@ export default function FeedWaterPanel({
                       headcount={h.headcount}
                       avgBWlb={h.avgBWlb}
                       onPreview={(custom) => {
-                        const r = calcRation({ species: h.species, headcount: h.headcount, avgBWlb: h.avgBWlb, custom });
-                        eventBus.emit("ui.toast", { variant: "info", message: `${h.group}: ${r.totalLb} lb (${r.perHeadLb}/hd)` });
+                        const r = calcRation({
+                          species: h.species,
+                          headcount: h.headcount,
+                          avgBWlb: h.avgBWlb,
+                          custom,
+                        });
+                        eventBus.emit("ui.toast", {
+                          variant: "info",
+                          message: `${h.group}: ${r.totalLb} lb (${r.perHeadLb}/hd)`,
+                        });
                       }}
                     />
                   </li>
@@ -385,7 +538,9 @@ export default function FeedWaterPanel({
         {/* Waterers */}
         <div className="rounded-2xl border p-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-gray-500">Water — Pens</h2>
+            <h2 className="text-sm font-medium uppercase tracking-wider text-gray-500">
+              Water — Pens
+            </h2>
             <button
               type="button"
               onClick={addWaterTasks}
@@ -395,7 +550,11 @@ export default function FeedWaterPanel({
                   ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                   : "bg-gray-900 text-white border-black hover:opacity-90",
               ].join(" ")}
-              title={disabledBySabbath ? "Sabbath guard active (welfare override disabled)" : "Create water tasks"}
+              title={
+                disabledBySabbath
+                  ? "Sabbath guard active (welfare override disabled)"
+                  : "Create water tasks"
+              }
               disabled={disabledBySabbath}
             >
               Create water tasks
@@ -411,7 +570,9 @@ export default function FeedWaterPanel({
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 truncate">Pen {w.pen}</h3>
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            Pen {w.pen}
+                          </h3>
                           <Badge>{w.type}</Badge>
                           <Badge>{w.capacityGal} gal</Badge>
                         </div>
@@ -431,7 +592,10 @@ export default function FeedWaterPanel({
                     </div>
 
                     {/* Consumption guide (rough) */}
-                    <WaterNeedHint herds={herds.filter((h) => h.pen === w.pen)} tempF={weatherNow?.tempF ?? 70} />
+                    <WaterNeedHint
+                      herds={herds.filter((h) => h.pen === w.pen)}
+                      tempF={weatherNow?.tempF ?? 70}
+                    />
                   </li>
                 );
               })
@@ -506,7 +670,13 @@ function InfoCard({ label, value, tone = "slate", onClick }) {
     emerald: "bg-emerald-50 text-emerald-900 border-emerald-200",
   };
   return (
-    <button type="button" onClick={onClick} className={`rounded-2xl border p-4 text-left ${toneMap[tone] || toneMap.slate}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-2xl border p-4 text-left ${
+        toneMap[tone] || toneMap.slate
+      }`}
+    >
       <div className="text-xs text-gray-500">{label}</div>
       <div className="mt-1 text-2xl font-semibold">{value}</div>
     </button>
@@ -524,7 +694,10 @@ function Badge({ children }) {
 function WelfareBadge({ enabled, sabbathGuard }) {
   if (!sabbathGuard) return null;
   return (
-    <span className="inline-flex items-center rounded-full bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 text-xs" title="Sabbath guard is ON">
+    <span
+      className="inline-flex items-center rounded-full bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 text-xs"
+      title="Sabbath guard is ON"
+    >
       Sabbath Guard
       {enabled ? " • welfare override enabled" : " • essential actions paused"}
     </span>
@@ -532,7 +705,8 @@ function WelfareBadge({ enabled, sabbathGuard }) {
 }
 
 function RationAdjuster({ species, headcount, avgBWlb, onPreview }) {
-  const defaults = speciesDefaults[species?.toLowerCase?.()] || speciesDefaults.sheep;
+  const defaults =
+    speciesDefaults[species?.toLowerCase?.()] || speciesDefaults.sheep;
   const [mode, setMode] = useState(defaults.rationType);
   const [perHead, setPerHead] = useState(defaults.perHead ?? 2.5);
   const [dmPctBW, setDmPctBW] = useState(defaults.dmPctBW ?? 2.2);
@@ -568,7 +742,9 @@ function RationAdjuster({ species, headcount, avgBWlb, onPreview }) {
             <div className="sm:col-span-2 flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => onPreview?.({ rationType: "perHead", perHead, dmPct })}
+                onClick={() =>
+                  onPreview?.({ rationType: "perHead", perHead, dmPct })
+                }
                 className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm"
               >
                 Preview total
@@ -600,7 +776,9 @@ function RationAdjuster({ species, headcount, avgBWlb, onPreview }) {
             <div className="flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => onPreview?.({ rationType: "dmPctBW", dmPctBW, dmPct })}
+                onClick={() =>
+                  onPreview?.({ rationType: "dmPctBW", dmPctBW, dmPct })
+                }
                 className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm"
               >
                 Preview total
@@ -611,7 +789,9 @@ function RationAdjuster({ species, headcount, avgBWlb, onPreview }) {
       </div>
 
       <div className="mt-2 text-xs text-gray-500">
-        Headcount {headcount}{Number(avgBWlb) ? ` • Avg BW ${avgBWlb} lb` : ""} • Switch mode for quick adjustments.
+        Headcount {headcount}
+        {Number(avgBWlb) ? ` • Avg BW ${avgBWlb} lb` : ""} • Switch mode for
+        quick adjustments.
       </div>
     </div>
   );
@@ -620,7 +800,11 @@ function RationAdjuster({ species, headcount, avgBWlb, onPreview }) {
 function WaterNeedHint({ herds = [], tempF = 70 }) {
   if (!herds.length) return null;
   const rows = herds.map((h) => {
-    const per = calcWater({ species: h.species, headcount: h.headcount, weatherF: tempF });
+    const per = calcWater({
+      species: h.species,
+      headcount: h.headcount,
+      weatherF: tempF,
+    });
     return { group: h.group, totalGal: per.totalGal, perHead: per.perHeadGal };
   });
 
@@ -643,7 +827,8 @@ function WaterNeedHint({ herds = [], tempF = 70 }) {
 function adviceForWater(tempF, climate = { freezeF: 32, heatF: 90 }) {
   if (typeof tempF !== "number") return "—";
   if (tempF <= climate.freezeF) return "Freeze risk — check heaters & ice.";
-  if (tempF >= climate.heatF) return "Heat risk — top off; consider electrolytes.";
+  if (tempF >= climate.heatF)
+    return "Heat risk — top off; consider electrolytes.";
   if (tempF >= 80) return "Warm — increase checks.";
   return "Normal conditions.";
 }

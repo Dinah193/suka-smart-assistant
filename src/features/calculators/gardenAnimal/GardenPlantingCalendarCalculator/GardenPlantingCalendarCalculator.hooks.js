@@ -11,8 +11,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { runGardenPlantingCalendarCalculatorShim } from "./GardenPlantingCalendarCalculator.shim";
-import eventBus from "@/services/eventBus";
-import * as featureFlags from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import * as featureFlags from "@/config/featureFlags";
 
 // ---------------------------------------------------------------------------
 // Hook: useGardenPlantingCalendarCalculator
@@ -51,8 +51,7 @@ export function useGardenPlantingCalendarCalculator(initialPayload) {
   const [isComputing, setIsComputing] = useState(false);
   const [error, setError] = useState("");
 
-  const familyFundMode =
-    (featureFlags && featureFlags.familyFundMode) || false;
+  const familyFundMode = (featureFlags && featureFlags.familyFundMode) || false;
 
   const recalc = useCallback(async () => {
     setIsComputing(true);
@@ -60,7 +59,7 @@ export function useGardenPlantingCalendarCalculator(initialPayload) {
     try {
       const next = await runGardenPlantingCalendarCalculatorShim(payload, {
         eventBus,
-        featureFlags: { familyFundMode }
+        featureFlags: { familyFundMode },
       });
 
       setResult(next);
@@ -74,8 +73,8 @@ export function useGardenPlantingCalendarCalculator(initialPayload) {
           "calculators/garden/GardenPlantingCalendarCalculator.hooks.recalc",
         data: {
           nodeKey: "gardenPlantingCalendar",
-          payload: next
-        }
+          payload: next,
+        },
       });
     } catch (err) {
       console.error("[useGardenPlantingCalendarCalculator] error:", err);
@@ -104,7 +103,7 @@ export function useGardenPlantingCalendarCalculator(initialPayload) {
     result,
     isComputing,
     error,
-    recalc
+    recalc,
   };
 }
 
@@ -151,7 +150,7 @@ export function useGardenPlannerIntegration(calculatorResult, options) {
       : {
           plantingWindows: [],
           harvestWindows: [],
-          calendarEvents: []
+          calendarEvents: [],
         };
 
   const plantingTasks = useMemo(
@@ -199,10 +198,10 @@ export function useGardenPlannerIntegration(calculatorResult, options) {
           total: tasks.length,
           planting: plantingTasks.length,
           harvest: harvestTasks.length,
-          events: calendarEventTasks.length
+          events: calendarEventTasks.length,
         },
-        tasks
-      }
+        tasks,
+      },
     });
   }, [tasks, plantingTasks, harvestTasks, calendarEventTasks, autoEmitEvents]);
 
@@ -223,7 +222,7 @@ export function useGardenPlannerIntegration(calculatorResult, options) {
       ts,
       source:
         "calculators/garden/GardenPlantingCalendarCalculator.hooks.requestSession",
-      data: { session }
+      data: { session },
     });
   }, []);
 
@@ -232,7 +231,7 @@ export function useGardenPlannerIntegration(calculatorResult, options) {
     plantingTasks,
     harvestTasks,
     calendarEventTasks,
-    requestSessionForTask
+    requestSessionForTask,
   };
 }
 
@@ -245,26 +244,26 @@ function getDefaultPayload() {
   return {
     context: {
       nodeKey: "gardenPlantingCalendar",
-      version: "1.0.0"
+      version: "1.0.0",
     },
     inputs: {
       climate: {
         lastFrostDate: "",
         firstFrostDate: "",
         zone: "",
-        notes: ""
+        notes: "",
       },
       calendar: {
         year: now.getFullYear(),
         alignWithFeastDays: true,
-        feastDays: []
+        feastDays: [],
       },
       crops: [],
       gardenLayout: {
-        beds: []
-      }
+        beds: [],
+      },
     },
-    outputs: null
+    outputs: null,
   };
 }
 
@@ -282,7 +281,7 @@ function safeEmit(evt) {
         type: evt.type,
         ts,
         source: evt.source,
-        data: evt.data
+        data: evt.data,
       });
     }
   } catch (err) {
@@ -308,15 +307,15 @@ function toPlannerPlantingTask(w) {
     bedId: w.bedId || "",
     links: {
       windowId: w.windowId || "",
-      eventId: ""
+      eventId: "",
     },
     meta: {
       season: w.season || "",
       flags: Array.isArray(w.flags) ? w.flags : [],
       successionIndex: w.successionIndex ?? 0,
       earliestSafeDate: w.earliestSafeDate || "",
-      latestSafeDate: w.latestSafeDate || ""
-    }
+      latestSafeDate: w.latestSafeDate || "",
+    },
   };
 }
 
@@ -336,14 +335,14 @@ function toPlannerHarvestTask(w) {
     bedId: w.bedId || "",
     links: {
       windowId: w.windowId || "",
-      eventId: ""
+      eventId: "",
     },
     meta: {
       targetUse: w.targetUse || "mixed",
       alignedFeastDays: Array.isArray(w.alignedFeastDays)
         ? w.alignedFeastDays
-        : []
-    }
+        : [],
+    },
   };
 }
 
@@ -352,8 +351,7 @@ function toPlannerHarvestTask(w) {
  * @returns {GardenPlannerTask}
  */
 function toPlannerCalendarEventTask(ev) {
-  const id =
-    ev.eventId || `cal-ev-${Math.random().toString(36).slice(2, 9)}`;
+  const id = ev.eventId || `cal-ev-${Math.random().toString(36).slice(2, 9)}`;
   return {
     id,
     kind: ev.kind === "harvest" || ev.kind === "planting" ? ev.kind : "event",
@@ -364,12 +362,12 @@ function toPlannerCalendarEventTask(ev) {
     bedId: ev.bedId || "",
     links: {
       windowId: ev.windowId || "",
-      eventId: ev.eventId || ""
+      eventId: ev.eventId || "",
     },
     meta: {
       notes: ev.notes || "",
-      raw: ev
-    }
+      raw: ev,
+    },
   };
 }
 
@@ -408,8 +406,8 @@ function buildGardenSessionFromPlannerTask(task) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Stop when bed is level, moist, and free of large clumps."
-        }
+          cueNotes: "Stop when bed is level, moist, and free of large clumps.",
+        },
       },
       {
         id: baseStepId("sow"),
@@ -420,8 +418,8 @@ function buildGardenSessionFromPlannerTask(task) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Ensure firm seed-to-soil contact and good spacing."
-        }
+          cueNotes: "Ensure firm seed-to-soil contact and good spacing.",
+        },
       },
       {
         id: baseStepId("water-in"),
@@ -432,8 +430,8 @@ function buildGardenSessionFromPlannerTask(task) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Check for pooling; adjust flow as needed."
-        }
+          cueNotes: "Check for pooling; adjust flow as needed.",
+        },
       }
     );
   } else if (isHarvest) {
@@ -447,8 +445,8 @@ function buildGardenSessionFromPlannerTask(task) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "texture",
-          cueNotes: "Skip any damaged or diseased produce."
-        }
+          cueNotes: "Skip any damaged or diseased produce.",
+        },
       },
       {
         id: baseStepId("harvest"),
@@ -459,8 +457,8 @@ function buildGardenSessionFromPlannerTask(task) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Keep produce shaded and cool while working."
-        }
+          cueNotes: "Keep produce shaded and cool while working.",
+        },
       }
     );
   } else {
@@ -476,8 +474,8 @@ function buildGardenSessionFromPlannerTask(task) {
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: ""
-      }
+        cueNotes: "",
+      },
     });
   }
 
@@ -488,9 +486,7 @@ function buildGardenSessionFromPlannerTask(task) {
     source: {
       type: "gardenPlan",
       refId:
-        (task.links &&
-          (task.links.windowId || task.links.eventId)) ||
-        null
+        (task.links && (task.links.windowId || task.links.eventId)) || null,
     },
     steps,
     prefs: { voiceGuidance: true, haptic: true, autoAdvance: false },
@@ -499,13 +495,13 @@ function buildGardenSessionFromPlannerTask(task) {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 }

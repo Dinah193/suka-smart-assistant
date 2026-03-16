@@ -46,8 +46,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
@@ -94,9 +94,11 @@ async function exportToHubIfEnabled(payload) {
 
 function notifSupported() {
   try {
-    return typeof window !== "undefined" &&
-           "Notification" in window &&
-           typeof Notification.requestPermission === "function";
+    return (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      typeof Notification.requestPermission === "function"
+    );
   } catch {
     return false;
   }
@@ -130,12 +132,24 @@ async function show(reg, title, options) {
     await reg.showNotification(title, options);
     return true;
   } catch (err) {
-    emit("device.notification.error", { phase: "show", message: String(err?.message || err) });
+    emit("device.notification.error", {
+      phase: "show",
+      message: String(err?.message || err),
+    });
     return false;
   }
 }
 
-function buildOngoingOptions({ tag, body, icon, badge, actions = [], paused = false, stepIdx = 0, totalSteps = 0 }) {
+function buildOngoingOptions({
+  tag,
+  body,
+  icon,
+  badge,
+  actions = [],
+  paused = false,
+  stepIdx = 0,
+  totalSteps = 0,
+}) {
   const requireInteraction = true; // keep it visible until user interacts (desktop)
   const silent = false; // let OS play default sound if any
   /** @type {NotificationAction[]} */
@@ -183,27 +197,35 @@ class NotificationsService {
       reg.update?.();
       return reg;
     } catch (err) {
-      emit("device.notification.error", { phase: "register", message: String(err?.message || err) });
+      emit("device.notification.error", {
+        phase: "register",
+        message: String(err?.message || err),
+      });
       return null;
     }
   }
 
   async ensurePermission() {
     if (!notifSupported()) {
-      emit("device.notification.error", { phase: "permission", message: "Notifications unsupported" });
+      emit("device.notification.error", {
+        phase: "permission",
+        message: "Notifications unsupported",
+      });
       return "denied";
     }
     emit("device.notification.permission.requested", {});
     const result = await Notification.requestPermission();
     this._permission = result;
     const evtType =
-      result === "granted" ? "device.notification.permission.granted" :
-      result === "denied"  ? "device.notification.permission.denied" :
-                             "device.notification.permission.requested"; // "default"
+      result === "granted"
+        ? "device.notification.permission.granted"
+        : result === "denied"
+        ? "device.notification.permission.denied"
+        : "device.notification.permission.requested"; // "default"
     const p = emit(evtType, { result });
     exportToHubIfEnabled(p);
     return result;
-    }
+  }
 
   /* --------------------------------- Simple -------------------------------- */
 
@@ -234,7 +256,11 @@ class NotificationsService {
   }
 
   async sessionStepChanged(session, step, { paused = false } = {}) {
-    return this._ongoingUpdate(session, { paused, step, reason: "step.changed" });
+    return this._ongoingUpdate(session, {
+      paused,
+      step,
+      reason: "step.changed",
+    });
   }
 
   async sessionPaused(session) {
@@ -265,8 +291,13 @@ class NotificationsService {
     try {
       const reg = await getRegistration();
       if (!reg) return false;
-      reg.active?.postMessage?.({ type: "SSA_NOTIFICATIONS_CLOSE", tag: toSessionTag(sessionId) });
-      const p = emit("device.notification.close", { tag: toSessionTag(sessionId) });
+      reg.active?.postMessage?.({
+        type: "SSA_NOTIFICATIONS_CLOSE",
+        tag: toSessionTag(sessionId),
+      });
+      const p = emit("device.notification.close", {
+        tag: toSessionTag(sessionId),
+      });
       exportToHubIfEnabled(p);
       return true;
     } catch {
@@ -310,8 +341,18 @@ class NotificationsService {
 
     const ok = await show(reg, title, options);
 
-    const evtType = reason === "step.changed" ? "device.notification.update" : "device.notification.show";
-    const p = emit(evtType, { tag, title, paused, stepIdx: currentIdx, totalSteps: total, reason });
+    const evtType =
+      reason === "step.changed"
+        ? "device.notification.update"
+        : "device.notification.show";
+    const p = emit(evtType, {
+      tag,
+      title,
+      paused,
+      stepIdx: currentIdx,
+      totalSteps: total,
+      reason,
+    });
     exportToHubIfEnabled(p);
 
     return ok;
@@ -336,7 +377,11 @@ class NotificationsService {
       data: { kind: "ssa.final.session" },
     });
 
-    const p = emit("device.notification.update", { tag, title, reason: "final" });
+    const p = emit("device.notification.update", {
+      tag,
+      title,
+      reason: "final",
+    });
     exportToHubIfEnabled(p);
 
     return ok;

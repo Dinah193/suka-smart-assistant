@@ -1,0 +1,2626 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.mexican.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Mexican • Dishes Catalog",
+    "cuisineId": "cuisines.mexican",
+    "status": "canonical",
+    "description": "Planner-friendly dish definitions for Mexican cuisine: street foods, stews, salsas, sides, breakfasts, and desserts. Designed for SSA meal planning, browse, and search indexes.",
+    "version": "2.0.0",
+    "author": "SSA Catalog Curation",
+    "createdAt": "2026-01-23T00:00:00.000Z",
+    "updatedAt": "2026-01-23T00:00:00.000Z"
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+  "notes": [
+    "All dish ids/tags follow SSA safe-id patterns (lowercase, dots/underscores/hyphens).",
+    "Equipment/technique/ingredient ids are canonical placeholders; map to your actual SSA catalogs as needed."
+  ],
+  "dishes": [
+    {
+      "id": "mexican.tacos_al_pastor",
+      "label": "Tacos al Pastor",
+      "aka": ["Pastor Tacos", "Al Pastor Tacos"],
+      "category": "street_food",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 90, "handsOffMins": 40 },
+      "servingStyles": ["tacos", "grab_and_go", "family_style"],
+      "mealArchetypes": ["archetype.taco", "archetype.street_food"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "marinated_meat_only"
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.pork_shoulder", "ingredient.pork_butt"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch.tortilla",
+          "items": ["ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce.salsa",
+          "items": ["ingredient.salsa_roja", "ingredient.salsa_verde"],
+          "chooseOne": true
+        },
+        {
+          "role": "fruit.acid_sweet",
+          "items": ["ingredient.pineapple"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish.fresh",
+          "items": [
+            "ingredient.cilantro",
+            "ingredient.onion_white",
+            "ingredient.lime"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.marinade",
+        "technique.roast",
+        "technique.sear",
+        "technique.slice"
+      ],
+      "equipmentRecommended": [
+        "equipment.comal",
+        "equipment.cast_iron_skillet",
+        "equipment.grill"
+      ],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.pork_shoulder",
+        "ingredient.achiote_paste",
+        "ingredient.guajillo_chile",
+        "ingredient.pineapple",
+        "ingredient.corn_tortilla",
+        "ingredient.onion_white",
+        "ingredient.cilantro",
+        "ingredient.lime"
+      ],
+      "allergens": [],
+      "dietFlags": [],
+      "pairingHints": {
+        "serveWith": [
+          "mexican.salsa_roja",
+          "mexican.pico_de_gallo",
+          "mexican.arroz_rojo"
+        ],
+        "drinkPairing": [
+          "mexican.agua_fresca_horchata",
+          "mexican.agua_fresca_jamaica"
+        ]
+      },
+      "variations": [
+        {
+          "id": "mexican.tacos_al_pastor.variation.sheet_pan",
+          "label": "Sheet-Pan Pastor (Home Oven)",
+          "when": { "noVerticalSpit": true },
+          "adapt": {
+            "method": "oven_roast_then_broil",
+            "notes": "Roast marinated pork on a sheet pan; broil for char; finish with pineapple."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "street_food",
+        "planner.weekend",
+        "leftovers.good"
+      ]
+    },
+    {
+      "id": "mexican.carne_asada_tacos",
+      "label": "Carne Asada Tacos",
+      "aka": ["Grilled Steak Tacos"],
+      "category": "street_food",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 45, "handsOffMins": 10 },
+      "servingStyles": ["tacos", "grab_and_go", "family_style"],
+      "mealArchetypes": ["archetype.taco", "archetype.grilled"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.skirt_steak", "ingredient.flank_steak"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch.tortilla",
+          "items": ["ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish.fresh",
+          "items": [
+            "ingredient.cilantro",
+            "ingredient.onion_white",
+            "ingredient.lime"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce.salsa",
+          "items": [
+            "ingredient.salsa_roja",
+            "ingredient.salsa_verde",
+            "ingredient.pico_de_gallo"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.marinade",
+        "technique.grill",
+        "technique.slice"
+      ],
+      "equipmentRecommended": ["equipment.grill", "equipment.comal"],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.skirt_steak",
+        "ingredient.lime",
+        "ingredient.garlic",
+        "ingredient.cilantro",
+        "ingredient.corn_tortilla",
+        "ingredient.onion_white"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "street_food",
+        "planner.weeknight",
+        "high_protein"
+      ]
+    },
+    {
+      "id": "mexican.carnitas",
+      "label": "Carnitas",
+      "aka": ["Pork Carnitas"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 180, "handsOffMins": 140 },
+      "servingStyles": ["tacos", "bowl", "family_style"],
+      "mealArchetypes": ["archetype.shredded_meat", "archetype.taco"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.pork_shoulder", "ingredient.pork_butt"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat.cooking",
+          "items": [
+            "ingredient.lard",
+            "ingredient.avocado_oil",
+            "ingredient.olive_oil"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.onion_white",
+            "ingredient.garlic",
+            "ingredient.cumin"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.orange", "ingredient.lime"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.braise", "technique.confit", "technique.crisp"],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.slow_cooker",
+        "equipment.pressure_cooker"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.pork_shoulder",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.orange",
+        "ingredient.cumin"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "freezer.friendly",
+        "leftovers.good"
+      ]
+    },
+    {
+      "id": "mexican.barbacoa",
+      "label": "Barbacoa",
+      "aka": ["Slow-Cooked Barbacoa"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 240, "handsOffMins": 200 },
+      "servingStyles": ["tacos", "bowl", "family_style"],
+      "mealArchetypes": ["archetype.shredded_meat", "archetype.stewed"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": [
+            "ingredient.beef_chuck",
+            "ingredient.beef_cheek",
+            "ingredient.goat_shoulder"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "chile.base",
+          "items": [
+            "ingredient.chipotle",
+            "ingredient.guajillo_chile",
+            "ingredient.ancho_chile"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lime", "ingredient.vinegar_apple_cider"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.garlic",
+            "ingredient.onion_white",
+            "ingredient.cumin",
+            "ingredient.oregano_mexican"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.braise", "technique.shred", "technique.simmer"],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.slow_cooker",
+        "equipment.pressure_cooker",
+        "equipment.blender"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef_chuck",
+        "ingredient.guajillo_chile",
+        "ingredient.garlic",
+        "ingredient.cumin",
+        "ingredient.lime"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "freezer.friendly",
+        "tacos",
+        "spice.medium"
+      ]
+    },
+    {
+      "id": "mexican.chicken_tinga",
+      "label": "Chicken Tinga",
+      "aka": ["Tinga de Pollo"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 60, "handsOffMins": 25 },
+      "servingStyles": ["tacos", "tostadas", "bowl", "family_style"],
+      "mealArchetypes": ["archetype.shredded_meat", "archetype.saucy"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.chicken_thigh", "ingredient.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "tomato.base",
+          "items": ["ingredient.tomato", "ingredient.crushed_tomato"],
+          "chooseOne": true
+        },
+        {
+          "role": "chile.base",
+          "items": ["ingredient.chipotle_in_adobo"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.onion_white",
+            "ingredient.garlic",
+            "ingredient.oregano_mexican"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.simmer", "technique.shred", "technique.saute"],
+      "equipmentRecommended": ["equipment.dutch_oven", "equipment.skillet"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken_thigh",
+        "ingredient.onion_white",
+        "ingredient.tomato",
+        "ingredient.chipotle_in_adobo",
+        "ingredient.oregano_mexican"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "planner.weeknight",
+        "leftovers.good"
+      ]
+    },
+    {
+      "id": "mexican.birria",
+      "label": "Birria (Stew) + Quesabirria Tacos",
+      "aka": ["Quesabirria", "Birria de Res"],
+      "category": "stew",
+      "difficulty": 4,
+      "heatTypical": 3,
+      "time": { "activeMins": 45, "totalMins": 240, "handsOffMins": 180 },
+      "servingStyles": ["bowl", "tacos", "family_style"],
+      "mealArchetypes": ["archetype.stew", "archetype.taco"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": [
+            "ingredient.beef_chuck",
+            "ingredient.goat_shoulder",
+            "ingredient.lamb_shank"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "chile.base",
+          "items": [
+            "ingredient.guajillo_chile",
+            "ingredient.ancho_chile",
+            "ingredient.pasilla_chile"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "broth.base",
+          "items": ["ingredient.beef_broth", "ingredient.chicken_broth"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice.warm",
+          "items": [
+            "ingredient.cinnamon",
+            "ingredient.clove",
+            "ingredient.cumin",
+            "ingredient.black_pepper"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "cheese.optional",
+          "items": ["ingredient.oaxaca_cheese", "ingredient.mozzarella"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.toast_chiles",
+        "technique.blend",
+        "technique.braise",
+        "technique.skim_fat",
+        "technique.crisp"
+      ],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.pressure_cooker",
+        "equipment.blender",
+        "equipment.skimmer"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef_chuck",
+        "ingredient.guajillo_chile",
+        "ingredient.ancho_chile",
+        "ingredient.beef_broth",
+        "ingredient.cumin",
+        "ingredient.onion_white",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "freezer.friendly",
+        "stew",
+        "spice.medium_high"
+      ]
+    },
+    {
+      "id": "mexican.enchiladas_rojas",
+      "label": "Enchiladas Rojas",
+      "aka": ["Red Enchiladas"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 35, "totalMins": 75, "handsOffMins": 20 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.baked", "archetype.saucy"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "starch.tortilla",
+          "items": ["ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce.red",
+          "items": ["ingredient.enchilada_sauce_red", "ingredient.salsa_roja"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.primary",
+          "items": [
+            "ingredient.chicken_shredded",
+            "ingredient.cheese_blend_mexican",
+            "ingredient.beef_ground"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "cheese.topping",
+          "items": [
+            "ingredient.cheddar",
+            "ingredient.monterey_jack",
+            "ingredient.oaxaca_cheese"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.toast_chiles",
+        "technique.simmer",
+        "technique.fill_roll",
+        "technique.bake"
+      ],
+      "equipmentRecommended": ["equipment.baking_dish", "equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.baking_dish",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.corn_tortilla",
+        "ingredient.enchilada_sauce_red",
+        "ingredient.chicken_shredded",
+        "ingredient.cheddar"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "planner.weeknight",
+        "baked"
+      ]
+    },
+    {
+      "id": "mexican.enchiladas_verdes",
+      "label": "Enchiladas Verdes",
+      "aka": ["Green Enchiladas"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 35, "totalMins": 75, "handsOffMins": 20 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.baked", "archetype.saucy"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "starch.tortilla",
+          "items": ["ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce.green",
+          "items": [
+            "ingredient.salsa_verde",
+            "ingredient.enchilada_sauce_green"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.primary",
+          "items": [
+            "ingredient.chicken_shredded",
+            "ingredient.cheese_blend_mexican",
+            "ingredient.pork_shredded"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "dairy.finish",
+          "items": ["ingredient.crema_mexicana", "ingredient.sour_cream"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.fill_roll",
+        "technique.bake"
+      ],
+      "equipmentRecommended": ["equipment.baking_dish", "equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.baking_dish",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.corn_tortilla",
+        "ingredient.salsa_verde",
+        "ingredient.chicken_shredded",
+        "ingredient.crema_mexicana"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "planner.weeknight",
+        "baked"
+      ]
+    },
+    {
+      "id": "mexican.chiles_rellenos",
+      "label": "Chiles Rellenos",
+      "aka": ["Stuffed Poblano Peppers"],
+      "category": "main",
+      "difficulty": 4,
+      "heatTypical": 2,
+      "time": { "activeMins": 50, "totalMins": 90, "handsOffMins": 15 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.fried", "archetype.stuffed"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "vegetable.shell",
+          "items": ["ingredient.poblano_pepper"],
+          "chooseOne": true
+        },
+        {
+          "role": "filling.primary",
+          "items": [
+            "ingredient.oaxaca_cheese",
+            "ingredient.monterey_jack",
+            "ingredient.picadillo"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "batter",
+          "items": ["ingredient.egg", "ingredient.flour_wheat"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce.tomato",
+          "items": ["ingredient.salsa_roja", "ingredient.tomato_sauce"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.roast_peppers",
+        "technique.stuff",
+        "technique.batter_fry",
+        "technique.simmer_sauce"
+      ],
+      "equipmentRecommended": [
+        "equipment.tongs",
+        "equipment.frying_pan",
+        "equipment.thermometer"
+      ],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.bowl",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.poblano_pepper",
+        "ingredient.oaxaca_cheese",
+        "ingredient.egg",
+        "ingredient.flour_wheat",
+        "ingredient.tomato_sauce"
+      ],
+      "allergens": ["allergen.egg", "allergen.gluten", "allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "fried",
+        "planner.weekend"
+      ]
+    },
+    {
+      "id": "mexican.tamales",
+      "label": "Tamales",
+      "aka": ["Pork Tamales", "Chicken Tamales", "Sweet Tamales"],
+      "category": "main",
+      "difficulty": 5,
+      "heatTypical": 1,
+      "time": { "activeMins": 90, "totalMins": 240, "handsOffMins": 90 },
+      "servingStyles": ["handheld", "grab_and_go", "family_style"],
+      "mealArchetypes": ["archetype.steamed", "archetype.wrapped"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "dough.masa",
+          "items": ["ingredient.masa_harina", "ingredient.masa_dough_prepared"],
+          "chooseOne": true
+        },
+        {
+          "role": "wrap",
+          "items": ["ingredient.corn_husk", "ingredient.banana_leaf"],
+          "chooseOne": true
+        },
+        {
+          "role": "filling.primary",
+          "items": [
+            "ingredient.pork_shredded",
+            "ingredient.chicken_shredded",
+            "ingredient.green_chile_cheese"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.lard", "ingredient.avocado_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.mix_masa",
+        "technique.fill_wrap",
+        "technique.steam"
+      ],
+      "equipmentRecommended": [
+        "equipment.steamer_basket",
+        "equipment.stock_pot",
+        "equipment.stand_mixer"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.bowl",
+        "equipment.spatula"
+      ],
+      "ingredientsCore": [
+        "ingredient.masa_harina",
+        "ingredient.corn_husk",
+        "ingredient.lard",
+        "ingredient.baking_powder",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "freezer.friendly",
+        "holiday_favorite"
+      ]
+    },
+    {
+      "id": "mexican.pozole_rojo",
+      "label": "Pozole Rojo",
+      "aka": ["Red Pozole"],
+      "category": "stew",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 35, "totalMins": 150, "handsOffMins": 100 },
+      "servingStyles": ["bowl", "family_style"],
+      "mealArchetypes": ["archetype.stew", "archetype.soup"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "grain.hominy",
+          "items": ["ingredient.hominy"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.pork_shoulder", "ingredient.chicken_thigh"],
+          "chooseOne": true
+        },
+        {
+          "role": "chile.base",
+          "items": ["ingredient.guajillo_chile", "ingredient.ancho_chile"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish.crunch",
+          "items": [
+            "ingredient.cabbage",
+            "ingredient.radish",
+            "ingredient.lime",
+            "ingredient.onion_white",
+            "ingredient.oregano_mexican"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.toast_chiles",
+        "technique.blend",
+        "technique.skimming"
+      ],
+      "equipmentRecommended": ["equipment.stock_pot", "equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.hominy",
+        "ingredient.pork_shoulder",
+        "ingredient.guajillo_chile",
+        "ingredient.onion_white",
+        "ingredient.garlic"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "stew",
+        "batch.friendly",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "mexican.pozole_verde",
+      "label": "Pozole Verde",
+      "aka": ["Green Pozole"],
+      "category": "stew",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 35, "totalMins": 150, "handsOffMins": 100 },
+      "servingStyles": ["bowl", "family_style"],
+      "mealArchetypes": ["archetype.stew", "archetype.soup"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "grain.hominy",
+          "items": ["ingredient.hominy"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.chicken_thigh", "ingredient.pork_shoulder"],
+          "chooseOne": true
+        },
+        {
+          "role": "green.base",
+          "items": [
+            "ingredient.tomato_tomatillo",
+            "ingredient.poblano_pepper",
+            "ingredient.jalapeno"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "herbs",
+          "items": ["ingredient.cilantro"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.roast",
+        "technique.blend",
+        "technique.skimming"
+      ],
+      "equipmentRecommended": ["equipment.stock_pot", "equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.hominy",
+        "ingredient.chicken_thigh",
+        "ingredient.tomato_tomatillo",
+        "ingredient.cilantro",
+        "ingredient.onion_white"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "stew",
+        "batch.friendly",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "mexican.menudo",
+      "label": "Menudo",
+      "aka": ["Menudo Rojo"],
+      "category": "stew",
+      "difficulty": 4,
+      "heatTypical": 2,
+      "time": { "activeMins": 45, "totalMins": 240, "handsOffMins": 180 },
+      "servingStyles": ["bowl", "family_style"],
+      "mealArchetypes": ["archetype.offal", "archetype.stew"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.beef_tripe"],
+          "chooseOne": true
+        },
+        {
+          "role": "grain.hominy",
+          "items": ["ingredient.hominy"],
+          "chooseOne": true
+        },
+        {
+          "role": "chile.base",
+          "items": ["ingredient.guajillo_chile", "ingredient.ancho_chile"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish.fresh",
+          "items": [
+            "ingredient.onion_white",
+            "ingredient.cilantro",
+            "ingredient.lime",
+            "ingredient.oregano_mexican"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.parboil",
+        "technique.simmer_long",
+        "technique.toast_chiles",
+        "technique.blend"
+      ],
+      "equipmentRecommended": ["equipment.stock_pot", "equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef_tripe",
+        "ingredient.hominy",
+        "ingredient.guajillo_chile",
+        "ingredient.onion_white",
+        "ingredient.garlic"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "stew",
+        "batch.friendly",
+        "freezer.friendly",
+        "traditional"
+      ]
+    },
+    {
+      "id": "mexican.tortilla_soup",
+      "label": "Sopa de Tortilla (Tortilla Soup)",
+      "aka": ["Tortilla Soup"],
+      "category": "soup",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 55, "handsOffMins": 20 },
+      "servingStyles": ["bowl", "family_style"],
+      "mealArchetypes": ["archetype.soup", "archetype.weeknight"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "broth.base",
+          "items": ["ingredient.chicken_broth", "ingredient.vegetable_broth"],
+          "chooseOne": true
+        },
+        {
+          "role": "tomato.base",
+          "items": ["ingredient.tomato", "ingredient.crushed_tomato"],
+          "chooseOne": true
+        },
+        {
+          "role": "crunch.tortilla",
+          "items": ["ingredient.tortilla_strips", "ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "dairy.optional",
+          "items": [
+            "ingredient.avocado",
+            "ingredient.crema_mexicana",
+            "ingredient.cheddar"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.simmer", "technique.blend", "technique.fry"],
+      "equipmentRecommended": ["equipment.blender", "equipment.stock_pot"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken_broth",
+        "ingredient.tomato",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.tortilla_strips"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "soup",
+        "planner.weeknight",
+        "batch.friendly"
+      ]
+    },
+    {
+      "id": "mexican.quesadillas",
+      "label": "Quesadillas",
+      "aka": ["Cheese Quesadillas"],
+      "category": "street_food",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 0 },
+      "servingStyles": ["handheld", "grab_and_go", "family_style"],
+      "mealArchetypes": ["archetype.quick", "archetype.handheld"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch.tortilla",
+          "items": ["ingredient.flour_tortilla", "ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "cheese.primary",
+          "items": [
+            "ingredient.oaxaca_cheese",
+            "ingredient.monterey_jack",
+            "ingredient.cheddar"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "filling.optional",
+          "items": [
+            "ingredient.chicken_shredded",
+            "ingredient.black_beans",
+            "ingredient.sauteed_peppers_onions"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce.salsa",
+          "items": [
+            "ingredient.salsa_roja",
+            "ingredient.salsa_verde",
+            "ingredient.pico_de_gallo"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.toast", "technique.melt"],
+      "equipmentRecommended": [
+        "equipment.comal",
+        "equipment.cast_iron_skillet"
+      ],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.spatula"
+      ],
+      "ingredientsCore": [
+        "ingredient.tortilla",
+        "ingredient.oaxaca_cheese",
+        "ingredient.salsa_roja"
+      ],
+      "allergens": ["allergen.dairy", "allergen.gluten"],
+      "dietFlags": [],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "planner.weeknight",
+        "kid_friendly",
+        "quick"
+      ]
+    },
+    {
+      "id": "mexican.nachos",
+      "label": "Nachos",
+      "aka": ["Loaded Nachos"],
+      "category": "snack",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["share_platter", "family_style"],
+      "mealArchetypes": ["archetype.shareable", "archetype.quick"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base.chips",
+          "items": ["ingredient.tortilla_chips"],
+          "chooseOne": true
+        },
+        {
+          "role": "cheese.primary",
+          "items": [
+            "ingredient.cheddar",
+            "ingredient.monterey_jack",
+            "ingredient.queso"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.optional",
+          "items": [
+            "ingredient.beef_ground",
+            "ingredient.chicken_shredded",
+            "ingredient.black_beans"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "toppings",
+          "items": [
+            "ingredient.pico_de_gallo",
+            "ingredient.jalapeno",
+            "ingredient.avocado",
+            "ingredient.crema_mexicana"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.layer", "technique.bake", "technique.melt"],
+      "equipmentRecommended": ["equipment.sheet_pan", "equipment.oven"],
+      "equipmentMinimum": ["equipment.oven", "equipment.sheet_pan"],
+      "ingredientsCore": [
+        "ingredient.tortilla_chips",
+        "ingredient.cheddar",
+        "ingredient.pico_de_gallo"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.snack",
+        "shareable",
+        "planner.weeknight"
+      ]
+    },
+    {
+      "id": "mexican.guacamole",
+      "label": "Guacamole",
+      "aka": ["Guac"],
+      "category": "dip",
+      "difficulty": 1,
+      "heatTypical": 1,
+      "time": { "activeMins": 10, "totalMins": 10, "handsOffMins": 0 },
+      "servingStyles": ["dip", "side", "topping"],
+      "mealArchetypes": ["archetype.dip", "archetype.fresh"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "fruit.base",
+          "items": ["ingredient.avocado"],
+          "chooseOne": true
+        },
+        { "role": "acid", "items": ["ingredient.lime"], "chooseOne": true },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.onion_white", "ingredient.cilantro"],
+          "chooseOne": false
+        },
+        {
+          "role": "heat.optional",
+          "items": ["ingredient.jalapeno", "ingredient.serrano_chile"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.mash", "technique.mix"],
+      "equipmentRecommended": ["equipment.mortar_pestle"],
+      "equipmentMinimum": [
+        "equipment.bowl",
+        "equipment.fork",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.avocado",
+        "ingredient.lime",
+        "ingredient.salt",
+        "ingredient.onion_white",
+        "ingredient.cilantro"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "fresh",
+        "quick",
+        "vegan"
+      ]
+    },
+    {
+      "id": "mexican.pico_de_gallo",
+      "label": "Pico de Gallo",
+      "aka": ["Salsa Fresca"],
+      "category": "salsa",
+      "difficulty": 1,
+      "heatTypical": 1,
+      "time": { "activeMins": 12, "totalMins": 12, "handsOffMins": 0 },
+      "servingStyles": ["topping", "dip", "side"],
+      "mealArchetypes": ["archetype.salsa", "archetype.fresh"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "tomato.base",
+          "items": ["ingredient.tomato"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.onion_white", "ingredient.cilantro"],
+          "chooseOne": false
+        },
+        { "role": "acid", "items": ["ingredient.lime"], "chooseOne": true },
+        {
+          "role": "heat.optional",
+          "items": ["ingredient.jalapeno", "ingredient.serrano_chile"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.chop", "technique.mix"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.knife",
+        "equipment.cutting_board",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.tomato",
+        "ingredient.onion_white",
+        "ingredient.cilantro",
+        "ingredient.lime",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "salsa",
+        "fresh",
+        "quick",
+        "vegan"
+      ]
+    },
+    {
+      "id": "mexican.salsa_roja",
+      "label": "Salsa Roja",
+      "aka": ["Red Salsa"],
+      "category": "salsa",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 5 },
+      "servingStyles": ["dip", "topping", "sauce"],
+      "mealArchetypes": ["archetype.salsa", "archetype.sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "chile.base",
+          "items": [
+            "ingredient.guajillo_chile",
+            "ingredient.ancho_chile",
+            "ingredient.chipotle"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "tomato.base",
+          "items": ["ingredient.tomato", "ingredient.crushed_tomato"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.onion_white"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.toast_chiles",
+        "technique.blend",
+        "technique.simmer"
+      ],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.pot",
+        "equipment.blender"
+      ],
+      "ingredientsCore": [
+        "ingredient.guajillo_chile",
+        "ingredient.tomato",
+        "ingredient.garlic",
+        "ingredient.onion_white",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "salsa",
+        "batch.friendly",
+        "freezer.friendly",
+        "vegan"
+      ]
+    },
+    {
+      "id": "mexican.salsa_verde",
+      "label": "Salsa Verde",
+      "aka": ["Green Salsa"],
+      "category": "salsa",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 5 },
+      "servingStyles": ["dip", "topping", "sauce"],
+      "mealArchetypes": ["archetype.salsa", "archetype.sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "green.base",
+          "items": ["ingredient.tomato_tomatillo"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": ["ingredient.jalapeno", "ingredient.serrano_chile"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.onion_white",
+            "ingredient.garlic",
+            "ingredient.cilantro"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.roast", "technique.blend", "technique.simmer"],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.pot",
+        "equipment.blender"
+      ],
+      "ingredientsCore": [
+        "ingredient.tomato_tomatillo",
+        "ingredient.jalapeno",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.cilantro"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "salsa",
+        "batch.friendly",
+        "freezer.friendly",
+        "vegan"
+      ]
+    },
+    {
+      "id": "mexican.elote",
+      "label": "Elote (Mexican Street Corn)",
+      "aka": ["Street Corn", "Elote Asado"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 5 },
+      "servingStyles": ["handheld", "side", "share_platter"],
+      "mealArchetypes": ["archetype.side", "archetype.grilled"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "vegetable.corn",
+          "items": ["ingredient.corn_on_cob"],
+          "chooseOne": true
+        },
+        {
+          "role": "dairy.spread",
+          "items": [
+            "ingredient.mayonnaise",
+            "ingredient.crema_mexicana",
+            "ingredient.sour_cream"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "cheese.finish",
+          "items": ["ingredient.cotija_cheese", "ingredient.parmesan"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice.finish",
+          "items": ["ingredient.chili_powder", "ingredient.tajin"],
+          "chooseOne": true
+        },
+        { "role": "acid", "items": ["ingredient.lime"], "chooseOne": true }
+      ],
+      "techniques": ["technique.grill", "technique.coat", "technique.sprinkle"],
+      "equipmentRecommended": ["equipment.grill"],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.tongs"
+      ],
+      "ingredientsCore": [
+        "ingredient.corn_on_cob",
+        "ingredient.crema_mexicana",
+        "ingredient.cotija_cheese",
+        "ingredient.lime",
+        "ingredient.tajin"
+      ],
+      "allergens": ["allergen.dairy", "allergen.egg"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "street_food",
+        "planner.weeknight"
+      ]
+    },
+    {
+      "id": "mexican.arroz_rojo",
+      "label": "Arroz Rojo (Mexican Red Rice)",
+      "aka": ["Mexican Rice", "Spanish Rice"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 35, "handsOffMins": 20 },
+      "servingStyles": ["side", "bowl", "family_style"],
+      "mealArchetypes": ["archetype.side", "archetype.rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "grain.rice",
+          "items": ["ingredient.rice_long_grain"],
+          "chooseOne": true
+        },
+        {
+          "role": "tomato.base",
+          "items": ["ingredient.tomato", "ingredient.tomato_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "broth.base",
+          "items": ["ingredient.chicken_broth", "ingredient.vegetable_broth"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.onion_white", "ingredient.garlic"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.toast_rice", "technique.simmer"],
+      "equipmentRecommended": ["equipment.saucepan"],
+      "equipmentMinimum": ["equipment.pot", "equipment.stovetop"],
+      "ingredientsCore": [
+        "ingredient.rice_long_grain",
+        "ingredient.tomato",
+        "ingredient.chicken_broth",
+        "ingredient.garlic",
+        "ingredient.onion_white"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "batch.friendly",
+        "freezer.friendly",
+        "planner.weeknight"
+      ]
+    },
+    {
+      "id": "mexican.frijoles_refritos",
+      "label": "Frijoles Refritos (Refried Beans)",
+      "aka": ["Refried Beans"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 45, "handsOffMins": 20 },
+      "servingStyles": ["side", "dip", "bowl"],
+      "mealArchetypes": ["archetype.legume", "archetype.side"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "legume.base",
+          "items": ["ingredient.pinto_beans", "ingredient.black_beans"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat.cooking",
+          "items": ["ingredient.lard", "ingredient.avocado_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.onion_white",
+            "ingredient.garlic",
+            "ingredient.cumin"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.simmer", "technique.mash", "technique.fry"],
+      "equipmentRecommended": ["equipment.pot", "equipment.potato_masher"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.pinto_beans",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.lard",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.side",
+        "batch.friendly",
+        "freezer.friendly",
+        "budget_friendly"
+      ]
+    },
+    {
+      "id": "mexican.chilaquiles",
+      "label": "Chilaquiles",
+      "aka": ["Chilaquiles Rojos", "Chilaquiles Verdes"],
+      "category": "breakfast",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 5 },
+      "servingStyles": ["bowl", "plated", "family_style"],
+      "mealArchetypes": ["archetype.breakfast", "archetype.saucy_crunch"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base.chips",
+          "items": ["ingredient.tortilla_chips", "ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.salsa_roja", "ingredient.salsa_verde"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.optional",
+          "items": ["ingredient.egg", "ingredient.chicken_shredded"],
+          "chooseOne": true
+        },
+        {
+          "role": "dairy.finish",
+          "items": ["ingredient.crema_mexicana", "ingredient.cotija_cheese"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.simmer", "technique.toss", "technique.fry"],
+      "equipmentRecommended": ["equipment.skillet"],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.spatula"
+      ],
+      "ingredientsCore": [
+        "ingredient.tortilla_chips",
+        "ingredient.salsa_roja",
+        "ingredient.crema_mexicana",
+        "ingredient.cotija_cheese"
+      ],
+      "allergens": ["allergen.dairy", "allergen.egg"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.breakfast",
+        "planner.weeknight",
+        "quick",
+        "comfort_food"
+      ]
+    },
+    {
+      "id": "mexican.huevos_rancheros",
+      "label": "Huevos Rancheros",
+      "aka": ["Ranch Eggs"],
+      "category": "breakfast",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 25, "handsOffMins": 0 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.breakfast", "archetype.egg"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein.egg",
+          "items": ["ingredient.egg"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch.base",
+          "items": ["ingredient.corn_tortilla"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.salsa_roja", "ingredient.ranchero_sauce"],
+          "chooseOne": true
+        },
+        {
+          "role": "beans.optional",
+          "items": ["ingredient.frijoles_refritos", "ingredient.black_beans"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.fry", "technique.simmer", "technique.assemble"],
+      "equipmentRecommended": ["equipment.skillet", "equipment.comal"],
+      "equipmentMinimum": [
+        "equipment.stovetop",
+        "equipment.skillet",
+        "equipment.spatula"
+      ],
+      "ingredientsCore": [
+        "ingredient.egg",
+        "ingredient.corn_tortilla",
+        "ingredient.salsa_roja",
+        "ingredient.black_beans"
+      ],
+      "allergens": ["allergen.egg"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.breakfast",
+        "planner.weeknight",
+        "high_protein",
+        "quick"
+      ]
+    },
+    {
+      "id": "mexican.mole_poblano",
+      "label": "Mole Poblano (Chicken)",
+      "aka": ["Chicken Mole"],
+      "category": "main",
+      "difficulty": 5,
+      "heatTypical": 2,
+      "time": { "activeMins": 60, "totalMins": 150, "handsOffMins": 45 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.sauce_forward", "archetype.braised"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.chicken_thigh", "ingredient.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "chile.base",
+          "items": [
+            "ingredient.ancho_chile",
+            "ingredient.pasilla_chile",
+            "ingredient.mulato_chile"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sweet_bitter",
+          "items": [
+            "ingredient.cacao_powder",
+            "ingredient.dark_chocolate",
+            "ingredient.raisins"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "nuts_seeds",
+          "items": [
+            "ingredient.sesame_seed",
+            "ingredient.peanut",
+            "ingredient.almond"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.toast_chiles",
+        "technique.toast_seeds",
+        "technique.blend",
+        "technique.simmer_sauce",
+        "technique.braise"
+      ],
+      "equipmentRecommended": ["equipment.blender", "equipment.dutch_oven"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.blender",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken_thigh",
+        "ingredient.ancho_chile",
+        "ingredient.sesame_seed",
+        "ingredient.cacao_powder",
+        "ingredient.onion_white",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.tree_nut", "allergen.peanut", "allergen.sesame"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "freezer.friendly",
+        "special_occasion",
+        "sauce_forward"
+      ]
+    },
+    {
+      "id": "mexican.cochinita_pibil",
+      "label": "Cochinita Pibil",
+      "aka": ["Yucatecan Achiote Pork"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 210, "handsOffMins": 170 },
+      "servingStyles": ["tacos", "bowl", "family_style"],
+      "mealArchetypes": ["archetype.shredded_meat", "archetype.braised"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein.primary",
+          "items": ["ingredient.pork_shoulder"],
+          "chooseOne": true
+        },
+        {
+          "role": "seasoning.achiote",
+          "items": ["ingredient.achiote_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.orange", "ingredient.vinegar_apple_cider"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish.pickled",
+          "items": ["ingredient.pickled_red_onion"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.marinade",
+        "technique.braise",
+        "technique.wrap",
+        "technique.shred"
+      ],
+      "equipmentRecommended": ["equipment.dutch_oven", "equipment.oven"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.pot",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.pork_shoulder",
+        "ingredient.achiote_paste",
+        "ingredient.orange",
+        "ingredient.garlic",
+        "ingredient.pickled_red_onion"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "batch.friendly",
+        "freezer.friendly",
+        "tacos"
+      ]
+    },
+    {
+      "id": "mexican.ceviche",
+      "label": "Ceviche (Mexican-Style)",
+      "aka": ["Ceviche Mexicano"],
+      "category": "seafood",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 60, "handsOffMins": 40 },
+      "servingStyles": ["bowl", "dip", "tostadas"],
+      "mealArchetypes": [
+        "archetype.cold",
+        "archetype.seafood",
+        "archetype.fresh"
+      ],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein.seafood",
+          "items": ["ingredient.white_fish", "ingredient.shrimp"],
+          "chooseOne": true
+        },
+        { "role": "acid", "items": ["ingredient.lime"], "chooseOne": true },
+        {
+          "role": "vegetable.crunch",
+          "items": [
+            "ingredient.tomato",
+            "ingredient.onion_white",
+            "ingredient.cucumber"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "heat.optional",
+          "items": ["ingredient.jalapeno", "ingredient.serrano_chile"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.macerate",
+        "technique.chop",
+        "technique.mix",
+        "technique.chill"
+      ],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.bowl",
+        "equipment.knife",
+        "equipment.cutting_board",
+        "equipment.refrigerator"
+      ],
+      "ingredientsCore": [
+        "ingredient.white_fish",
+        "ingredient.lime",
+        "ingredient.tomato",
+        "ingredient.onion_white",
+        "ingredient.cilantro"
+      ],
+      "allergens": ["allergen.shellfish"],
+      "dietFlags": ["diet.gluten_free", "diet.pescatarian"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.main",
+        "fresh",
+        "pescatarian",
+        "planner.weeknight"
+      ]
+    },
+    {
+      "id": "mexican.flan",
+      "label": "Flan (Caramel Custard)",
+      "aka": ["Flan Napolitano"],
+      "category": "dessert",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 120, "handsOffMins": 95 },
+      "servingStyles": ["plated", "chilled"],
+      "mealArchetypes": ["archetype.custard", "archetype.baked"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "dairy.base",
+          "items": [
+            "ingredient.milk",
+            "ingredient.evaporated_milk",
+            "ingredient.condensed_milk"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein.egg",
+          "items": ["ingredient.egg"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar"],
+          "chooseOne": true
+        },
+        {
+          "role": "flavor",
+          "items": ["ingredient.vanilla"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.caramelize",
+        "technique.blend",
+        "technique.bain_marie",
+        "technique.chill"
+      ],
+      "equipmentRecommended": ["equipment.loaf_pan", "equipment.roasting_pan"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.baking_dish",
+        "equipment.whisk",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.egg",
+        "ingredient.milk",
+        "ingredient.sugar",
+        "ingredient.vanilla"
+      ],
+      "allergens": ["allergen.egg", "allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.dessert",
+        "make_ahead",
+        "family_favorite"
+      ]
+    },
+    {
+      "id": "mexican.tres_leches_cake",
+      "label": "Tres Leches Cake",
+      "aka": ["Three Milks Cake"],
+      "category": "dessert",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 45, "totalMins": 180, "handsOffMins": 120 },
+      "servingStyles": ["plated", "chilled", "party"],
+      "mealArchetypes": ["archetype.cake", "archetype.chilled_dessert"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "cake.base",
+          "items": ["ingredient.flour_wheat", "ingredient.baking_powder"],
+          "chooseOne": false
+        },
+        {
+          "role": "dairy.milks",
+          "items": [
+            "ingredient.milk",
+            "ingredient.evaporated_milk",
+            "ingredient.condensed_milk"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein.egg",
+          "items": ["ingredient.egg"],
+          "chooseOne": true
+        },
+        {
+          "role": "topping",
+          "items": ["ingredient.whipped_cream"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.bake",
+        "technique.poke_soak",
+        "technique.chill",
+        "technique.whip"
+      ],
+      "equipmentRecommended": ["equipment.mixer", "equipment.baking_dish"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.baking_dish",
+        "equipment.bowl",
+        "equipment.whisk"
+      ],
+      "ingredientsCore": [
+        "ingredient.flour_wheat",
+        "ingredient.egg",
+        "ingredient.milk",
+        "ingredient.condensed_milk",
+        "ingredient.whipped_cream"
+      ],
+      "allergens": ["allergen.egg", "allergen.dairy", "allergen.gluten"],
+      "dietFlags": [],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.dessert",
+        "make_ahead",
+        "party_favorite"
+      ]
+    },
+    {
+      "id": "mexican.horchata",
+      "label": "Horchata",
+      "aka": ["Agua Fresca de Horchata"],
+      "category": "drink",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 120, "handsOffMins": 110 },
+      "servingStyles": ["chilled", "drink"],
+      "mealArchetypes": ["archetype.drink", "archetype.chilled"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "grain.base",
+          "items": ["ingredient.rice_long_grain"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar", "ingredient.honey"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cinnamon", "ingredient.vanilla"],
+          "chooseOne": false
+        },
+        {
+          "role": "liquid",
+          "items": ["ingredient.water", "ingredient.milk"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.soak",
+        "technique.blend",
+        "technique.strain",
+        "technique.chill"
+      ],
+      "equipmentRecommended": ["equipment.blender", "equipment.fine_strainer"],
+      "equipmentMinimum": [
+        "equipment.blender",
+        "equipment.bowl",
+        "equipment.refrigerator"
+      ],
+      "ingredientsCore": [
+        "ingredient.rice_long_grain",
+        "ingredient.cinnamon",
+        "ingredient.sugar",
+        "ingredient.water"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free", "diet.vegetarian"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.drink",
+        "batch.friendly",
+        "make_ahead",
+        "chilled"
+      ]
+    },
+    {
+      "id": "mexican.agua_fresca_jamaica",
+      "label": "Agua Fresca de Jamaica (Hibiscus)",
+      "aka": ["Hibiscus Iced Tea"],
+      "category": "drink",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 45, "handsOffMins": 30 },
+      "servingStyles": ["chilled", "drink"],
+      "mealArchetypes": ["archetype.drink", "archetype.chilled"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "herbal.base",
+          "items": ["ingredient.hibiscus_dried"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar", "ingredient.honey"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid.optional",
+          "items": ["ingredient.lime"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.steep", "technique.strain", "technique.chill"],
+      "equipmentRecommended": ["equipment.fine_strainer"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stovetop",
+        "equipment.pitcher",
+        "equipment.refrigerator"
+      ],
+      "ingredientsCore": [
+        "ingredient.hibiscus_dried",
+        "ingredient.water",
+        "ingredient.sugar"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.mexican",
+        "course.drink",
+        "batch.friendly",
+        "chilled",
+        "vegan"
+      ]
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisines.mexican": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.chicken_tinga",
+        "mexican.birria",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.chiles_rellenos",
+        "mexican.tamales",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.tortilla_soup",
+        "mexican.quesadillas",
+        "mexican.nachos",
+        "mexican.guacamole",
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde",
+        "mexican.elote",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos",
+        "mexican.chilaquiles",
+        "mexican.huevos_rancheros",
+        "mexican.mole_poblano",
+        "mexican.cochinita_pibil",
+        "mexican.ceviche",
+        "mexican.flan",
+        "mexican.tres_leches_cake",
+        "mexican.horchata",
+        "mexican.agua_fresca_jamaica"
+      ]
+    },
+    "byArchetype": {
+      "archetype.taco": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.birria",
+        "mexican.cochinita_pibil"
+      ],
+      "archetype.street_food": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.quesadillas",
+        "mexican.nachos",
+        "mexican.elote"
+      ],
+      "archetype.stew": [
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.birria"
+      ],
+      "archetype.soup": [
+        "mexican.tortilla_soup",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde"
+      ],
+      "archetype.breakfast": [
+        "mexican.chilaquiles",
+        "mexican.huevos_rancheros"
+      ],
+      "archetype.salsa": [
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde"
+      ],
+      "archetype.dessert": ["mexican.flan", "mexican.tres_leches_cake"],
+      "archetype.drink": ["mexican.horchata", "mexican.agua_fresca_jamaica"]
+    },
+    "aliasIndex": {
+      "tacos al pastor": "mexican.tacos_al_pastor",
+      "al pastor tacos": "mexican.tacos_al_pastor",
+      "carne asada tacos": "mexican.carne_asada_tacos",
+      "carnitas": "mexican.carnitas",
+      "barbacoa": "mexican.barbacoa",
+      "tinga": "mexican.chicken_tinga",
+      "tinga de pollo": "mexican.chicken_tinga",
+      "birria": "mexican.birria",
+      "quesabirria": "mexican.birria",
+      "enchiladas rojas": "mexican.enchiladas_rojas",
+      "enchiladas verdes": "mexican.enchiladas_verdes",
+      "chiles rellenos": "mexican.chiles_rellenos",
+      "tamales": "mexican.tamales",
+      "pozole rojo": "mexican.pozole_rojo",
+      "pozole verde": "mexican.pozole_verde",
+      "menudo": "mexican.menudo",
+      "tortilla soup": "mexican.tortilla_soup",
+      "sopa de tortilla": "mexican.tortilla_soup",
+      "quesadillas": "mexican.quesadillas",
+      "nachos": "mexican.nachos",
+      "guacamole": "mexican.guacamole",
+      "pico de gallo": "mexican.pico_de_gallo",
+      "salsa fresca": "mexican.pico_de_gallo",
+      "salsa roja": "mexican.salsa_roja",
+      "salsa verde": "mexican.salsa_verde",
+      "elote": "mexican.elote",
+      "mexican rice": "mexican.arroz_rojo",
+      "arroz rojo": "mexican.arroz_rojo",
+      "refried beans": "mexican.frijoles_refritos",
+      "frijoles refritos": "mexican.frijoles_refritos",
+      "chilaquiles": "mexican.chilaquiles",
+      "huevos rancheros": "mexican.huevos_rancheros",
+      "mole poblano": "mexican.mole_poblano",
+      "chicken mole": "mexican.mole_poblano",
+      "cochinita pibil": "mexican.cochinita_pibil",
+      "ceviche": "mexican.ceviche",
+      "flan": "mexican.flan",
+      "tres leches": "mexican.tres_leches_cake",
+      "tres leches cake": "mexican.tres_leches_cake",
+      "horchata": "mexican.horchata",
+      "jamaica": "mexican.agua_fresca_jamaica",
+      "agua fresca de jamaica": "mexican.agua_fresca_jamaica"
+    },
+    "keywordIndex": {
+      "taco": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.birria",
+        "mexican.cochinita_pibil"
+      ],
+      "enchilada": ["mexican.enchiladas_rojas", "mexican.enchiladas_verdes"],
+      "salsa": [
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde"
+      ],
+      "soup": [
+        "mexican.tortilla_soup",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.birria"
+      ],
+      "beans": ["mexican.frijoles_refritos"],
+      "rice": ["mexican.arroz_rojo"],
+      "breakfast": ["mexican.chilaquiles", "mexican.huevos_rancheros"],
+      "dessert": ["mexican.flan", "mexican.tres_leches_cake"],
+      "drink": ["mexican.horchata", "mexican.agua_fresca_jamaica"]
+    },
+    "tagIndex": {
+      "cuisine.mexican": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.chicken_tinga",
+        "mexican.birria",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.chiles_rellenos",
+        "mexican.tamales",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.tortilla_soup",
+        "mexican.quesadillas",
+        "mexican.nachos",
+        "mexican.guacamole",
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde",
+        "mexican.elote",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos",
+        "mexican.chilaquiles",
+        "mexican.huevos_rancheros",
+        "mexican.mole_poblano",
+        "mexican.cochinita_pibil",
+        "mexican.ceviche",
+        "mexican.flan",
+        "mexican.tres_leches_cake",
+        "mexican.horchata",
+        "mexican.agua_fresca_jamaica"
+      ],
+      "course.main": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.chicken_tinga",
+        "mexican.birria",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.chiles_rellenos",
+        "mexican.tamales",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.tortilla_soup",
+        "mexican.quesadillas",
+        "mexican.ceviche",
+        "mexican.mole_poblano",
+        "mexican.cochinita_pibil"
+      ],
+      "course.side": [
+        "mexican.guacamole",
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde",
+        "mexican.elote",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos"
+      ],
+      "course.breakfast": ["mexican.chilaquiles", "mexican.huevos_rancheros"],
+      "course.dessert": ["mexican.flan", "mexican.tres_leches_cake"],
+      "course.drink": ["mexican.horchata", "mexican.agua_fresca_jamaica"],
+      "batch.friendly": [
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.chicken_tinga",
+        "mexican.birria",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.tamales",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.tortilla_soup",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos",
+        "mexican.mole_poblano",
+        "mexican.cochinita_pibil",
+        "mexican.horchata",
+        "mexican.agua_fresca_jamaica"
+      ],
+      "freezer.friendly": [
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.chicken_tinga",
+        "mexican.birria",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.tamales",
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.tortilla_soup",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos",
+        "mexican.mole_poblano",
+        "mexican.cochinita_pibil"
+      ],
+      "planner.weeknight": [
+        "mexican.carne_asada_tacos",
+        "mexican.chicken_tinga",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.tortilla_soup",
+        "mexican.quesadillas",
+        "mexican.nachos",
+        "mexican.guacamole",
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde",
+        "mexican.elote",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos",
+        "mexican.chilaquiles",
+        "mexican.huevos_rancheros",
+        "mexican.ceviche",
+        "mexican.agua_fresca_jamaica"
+      ]
+    },
+    "bySubprofile": {},
+    "byCategory": {
+      "street_food": [
+        "mexican.tacos_al_pastor",
+        "mexican.carne_asada_tacos",
+        "mexican.quesadillas",
+        "mexican.nachos",
+        "mexican.elote"
+      ],
+      "main": [
+        "mexican.carnitas",
+        "mexican.barbacoa",
+        "mexican.chicken_tinga",
+        "mexican.birria",
+        "mexican.enchiladas_rojas",
+        "mexican.enchiladas_verdes",
+        "mexican.chiles_rellenos",
+        "mexican.tamales",
+        "mexican.mole_poblano",
+        "mexican.cochinita_pibil"
+      ],
+      "stew": [
+        "mexican.pozole_rojo",
+        "mexican.pozole_verde",
+        "mexican.menudo",
+        "mexican.birria"
+      ],
+      "soup": ["mexican.tortilla_soup"],
+      "salsa": [
+        "mexican.pico_de_gallo",
+        "mexican.salsa_roja",
+        "mexican.salsa_verde"
+      ],
+      "side": [
+        "mexican.guacamole",
+        "mexican.elote",
+        "mexican.arroz_rojo",
+        "mexican.frijoles_refritos"
+      ],
+      "breakfast": ["mexican.chilaquiles", "mexican.huevos_rancheros"],
+      "dessert": ["mexican.flan", "mexican.tres_leches_cake"],
+      "drink": ["mexican.horchata", "mexican.agua_fresca_jamaica"],
+      "dip": ["mexican.guacamole"],
+      "snack": ["mexican.nachos"],
+      "seafood": ["mexican.ceviche"]
+    }
+  }
+}

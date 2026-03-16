@@ -1,6 +1,6 @@
 # GardenPlantingCalendarCalculator
 
-Planner-friendly planting calendar for **SSA’s garden domain**.  
+Planner-friendly planting calendar for **SSA’s garden domain**.
 
 This calculator takes your **climate**, **calendar**, and **crop** info (including Hebrew calendar + feast-day alignment from upstream), then computes:
 
@@ -31,6 +31,7 @@ It is designed to be a **“thinking front-end”** for garden planning, not a f
 
 - `GardenPlantingCalendarCalculator.shim.js`  
   Pure logic shim that:
+
   - Validates & normalizes payloads,
   - Computes planting & harvest windows,
   - Produces calendar events and summary metadata,
@@ -41,12 +42,14 @@ It is designed to be a **“thinking front-end”** for garden planning, not a f
 
 - `GardenPlantingCalendarCalculator.hooks.js`  
   React hooks for:
+
   - Running the shim,
   - Wiring the calculator into the garden planner,
   - Emitting planner events for SessionRunner and the Planning Graph.
 
 - `GardenPlantingCalendarCalculator.mappings.json`  
   Planning Graph “Next Steps” mapping, connecting outputs from this calculator into:
+
   - `gardenLayoutPlanner`
   - `irrigationPlanner`
   - `soilHealthTracker`
@@ -65,6 +68,7 @@ It is designed to be a **“thinking front-end”** for garden planning, not a f
 ### What this calculator does
 
 1. **Takes inputs:**
+
    - **Climate**
      - `lastFrostDate`, `firstFrostDate`
      - `zone`, `notes`
@@ -82,6 +86,7 @@ It is designed to be a **“thinking front-end”** for garden planning, not a f
      - `gardenLayout.beds[]` – basic structure for bed IDs and notes
 
 2. **Computes:**
+
    - **Planting windows**  
      ranges of dates where it’s safe & sensible to plant each crop, including successions.
    - **Harvest windows**  
@@ -91,7 +96,7 @@ It is designed to be a **“thinking front-end”** for garden planning, not a f
      - Planting
      - Harvest
      - Generic garden tasks (optional)
-   - **Summary metrics**  
+   - **Summary metrics**
      - `totalCropsPlanned`
      - `totalPlantingEvents`
      - `totalHarvestWindows`
@@ -224,8 +229,8 @@ Usage example (outside the view):
 js
 Copy code
 import { runGardenPlantingCalendarCalculatorShim } from "./GardenPlantingCalendarCalculator.shim";
-import eventBus from "@/services/eventBus";
-import featureFlags from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags";
 
 async function recomputePlantingCalendar(currentPayload) {
   const next = await runGardenPlantingCalendarCalculatorShim(currentPayload, {
@@ -537,3 +542,4 @@ GardenPlantingCalendarCalculator.view.jsx
 GardenPlantingCalendarCalculator.mappings.json
 
 …to keep everything in sync and Planning Graph–friendly.
+```

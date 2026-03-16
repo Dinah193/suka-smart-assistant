@@ -11,14 +11,70 @@
 // ---------------------------------------------------------
 // 1) Superset registry (LITERAL patterns only for Vite)
 // ---------------------------------------------------------
-const G_JS   = import.meta.glob('/src/**/*.js');
-const G_TS   = import.meta.glob('/src/**/*.ts');
-const G_JSX  = import.meta.glob('/src/**/*.jsx');
-const G_TSX  = import.meta.glob('/src/**/*.tsx');
-const G_MD   = import.meta.glob('/src/**/*.md');
-const G_MDX  = import.meta.glob('/src/**/*.mdx');
+const G_JS   = import.meta.glob([
+  '/src/**/*.js',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+]);
+const G_TS   = import.meta.glob([
+  '/src/**/*.ts',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+]);
+const G_JSX  = import.meta.glob([
+  '/src/**/*.jsx',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+]);
+const G_TSX  = import.meta.glob([
+  '/src/**/*.tsx',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+]);
+const G_MD   = import.meta.glob([
+  '/src/**/*.md',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+]);
+const G_MDX  = import.meta.glob([
+  '/src/**/*.mdx',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+]);
 // Remove this if you don't need JSON as raw:
-const G_JSON = import.meta.glob('/src/**/*.json', { as: 'raw' });
+const G_JSON = import.meta.glob([
+  '/src/**/*.json',
+  '!/src/tests/**',
+  '!/src/**/__tests__/**',
+  '!/src/**/*.test.*',
+  '!/src/**/*.spec.*',
+  '!/src/pages/**/Import.*',
+  '!/src/pages/**/import.*',
+], { query: '?raw', import: 'default' });
 
 // path -> () => Promise<Module>
 const ALL_MODULES = Object.assign({}, G_JS, G_TS, G_JSX, G_TSX, G_MD, G_MDX, G_JSON);

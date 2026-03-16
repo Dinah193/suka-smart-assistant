@@ -1,0 +1,574 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:44:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.minestrone_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Minestrone Soup",
+    "subtitle": "Hearty Italian vegetable & bean soup with pasta option",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical minestrone: soffritto base + tomatoes + beans + seasonal vegetables; pasta added near end.",
+        "Designed for SSA planners: ingredient roles, batch signals, freezing guidance, and optional variations."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "subprofiles": ["italian.rustic", "italian.weeknight"],
+    "category": "soup",
+    "mealArchetypes": ["one_pot", "stew_and_starch", "bowls"],
+    "servingStyles": ["one_pot", "family_style", "bowls"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.soup",
+      "one_pot",
+      "batch.friendly",
+      "freezer.friendly",
+      "weeknight.friendly",
+      "vegetable_forward",
+      "beans",
+      "comfort_food",
+      "contains_gluten.optional"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 1.5, "unit": "cups" },
+    "notes": "Makes ~10–12 cups depending on vegetables and broth reduction."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 40,
+    "totalMins": 65
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": "high",
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "high",
+    "notes": [
+      "If freezing, keep pasta separate and add fresh when reheating.",
+      "Flavor improves overnight; great for meal prep."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "umami": 4,
+    "sweetness": 1,
+    "sourness": 1,
+    "heat": 0,
+    "oilUse": 2,
+    "notes": [
+      "Umami comes from tomatoes + parmesan rind (optional).",
+      "Bright finish from lemon or vinegar if needed."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.dutch_oven_or_stockpot",
+      "tool.chef_knife",
+      "tool.cutting_board",
+      "tool.wooden_spoon",
+      "tool.ladle",
+      "tool.measuring_cups",
+      "tool.measuring_spoons"
+    ],
+    "minimum": [
+      "tool.stockpot",
+      "tool.knife",
+      "tool.cutting_board",
+      "tool.spoon"
+    ],
+    "optional": [
+      {
+        "id": "tool.immersion_blender",
+        "label": "Immersion blender",
+        "required": false,
+        "notes": "Blending a cup of soup adds body without cream."
+      },
+      {
+        "id": "tool.microplane",
+        "label": "Microplane/grater",
+        "required": false,
+        "notes": "For parmesan on top."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian.optional_vegan"],
+  "allergens": [
+    "allergen.celery",
+    "allergen.gluten.optional",
+    "allergen.dairy.optional"
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group_soffritto",
+      "label": "Soffritto Base",
+      "items": [
+        "fat.olive_oil",
+        "veg.onion",
+        "veg.carrot",
+        "veg.celery",
+        "aromatic.garlic"
+      ],
+      "notes": "Classic Italian base for soups and sauces."
+    },
+    {
+      "id": "group_soup_base",
+      "label": "Soup Base",
+      "items": [
+        "tomato.crushed",
+        "broth.vegetable",
+        "leaf.bay",
+        "herb.oregano_dried",
+        "herb.thyme_dried",
+        "salt.kosher",
+        "pepper.black"
+      ],
+      "notes": "Tomatoes + broth + herbs create the signature minestrone flavor."
+    },
+    {
+      "id": "group_veg_beans_pasta",
+      "label": "Vegetables + Beans + Pasta",
+      "items": [
+        "bean.cannellini",
+        "veg.green_beans",
+        "veg.zucchini",
+        "veg.potato",
+        "greens.kale_or_spinach",
+        "pasta.ditalini_or_small",
+        "cheese.parmesan_rind_optional"
+      ],
+      "notes": "Use seasonal vegetables; pasta is optional (or add when serving)."
+    },
+    {
+      "id": "group_finish",
+      "label": "Finish",
+      "items": ["herb.basil_fresh", "fat.olive_oil", "acid.lemon_or_vinegar"],
+      "notes": "Fresh herbs and a little acid brighten the soup."
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "fat.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 tbsp."
+    },
+    {
+      "id": "veg.onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium onion."
+    },
+    {
+      "id": "veg.carrot",
+      "label": "Carrots, diced",
+      "role": "veg",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 2 medium carrots."
+    },
+    {
+      "id": "veg.celery",
+      "label": "Celery, diced",
+      "role": "veg",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 2–3 stalks."
+    },
+    {
+      "id": "aromatic.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+
+    {
+      "id": "tomato.crushed",
+      "label": "Crushed tomatoes",
+      "role": "stew_base",
+      "amount": { "value": 800, "unit": "g" },
+      "notes": "Two 14–15 oz cans (or one 28 oz can)."
+    },
+    {
+      "id": "broth.vegetable",
+      "label": "Vegetable broth (or chicken broth)",
+      "role": "liquid",
+      "amount": { "value": 1200, "unit": "ml" },
+      "notes": "5 cups. Add more to adjust thickness."
+    },
+    {
+      "id": "leaf.bay",
+      "label": "Bay leaf",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "herb.oregano_dried",
+      "label": "Dried oregano",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "herb.thyme_dried",
+      "label": "Dried thyme",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Start here; adjust at the end based on broth and beans."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "veg.potato",
+      "label": "Potato, diced (optional but common)",
+      "role": "starch",
+      "amount": { "value": 250, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 medium potato; adds body."
+    },
+    {
+      "id": "veg.green_beans",
+      "label": "Green beans, cut into bite-size pieces",
+      "role": "veg",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "veg.zucchini",
+      "label": "Zucchini, diced",
+      "role": "veg",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "bean.cannellini",
+      "label": "Cannellini beans, drained and rinsed",
+      "role": "legume",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 2 cans (15 oz each) drained weight varies."
+    },
+    {
+      "id": "greens.kale_or_spinach",
+      "label": "Kale (chopped) or spinach",
+      "role": "greens",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "Kale holds up better; spinach is more delicate."
+    },
+    {
+      "id": "pasta.ditalini_or_small",
+      "label": "Small pasta (ditalini, small shells, or elbow)",
+      "role": "starch",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Add near the end; for freezer meal prep, cook separately."
+    },
+    {
+      "id": "cheese.parmesan_rind_optional",
+      "label": "Parmesan rind",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Simmer in soup for extra depth; remove before serving."
+    },
+
+    {
+      "id": "herb.basil_fresh",
+      "label": "Fresh basil, torn",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "acid.lemon_or_vinegar",
+      "label": "Lemon juice or red wine vinegar (to finish)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Add at the end if the soup needs brightness."
+    },
+    {
+      "id": "cheese.parmesan_grated",
+      "label": "Parmesan, grated (for serving)",
+      "role": "garnish",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_soffritto",
+      "title": "Build the soffritto",
+      "instructions": [
+        "Heat olive oil in a large pot over medium heat.",
+        "Add onion, carrot, and celery. Cook 8–10 minutes until softened and fragrant.",
+        "Add garlic and cook 30–60 seconds until aromatic (don’t brown)."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Soffritto cook", "minutes": 10 }],
+      "checks": [
+        "Vegetables softened and sweet-smelling, not browned.",
+        "Garlic fragrant, not burnt."
+      ]
+    },
+    {
+      "id": "step_02_add_base",
+      "title": "Add tomatoes, broth, and herbs",
+      "instructions": [
+        "Stir in crushed tomatoes, broth, oregano, thyme (if using), bay leaf (if using), salt, and pepper.",
+        "Add parmesan rind if using.",
+        "Bring to a gentle simmer."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": ["Soup is at a gentle simmer (small bubbles), not a hard boil."]
+    },
+    {
+      "id": "step_03_simmer_veg",
+      "title": "Simmer vegetables until tender",
+      "instructions": [
+        "Add potato (if using) and green beans. Simmer 15 minutes.",
+        "Add zucchini (if using) and simmer 8–10 minutes more.",
+        "Stir occasionally to prevent sticking."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 25,
+      "timers": [
+        { "label": "Potato/green bean simmer", "minutes": 15 },
+        { "label": "Zucchini simmer", "minutes": 10 }
+      ],
+      "checks": ["Potatoes and beans are tender but not mushy."]
+    },
+    {
+      "id": "step_04_add_beans_greens",
+      "title": "Add beans and greens",
+      "instructions": [
+        "Stir in cannellini beans and chopped kale/spinach.",
+        "Simmer 5 minutes until greens are tender.",
+        "If using spinach, it may only need 1–2 minutes."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "timers": [{ "label": "Beans + greens simmer", "minutes": 5 }]
+    },
+    {
+      "id": "step_05_add_pasta_optional",
+      "title": "Add pasta (optional) or cook separately",
+      "instructions": [
+        "If adding pasta directly: bring soup to a slightly stronger simmer and stir in pasta; cook until al dente (8–10 minutes, check package).",
+        "If meal-prepping/freezing: cook pasta separately in salted water, drain, and add to individual bowls when serving."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Pasta cook (if in soup)", "minutes": 9 }],
+      "checks": ["Pasta is al dente (still has bite)."]
+    },
+    {
+      "id": "step_06_finish_adjust",
+      "title": "Finish and adjust seasoning",
+      "instructions": [
+        "Remove bay leaf and parmesan rind (if used).",
+        "Taste and adjust salt and pepper.",
+        "If needed, add a squeeze of lemon or splash of red wine vinegar for brightness.",
+        "Serve with basil and parmesan (optional)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "Seasoning balanced: savory, tomato-forward, not flat.",
+        "Greens tender, vegetables cooked through."
+      ]
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Cool soup quickly for storage: portion into shallow containers before refrigerating.",
+      "If using dairy garnish, keep refrigerated and add at serving."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": [
+        "Refrigerate up to 4 days in airtight containers.",
+        "Pasta will absorb broth over time; add extra broth when reheating or store pasta separately."
+      ]
+    },
+    "freeze": {
+      "notes": [
+        "Freeze up to 3 months.",
+        "Best practice: freeze soup without pasta; add freshly cooked pasta when serving.",
+        "Thaw overnight in fridge or reheat gently from frozen with added broth/water."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat on stovetop over medium-low until simmering.",
+        "Add broth/water to adjust thickness as needed."
+      ]
+    }
+  },
+
+  "notes": [
+    "Seasonal swaps: cabbage, zucchini, squash, peas, or carrots can rotate based on availability.",
+    "For extra body: blend 1 cup of soup and stir back in (or mash some beans).",
+    "Optional protein: add cooked shredded chicken or Italian sausage (not traditional vegetarian minestrone, but common in modern kitchens)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_vegan",
+      "label": "Vegan minestrone",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "notes": [
+          "Use vegetable broth only.",
+          "Skip parmesan rind and parmesan topping.",
+          "Boost umami with a small spoon of tomato paste or a splash of tamari if desired."
+        ]
+      }
+    },
+    {
+      "id": "variation_pasta_separate_for_freezer",
+      "label": "Freezer-friendly (pasta cooked separately)",
+      "when": { "storage": "freeze" },
+      "adapt": {
+        "notes": [
+          "Do not add pasta to the pot.",
+          "Cook pasta separately and add to bowls when serving."
+        ]
+      }
+    },
+    {
+      "id": "variation_more_rustic",
+      "label": "Rustic minestrone with cabbage",
+      "when": { "style": "rustic" },
+      "adapt": {
+        "notes": [
+          "Add 2 cups shredded cabbage with green beans.",
+          "Simmer 20 minutes total before adding beans and greens."
+        ],
+        "addIngredients": [
+          {
+            "id": "veg.cabbage",
+            "label": "Green cabbage, shredded",
+            "amount": { "value": 200, "unit": "g" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation_meaty_optional",
+      "label": "Meaty minestrone (optional)",
+      "when": { "protein": "sausage_or_chicken" },
+      "adapt": {
+        "notes": [
+          "Brown 225 g Italian sausage first, remove, then build soffritto in rendered fat + olive oil.",
+          "Add sausage back in with beans."
+        ],
+        "addIngredients": [
+          {
+            "id": "protein.italian_sausage",
+            "label": "Italian sausage (optional)",
+            "amount": { "value": 225, "unit": "g" },
+            "optional": true
+          }
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "stew_base", "ids": ["tomato.crushed", "broth.vegetable"] },
+      { "role": "legume", "ids": ["bean.cannellini"] },
+      {
+        "role": "veg",
+        "ids": [
+          "veg.onion",
+          "veg.carrot",
+          "veg.celery",
+          "veg.green_beans",
+          "veg.zucchini"
+        ]
+      },
+      { "role": "greens", "ids": ["greens.kale_or_spinach"] },
+      { "role": "starch", "ids": ["pasta.ditalini_or_small", "veg.potato"] }
+    ],
+    "pairWith": {
+      "sides": [
+        "bread.crusty",
+        "salad.simple_green",
+        "side.roasted_vegetables"
+      ],
+      "toppings": [
+        "cheese.parmesan_grated",
+        "herb.basil_fresh",
+        "fat.olive_oil"
+      ]
+    },
+    "makeAhead": {
+      "notes": [
+        "Make full pot for weekly lunches.",
+        "Freeze in 2-cup portions; keep pasta separate."
+      ]
+    }
+  },
+
+  "methods": ["technique.saute", "technique.simmer", "technique.one_pot"],
+
+  "compat": {
+    "aliases": [
+      "minestrone",
+      "italian vegetable soup",
+      "bean and vegetable soup",
+      "minestrone with pasta"
+    ],
+    "keywordBoost": [
+      "soffritto",
+      "cannellini",
+      "parmesan rind",
+      "ditalini",
+      "one pot"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

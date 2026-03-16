@@ -4,33 +4,82 @@
  * ---------------------------------------------
  * A resilient client for triggering n8n webhooks and calling the n8n Public API.
  *
- * Env vars:
- *   N8N_BASE_URL         e.g. https://automations.yourdomain.com
- *   N8N_API_KEY          Public API key (Enterprise/Cloud/Pro; or self-hosted public API)
- *   N8N_WEBHOOK_SECRET   Shared secret for HMAC signing to your Webhook node (optional)
- *   N8N_TIMEOUT_MS       Request timeout (default 20000)
- *   N8N_RETRY_MAX        Max retries on 429/5xx (default 3)
- *   N8N_RETRY_BASE_MS    Base backoff ms (default 400)
- *   N8N_NAME_CACHE_TTL   ms for workflow name->id cache (default 300000 = 5m)
- *   N8N_CB_OPEN_MS       Circuit breaker open cooldown ms (default 15000)
+ * Env vars (supports both Vite + Node):
+ *   VITE_N8N_BASE_URL / N8N_BASE_URL         e.g. https://automations.yourdomain.com
+ *   VITE_N8N_API_KEY  / N8N_API_KEY          Public API key
+ *   VITE_N8N_WEBHOOK_SECRET / N8N_WEBHOOK_SECRET   Shared secret for HMAC signing (optional)
+ *   VITE_N8N_TIMEOUT_MS / N8N_TIMEOUT_MS     Request timeout (default 20000)
+ *   VITE_N8N_RETRY_MAX / N8N_RETRY_MAX       Max retries on 429/5xx (default 3)
+ *   VITE_N8N_RETRY_BASE_MS / N8N_RETRY_BASE_MS Base backoff ms (default 400)
+ *   VITE_N8N_NAME_CACHE_TTL / N8N_NAME_CACHE_TTL  ms for workflow name->id cache (default 300000 = 5m)
+ *   VITE_N8N_CB_OPEN_MS / N8N_CB_OPEN_MS     Circuit breaker open cooldown ms (default 15000)
  */
 
-const axios = require("axios");
-const crypto = require("crypto");
-const ms = require("ms");
-const { URL } = require("url");
+import axios from "axios";
+import ms from "ms";
+
+/* -------------------------------------------
+   Env helper (Vite + Node)
+--------------------------------------------*/
+function readEnv(key) {
+  // Vite (browser build)
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      const v = import.meta.env[key];
+      if (v !== undefined) return v;
+    }
+  } catch (_) {
+    // ignore
+  }
+  // Node / legacy
+  try {
+    if (typeof process !== "undefined" && process.env) {
+      const v = process.env[key];
+      if (v !== undefined) return v;
+    }
+  } catch (_) {
+    // ignore
+  }
+  return undefined;
+}
+
+function readEnvEither(viteKey, nodeKey, fallback = "") {
+  const a = readEnv(viteKey);
+  if (a !== undefined && a !== null && String(a).length) return a;
+  const b = readEnv(nodeKey);
+  if (b !== undefined && b !== null && String(b).length) return b;
+  return fallback;
+}
 
 /* -------------------------------------------
    Config
 --------------------------------------------*/
-const BASE_URL = process.env.N8N_BASE_URL?.replace(/\/+$/, "") || "http://localhost:5678";
-const API_KEY = process.env.N8N_API_KEY || "";
-const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || "";
-const TIMEOUT = Number(process.env.N8N_TIMEOUT_MS || 20000);
-const RETRY_MAX = Number(process.env.N8N_RETRY_MAX || 3);
-const RETRY_BASE_MS = Number(process.env.N8N_RETRY_BASE_MS || 400);
-const NAME_CACHE_TTL = Number(process.env.N8N_NAME_CACHE_TTL || 300_000);
-const CB_OPEN_MS = Number(process.env.N8N_CB_OPEN_MS || 15_000);
+const BASE_URL = String(
+  readEnvEither("VITE_N8N_BASE_URL", "N8N_BASE_URL", "http://localhost:5678")
+).replace(/\/+$/, "");
+
+const API_KEY = readEnvEither("VITE_N8N_API_KEY", "N8N_API_KEY", "");
+const WEBHOOK_SECRET = readEnvEither(
+  "VITE_N8N_WEBHOOK_SECRET",
+  "N8N_WEBHOOK_SECRET",
+  ""
+);
+
+const TIMEOUT = Number(
+  readEnvEither("VITE_N8N_TIMEOUT_MS", "N8N_TIMEOUT_MS", 20000)
+);
+const RETRY_MAX = Number(
+  readEnvEither("VITE_N8N_RETRY_MAX", "N8N_RETRY_MAX", 3)
+);
+const RETRY_BASE_MS = Number(
+  readEnvEither("VITE_N8N_RETRY_BASE_MS", "N8N_RETRY_BASE_MS", 400)
+);
+const NAME_CACHE_TTL = Number(
+  readEnvEither("VITE_N8N_NAME_CACHE_TTL", "N8N_NAME_CACHE_TTL", 300000)
+);
+const CB_OPEN_MS = Number(
+  readEnvEither("VITE_N8N_CB_OPEN_MS", "N8N_CB_OPEN_MS", 15000)
+);
 
 /* -------------------------------------------
    Axios instances
@@ -59,16 +108,60 @@ let _cbOpenUntil = 0;
 --------------------------------------------*/
 const sleep = (n) => new Promise((r) => setTimeout(r, n));
 
-function computeHmacSignature({ secret, bodyString, timestamp }) {
+/**
+ * Compute HMAC SHA-256 signature in either:
+ * - Browser: Web Crypto (crypto.subtle)
+ * - Node: dynamic import('crypto') (hidden from bundlers)
+ */
+async function computeHmacSignature({ secret, bodyString, timestamp }) {
   const payload = `${timestamp}.${bodyString}`;
-  return crypto.createHmac("sha256", secret).update(payload).digest("hex");
+
+  // Browser WebCrypto
+  const subtle = globalThis?.crypto?.subtle;
+  if (subtle && typeof TextEncoder !== "undefined") {
+    const enc = new TextEncoder();
+    const key = await subtle.importKey(
+      "raw",
+      enc.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const sigBuf = await subtle.sign("HMAC", key, enc.encode(payload));
+    const bytes = new Uint8Array(sigBuf);
+    let hex = "";
+    for (let i = 0; i < bytes.length; i++) {
+      hex += bytes[i].toString(16).padStart(2, "0");
+    }
+    return hex;
+  }
+
+  // Node crypto (avoid static import so Vite doesn't externalize at build time)
+  try {
+    const importer = new Function("m", "return import(m)");
+    const mod = await importer("crypto");
+    const nodeCrypto = mod?.default || mod;
+    return nodeCrypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+  } catch (_) {
+    // No crypto available
+    throw new Error(
+      "HMAC signing requested but no crypto implementation is available in this runtime."
+    );
+  }
 }
 
-function webhookHeaders(body, extra = {}) {
+async function webhookHeaders(body, extra = {}) {
   if (!WEBHOOK_SECRET) return { "content-type": "application/json", ...extra };
   const ts = Date.now().toString();
   const bodyStr = typeof body === "string" ? body : JSON.stringify(body ?? {});
-  const sig = computeHmacSignature({ secret: WEBHOOK_SECRET, bodyString: bodyStr, timestamp: ts });
+  const sig = await computeHmacSignature({
+    secret: WEBHOOK_SECRET,
+    bodyString: bodyStr,
+    timestamp: ts,
+  });
   return {
     "content-type": "application/json",
     "x-n8n-timestamp": ts,
@@ -99,7 +192,7 @@ function jitteredBackoff(base, attempt) {
   const rawDelay = base * expo;
   // +/- 20% jitter
   const jitter = rawDelay * (0.6 + Math.random() * 0.8);
-  return Math.max(50, Math.min(jitter, 30_000));
+  return Math.max(50, Math.min(jitter, 30000));
 }
 
 function honorRetryAfter(err, fallbackMs) {
@@ -168,7 +261,7 @@ async function runWorkflow(workflowId, payload = {}, opts = {}) {
   const {
     waitForFinish = false,
     pollIntervalMs = 1200,
-    timeoutMs = 90_000,
+    timeoutMs = 90000,
     idempotencyKey = undefined,
     meta = undefined,
   } = opts;
@@ -178,32 +271,34 @@ async function runWorkflow(workflowId, payload = {}, opts = {}) {
   let res;
   try {
     res = await resilientRequest(() =>
-      api.post(
-        `/workflows/${encodeURIComponent(workflowId)}/run`,
-        body,
-        { headers: withIdempotency(commonHeaders, idempotencyKey) }
-      )
+      api.post(`/workflows/${encodeURIComponent(workflowId)}/run`, body, {
+        headers: withIdempotency(commonHeaders, idempotencyKey),
+      })
     );
   } catch (_) {
     res = await resilientRequest(() =>
-      rest.post(
-        `/workflows/${encodeURIComponent(workflowId)}/run`,
-        body,
-        { headers: withIdempotency(commonHeaders, idempotencyKey) }
-      )
+      rest.post(`/workflows/${encodeURIComponent(workflowId)}/run`, body, {
+        headers: withIdempotency(commonHeaders, idempotencyKey),
+      })
     );
   }
 
-  const executionId = res?.data?.executionId || res?.data?.id || res?.data?.data?.id;
+  const executionId =
+    res?.data?.executionId || res?.data?.id || res?.data?.data?.id;
   if (!waitForFinish || !executionId) return { executionId, data: res?.data };
 
   const start = Date.now();
   for (;;) {
     const info = await getExecution(executionId);
     const status = info?.status || info?.data?.status || info?.state;
-    if (["success", "error", "crashed", "canceled"].includes(status)) return { executionId, ...info };
+    if (["success", "error", "crashed", "canceled"].includes(status))
+      return { executionId, ...info };
     if (Date.now() - start > timeoutMs) {
-      throw new Error(`n8n runWorkflow timed out after ${ms(timeoutMs)} (executionId=${executionId})`);
+      throw new Error(
+        `n8n runWorkflow timed out after ${ms(
+          timeoutMs
+        )} (executionId=${executionId})`
+      );
     }
     await sleep(pollIntervalMs);
   }
@@ -219,7 +314,10 @@ async function runWorkflowByName(name, payload = {}, opts = {}) {
   }
 
   const wf = await findWorkflowByName(name, { tag });
-  if (!wf?.id) throw new Error(`Workflow not found by name "${name}"${tag ? ` (tag=${tag})` : ""}`);
+  if (!wf?.id)
+    throw new Error(
+      `Workflow not found by name "${name}"${tag ? ` (tag=${tag})` : ""}`
+    );
   _nameIdCache.set(name, { id: wf.id, ts: Date.now() });
 
   return runWorkflow(wf.id, payload, restOpts);
@@ -228,10 +326,14 @@ async function runWorkflowByName(name, payload = {}, opts = {}) {
 /** Get execution by ID */
 async function getExecution(executionId) {
   try {
-    const r = await resilientRequest(() => api.get(`/executions/${encodeURIComponent(executionId)}`));
+    const r = await resilientRequest(() =>
+      api.get(`/executions/${encodeURIComponent(executionId)}`)
+    );
     return r.data;
   } catch (_) {
-    const r = await resilientRequest(() => rest.get(`/executions/${encodeURIComponent(executionId)}`));
+    const r = await resilientRequest(() =>
+      rest.get(`/executions/${encodeURIComponent(executionId)}`)
+    );
     return r.data;
   }
 }
@@ -250,10 +352,14 @@ async function listExecutions(params = {}) {
 /** Cancel an execution (if supported) */
 async function cancelExecution(executionId) {
   try {
-    const r = await resilientRequest(() => api.delete(`/executions/${encodeURIComponent(executionId)}`));
+    const r = await resilientRequest(() =>
+      api.delete(`/executions/${encodeURIComponent(executionId)}`)
+    );
     return r.data;
   } catch (_) {
-    const r = await resilientRequest(() => rest.delete(`/executions/${encodeURIComponent(executionId)}`));
+    const r = await resilientRequest(() =>
+      rest.delete(`/executions/${encodeURIComponent(executionId)}`)
+    );
     return r.data;
   }
 }
@@ -264,10 +370,14 @@ async function cancelExecution(executionId) {
 
 async function getWorkflow(workflowId) {
   try {
-    const r = await resilientRequest(() => api.get(`/workflows/${encodeURIComponent(workflowId)}`));
+    const r = await resilientRequest(() =>
+      api.get(`/workflows/${encodeURIComponent(workflowId)}`)
+    );
     return r.data;
   } catch (_) {
-    const r = await resilientRequest(() => rest.get(`/workflows/${encodeURIComponent(workflowId)}`));
+    const r = await resilientRequest(() =>
+      rest.get(`/workflows/${encodeURIComponent(workflowId)}`)
+    );
     return r.data;
   }
 }
@@ -310,7 +420,7 @@ async function triggerWebhook(webhookUrl, opts = {}) {
   const query = opts.query || {};
   const idk = opts.idempotencyKey;
 
-  // merge query params into URL safely
+  // merge query params into URL safely (URL is global in browsers + modern node)
   const u = new URL(webhookUrl, BASE_URL);
   for (const [k, v] of Object.entries(query)) {
     if (v === undefined || v === null) continue;
@@ -318,7 +428,7 @@ async function triggerWebhook(webhookUrl, opts = {}) {
   }
 
   const headersBase = opts.sign
-    ? webhookHeaders(body, opts.headers)
+    ? await webhookHeaders(body, opts.headers)
     : { "content-type": "application/json", ...(opts.headers || {}) };
 
   const headers = withIdempotency(headersBase, idk);
@@ -369,9 +479,15 @@ async function ping() {
 function withMeta(meta = {}) {
   return {
     runWorkflow: (id, payload = {}, opts = {}) =>
-      runWorkflow(id, payload, { ...opts, meta: { ...(opts.meta || {}), ...meta } }),
+      runWorkflow(id, payload, {
+        ...opts,
+        meta: { ...(opts.meta || {}), ...meta },
+      }),
     runWorkflowByName: (name, payload = {}, opts = {}) =>
-      runWorkflowByName(name, payload, { ...opts, meta: { ...(opts.meta || {}), ...meta } }),
+      runWorkflowByName(name, payload, {
+        ...opts,
+        meta: { ...(opts.meta || {}), ...meta },
+      }),
     triggerWebhook: (url, opts = {}) => triggerWebhook(url, opts),
     getExecution,
     listExecutions,
@@ -386,10 +502,61 @@ function withMeta(meta = {}) {
   };
 }
 
+/* -------------------------------------------------------------------------- */
+/* ✅ Compatibility export for src/automation/n8nBridge.js                      */
+/* -------------------------------------------------------------------------- */
+/**
+ * triggerFlow
+ * Bridge-friendly helper expected by n8nBridge:
+ * - If opts.webhookUrl provided -> triggerWebhook(url)
+ * - Else if opts.webhookHash provided -> triggerWebhook(buildWebhookUrl(hash, suffix))
+ * - Else if opts.testWebhookHash provided -> triggerWebhook(buildTestWebhookUrl(hash, suffix))
+ * - Else if opts.workflowId provided -> runWorkflow(id)
+ * - Else -> runWorkflowByName(flow)
+ *
+ * @param {string} flow  workflow name (default) or label used by your bridge
+ * @param {object} payload
+ * @param {object} opts
+ *   {
+ *     webhookUrl?: string,
+ *     webhookHash?: string,
+ *     testWebhookHash?: string,
+ *     suffix?: string,
+ *     webhook?: { method?, headers?, sign?, query?, idempotencyKey? },
+ *     workflowId?: string,
+ *     workflow?: { waitForFinish?, pollIntervalMs?, timeoutMs?, idempotencyKey?, meta?, tag? }
+ *   }
+ */
+async function triggerFlow(flow, payload = {}, opts = {}) {
+  const webhookOpts = opts.webhook || {};
+  const wfOpts = opts.workflow || {};
+
+  if (opts.webhookUrl) {
+    return triggerWebhook(opts.webhookUrl, { ...webhookOpts, body: payload });
+  }
+
+  if (opts.webhookHash) {
+    const url = buildWebhookUrl(opts.webhookHash, opts.suffix || "");
+    return triggerWebhook(url, { ...webhookOpts, body: payload });
+  }
+
+  if (opts.testWebhookHash) {
+    const url = buildTestWebhookUrl(opts.testWebhookHash, opts.suffix || "");
+    return triggerWebhook(url, { ...webhookOpts, body: payload });
+  }
+
+  if (opts.workflowId) {
+    return runWorkflow(opts.workflowId, payload, wfOpts);
+  }
+
+  // Default: treat "flow" as workflow NAME
+  return runWorkflowByName(String(flow || ""), payload, wfOpts);
+}
+
 /* -------------------------------------------
-   Exports
+   ESM Exports (Vite/Rollup friendly)
 --------------------------------------------*/
-module.exports = {
+export {
   // config
   BASE_URL,
   API_KEY,
@@ -414,4 +581,29 @@ module.exports = {
   // misc
   ping,
   withMeta,
+
+  // ✅ bridge compat
+  triggerFlow,
+};
+
+// Optional default export for convenience
+export default {
+  BASE_URL,
+  API_KEY,
+  WEBHOOK_SECRET,
+  runWorkflow,
+  runWorkflowByName,
+  getExecution,
+  listExecutions,
+  cancelExecution,
+  getWorkflow,
+  listWorkflows,
+  listWorkflowsByTag,
+  findWorkflowByName,
+  triggerWebhook,
+  buildWebhookUrl,
+  buildTestWebhookUrl,
+  ping,
+  withMeta,
+  triggerFlow,
 };

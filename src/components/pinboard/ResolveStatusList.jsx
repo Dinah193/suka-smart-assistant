@@ -36,7 +36,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let automation = null;
@@ -48,7 +48,8 @@ let useMealPlanStore = () => ({
   retryAction: null, // optional (entry) => Promise<void> | void
 });
 try {
-  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
+  useMealPlanStore =
+    require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
 } catch {}
 
 /* ---------------------------------- Helpers --------------------------------- */
@@ -118,8 +119,21 @@ export default function ResolveStatusList({
   className,
 }) {
   const {
-    CheckCircle2, XCircle, Clock, AlertTriangle, Info, RefreshCcw, Trash2, Search, Filter,
-    ChevronDown, ChevronUp, Download, Upload, Zap, ExternalLink
+    CheckCircle2,
+    XCircle,
+    Clock,
+    AlertTriangle,
+    Info,
+    RefreshCcw,
+    Trash2,
+    Search,
+    Filter,
+    ChevronDown,
+    ChevronUp,
+    Download,
+    Upload,
+    Zap,
+    ExternalLink,
   } = Icons;
 
   const ChevronDownIcon = ChevronDown || (() => null);
@@ -128,7 +142,9 @@ export default function ResolveStatusList({
   const mealPlan = useMealPlanStore();
 
   /* ----------------------------------- State ---------------------------------- */
-  const [log, setLog] = useState(() => (Array.isArray(items) ? items.map(hydrate) : loadLog()));
+  const [log, setLog] = useState(() =>
+    Array.isArray(items) ? items.map(hydrate) : loadLog()
+  );
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("open"); // open|ok|failed|all
@@ -180,75 +196,137 @@ export default function ResolveStatusList({
 
     const handlers = [
       // Pinboard bulk actions
-      ["pinboard.plan", (e) => add({ type: "plan", status: "ok", title: "Added to plan", count: e?.count, when: nowISO() })],
-      ["pinboard.batch", (e) => add({ type: "batch", status: "ok", title: "Added to batch queue", count: e?.count, when: nowISO() })],
-      ["pinboard.unpin", (e) => add({ type: "unpin", status: "ok", title: "Unpinned", count: e?.count, when: nowISO() })],
+      [
+        "pinboard.plan",
+        (e) =>
+          add({
+            type: "plan",
+            status: "ok",
+            title: "Added to plan",
+            count: e?.count,
+            when: nowISO(),
+          }),
+      ],
+      [
+        "pinboard.batch",
+        (e) =>
+          add({
+            type: "batch",
+            status: "ok",
+            title: "Added to batch queue",
+            count: e?.count,
+            when: nowISO(),
+          }),
+      ],
+      [
+        "pinboard.unpin",
+        (e) =>
+          add({
+            type: "unpin",
+            status: "ok",
+            title: "Unpinned",
+            count: e?.count,
+            when: nowISO(),
+          }),
+      ],
 
       // Planner conflicts
-      ["meals.planner.conflicts.summary", (e) =>
-        add({
-          type: "conflict",
-          status: e?.total ? "partial" : "ok",
-          title: e?.total ? `Conflicts detected (${e.total})` : "No conflicts",
-          message: e?.high ? `${e.high} high` : "",
-          when: nowISO(),
-        }),
+      [
+        "meals.planner.conflicts.summary",
+        (e) =>
+          add({
+            type: "conflict",
+            status: e?.total ? "partial" : "ok",
+            title: e?.total
+              ? `Conflicts detected (${e.total})`
+              : "No conflicts",
+            message: e?.high ? `${e.high} high` : "",
+            when: nowISO(),
+          }),
       ],
-      ["meals.planner.conflict.resolved", (e) =>
-        add({ type: "conflict", status: "ok", title: "Conflict resolved", message: e?.type, when: nowISO() }),
+      [
+        "meals.planner.conflict.resolved",
+        (e) =>
+          add({
+            type: "conflict",
+            status: "ok",
+            title: "Conflict resolved",
+            message: e?.type,
+            when: nowISO(),
+          }),
       ],
-      ["meals.planner.conflict.resolveAll", (e) =>
-        add({
-          type: "conflict",
-          status: "ok",
-          title: "Resolve all complete",
-          message: `${e?.total || 0} processed`,
-          when: nowISO(),
-        }),
+      [
+        "meals.planner.conflict.resolveAll",
+        (e) =>
+          add({
+            type: "conflict",
+            status: "ok",
+            title: "Resolve all complete",
+            message: `${e?.total || 0} processed`,
+            when: nowISO(),
+          }),
       ],
 
       // Grocery add
-      ["meals.grocery.added", (e) =>
-        add({
-          type: "grocery",
-          status: "ok",
-          title: "Grocery items added",
-          count: e?.count,
-          when: nowISO(),
-        }),
+      [
+        "meals.grocery.added",
+        (e) =>
+          add({
+            type: "grocery",
+            status: "ok",
+            title: "Grocery items added",
+            count: e?.count,
+            when: nowISO(),
+          }),
       ],
 
       // Template apply/preview
-      ["meals.plan.applyTemplate", (e) =>
-        add({
-          type: "template",
-          status: "ok",
-          title: "Template applied",
-          message: e?.title,
-          when: nowISO(),
-        }),
+      [
+        "meals.plan.applyTemplate",
+        (e) =>
+          add({
+            type: "template",
+            status: "ok",
+            title: "Template applied",
+            message: e?.title,
+            when: nowISO(),
+          }),
       ],
-      ["meals.plan.previewTemplate", (e) =>
-        add({
-          type: "template",
-          status: "pending",
-          title: "Preview template",
-          when: nowISO(),
-        }),
+      [
+        "meals.plan.previewTemplate",
+        (e) =>
+          add({
+            type: "template",
+            status: "pending",
+            title: "Preview template",
+            when: nowISO(),
+          }),
       ],
 
       // Batch add (from RecipeCard)
-      ["meals.batch.added", (e) => add({ type: "batch", status: "ok", title: "Added to batch", message: e?.title, when: nowISO() })],
+      [
+        "meals.batch.added",
+        (e) =>
+          add({
+            type: "batch",
+            status: "ok",
+            title: "Added to batch",
+            message: e?.title,
+            when: nowISO(),
+          }),
+      ],
 
       // Generic error hook
-      ["error", (e) =>
-        add({
-          type: "other",
-          status: "failed",
-          title: e?.title || "Error",
-          message: e?.message || "",
-          when: nowISO(),
-        }),
+      [
+        "error",
+        (e) =>
+          add({
+            type: "other",
+            status: "failed",
+            title: e?.title || "Error",
+            message: e?.message || "",
+            when: nowISO(),
+          }),
       ],
     ];
 
@@ -264,7 +342,11 @@ export default function ResolveStatusList({
       const typeOk = typeFilter === "all" || row.type === typeFilter;
       const statusOk =
         statusFilter === "all" ||
-        (statusFilter === "open" ? row.status === "pending" || row.status === "partial" || row.status === "failed" : row.status === statusFilter);
+        (statusFilter === "open"
+          ? row.status === "pending" ||
+            row.status === "partial" ||
+            row.status === "failed"
+          : row.status === statusFilter);
       const textOk =
         !needle ||
         [row.title, row.message, row.meta?.reason, row.meta?.detail]
@@ -278,7 +360,14 @@ export default function ResolveStatusList({
   }, [log, q, typeFilter, statusFilter]);
 
   const counts = useMemo(() => {
-    const c = { total: log.length, ok: 0, failed: 0, pending: 0, partial: 0, open: 0 };
+    const c = {
+      total: log.length,
+      ok: 0,
+      failed: 0,
+      pending: 0,
+      partial: 0,
+      open: 0,
+    };
     for (const r of log) {
       c[r.status] = (c[r.status] || 0) + 1;
     }
@@ -298,18 +387,31 @@ export default function ResolveStatusList({
       setBusy(true);
       // Prefer external retry; else store; else automation
       if (typeof onRetry === "function") await onRetry(entry);
-      else if (typeof mealPlan.retryAction === "function") await mealPlan.retryAction(entry);
-      else if (automation?.runTemplate) await automation.runTemplate("meals.generic.retry", { entry });
+      else if (typeof mealPlan.retryAction === "function")
+        await mealPlan.retryAction(entry);
+      else if (automation?.runTemplate)
+        await automation.runTemplate("meals.generic.retry", { entry });
       // Mark ok if we reached here without throwing
       setLog((prev) => {
-        const next = prev.map((r) => (r.id === entry.id ? { ...r, status: "ok", when: nowISO() } : r));
+        const next = prev.map((r) =>
+          r.id === entry.id ? { ...r, status: "ok", when: nowISO() } : r
+        );
         saveLog(next);
         return next;
       });
     } catch (e) {
       // Keep failed but update timestamp
       setLog((prev) => {
-        const next = prev.map((r) => (r.id === entry.id ? { ...r, status: "failed", when: nowISO(), meta: { ...r.meta, reason: e?.message || "Retry failed" } } : r));
+        const next = prev.map((r) =>
+          r.id === entry.id
+            ? {
+                ...r,
+                status: "failed",
+                when: nowISO(),
+                meta: { ...r.meta, reason: e?.message || "Retry failed" },
+              }
+            : r
+        );
         saveLog(next);
         return next;
       });
@@ -319,7 +421,12 @@ export default function ResolveStatusList({
   }
 
   async function retryAllFailed() {
-    const todo = filtered.filter((r) => r.status === "failed" || r.status === "partial" || r.status === "pending");
+    const todo = filtered.filter(
+      (r) =>
+        r.status === "failed" ||
+        r.status === "partial" ||
+        r.status === "pending"
+    );
     if (!todo.length) return;
     setBusy(true);
     for (const entry of todo) {
@@ -358,7 +465,12 @@ export default function ResolveStatusList({
         ? "bg-amber-50 text-amber-700 border-amber-200"
         : "bg-gray-50 text-gray-700 border-gray-200";
     return (
-      <span className={cx("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border", tone)}>
+      <span
+        className={cx(
+          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border",
+          tone
+        )}
+      >
         <Icon className="w-3 h-3" />
         {meta.label}
       </span>
@@ -392,11 +504,17 @@ export default function ResolveStatusList({
             <div className="text-sm font-medium text-gray-900">{row.title}</div>
             <div className="text-xs text-gray-600 mt-0.5">
               {row.message}
-              {row.count ? <span className="ml-1 text-gray-500">• {row.count}</span> : null}
-              <span className="ml-1 text-gray-400">• {new Date(row.when).toLocaleString()}</span>
+              {row.count ? (
+                <span className="ml-1 text-gray-500">• {row.count}</span>
+              ) : null}
+              <span className="ml-1 text-gray-400">
+                • {new Date(row.when).toLocaleString()}
+              </span>
             </div>
             {!collapsed && row.meta && (row.meta.reason || row.meta.detail) ? (
-              <div className="mt-1 text-[11px] text-gray-500">{row.meta.reason || row.meta.detail}</div>
+              <div className="mt-1 text-[11px] text-gray-500">
+                {row.meta.reason || row.meta.detail}
+              </div>
             ) : null}
             <div className="mt-1 flex items-center gap-1">
               <TypePill type={row.type} />
@@ -417,7 +535,9 @@ export default function ResolveStatusList({
         </div>
 
         <div className="flex items-center gap-2">
-          {row.status === "failed" || row.status === "partial" || row.status === "pending" ? (
+          {row.status === "failed" ||
+          row.status === "partial" ||
+          row.status === "pending" ? (
             <button
               type="button"
               onClick={(e) => {
@@ -453,7 +573,10 @@ export default function ResolveStatusList({
 
   /* ------------------------------------ JSX ----------------------------------- */
   return (
-    <section className={cx("w-full", className)} aria-label="Resolution status list">
+    <section
+      className={cx("w-full", className)}
+      aria-label="Resolution status list"
+    >
       {/* Header */}
       <div className="rounded-2xl border bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white p-3 mb-3">
         <div className="flex items-center gap-3">
@@ -462,7 +585,8 @@ export default function ResolveStatusList({
             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
               <span>Progress</span>
               <span>
-                {counts.ok} ok • {counts.open} open • {counts.failed || 0} failed
+                {counts.ok} ok • {counts.open} open • {counts.failed || 0}{" "}
+                failed
               </span>
             </div>
             <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
@@ -507,7 +631,11 @@ export default function ResolveStatusList({
               onClick={() => setCollapsed((v) => !v)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm hover:bg-gray-50"
             >
-              {collapsed ? <ChevronDownIcon className="w-4 h-4" /> : <ChevronUpIcon className="w-4 h-4" />}
+              {collapsed ? (
+                <ChevronDownIcon className="w-4 h-4" />
+              ) : (
+                <ChevronUpIcon className="w-4 h-4" />
+              )}
               {collapsed ? "Show details" : "Hide details"}
             </button>
             <button
@@ -557,7 +685,9 @@ export default function ResolveStatusList({
             >
               <option value="all">All</option>
               {Object.keys(TYPE_META).map((t) => (
-                <option key={t} value={t}>{TYPE_META[t].label}</option>
+                <option key={t} value={t}>
+                  {TYPE_META[t].label}
+                </option>
               ))}
             </select>
           </div>
@@ -570,8 +700,10 @@ export default function ResolveStatusList({
           filtered.map((row) => <Row key={row.id} row={row} />)
         ) : (
           <div className="col-span-full rounded-xl border border-dashed p-6 text-center text-sm text-gray-600 bg-white">
-            No activity yet. When you use <strong>Plan</strong>, <strong>Batch</strong>, apply a <strong>Template</strong>,
-            or run <strong>Resolve all</strong> in the planner, you’ll see results here.
+            No activity yet. When you use <strong>Plan</strong>,{" "}
+            <strong>Batch</strong>, apply a <strong>Template</strong>, or run{" "}
+            <strong>Resolve all</strong> in the planner, you’ll see results
+            here.
           </div>
         )}
       </div>
@@ -579,7 +711,9 @@ export default function ResolveStatusList({
       {/* Footer tip */}
       <div className="mt-3 text-[11px] text-gray-500 flex items-center gap-2">
         <Filter className="w-3 h-3" />
-        Tip: filter to <em>Open</em> to focus on pending/failed items; use <kbd className="px-1 border rounded bg-white">Retry all</kbd> after fixing settings (e.g., inventory or standards).
+        Tip: filter to <em>Open</em> to focus on pending/failed items; use{" "}
+        <kbd className="px-1 border rounded bg-white">Retry all</kbd> after
+        fixing settings (e.g., inventory or standards).
       </div>
     </section>
   );

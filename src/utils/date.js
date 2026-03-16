@@ -10,7 +10,8 @@
 /* -------------------------------- constants -------------------------------- */
 const isBrowser = typeof window !== "undefined";
 const DEFAULT_TZ =
-  (isBrowser && Intl.DateTimeFormat().resolvedOptions().timeZone) || "America/New_York";
+  (isBrowser && Intl.DateTimeFormat().resolvedOptions().timeZone) ||
+  "America/New_York";
 
 // Week starts Monday by default; you can switch to Sunday if needed
 const WEEK_START = 1; // 0 = Sunday, 1 = Monday
@@ -23,19 +24,23 @@ try {
   offsetParser = mod.default || mod;
 } catch (_e) {}
 
-let eventBus = { emit(){}, on(){}, off(){} };
+let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
 /* ----------------------------- astronomy provider -------------------------- */
 // Pluggable provider { getFullMoon(dateISO, tz) -> ISO string }
 let astronomyProvider = null;
-export function registerAstronomyProvider(provider) { astronomyProvider = provider; }
+export function registerAstronomyProvider(provider) {
+  astronomyProvider = provider;
+}
 function getFullMoonISO(anchorISO, tz = DEFAULT_TZ) {
   if (astronomyProvider?.getFullMoon) {
-    try { return astronomyProvider.getFullMoon(anchorISO, tz); } catch (_e) {}
+    try {
+      return astronomyProvider.getFullMoon(anchorISO, tz);
+    } catch (_e) {}
   }
   // Fallback: return the same date at 00:00—real implementation should be injected
   return toISO(startOfDay(parseISO(anchorISO), tz));
@@ -52,7 +57,9 @@ export function toISO(d = new Date()) {
   try {
     if (d instanceof Date) return d.toISOString();
     return new Date(d).toISOString();
-  } catch (_e) { return new Date().toISOString(); }
+  } catch (_e) {
+    return new Date().toISOString();
+  }
 }
 
 export function safeDate(input) {
@@ -79,7 +86,8 @@ export function add(d, delta = {}) {
   if (delta.hours) out.setHours(out.getHours() + delta.hours);
   if (delta.minutes) out.setMinutes(out.getMinutes() + delta.minutes);
   if (delta.seconds) out.setSeconds(out.getSeconds() + delta.seconds);
-  if (delta.milliseconds) out.setMilliseconds(out.getMilliseconds() + delta.milliseconds);
+  if (delta.milliseconds)
+    out.setMilliseconds(out.getMilliseconds() + delta.milliseconds);
   return out;
 }
 
@@ -109,7 +117,13 @@ export function startOfWeek(d, weekStart = WEEK_START) {
   return add(x, { days: -diff });
 }
 export function endOfWeek(d, weekStart = WEEK_START) {
-  return add(startOfWeek(d, weekStart), { days: 6, hours: 23, minutes: 59, seconds: 59, milliseconds: 999 });
+  return add(startOfWeek(d, weekStart), {
+    days: 6,
+    hours: 23,
+    minutes: 59,
+    seconds: 59,
+    milliseconds: 999,
+  });
 }
 export function startOfMonth(d) {
   const x = safeDate(d);
@@ -121,7 +135,9 @@ export function endOfMonth(d) {
 }
 
 /* ------------------------------- formatting -------------------------------- */
-function pad2(n) { return (n < 10 ? "0" : "") + n; }
+function pad2(n) {
+  return (n < 10 ? "0" : "") + n;
+}
 
 export function fmtYMD(d) {
   const x = safeDate(d);
@@ -129,7 +145,8 @@ export function fmtYMD(d) {
 }
 export function fmtClock(d) {
   const x = safeDate(d);
-  let h = x.getHours(), m = x.getMinutes();
+  let h = x.getHours(),
+    m = x.getMinutes();
   const ampm = h >= 12 ? "PM" : "AM";
   h = h % 12 || 12;
   return `${h}:${pad2(m)} ${ampm}`;
@@ -141,10 +158,11 @@ export function fmtYMDHM(d) {
 
 export function formatRangeSmart(a, b) {
   // Like Google Calendar: compact same-day ranges, otherwise show dates
-  const da = safeDate(a), db = safeDate(b);
+  const da = safeDate(a),
+    db = safeDate(b);
   if (fmtYMD(da) === fmtYMD(db)) {
     return `${fmtYMD(da)} • ${fmtClock(da)} – ${fmtClock(db)}`;
-    }
+  }
   return `${fmtYMDHM(da)} → ${fmtYMDHM(db)}`;
 }
 
@@ -173,15 +191,15 @@ export function relativeToNow(d) {
 /* --------------------------- day/week helpers ------------------------------ */
 export function dayName(d) {
   const x = safeDate(d);
-  return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getDay()];
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][x.getDay()];
 }
 export function weekNumber(d) {
   // ISO week number
   const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = x.getUTCDay() || 7;
   x.setUTCDate(x.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(x.getUTCFullYear(),0,1));
-  return Math.ceil((((x - yearStart) / 86400000) + 1) / 7);
+  const yearStart = new Date(Date.UTC(x.getUTCFullYear(), 0, 1));
+  return Math.ceil(((x - yearStart) / 86400000 + 1) / 7);
 }
 
 /* ------------------------------ comparisons -------------------------------- */
@@ -189,7 +207,9 @@ export function isWithin(target, start, end) {
   const t = safeDate(target).getTime();
   return t >= safeDate(start).getTime() && t <= safeDate(end).getTime();
 }
-export function sameDay(a, b) { return fmtYMD(a) === fmtYMD(b); }
+export function sameDay(a, b) {
+  return fmtYMD(a) === fmtYMD(b);
+}
 
 /* ----------------------------- time parsing UX ----------------------------- */
 export function parseTimeOfDay(str = "") {
@@ -202,7 +222,8 @@ export function parseTimeOfDay(str = "") {
   const ap = m12[3];
   if (ap === "pm" && h !== 12) h += 12;
   if (ap === "am" && h === 12) h = 0;
-  if (h < 0 || h > 23 || min < 0 || min > 59) return { hours: 0, minutes: 0, ok: false };
+  if (h < 0 || h > 23 || min < 0 || min > 59)
+    return { hours: 0, minutes: 0, ok: false };
   return { hours: h, minutes: min, ok: true };
 }
 
@@ -210,14 +231,24 @@ export function combineDateAndTime(dateInput, timeStr) {
   const d = safeDate(dateInput);
   const { hours, minutes, ok } = parseTimeOfDay(timeStr);
   if (!ok) return new Date(NaN);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), hours, minutes, 0, 0);
+  return new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate(),
+    hours,
+    minutes,
+    0,
+    0
+  );
 }
 
 /* ------------------------------ offsets parser ----------------------------- */
 export function parseOffset(expr, baseISO = toISO()) {
   // Prefer your dedicated offsetParser if available
   if (offsetParser?.parse) {
-    try { return offsetParser.parse(expr, baseISO); } catch (_e) {}
+    try {
+      return offsetParser.parse(expr, baseISO);
+    } catch (_e) {}
   }
   // Minimal fallback: "+20m", "+2h", "PT1H30M"
   const s = String(expr || "").trim();
@@ -227,10 +258,15 @@ export function parseOffset(expr, baseISO = toISO()) {
   if (/^PT/i.test(s)) {
     const m = s.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i);
     if (m) {
-      const addMs = (parseInt(m[1] || "0", 10) * 3600000) +
-                    (parseInt(m[2] || "0", 10) * 60000) +
-                    (parseInt(m[3] || "0", 10) * 1000);
-      return { iso: toISO(add(parseISO(baseISO), { milliseconds: addMs })), ms: addMs, ok: true };
+      const addMs =
+        parseInt(m[1] || "0", 10) * 3600000 +
+        parseInt(m[2] || "0", 10) * 60000 +
+        parseInt(m[3] || "0", 10) * 1000;
+      return {
+        iso: toISO(add(parseISO(baseISO), { milliseconds: addMs })),
+        ms: addMs,
+        ok: true,
+      };
     }
   }
 
@@ -241,7 +277,11 @@ export function parseOffset(expr, baseISO = toISO()) {
     const unit = mm[2].toLowerCase();
     const map = { s: 1000, m: 60000, h: 3600000, d: 86400000, w: 604800000 };
     const addMs = val * (map[unit] || 0);
-    return { iso: toISO(add(parseISO(baseISO), { milliseconds: addMs })), ms: addMs, ok: true };
+    return {
+      iso: toISO(add(parseISO(baseISO), { milliseconds: addMs })),
+      ms: addMs,
+      ok: true,
+    };
   }
 
   // Fallback: return base
@@ -290,16 +330,31 @@ export function buildVEVENT({
 export function rruleDaily({ byHour = 9, byMinute = 0, bySecond = 0 } = {}) {
   return `FREQ=DAILY;BYHOUR=${byHour};BYMINUTE=${byMinute};BYSECOND=${bySecond}`;
 }
-export function rruleWeekly({ byDay = ["MO"], byHour = 9, byMinute = 0, bySecond = 0 } = {}) {
-  return `FREQ=WEEKLY;BYDAY=${byDay.join(",")};BYHOUR=${byHour};BYMINUTE=${byMinute};BYSECOND=${bySecond}`;
+export function rruleWeekly({
+  byDay = ["MO"],
+  byHour = 9,
+  byMinute = 0,
+  bySecond = 0,
+} = {}) {
+  return `FREQ=WEEKLY;BYDAY=${byDay.join(
+    ","
+  )};BYHOUR=${byHour};BYMINUTE=${byMinute};BYSECOND=${bySecond}`;
 }
-export function rruleMonthlyByDay({ day = 1, byHour = 9, byMinute = 0, bySecond = 0 } = {}) {
+export function rruleMonthlyByDay({
+  day = 1,
+  byHour = 9,
+  byMinute = 0,
+  bySecond = 0,
+} = {}) {
   return `FREQ=MONTHLY;BYMONTHDAY=${day};BYHOUR=${byHour};BYMINUTE=${byMinute};BYSECOND=${bySecond}`;
 }
 
 /* ------------------------------- guards (Sabbath) -------------------------- */
 // Simple guard windows. For accurate sunset times, inject an astronomy provider
-export function isSabbath(now = new Date(), { tz = DEFAULT_TZ, friSunset = "18:00", satSunset = "18:00" } = {}) {
+export function isSabbath(
+  now = new Date(),
+  { tz = DEFAULT_TZ, friSunset = "18:00", satSunset = "18:00" } = {}
+) {
   const d = safeDate(now);
   const day = d.getDay(); // 5 = Fri, 6 = Sat
   if (day === 5) {
@@ -325,14 +380,24 @@ export function monthStartFullMoon(anchorISO = toISO(), tz = DEFAULT_TZ) {
 
 /* ------------------------------ small helpers ------------------------------ */
 export function slugWithTimestamp(title) {
-  const base = String(title || "plan").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  const ts = fmtYMD(new Date()) + "-" + pad2(safeDate(new Date()).getHours()) + pad2(safeDate(new Date()).getMinutes());
+  const base = String(title || "plan")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const ts =
+    fmtYMD(new Date()) +
+    "-" +
+    pad2(safeDate(new Date()).getHours()) +
+    pad2(safeDate(new Date()).getMinutes());
   return `${base}-${ts}`;
 }
 
 export function filenameTS(prefix = "export", ext = "csv") {
   const ts = new Date();
-  const stamp = `${ts.getFullYear()}${pad2(ts.getMonth() + 1)}${pad2(ts.getDate())}_${pad2(ts.getHours())}${pad2(ts.getMinutes())}`;
+  const stamp = `${ts.getFullYear()}${pad2(ts.getMonth() + 1)}${pad2(
+    ts.getDate()
+  )}_${pad2(ts.getHours())}${pad2(ts.getMinutes())}`;
   return `${prefix}_${stamp}.${ext}`;
 }
 

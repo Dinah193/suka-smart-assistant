@@ -1,0 +1,158 @@
+{
+  "id": "creole_dishes_catalog",
+  "name": "Creole Dishes Catalog",
+  "cuisineId": "creole",
+  "version": "1.0.0",
+  "description": "Canonical Creole dish list for SSA meal planning, rotation, search, and recipe mapping. Uses stable dish IDs and lightweight metadata so recipes can map to dishes consistently.",
+  "dishes": [
+    {
+      "id": "creole_shrimp_creole",
+      "name": "Shrimp Creole",
+      "category": "main",
+      "course": "entree",
+      "signature": ["holy_trinity", "tomato_base", "shrimp", "rice"],
+      "typicalServings": 6,
+      "tags": ["tomato", "seafood", "stew", "rice"],
+      "recommendedRecipes": ["creole_shrimp_creole"]
+    },
+    {
+      "id": "creole_gumbo",
+      "name": "Creole Gumbo",
+      "category": "main",
+      "course": "entree",
+      "signature": ["holy_trinity", "roux", "stock", "seafood_or_meat", "rice"],
+      "typicalServings": 8,
+      "tags": ["stew", "roux", "okra_optional", "rice"],
+      "recommendedRecipes": [
+        "creole_gumbo_seafood",
+        "creole_gumbo_chicken_sausage"
+      ]
+    },
+    {
+      "id": "creole_jambalaya",
+      "name": "Creole Jambalaya",
+      "category": "main",
+      "course": "entree",
+      "signature": [
+        "holy_trinity",
+        "tomato_base",
+        "rice_pilaf",
+        "sausage",
+        "chicken_or_seafood"
+      ],
+      "typicalServings": 8,
+      "tags": ["one-pot", "rice", "tomato", "sausage"],
+      "recommendedRecipes": ["creole_jambalaya"]
+    },
+    {
+      "id": "creole_crawfish_etouffee",
+      "name": "Crawfish Etouffee",
+      "category": "main",
+      "course": "entree",
+      "signature": ["holy_trinity", "light_roux", "crawfish", "rice"],
+      "typicalServings": 6,
+      "tags": ["seafood", "sauce", "roux", "rice"],
+      "recommendedRecipes": ["creole_crawfish_etouffee"]
+    },
+    {
+      "id": "creole_shrimp_etouffee",
+      "name": "Shrimp Etouffee",
+      "category": "main",
+      "course": "entree",
+      "signature": ["holy_trinity", "light_roux", "shrimp", "rice"],
+      "typicalServings": 6,
+      "tags": ["seafood", "sauce", "roux", "rice"],
+      "recommendedRecipes": ["creole_shrimp_etouffee"]
+    },
+    {
+      "id": "creole_red_beans_and_rice",
+      "name": "Red Beans and Rice",
+      "category": "main",
+      "course": "entree",
+      "signature": ["beans", "smoked_meat", "holy_trinity", "rice"],
+      "typicalServings": 8,
+      "tags": ["beans", "sausage", "comfort"],
+      "recommendedRecipes": ["creole_red_beans_and_rice"]
+    },
+    {
+      "id": "creole_oyster_po_boy",
+      "name": "Oyster Po' Boy",
+      "category": "main",
+      "course": "sandwich",
+      "signature": ["fried_oysters", "french_bread", "remoulade"],
+      "typicalServings": 4,
+      "tags": ["sandwich", "fried", "seafood"],
+      "recommendedRecipes": ["creole_oyster_po_boy"]
+    },
+    {
+      "id": "creole_shrimp_po_boy",
+      "name": "Shrimp Po' Boy",
+      "category": "main",
+      "course": "sandwich",
+      "signature": ["fried_shrimp", "french_bread", "remoulade"],
+      "typicalServings": 4,
+      "tags": ["sandwich", "fried", "seafood"],
+      "recommendedRecipes": ["creole_shrimp_po_boy"]
+    },
+    {
+      "id": "creole_grillades_and_grits",
+      "name": "Grillades and Grits",
+      "category": "main",
+      "course": "entree",
+      "signature": ["braised_meat", "tomato_gravy", "grits"],
+      "typicalServings": 6,
+      "tags": ["braise", "tomato", "grits"],
+      "recommendedRecipes": ["creole_grillades_and_grits"]
+    },
+    {
+      "id": "creole_maque_choux",
+      "name": "Maque Choux",
+      "category": "side",
+      "course": "side",
+      "signature": ["corn", "bell_pepper", "onion", "cream_optional"],
+      "typicalServings": 6,
+      "tags": ["corn", "vegetable", "side"],
+      "recommendedRecipes": ["creole_maque_choux"]
+    },
+    {
+      "id": "creole_cornbread_dressing",
+      "name": "Cornbread Dressing",
+      "category": "side",
+      "course": "side",
+      "signature": ["cornbread", "holy_trinity", "stock", "baked"],
+      "typicalServings": 10,
+      "tags": ["holiday", "baked", "side"],
+      "recommendedRecipes": ["creole_cornbread_dressing"]
+    },
+    {
+      "id": "creole_stuffed_bell_peppers",
+      "name": "Stuffed Bell Peppers",
+      "category": "main",
+      "course": "entree",
+      "signature": ["bell_pepper", "rice", "ground_meat", "tomato_sauce"],
+      "typicalServings": 6,
+      "tags": ["baked", "rice", "tomato"],
+      "recommendedRecipes": ["creole_stuffed_bell_peppers"]
+    },
+    {
+      "id": "creole_bread_pudding",
+      "name": "Bread Pudding",
+      "category": "dessert",
+      "course": "dessert",
+      "signature": ["bread", "custard", "baked", "sauce_optional"],
+      "typicalServings": 10,
+      "tags": ["dessert", "baked"],
+      "recommendedRecipes": ["creole_bread_pudding"]
+    },
+    {
+      "id": "creole_pralines",
+      "name": "Creole Pralines",
+      "category": "dessert",
+      "course": "dessert",
+      "signature": ["pecans", "sugar", "cream_optional"],
+      "typicalServings": 12,
+      "tags": ["candy", "pecans", "dessert"],
+      "recommendedRecipes": ["creole_pralines"]
+    }
+  ]
+}

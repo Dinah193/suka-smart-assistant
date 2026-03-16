@@ -24,7 +24,7 @@
 // - Defensive: catches errors, surfaces to UI, still emits eventBus messages.
 
 import React, { useEffect, useState, useCallback } from "react";
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import ImportService from "./ImportService";
 import ImportSettings from "./ImportSettings.jsx";
 import config from "../config"; // assume central config accessor (featureFlags, env, etc.)
@@ -34,13 +34,41 @@ import config from "../config"; // assume central config accessor (featureFlags,
 // Extend this list as new SSA domains become importable.
 // -----------------------------------------------------------------------------
 const DOMAIN_OPTIONS = [
-  { id: "auto", label: "Auto-detect", description: "SSA will guess the right domain" },
-  { id: "recipe", label: "Meals / Recipes", description: "Cooking sessions, meal plans, inventory links" },
-  { id: "cleaning", label: "Cleaning / Declutter", description: "Zone routines, checklists, rotation" },
-  { id: "garden", label: "Garden / Seeds", description: "Planting, care, harvest, seasonality" },
-  { id: "animal", label: "Animal / Butchery", description: "Acquisition, care, butchery, yield curves" },
-  { id: "storehouse", label: "Storehouse / Stock", description: "Long-term goals → inventory execution" },
-  { id: "howto", label: "Video / How-to", description: "YT, TikTok, FB — extract steps & equipment" },
+  {
+    id: "auto",
+    label: "Auto-detect",
+    description: "SSA will guess the right domain",
+  },
+  {
+    id: "recipe",
+    label: "Meals / Recipes",
+    description: "Cooking sessions, meal plans, inventory links",
+  },
+  {
+    id: "cleaning",
+    label: "Cleaning / Declutter",
+    description: "Zone routines, checklists, rotation",
+  },
+  {
+    id: "garden",
+    label: "Garden / Seeds",
+    description: "Planting, care, harvest, seasonality",
+  },
+  {
+    id: "animal",
+    label: "Animal / Butchery",
+    description: "Acquisition, care, butchery, yield curves",
+  },
+  {
+    id: "storehouse",
+    label: "Storehouse / Stock",
+    description: "Long-term goals → inventory execution",
+  },
+  {
+    id: "howto",
+    label: "Video / How-to",
+    description: "YT, TikTok, FB — extract steps & equipment",
+  },
 ];
 
 // -----------------------------------------------------------------------------
@@ -62,20 +90,31 @@ function emitImportEvent(type, source, data = {}) {
 // -----------------------------------------------------------------------------
 async function exportToHubIfEnabled(payload) {
   try {
-    const flags = (config && (config.featureFlags || config().featureFlags)) || config.featureFlags || {};
-    const familyFundMode = flags.familyFundMode === true || flags["familyFundMode"] === "true";
+    const flags =
+      (config && (config.featureFlags || config().featureFlags)) ||
+      config.featureFlags ||
+      {};
+    const familyFundMode =
+      flags.familyFundMode === true || flags["familyFundMode"] === "true";
 
     if (!familyFundMode) return;
 
     // Soft-import so we don't blow up in environments without Hub wired
-    const { default: HubPacketFormatter } = await import("../services/HubPacketFormatter.js");
-    const { default: FamilyFundConnector } = await import("../services/FamilyFundConnector.js");
+    const { default: HubPacketFormatter } = await import(
+      "@/services/hub/HubPacketFormatter.js"
+    );
+    const { default: FamilyFundConnector } = await import(
+      "@/services/hub/FamilyFundConnector.js"
+    );
 
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // Silent fail — SSA owns the data; Hub is optional
-    console.warn("[ImportLanding] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[ImportLanding] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -129,7 +168,10 @@ export default function ImportLanding({ onImportComplete }) {
         // Emit that user *requested* an import
         emitImportEvent("import.requested", source, {
           domain,
-          rawPreview: typeof rawPayload.raw === "string" ? rawPayload.raw.slice(0, 160) : "[non-string]",
+          rawPreview:
+            typeof rawPayload.raw === "string"
+              ? rawPayload.raw.slice(0, 160)
+              : "[non-string]",
         });
 
         // Call the high-level import service
@@ -162,7 +204,11 @@ export default function ImportLanding({ onImportComplete }) {
               id: Date.now().toString(36),
               domain: result.inferredDomain || domain,
               ts: new Date().toISOString(),
-              title: result.normalized?.title || result.normalized?.name || rawPayload.meta?.title || "Imported item",
+              title:
+                result.normalized?.title ||
+                result.normalized?.name ||
+                rawPayload.meta?.title ||
+                "Imported item",
             },
             ...prev,
           ];
@@ -272,10 +318,13 @@ export default function ImportLanding({ onImportComplete }) {
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bring it into Suka</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Bring it into Suka
+          </h1>
           <p className="text-sm text-slate-500">
-            Recipes, cleaning routines, garden plans, animal/butchery notes, storehouse goals, and even how-to videos —
-            SSA will normalize it and make it actionable.
+            Recipes, cleaning routines, garden plans, animal/butchery notes,
+            storehouse goals, and even how-to videos — SSA will normalize it and
+            make it actionable.
           </p>
         </div>
 
@@ -309,15 +358,24 @@ export default function ImportLanding({ onImportComplete }) {
         <div className="border rounded-2xl p-4 bg-white/70 flex flex-col gap-3">
           <h2 className="font-semibold">Upload a file</h2>
           <p className="text-xs text-slate-500">
-            JSON, HTML, markdown, CSV from your scan/exports, seed/garden files, household exports.
+            JSON, HTML, markdown, CSV from your scan/exports, seed/garden files,
+            household exports.
           </p>
           <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-purple-200 rounded-xl py-6 cursor-pointer text-center">
             <span className="text-sm mb-1">Drop a file or click to upload</span>
-            <span className="text-xs text-slate-400">.json, .txt, .csv, .html</span>
-            <input type="file" className="hidden" onChange={handleFileUpload} disabled={isImporting} />
+            <span className="text-xs text-slate-400">
+              .json, .txt, .csv, .html
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={isImporting}
+            />
           </label>
           <p className="text-[10px] text-slate-400">
-            SSA will try to detect the domain. You selected: <strong>{activeDomain}</strong>
+            SSA will try to detect the domain. You selected:{" "}
+            <strong>{activeDomain}</strong>
           </p>
         </div>
 
@@ -325,7 +383,8 @@ export default function ImportLanding({ onImportComplete }) {
         <div className="border rounded-2xl p-4 bg-white/70 flex flex-col gap-3">
           <h2 className="font-semibold">Import from a URL</h2>
           <p className="text-xs text-slate-500">
-            Paste a link from Allrecipes, Love & Lemons, YouTube, TikTok, garden sites, or a cleaning blog.
+            Paste a link from Allrecipes, Love & Lemons, YouTube, TikTok, garden
+            sites, or a cleaning blog.
           </p>
           <form onSubmit={handleUrlSubmit} className="flex gap-2">
             <input
@@ -354,7 +413,8 @@ export default function ImportLanding({ onImportComplete }) {
         <div className="border rounded-2xl p-4 bg-white/70 flex flex-col gap-3">
           <h2 className="font-semibold">Paste raw data</h2>
           <p className="text-xs text-slate-500">
-            Paste JSON, text, or copied steps from a video description. SSA will try to make sense of it.
+            Paste JSON, text, or copied steps from a video description. SSA will
+            try to make sense of it.
           </p>
           <textarea
             rows={4}
@@ -372,7 +432,8 @@ export default function ImportLanding({ onImportComplete }) {
             {isImporting ? "Importing..." : "Process paste"}
           </button>
           <p className="text-[10px] text-slate-400">
-            Tip: copy a whole YouTube description with ingredients & steps — SSA will turn it into a session.
+            Tip: copy a whole YouTube description with ingredients & steps — SSA
+            will turn it into a session.
           </p>
         </div>
       </section>
@@ -397,11 +458,16 @@ export default function ImportLanding({ onImportComplete }) {
       <section className="border rounded-2xl bg-white/50 p-4">
         <h2 className="font-semibold mb-3 text-sm">Recent imports</h2>
         {lastImports.length === 0 ? (
-          <p className="text-xs text-slate-400">No imports yet. Upload a file or paste something.</p>
+          <p className="text-xs text-slate-400">
+            No imports yet. Upload a file or paste something.
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {lastImports.map((imp) => (
-              <li key={imp.id} className="flex items-center justify-between gap-2 text-sm">
+              <li
+                key={imp.id}
+                className="flex items-center justify-between gap-2 text-sm"
+              >
                 <div>
                   <p className="font-medium">{imp.title}</p>
                   <p className="text-[10px] text-slate-400">
@@ -420,10 +486,13 @@ export default function ImportLanding({ onImportComplete }) {
       {/* Dev/help notes (can be hidden behind feature flag later) */}
       <section className="text-[11px] text-slate-400">
         <p>
-          This panel emits: <code>import.requested</code>, <code>import.parsed</code>, <code>import.failed</code>.
+          This panel emits: <code>import.requested</code>,{" "}
+          <code>import.parsed</code>, <code>import.failed</code>.
         </p>
         <p>
-          For bookmarklet/mobile: call <code>window.__sukaImport({`{ raw: '...', domain: 'recipe' }`})</code>.
+          For bookmarklet/mobile: call{" "}
+          <code>window.__sukaImport({`{ raw: '...', domain: 'recipe' }`})</code>
+          .
         </p>
       </section>
     </div>

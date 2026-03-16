@@ -1,0 +1,420 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.ayamase_ofada_sauce",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.ayamase_ofada_sauce",
+    "label": "Ayamase (Ofada Sauce)",
+    "altLabels": ["Ofada Sauce", "Green Pepper Stew", "Designer Stew (Green)"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["Nigeria", "Yoruba", "West Africa"],
+    "tags": [
+      "west_african",
+      "nigerian",
+      "yoruba",
+      "stew",
+      "pepper_stew",
+      "stew_and_starch",
+      "one_pot",
+      "spicy",
+      "batch_friendly",
+      "family_style"
+    ]
+  },
+  "summary": {
+    "oneLine": "A bold Nigerian green pepper stew—slow-cooked green pepper blend in palm oil with deep umami, traditionally served with Ofada rice.",
+    "notes": [
+      "Ayamase is defined by a green pepper blend (green bell + green chilies), cooked down until aromatic and oil rises.",
+      "Traditional versions often include iru/dawadawa and assorted meats; this SSA baseline supports flexible protein and allergen-safe options."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Sauce servings (served over rice)."
+  },
+  "time": {
+    "totalMinutes": 90,
+    "activeMinutes": 30,
+    "restMinutes": 10
+  },
+  "difficulty": "intermediate",
+  "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+  "plannerHints": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightBias": "medium",
+    "mealArchetypeId": "archetype_stew_with_starch"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Ayamase can be oil-forward; SSA nutrition pipeline should compute final values from oil and protein choice."
+    ]
+  },
+  "allergens": {
+    "mayContain": ["allergen_fish_optional"],
+    "commonTriggers": [
+      "fermented_locust_beans_iru_optional",
+      "fish_dried_smoked_optional"
+    ],
+    "notes": [
+      "Iru/dawadawa is traditional and strong—optional and should respect household ingredient preferences.",
+      "Some versions include dried fish/crayfish—apply fish/shellfish allergen rules."
+    ]
+  },
+  "equipment": {
+    "required": [
+      {
+        "id": "pot_lidded",
+        "label": "Heavy pot / Dutch oven with lid",
+        "qty": 1
+      },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "spoon_wooden", "label": "Wooden spoon", "qty": 1 },
+      { "id": "measuring_cups", "label": "Measuring cups", "qty": 1 }
+    ],
+    "optional": [
+      { "id": "blender", "label": "Blender", "qty": 1 },
+      { "id": "food_processor", "label": "Food processor", "qty": 1 }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "pepper_bell_green_optional",
+      "label": "Green bell peppers",
+      "qty": 6,
+      "unit": "count",
+      "role": "base",
+      "notes": ["Washed, seeds removed. Core flavor carrier for green stew."]
+    },
+    {
+      "id": "pepper_hot_green_optional",
+      "label": "Green hot peppers (green scotch bonnet / habanero / long green chilies)",
+      "qty": 4,
+      "unit": "count",
+      "role": "heat",
+      "optional": true,
+      "notes": ["Adjust to desired heat; wear gloves when handling."]
+    },
+    {
+      "id": "onion_yellow",
+      "label": "Yellow onions",
+      "qty": 3,
+      "unit": "count",
+      "role": "aromatic",
+      "notes": ["2 for blending, 1 sliced for frying (optional)."]
+    },
+    {
+      "id": "tomato_optional",
+      "label": "Tomatoes (optional)",
+      "qty": 1,
+      "unit": "count",
+      "role": "base",
+      "optional": true,
+      "notes": [
+        "Optional and minimal—some households add a small tomato to round flavors; others avoid tomato entirely for a truer green profile."
+      ]
+    },
+    {
+      "id": "garlic_optional",
+      "label": "Garlic (optional)",
+      "qty": 3,
+      "unit": "clove",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "ginger_optional",
+      "label": "Ginger (optional)",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "aromatic",
+      "optional": true
+    },
+
+    {
+      "id": "oil_palm_red_optional",
+      "label": "Red palm oil",
+      "qty": 0.75,
+      "unit": "cup",
+      "role": "fat",
+      "optional": true,
+      "notes": [
+        "Traditional base fat. If using, warm gently and avoid smoking."
+      ]
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil",
+      "qty": 0.25,
+      "unit": "cup",
+      "role": "fat",
+      "notes": ["Use alone for a lighter version or to blend with palm oil."]
+    },
+
+    {
+      "id": "fermented_locust_beans_iru_optional",
+      "label": "Iru/Dawadawa (fermented locust beans)",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Very pungent and traditional; start with 1 tsp if new to it."]
+    },
+    {
+      "id": "seasoning_stock_cube_optional",
+      "label": "Stock cube / seasoning cube",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 1.5,
+      "unit": "tsp",
+      "role": "seasoning",
+      "notes": ["Adjust for stock cube and salted proteins."]
+    },
+    {
+      "id": "pepper_black_optional",
+      "label": "Black pepper (optional)",
+      "qty": 0.5,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+
+    {
+      "id": "beef_generic",
+      "label": "Beef (assorted cuts) (optional)",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": ["Common in assorted-meat versions; pre-cook until tender."]
+    },
+    {
+      "id": "goat",
+      "label": "Goat meat (optional)",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+    {
+      "id": "chicken_generic",
+      "label": "Chicken pieces (optional)",
+      "qty": 2,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+    {
+      "id": "egg_chicken",
+      "label": "Hard-boiled eggs",
+      "qty": 4,
+      "unit": "count",
+      "role": "protein",
+      "optional": true,
+      "notes": ["Classic option: add peeled eggs near the end to soak flavor."]
+    },
+    {
+      "id": "fish_dried_smoked_optional",
+      "label": "Smoked dried fish (optional)",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Optional; remove bones; apply fish allergen rules."]
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "blend_optional",
+    "fry",
+    "reduce",
+    "stew",
+    "season_to_taste",
+    "rest"
+  ],
+  "steps": [
+    {
+      "id": "step.prep_and_blend_green_base",
+      "title": "Prep and blend the green pepper base",
+      "body": "Rough-chop green bell peppers, hot green peppers (optional), 2 onions, and optional garlic/ginger (and optional 1 small tomato if using). Blend until smooth or slightly coarse depending on preference. Set aside.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Blend green base", "seconds": 600 }],
+      "hazards": [
+        {
+          "type": "pepper",
+          "message": "Wear gloves for hot peppers; avoid touching eyes/face; ventilate when blending."
+        }
+      ]
+    },
+    {
+      "id": "step.cook_protein_broth_optional",
+      "title": "Cook proteins until tender (optional)",
+      "body": "If using beef/goat/chicken: simmer with water/stock, a pinch of salt, and a little onion until tender (chicken 20–30 min; beef/goat 40–60 min). Reserve broth and set proteins aside. If using hard-boiled eggs, boil and peel now.",
+      "timeMinutes": 45,
+      "timers": [
+        { "label": "Simmer protein (chicken)", "seconds": 1500 },
+        { "label": "Simmer protein (beef/goat)", "seconds": 2700 }
+      ],
+      "hazards": []
+    },
+    {
+      "id": "step.heat_oil_and_fry_onion",
+      "title": "Heat oil and fry onions",
+      "body": "In a heavy pot, warm palm oil (if using) with neutral oil over medium heat until fluid (do not smoke). Add remaining sliced onion and fry 6–10 minutes, stirring often, until softened and fragrant.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Fry onions", "seconds": 540 }],
+      "hazards": [
+        {
+          "type": "burn",
+          "message": "Palm oil can smoke if overheated—keep heat moderate and watch closely."
+        }
+      ],
+      "checks": ["Onions softened and aromatic", "Oil is hot but not smoking"]
+    },
+    {
+      "id": "step.add_green_base_and_reduce",
+      "title": "Add green pepper base and cook down",
+      "body": "Carefully add the blended green pepper base (it may splatter). Stir well. Simmer uncovered 30–45 minutes, stirring every few minutes, until the sauce reduces, deepens in flavor, and oil begins to rise/separate slightly. This cook-down is essential to remove raw pepper flavor.",
+      "timeMinutes": 45,
+      "timers": [{ "label": "Reduce green base", "seconds": 2100 }],
+      "hazards": [
+        {
+          "type": "splatter",
+          "message": "Pepper blend may splatter—lower heat and stir carefully; partially cover if needed."
+        }
+      ],
+      "checks": [
+        "No raw/green pepper bite",
+        "Sauce thickened",
+        "Oil begins to rise at edges"
+      ]
+    },
+    {
+      "id": "step.season_and_add_umami",
+      "title": "Season and add umami builders",
+      "body": "Add iru/dawadawa (optional), stock cube (optional), salt, and black pepper (optional). If using smoked fish, add now. Stir and simmer 8–10 minutes to integrate.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Integrate seasoning", "seconds": 600 }],
+      "hazards": [],
+      "checks": ["Balanced salt", "Umami present but not overpowering"]
+    },
+    {
+      "id": "step.add_proteins_finish_rest",
+      "title": "Add proteins, finish, and rest",
+      "body": "Add cooked proteins and a splash of reserved broth if needed to loosen. Simmer 10–15 minutes so proteins absorb flavor. Add peeled hard-boiled eggs (optional) for the last 5–8 minutes. Taste and adjust seasoning. Turn off heat and rest 10 minutes before serving.",
+      "timeMinutes": 20,
+      "timers": [
+        { "label": "Simmer with proteins", "seconds": 900 },
+        { "label": "Rest", "seconds": 600 }
+      ],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve with Ofada rice (or long-grain rice).",
+      "Also works with yam, plantain, or other starches depending on household preference."
+    ],
+    "garnishes": ["lime_optional", "onion_sliced_optional"],
+    "storage": {
+      "refrigeratorDays": 4,
+      "freezerDays": 90,
+      "reheatNotes": [
+        "Reheat gently; add a splash of broth/water if too thick.",
+        "Oil may rise on chilling; stir while warming to re-emulsify."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "baseReduction": "cooked_down_no_raw_pepper",
+      "oilRise": "light_separation_at_edges",
+      "heatLevel": "medium_to_hot_traditional"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["oil_palm_red_optional"],
+        "useInstead": ["oil_neutral", "oil_olive_optional"],
+        "notes": "Palm oil adds classic color/flavor; neutral oil yields a lighter profile."
+      },
+      {
+        "whenMissing": ["fermented_locust_beans_iru_optional"],
+        "useInstead": [
+          "seasoning_stock_cube_optional",
+          "seasoning_msg_optional"
+        ],
+        "notes": "Iru is distinct; substitutes provide umami but not the same fermented character."
+      },
+      {
+        "whenMissing": ["pepper_hot_green_optional"],
+        "useInstead": [
+          "pepper_hot_scotch_bonnet_optional",
+          "pepper_red_flakes"
+        ],
+        "notes": "Use what hot peppers are available; adjust carefully."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["blender"],
+        "doInstead": "Finely chop peppers/onion and cook down longer. Rustic texture is acceptable; longer reduction improves smoothness."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "fish",
+        "avoid": ["fish_dried_smoked_optional"],
+        "notes": "Omit smoked fish; lean on stock and fermented iru (if tolerated) for depth."
+      },
+      {
+        "ifAllergenActive": "egg",
+        "avoid": ["egg_chicken"],
+        "notes": "Skip boiled eggs or substitute with additional meat/beans based on household preference."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Green pepper base must be cooked down thoroughly—raw pepper flavor is the #1 failure mode.",
+      "Oil should be hot but not smoking; palm oil burns easily if overheated.",
+      "Final sauce should be thick, aromatic, and bold—served over rice."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Sauce tastes raw / grassy",
+        "likelyCause": "Pepper base not reduced long enough",
+        "fix": "Simmer uncovered longer, stirring often, until thick and aromatic; oil should start to rise."
+      },
+      {
+        "problem": "Sauce is bitter or burnt",
+        "likelyCause": "Heat too high or base stuck to pot during reduction",
+        "fix": "Lower heat; stir more frequently; use a heavier pot; add a small splash of water/broth and scrape fond carefully."
+      },
+      {
+        "problem": "Too oily",
+        "likelyCause": "Oil amount high relative to pepper base or insufficient reduction",
+        "fix": "Reduce longer to concentrate; skim excess oil if needed; adjust oil next time."
+      }
+    ]
+  }
+}

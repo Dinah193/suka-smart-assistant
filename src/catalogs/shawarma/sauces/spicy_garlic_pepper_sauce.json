@@ -1,0 +1,143 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.sauces.spicy_garlic_pepper_sauce",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Spicy Garlic Pepper Sauce",
+    "tags": [
+      "sauce",
+      "shawarma",
+      "condiment",
+      "spicy",
+      "garlic_forward",
+      "pepper_forward",
+      "creamy",
+      "no_cook",
+      "batch_friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Creamy shawarma-style sauce: bold garlic, heat, and black pepper bite."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.mayonnaise",
+      "label": "Mayonnaise",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": ["Use full-fat mayo for best texture."]
+    },
+    {
+      "id": "ing.greek_yogurt.plain",
+      "label": "Plain Greek yogurt",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": ["Sub: plain whole-milk yogurt (slightly thinner)."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, finely grated or pressed",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": ["About 5–6 medium cloves."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 30, "unit": "ml" }
+    },
+    {
+      "id": "ing.vinegar.white",
+      "label": "White vinegar",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": ["Sub: apple cider vinegar."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Helps round out sharp garlic and adds body."]
+    },
+    {
+      "id": "ing.jalapeno",
+      "label": "Jalapeño, seeded and minced",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": ["Adjust heat: keep seeds for hotter, or reduce amount."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 2.5, "unit": "g" },
+      "notes": ["About 1 teaspoon; increase for a stronger bite."]
+    },
+    {
+      "id": "ing.cayenne",
+      "label": "Cayenne pepper",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; optional for extra heat."]
+    },
+    {
+      "id": "ing.smoked_paprika",
+      "label": "Smoked paprika",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["Adds warmth and color; optional."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": ["Start lower; adjust after resting."]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Sugar",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["Balances acidity; optional."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Prep",
+      "instructions": [
+        "If using a whole jalapeño, seed it for moderate heat (or leave some seeds for hotter). Mince very finely.",
+        "Grate or press the garlic so it disperses evenly into the sauce."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Mix the base",
+      "instructions": [
+        "In a bowl, whisk together mayonnaise and Greek yogurt until smooth.",
+        "Whisk in lemon juice, vinegar, and olive oil."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Season",
+      "instructions": [
+        "Add garlic, jalapeño, black pepper, cayenne, smoked paprika, salt, and (optional) sugar.",
+        "Whisk until fully combined, scraping the bowl to ensure no garlic clumps remain."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Taste and adjust",
+      "instructions": [
+        "Taste. Adjust heat (cayenne/jalapeño), pepper, salt, or acidity (lemon/vinegar) to your preference.",
+        "If the sauce is too thick, whisk in 1–2 teaspoons (5–10 ml) of water, a little at a time."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Rest and store",
+      "instructions": [
+        "Cover and refrigerate for at least 30 minutes so the garlic mellows and flavors blend.",
+        "Store refrigerated in a sealed container. Use within 5–7 days."
+      ]
+    }
+  ]
+}

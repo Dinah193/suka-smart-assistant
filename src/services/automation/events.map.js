@@ -20,15 +20,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* optional: eventBus may not be wired in unit tests */ }
+} catch {
+  /* optional: eventBus may not be wired in unit tests */
+}
 
 // Feature flags (familyFundMode gate)
 let featureFlags = { familyFundMode: false };
 try {
   featureFlags = require("@/config/featureFlags.json");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 // Optional Hub export shims
 let HubPacketFormatter = null;
@@ -36,46 +40,61 @@ let FamilyFundConnector = null;
 try {
   HubPacketFormatter = require("@/integrations/HubPacketFormatter");
   FamilyFundConnector = require("@/integrations/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 const SRC = "services.automation.events.map";
 
 /* ------------------------- Canonical play.* constants ------------------------- */
 // Session lifecycle
-const PLAY_STARTED         = "play.started";
-const PLAY_STEP_CHANGED    = "play.step.changed";
-const PLAY_PAUSED          = "play.paused";
-const PLAY_RESUMED         = "play.resumed";
-const PLAY_COMPLETED       = "play.completed";
-const PLAY_CANCELED        = "play.canceled";
-const PLAY_FAILED          = "play.failed";
-const PLAY_PLAN_UPDATED    = "play.plan.updated";     // replan during execution
-const PLAY_SESSION_UPDATED = "play.session.updated";  // non-step field updates (notes, title, etc.)
+const PLAY_STARTED = "play.started";
+const PLAY_STEP_CHANGED = "play.step.changed";
+const PLAY_PAUSED = "play.paused";
+const PLAY_RESUMED = "play.resumed";
+const PLAY_COMPLETED = "play.completed";
+const PLAY_CANCELED = "play.canceled";
+const PLAY_FAILED = "play.failed";
+const PLAY_PLAN_UPDATED = "play.plan.updated"; // replan during execution
+const PLAY_SESSION_UPDATED = "play.session.updated"; // non-step field updates (notes, title, etc.)
 
 // Timing / timers
-const PLAY_TIMER_STARTED   = "play.timer.started";
-const PLAY_TIMER_TICK      = "play.timer.tick";
-const PLAY_TIMER_PAUSED    = "play.timer.paused";
-const PLAY_TIMER_RESUMED   = "play.timer.resumed";
+const PLAY_TIMER_STARTED = "play.timer.started";
+const PLAY_TIMER_TICK = "play.timer.tick";
+const PLAY_TIMER_PAUSED = "play.timer.paused";
+const PLAY_TIMER_RESUMED = "play.timer.resumed";
 const PLAY_TIMER_COMPLETED = "play.timer.completed";
 
 // Devices / resources
-const PLAY_DEVICE_BUSY     = "play.device.busy";
+const PLAY_DEVICE_BUSY = "play.device.busy";
 const PLAY_DEVICE_RELEASED = "play.device.released";
 
 // Risk / status
-const PLAY_RISK_GREEN      = "play.risk.green";
-const PLAY_RISK_AMBER      = "play.risk.amber";
-const PLAY_RISK_RED        = "play.risk.red";
+const PLAY_RISK_GREEN = "play.risk.green";
+const PLAY_RISK_AMBER = "play.risk.amber";
+const PLAY_RISK_RED = "play.risk.red";
 
 // Convenience collections
 const ALL_PLAY_EVENTS = [
-  PLAY_STARTED, PLAY_STEP_CHANGED, PLAY_PAUSED, PLAY_RESUMED,
-  PLAY_COMPLETED, PLAY_CANCELED, PLAY_FAILED,
-  PLAY_PLAN_UPDATED, PLAY_SESSION_UPDATED,
-  PLAY_TIMER_STARTED, PLAY_TIMER_TICK, PLAY_TIMER_PAUSED, PLAY_TIMER_RESUMED, PLAY_TIMER_COMPLETED,
-  PLAY_DEVICE_BUSY, PLAY_DEVICE_RELEASED,
-  PLAY_RISK_GREEN, PLAY_RISK_AMBER, PLAY_RISK_RED,
+  PLAY_STARTED,
+  PLAY_STEP_CHANGED,
+  PLAY_PAUSED,
+  PLAY_RESUMED,
+  PLAY_COMPLETED,
+  PLAY_CANCELED,
+  PLAY_FAILED,
+  PLAY_PLAN_UPDATED,
+  PLAY_SESSION_UPDATED,
+  PLAY_TIMER_STARTED,
+  PLAY_TIMER_TICK,
+  PLAY_TIMER_PAUSED,
+  PLAY_TIMER_RESUMED,
+  PLAY_TIMER_COMPLETED,
+  PLAY_DEVICE_BUSY,
+  PLAY_DEVICE_RELEASED,
+  PLAY_RISK_GREEN,
+  PLAY_RISK_AMBER,
+  PLAY_RISK_RED,
 ];
 
 const PLAY_EVENT_SET = new Set(ALL_PLAY_EVENTS);
@@ -85,12 +104,12 @@ const PLAY_EVENT_SET = new Set(ALL_PLAY_EVENTS);
 //   that lead to inventory/storehouse updates (e.g., after meal execution).
 const MUTATING_PLAY_TYPES = new Set([
   PLAY_STARTED,
-  PLAY_STEP_CHANGED,     // step transitions may drive device usage & ingredient consumption timing
-  PLAY_COMPLETED,        // often followed by meal.executed, preservation.completed, etc.
+  PLAY_STEP_CHANGED, // step transitions may drive device usage & ingredient consumption timing
+  PLAY_COMPLETED, // often followed by meal.executed, preservation.completed, etc.
   PLAY_CANCELED,
   PLAY_FAILED,
-  PLAY_PLAN_UPDATED,     // dynamic replan impacts schedule/consumption
-  PLAY_SESSION_UPDATED,  // structural session field change during play
+  PLAY_PLAN_UPDATED, // dynamic replan impacts schedule/consumption
+  PLAY_SESSION_UPDATED, // structural session field change during play
 ]);
 
 /* --------------------------------- Helpers --------------------------------- */
@@ -115,7 +134,8 @@ function isPlayEvent(type) {
  */
 function buildPlayEnvelope(type, data = {}) {
   if (!isPlayEvent(type)) return null;
-  const payloadData = (data && typeof data === "object") ? { ...data } : (data ?? {});
+  const payloadData =
+    data && typeof data === "object" ? { ...data } : data ?? {};
   return { type, ts: nowIso(), source: SRC, data: payloadData };
 }
 
@@ -147,7 +167,9 @@ function emitPlay(type, data = {}) {
 
 /* ------------------------------- Internals -------------------------------- */
 
-function nowIso() { return new Date().toISOString(); }
+function nowIso() {
+  return new Date().toISOString();
+}
 
 async function exportToHubIfEnabled(payload) {
   if (!featureFlags?.familyFundMode) return;
@@ -157,7 +179,10 @@ async function exportToHubIfEnabled(payload) {
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // Hub is auxiliary; fail silently by design
-    console.warn("[events.map] Hub export failed silently:", err?.message || err);
+    console.warn(
+      "[events.map] Hub export failed silently:",
+      err?.message || err
+    );
   }
 }
 
@@ -200,8 +225,6 @@ module.exports = {
     exportToHubIfEnabled,
   },
 };
-
-
 
 // -----------------------------------------------------------------------------
 // Import pipeline canonical events (L0→L3→Session)

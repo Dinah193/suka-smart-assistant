@@ -27,7 +27,7 @@ function useMotionCompat() {
 
       const compat =
         (await tryImport("@/app/ui/motion/compat")) ||
-        (await tryImport("../../app/ui/motion/compat"));
+        (await tryImport("@/app/ui/motion/compat"));
 
       if (compat && ok) {
         setMod({

@@ -19,7 +19,7 @@
  */
 
 import React, { useState } from "react";
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 import { runFermentationDurationCalculator } from "./FermentationDurationCalculator.shim";
 
 /**
@@ -56,7 +56,7 @@ export default function FermentationDurationCalculatorView({ onResult }) {
       targetStyle: "tangy",
       saltPct: 2.5,
       starterType: "",
-      desiredShelfLifeDays: 60
+      desiredShelfLifeDays: 60,
     })
   );
 
@@ -74,17 +74,25 @@ export default function FermentationDurationCalculatorView({ onResult }) {
   function handleChange(e) {
     const { name, value } = e.target;
 
-    if (["batchSize", "temperatureMin", "temperatureMax", "saltPct", "desiredShelfLifeDays"].includes(name)) {
+    if (
+      [
+        "batchSize",
+        "temperatureMin",
+        "temperatureMax",
+        "saltPct",
+        "desiredShelfLifeDays",
+      ].includes(name)
+    ) {
       setForm((prev) => ({
         ...prev,
-        [name]: value === "" ? "" : Number(value)
+        [name]: value === "" ? "" : Number(value),
       }));
       return;
     }
 
     setForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   }
 
@@ -135,9 +143,9 @@ export default function FermentationDurationCalculatorView({ onResult }) {
         sessionMeta: {
           domain: "preservation",
           title: `Ferment: ${form.productType}`,
-          sourceType: "manual"
-        }
-      }
+          sourceType: "manual",
+        },
+      },
     });
   }
 
@@ -150,8 +158,9 @@ export default function FermentationDurationCalculatorView({ onResult }) {
             Fermentation Planner
           </h1>
           <p className="text-sm text-slate-600 mt-1">
-            Define your batch, temperature, and style to generate a fermentation schedule,
-            ready window, and gentle reminders that can flow into your SessionRunner.
+            Define your batch, temperature, and style to generate a fermentation
+            schedule, ready window, and gentle reminders that can flow into your
+            SessionRunner.
           </p>
         </div>
 
@@ -166,7 +175,9 @@ export default function FermentationDurationCalculatorView({ onResult }) {
               : "bg-slate-200 text-slate-500 cursor-not-allowed"
           }`}
         >
-          {hasResult ? "Start Guidance Session" : "Calculate First to Start Session"}
+          {hasResult
+            ? "Start Guidance Session"
+            : "Calculate First to Start Session"}
         </button>
       </header>
 
@@ -372,13 +383,18 @@ export default function FermentationDurationCalculatorView({ onResult }) {
 
             <div className="flex items-center justify-between pt-2">
               <p className="text-[11px] text-slate-500">
-                Tip: Start with your everyday kraut and tweak style & temp to see how your schedule shifts.
+                Tip: Start with your everyday kraut and tweak style & temp to
+                see how your schedule shifts.
               </p>
               <button
                 type="submit"
                 disabled={loading}
                 className={`inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors
-                ${loading ? "bg-slate-300 text-slate-600" : "bg-emerald-600 text-white hover:bg-emerald-700"}`}
+                ${
+                  loading
+                    ? "bg-slate-300 text-slate-600"
+                    : "bg-emerald-600 text-white hover:bg-emerald-700"
+                }`}
               >
                 {loading ? "Calculating…" : "Calculate Schedule"}
               </button>
@@ -394,7 +410,10 @@ export default function FermentationDurationCalculatorView({ onResult }) {
 
           {!hasResult && (
             <div className="flex-1 flex flex-col items-center justify-center text-center text-sm text-slate-500 border border-dashed border-slate-200 rounded-lg p-4">
-              <p>Run a calculation to see suggested fermentation phases, checkpoints, and ready windows.</p>
+              <p>
+                Run a calculation to see suggested fermentation phases,
+                checkpoints, and ready windows.
+              </p>
             </div>
           )}
 
@@ -417,11 +436,14 @@ export default function FermentationDurationCalculatorView({ onResult }) {
                         {formatDateTime(targetReadyWindow.end)}
                       </p>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        This is when your ferment should be at peak flavor and texture.
+                        This is when your ferment should be at peak flavor and
+                        texture.
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500">No ready window calculated.</p>
+                    <p className="text-xs text-slate-500">
+                      No ready window calculated.
+                    </p>
                   )}
                 </div>
 
@@ -437,14 +459,18 @@ export default function FermentationDurationCalculatorView({ onResult }) {
                       </p>
                       <p>
                         <span className="font-medium">Location:</span>{" "}
-                        {storageShift.targetStorage || "Fermentation Shelf / Fridge"}
+                        {storageShift.targetStorage ||
+                          "Fermentation Shelf / Fridge"}
                       </p>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        SessionRunner can remind you when it&apos;s time to move jars/crocks.
+                        SessionRunner can remind you when it&apos;s time to move
+                        jars/crocks.
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500">No storage shift calculated.</p>
+                    <p className="text-xs text-slate-500">
+                      No storage shift calculated.
+                    </p>
                   )}
                 </div>
               </div>
@@ -466,8 +492,9 @@ export default function FermentationDurationCalculatorView({ onResult }) {
                             {phase.label}
                           </p>
                           <p className="text-[11px] text-slate-500">
-                            {formatDateTime(phase.startAt)} → {formatDateTime(phase.endAt)} •{" "}
-                            {phase.durationDays} day(s)
+                            {formatDateTime(phase.startAt)} →{" "}
+                            {formatDateTime(phase.endAt)} • {phase.durationDays}{" "}
+                            day(s)
                           </p>
                         </div>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
@@ -475,30 +502,36 @@ export default function FermentationDurationCalculatorView({ onResult }) {
                         </span>
                       </div>
 
-                      {Array.isArray(phase.checkpoints) && phase.checkpoints.length > 0 && (
-                        <div className="border-t border-slate-100 pt-2">
-                          <p className="text-[11px] font-medium text-slate-700 mb-1">
-                            Checkpoints
-                          </p>
-                          <ul className="space-y-1">
-                            {phase.checkpoints.map((cp) => (
-                              <li
-                                key={`${cp.id}-${cp.offsetDays}`}
-                                className="flex items-start gap-2 text-[11px] text-slate-600"
-                              >
-                                <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                <span>
-                                  <span className="font-medium">{cp.label}</span>{" "}
-                                  <span className="text-slate-500">
-                                    (Day +{cp.offsetDays}
-                                    {cp.preferredTimeOfDay ? `, ${cp.preferredTimeOfDay}` : ""})
+                      {Array.isArray(phase.checkpoints) &&
+                        phase.checkpoints.length > 0 && (
+                          <div className="border-t border-slate-100 pt-2">
+                            <p className="text-[11px] font-medium text-slate-700 mb-1">
+                              Checkpoints
+                            </p>
+                            <ul className="space-y-1">
+                              {phase.checkpoints.map((cp) => (
+                                <li
+                                  key={`${cp.id}-${cp.offsetDays}`}
+                                  className="flex items-start gap-2 text-[11px] text-slate-600"
+                                >
+                                  <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                  <span>
+                                    <span className="font-medium">
+                                      {cp.label}
+                                    </span>{" "}
+                                    <span className="text-slate-500">
+                                      (Day +{cp.offsetDays}
+                                      {cp.preferredTimeOfDay
+                                        ? `, ${cp.preferredTimeOfDay}`
+                                        : ""}
+                                      )
+                                    </span>
                                   </span>
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                     </li>
                   ))}
                 </ol>
@@ -524,7 +557,9 @@ export default function FermentationDurationCalculatorView({ onResult }) {
                         className="border border-slate-200 rounded-md px-2 py-1.5 text-[11px] flex flex-col gap-0.5"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-slate-800">{s.title}</span>
+                          <span className="font-medium text-slate-800">
+                            {s.title}
+                          </span>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                             {s.kind}
                           </span>
@@ -539,9 +574,10 @@ export default function FermentationDurationCalculatorView({ onResult }) {
                   </ul>
 
                   <p className="text-[11px] text-slate-500 mt-2">
-                    Use <span className="font-medium">Start Guidance Session</span> to send one
-                    or more of these into the SessionRunner, where timers, toasts, and voice cues
-                    can guide you step by step.
+                    Use{" "}
+                    <span className="font-medium">Start Guidance Session</span>{" "}
+                    to send one or more of these into the SessionRunner, where
+                    timers, toasts, and voice cues can guide you step by step.
                   </p>
                 </div>
               )}
@@ -567,6 +603,6 @@ function formatDateTime(iso) {
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 }

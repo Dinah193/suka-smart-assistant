@@ -1,0 +1,629 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean.recipes.bibimbap",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Bibimbap (Korean Mixed Rice Bowl)",
+    "subtitle": "Warm rice topped with seasoned vegetables, protein, and gochujang, finished with sesame and a fried egg.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": "Canonical SSA-style bibimbap with modular toppings (namul), optional bulgogi, and vegetarian-friendly swaps."
+    }
+  },
+
+  "classification": {
+    "cuisine": "korean",
+    "category": "main",
+    "mealArchetypes": ["korean.meal.rice_bowl", "korean.meal.rice_banchan"],
+    "servingStyles": ["bowls", "plates", "family_style"],
+    "plannerTags": [
+      "korean",
+      "bibimbap",
+      "rice_bowl",
+      "namul",
+      "gochujang",
+      "weeknight",
+      "modular",
+      "meal_prep_friendly",
+      "leftovers_good"
+    ],
+    "subprofiles": ["korean.home_style"]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 520, "unit": "g" },
+    "notes": "Serves 4 bowls. Toppings scale easily; ideal for meal prep (store toppings separately)."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 20,
+    "totalMins": 65
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "weeknightFriendly": true,
+    "batchFriendly": "high",
+    "leftoversGood": true,
+    "freezerFriendly": "low",
+    "mealPrep": true,
+    "crowdFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweet": 1,
+    "salty": 3,
+    "umami": 4,
+    "sour": 0,
+    "heat": 3,
+    "aromatics": ["garlic", "scallion", "sesame"],
+    "notes": ["savory", "spicy-sweet gochujang", "fresh-vegetable contrast"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.rice_cooker_or_pot",
+        "label": "Rice cooker or pot with lid",
+        "required": true
+      },
+      { "id": "equipment.skillet", "label": "Large skillet", "required": true },
+      {
+        "id": "equipment.saucepan",
+        "label": "Small saucepan (optional)",
+        "required": false
+      },
+      {
+        "id": "equipment.mixing_bowls",
+        "label": "Mixing bowls (for seasoning)",
+        "required": true
+      },
+      { "id": "equipment.knife", "label": "Chef’s knife", "required": true },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.microplane",
+      "equipment.tongs",
+      "equipment.sheet_pan",
+      "equipment.oven"
+    ],
+    "optional": [
+      {
+        "id": "equipment.dolsot_stone_bowl",
+        "label": "Dolsot (hot stone bowl)",
+        "required": false,
+        "notes": "For dolsot bibimbap with crispy rice (nurungji)."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.omnivore"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame", "allergen.egg"],
+    "mayContain": [],
+    "notes": [
+      "Use gluten-free gochujang/soy sauce if needed (many gochujang contain wheat).",
+      "For egg-free: omit egg or use tofu scramble."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.rice_short_grain_uncooked",
+      "label": "Short-grain rice (uncooked)",
+      "role": "starch",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "About 2 cups. Cook to yield ~4–5 cups cooked."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water (for cooking rice)",
+      "role": "cook",
+      "amount": { "value": 540, "unit": "ml" },
+      "notes": "Adjust per rice brand/rice cooker guidance."
+    },
+
+    {
+      "id": "ingredient.eggs",
+      "label": "Eggs",
+      "role": "protein",
+      "amount": { "value": 4, "unit": "count" },
+      "notes": "Fried egg on top is classic; sunny-side up is common."
+    },
+
+    {
+      "id": "ingredient.gochujang",
+      "label": "Gochujang (Korean chili paste)",
+      "role": "sauce",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 4 tbsp; adjust heat to taste."
+    },
+    {
+      "id": "ingredient.sesame_oil",
+      "label": "Toasted sesame oil",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Used across toppings + sauce."
+    },
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Split between toppings + sauce."
+    },
+    {
+      "id": "ingredient.rice_vinegar",
+      "label": "Rice vinegar",
+      "role": "acid",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true,
+      "notes": "Optional for a brighter bibimbap sauce."
+    },
+    {
+      "id": "ingredient.honey_or_sugar",
+      "label": "Honey or sugar",
+      "role": "sweetener",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Balances gochujang."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, finely minced or grated",
+      "role": "aromatic",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 5–6 cloves, divided."
+    },
+    {
+      "id": "ingredient.sesame_seeds",
+      "label": "Toasted sesame seeds",
+      "role": "garnish",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "Plus extra for serving if desired."
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions (green onions), thinly sliced",
+      "role": "aromatic",
+      "amount": { "value": 40, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.spinach",
+      "label": "Spinach",
+      "role": "veg",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "For sigeumchi-namul. Baby spinach works."
+    },
+    {
+      "id": "ingredient.bean_sprouts",
+      "label": "Bean sprouts",
+      "role": "veg",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Soybean sprouts preferred; mung bean sprouts also work."
+    },
+    {
+      "id": "ingredient.carrot",
+      "label": "Carrot, julienned",
+      "role": "veg",
+      "amount": { "value": 140, "unit": "g" }
+    },
+    {
+      "id": "ingredient.zucchini",
+      "label": "Zucchini, julienned or thin half-moons",
+      "role": "veg",
+      "amount": { "value": 220, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.mushrooms",
+      "label": "Mushrooms (shiitake or cremini), sliced",
+      "role": "veg",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "ingredient.cucumber",
+      "label": "Cucumber, thin matchsticks or half-moons",
+      "role": "veg",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Often served lightly seasoned (or raw) for crunch."
+    },
+
+    {
+      "id": "ingredient.kimchi",
+      "label": "Kimchi (for serving)",
+      "role": "banchan",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.gim",
+      "label": "Roasted seaweed (gim), shredded (for serving)",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil (for sautéing/frying)",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" }
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Used mainly for blanching/seasoning vegetables; adjust to taste."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.rice",
+      "label": "Rice Base",
+      "items": ["ingredient.rice_short_grain_uncooked", "ingredient.water"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Bibimbap Sauce",
+      "items": [
+        "ingredient.gochujang",
+        "ingredient.soy_sauce",
+        "ingredient.sesame_oil",
+        "ingredient.honey_or_sugar",
+        "ingredient.garlic",
+        "ingredient.sesame_seeds",
+        "ingredient.rice_vinegar"
+      ]
+    },
+    {
+      "id": "group.veg",
+      "label": "Vegetable Toppings (Namul + Sautéed Veg)",
+      "items": [
+        "ingredient.spinach",
+        "ingredient.bean_sprouts",
+        "ingredient.carrot",
+        "ingredient.zucchini",
+        "ingredient.mushrooms",
+        "ingredient.cucumber"
+      ]
+    },
+    {
+      "id": "group.protein_garnish",
+      "label": "Egg + Garnishes",
+      "items": [
+        "ingredient.eggs",
+        "ingredient.scallions",
+        "ingredient.gim",
+        "ingredient.kimchi"
+      ]
+    }
+  ],
+
+  "methods": [
+    "method.cook_rice",
+    "method.blanch",
+    "method.sauté",
+    "method.fry_egg",
+    "method.assemble"
+  ],
+
+  "safety": {
+    "notes": [
+      "Cool cooked rice quickly if meal-prepping; refrigerate within 2 hours.",
+      "Cook eggs to your household’s safety preference; avoid cross-contamination on cutting boards.",
+      "If using dolsot bowls, handle carefully—extremely hot surfaces."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Store rice and toppings separately for best texture."
+    },
+    "reheat": {
+      "notes": [
+        "Reheat rice covered with a splash of water.",
+        "Warm toppings briefly in a skillet or microwave before assembling."
+      ]
+    },
+    "freezer": {
+      "maxDays": 0,
+      "notes": "Not recommended (fresh toppings lose texture)."
+    }
+  },
+
+  "pairings": {
+    "banchan": [
+      "dish.kimchi",
+      "dish.bean_sprout_namul",
+      "dish.spinach_namul",
+      "dish.cucumber_kimchi"
+    ],
+    "soups": ["dish.miyeokguk", "dish.doenjang_jjigae"],
+    "proteinAddOns": [
+      "cuisines.korean.recipes.bulgogi",
+      "dish.oyakodon_like_not_korean_placeholder"
+    ],
+    "condiments": [
+      "ingredient.gochujang",
+      "ingredient.sesame_oil",
+      "ingredient.gim"
+    ]
+  },
+
+  "planner": {
+    "roles": {
+      "starch": ["ingredient.rice_short_grain_uncooked"],
+      "veg": [
+        "ingredient.spinach",
+        "ingredient.bean_sprouts",
+        "ingredient.carrot",
+        "ingredient.zucchini",
+        "ingredient.mushrooms",
+        "ingredient.cucumber"
+      ],
+      "protein": ["ingredient.eggs"],
+      "sauce": ["ingredient.gochujang"],
+      "banchan": ["ingredient.kimchi"]
+    },
+    "suggestedPlates": [
+      {
+        "id": "plate.bibimbap_classic",
+        "label": "Classic Bibimbap Bowl",
+        "components": [
+          {
+            "role": "starch",
+            "items": ["dish.steamed_rice"],
+            "chooseOne": true
+          },
+          {
+            "role": "veg",
+            "items": [
+              "dish.spinach_namul",
+              "dish.bean_sprout_namul",
+              "dish.sauteed_mushrooms",
+              "dish.sauteed_carrots"
+            ],
+            "chooseOne": false
+          },
+          { "role": "protein", "items": ["dish.fried_egg"], "chooseOne": true },
+          {
+            "role": "sauce",
+            "items": ["sauce.bibimbap_gochujang"],
+            "chooseOne": true
+          }
+        ]
+      }
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.add_bulgogi",
+      "label": "Add Bulgogi",
+      "when": { "available": ["cuisines.korean.recipes.bulgogi"] },
+      "changes": {
+        "notes": [
+          "Top bowls with 1/2–3/4 cup cooked bulgogi per serving for a classic meat bibimbap."
+        ]
+      }
+    },
+    {
+      "id": "adapt.vegetarian",
+      "label": "Vegetarian Bibimbap",
+      "when": { "diet": ["vegetarian"] },
+      "changes": {
+        "swap": [
+          {
+            "from": "ingredient.eggs",
+            "to": "ingredient.tofu_extra_firm",
+            "notes": "Pan-sear tofu cubes until crisp; season with soy + sesame."
+          }
+        ],
+        "notes": ["Keep the bowl vibrant with extra mushrooms and zucchini."]
+      }
+    },
+    {
+      "id": "adapt.gluten_free",
+      "label": "Gluten-free",
+      "when": { "diet": ["gluten_free"] },
+      "changes": {
+        "notes": [
+          "Use tamari instead of soy sauce and verify your gochujang is gluten-free."
+        ]
+      }
+    },
+    {
+      "id": "adapt.quick_weeknight",
+      "label": "Quick weeknight version",
+      "when": { "constraint": ["time_short"] },
+      "changes": {
+        "notes": [
+          "Use pre-cooked rice (reheat covered).",
+          "Use 2–3 toppings instead of 5 (spinach + sprouts + mushrooms is a strong trio).",
+          "Serve cucumber raw with sesame oil + salt for a fast crunch topping."
+        ]
+      }
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.dolsot",
+      "label": "Dolsot Bibimbap (crispy rice)",
+      "notes": [
+        "Heat a stone bowl, brush with sesame oil, add rice, then let it crisp 3–5 minutes before topping.",
+        "Use caution: the bowl stays dangerously hot."
+      ]
+    },
+    {
+      "id": "var.extra_spicy",
+      "label": "Extra spicy",
+      "notes": [
+        "Add gochugaru (Korean chili flakes) to sauce or top with sliced fresh chilies."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Bibimbap is best when toppings are seasoned separately—each one should taste good on its own.",
+    "Make-ahead: cook rice and prep toppings; assemble fresh to keep textures bright."
+  ],
+
+  "steps": [
+    {
+      "id": "step.01_cook_rice",
+      "title": "Cook the rice",
+      "instructions": [
+        "Rinse rice until the water runs mostly clear.",
+        "Cook in a rice cooker or pot with the measured water until tender.",
+        "Keep warm while you prepare toppings."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 15,
+      "timers": [
+        { "label": "Rice cook time (typical)", "minutes": 15 },
+        { "label": "Rice rest time (optional)", "minutes": 10 }
+      ],
+      "checks": ["Rice is tender and fluffy; not mushy."]
+    },
+    {
+      "id": "step.02_make_sauce",
+      "title": "Make bibimbap sauce",
+      "instructions": [
+        "In a small bowl, mix gochujang, soy sauce, sesame oil, honey (or sugar), and 1/3 of the garlic.",
+        "Optional: add rice vinegar for brightness.",
+        "Stir in sesame seeds. Taste and adjust: more honey for sweetness, more gochujang for heat."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": ["Sauce is balanced spicy-sweet-salty; spoonable consistency."]
+    },
+    {
+      "id": "step.03_spinach_namul",
+      "title": "Prepare spinach namul",
+      "instructions": [
+        "Bring a pot of lightly salted water to a boil.",
+        "Blanch spinach 30–45 seconds until bright green, then rinse under cold water.",
+        "Squeeze out excess water and cut into bite-size lengths.",
+        "Season with a pinch of salt, a drizzle of sesame oil, a little soy sauce (optional), and a pinch of garlic."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Blanch spinach", "seconds": 40 }],
+      "checks": ["Spinach is bright green and not watery after squeezing."]
+    },
+    {
+      "id": "step.04_sprout_namul",
+      "title": "Prepare bean sprout namul",
+      "instructions": [
+        "Blanch sprouts 2–3 minutes until just tender but still crisp, then drain well.",
+        "Season with a pinch of salt, sesame oil, sesame seeds, and a little garlic.",
+        "Taste and adjust seasoning."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Blanch sprouts", "minutes": 2.5 }],
+      "checks": ["Sprouts are tender-crisp and not soggy."]
+    },
+    {
+      "id": "step.05_saute_veg",
+      "title": "Sauté remaining vegetables",
+      "instructions": [
+        "Heat a skillet over medium-high with a small amount of neutral oil.",
+        "Sauté carrots 2–3 minutes with a pinch of salt; remove to a plate.",
+        "Sauté zucchini 2–3 minutes with a pinch of salt; remove to a plate.",
+        "Sauté mushrooms 4–6 minutes until browned; season lightly with soy (optional) and sesame oil at the end."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Sauté carrots", "minutes": 2.5 },
+        { "label": "Sauté zucchini", "minutes": 2.5 },
+        { "label": "Sauté mushrooms", "minutes": 5 }
+      ],
+      "checks": [
+        "Carrots are tender-crisp.",
+        "Mushrooms are browned (not pale/steamed)."
+      ]
+    },
+    {
+      "id": "step.06_fry_eggs",
+      "title": "Fry eggs",
+      "instructions": [
+        "In the same skillet, add a little more oil if needed.",
+        "Fry eggs sunny-side up or over-easy (your preference).",
+        "Season lightly with salt."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Sunny-side cook time", "minutes": 2.5 },
+        { "label": "Over-easy flip time", "seconds": 20 }
+      ],
+      "checks": ["Egg whites are set; yolk doneness matches preference."]
+    },
+    {
+      "id": "step.07_assemble",
+      "title": "Assemble bowls and mix",
+      "instructions": [
+        "Divide warm rice among 4 bowls.",
+        "Arrange toppings in sections: spinach, sprouts, carrots, zucchini, mushrooms, and optional cucumber.",
+        "Top each bowl with a fried egg.",
+        "Add 1–2 tbsp bibimbap sauce per bowl, plus sesame seeds and optional shredded gim.",
+        "Mix thoroughly before eating."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "checks": [
+        "Bowl includes a balance of colors/textures.",
+        "Sauce amount is adjusted per eater."
+      ]
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.korean",
+    "dishId": "dish.bibimbap",
+    "sourcePaths": ["src/catalogs/cuisines/korean/recipes/bibimbap.json"],
+    "search": {
+      "aliases": ["bibim bap", "mixed rice bowl", "korean rice bowl"],
+      "keywords": [
+        "bibimbap",
+        "korean",
+        "rice bowl",
+        "gochujang",
+        "namul",
+        "vegetable toppings",
+        "fried egg"
+      ]
+    }
+  }
+}

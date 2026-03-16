@@ -35,8 +35,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useEffect, useState, useMemo } from "react";
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 // soft hub deps – optional
 let HubPacketFormatter = null;
@@ -251,7 +251,9 @@ export default function HouseholdAnalytics() {
           </p>
         </div>
         <div className="text-right">
-          <div className="text-xs uppercase tracking-wide text-slate-400">Est. savings</div>
+          <div className="text-xs uppercase tracking-wide text-slate-400">
+            Est. savings
+          </div>
           <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
             {formatCurrency(metrics.estimatedSavings)}
           </div>
@@ -268,7 +270,9 @@ export default function HouseholdAnalytics() {
             key={card.title}
             className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white/80 dark:bg-slate-900/40 p-3.5 flex flex-col gap-1 shadow-sm"
           >
-            <div className="text-[10px] uppercase tracking-wide text-slate-400">{card.title}</div>
+            <div className="text-[10px] uppercase tracking-wide text-slate-400">
+              {card.title}
+            </div>
             <div className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
               {card.value}
             </div>
@@ -285,16 +289,25 @@ export default function HouseholdAnalytics() {
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               Imports by domain
             </h2>
-            <span className="text-[10px] text-slate-400">Total {metrics.imports}</span>
+            <span className="text-[10px] text-slate-400">
+              Total {metrics.imports}
+            </span>
           </div>
           <div className="flex flex-col gap-3">
             {domainBreakdown.map((d) => {
-              const pct = metrics.imports > 0 ? Math.round((d.value / metrics.imports) * 100) : 0;
+              const pct =
+                metrics.imports > 0
+                  ? Math.round((d.value / metrics.imports) * 100)
+                  : 0;
               return (
                 <div key={d.label}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-600 dark:text-slate-200">{d.label}</span>
-                    <span className="text-slate-400">{d.value} ({pct}%)</span>
+                    <span className="text-slate-600 dark:text-slate-200">
+                      {d.label}
+                    </span>
+                    <span className="text-slate-400">
+                      {d.value} ({pct}%)
+                    </span>
                   </div>
                   <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <div
@@ -329,7 +342,9 @@ export default function HouseholdAnalytics() {
                   <div className="text-xs text-slate-800 dark:text-slate-200 leading-tight">
                     {ev.type}
                   </div>
-                  <div className="text-[10px] text-slate-400 leading-tight">{ev.ts}</div>
+                  <div className="text-[10px] text-slate-400 leading-tight">
+                    {ev.ts}
+                  </div>
                   {ev.data?.kind && (
                     <div className="text-[10px] text-slate-400 leading-tight">
                       {ev.data.kind}
@@ -344,9 +359,9 @@ export default function HouseholdAnalytics() {
 
       {/* FUTURE: chart hooks, seasonal view, hub sync stats */}
       <div className="rounded-2xl border border-dashed border-slate-200/70 dark:border-slate-800/70 bg-slate-50/40 dark:bg-slate-950/10 p-4 text-xs text-slate-400">
-        This panel can render time-series charts (per day/week), hub-export health,
-        and anomaly detection for waste spikes. Wire to Dexie or server analytics
-        store when you’re ready.
+        This panel can render time-series charts (per day/week), hub-export
+        health, and anomaly detection for waste spikes. Wire to Dexie or server
+        analytics store when you’re ready.
       </div>
     </div>
   );

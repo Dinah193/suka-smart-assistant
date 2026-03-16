@@ -1,4 +1,4 @@
-// src/agents/shims/cleaningRoutineAgent.js
+// src/agents/shims/cleaningRoutineShim.js
 // -----------------------------------------------------------------------------
 // SSA Cleaning Routine Shim
 // Replaces the old "CleaningRoutineAgent" that:
@@ -22,10 +22,10 @@
 //   - "cleaning.finalize"      → finalizeCleaningSession
 // -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectCleaningContext } from "@/reasoner/selectors";
@@ -38,8 +38,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildCleaningPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -104,7 +104,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       : {}),
   };
 
-  return buildShimResponse(false, mode, payload, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    payload,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -117,7 +123,9 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
  */
 function enforceBudget(reqLike, debug) {
   const domainBudget =
-    (budget && (budget.cleaningRoutine || budget.cleaning || budget.household)) || {};
+    (budget &&
+      (budget.cleaningRoutine || budget.cleaning || budget.household)) ||
+    {};
 
   const maxChars = domainBudget.maxChars || 20000;
   const estimateSize = JSON.stringify(reqLike.input || {}).length;
@@ -328,7 +336,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -618,7 +629,11 @@ export async function invokeShim(req) {
     // 11. Compose sessions (if provided by Reasoner)
     //     e.g., for "cleaning.plan.daily" and "cleaning.forward"
     // -------------------------------------------------
-    const sessions = await maybeComposeSessions(normalized, { domain, intent, input, runtime }, debug);
+    const sessions = await maybeComposeSessions(
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // Session lifecycle events (session.started / step.changed / etc.)
     // are handled by SessionRunner when those sessions actually run.
@@ -642,7 +657,12 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 13. Optional Hub export
     // -------------------------------------------------
-    await maybeExportToHub(sessions, normalized, { domain, intent, input, runtime }, debug);
+    await maybeExportToHub(
+      sessions,
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------------------------
     // 14. Final response
@@ -753,7 +773,8 @@ export async function finalizeCleaningSession(plan = {}, runtime = {}) {
  * @returns {Array<Object>}
  */
 export function suggestMakeBuyActions(shortages = []) {
-  const uid = (prefix = "id") => `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
+  const uid = (prefix = "id") =>
+    `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
   if (!Array.isArray(shortages) || !shortages.length) return [];
   return shortages.map((s) => ({
     id: uid("mb"),
@@ -762,7 +783,11 @@ export function suggestMakeBuyActions(shortages = []) {
     detail: `Needed ${s.need}${s.unit}, have ${s.have}${s.unit} (for ${s.recipe})`,
     options: [
       { label: "Make now", action: "MAKE", payload: { key: s.key } },
-      { label: "Add to shopping list", action: "BUY", payload: { key: s.key, qty: s.need - s.have, unit: s.unit } },
+      {
+        label: "Add to shopping list",
+        action: "BUY",
+        payload: { key: s.key, qty: s.need - s.have, unit: s.unit },
+      },
     ],
   }));
 }

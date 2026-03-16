@@ -24,9 +24,9 @@
  *   Add more domain-specific strategies (preservation/animal/storehouse).
  */
 
-import eventBus from 'src/services/eventBus.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
-const SOURCE = 'SynthesisDeDup';
+const SOURCE = "SynthesisDeDup";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Public API
@@ -46,13 +46,19 @@ const SOURCE = 'SynthesisDeDup';
  *   notes: string[]
  * }>}
  */
-export async function dedupe({ readinessSteps = [], sessionSuggestions = [], policies = {} } = {}) {
+export async function dedupe({
+  readinessSteps = [],
+  sessionSuggestions = [],
+  policies = {},
+} = {}) {
   const steps = Array.isArray(readinessSteps) ? readinessSteps.slice() : [];
-  const sessions = Array.isArray(sessionSuggestions) ? sessionSuggestions.slice() : [];
+  const sessions = Array.isArray(sessionSuggestions)
+    ? sessionSuggestions.slice()
+    : [];
   const merges = [];
   const notes = [];
 
-  emit('synthesis.dedup.started', {
+  emit("synthesis.dedup.started", {
     steps: steps.length,
     sessions: sessions.length,
     strategies: listStrategies(),
@@ -68,12 +74,19 @@ export async function dedupe({ readinessSteps = [], sessionSuggestions = [], pol
   for (const strat of STRATEGIES) {
     try {
       if (!strat?.applies || !strat?.merge) continue;
-      const applies = await safeCall(() => strat.applies({ steps, sessions, policies }));
+      const applies = await safeCall(() =>
+        strat.applies({ steps, sessions, policies })
+      );
       if (!applies) continue;
 
       const before = steps.length;
-      const { steps: newSteps, sessions: newSessions, detail, note } =
-        (await safeCall(() => strat.merge({ steps, sessions, policies }))) || {};
+      const {
+        steps: newSteps,
+        sessions: newSessions,
+        detail,
+        note,
+      } = (await safeCall(() => strat.merge({ steps, sessions, policies }))) ||
+      {};
 
       if (Array.isArray(newSteps)) {
         steps.splice(0, steps.length, ...newSteps);
@@ -85,23 +98,42 @@ export async function dedupe({ readinessSteps = [], sessionSuggestions = [], pol
       const after = steps.length;
       if (before !== after) {
         merges.push({ strategy: strat.id, before, after, detail });
-        emit('synthesis.dedup.merged', { strategy: strat.id, delta: before - after, detail });
+        emit("synthesis.dedup.merged", {
+          strategy: strat.id,
+          delta: before - after,
+          detail,
+        });
       }
       if (note) notes.push(note);
     } catch (err) {
-      emit('synthesis.dedup.error', { strategy: strat?.id || '<unknown>', message: err?.message || 'merge error' });
+      emit("synthesis.dedup.error", {
+        strategy: strat?.id || "<unknown>",
+        message: err?.message || "merge error",
+      });
     }
   }
 
   // Final lightweight general-purpose coalesce (same-title+resource within window)
-  const { steps: coalesced, detail: coDetail } = coalesceSimilarSteps(steps, policies);
+  const { steps: coalesced, detail: coDetail } = coalesceSimilarSteps(
+    steps,
+    policies
+  );
   if (coDetail?.reduced > 0) {
-    merges.push({ strategy: 'general.coalesce', before: steps.length, after: coalesced.length, detail: coDetail });
+    merges.push({
+      strategy: "general.coalesce",
+      before: steps.length,
+      after: coalesced.length,
+      detail: coDetail,
+    });
     steps.splice(0, steps.length, ...coalesced);
-    emit('synthesis.dedup.merged', { strategy: 'general.coalesce', delta: coDetail.reduced, detail: coDetail });
+    emit("synthesis.dedup.merged", {
+      strategy: "general.coalesce",
+      delta: coDetail.reduced,
+      detail: coDetail,
+    });
   }
 
-  emit('synthesis.dedup.completed', {
+  emit("synthesis.dedup.completed", {
     steps: steps.length,
     sessions: sessions.length,
     merges: merges.length,
@@ -113,7 +145,13 @@ export async function dedupe({ readinessSteps = [], sessionSuggestions = [], pol
     delete s.__resource;
   }
 
-  return { ok: true, readinessSteps: steps, sessionSuggestions: sessions, merges, notes };
+  return {
+    ok: true,
+    readinessSteps: steps,
+    sessionSuggestions: sessions,
+    merges,
+    notes,
+  };
 }
 
 /**
@@ -121,9 +159,9 @@ export async function dedupe({ readinessSteps = [], sessionSuggestions = [], pol
  * @param {MergeStrategy} strategy
  */
 export function registerMergeStrategy(strategy) {
-  if (!strategy || typeof strategy !== 'object' || !strategy.id) return;
+  if (!strategy || typeof strategy !== "object" || !strategy.id) return;
   STRATEGIES.push(strategy);
-  emit('synthesis.dedup.strategy.registered', { id: strategy.id });
+  emit("synthesis.dedup.strategy.registered", { id: strategy.id });
 }
 
 /** Get a list of strategy ids (for observability/UI). */
@@ -145,11 +183,14 @@ const STRATEGIES = [];
  *   - Keep the highest priority and earliest dueBy
  */
 registerMergeStrategy({
-  id: 'device.oven.preheat.merge',
+  id: "device.oven.preheat.merge",
   applies: ({ steps }) => steps.some((s) => isPreheatOven(s)),
   merge: ({ steps, policies }) => {
     const win = toInt(policies?.ovenMergeWindowMins, 45);
-    const groups = groupBy(steps.filter(isPreheatOven), (s) => s.meta?.resource || 'device:oven-1');
+    const groups = groupBy(
+      steps.filter(isPreheatOven),
+      (s) => s.meta?.resource || "device:oven-1"
+    );
 
     const keep = steps.filter((s) => !isPreheatOven(s));
     const detail = { groups: [], reduced: 0 };
@@ -164,16 +205,25 @@ registerMergeStrategy({
       const first = items[0];
       const merged = {
         ...first,
-        id: first.id || `prep:${hash(`${resource}:preheat:${first.dueBy || ''}`)}`,
-        title: 'Preheat oven',
-        meta: { ...(first.meta || {}), mergedFrom: items.map((x) => x.id).filter(Boolean), resource },
+        id:
+          first.id ||
+          `prep:${hash(`${resource}:preheat:${first.dueBy || ""}`)}`,
+        title: "Preheat oven",
+        meta: {
+          ...(first.meta || {}),
+          mergedFrom: items.map((x) => x.id).filter(Boolean),
+          resource,
+        },
       };
 
       // Expand dueBy to cover the cluster window
       const earliest = toDate(items[0].dueBy) || null;
       const latest = findLatestWithinWindow(items, earliest, win);
       if (earliest && latest && latest > earliest) {
-        merged.meta.window = { start: earliest.toISOString(), end: latest.toISOString() };
+        merged.meta.window = {
+          start: earliest.toISOString(),
+          end: latest.toISOString(),
+        };
       }
 
       detail.groups.push({ resource, before: items.length, kept: merged.id });
@@ -181,7 +231,12 @@ registerMergeStrategy({
       keep.push(merged);
     }
 
-    return { steps: keep, sessions: undefined, detail, note: 'Merged oven preheats.' };
+    return {
+      steps: keep,
+      sessions: undefined,
+      detail,
+      note: "Merged oven preheats.",
+    };
   },
 });
 
@@ -192,21 +247,32 @@ registerMergeStrategy({
  * and remove per-room duplicates that only prep the same bucket.
  */
 registerMergeStrategy({
-  id: 'cleaning.sanitizer.bucket.share',
+  id: "cleaning.sanitizer.bucket.share",
   applies: ({ steps }) =>
-    steps.some((s) => s.domain === 'cleaning' && (s.meta?.consumableGroup === 'sanitizer' || /sanitizer/.test(s.__normTitle))),
+    steps.some(
+      (s) =>
+        s.domain === "cleaning" &&
+        (s.meta?.consumableGroup === "sanitizer" ||
+          /sanitizer/.test(s.__normTitle))
+    ),
   merge: ({ steps, policies }) => {
     const sanitizerSteps = steps.filter(
       (s) =>
-        s.domain === 'cleaning' &&
-        (s.meta?.consumableGroup === 'sanitizer' || /sanitizer/.test(s.__normTitle))
+        s.domain === "cleaning" &&
+        (s.meta?.consumableGroup === "sanitizer" ||
+          /sanitizer/.test(s.__normTitle))
     );
     if (sanitizerSteps.length <= 1) return { steps };
 
     const nonSan = steps.filter((s) => !sanitizerSteps.includes(s));
-    const rooms = sanitizerSteps.map((s) => s.meta?.room || inferRoomFromTitle(s.title)).filter(Boolean);
+    const rooms = sanitizerSteps
+      .map((s) => s.meta?.room || inferRoomFromTitle(s.title))
+      .filter(Boolean);
     const qtyPerRoom = toInt(policies?.sanitizer?.litersPerRoom, 3);
-    const totalLiters = Math.max(qtyPerRoom * Math.max(1, rooms.length), qtyPerRoom);
+    const totalLiters = Math.max(
+      qtyPerRoom * Math.max(1, rooms.length),
+      qtyPerRoom
+    );
 
     // Keep earliest dueBy among the group
     const earliest = sanitizerSteps
@@ -215,21 +281,34 @@ registerMergeStrategy({
       .sort((a, b) => a - b)[0];
 
     const merged = {
-      id: `prep:${hash(`sanitizer:${rooms.sort().join('|')}:${earliest ? earliest.toISOString() : ''}`)}`,
-      domain: 'cleaning',
+      id: `prep:${hash(
+        `sanitizer:${rooms.sort().join("|")}:${
+          earliest ? earliest.toISOString() : ""
+        }`
+      )}`,
+      domain: "cleaning",
       title: `Mix sanitizer bucket (${totalLiters} L)`,
       dueBy: earliest ? earliest.toISOString() : null,
       priority: Math.max(...sanitizerSteps.map((s) => s.priority ?? 0)),
       meta: {
-        reason: 'shared-sanitizer',
-        consumableGroup: 'sanitizer',
+        reason: "shared-sanitizer",
+        consumableGroup: "sanitizer",
         rooms: Array.from(new Set(rooms)),
         mergedFrom: sanitizerSteps.map((s) => s.id).filter(Boolean),
       },
     };
 
-    const detail = { before: sanitizerSteps.length, kept: merged.id, rooms: merged.meta.rooms, totalLiters };
-    return { steps: [...nonSan, merged], detail, note: 'Shared sanitizer bucket across rooms.' };
+    const detail = {
+      before: sanitizerSteps.length,
+      kept: merged.id,
+      rooms: merged.meta.rooms,
+      totalLiters,
+    };
+    return {
+      steps: [...nonSan, merged],
+      detail,
+      note: "Shared sanitizer bucket across rooms.",
+    };
   },
 });
 
@@ -238,10 +317,13 @@ registerMergeStrategy({
  * Example: "Bring stovetop to simmer" steps referencing capacity:stovetop should coalesce.
  */
 registerMergeStrategy({
-  id: 'capacity.window.merge',
-  applies: ({ steps }) => steps.some((s) => String(s.__resource || '').startsWith('capacity:')),
+  id: "capacity.window.merge",
+  applies: ({ steps }) =>
+    steps.some((s) => String(s.__resource || "").startsWith("capacity:")),
   merge: ({ steps }) => {
-    const capSteps = steps.filter((s) => String(s.__resource || '').startsWith('capacity:'));
+    const capSteps = steps.filter((s) =>
+      String(s.__resource || "").startsWith("capacity:")
+    );
     if (capSteps.length === 0) return { steps };
 
     const byCap = groupBy(capSteps, (s) => s.__resource);
@@ -257,14 +339,22 @@ registerMergeStrategy({
       const first = arr[0];
       const merged = {
         ...first,
-        id: first.id || `prep:${hash(`${cap}:${first.dueBy || ''}`)}`,
-        meta: { ...(first.meta || {}), mergedFrom: arr.map((x) => x.id).filter(Boolean), resource: cap },
+        id: first.id || `prep:${hash(`${cap}:${first.dueBy || ""}`)}`,
+        meta: {
+          ...(first.meta || {}),
+          mergedFrom: arr.map((x) => x.id).filter(Boolean),
+          resource: cap,
+        },
       };
-      detail.groups.push({ capacity: cap, before: arr.length, kept: merged.id });
+      detail.groups.push({
+        capacity: cap,
+        before: arr.length,
+        kept: merged.id,
+      });
       detail.reduced += arr.length - 1;
       keep.push(merged);
     }
-    return { steps: keep, detail, note: 'Merged capacity prep windows.' };
+    return { steps: keep, detail, note: "Merged capacity prep windows." };
   },
 });
 
@@ -276,7 +366,7 @@ function coalesceSimilarSteps(steps, policies = {}) {
   const buckets = new Map(); // key -> array
 
   for (const s of steps) {
-    const key = `${s.__resource || ''}|${s.__normTitle}`;
+    const key = `${s.__resource || ""}|${s.__normTitle}`;
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(s);
   }
@@ -298,14 +388,20 @@ function coalesceSimilarSteps(steps, policies = {}) {
       if (closeInTime(prev.dueBy, cur.dueBy, maxDeltaMin)) {
         // merge cur into prev (keep earliest due, max priority, concat refs)
         prev.priority = Math.max(prev.priority ?? 0, cur.priority ?? 0);
-        prev.meta = { ...(prev.meta || {}), mergedFrom: uniq([...(prev.meta?.mergedFrom || []), cur.id].filter(Boolean)) };
+        prev.meta = {
+          ...(prev.meta || {}),
+          mergedFrom: uniq(
+            [...(prev.meta?.mergedFrom || []), cur.id].filter(Boolean)
+          ),
+        };
         reduced += 1;
       } else {
         merged.push(cur);
       }
     }
     out.push(...merged);
-    if (merged.length < arr.length) groups.push({ key, before: arr.length, after: merged.length });
+    if (merged.length < arr.length)
+      groups.push({ key, before: arr.length, after: merged.length });
   }
 
   return { steps: out, detail: { reduced, groups } };
@@ -315,35 +411,35 @@ function coalesceSimilarSteps(steps, policies = {}) {
 // Utilities
 
 function isPreheatOven(s) {
-  const t = s.__normTitle || '';
-  const res = String(s.__resource || '');
-  return /preheat/.test(t) && (res.startsWith('device:oven') || /oven/.test(t));
+  const t = s.__normTitle || "";
+  const res = String(s.__resource || "");
+  return /preheat/.test(t) && (res.startsWith("device:oven") || /oven/.test(t));
 }
 
 function inferResourceFromTitle(normTitle) {
-  if (!normTitle) return '';
-  if (/\boven\b/.test(normTitle)) return 'device:oven-1';
-  if (/\bstovetop|burner|hob\b/.test(normTitle)) return 'capacity:stovetop';
-  if (/sanitizer|disinfect/.test(normTitle)) return 'consumable:sanitizer';
-  return '';
+  if (!normTitle) return "";
+  if (/\boven\b/.test(normTitle)) return "device:oven-1";
+  if (/\bstovetop|burner|hob\b/.test(normTitle)) return "capacity:stovetop";
+  if (/sanitizer|disinfect/.test(normTitle)) return "consumable:sanitizer";
+  return "";
 }
 
-function inferRoomFromTitle(title = '') {
+function inferRoomFromTitle(title = "") {
   const s = title.toLowerCase();
-  if (s.includes('bathroom')) return 'bathroom';
-  if (s.includes('kitchen')) return 'kitchen';
-  if (s.includes('living')) return 'living';
-  if (s.includes('bedroom')) return 'bedroom';
+  if (s.includes("bathroom")) return "bathroom";
+  if (s.includes("kitchen")) return "kitchen";
+  if (s.includes("living")) return "living";
+  if (s.includes("bedroom")) return "bedroom";
   return null;
 }
 
 function normalizeTitle(t) {
-  return String(t || '')
+  return String(t || "")
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -389,7 +485,7 @@ function uniq(arr) {
 
 function hash(str) {
   let h = 2166136261 >>> 0; // FNV-1a
-  const s = String(str || '');
+  const s = String(str || "");
   for (let i = 0; i < s.length; i += 1) {
     h ^= s.charCodeAt(i);
     h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
@@ -402,7 +498,7 @@ function hash(str) {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: new Date().toISOString(),
       source: SOURCE,

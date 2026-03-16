@@ -1,0 +1,214 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.marinades.lamb_shawarma_marinade",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Lamb Shawarma Marinade",
+    "tags": [
+      "marinade",
+      "shawarma",
+      "lamb",
+      "middle_eastern",
+      "spice_blend",
+      "garlic_forward",
+      "citrus",
+      "herb_forward",
+      "make_ahead",
+      "batch_friendly",
+      "grill",
+      "oven",
+      "stovetop"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Lamb shawarma marinade with warm spices, garlic, lemon, and herbs—balanced for leg, shoulder, or chops."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": ["About 3 tablespoons."]
+    },
+    {
+      "id": "ing.red_wine_vinegar",
+      "label": "Red wine vinegar",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Sub: apple cider vinegar."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": ["About 5–6 medium cloves."]
+    },
+    {
+      "id": "ing.onion",
+      "label": "Onion, finely grated",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": [
+        "About 1 small onion.",
+        "For a smoother marinade, use onion juice only (strain the pulp)."
+      ]
+    },
+    {
+      "id": "ing.greek_yogurt.plain",
+      "label": "Plain Greek yogurt",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": [
+        "Optional but recommended: helps tenderize and cling to lamb.",
+        "Sub: plain whole-milk yogurt."
+      ]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; classic lamb shawarma note."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon."]
+    },
+    {
+      "id": "ing.clove_ground",
+      "label": "Ground cloves",
+      "amount": { "value": 0.3, "unit": "g" },
+      "notes": ["About 1/8 teaspoon; very strong—use lightly."]
+    },
+    {
+      "id": "ing.cardamom_ground",
+      "label": "Ground cardamom",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; optional but authentic."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 2.5, "unit": "g" },
+      "notes": ["About 1 teaspoon."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": [
+        "About 1 3/4 teaspoons. Sized for ~1.3–1.8 kg (3–4 lb) lamb.",
+        "Reduce to 7 g if you will salt again before cooking."
+      ]
+    },
+    {
+      "id": "ing.oregano_dried",
+      "label": "Dried oregano",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional, adds herbal backbone."]
+    },
+    {
+      "id": "ing.thyme_dried",
+      "label": "Dried thyme",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; optional."]
+    },
+    {
+      "id": "ing.mint_dried",
+      "label": "Dried mint",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": [
+        "About 1/2 teaspoon; optional but pairs beautifully with lamb.",
+        "Sub: 1 tbsp fresh mint, finely chopped."
+      ]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["Optional for heat (about 1/2 teaspoon)."]
+    },
+    {
+      "id": "ing.honey",
+      "label": "Honey",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": [
+        "Optional: balances acidity and improves browning (about 1 teaspoon).",
+        "Sub: 6 g brown sugar."
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Make the marinade",
+      "instructions": [
+        "In a bowl, whisk olive oil, lemon juice, vinegar, grated garlic, and grated onion until combined.",
+        "Whisk in Greek yogurt (if using) until smooth.",
+        "Add spices (cumin, coriander, paprika, allspice, cinnamon, cloves, optional cardamom), pepper, salt, optional dried herbs, optional chili flakes, and optional honey. Whisk until evenly blended."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Marinate the lamb",
+      "instructions": [
+        "Add lamb (shoulder/leg slices, cubes for skewers, chops, or thin strips) to a zip bag or covered container.",
+        "Pour marinade over lamb and massage to coat thoroughly."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Marinate time",
+      "instructions": [
+        "Refrigerate minimum 2 hours.",
+        "Best flavor: 8–24 hours (lamb benefits from longer spice contact).",
+        "If using yogurt, keep to 24 hours max for best texture."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Cooking guidance (notes)",
+      "instructions": [
+        "For shawarma-style serving, slice lamb thinly across the grain after cooking (or slice thinly before marinating for very fast cooking).",
+        "Cook hot for browning: grill, cast-iron skillet, or high-heat oven/roast.",
+        "Pat off excess wet marinade if needed to improve searing."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Food safety",
+      "instructions": [
+        "Marinate lamb in the refrigerator.",
+        "Discard used marinade that touched raw meat, or boil thoroughly before using for basting."
+      ]
+    }
+  ]
+}

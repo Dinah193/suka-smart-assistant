@@ -1,0 +1,694 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "farm_to_table.plate_templates",
+    "type": "catalog",
+    "domain": "farm-to-table",
+    "locale": "en-US",
+    "name": "Farm-to-Table • Plate Templates Catalog",
+    "label": "Plate Templates",
+    "subtitle": "Deterministic plate-model templates used by planners to assemble balanced meals using farm-to-table components and roles.",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/farm-to-table/plate_templates.catalog.json",
+      "notes": [
+        "Templates define roles, required slots, and common pairings; planners resolve to actual components via inventory, cuisine rulesets, and substitutions.",
+        "Portioning is expressed as flexible hints (not strict nutrition). Nutrition modules can override with macro targets.",
+        "Use plannerTags to bias search (weeknight/batch/leftovers/etc.)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "module": "farm-to-table",
+    "locale": "en-US"
+  },
+  "defaults": {
+    "namespace": "plate",
+    "statusDefault": "active",
+    "ui": {
+      "sortBy": "rank",
+      "groupBy": "group"
+    },
+    "engineHints": {
+      "slotFillOrder": [
+        "protein",
+        "starch",
+        "vegetable",
+        "sauce",
+        "fresh_element",
+        "garnish",
+        "drink"
+      ],
+      "readinessBias": {
+        "weeknight": [
+          "readiness.prepped",
+          "readiness.parcooked",
+          "readiness.cooked",
+          "readiness.preserved_shelf_stable",
+          "readiness.preserved_frozen"
+        ],
+        "batchDay": [
+          "readiness.raw",
+          "readiness.cleaned",
+          "readiness.trimmed",
+          "readiness.chopped",
+          "readiness.marinated"
+        ]
+      }
+    }
+  },
+  "items": [
+    {
+      "id": "plate.template.core_balanced",
+      "label": "Core Balanced Plate",
+      "group": "Core",
+      "rank": 10,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.balanced",
+        "planner.core",
+        "weeknight.friendly",
+        "batch.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "protein",
+            "label": "Protein",
+            "role": "role.protein",
+            "required": true,
+            "choose": 1,
+            "portionHint": "Palm-size portion (or per macro target).",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.marinated",
+              "readiness.parcooked",
+              "readiness.cooked"
+            ]
+          },
+          {
+            "id": "veg_primary",
+            "label": "Vegetable (Primary)",
+            "role": "role.vegetable",
+            "required": true,
+            "choose": 1,
+            "portionHint": "1–2 fists of vegetables (raw or cooked).",
+            "preferredReadiness": [
+              "readiness.chopped",
+              "readiness.prepped",
+              "readiness.parcooked",
+              "readiness.cooked"
+            ]
+          },
+          {
+            "id": "starch",
+            "label": "Starch / Grain / Root",
+            "role": "role.starch",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1 cupped-hand starch (optional; adjust for activity goals).",
+            "preferredReadiness": [
+              "readiness.parcooked",
+              "readiness.cooked",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "fat",
+            "label": "Fat (Cooking or Finishing)",
+            "role": "role.fat",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1–2 thumbs fat (oil, butter, avocado, nuts).",
+            "preferredReadiness": [
+              "readiness.preserved_shelf_stable",
+              "readiness.prepped"
+            ]
+          },
+          {
+            "id": "acid",
+            "label": "Acid / Brightener",
+            "role": "role.acid",
+            "required": false,
+            "choose": 1,
+            "portionHint": "A squeeze/splash for balance.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "sauce",
+            "label": "Sauce / Dressing",
+            "role": "role.sauce",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1–3 tbsp (optional).",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.cooked",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "garnish",
+            "label": "Garnish / Herb",
+            "role": "role.garnish",
+            "required": false,
+            "choose": 1,
+            "portionHint": "A pinch/handful for aroma and finish.",
+            "preferredReadiness": [
+              "readiness.cleaned",
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable"
+            ]
+          }
+        ],
+        "pairingHints": {
+          "protein_to_sauce": [
+            {
+              "proteinTag": "protein.chicken",
+              "sauceTags": [
+                "sauce.garlic",
+                "sauce.lemon",
+                "sauce.yogurt",
+                "sauce.bbq"
+              ]
+            },
+            {
+              "proteinTag": "protein.beef",
+              "sauceTags": [
+                "sauce.pan_gravy",
+                "sauce.chimichurri",
+                "sauce.pepper",
+                "sauce.tomato"
+              ]
+            },
+            {
+              "proteinTag": "protein.fish",
+              "sauceTags": [
+                "sauce.lemon",
+                "sauce.tartar",
+                "sauce.herb",
+                "sauce.cream"
+              ]
+            }
+          ],
+          "starch_to_protein": [
+            {
+              "starchTag": "starch.rice",
+              "proteinTags": [
+                "protein.chicken",
+                "protein.beef",
+                "protein.fish",
+                "protein.lamb",
+                "protein.goat"
+              ]
+            },
+            {
+              "starchTag": "starch.potato",
+              "proteinTags": [
+                "protein.beef",
+                "protein.pork",
+                "protein.chicken",
+                "protein.fish"
+              ]
+            }
+          ]
+        },
+        "plannerTags": [
+          "plate.core",
+          "plate.flexible",
+          "meal.dinner",
+          "meal.lunch"
+        ]
+      }
+    },
+
+    {
+      "id": "plate.template.bowl_grain_bowl",
+      "label": "Grain Bowl / Power Bowl",
+      "group": "Bowls",
+      "rank": 20,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.bowl",
+        "meal.lunch",
+        "meal.dinner",
+        "batch.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "base_starch",
+            "label": "Base (Grain/Root)",
+            "role": "role.starch",
+            "required": true,
+            "choose": 1,
+            "portionHint": "1–2 cups cooked grain/root (or per targets).",
+            "preferredReadiness": [
+              "readiness.cooked",
+              "readiness.parcooked",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "protein",
+            "label": "Protein",
+            "role": "role.protein",
+            "required": true,
+            "choose": 1,
+            "portionHint": "Palm-size portion.",
+            "preferredReadiness": [
+              "readiness.cooked",
+              "readiness.prepped",
+              "readiness.marinated"
+            ]
+          },
+          {
+            "id": "veg_mix",
+            "label": "Vegetables (2+)",
+            "role": "role.vegetable",
+            "required": true,
+            "choose": 2,
+            "portionHint": "2+ cups mixed veg (roasted + fresh works best).",
+            "preferredReadiness": [
+              "readiness.chopped",
+              "readiness.cooked",
+              "readiness.prepped"
+            ]
+          },
+          {
+            "id": "sauce",
+            "label": "Sauce / Dressing",
+            "role": "role.sauce",
+            "required": true,
+            "choose": 1,
+            "portionHint": "2–4 tbsp.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable",
+              "readiness.cooked"
+            ]
+          },
+          {
+            "id": "crunch",
+            "label": "Crunch (Nuts/Seeds/Croutons)",
+            "role": "role.crunch",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1–2 tbsp.",
+            "preferredReadiness": ["readiness.preserved_shelf_stable"]
+          },
+          {
+            "id": "acid",
+            "label": "Acid / Pickle",
+            "role": "role.acid",
+            "required": false,
+            "choose": 1,
+            "portionHint": "Pickled veg or squeeze of citrus.",
+            "preferredReadiness": [
+              "readiness.preserved_shelf_stable",
+              "readiness.prepped"
+            ]
+          }
+        ],
+        "plannerTags": [
+          "plate.bowl",
+          "plate.batchable",
+          "leftovers.good",
+          "weeknight.friendly"
+        ]
+      }
+    },
+
+    {
+      "id": "plate.template.salad_meal",
+      "label": "Meal Salad (Protein Salad)",
+      "group": "Salads",
+      "rank": 30,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.salad",
+        "meal.lunch",
+        "weeknight.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "greens",
+            "label": "Greens/Base",
+            "role": "role.fresh_element",
+            "required": true,
+            "choose": 1,
+            "portionHint": "2–4 cups greens.",
+            "preferredReadiness": [
+              "readiness.cleaned",
+              "readiness.prepped",
+              "readiness.assembled"
+            ]
+          },
+          {
+            "id": "protein",
+            "label": "Protein",
+            "role": "role.protein",
+            "required": true,
+            "choose": 1,
+            "portionHint": "Palm-size portion.",
+            "preferredReadiness": ["readiness.cooked", "readiness.prepped"]
+          },
+          {
+            "id": "veg_addins",
+            "label": "Vegetable Add-ins (2+)",
+            "role": "role.vegetable",
+            "required": true,
+            "choose": 2,
+            "portionHint": "1–2 cups total.",
+            "preferredReadiness": [
+              "readiness.chopped",
+              "readiness.prepped",
+              "readiness.cooked"
+            ]
+          },
+          {
+            "id": "dressing",
+            "label": "Dressing",
+            "role": "role.sauce",
+            "required": true,
+            "choose": 1,
+            "portionHint": "2–3 tbsp.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "crunch",
+            "label": "Crunch",
+            "role": "role.crunch",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1–2 tbsp.",
+            "preferredReadiness": ["readiness.preserved_shelf_stable"]
+          }
+        ],
+        "plannerTags": ["plate.salad", "plate.light", "quick", "meal.lunch"]
+      }
+    },
+
+    {
+      "id": "plate.template.sandwich_plate",
+      "label": "Sandwich + Side Plate",
+      "group": "Handhelds",
+      "rank": 40,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.sandwich",
+        "meal.lunch",
+        "weeknight.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "bread_wrap",
+            "label": "Bread / Wrap",
+            "role": "role.carrier",
+            "required": true,
+            "choose": 1,
+            "portionHint": "2 slices bread or 1 wrap/pita.",
+            "preferredReadiness": [
+              "readiness.preserved_shelf_stable",
+              "readiness.prepped"
+            ]
+          },
+          {
+            "id": "protein",
+            "label": "Protein / Filling",
+            "role": "role.protein",
+            "required": true,
+            "choose": 1,
+            "portionHint": "Palm-size portion.",
+            "preferredReadiness": [
+              "readiness.cooked",
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "veg",
+            "label": "Fresh Veg",
+            "role": "role.fresh_element",
+            "required": false,
+            "choose": 1,
+            "portionHint": "Lettuce/tomato/onion/pickles.",
+            "preferredReadiness": [
+              "readiness.cleaned",
+              "readiness.prepped",
+              "readiness.assembled"
+            ]
+          },
+          {
+            "id": "spread_sauce",
+            "label": "Spread / Sauce",
+            "role": "role.sauce",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1–2 tbsp.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "side",
+            "label": "Side (Fruit/Veg/Chips/Salad)",
+            "role": "role.side",
+            "required": true,
+            "choose": 1,
+            "portionHint": "1 side portion.",
+            "preferredReadiness": [
+              "readiness.assembled",
+              "readiness.cooked",
+              "readiness.preserved_shelf_stable"
+            ]
+          }
+        ],
+        "plannerTags": [
+          "plate.handheld",
+          "plate.lunch",
+          "quick",
+          "leftovers.good"
+        ]
+      }
+    },
+
+    {
+      "id": "plate.template.soup_and_side",
+      "label": "Soup/Stew + Side",
+      "group": "Comfort",
+      "rank": 50,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.soup",
+        "meal.dinner",
+        "batch.friendly",
+        "freezer.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "soup",
+            "label": "Soup / Stew",
+            "role": "role.main",
+            "required": true,
+            "choose": 1,
+            "portionHint": "1–2 bowls.",
+            "preferredReadiness": [
+              "readiness.cooked",
+              "readiness.preserved_frozen",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "side_carrier",
+            "label": "Side (Bread/Crackers/Rice)",
+            "role": "role.carrier",
+            "required": false,
+            "choose": 1,
+            "portionHint": "Small bread portion or rice.",
+            "preferredReadiness": [
+              "readiness.preserved_shelf_stable",
+              "readiness.cooked"
+            ]
+          },
+          {
+            "id": "fresh_element",
+            "label": "Fresh Element (Salad/Fruit)",
+            "role": "role.fresh_element",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1 cup salad or fruit.",
+            "preferredReadiness": [
+              "readiness.cleaned",
+              "readiness.assembled",
+              "readiness.prepped"
+            ]
+          }
+        ],
+        "plannerTags": ["plate.comfort", "plate.batchable", "leftovers.good"]
+      }
+    },
+
+    {
+      "id": "plate.template.breakfast_standard",
+      "label": "Breakfast Plate (Egg + Carb + Fruit)",
+      "group": "Breakfast",
+      "rank": 60,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.breakfast",
+        "meal.breakfast",
+        "weeknight.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "protein",
+            "label": "Protein",
+            "role": "role.protein",
+            "required": true,
+            "choose": 1,
+            "portionHint": "Eggs or meat protein.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.cooked",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "carb",
+            "label": "Carb (Waffle/Toast/Oats)",
+            "role": "role.starch",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1 serving carb.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.cooked",
+              "readiness.preserved_shelf_stable"
+            ]
+          },
+          {
+            "id": "fruit",
+            "label": "Fruit",
+            "role": "role.fresh_element",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1 cup fruit.",
+            "preferredReadiness": [
+              "readiness.cleaned",
+              "readiness.prepped",
+              "readiness.assembled"
+            ]
+          },
+          {
+            "id": "fat",
+            "label": "Fat (Butter/Oil/Nut Butter)",
+            "role": "role.fat",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1 thumb fat (optional).",
+            "preferredReadiness": [
+              "readiness.preserved_shelf_stable",
+              "readiness.prepped"
+            ]
+          }
+        ],
+        "plannerTags": ["plate.breakfast", "quick", "family.friendly"]
+      }
+    },
+
+    {
+      "id": "plate.template.snack_box",
+      "label": "Snack Box (Protein + Fruit + Crunch)",
+      "group": "Snacks",
+      "rank": 70,
+      "status": "active",
+      "tags": [
+        "plate.template",
+        "plate.snack",
+        "meal.snack",
+        "no_cook",
+        "weeknight.friendly"
+      ],
+      "refs": {
+        "templateVersion": "1.0",
+        "slots": [
+          {
+            "id": "protein",
+            "label": "Protein",
+            "role": "role.protein",
+            "required": true,
+            "choose": 1,
+            "portionHint": "Small protein portion.",
+            "preferredReadiness": [
+              "readiness.cooked",
+              "readiness.preserved_shelf_stable",
+              "readiness.assembled"
+            ]
+          },
+          {
+            "id": "fruit_or_veg",
+            "label": "Fruit or Veg",
+            "role": "role.fresh_element",
+            "required": true,
+            "choose": 1,
+            "portionHint": "1 cup.",
+            "preferredReadiness": [
+              "readiness.cleaned",
+              "readiness.prepped",
+              "readiness.assembled"
+            ]
+          },
+          {
+            "id": "crunch",
+            "label": "Crunch",
+            "role": "role.crunch",
+            "required": true,
+            "choose": 1,
+            "portionHint": "1–2 tbsp nuts/seeds or small crackers portion.",
+            "preferredReadiness": ["readiness.preserved_shelf_stable"]
+          },
+          {
+            "id": "dip",
+            "label": "Dip / Spread",
+            "role": "role.sauce",
+            "required": false,
+            "choose": 1,
+            "portionHint": "1–2 tbsp.",
+            "preferredReadiness": [
+              "readiness.prepped",
+              "readiness.preserved_shelf_stable"
+            ]
+          }
+        ],
+        "plannerTags": ["plate.snack", "no_cook", "portable"]
+      }
+    }
+  ]
+}

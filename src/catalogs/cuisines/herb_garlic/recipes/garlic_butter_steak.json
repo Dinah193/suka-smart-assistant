@@ -1,0 +1,407 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic.recipes.garlic_butter_steak",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Garlic Butter Steak",
+    "subtitle": "Pan-seared steak basted with garlic, herbs, and butter (Herb & Garlic style)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Canonical SSA Herb & Garlic baseline garlic-butter steak.",
+        "Designed for deterministic doneness targets and equipment-aware cooking (cast iron preferred)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Herb & Garlic",
+    "subprofiles": ["cuisines.herb_garlic"],
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.pan_seared",
+      "archetype.steak_night",
+      "archetype.weeknight_dinner"
+    ],
+    "servingStyles": ["plated", "family_style", "sliced_platter"],
+    "plannerTags": [
+      "herb_garlic",
+      "garlic_forward",
+      "herb_forward",
+      "high_protein",
+      "weeknight",
+      "special_occasion",
+      "doneness_sensitive"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 when slicing steak and serving with sides; 2 if serving large portions."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": false,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "donenessSensitive": true
+  },
+
+  "tasteProfile": {
+    "dominant": ["butter", "garlic", "herbs", "beefy"],
+    "supporting": ["black_pepper", "lemon_optional"],
+    "heat": 0,
+    "salt": "medium_high"
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equip.skillet_cast_iron",
+        "label": "Cast iron or heavy skillet",
+        "required": true,
+        "notes": "Best for searing. Stainless also works. Nonstick is not recommended for high-heat sear."
+      },
+      {
+        "id": "equip.tongs",
+        "label": "Tongs",
+        "required": true
+      },
+      {
+        "id": "equip.knife",
+        "label": "Knife (for slicing)",
+        "required": true
+      },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.instant_read_thermometer",
+        "label": "Instant-read thermometer",
+        "required": false,
+        "notes": "Strongly recommended for consistent doneness."
+      },
+      {
+        "id": "equip.splatter_screen",
+        "label": "Splatter screen",
+        "required": false
+      }
+    ],
+    "minimum": [
+      "equip.skillet_cast_iron",
+      "equip.tongs",
+      "equip.cutting_board"
+    ],
+    "recommended": ["equip.instant_read_thermometer", "equip.splatter_screen"]
+  },
+
+  "dietFlags": ["diet.gluten_free", "diet.low_carb", "diet.keto_friendly"],
+  "allergens": ["allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "ing.steak_ribeye_or_strip",
+      "label": "Steaks (ribeye or strip), 1-inch thick",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": [
+        "Two 1-lb steaks or four 8-oz steaks.",
+        "Thickness drives timing; adjust for thinner/thicker cuts."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": [
+        "Salt generously. For best results, salt 30–60 minutes ahead (dry brine)."
+      ]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.high_heat_oil",
+      "label": "High-heat oil (avocado, grapeseed, or light olive oil)",
+      "role": "sear_fat",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.butter_unsalted",
+      "label": "Unsalted butter",
+      "role": "baste_fat",
+      "amount": { "value": 4, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic cloves, lightly smashed",
+      "role": "aromatic",
+      "amount": { "value": 5, "unit": "clove" },
+      "notes": [
+        "Smashed garlic perfumes butter without burning as quickly as minced garlic."
+      ]
+    },
+    {
+      "id": "ing.rosemary",
+      "label": "Fresh rosemary sprigs",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ing.thyme",
+      "label": "Fresh thyme sprigs",
+      "role": "herb",
+      "amount": { "value": 4, "unit": "each" },
+      "optional": true,
+      "notes": ["If you only use one herb, thyme is the most forgiving."]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon wedges (optional)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": ["A squeeze at the end brightens the butter."]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep_and_season",
+      "title": "Prep and season steak",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat steaks dry thoroughly with paper towels.",
+        "Season both sides with kosher salt and black pepper.",
+        "If time allows, rest steaks uncovered 30–60 minutes at room temp (or 2–24 hours in the fridge for a dry brine)."
+      ],
+      "checks": ["Steak surface is dry", "Seasoning applied evenly"]
+    },
+    {
+      "id": "step.preheat_pan",
+      "title": "Preheat the pan",
+      "activeMins": 3,
+      "handsOffMins": 3,
+      "instructions": [
+        "Heat a cast iron or heavy skillet over medium-high until very hot (a drop of water should sizzle and evaporate quickly).",
+        "Add high-heat oil and swirl to coat."
+      ],
+      "timers": [{ "label": "Preheat pan", "minutes": 3 }]
+    },
+    {
+      "id": "step.sear_first_side",
+      "title": "Sear the first side",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Lay steaks in the pan and press lightly to maximize contact.",
+        "Sear without moving for 2–3 minutes until a deep brown crust forms."
+      ],
+      "timers": [{ "label": "Sear side 1", "minutes": 3 }],
+      "checks": ["Deep brown crust formed (not gray)"]
+    },
+    {
+      "id": "step.sear_second_side",
+      "title": "Flip and sear the second side",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Flip steaks and sear 2–3 minutes on the second side.",
+        "Sear edges briefly (fat cap) if applicable."
+      ],
+      "timers": [{ "label": "Sear side 2", "minutes": 3 }]
+    },
+    {
+      "id": "step.baste_with_garlic_herb_butter",
+      "title": "Baste with garlic-herb butter",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Reduce heat to medium.",
+        "Add butter, smashed garlic, and herb sprigs to the pan.",
+        "Tilt the pan and spoon the foaming butter over the steaks continuously for 1–2 minutes.",
+        "Check internal temperature if using a thermometer and continue basting until you reach your target."
+      ],
+      "timers": [{ "label": "Butter baste", "minutes": 2 }],
+      "checks": [
+        "Butter is foaming, not burning (if browning too fast, lower heat)",
+        "Internal temp approaching target"
+      ]
+    },
+    {
+      "id": "step.rest_and_slice",
+      "title": "Rest, then slice",
+      "activeMins": 2,
+      "handsOffMins": 8,
+      "instructions": [
+        "Transfer steaks to a cutting board and rest 8–10 minutes.",
+        "Spoon a little garlic-herb butter over the top while resting.",
+        "Slice against the grain and serve. Optional: finish with a squeeze of lemon."
+      ],
+      "timers": [{ "label": "Rest steak", "minutes": 10 }]
+    }
+  ],
+
+  "methods": ["technique.pan_sear", "technique.baste"],
+
+  "planner": {
+    "dishId": "herb_garlic.garlic_butter_steak",
+    "course": "main",
+    "batchNotes": [
+      "Cook in batches if pan is crowded; overcrowding prevents crust.",
+      "Make extra garlic-herb butter and use for vegetables or potatoes."
+    ],
+    "donenessTargets": {
+      "rareF": 120,
+      "mediumRareF": 130,
+      "mediumF": 140,
+      "mediumWellF": 150,
+      "wellF": 160,
+      "carryoverRiseF": 5,
+      "notes": [
+        "Pull steak ~5°F before target; it rises while resting.",
+        "Times vary by thickness and pan heat—temperature is most reliable."
+      ]
+    }
+  },
+
+  "pairings": {
+    "sides": [
+      "cuisines.herb_garlic.recipes.garlic_mashed_potatoes",
+      "cuisines.herb_garlic.recipes.herb_roasted_vegetables"
+    ],
+    "salads": ["salad.simple_greens", "salad.lemon_vinaigrette"],
+    "sauces": ["sauce.garlic_herb_butter"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Cool and store airtight. Slice cold for sandwiches/salads or reheat gently.",
+      "maxDays": 3
+    },
+    "freezer": {
+      "guidance": "Freezing cooked steak is possible but quality drops. Freeze sliced, tightly wrapped.",
+      "maxMonths": 2
+    },
+    "reheat": {
+      "best": [
+        "Warm slices briefly in a skillet with a splash of butter/broth",
+        "Warm whole steak in a low oven (250°F) then quick sear"
+      ],
+      "avoid": ["High microwave heat (toughens quickly)"]
+    }
+  },
+
+  "summary": "Pan-seared steak basted with foaming garlic-herb butter for a rich Herb & Garlic finish—temperature-driven for consistent doneness.",
+
+  "keywords": [
+    "garlic butter steak",
+    "pan seared steak",
+    "basted steak",
+    "ribeye",
+    "strip steak",
+    "weeknight steak"
+  ],
+
+  "tags": [
+    "cuisine.herb_garlic",
+    "herb_garlic",
+    "garlic_forward",
+    "herb_forward",
+    "steak",
+    "pan_seared",
+    "doneness_sensitive",
+    "high_protein",
+    "gluten_free",
+    "low_carb",
+    "keto_friendly"
+  ],
+
+  "safety": {
+    "handling": [
+      "Use tongs and avoid splatter; hot oil can burn.",
+      "Rest steak to allow juices to redistribute; do not leave cooked steak at room temperature longer than 2 hours."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.reverse_sear_thick",
+      "label": "Reverse sear for thick steaks (1.5–2 inches)",
+      "when": { "steakThickness": "thick" },
+      "adapt": {
+        "notes": [
+          "Bake steaks on a rack at 250°F until 10–15°F below target, then sear hot 60–90 seconds per side.",
+          "Finish with garlic-herb butter basting in the last minute."
+        ]
+      }
+    },
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free garlic-herb steak",
+      "when": { "avoidAllergen": "allergen.dairy" },
+      "adapt": {
+        "notes": [
+          "Replace butter with 2 tbsp olive oil + 1 tbsp extra oil for basting.",
+          "Add minced garlic at the very end (off heat) to avoid burning.",
+          "Finish with lemon and herbs."
+        ],
+        "allergens": []
+      }
+    },
+    {
+      "id": "var.grill",
+      "label": "Grill method",
+      "when": { "hasEquipment": "equip.grill" },
+      "adapt": {
+        "notes": [
+          "Grill over high heat to desired doneness, then brush with garlic-herb butter off heat.",
+          "Make garlic-herb butter separately and spoon on top while resting."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.herb_garlic.recipes.garlic_butter_steak",
+    "aliases": [
+      "garlic herb steak",
+      "butter basted steak",
+      "pan seared garlic steak"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.pan_sear", "technique.baste"],
+      "coreIngredients": [
+        "ing.steak_ribeye_or_strip",
+        "ing.garlic",
+        "ing.butter_unsalted",
+        "ing.thyme"
+      ]
+    }
+  }
+}

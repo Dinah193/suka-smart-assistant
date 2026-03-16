@@ -22,16 +22,16 @@
  *   { type, ts, source, data }
  */
 
-import Dexie from 'dexie';
-import eventBus from 'src/services/eventBus.js';
+import Dexie from "dexie";
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Configuration & singletons
 
-const DB_NAME = 'SSA-Nutrition';
+const DB_NAME = "SSA-Nutrition";
 const DB_VERSION = 1; // bump with schema changes
-const TABLE = 'nutrition';
-const SOURCE = 'NutritionStore';
+const TABLE = "nutrition";
+const SOURCE = "NutritionStore";
 
 /**
  * Dexie database singleton.
@@ -43,7 +43,7 @@ db.version(DB_VERSION).stores({
   // @index normalizedName for fast lookups
   // @index foodName for fuzzy matching and display searches
   // @index lastUpdated to prune stale entries
-  [TABLE]: 'id, normalizedName, foodName, lastUpdated',
+  [TABLE]: "id, normalizedName, foodName, lastUpdated",
 });
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -54,15 +54,15 @@ db.version(DB_VERSION).stores({
  * registerSynonyms() without changing this file. Keys and values should be lowercase.
  */
 const BUILTIN_SYNONYMS = {
-  'garbanzo bean': 'chickpea',
-  'garbanzo beans': 'chickpeas',
-  'chick peas': 'chickpeas',
-  'bell pepper': 'sweet pepper',
-  'scallion': 'green onion',
-  'scallions': 'green onions',
-  'confectioners sugar': 'powdered sugar',
-  'confectioner sugar': 'powdered sugar',
-  'capsicum': 'sweet pepper',
+  "garbanzo bean": "chickpea",
+  "garbanzo beans": "chickpeas",
+  "chick peas": "chickpeas",
+  "bell pepper": "sweet pepper",
+  scallion: "green onion",
+  scallions: "green onions",
+  "confectioners sugar": "powdered sugar",
+  "confectioner sugar": "powdered sugar",
+  capsicum: "sweet pepper",
 };
 
 let synonymMap = new Map(Object.entries(BUILTIN_SYNONYMS));
@@ -75,18 +75,21 @@ let synonymMap = new Map(Object.entries(BUILTIN_SYNONYMS));
  * - applies synonym map (one hop)
  */
 function normalizeName(name) {
-  if (!name || typeof name !== 'string') return '';
+  if (!name || typeof name !== "string") return "";
   const base = name
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9\s\-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9\s\-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 
   const mapped = synonymMap.get(base) || base;
   // plural → singular heuristic (very light; domain parsers can override)
-  const singular = mapped.endsWith('s') && !mapped.endsWith('ss') ? mapped.slice(0, -1) : mapped;
+  const singular =
+    mapped.endsWith("s") && !mapped.endsWith("ss")
+      ? mapped.slice(0, -1)
+      : mapped;
   return singular;
 }
 
@@ -96,7 +99,7 @@ function normalizeName(name) {
  */
 export function registerSynonyms(pairs = {}) {
   for (const [k, v] of Object.entries(pairs)) {
-    if (typeof k === 'string' && typeof v === 'string' && k && v) {
+    if (typeof k === "string" && typeof v === "string" && k && v) {
       synonymMap.set(k.toLowerCase().trim(), v.toLowerCase().trim());
     }
   }
@@ -111,7 +114,7 @@ function nowISO() {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: nowISO(),
       source: SOURCE,
@@ -132,13 +135,14 @@ function emit(type, data) {
  */
 export async function upsert(entry) {
   try {
-    if (!entry || typeof entry !== 'object') {
-      return { ok: false, error: 'Invalid entry' };
+    if (!entry || typeof entry !== "object") {
+      return { ok: false, error: "Invalid entry" };
     }
-    const id = stringOrNull(entry.id) || generateDeterministicId(entry.foodName);
+    const id =
+      stringOrNull(entry.id) || generateDeterministicId(entry.foodName);
     const foodName = stringOrNull(entry.foodName);
     if (!id || !foodName) {
-      return { ok: false, error: 'Missing required fields: id and foodName' };
+      return { ok: false, error: "Missing required fields: id and foodName" };
     }
 
     const normalizedName =
@@ -149,14 +153,14 @@ export async function upsert(entry) {
 
     await db[TABLE].put(record);
 
-    emit('nutrition.updated', { id, normalizedName, foodName });
+    emit("nutrition.updated", { id, normalizedName, foodName });
 
     // NOTE: Not exporting to hub — this is reference data, not household mutation.
     // If you want to mirror nutrition catalog upstream, add exportToHubIfEnabled here.
 
     return { ok: true, id };
   } catch (err) {
-    return { ok: false, error: err?.message || 'Upsert failed' };
+    return { ok: false, error: err?.message || "Upsert failed" };
   }
 }
 
@@ -171,7 +175,7 @@ export async function bulkUpsert(items = []) {
   const toPut = [];
   const ts = nowISO();
   for (const raw of items) {
-    if (!raw || typeof raw !== 'object' || !raw.foodName) continue;
+    if (!raw || typeof raw !== "object" || !raw.foodName) continue;
     const id = stringOrNull(raw.id) || generateDeterministicId(raw.foodName);
     const foodName = stringOrNull(raw.foodName);
     if (!id || !foodName) continue;
@@ -184,17 +188,17 @@ export async function bulkUpsert(items = []) {
 
   // We want counts of inserted vs updated. Read existing ids first.
   const ids = toPut.map((r) => r.id);
-  const existing = await db[TABLE].where('id').anyOf(ids).toArray();
+  const existing = await db[TABLE].where("id").anyOf(ids).toArray();
   const existingSet = new Set(existing.map((r) => r.id));
 
-  await db.transaction('rw', db[TABLE], async () => {
+  await db.transaction("rw", db[TABLE], async () => {
     await db[TABLE].bulkPut(toPut);
   });
 
   const updated = toPut.filter((r) => existingSet.has(r.id)).length;
   const inserted = toPut.length - updated;
 
-  emit('nutrition.updated', { count: toPut.length, inserted, updated });
+  emit("nutrition.updated", { count: toPut.length, inserted, updated });
   return { ok: true, inserted, updated };
 }
 
@@ -212,7 +216,7 @@ export async function getById(id) {
 export async function getByNormalizedName(name) {
   const norm = normalizeName(name);
   if (!norm) return null;
-  return db[TABLE].where('normalizedName').equals(norm).first();
+  return db[TABLE].where("normalizedName").equals(norm).first();
 }
 
 /**
@@ -221,15 +225,18 @@ export async function getByNormalizedName(name) {
  * @param {number} limit
  */
 export async function searchByFoodName(q, limit = 25) {
-  const needle = (q || '').toLowerCase().trim();
+  const needle = (q || "").toLowerCase().trim();
   if (!needle) return [];
   // Use Dexie's filter for contains; for large catalogs consider an FTS index
-  const all = await db[TABLE].where('foodName').startsWithIgnoreCase(needle).limit(limit).toArray();
+  const all = await db[TABLE].where("foodName")
+    .startsWithIgnoreCase(needle)
+    .limit(limit)
+    .toArray();
   // If startsWith was too strict, fallback to full filter contains:
   if (all.length < limit / 2) {
     const alt = await db[TABLE].toArray();
     return alt
-      .filter((r) => (r.foodName || '').toLowerCase().includes(needle))
+      .filter((r) => (r.foodName || "").toLowerCase().includes(needle))
       .slice(0, limit);
   }
   return all;
@@ -257,15 +264,17 @@ export async function count() {
 export async function purgeStale(cutoffISO) {
   if (!isISO(cutoffISO)) return { ok: false, removed: 0 };
   let removed = 0;
-  await db.transaction('rw', db[TABLE], async () => {
-    const stale = await db[TABLE].where('lastUpdated').below(cutoffISO).toArray();
+  await db.transaction("rw", db[TABLE], async () => {
+    const stale = await db[TABLE].where("lastUpdated")
+      .below(cutoffISO)
+      .toArray();
     const staleIds = stale.map((r) => r.id);
     if (staleIds.length) {
       await db[TABLE].bulkDelete(staleIds);
       removed = staleIds.length;
     }
   });
-  if (removed > 0) emit('nutrition.updated', { removed, note: 'purgeStale' });
+  if (removed > 0) emit("nutrition.updated", { removed, note: "purgeStale" });
   return { ok: true, removed };
 }
 
@@ -274,7 +283,7 @@ export async function purgeStale(cutoffISO) {
  */
 export async function clearAll() {
   await db[TABLE].clear();
-  emit('nutrition.cleared', { ok: true });
+  emit("nutrition.cleared", { ok: true });
   return { ok: true };
 }
 
@@ -304,11 +313,11 @@ function djb2(str) {
 }
 
 function stringOrNull(v) {
-  return typeof v === 'string' && v.trim() ? v.trim() : null;
+  return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
 function isISO(v) {
-  if (!v || typeof v !== 'string') return false;
+  if (!v || typeof v !== "string") return false;
   const d = new Date(v);
   return !Number.isNaN(d.getTime()) && /\d{4}-\d{2}-\d{2}T/.test(v);
 }

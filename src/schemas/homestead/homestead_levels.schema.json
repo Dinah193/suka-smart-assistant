@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/homestead/homestead_levels.schema.json",
+  "title": "SSA • Homestead Levels Catalog Schema",
+  "description": "Schema for homestead_levels.catalog.json defining Level 0–4, enabled domains per level, and UI feature flags per level. Used by UI gating, planners, and deterministic rulesets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "updatedAt", "meta", "levels"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "$id": { "type": "string" },
+
+    "schemaVersion": { "$ref": "#/$defs/Semver" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "defaults": {
+      "description": "Optional defaults applied when a household has not selected a level yet.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaultLevelId": { "$ref": "#/$defs/LevelId" },
+        "defaultLevelOrder": { "$ref": "#/$defs/LevelOrder" },
+        "requireLevelForRoutes": { "type": "boolean", "default": true },
+        "hideLockedModules": { "type": "boolean", "default": false },
+        "showUpgradeCTA": { "type": "boolean", "default": true }
+      },
+      "default": {
+        "defaultLevelId": "homestead.level_0",
+        "defaultLevelOrder": 0,
+        "requireLevelForRoutes": true,
+        "hideLockedModules": false,
+        "showUpgradeCTA": true
+      }
+    },
+
+    "domains": {
+      "description": "Optional registry of domain keys and labels. UI can use for icons and grouping.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/DomainDef" },
+      "default": []
+    },
+
+    "features": {
+      "description": "Optional registry of feature keys and labels. UI can use for toggles and docs.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/FeatureDef" },
+      "default": []
+    },
+
+    "levels": {
+      "description": "Ordered homestead levels. Must include exactly orders 0..4 (Level 0–4).",
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/Level" }
+    }
+  },
+
+  "$defs": {
+    "Semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+
+    "IdToken": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 140,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Locale": { "type": "string", "minLength": 2, "maxLength": 35 },
+
+    "LevelId": {
+      "description": "Canonical homestead level ID.",
+      "type": "string",
+      "pattern": "^homestead\\.level_[0-4]$"
+    },
+
+    "LevelOrder": {
+      "description": "Homestead level order index.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4
+    },
+
+    "DomainKey": {
+      "description": "Domain key used by UI and rules (e.g., domain.garden).",
+      "type": "string",
+      "pattern": "^domain\\.[a-z0-9_\\.\\-]+$"
+    },
+
+    "FeatureKey": {
+      "description": "Feature key used by UI and rules (e.g., showTargetsPanel).",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_\\.\\-]*$"
+    },
+
+    "RoutePattern": {
+      "description": "UI route regex string (stored as a string).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "locale", "label"],
+      "properties": {
+        "id": { "$ref": "#/$defs/IdToken" },
+        "type": { "type": "string", "const": "homestead_levels_catalog" },
+        "domain": { "type": "string", "const": "homestead" },
+        "locale": { "$ref": "#/$defs/Locale" },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/Text" },
+
+        "version": { "$ref": "#/$defs/ShortText" },
+        "author": { "$ref": "#/$defs/ShortText" },
+
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "source": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        }
+      }
+    },
+
+    "DomainDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": { "$ref": "#/$defs/DomainKey" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/Text" },
+        "icon": { "$ref": "#/$defs/IdToken" },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      }
+    },
+
+    "FeatureDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": { "$ref": "#/$defs/FeatureKey" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/Text" },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      }
+    },
+
+    "UiFlags": {
+      "description": "Level-specific UI flags. Keep deterministic booleans; engines can interpret these without LLMs.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "features": {
+          "description": "Feature toggles by featureKey. false means disabled/locked.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/FeatureKey" },
+          "additionalProperties": { "type": "boolean" },
+          "default": {}
+        },
+
+        "modules": {
+          "description": "Optional module-specific toggles by moduleKey (e.g. meals, inventory, garden).",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/IdToken" },
+          "additionalProperties": { "type": "boolean" },
+          "default": {}
+        },
+
+        "panels": {
+          "description": "Optional panel-specific toggles by panelKey (e.g. targetsPanel, knowledgeHelper).",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/IdToken" },
+          "additionalProperties": { "type": "boolean" },
+          "default": {}
+        },
+
+        "routes": {
+          "description": "Optional route gating hints for UI menus (regex patterns).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/RouteGate" },
+          "default": []
+        }
+      },
+      "default": {
+        "features": {},
+        "modules": {},
+        "panels": {},
+        "routes": []
+      }
+    },
+
+    "RouteGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pattern", "minLevel"],
+      "properties": {
+        "pattern": { "$ref": "#/$defs/RoutePattern" },
+        "minLevel": { "$ref": "#/$defs/LevelOrder" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "notes": { "$ref": "#/$defs/Text" }
+      }
+    },
+
+    "Level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "order",
+        "label",
+        "enabledDomains",
+        "domainTags",
+        "uiFlags"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/LevelId" },
+        "order": { "$ref": "#/$defs/LevelOrder" },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "subtitle": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/Text" },
+
+        "enabledDomains": {
+          "description": "List of enabled domain keys for this level (domain.*).",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/DomainKey" }
+        },
+
+        "domainTags": {
+          "description": "Compatibility: tags that represent domain enablement (often same as enabledDomains).",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Tag" }
+        },
+
+        "uiFlags": { "$ref": "#/$defs/UiFlags" },
+
+        "limits": {
+          "description": "Optional deterministic limits (e.g., maxAnimals, maxBeds, maxProjects) used by planners.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              { "type": "integer" },
+              { "type": "number" },
+              { "type": "string" },
+              { "type": "boolean" },
+              { "type": "null" }
+            ]
+          },
+          "default": {}
+        },
+
+        "unlockHints": {
+          "description": "Optional UI-only hints describing what unlocks at the next level.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/UnlockHint" },
+          "default": []
+        },
+
+        "tags": {
+          "description": "Optional search tags for level cards.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "order": { "const": 0 } },
+            "required": ["order"]
+          },
+          "then": { "properties": { "id": { "const": "homestead.level_0" } } }
+        },
+        {
+          "if": {
+            "properties": { "order": { "const": 1 } },
+            "required": ["order"]
+          },
+          "then": { "properties": { "id": { "const": "homestead.level_1" } } }
+        },
+        {
+          "if": {
+            "properties": { "order": { "const": 2 } },
+            "required": ["order"]
+          },
+          "then": { "properties": { "id": { "const": "homestead.level_2" } } }
+        },
+        {
+          "if": {
+            "properties": { "order": { "const": 3 } },
+            "required": ["order"]
+          },
+          "then": { "properties": { "id": { "const": "homestead.level_3" } } }
+        },
+        {
+          "if": {
+            "properties": { "order": { "const": 4 } },
+            "required": ["order"]
+          },
+          "then": { "properties": { "id": { "const": "homestead.level_4" } } }
+        }
+      ]
+    },
+
+    "UnlockHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "label"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["domain", "feature", "module", "panel", "route", "limit"]
+        },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "key": { "$ref": "#/$defs/IdToken" },
+        "notes": { "$ref": "#/$defs/Text" }
+      }
+    }
+  }
+}

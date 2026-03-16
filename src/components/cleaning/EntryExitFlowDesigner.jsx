@@ -38,56 +38,139 @@ import {
 let eventBus = { emit: () => {}, on: () => () => {} };
 let automation = { queue: () => {}, invoke: async () => {} };
 let CleaningPlanManager = null;
-let PreferencesStore = { getState: () => ({ timezone: "America/New_York", sabbathAware: true }) };
+let PreferencesStore = {
+  getState: () => ({ timezone: "America/New_York", sabbathAware: true }),
+};
 let materializeCleaningPacks = null;
-let deepCleanCadenceToRRULE = (x) => "RRULE:FREQ=YEARLY;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
+let deepCleanCadenceToRRULE = (x) =>
+  "RRULE:FREQ=YEARLY;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
 
 (async () => {
-  try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-  try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-  try { ({ default: CleaningPlanManager } = await import("@/managers/CleaningPlanManager")); } catch {}
+  try {
+    ({ eventBus } = await import("@/services/events/eventBus"));
+  } catch {}
+  try {
+    ({ automation } = await import("@/services/automation/runtime"));
+  } catch {}
+  try {
+    ({ default: CleaningPlanManager } = await import(
+      "@/managers/CleaningPlanManager"
+    ));
+  } catch {}
   try {
     const t = await import("@/data/cleaningTemplates");
     materializeCleaningPacks = t?.materializePacks;
   } catch {}
   try {
     const s = await import("@/data/organizingStrategies");
-    deepCleanCadenceToRRULE = s?.deepCleanCadenceToRRULE || deepCleanCadenceToRRULE;
+    deepCleanCadenceToRRULE =
+      s?.deepCleanCadenceToRRULE || deepCleanCadenceToRRULE;
   } catch {}
   try {
-    const p = await import("@/stores/preferences");
+    const p = await import("@/store/PreferencesStore");
     PreferencesStore = p?.usePreferencesStore || PreferencesStore;
   } catch {}
 })();
 
 const TZ = () => {
-  try { return PreferencesStore.getState()?.timezone || "America/New_York"; } catch { return "America/New_York"; }
+  try {
+    return PreferencesStore.getState()?.timezone || "America/New_York";
+  } catch {
+    return "America/New_York";
+  }
 };
 const SABBATH_AWARE = () => {
-  try { return !!PreferencesStore.getState()?.sabbathAware; } catch { return true; }
+  try {
+    return !!PreferencesStore.getState()?.sabbathAware;
+  } catch {
+    return true;
+  }
 };
-const isSabbathApprox = (d = new Date(), tz = "America/New_York", aware = true) => {
+const isSabbathApprox = (
+  d = new Date(),
+  tz = "America/New_York",
+  aware = true
+) => {
   if (!aware) return false;
   // Approx: Saturday
-  const dow = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: tz }).format(d);
+  const dow = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: tz,
+  }).format(d);
   return dow === "Sat";
 };
 
 // Simple id
-const toId = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const toId = (s) =>
+  (s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
 // Default Zones for entry/exit flows
-const ZONES = ["entry", "mudroom", "garage", "back-door", "kitchen", "storehouse"];
+const ZONES = [
+  "entry",
+  "mudroom",
+  "garage",
+  "back-door",
+  "kitchen",
+  "storehouse",
+];
 
 // Quick-add chips used by many households
 const QUICK_CHIPS = [
-  { icon: <Footprints className="w-4 h-4" />, label: "Shoe Rack Reset", title: "Reset shoe rack & mud tray", zone: "entry", estMinutes: 3 },
-  { icon: <KeySquare className="w-4 h-4" />, label: "Key Hook", title: "Keys on hook, bags to peg", zone: "entry", estMinutes: 1 },
-  { icon: <Inbox className="w-4 h-4" />, label: "Mail Basket", title: "Mail to basket (no counters)", zone: "entry", estMinutes: 1, tags: ["paper-inbox"] },
-  { icon: <Shield className="w-4 h-4" />, label: "Bug Sweep", title: "Crumb wipe & trash seal check", zone: "kitchen", estMinutes: 4, cadence: "monthly" },
-  { icon: <ShoppingBasket className="w-4 h-4" />, label: "Groceries Staging", title: "Stage groceries; cold first", zone: "kitchen", estMinutes: 5 },
-  { icon: <Leaf className="w-4 h-4" />, label: "Garden Basket", title: "Harvest basket to sink/wash", zone: "kitchen", estMinutes: 5, tags: ["harvest"] },
-  { icon: <TimerReset className="w-4 h-4" />, label: "Daily Reset", title: "Quick surface reset (entry)", zone: "entry", estMinutes: 3 },
+  {
+    icon: <Footprints className="w-4 h-4" />,
+    label: "Shoe Rack Reset",
+    title: "Reset shoe rack & mud tray",
+    zone: "entry",
+    estMinutes: 3,
+  },
+  {
+    icon: <KeySquare className="w-4 h-4" />,
+    label: "Key Hook",
+    title: "Keys on hook, bags to peg",
+    zone: "entry",
+    estMinutes: 1,
+  },
+  {
+    icon: <Inbox className="w-4 h-4" />,
+    label: "Mail Basket",
+    title: "Mail to basket (no counters)",
+    zone: "entry",
+    estMinutes: 1,
+    tags: ["paper-inbox"],
+  },
+  {
+    icon: <Shield className="w-4 h-4" />,
+    label: "Bug Sweep",
+    title: "Crumb wipe & trash seal check",
+    zone: "kitchen",
+    estMinutes: 4,
+    cadence: "monthly",
+  },
+  {
+    icon: <ShoppingBasket className="w-4 h-4" />,
+    label: "Groceries Staging",
+    title: "Stage groceries; cold first",
+    zone: "kitchen",
+    estMinutes: 5,
+  },
+  {
+    icon: <Leaf className="w-4 h-4" />,
+    label: "Garden Basket",
+    title: "Harvest basket to sink/wash",
+    zone: "kitchen",
+    estMinutes: 5,
+    tags: ["harvest"],
+  },
+  {
+    icon: <TimerReset className="w-4 h-4" />,
+    label: "Daily Reset",
+    title: "Quick surface reset (entry)",
+    zone: "entry",
+    estMinutes: 3,
+  },
 ];
 
 // Smart presets (pulling from project chats)
@@ -97,10 +180,31 @@ const PRESETS = [
     name: "Daily Entry Reset",
     icon: <DoorClosed className="w-4 h-4" />,
     steps: [
-      { title: "Shoes to rack; mud tray clear", zone: "entry", estMinutes: 3, trigger: "onEntry" },
-      { title: "Keys to hook; bags to peg", zone: "entry", estMinutes: 1, trigger: "onEntry" },
-      { title: "Mail to inbox basket", zone: "entry", estMinutes: 1, tags: ["paper-inbox"], trigger: "onEntry" },
-      { title: "Groceries staged; cold items first", zone: "kitchen", estMinutes: 5, trigger: "onEntry" },
+      {
+        title: "Shoes to rack; mud tray clear",
+        zone: "entry",
+        estMinutes: 3,
+        trigger: "onEntry",
+      },
+      {
+        title: "Keys to hook; bags to peg",
+        zone: "entry",
+        estMinutes: 1,
+        trigger: "onEntry",
+      },
+      {
+        title: "Mail to inbox basket",
+        zone: "entry",
+        estMinutes: 1,
+        tags: ["paper-inbox"],
+        trigger: "onEntry",
+      },
+      {
+        title: "Groceries staged; cold items first",
+        zone: "kitchen",
+        estMinutes: 5,
+        trigger: "onEntry",
+      },
     ],
   },
   {
@@ -108,13 +212,34 @@ const PRESETS = [
     name: "Bug-Shield Touchpoints",
     icon: <Shield className="w-4 h-4" />,
     steps: [
-      { title: "Entry points quick check (gaps/doors)", zone: "entry", estMinutes: 3, trigger: "onExit", cadence: "monthly" },
-      { title: "Crumb wipe near pet bowls & trash seals", zone: "kitchen", estMinutes: 4, trigger: "onEntry", cadence: "monthly" },
-      { title: "Refresh traps/monitor cards", zone: "entry", estMinutes: 2, trigger: "onExit", cadence: "monthly" },
+      {
+        title: "Entry points quick check (gaps/doors)",
+        zone: "entry",
+        estMinutes: 3,
+        trigger: "onExit",
+        cadence: "monthly",
+      },
+      {
+        title: "Crumb wipe near pet bowls & trash seals",
+        zone: "kitchen",
+        estMinutes: 4,
+        trigger: "onEntry",
+        cadence: "monthly",
+      },
+      {
+        title: "Refresh traps/monitor cards",
+        zone: "entry",
+        estMinutes: 2,
+        trigger: "onExit",
+        cadence: "monthly",
+      },
     ],
     afterLoad: () => {
       // Materialize cleaning pack, if available
-      try { materializeCleaningPacks && materializeCleaningPacks(["bugShieldBasics"]); } catch {}
+      try {
+        materializeCleaningPacks &&
+          materializeCleaningPacks(["bugShieldBasics"]);
+      } catch {}
     },
   },
   {
@@ -122,8 +247,20 @@ const PRESETS = [
     name: "Paper Inbox Bridge",
     icon: <Inbox className="w-4 h-4" />,
     steps: [
-      { title: "Mail to paper inbox; counters stay clear", zone: "entry", estMinutes: 1, trigger: "onEntry", tags: ["paper-inbox"] },
-      { title: "Pin weekly ‘Paper Inbox Zero’ slot", zone: "office", estMinutes: 0, trigger: "onExit", cadence: "weekly" },
+      {
+        title: "Mail to paper inbox; counters stay clear",
+        zone: "entry",
+        estMinutes: 1,
+        trigger: "onEntry",
+        tags: ["paper-inbox"],
+      },
+      {
+        title: "Pin weekly ‘Paper Inbox Zero’ slot",
+        zone: "office",
+        estMinutes: 0,
+        trigger: "onExit",
+        cadence: "weekly",
+      },
     ],
   },
   {
@@ -131,9 +268,25 @@ const PRESETS = [
     name: "Harvest → Pantry Handoff",
     icon: <Leaf className="w-4 h-4" />,
     steps: [
-      { title: "Harvest basket to sink; wash & inspect", zone: "kitchen", estMinutes: 10, trigger: "onEntry" },
-      { title: "Portion for fresh vs preserve", zone: "kitchen", estMinutes: 8, trigger: "onEntry" },
-      { title: "Update Storehouse inventory & labels", zone: "storehouse", estMinutes: 5, trigger: "onExit", cadence: "weekly" },
+      {
+        title: "Harvest basket to sink; wash & inspect",
+        zone: "kitchen",
+        estMinutes: 10,
+        trigger: "onEntry",
+      },
+      {
+        title: "Portion for fresh vs preserve",
+        zone: "kitchen",
+        estMinutes: 8,
+        trigger: "onEntry",
+      },
+      {
+        title: "Update Storehouse inventory & labels",
+        zone: "storehouse",
+        estMinutes: 5,
+        trigger: "onExit",
+        cadence: "weekly",
+      },
     ],
   },
 ];
@@ -161,8 +314,12 @@ function useHistory(value) {
     setStack(newStack);
     setIndex(newStack.length - 1);
   };
-  const undo = () => { if (canUndo) setIndex(index - 1); };
-  const redo = () => { if (canRedo) setIndex(index + 1); };
+  const undo = () => {
+    if (canUndo) setIndex(index - 1);
+  };
+  const redo = () => {
+    if (canRedo) setIndex(index + 1);
+  };
   return { value: stack[index], set, undo, redo, canUndo, canRedo };
 }
 
@@ -176,7 +333,9 @@ export default function EntryExitFlowDesigner({
     sabbathAware: initialFlow?.sabbathAware ?? true,
   });
 
-  const history = useHistory(initialFlow?.steps?.length ? initialFlow.steps : []);
+  const history = useHistory(
+    initialFlow?.steps?.length ? initialFlow.steps : []
+  );
   const steps = history.value;
 
   const [presetId, setPresetId] = useState("");
@@ -185,13 +344,18 @@ export default function EntryExitFlowDesigner({
 
   const tz = useMemo(() => TZ(), []);
   const sabbathAwarePref = useMemo(() => SABBATH_AWARE(), []);
-  const sabbathBlockedNow = isSabbathApprox(new Date(), tz, flowMeta.sabbathAware && sabbathAwarePref);
+  const sabbathBlockedNow = isSabbathApprox(
+    new Date(),
+    tz,
+    flowMeta.sabbathAware && sabbathAwarePref
+  );
 
   // Keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
-        e.preventDefault(); handleSave();
+        e.preventDefault();
+        handleSave();
       }
       if (e.key.toLowerCase() === "n" && !e.repeat) addStep();
       if (e.key.toLowerCase() === "g" && !e.repeat) handleGenerateRoutine();
@@ -203,7 +367,10 @@ export default function EntryExitFlowDesigner({
   const addStep = (prefill = {}) => {
     const created = { ...DEFAULT_STEP(), ...prefill };
     history.set([...(steps || []), created]);
-    eventBus.emit("ui:toast", { type: "info", message: "Step added. Press Ctrl+S to save." });
+    eventBus.emit("ui:toast", {
+      type: "info",
+      message: "Step added. Press Ctrl+S to save.",
+    });
   };
 
   const removeStep = (id) => {
@@ -235,50 +402,83 @@ export default function EntryExitFlowDesigner({
     const preset = PRESETS.find((p) => p.id === id);
     if (!preset) return;
     setPresetId(id);
-    const inflated = preset.steps.map((st) => ({ ...DEFAULT_STEP(), ...st, id: crypto.randomUUID() }));
+    const inflated = preset.steps.map((st) => ({
+      ...DEFAULT_STEP(),
+      ...st,
+      id: crypto.randomUUID(),
+    }));
     history.set(inflated);
-    try { preset.afterLoad && preset.afterLoad(); } catch {}
-    eventBus.emit("ui:toast", { type: "success", message: `Preset loaded: ${preset.name}` });
+    try {
+      preset.afterLoad && preset.afterLoad();
+    } catch {}
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: `Preset loaded: ${preset.name}`,
+    });
   };
 
   const handleSave = async () => {
-    const payload = { name: flowMeta.name.trim(), steps, sabbathAware: !!flowMeta.sabbathAware, tz };
+    const payload = {
+      name: flowMeta.name.trim(),
+      steps,
+      sabbathAware: !!flowMeta.sabbathAware,
+      tz,
+    };
     onSave?.(payload);
     // Allow others to persist as template
     eventBus.emit("organizing:flow:saveTemplate", payload);
-    eventBus.emit("ui:toast", { type: "success", message: "Entry/Exit flow saved." });
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: "Entry/Exit flow saved.",
+    });
   };
 
   const buildTasksForCleaning = () => {
     // Convert steps to Cleaning Plan tasks (respect sabbath)
-    const tasks = steps.map((s, idx) => ({
-      id: s.id,
-      title: s.title || `Step ${idx + 1}`,
-      area: s.zone || "entry",
-      estMinutes: s.estMinutes || 3,
-      priority: 2,
-      cadence: s.cadence || null,
-      meta: { trigger: s.trigger, role: s.role, sabbathBlocked: !!s.sabbathBlocked, tags: s.tags || [] },
-    })).filter(s => !(s.sabbathBlocked && sabbathBlockedNow));
+    const tasks = steps
+      .map((s, idx) => ({
+        id: s.id,
+        title: s.title || `Step ${idx + 1}`,
+        area: s.zone || "entry",
+        estMinutes: s.estMinutes || 3,
+        priority: 2,
+        cadence: s.cadence || null,
+        meta: {
+          trigger: s.trigger,
+          role: s.role,
+          sabbathBlocked: !!s.sabbathBlocked,
+          tags: s.tags || [],
+        },
+      }))
+      .filter((s) => !(s.sabbathBlocked && sabbathBlockedNow));
     return tasks;
   };
 
   const scheduleCadenceSteps = (tasks) => {
-    tasks.filter(t => !!t.cadence).forEach((t) => {
-      const rrule = deepCleanCadenceToRRULE(t.cadence);
-      eventBus.emit("calendar:create:rrule", {
-        title: `Entry/Exit: ${t.title}`,
-        area: t.area,
-        rrule,
-        tz,
-        meta: { source: "entry-exit-flow", cadence: t.cadence, trigger: t.meta?.trigger },
+    tasks
+      .filter((t) => !!t.cadence)
+      .forEach((t) => {
+        const rrule = deepCleanCadenceToRRULE(t.cadence);
+        eventBus.emit("calendar:create:rrule", {
+          title: `Entry/Exit: ${t.title}`,
+          area: t.area,
+          rrule,
+          tz,
+          meta: {
+            source: "entry-exit-flow",
+            cadence: t.cadence,
+            trigger: t.meta?.trigger,
+          },
+        });
       });
-    });
   };
 
   const handleGenerateRoutine = async () => {
     if (!steps?.length) {
-      eventBus.emit("ui:toast", { type: "warning", message: "Add at least one step to generate a routine." });
+      eventBus.emit("ui:toast", {
+        type: "warning",
+        message: "Add at least one step to generate a routine.",
+      });
       return;
     }
     if (sabbathBlockedNow) {
@@ -296,37 +496,61 @@ export default function EntryExitFlowDesigner({
         const plan = CleaningPlanManager.createAdhocPlan({
           title: `${flowMeta.name} (Entry/Exit)`,
           tasks,
-          meta: { source: "EntryExitFlowDesigner", createdAt: new Date().toISOString() },
+          meta: {
+            source: "EntryExitFlowDesigner",
+            createdAt: new Date().toISOString(),
+          },
         });
-        eventBus.emit("cleaning:plan:created", { planId: plan?.id, source: "entry-exit-flow" });
+        eventBus.emit("cleaning:plan:created", {
+          planId: plan?.id,
+          source: "entry-exit-flow",
+        });
       }
 
       // Schedule cadence steps to Calendar
       scheduleCadenceSteps(tasks);
 
       // Friendly nudge for paper inbox / harvest / groceries ties
-      const hasPaper = tasks.some(t => t.meta?.tags?.includes("paper-inbox"));
+      const hasPaper = tasks.some((t) => t.meta?.tags?.includes("paper-inbox"));
       if (hasPaper) {
         automation.queue?.("UI:Nudge", {
-          message: "Want to pin ‘Paper Inbox Zero’ weekly block on your calendar?",
-          actions: [{ label: "Open Calendar", event: "ui:navigate", to: "/calendar" }],
+          message:
+            "Want to pin ‘Paper Inbox Zero’ weekly block on your calendar?",
+          actions: [
+            { label: "Open Calendar", event: "ui:navigate", to: "/calendar" },
+          ],
         });
       }
-      const hasHarvest = tasks.some(t => (t.title || "").toLowerCase().includes("harvest"));
+      const hasHarvest = tasks.some((t) =>
+        (t.title || "").toLowerCase().includes("harvest")
+      );
       if (hasHarvest) {
         automation.queue?.("Inventory:SyncFromHarvestLog", { mode: "append" });
       }
 
-      eventBus.emit("ui:toast", { type: "success", message: "Routine generated. Open Live Session to begin." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Routine generated. Open Live Session to begin.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not generate routine." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not generate routine.",
+      });
     } finally {
       setBusy(false);
     }
   };
 
-  const addQuickChip = (chip) => addStep({ title: chip.title, zone: chip.zone, estMinutes: chip.estMinutes, tags: chip.tags || [], cadence: chip.cadence || null });
+  const addQuickChip = (chip) =>
+    addStep({
+      title: chip.title,
+      zone: chip.zone,
+      estMinutes: chip.estMinutes,
+      tags: chip.tags || [],
+      cadence: chip.cadence || null,
+    });
 
   // UI bits
   const EmptyState = () => (
@@ -335,11 +559,22 @@ export default function EntryExitFlowDesigner({
         <Info className="w-5 h-5" />
         <span className="font-medium">No steps yet</span>
       </div>
-      <p className="text-sm text-gray-500 mt-2">Use a preset, quick-add chips, or add a custom step.</p>
+      <p className="text-sm text-gray-500 mt-2">
+        Use a preset, quick-add chips, or add a custom step.
+      </p>
       <div className="mt-4 flex items-center justify-center gap-2">
-        <button className="btn" onClick={() => loadPreset("daily-entry-reset")}><DoorClosed className="w-4 h-4 mr-1" /> Daily Entry Reset</button>
-        <button className="btn" onClick={() => loadPreset("bug-shield-touchpoints")}><Shield className="w-4 h-4 mr-1" /> Bug-Shield</button>
-        <button className="btn" onClick={() => addStep()}><Plus className="w-4 h-4 mr-1" /> Add Step</button>
+        <button className="btn" onClick={() => loadPreset("daily-entry-reset")}>
+          <DoorClosed className="w-4 h-4 mr-1" /> Daily Entry Reset
+        </button>
+        <button
+          className="btn"
+          onClick={() => loadPreset("bug-shield-touchpoints")}
+        >
+          <Shield className="w-4 h-4 mr-1" /> Bug-Shield
+        </button>
+        <button className="btn" onClick={() => addStep()}>
+          <Plus className="w-4 h-4 mr-1" /> Add Step
+        </button>
       </div>
     </div>
   );
@@ -353,16 +588,30 @@ export default function EntryExitFlowDesigner({
           <h2 className="text-lg font-semibold">{title}</h2>
         </div>
         <div className="flex items-center gap-2">
-          <button className="btn" onClick={() => history.undo()} disabled={!history.canUndo} title="Undo (Ctrl+Z)">
+          <button
+            className="btn"
+            onClick={() => history.undo()}
+            disabled={!history.canUndo}
+            title="Undo (Ctrl+Z)"
+          >
             <Undo2 className="w-4 h-4 mr-1" /> Undo
           </button>
-          <button className="btn" onClick={() => history.redo()} disabled={!history.canRedo} title="Redo (Ctrl+Shift+Z)">
+          <button
+            className="btn"
+            onClick={() => history.redo()}
+            disabled={!history.canRedo}
+            title="Redo (Ctrl+Shift+Z)"
+          >
             <Redo2 className="w-4 h-4 mr-1" /> Redo
           </button>
           <button className="btn" onClick={handleSave} title="Save (Ctrl+S)">
             <Save className="w-4 h-4 mr-1" /> Save
           </button>
-          <button className="btn btn-primary" onClick={handleGenerateRoutine} disabled={busy}>
+          <button
+            className="btn btn-primary"
+            onClick={handleGenerateRoutine}
+            disabled={busy}
+          >
             <Play className="w-4 h-4 mr-1" /> Generate Routine
           </button>
         </div>
@@ -375,7 +624,9 @@ export default function EntryExitFlowDesigner({
           <input
             className="w-full border rounded-lg px-3 py-2 mt-1"
             value={flowMeta.name}
-            onChange={(e) => setFlowMeta((m) => ({ ...m, name: e.target.value }))}
+            onChange={(e) =>
+              setFlowMeta((m) => ({ ...m, name: e.target.value }))
+            }
             placeholder="e.g., ‘Front Door Daily Flow’"
           />
         </div>
@@ -390,14 +641,21 @@ export default function EntryExitFlowDesigner({
             >
               <option value="">Choose…</option>
               {PRESETS.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
-            <button className="btn" onClick={() => presetId && loadPreset(presetId)}>
+            <button
+              className="btn"
+              onClick={() => presetId && loadPreset(presetId)}
+            >
               <ClipboardList className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[11px] text-gray-500 mt-1">Switching presets replaces current steps.</p>
+          <p className="text-[11px] text-gray-500 mt-1">
+            Switching presets replaces current steps.
+          </p>
         </div>
 
         <div className="p-3 rounded-xl border bg-white flex items-center justify-between">
@@ -412,7 +670,9 @@ export default function EntryExitFlowDesigner({
           </div>
           <button
             className="btn"
-            onClick={() => setFlowMeta((m) => ({ ...m, sabbathAware: !m.sabbathAware }))}
+            onClick={() =>
+              setFlowMeta((m) => ({ ...m, sabbathAware: !m.sabbathAware }))
+            }
             title="Toggle Sabbath Guard"
           >
             <Settings className="w-4 h-4 mr-1" /> Toggle
@@ -438,7 +698,10 @@ export default function EntryExitFlowDesigner({
               {chip.label}
             </button>
           ))}
-          <button className="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-full border hover:bg-gray-50" onClick={() => addStep()}>
+          <button
+            className="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-full border hover:bg-gray-50"
+            onClick={() => addStep()}
+          >
             <Plus className="w-4 h-4" /> Custom…
           </button>
         </div>
@@ -457,7 +720,9 @@ export default function EntryExitFlowDesigner({
                   <input
                     className="w-full border rounded-lg px-3 py-2 mt-1"
                     value={s.title}
-                    onChange={(e) => updateStep(s.id, { title: e.target.value })}
+                    onChange={(e) =>
+                      updateStep(s.id, { title: e.target.value })
+                    }
                     placeholder={`Step ${idx + 1}`}
                   />
                 </div>
@@ -468,7 +733,11 @@ export default function EntryExitFlowDesigner({
                     value={s.zone}
                     onChange={(e) => updateStep(s.id, { zone: e.target.value })}
                   >
-                    {ZONES.map((z) => <option key={z} value={z}>{z}</option>)}
+                    {ZONES.map((z) => (
+                      <option key={z} value={z}>
+                        {z}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="col-span-3 md:col-span-1">
@@ -478,7 +747,11 @@ export default function EntryExitFlowDesigner({
                     min={1}
                     className="w-full border rounded-lg px-3 py-2 mt-1"
                     value={s.estMinutes}
-                    onChange={(e) => updateStep(s.id, { estMinutes: Math.max(1, Number(e.target.value || 1)) })}
+                    onChange={(e) =>
+                      updateStep(s.id, {
+                        estMinutes: Math.max(1, Number(e.target.value || 1)),
+                      })
+                    }
                   />
                 </div>
                 <div className="col-span-6 md:col-span-2">
@@ -486,7 +759,9 @@ export default function EntryExitFlowDesigner({
                   <select
                     className="w-full border rounded-lg px-3 py-2 mt-1"
                     value={s.trigger}
-                    onChange={(e) => updateStep(s.id, { trigger: e.target.value })}
+                    onChange={(e) =>
+                      updateStep(s.id, { trigger: e.target.value })
+                    }
                   >
                     <option value="onEntry">On Entry</option>
                     <option value="onExit">On Exit</option>
@@ -508,12 +783,15 @@ export default function EntryExitFlowDesigner({
 
                 <div className="col-span-12 md:col-span-6">
                   <label className="text-xs text-gray-500 flex items-center gap-1">
-                    <CalendarPlus className="w-4 h-4" /> Deep Clean Focus (cadence)
+                    <CalendarPlus className="w-4 h-4" /> Deep Clean Focus
+                    (cadence)
                   </label>
                   <select
                     className="w-full border rounded-lg px-3 py-2 mt-1"
                     value={s.cadence || ""}
-                    onChange={(e) => updateStep(s.id, { cadence: e.target.value || null })}
+                    onChange={(e) =>
+                      updateStep(s.id, { cadence: e.target.value || null })
+                    }
                   >
                     <option value="">— None —</option>
                     <option value="monthly">Monthly</option>
@@ -525,7 +803,9 @@ export default function EntryExitFlowDesigner({
                   </select>
                   {s.cadence && (
                     <p className="text-[11px] text-gray-500 mt-1">
-                      Will create a Calendar RRULE (e.g., {deepCleanCadenceToRRULE(s.cadence).replace("RRULE:", "")})
+                      Will create a Calendar RRULE (e.g.,{" "}
+                      {deepCleanCadenceToRRULE(s.cadence).replace("RRULE:", "")}
+                      )
                     </p>
                   )}
                 </div>
@@ -535,7 +815,14 @@ export default function EntryExitFlowDesigner({
                   <input
                     className="w-full border rounded-lg px-3 py-2 mt-1"
                     value={(s.tags || []).join(", ")}
-                    onChange={(e) => updateStep(s.id, { tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean) })}
+                    onChange={(e) =>
+                      updateStep(s.id, {
+                        tags: e.target.value
+                          .split(",")
+                          .map((t) => t.trim())
+                          .filter(Boolean),
+                      })
+                    }
                     placeholder="paper-inbox, harvest"
                   />
                 </div>
@@ -544,14 +831,20 @@ export default function EntryExitFlowDesigner({
                   <label className="text-xs text-gray-500">Sabbath Block</label>
                   <div className="mt-1 flex items-center gap-2">
                     <button
-                      className={`px-3 py-2 rounded-lg border ${s.sabbathBlocked ? "bg-gray-800 text-white" : "bg-white"}`}
-                      onClick={() => updateStep(s.id, { sabbathBlocked: !s.sabbathBlocked })}
+                      className={`px-3 py-2 rounded-lg border ${
+                        s.sabbathBlocked ? "bg-gray-800 text-white" : "bg-white"
+                      }`}
+                      onClick={() =>
+                        updateStep(s.id, { sabbathBlocked: !s.sabbathBlocked })
+                      }
                       title="If on, this step will be skipped during Sabbath."
                     >
                       {s.sabbathBlocked ? "Blocked" : "Allowed"}
                     </button>
                     {sabbathBlockedNow && s.sabbathBlocked && (
-                      <span className="text-[11px] text-amber-600">Active now</span>
+                      <span className="text-[11px] text-amber-600">
+                        Active now
+                      </span>
                     )}
                   </div>
                 </div>
@@ -560,15 +853,28 @@ export default function EntryExitFlowDesigner({
               {/* Row actions */}
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-2">
-                  <button className="btn" onClick={() => moveStep(idx, -1)} disabled={idx === 0} title="Move up">
+                  <button
+                    className="btn"
+                    onClick={() => moveStep(idx, -1)}
+                    disabled={idx === 0}
+                    title="Move up"
+                  >
                     <MoveUp className="w-4 h-4" />
                   </button>
-                  <button className="btn" onClick={() => moveStep(idx, +1)} disabled={idx === steps.length - 1} title="Move down">
+                  <button
+                    className="btn"
+                    onClick={() => moveStep(idx, +1)}
+                    disabled={idx === steps.length - 1}
+                    title="Move down"
+                  >
                     <MoveDown className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="btn btn-danger" onClick={() => removeStep(s.id)}>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => removeStep(s.id)}
+                  >
                     <Trash2 className="w-4 h-4 mr-1" /> Remove
                   </button>
                 </div>
@@ -582,13 +888,16 @@ export default function EntryExitFlowDesigner({
       <div className="mt-4 p-3 rounded-xl border bg-white">
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="text-gray-600 flex items-center gap-1">
-            <Play className="w-4 h-4" /> <b>Generate Routine</b> creates an ad-hoc Cleaning Plan and schedules cadence items.
+            <Play className="w-4 h-4" /> <b>Generate Routine</b> creates an
+            ad-hoc Cleaning Plan and schedules cadence items.
           </span>
           <span className="text-gray-600 flex items-center gap-1">
-            <Sparkles className="w-4 h-4" /> Use <b>cadences</b> for Deep Clean Focus per step.
+            <Sparkles className="w-4 h-4" /> Use <b>cadences</b> for Deep Clean
+            Focus per step.
           </span>
           <span className="text-gray-600 flex items-center gap-1">
-            <DoorOpen className="w-4 h-4" /> <b>Triggers</b> run on entry, exit, or both.
+            <DoorOpen className="w-4 h-4" /> <b>Triggers</b> run on entry, exit,
+            or both.
           </span>
         </div>
       </div>
@@ -600,10 +909,12 @@ export default function EntryExitFlowDesigner({
    Lightweight button styles
    (Tailwind utility-first)
 --------------------------------*/
-const BTN_BASE = "inline-flex items-center justify-center rounded-lg px-3 py-2 border text-sm";
-const styles = document?.createElement ? (() => {
-  const el = document.createElement("style");
-  el.innerHTML = `
+const BTN_BASE =
+  "inline-flex items-center justify-center rounded-lg px-3 py-2 border text-sm";
+const styles = document?.createElement
+  ? (() => {
+      const el = document.createElement("style");
+      el.innerHTML = `
   .btn { ${tw(`
     ${BTN_BASE}
     bg-white hover:bg-gray-50 border-gray-300 text-gray-700
@@ -617,9 +928,12 @@ const styles = document?.createElement ? (() => {
     bg-white text-red-600 border-red-300 hover:bg-red-50
   `)} }
   `;
-  document.head.appendChild(el);
-  return true;
-})() : false;
+      document.head.appendChild(el);
+      return true;
+    })()
+  : false;
 
 // Tailwind helper (no-op at runtime, just keeps styles collocated)
-function tw(str) { return str; }
+function tw(str) {
+  return str;
+}

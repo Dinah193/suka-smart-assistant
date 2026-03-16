@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "file:///src/schemas/techniques.glossary.schema.json",
+  "title": "SSA • Techniques Glossary Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "techniques",
+    "aliasIndex"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference used by JSON tooling (may be a relative path in catalogs).",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version of the data contract for this catalog.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "ISO-8601 date or datetime.",
+      "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+    },
+    "notes": {
+      "type": "array",
+      "description": "Human-readable notes for maintainers.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "locale", "normalization"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable catalog ID.",
+          "pattern": "^[a-z0-9_\\.\\-]+$",
+          "minLength": 3
+        },
+        "type": {
+          "type": "string",
+          "const": "glossary",
+          "description": "Catalog type discriminator."
+        },
+        "domain": {
+          "type": "string",
+          "const": "techniques",
+          "description": "Domain discriminator."
+        },
+        "locale": {
+          "type": "string",
+          "description": "BCP-47-ish locale tag (SSA defaults to en-US).",
+          "minLength": 2
+        },
+        "normalization": {
+          "type": "object",
+          "description": "Normalization rules the app should apply before matching aliases.",
+          "additionalProperties": false,
+          "required": [
+            "case",
+            "trim",
+            "collapseWhitespace",
+            "stripPunctuation"
+          ],
+          "properties": {
+            "case": {
+              "type": "string",
+              "enum": ["lower", "none"],
+              "default": "lower"
+            },
+            "trim": { "type": "boolean", "default": true },
+            "collapseWhitespace": { "type": "boolean", "default": true },
+            "stripPunctuation": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+    "techniques": {
+      "type": "array",
+      "description": "List of technique definitions.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Technique"
+      }
+    },
+    "aliasIndex": {
+      "type": "object",
+      "description": "Fast lookup: normalized alias phrase -> technique id.",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "^[^\\u0000-\\u001F]+$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-z0-9_\\.\\-]+$",
+        "minLength": 2,
+        "maxLength": 80
+      }
+    }
+  },
+  "$defs": {
+    "Difficulty": {
+      "type": "string",
+      "enum": ["beginner", "intermediate", "advanced"]
+    },
+    "Category": {
+      "type": "string",
+      "enum": [
+        "prep",
+        "heat",
+        "stovetop",
+        "oven",
+        "wet_cook",
+        "sauce",
+        "dough",
+        "finishing",
+        "preservation",
+        "safety",
+        "other"
+      ]
+    },
+    "StringId": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "SafeText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+    "ToolId": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "Tag": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 40
+    },
+    "Technique": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "category",
+        "difficulty",
+        "definition",
+        "aliases",
+        "tags"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/StringId" },
+        "label": { "$ref": "#/$defs/SafeText" },
+        "category": { "$ref": "#/$defs/Category" },
+        "difficulty": { "$ref": "#/$defs/Difficulty" },
+        "definition": {
+          "$ref": "#/$defs/SafeText",
+          "description": "Plain-language definition of the technique."
+        },
+        "why_it_matters": {
+          "$ref": "#/$defs/SafeText",
+          "description": "Short explanation of the payoff."
+        },
+        "common_tools": {
+          "type": "array",
+          "description": "Tool/appliance IDs commonly used for this technique.",
+          "items": { "$ref": "#/$defs/ToolId" },
+          "default": []
+        },
+        "signals_of_success": {
+          "type": "array",
+          "description": "Observable outcomes that indicate correct execution.",
+          "items": { "$ref": "#/$defs/SafeText" },
+          "default": []
+        },
+        "common_mistakes": {
+          "type": "array",
+          "description": "Frequent pitfalls and what to avoid.",
+          "items": { "$ref": "#/$defs/SafeText" },
+          "default": []
+        },
+        "aliases": {
+          "type": "array",
+          "description": "Recipe-facing phrases that should map to this technique (normalized by meta.normalization).",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^\\u0000-\\u001F]+$"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Short tags for filtering, learning paths, and UI grouping.",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Tag" }
+        }
+      }
+    }
+  }
+}

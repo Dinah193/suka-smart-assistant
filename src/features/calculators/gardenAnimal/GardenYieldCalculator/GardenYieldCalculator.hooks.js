@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { runGardenYieldCalculatorShim } from "./GardenYieldCalculator.shim";
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 /**
  * useGardenYieldCalculatorState
@@ -24,7 +24,7 @@ export function useGardenYieldCalculatorState(options = {}) {
     featureFlags,
     bus = eventBus,
     onResult,
-    onPayloadChange
+    onPayloadChange,
   } = options;
 
   const [payload, setPayload] = useState(() =>
@@ -65,8 +65,8 @@ export function useGardenYieldCalculatorState(options = {}) {
         ts,
         source: "calculators/garden/GardenYieldCalculator.hooks",
         data: {
-          payload: effectivePayload
-        }
+          payload: effectivePayload,
+        },
       });
 
       try {
@@ -76,8 +76,8 @@ export function useGardenYieldCalculatorState(options = {}) {
             familyFundMode:
               featureFlags && typeof featureFlags.familyFundMode === "boolean"
                 ? featureFlags.familyFundMode
-                : false
-          }
+                : false,
+          },
         });
 
         setResult(next);
@@ -91,8 +91,8 @@ export function useGardenYieldCalculatorState(options = {}) {
           ts: new Date().toISOString(),
           source: "calculators/garden/GardenYieldCalculator.hooks",
           data: {
-            payload: next
-          }
+            payload: next,
+          },
         });
 
         return next;
@@ -105,8 +105,8 @@ export function useGardenYieldCalculatorState(options = {}) {
           ts: new Date().toISOString(),
           source: "calculators/garden/GardenYieldCalculator.hooks",
           data: {
-            error: String(err)
-          }
+            error: String(err),
+          },
         });
 
         return null;
@@ -131,7 +131,7 @@ export function useGardenYieldCalculatorState(options = {}) {
     result,
     isComputing,
     error,
-    recalculate
+    recalculate,
   };
 }
 
@@ -156,11 +156,10 @@ export function useStorehouseTargetsFromYield(options = {}) {
     yieldOutputs,
     householdProfile,
     bus = eventBus,
-    autoEmit = true
+    autoEmit = true,
   } = options;
 
-  const yieldEstimates =
-    (yieldOutputs && yieldOutputs.yieldEstimates) || [];
+  const yieldEstimates = (yieldOutputs && yieldOutputs.yieldEstimates) || [];
   const storehouseCoverage =
     (yieldOutputs && yieldOutputs.storehouseCoverage) || [];
 
@@ -203,17 +202,12 @@ export function useStorehouseTargetsFromYield(options = {}) {
         peopleCount,
         monthsTarget,
         coverageStatus: coverage ? coverage.status : "unknown",
-        coveragePercent: coverage ? coverage.coveragePercent : null
+        coveragePercent: coverage ? coverage.coveragePercent : null,
       });
     }
 
     return out;
-  }, [
-    yieldEstimates,
-    storehouseCoverage,
-    peopleCount,
-    monthsTarget
-  ]);
+  }, [yieldEstimates, storehouseCoverage, peopleCount, monthsTarget]);
 
   useEffect(() => {
     if (!autoEmit || suggestions.length === 0) return;
@@ -226,13 +220,13 @@ export function useStorehouseTargetsFromYield(options = {}) {
       source: "calculators/garden/GardenYieldCalculator.hooks",
       data: {
         suggestions,
-        householdProfile: profile
-      }
+        householdProfile: profile,
+      },
     });
   }, [autoEmit, bus, suggestions, profile]);
 
   return {
-    storehouseSuggestions: suggestions
+    storehouseSuggestions: suggestions,
   };
 }
 
@@ -254,20 +248,14 @@ export function useStorehouseTargetsFromYield(options = {}) {
  * - tag?: string (optional tag to help downstream filter events)
  */
 export function useYieldToBatchAndPreservationBridge(options = {}) {
-  const {
-    yieldOutputs,
-    bus = eventBus,
-    autoEmit = true,
-    tag
-  } = options;
+  const { yieldOutputs, bus = eventBus, autoEmit = true, tag } = options;
 
   const preservationLoad =
     (yieldOutputs && yieldOutputs.preservationLoad) || [];
   const harvestLoadByWeek =
     (yieldOutputs && yieldOutputs.harvestLoadByWeek) || [];
 
-  const hasData =
-    preservationLoad.length > 0 || harvestLoadByWeek.length > 0;
+  const hasData = preservationLoad.length > 0 || harvestLoadByWeek.length > 0;
 
   useEffect(() => {
     if (!autoEmit || !hasData) return;
@@ -281,8 +269,8 @@ export function useYieldToBatchAndPreservationBridge(options = {}) {
         source: "calculators/garden/GardenYieldCalculator.hooks",
         data: {
           groups: preservationLoad,
-          tag: tag || null
-        }
+          tag: tag || null,
+        },
       });
     }
 
@@ -293,23 +281,16 @@ export function useYieldToBatchAndPreservationBridge(options = {}) {
         source: "calculators/garden/GardenYieldCalculator.hooks",
         data: {
           weeks: harvestLoadByWeek,
-          tag: tag || null
-        }
+          tag: tag || null,
+        },
       });
     }
-  }, [
-    autoEmit,
-    bus,
-    harvestLoadByWeek,
-    preservationLoad,
-    hasData,
-    tag
-  ]);
+  }, [autoEmit, bus, harvestLoadByWeek, preservationLoad, hasData, tag]);
 
   return {
     hasYieldBridges: hasData,
     preservationLoad,
-    harvestLoadByWeek
+    harvestLoadByWeek,
   };
 }
 
@@ -322,7 +303,7 @@ function buildDefaultYieldPayload() {
   return {
     context: {
       nodeKey: "gardenYield",
-      version: "1.0.0"
+      version: "1.0.0",
     },
     inputs: {
       crops: [],
@@ -330,7 +311,7 @@ function buildDefaultYieldPayload() {
       harvestWindows: [],
       storehouseTargets: {
         year: now.getFullYear(),
-        targetsByCrop: []
+        targetsByCrop: [],
       },
       assumptions: {
         lossFactor: 0.15,
@@ -341,11 +322,11 @@ function buildDefaultYieldPayload() {
           dehydrating: 8,
           fermenting: 8,
           rootCellar: 12,
-          unit: "lbs"
-        }
-      }
+          unit: "lbs",
+        },
+      },
     },
-    outputs: null
+    outputs: null,
   };
 }
 
@@ -364,5 +345,5 @@ function safeEmit(bus, payload) {
 export default {
   useGardenYieldCalculatorState,
   useStorehouseTargetsFromYield,
-  useYieldToBatchAndPreservationBridge
+  useYieldToBatchAndPreservationBridge,
 };

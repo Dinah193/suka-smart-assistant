@@ -16,6 +16,10 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
+const dbConnection = require("./services/dbConnection.js");
+const { validateStartupEnv } = require("./services/envValidation.js");
+const catalogSyncService = require("./services/catalogSyncService.js");
+const { redactObject, redactText } = require("./services/loggingSanitizer.js");
 
 // ---- Optional modules (loaded only if installed) ----
 function opt(name) {
@@ -41,11 +45,25 @@ const TRUST_PROXY = process.env.TRUST_PROXY || "loopback";
 const JSON_LIMIT = process.env.JSON_LIMIT || "2mb";
 const URLENC_LIMIT = process.env.URLENC_LIMIT || "2mb";
 const STATIC_DIR = path.resolve(__dirname, "../public");
-const CORS_ORIGIN = (process.env.CORS_ORIGIN || "*")
+const CORS_ORIGIN = (process.env.CORS_ORIGIN || (NODE_ENV === "production" ? "" : "*"))
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 const SERVER_TZ = process.env.TZ || "America/New_York";
+
+// ---- Startup environment validation ----
+const envValidation = validateStartupEnv({ nodeEnv: NODE_ENV });
+for (const msg of envValidation.warnings) {
+  console.warn(`[env] ${msg}`);
+}
+if (envValidation.errors.length > 0) {
+  for (const msg of envValidation.errors) {
+    console.error(`[env] ${msg}`);
+  }
+  if (envValidation.strict || envValidation.isProd) {
+    throw new Error("Startup environment validation failed");
+  }
+}
 
 // ---- Helpers: hybrid module loader (CJS + ESM) ------------------------------
 async function loadAny(modulePath) {
@@ -99,9 +117,54 @@ app.use(express.json({ limit: JSON_LIMIT }));
 app.use(express.urlencoded({ extended: true, limit: URLENC_LIMIT }));
 
 if (morgan) {
+  morgan.token("safe-headers", (req) => {
+    const redacted = redactObject(req.headers || {});
+    return JSON.stringify(redacted);
+  });
   app.use(
-    morgan("dev", {
+    morgan(":method :url :status :response-time ms headers=:safe-headers", {
       skip: () => NODE_ENV === "test",
+    })
+  );
+}
+
+// ---- Optional: basic rate limit on all requests (must run before routes) ----
+function createFallbackLimiter({ windowMs, max }) {
+  const byIp = new Map();
+  const maxHits = Number(max || 600);
+  const periodMs = Number(windowMs || 60_000);
+
+  return (req, res, next) => {
+    const now = Date.now();
+    const ip = req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown";
+    const state = byIp.get(ip) || { count: 0, resetAt: now + periodMs };
+    if (now >= state.resetAt) {
+      state.count = 0;
+      state.resetAt = now + periodMs;
+    }
+    state.count += 1;
+    byIp.set(ip, state);
+    if (state.count > maxHits) {
+      res.setHeader("Retry-After", Math.ceil((state.resetAt - now) / 1000));
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+    return next();
+  };
+}
+
+if (rateLimit) {
+  const limiter = rateLimit({
+    windowMs: Number(process.env.RATE_WINDOW_MS || 60_000),
+    max: Number(process.env.RATE_MAX || 600),
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use(limiter);
+} else {
+  app.use(
+    createFallbackLimiter({
+      windowMs: Number(process.env.RATE_WINDOW_MS || 60_000),
+      max: Number(process.env.RATE_MAX || 600),
     })
   );
 }
@@ -131,6 +194,7 @@ app.get("/health", (req, res) => {
     startedAt: startedAt.toISOString(),
     now: new Date().toISOString(),
     requestId: req.id,
+    db: dbConnection.getStatus(),
   });
 });
 
@@ -205,32 +269,43 @@ async function safeMountRoute(fileRel, basePath) {
   //  2) { router: express.Router }
   //  3) default export as function or router
   //  4) direct express.Router instance
-  if (typeof mod === "function") {
-    mod(app);
-    console.log(`[routes] mounted function from ${fileRel}`);
-    return true;
-  }
-  if (mod?.router && typeof mod.router === "function") {
+  // 1) Named router export object: { router, basePath? }
+  if (mod?.router && typeof mod.router?.use === "function") {
     app.use(mountPath, mod.router);
     console.log(`[routes] mounted router at ${mountPath} from ${fileRel}`);
     return true;
   }
-  if (mod?.default && typeof mod.default === "function" && mod.default.name.length) {
-    // Named function default (assume (app) loader)
-    try {
-      mod.default(app);
-      console.log(`[routes] mounted default(app) from ${fileRel}`);
-      return true;
-    } catch {}
-  }
+
+  // 2) Default router export
   if (mod?.default && typeof mod.default?.use === "function") {
     app.use(mountPath, mod.default);
     console.log(`[routes] mounted default router at ${mountPath} from ${fileRel}`);
     return true;
   }
-  if (mod && typeof mod.use === "function") {
+
+  // 3) Direct router instance export (express.Router() is also a function)
+  if (mod && typeof mod.use === "function" && typeof mod.handle === "function") {
     app.use(mountPath, mod);
     console.log(`[routes] mounted router instance at ${mountPath} from ${fileRel}`);
+    return true;
+  }
+
+  // 4) App-loader function export: function(app) {}
+  if (typeof mod === "function") {
+    if (typeof mod.use === "function" && typeof mod.handle === "function") {
+      app.use(mountPath, mod);
+      console.log(`[routes] mounted function-router at ${mountPath} from ${fileRel}`);
+      return true;
+    }
+    mod(app);
+    console.log(`[routes] mounted function from ${fileRel}`);
+    return true;
+  }
+
+  // 5) Default app-loader function export
+  if (mod?.default && typeof mod.default === "function") {
+    mod.default(app);
+    console.log(`[routes] mounted default(app) from ${fileRel}`);
     return true;
   }
 
@@ -250,51 +325,75 @@ const candidates = [
   "./routes/cookingOrchestrator.js",
   "./routes/inventoryController.js",
   "./routes/irrigationController.js",
-  "./routes/mealPlanController.js",
+  { file: "./routes/mealPlanController.js", basePath: "/api/mealplan" },
+  { file: "./routes/planners.js", basePath: "/api/planners" },
   "./routes/labelsController.js",
   "./routes/preferencesController.js",
+  { file: "./routes/battleRhythmController.js", basePath: "/api/battle-rhythm" },
   "./routes/automationsController.js",
+  "./routes/realtimeController.js",
   "./routes/uploadsController.js",
 ];
 
-(async () => {
+const routesReadyPromise = (async () => {
   let mountedCount = 0;
-  for (const rel of candidates) {
+  for (const candidate of candidates) {
+    const rel = typeof candidate === "string" ? candidate : candidate.file;
+    const basePath =
+      candidate && typeof candidate === "object" ? candidate.basePath : undefined;
     // eslint-disable-next-line no-await-in-loop
-    if (await safeMountRoute(rel)) mountedCount++;
+    if (await safeMountRoute(rel, basePath)) mountedCount++;
   }
   console.log(`[routes] mounted ${mountedCount}/${candidates.length} candidate route files`);
 })().catch((e) => {
   console.warn("[routes] dynamic mount failed:", e?.message || e);
 });
 
-// ---- 404 handler ----
-app.use((req, res) => {
-  res.status(404).json({
-    ok: false,
-    error: "not_found",
-    path: req.originalUrl,
-    method: req.method,
-    requestId: req.id,
-  });
-});
+let terminalHandlersInstalled = false;
+function installTerminalHandlers() {
+  if (terminalHandlersInstalled) return;
+  terminalHandlersInstalled = true;
 
-// ---- Error handler ----
-app.use((err, req, res, next) => {
-  const status = err.status || err.statusCode || 500;
-  const payload = {
-    ok: false,
-    error: err.code || err.name || "Error",
-    message: err.expose
-      ? err.message
-      : NODE_ENV === "development"
-      ? String(err.message || err)
-      : "Internal Server Error",
-    requestId: req.id,
-  };
-  if (NODE_ENV === "development") payload.stack = err.stack;
-  res.status(status).json(payload);
-});
+  // ---- 404 handler ----
+  app.use((req, res) => {
+    res.status(404).json({
+      ok: false,
+      error: "not_found",
+      path: req.originalUrl,
+      method: req.method,
+      requestId: req.id,
+    });
+  });
+
+  // ---- Error handler ----
+  app.use((err, req, res, next) => {
+    const safeError = {
+      name: err?.name,
+      code: err?.code,
+      message: redactText(String(err?.message || "")),
+      stack: NODE_ENV === "development" ? redactText(String(err?.stack || "")) : undefined,
+      requestId: req?.id,
+      path: req?.originalUrl,
+      method: req?.method,
+      headers: redactObject(req?.headers || {}),
+    };
+    console.error("[http:error]", safeError);
+
+    const status = err.status || err.statusCode || 500;
+    const payload = {
+      ok: false,
+      error: err.code || err.name || "Error",
+      message: err.expose
+        ? err.message
+        : NODE_ENV === "development"
+        ? String(err.message || err)
+        : "Internal Server Error",
+      requestId: req.id,
+    };
+    if (NODE_ENV === "development") payload.stack = err.stack;
+    res.status(status).json(payload);
+  });
+}
 
 // ---- Create HTTP server & attach sockets ----
 const server = http.createServer(app);
@@ -310,20 +409,88 @@ const server = http.createServer(app);
   }
 })();
 
-// ---- Optional: basic rate limit on all requests (attach last) ----
-if (rateLimit) {
-  const limiter = rateLimit({
-    windowMs: Number(process.env.RATE_WINDOW_MS || 60_000),
-    max: Number(process.env.RATE_MAX || 600),
-    standardHeaders: true,
-    legacyHeaders: false,
+// ---- Start listening ----
+async function startServer() {
+  try {
+    await dbConnection.init();
+  } catch (e) {
+    console.warn("[boot] db connection init failed; continuing in file-fallback mode:", e?.message || e);
+  }
+
+  try {
+    const plannerIntegration = await loadAny("./services/planners/PlannerIntegrationService.js").catch(
+      () => null
+    );
+    if (plannerIntegration?.verifyNeo4jIntegration) {
+      const required = String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true";
+      const neo4jStatus = await plannerIntegration.verifyNeo4jIntegration({ required });
+      if (!neo4jStatus.ok) {
+        const message = `[boot] neo4j validation failed: ${neo4jStatus.error || "unknown"}`;
+        if (neo4jStatus.required) {
+          throw new Error(message);
+        }
+        console.warn(`${message}; continuing (NEO4J_REQUIRED=false)`);
+      } else if (neo4jStatus.skipped) {
+        console.log("[boot] neo4j validation skipped (feature not enabled)");
+      } else {
+        console.log("[boot] neo4j validation passed (ping ok)");
+      }
+    }
+  } catch (e) {
+    console.warn("[boot] neo4j validation warning:", e?.message || e);
+    if (String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true") {
+      throw e;
+    }
+  }
+
+  await routesReadyPromise;
+  installTerminalHandlers();
+
+  try {
+    const projectionSync = await loadAny("./services/planners/PlannerProjectionSync.js").catch(
+      () => null
+    );
+    projectionSync?.startProjectionWorker?.();
+  } catch (e) {
+    console.warn("[boot] projection worker start skipped:", e?.message || e);
+  }
+
+  try {
+    const disabled =
+      String(process.env.PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED || "false").toLowerCase() ===
+      "true";
+    if (!disabled) {
+      const outboxWorker = await loadAny(
+        "./services/planners/OperationalProjectionWorker.js"
+      ).catch(() => null);
+      outboxWorker?.startOperationalProjectionWorker?.();
+    }
+  } catch (e) {
+    console.warn("[boot] operational outbox worker start skipped:", e?.message || e);
+  }
+
+  server.listen(PORT, HOST, () => {
+    const db = dbConnection.getStatus();
+    console.log(`\nSuka Smart Assistant server listening on http://${HOST}:${PORT}  [env=${NODE_ENV}]`);
+    console.log(`[boot] db driver=${db.driver} connected=${db.connected} fallbackFileMode=${db.fallbackFileMode}`);
+
+    Promise.resolve()
+      .then(() => catalogSyncService?.syncCatalogIndexes?.())
+      .then((sync) => {
+        if (!sync?.ok) return;
+        console.log(
+          `[boot] catalog cache sync mode=${sync.mode} recipes=${sync.recipeCount} rules=${sync.ruleCount}`
+        );
+      })
+      .catch((e) => {
+        console.warn("[boot] catalog cache sync skipped:", e?.message || e);
+      });
   });
-  app.use(limiter);
 }
 
-// ---- Start listening ----
-server.listen(PORT, HOST, () => {
-  console.log(`\nSuka Smart Assistant server listening on http://${HOST}:${PORT}  [env=${NODE_ENV}]`);
+startServer().catch((e) => {
+  console.error("[server] failed to start:", redactText(String(e?.stack || e?.message || e)));
+  process.exitCode = 1;
 });
 
 // ---- Graceful shutdown ----
@@ -337,6 +504,17 @@ async function shutdown(signal) {
       console.error("[server] Error during close:", err);
       process.exitCode = 1;
     }
+    dbConnection.close().catch((e) => {
+      console.warn("[server] DB close warning:", e?.message || e);
+    });
+    Promise.resolve()
+      .then(() => loadAny("./services/planners/PlannerProjectionSync.js"))
+      .then((projectionSync) => projectionSync?.stopProjectionWorker?.())
+      .catch(() => {});
+    Promise.resolve()
+      .then(() => loadAny("./services/planners/OperationalProjectionWorker.js"))
+      .then((outboxWorker) => outboxWorker?.stopOperationalProjectionWorker?.())
+      .catch(() => {});
     try {
       setTimeout(() => process.exit(), 200);
     } catch {
@@ -347,10 +525,10 @@ async function shutdown(signal) {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("unhandledRejection", (reason) => {
-  console.error("[server] unhandledRejection:", reason);
+  console.error("[server] unhandledRejection:", redactText(String(reason?.stack || reason?.message || reason)));
 });
 process.on("uncaughtException", (err) => {
-  console.error("[server] uncaughtException:", err);
+  console.error("[server] uncaughtException:", redactText(String(err?.stack || err?.message || err)));
 });
 
 module.exports = { app, server };

@@ -22,10 +22,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import AnimalFeedCalculatorView from "@/features/calculators/gardenAnimal/AnimalFeedCalculator.view";
+import AnimalFeedCalculatorView from "@/features/calculators/gardenAnimal/AnimalFeedCalculator/AnimalFeedCalculator.view.jsx";
 
 const CALCULATOR_ID = "gardenAnimal.animalFeed";
 
@@ -259,7 +259,8 @@ function AnimalFeedSummaryCard({
   }, [shortfallDays, storehouseDaysCovered, planningWindowDays]);
 
   const windowLabel = useMemo(() => {
-    if (!planningWindowDays || planningWindowDays <= 0) return "Planning window";
+    if (!planningWindowDays || planningWindowDays <= 0)
+      return "Planning window";
     if (planningWindowDays === 30) return "30-day window";
     if (planningWindowDays === 90) return "90-day window";
     if (planningWindowDays === 180) return "6-month window";
@@ -411,9 +412,7 @@ function AnimalFeedSummaryCard({
           <button
             type="button"
             onClick={() =>
-              result &&
-              onProcurementPlanning &&
-              onProcurementPlanning(result)
+              result && onProcurementPlanning && onProcurementPlanning(result)
             }
             className="inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-md shadow-emerald-500/30 transition"
           >
@@ -447,17 +446,15 @@ export default function AnimalFeedCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.gardenAnimal.animal-feed",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.animal-feed",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
-        throw new Error("Animal Feed calculator did not return a result object.");
+        throw new Error(
+          "Animal Feed calculator did not return a result object."
+        );
       }
 
       /** @type {AnimalFeedResult} */
@@ -511,9 +508,7 @@ export default function AnimalFeedCalculatorPage() {
           typeof calcResult.feedMixLabel === "string"
             ? calcResult.feedMixLabel
             : undefined,
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         suggestedPlannerLabel:
           typeof calcResult.suggestedPlannerLabel === "string"

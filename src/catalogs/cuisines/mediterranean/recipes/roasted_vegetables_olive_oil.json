@@ -1,0 +1,280 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.roasted_vegetables_olive_oil",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Roasted Vegetables with Olive Oil, Garlic, and Herbs",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Mediterranean baseline side: high-veg, olive oil + herbs + optional lemon finish.",
+        "Designed as a reusable template for planners (swap seasonal vegetables)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.mediterranean",
+    "category": "side",
+    "mealArchetypes": ["side", "veg_side", "meal_prep_component"],
+    "servingStyles": ["family_style", "meal_prep"],
+    "plannerTags": [
+      "cuisine.mediterranean",
+      "side",
+      "veg_forward",
+      "method.roast",
+      "olive_oil_forward",
+      "meal_prep_friendly",
+      "seasonal_swap"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 190, "unit": "g" },
+    "notes": "Makes ~1 full sheet pan. Scale for multiple pans rather than overcrowding."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "oven",
+      "sheet_pan",
+      "mixing_bowl",
+      "chef_knife",
+      "cutting_board"
+    ],
+    "recommended": ["parchment_paper", "metal_spatula", "microplane"],
+    "optional": ["wire_rack", "instant_read_thermometer"]
+  },
+
+  "dietFlags": ["vegetarian", "vegan", "dairy_free", "gluten_free"],
+
+  "allergens": [],
+
+  "keywords": [
+    "roasted vegetables",
+    "olive oil",
+    "sheet pan",
+    "Mediterranean",
+    "meal prep",
+    "garlic",
+    "herbs"
+  ],
+
+  "tags": [
+    "cuisine.mediterranean",
+    "side",
+    "veg_forward",
+    "method.roast",
+    "flavor.herb_forward",
+    "flavor.olive_oil",
+    "sheet_pan"
+  ],
+
+  "signals": {
+    "profile": "olive_oil_herb_forward",
+    "acidOptional": "lemon",
+    "vegForward": true,
+    "methodCore": "roast",
+    "plannerComponent": {
+      "kind": "side_base",
+      "swapSeasonalVegetables": true
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredients.zucchini",
+      "label": "Zucchini, cut into 1-inch chunks",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "Swap: summer squash."
+    },
+    {
+      "id": "ingredients.eggplant",
+      "label": "Eggplant, cut into 1-inch chunks",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "If eggplant is very spongy, salt 10 minutes and pat dry to reduce oil absorption."
+    },
+    {
+      "id": "ingredients.bell_pepper",
+      "label": "Bell peppers, cut into 1-inch pieces",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "Use mixed colors if available."
+    },
+    {
+      "id": "ingredients.red_onion",
+      "label": "Red onion, cut into wedges",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Keeps structure and caramelizes nicely."
+    },
+    {
+      "id": "ingredients.cherry_tomatoes",
+      "label": "Cherry tomatoes (optional), left whole",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Add halfway through roasting to prevent bursting into sauce."
+    },
+    {
+      "id": "ingredients.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Use enough to lightly coat; avoid pooling oil on pan."
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves. For less risk of scorching, add in the last 10 minutes."
+    },
+    {
+      "id": "ingredients.oregano",
+      "label": "Dried oregano",
+      "amount": { "value": 2, "unit": "g" }
+    },
+    {
+      "id": "ingredients.thyme",
+      "label": "Dried thyme",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.rosemary",
+      "label": "Rosemary, finely chopped (or dried)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "Use lightly; rosemary can dominate."
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Fine salt",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "Adjust to taste and vegetable water content."
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon (zest and/or juice), to finish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "A bright finish is very Mediterranean; add to taste."
+    },
+    {
+      "id": "ingredients.parsley",
+      "label": "Flat-leaf parsley, chopped (to finish)",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven and prep pan",
+      "body": "Heat oven to 425°F (220°C). Line a sheet pan with parchment (optional) for easier cleanup. For best browning, use a large pan and avoid overcrowding.",
+      "timers": [{ "label": "Oven preheat (typical)", "seconds": 600 }]
+    },
+    {
+      "id": "step_02_cut_veg",
+      "title": "Cut vegetables evenly",
+      "body": "Cut zucchini, eggplant, peppers, and red onion into roughly 1-inch pieces so they roast at the same rate. Pat eggplant dry if salted or very wet."
+    },
+    {
+      "id": "step_03_toss_season",
+      "title": "Toss with olive oil, herbs, salt, and pepper",
+      "body": "In a large bowl, toss vegetables with olive oil, oregano, thyme/rosemary (optional), salt, and pepper (optional) until lightly coated. Add garlic now if you prefer a stronger garlic roast flavor, or reserve it for the last 10 minutes to prevent scorching."
+    },
+    {
+      "id": "step_04_roast_first_stage",
+      "title": "Roast until starting to brown",
+      "body": "Spread vegetables in a single layer on the sheet pan (do not pile). Roast 15 minutes, then flip/stir with a spatula to expose new surfaces for browning.",
+      "timers": [{ "label": "Roast stage 1", "seconds": 900 }]
+    },
+    {
+      "id": "step_05_add_tomatoes_optional",
+      "title": "Add cherry tomatoes (optional) and finish roasting",
+      "body": "If using cherry tomatoes, add them now and stir gently. If reserving garlic, add it now and toss lightly. Return to oven and roast until vegetables are tender with browned edges.",
+      "timers": [{ "label": "Roast stage 2", "seconds": 720 }]
+    },
+    {
+      "id": "step_06_finish_bright",
+      "title": "Finish with lemon and herbs (optional) and serve",
+      "body": "Transfer to a serving bowl. If desired, finish with lemon zest and/or juice and chopped parsley. Taste and adjust salt. Serve warm or at room temperature.",
+      "timers": [{ "label": "Rest (optional)", "seconds": 300 }]
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "container": "airtight",
+      "notes": "Reheat in a hot oven or skillet to re-crisp edges. Microwave works but softens texture."
+    },
+    "freeze": {
+      "maxDays": 60,
+      "container": "airtight",
+      "notes": "Freezing is possible but texture softens; best for blending into soups/sauces."
+    }
+  },
+
+  "variations": [
+    {
+      "id": "variation_seasonal_swap",
+      "title": "Seasonal vegetable swaps",
+      "changes": [
+        "Winter: use cauliflower, carrots, Brussels sprouts, sweet potatoes (adjust roast time +10–15 mins).",
+        "Spring: asparagus + fennel + baby potatoes (add asparagus late).",
+        "Summer: zucchini + eggplant + peppers + tomatoes (baseline).",
+        "Fall: butternut squash + red onion + mushrooms (add mushrooms late)."
+      ]
+    },
+    {
+      "id": "variation_spice_paprika",
+      "title": "Paprika + cumin Mediterranean profile (warm spice)",
+      "changes": [
+        "Add 2 g paprika and 1 g ground cumin with the oregano.",
+        "Finish with lemon juice to keep it bright."
+      ]
+    },
+    {
+      "id": "variation_feta_finish",
+      "title": "Feta finish (not vegan)",
+      "changes": [
+        "Crumble 60–100 g feta over hot vegetables right before serving.",
+        "Reduce salt slightly since feta adds salinity."
+      ]
+    },
+    {
+      "id": "variation_balsamic_glaze",
+      "title": "Balsamic finish (sweet/tangy)",
+      "changes": [
+        "Drizzle 10–15 ml balsamic vinegar (or reduced balsamic glaze) after roasting.",
+        "Pairs well with peppers and onions."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Do not overcrowd: steam is the enemy of browning. Use two pans if doubling.",
+    "425°F / 220°C gives good caramelization. If your oven runs hot, use 410°F / 210°C.",
+    "If garlic scorches easily in your oven, add garlic during the final 8–10 minutes."
+  ]
+}

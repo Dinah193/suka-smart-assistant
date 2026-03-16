@@ -1,0 +1,224 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.cheesecake_new_york_style",
+    "slug": "cheesecake_new_york_style",
+    "name": "New York-Style Cheesecake (Custard Precision)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "advanced",
+    "tags": [
+      "dessert",
+      "cheesecake",
+      "new-york-style",
+      "custard",
+      "baking-precision",
+      "water-bath",
+      "make-ahead",
+      "celebration"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A classic New York-style cheesecake: dense, creamy, custard-based, with a baked graham crust. This recipe is a precision example: room-temp ingredients, low mixing to avoid air, water-bath bake, and slow cooling to prevent cracks. Flour note: not flour-based except optional crust binder; fresh-milled vs commercial flour is generally not applicable."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "springform_pan_9in", "label": "9-inch springform pan" },
+    { "id": "roasting_pan", "label": "Large roasting pan (for water bath)" },
+    { "id": "foil_heavy", "label": "Heavy-duty foil (to wrap springform)" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "hand_mixer_or_stand_mixer", "label": "Hand mixer or stand mixer" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "kettle", "label": "Kettle (for hot water bath)" },
+    { "id": "cooling_rack", "label": "Cooling rack" },
+    {
+      "id": "thermometer_optional",
+      "label": "Instant-read thermometer (optional, for doneness)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "graham_crackers",
+      "label": "Graham cracker crumbs",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 2 cups crumbs (roughly 14–16 full sheets)."
+    },
+    {
+      "id": "crust_sugar",
+      "label": "Granulated sugar (for crust)",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": "About 2 tbsp."
+    },
+    {
+      "id": "crust_salt",
+      "label": "Pinch of salt (for crust)",
+      "amount": { "value": 1, "unit": "g" }
+    },
+    {
+      "id": "butter_melted_crust",
+      "label": "Unsalted butter, melted (for crust)",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp."
+    },
+    {
+      "id": "crust_flour_optional",
+      "label": "All-purpose flour or cornstarch (optional crust binder)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 tbsp. Optional; helps crust hold together. Fresh-milled flour is not recommended here; use AP or cornstarch if needed.",
+      "optional": true
+    },
+
+    {
+      "id": "cream_cheese",
+      "label": "Cream cheese, full-fat, room temperature",
+      "amount": { "value": 1360, "unit": "g" },
+      "notes": "About 48 oz / three 16-oz blocks."
+    },
+    {
+      "id": "sugar",
+      "label": "Granulated sugar",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 1 1/2 cups."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+    {
+      "id": "sour_cream",
+      "label": "Sour cream, full-fat, room temperature",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup."
+    },
+    {
+      "id": "heavy_cream",
+      "label": "Heavy cream, room temperature",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": "About 1/2 cup."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "lemon_zest_optional",
+      "label": "Lemon zest (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp; brightens flavor without making it 'lemony'.",
+      "optional": true
+    },
+    {
+      "id": "eggs",
+      "label": "Large eggs, room temperature",
+      "amount": { "value": 4, "unit": "each" }
+    },
+    {
+      "id": "egg_yolk_optional",
+      "label": "Egg yolk (optional, richer set)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Optional; adds richness and slightly firmer custard.",
+      "optional": true
+    },
+    {
+      "id": "cornstarch_optional",
+      "label": "Cornstarch (optional, stabilizer)",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tbsp. Optional; helps reduce cracking and improves slice. Traditionalists may omit.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_room_temp_precision",
+      "title": "Precision setup: bring ingredients to room temperature",
+      "body": "For a smooth, crack-resistant cheesecake: let cream cheese, eggs, sour cream, and cream sit at room temperature 1–2 hours. Cold ingredients cause lumps and encourage overmixing (introducing air)."
+    },
+    {
+      "id": "step_02_prep_pan",
+      "title": "Prep springform pan for water bath",
+      "body": "Heat oven to 325°F (163°C). Wrap the outside of a 9-inch springform pan with 2–3 layers of heavy-duty foil to prevent leaks. Set aside."
+    },
+    {
+      "id": "step_03_make_crust",
+      "title": "Make and bake the crust",
+      "body": "Mix graham crumbs, sugar, salt, and melted butter (and optional binder). Press firmly into the bottom (and 1 inch up the sides if desired). Bake 10 minutes. Cool while you make filling."
+    },
+    {
+      "id": "step_04_beat_cream_cheese_low_air",
+      "title": "Beat cream cheese (low air)",
+      "body": "In a large bowl, beat cream cheese on low-medium just until smooth (about 1–2 minutes). Scrape bowl often. Avoid whipping air into it—air causes puffing and cracks."
+    },
+    {
+      "id": "step_05_add_sugar_salt",
+      "title": "Add sugar and salt",
+      "body": "Add sugar and salt (and optional cornstarch) and beat on low until combined and smooth. Scrape bowl."
+    },
+    {
+      "id": "step_06_add_sour_cream_cream_vanilla",
+      "title": "Add sour cream, cream, vanilla",
+      "body": "Mix in sour cream, heavy cream, vanilla, and optional lemon zest on low just until uniform. Scrape bowl."
+    },
+    {
+      "id": "step_07_add_eggs_last",
+      "title": "Add eggs last (minimal mixing)",
+      "body": "Add eggs one at a time on low speed, mixing only until each disappears. Add optional yolk if using. Do not overmix—this is the most important anti-crack step."
+    },
+    {
+      "id": "step_08_debubble_optional",
+      "title": "Optional: de-bubble for a flawless top",
+      "body": "Tap the bowl gently on the counter to release bubbles. If you see bubbles on the surface after pouring, pop with a toothpick."
+    },
+    {
+      "id": "step_09_fill_pan",
+      "title": "Fill the crust",
+      "body": "Pour filling into cooled crust. Smooth the top. Place the foil-wrapped springform pan in a large roasting pan."
+    },
+    {
+      "id": "step_10_water_bath",
+      "title": "Add hot water bath",
+      "body": "Carefully pour hot water into the roasting pan to come about halfway up the sides of the springform pan. Water bath provides gentle, even heat and reduces cracking."
+    },
+    {
+      "id": "step_11_bake_precision",
+      "title": "Bake (doneness by jiggle/temperature)",
+      "body": "Bake 60–80 minutes. The cheesecake is done when the edges are set but the center (2–3 inches) still jiggles like gelatin when gently shaken. Optional thermometer: center 150–155°F (65–68°C) is ideal."
+    },
+    {
+      "id": "step_12_slow_cool",
+      "title": "Slow cool to prevent cracks",
+      "body": "Turn off oven, crack the door 1–2 inches, and let cheesecake cool in the oven 45–60 minutes. This prevents rapid contraction that causes cracks."
+    },
+    {
+      "id": "step_13_cool_then_chill",
+      "title": "Cool fully, then chill overnight",
+      "body": "Remove from water bath, unwrap foil, and cool on a rack until room temperature. Refrigerate uncovered 4 hours, then cover and chill at least 8 hours (overnight best) for full set and clean slices."
+    },
+    {
+      "id": "step_14_release_slice",
+      "title": "Release and slice cleanly",
+      "body": "Run a thin knife around the edge, release springform. Slice with a warm, clean knife (dip in hot water and wipe between cuts)."
+    }
+  ],
+  "notes": [
+    "Baking precision model: room-temp ingredients + low mixing + water bath + slow cooling = smooth cheesecake with minimal cracking.",
+    "Crust notes: Graham crust is classic. For a flour-based crust, use a cookie/biscuit crust made from your bakery catalog (fresh-milled or commercial flour cookies).",
+    "Cracks are cosmetic: if cracks occur, cover with sour cream topping or fruit compote.",
+    "Do not overbake: a fully solid center in the oven usually means an overbaked cheesecake that will be dry or crack as it cools."
+  ],
+  "storage": {
+    "refrigerator": "Covered: up to 5 days.",
+    "freezer": "Freeze slices or whole cheesecake (well-wrapped) up to 2 months. Thaw overnight in refrigerator."
+  }
+}

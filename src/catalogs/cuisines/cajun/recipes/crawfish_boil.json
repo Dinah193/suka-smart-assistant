@@ -1,0 +1,129 @@
+{
+  "id": "cajun_crawfish_boil",
+  "name": "Cajun Crawfish Boil",
+  "servings": 10,
+  "ingredients": [
+    {
+      "item": "live crawfish",
+      "amount": 20,
+      "unit": "lb",
+      "prep": "rinsed (purging optional; see steps)"
+    },
+    {
+      "item": "water",
+      "amount": 6,
+      "unit": "gallons",
+      "prep": "enough to fill boil pot ~2/3"
+    },
+
+    {
+      "item": "Cajun boil seasoning",
+      "amount": 1,
+      "unit": "bag",
+      "prep": "16 oz (or equivalent)"
+    },
+    {
+      "item": "Cajun boil liquid concentrate",
+      "amount": 4,
+      "unit": "oz",
+      "prep": "optional but common"
+    },
+    { "item": "bay leaves", "amount": 4, "unit": "each" },
+
+    { "item": "lemons", "amount": 4, "unit": "each", "prep": "halved" },
+    {
+      "item": "garlic",
+      "amount": 2,
+      "unit": "heads",
+      "prep": "halved crosswise"
+    },
+    {
+      "item": "yellow onions",
+      "amount": 2,
+      "unit": "large",
+      "prep": "quartered"
+    },
+
+    {
+      "item": "red potatoes",
+      "amount": 5,
+      "unit": "lb",
+      "prep": "washed; halved if large"
+    },
+    {
+      "item": "corn on the cob",
+      "amount": 12,
+      "unit": "ears",
+      "prep": "shucked; halved"
+    },
+    {
+      "item": "andouille sausage",
+      "amount": 3,
+      "unit": "lb",
+      "prep": "cut into 4-inch pieces"
+    },
+
+    {
+      "item": "mushrooms",
+      "amount": 2,
+      "unit": "lb",
+      "prep": "optional; whole or halved"
+    },
+    {
+      "item": "whole artichokes",
+      "amount": 2,
+      "unit": "each",
+      "prep": "optional; trimmed"
+    },
+
+    {
+      "item": "unsalted butter",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "melted for serving (optional)"
+    },
+    { "item": "hot sauce", "amount": 1, "unit": "to_taste" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Set up: Use a large outdoor boil pot with basket, burner, and propane. Fill pot about 2/3 with water (leave room for displacement). Bring to a rolling boil."
+    },
+    {
+      "order": 2,
+      "text": "Season the boil: Add Cajun boil seasoning, optional liquid concentrate, bay leaves, lemons, garlic, and onions. Boil 10–15 minutes to build a flavorful boil."
+    },
+    {
+      "order": 3,
+      "text": "Cook potatoes first: Add potatoes (and optional artichokes if using). Boil until potatoes are nearly tender."
+    },
+    {
+      "order": 4,
+      "text": "Add sausage and corn: Add sausage, corn, and optional mushrooms. Return to a boil and cook until corn is tender and sausage is hot."
+    },
+    {
+      "order": 5,
+      "text": "Rinse crawfish: While vegetables cook, rinse live crawfish in clean water until rinse water runs clearer. Purging with salt is optional and controversial; if you choose to purge, do it briefly and rinse thoroughly."
+    },
+    {
+      "order": 6,
+      "text": "Add crawfish: Turn heat up to maintain a strong boil. Add crawfish to the basket and lower into the pot. Return to a boil and cook briefly."
+    },
+    {
+      "order": 7,
+      "text": "Kill the boil, then soak: After the crawfish come back to a boil, cook a few minutes, then turn off the heat. Let everything soak in the seasoned water so crawfish take on flavor. Taste a crawfish during the soak and adjust soak time to preference."
+    },
+    {
+      "order": 8,
+      "text": "Optional spice adjustment: If you want more heat/flavor, add more boil seasoning or concentrate during the soak (small amounts at a time). Stir carefully and re-taste."
+    },
+    {
+      "order": 9,
+      "text": "Drain and dump: Lift the basket and let it drain well. Dump crawfish, corn, potatoes, sausage, and add-ins onto a covered table (or large trays)."
+    },
+    {
+      "order": 10,
+      "text": "Serve: Serve immediately with optional melted butter and hot sauce. Provide paper towels, gloves, and plenty of cold drinks."
+    }
+  ]
+}

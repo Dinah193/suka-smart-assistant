@@ -23,7 +23,7 @@ digraph SukaSystem {
 
     subgraph cluster_orch {
       label="Automation & Orchestration"; color="#FCA5A5"; style="rounded";
-      EventBus               [label="eventBus\n(@/services/eventBus)", fillcolor="#FFE4E6"];
+      EventBus               [label="eventBus\n(@/services/events/eventBus)", fillcolor="#FFE4E6"];
       AutomationRuntime      [label="automation/runtime.js\n(Local Event-driven)", fillcolor="#FFE4E6"];
       RelativeScheduler      [label="RelativeScheduler\n(@/services/schedule/RelativeScheduler)", fillcolor="#FFE4E6"];
       SessionRunner          [label="SessionRunner\n(@/services/session/SessionRunner)", fillcolor="#FFE4E6"];

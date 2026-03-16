@@ -1,23 +1,47 @@
 // src/components/meals/MealDayCard.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { sabbathGuard } from "@/services/guardrails/sabbathGuard";
 import { automation, emitProgress } from "@/services/automation/runtime";
 import { classNames as cx } from "@/utils/css";
 import { eventBus } from "@/services/events/eventBus";
 
 let TargetsBadge, NBAToolbar, MealSlot, UndoToast, RecipePickerDrawer;
-try { TargetsBadge = require("./TargetsBadge.jsx").default; } catch {}
-try { NBAToolbar  = require("./NBAToolbar.jsx").default; } catch {}
-try { MealSlot     = require("./MealSlot.jsx").default; } catch {}
-try { UndoToast    = require("./UndoToast.jsx").default; } catch {}
-try { RecipePickerDrawer = require("./RecipePickerDrawer.jsx").default; } catch {}
+try {
+  TargetsBadge = require("./TargetsBadge.jsx").default;
+} catch {}
+try {
+  NBAToolbar = require("./NBAToolbar.jsx").default;
+} catch {}
+try {
+  MealSlot = require("./MealSlot.jsx").default;
+} catch {}
+try {
+  UndoToast = require("./UndoToast.jsx").default;
+} catch {}
+try {
+  RecipePickerDrawer = require("./RecipePickerDrawer.jsx").default;
+} catch {}
 
 // Optional stores (component works fine without them)
 let useFoodStore, usePreferencesStore, useMealPlanStore, useRecipeStore;
-try { useFoodStore = require("@/store/FoodStore").useFoodStore; } catch {}
-try { usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore; } catch {}
-try { useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore; } catch {}
-try { useRecipeStore = require("@/store/RecipeStore").useRecipeStore; } catch {}
+try {
+  useFoodStore = require("@/store/FoodStore").useFoodStore;
+} catch {}
+try {
+  usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore;
+} catch {}
+try {
+  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore;
+} catch {}
+try {
+  useRecipeStore = require("@/store/RecipeStore").useRecipeStore;
+} catch {}
 
 /**
  * MealDayCard
@@ -28,19 +52,19 @@ try { useRecipeStore = require("@/store/RecipeStore").useRecipeStore; } catch {}
  * - NBA toolbar for "Auto-fill day", "Balance macros", and "Copy from..."
  */
 export default function MealDayCard({
-  date,                 // JS Date or ISO string
-  dayKey,               // stable id for this day (e.g., '2025-10-11')
+  date, // JS Date or ISO string
+  dayKey, // stable id for this day (e.g., '2025-10-11')
   slots = ["Breakfast", "Lunch", "Dinner", "Snack"],
-  itemsBySlot = {},     // { Breakfast:[recipeRef], Lunch:[], ... }
-  mode = "auto",        // "auto" | "manual"
-  editable = true,      // allow interactions
-  compact = false,      // denser UI
-  onRequestEdit,        // optional callback to open day editor
-  onChangeDay,          // (patch) external notify
+  itemsBySlot = {}, // { Breakfast:[recipeRef], Lunch:[], ... }
+  mode = "auto", // "auto" | "manual"
+  editable = true, // allow interactions
+  compact = false, // denser UI
+  onRequestEdit, // optional callback to open day editor
+  onChangeDay, // (patch) external notify
 }) {
   const prefs = usePreferencesStore?.() || {};
-  const food  = useFoodStore?.() || {};
-  const meal  = useMealPlanStore?.() || {};
+  const food = useFoodStore?.() || {};
+  const meal = useMealPlanStore?.() || {};
   const recipesStore = useRecipeStore?.();
 
   const [openPickerSlot, setOpenPickerSlot] = useState(null);
@@ -48,8 +72,13 @@ export default function MealDayCard({
   const [busy, setBusy] = useState(false);
 
   // Internal state mirror so we can optimistically update with undo support.
-  const [slotsState, setSlotsState] = useState(() => seedSlots(slots, itemsBySlot));
-  useEffect(() => setSlotsState(seedSlots(slots, itemsBySlot)), [slots, itemsBySlot]);
+  const [slotsState, setSlotsState] = useState(() =>
+    seedSlots(slots, itemsBySlot)
+  );
+  useEffect(
+    () => setSlotsState(seedSlots(slots, itemsBySlot)),
+    [slots, itemsBySlot]
+  );
 
   // Respond to external updates
   useEffect(() => {
@@ -59,7 +88,10 @@ export default function MealDayCard({
       }
     });
     const offB = eventBus?.on?.("preferences.changed", () => forceRerender());
-    return () => { offA?.(); offB?.(); };
+    return () => {
+      offA?.();
+      offB?.();
+    };
   }, [dayKey, slots, itemsBySlot]);
 
   const forceRerender = () => setSlotsState((prev) => ({ ...prev }));
@@ -72,7 +104,10 @@ export default function MealDayCard({
   }, [slotsState, slots]);
 
   // Derived: nutrition totals for the day
-  const totals = useMemo(() => sumNutrition(allRecipeRefs, recipesStore), [allRecipeRefs, recipesStore]);
+  const totals = useMemo(
+    () => sumNutrition(allRecipeRefs, recipesStore),
+    [allRecipeRefs, recipesStore]
+  );
 
   // Goals (USDA defaults from prefs/food stores; fallback numbers)
   const goals = useMemo(() => {
@@ -94,13 +129,13 @@ export default function MealDayCard({
   const macroPctActual = useMemo(() => {
     const { protein, carbs, fat } = totals;
     const calFromProtein = protein * 4;
-    const calFromCarbs   = carbs * 4;
-    const calFromFat     = fat * 9;
+    const calFromCarbs = carbs * 4;
+    const calFromFat = fat * 9;
     const denom = Math.max(1, calFromProtein + calFromCarbs + calFromFat);
     return {
       protein: Math.round((calFromProtein / denom) * 100),
-      carbs:   Math.round((calFromCarbs   / denom) * 100),
-      fat:     Math.round((calFromFat     / denom) * 100),
+      carbs: Math.round((calFromCarbs / denom) * 100),
+      fat: Math.round((calFromFat / denom) * 100),
     };
   }, [totals]);
 
@@ -136,7 +171,10 @@ export default function MealDayCard({
   const onDragStart = (sourceSlot, idx, item) => (e) => {
     dragPayloadRef.current = { sourceSlot, idx, item, dayKey };
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", JSON.stringify({ t: "RECIPE_CARD", id: item.id }));
+    e.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({ t: "RECIPE_CARD", id: item.id })
+    );
   };
   const onDragOver = (targetSlot) => (e) => {
     if (!editable) return;
@@ -150,7 +188,10 @@ export default function MealDayCard({
     if (!payload) return;
     // Allow cross-day drops by emitting a bus event if dayKey differs.
     if (payload.dayKey !== dayKey) {
-      eventBus?.emit?.("mealPlan.moveRecipe", { from: payload, to: { dayKey, targetSlot } });
+      eventBus?.emit?.("mealPlan.moveRecipe", {
+        from: payload,
+        to: { dayKey, targetSlot },
+      });
       dragPayloadRef.current = null;
       return;
     }
@@ -202,7 +243,10 @@ export default function MealDayCard({
     if (!item) return;
     setSlotsState((prev) => {
       const next = cloneSlots(prev);
-      next[slot].splice(idx + 1, 0, { ...item, id: `${item.id}-dup-${Date.now()}` });
+      next[slot].splice(idx + 1, 0, {
+        ...item,
+        id: `${item.id}-dup-${Date.now()}`,
+      });
       return next;
     });
     emitDayChanged("recipe.duplicated");
@@ -238,11 +282,16 @@ export default function MealDayCard({
   const runAutoFill = async () => {
     setBusy(true);
     const fn = async () => {
-      const payload = { dayKey, date: asISO(date), slots: Object.keys(slotsState) };
+      const payload = {
+        dayKey,
+        date: asISO(date),
+        slots: Object.keys(slotsState),
+      };
       const result = await automation?.("meal.autofillDay", payload);
       if (Array.isArray(result?.slots)) {
         const next = {};
-        for (const s of result.slots) next[s.name] = (s.items || []).map(mkRecipeRef);
+        for (const s of result.slots)
+          next[s.name] = (s.items || []).map(mkRecipeRef);
         setSlotsState(next);
         emitDayChanged("autoFill.applied", next);
       }
@@ -273,10 +322,14 @@ export default function MealDayCard({
   const copyFromPrevious = async () => {
     setBusy(true);
     const fn = async () => {
-      const prev = await automation?.("meal.copyPreviousDay", { dayKey, date: asISO(date) });
+      const prev = await automation?.("meal.copyPreviousDay", {
+        dayKey,
+        date: asISO(date),
+      });
       if (prev?.slots) {
         const next = {};
-        for (const s of Object.keys(prev.slots)) next[s] = (prev.slots[s] || []).map(mkRecipeRef);
+        for (const s of Object.keys(prev.slots))
+          next[s] = (prev.slots[s] || []).map(mkRecipeRef);
         setSlotsState(next);
         emitDayChanged("day.copied");
       }
@@ -289,7 +342,8 @@ export default function MealDayCard({
   const applyDayPatch = (patch) => {
     setSlotsState((prev) => {
       const next = cloneSlots(prev);
-      for (const [slot, items] of Object.entries(patch)) next[slot] = items.map(mkRecipeRef);
+      for (const [slot, items] of Object.entries(patch))
+        next[slot] = items.map(mkRecipeRef);
       return next;
     });
   };
@@ -298,7 +352,13 @@ export default function MealDayCard({
   const emitDayChanged = (reason, data) => {
     const state = serializeDay(slotsState);
     onChangeDay?.({ dayKey, reason, state });
-    eventBus?.emit?.("mealPlan.updated", { scope: "day", dayKey, reason, state, data });
+    eventBus?.emit?.("mealPlan.updated", {
+      scope: "day",
+      dayKey,
+      reason,
+      state,
+      data,
+    });
     emitProgress?.("meal.day.changed", { dayKey, reason });
   };
 
@@ -313,10 +373,12 @@ export default function MealDayCard({
   const dayTitle = useMemo(() => formatDayTitle(date), [date]);
 
   return (
-    <div className={cx(
-      "rounded-2xl border border-base-200 bg-base-100 shadow-md",
-      compact ? "p-3" : "p-5"
-    )}>
+    <div
+      className={cx(
+        "rounded-2xl border border-base-200 bg-base-100 shadow-md",
+        compact ? "p-3" : "p-5"
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -328,14 +390,15 @@ export default function MealDayCard({
             {TargetsBadge ? (
               <TargetsBadge actual={macroPctActual} target={goals.macroPct} />
             ) : (
-              <FallbackTargets actual={macroPctActual} target={goals.macroPct} />
+              <FallbackTargets
+                actual={macroPctActual}
+                target={goals.macroPct}
+              />
             )}
           </div>
         </div>
 
-        {NBAToolbar && (
-          <NBAToolbar actions={nbaActions} />
-        )}
+        {NBAToolbar && <NBAToolbar actions={nbaActions} />}
       </div>
 
       {/* Day totals vs goals */}
@@ -387,7 +450,10 @@ export default function MealDayCard({
         <UndoToast
           message={toast.message}
           actionLabel={toast.actionLabel}
-          onAction={() => { toast.onUndo?.(); setToast(null); }}
+          onAction={() => {
+            toast.onUndo?.();
+            setToast(null);
+          }}
           onClose={() => setToast(null)}
         />
       )}
@@ -401,10 +467,7 @@ export default function MealDayCard({
 function ModeBadge({ mode }) {
   const isAuto = mode === "auto";
   return (
-    <span className={cx(
-      "badge",
-      isAuto ? "badge-info" : "badge-warning"
-    )}>
+    <span className={cx("badge", isAuto ? "badge-info" : "badge-warning")}>
       {isAuto ? "AUTO" : "MANUAL"}
     </span>
   );
@@ -413,14 +476,14 @@ function ModeBadge({ mode }) {
 function DayTotals({ totals, goals }) {
   const rows = [
     { key: "calories", label: "Calories", unit: "kcal" },
-    { key: "protein",  label: "Protein",  unit: "g"   },
-    { key: "carbs",    label: "Carbs",    unit: "g"   },
-    { key: "fat",      label: "Fat",      unit: "g"   },
+    { key: "protein", label: "Protein", unit: "g" },
+    { key: "carbs", label: "Carbs", unit: "g" },
+    { key: "fat", label: "Fat", unit: "g" },
   ];
   return (
     <div className="mt-3 rounded-xl border border-base-200 p-3 bg-base-100/60">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {rows.map(r => {
+        {rows.map((r) => {
           const val = Math.round(totals[r.key] || 0);
           const goal = Math.max(1, Math.round(goals[r.key] || 0));
           const pct = Math.min(100, Math.round((val / goal) * 100));
@@ -428,10 +491,15 @@ function DayTotals({ totals, goals }) {
             <div key={r.key}>
               <div className="flex items-center justify-between mb-1 text-sm">
                 <span className="font-medium">{r.label}</span>
-                <span className="text-base-content/70">{val} / {goal} {r.unit}</span>
+                <span className="text-base-content/70">
+                  {val} / {goal} {r.unit}
+                </span>
               </div>
               <div className="w-full bg-base-200 rounded-full h-2 overflow-hidden">
-                <div className="h-2 rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                <div
+                  className="h-2 rounded-full bg-primary"
+                  style={{ width: `${pct}%` }}
+                />
               </div>
             </div>
           );
@@ -441,7 +509,16 @@ function DayTotals({ totals, goals }) {
   );
 }
 
-function SlotCard({ title, items, editable, onAddClick, onClear, onDragOver, onDrop, children }) {
+function SlotCard({
+  title,
+  items,
+  editable,
+  onAddClick,
+  onClear,
+  onDragOver,
+  onDrop,
+  children,
+}) {
   return (
     <div
       className="rounded-xl border border-base-200 bg-base-100 p-3"
@@ -452,8 +529,15 @@ function SlotCard({ title, items, editable, onAddClick, onClear, onDragOver, onD
         <div className="font-semibold">{title}</div>
         {editable && (
           <div className="flex items-center gap-2">
-            <button className="btn btn-ghost btn-xs" onClick={onAddClick}>Add</button>
-            <button className="btn btn-ghost btn-xs text-error" onClick={onClear}>Clear</button>
+            <button className="btn btn-ghost btn-xs" onClick={onAddClick}>
+              Add
+            </button>
+            <button
+              className="btn btn-ghost btn-xs text-error"
+              onClick={onClear}
+            >
+              Clear
+            </button>
           </div>
         )}
       </div>
@@ -472,12 +556,28 @@ function MealItemRow({ item, draggable, onDragStart, onRemove, onDuplicate }) {
     >
       <div className="flex items-center gap-2">
         {draggable && <span className="cursor-grab select-none">⋮⋮</span>}
-        <div className="font-medium line-clamp-1">{item.title || item.name || "Recipe"}</div>
-        {item.servings && <span className="badge badge-ghost">{item.servings} sv</span>}
+        <div className="font-medium line-clamp-1">
+          {item.title || item.name || "Recipe"}
+        </div>
+        {item.servings && (
+          <span className="badge badge-ghost">{item.servings} sv</span>
+        )}
       </div>
       <div className="flex items-center gap-1">
-        <button className="btn btn-ghost btn-xs" onClick={onDuplicate} title="Duplicate">Copy</button>
-        <button className="btn btn-ghost btn-xs text-error" onClick={onRemove} title="Remove">Remove</button>
+        <button
+          className="btn btn-ghost btn-xs"
+          onClick={onDuplicate}
+          title="Duplicate"
+        >
+          Copy
+        </button>
+        <button
+          className="btn btn-ghost btn-xs text-error"
+          onClick={onRemove}
+          title="Remove"
+        >
+          Remove
+        </button>
       </div>
     </div>
   );
@@ -503,7 +603,8 @@ function FallbackTargets({ actual, target }) {
 function EmptySlotHint() {
   return (
     <div className="text-sm text-base-content/60 italic">
-      No items. Click <span className="not-italic font-medium">Add</span> or drop a recipe here.
+      No items. Click <span className="not-italic font-medium">Add</span> or
+      drop a recipe here.
     </div>
   );
 }
@@ -524,7 +625,11 @@ function cloneSlots(slotsState) {
 }
 
 function mkRecipeRef(any) {
-  if (!any) return { id: `recipe-${Math.random().toString(36).slice(2, 9)}`, title: "Recipe" };
+  if (!any)
+    return {
+      id: `recipe-${Math.random().toString(36).slice(2, 9)}`,
+      title: "Recipe",
+    };
   // Normalize common fields: id, title/name, servings, nutrition
   return {
     id: any.id || any._id || `recipe-${Math.random().toString(36).slice(2, 9)}`,
@@ -535,15 +640,18 @@ function mkRecipeRef(any) {
 }
 
 function sumNutrition(refs, recipesStore) {
-  let calories = 0, protein = 0, carbs = 0, fat = 0;
+  let calories = 0,
+    protein = 0,
+    carbs = 0,
+    fat = 0;
   for (const r of refs) {
     const full = resolveRecipe(r, recipesStore);
     const n = full?.nutrition || r.nutrition || null;
     if (!n) continue;
     calories += safeNum(n.calories, 0);
-    protein  += safeNum(n.protein, 0);
-    carbs    += safeNum(n.carbs, 0);
-    fat      += safeNum(n.fat, 0);
+    protein += safeNum(n.protein, 0);
+    carbs += safeNum(n.carbs, 0);
+    fat += safeNum(n.fat, 0);
   }
   return { calories, protein, carbs, fat };
 }
@@ -566,13 +674,23 @@ function clampPct(n) {
 function formatDayTitle(date) {
   try {
     const d = typeof date === "string" ? new Date(date) : date;
-    return d?.toLocaleDateString?.(undefined, { weekday: "short", month: "short", day: "numeric" }) || "Day";
-  } catch { return "Day"; }
+    return (
+      d?.toLocaleDateString?.(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }) || "Day"
+    );
+  } catch {
+    return "Day";
+  }
 }
 
 function asISO(date) {
   try {
     const d = typeof date === "string" ? new Date(date) : date;
     return d?.toISOString?.() || "";
-  } catch { return ""; }
+  } catch {
+    return "";
+  }
 }

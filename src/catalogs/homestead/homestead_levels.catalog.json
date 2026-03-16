@@ -1,0 +1,559 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "$id": "https://suka-smart-assistant.local/catalogs/homestead/homestead_levels.catalog.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "homestead.homestead_levels",
+    "type": "catalog",
+    "domain": "homestead",
+    "locale": "en-US",
+    "name": "Homestead Levels",
+    "label": "Homestead Levels",
+    "subtitle": "Level 0–4: enabled domains + UI feature flags",
+    "source": {
+      "curation": "ssa_canonical",
+      "author": "SSA",
+      "license": "CC-BY-4.0"
+    }
+  },
+  "scope": {
+    "resolver": "homestead_levels",
+    "appliesTo": ["ui", "routing", "domain_gating", "feature_flags"],
+    "levels": [0, 1, 2, 3, 4]
+  },
+  "defaults": {
+    "activeLevelId": "homestead.level_0",
+    "unlockMode": "progressive",
+    "ui": {
+      "requireLevelForRoutes": true,
+      "hideLockedModules": true,
+      "showUpgradeCTA": true,
+      "showLockBadges": true,
+      "lockReasonStyle": "tooltip"
+    },
+    "flags": {
+      "offlineMode": true,
+      "sync": true
+    }
+  },
+  "items": [
+    {
+      "id": "homestead.level_0",
+      "label": "Level 0 • Household Basics",
+      "rank": 0,
+      "group": "levels",
+      "status": "active",
+      "tags": [
+        "level.0",
+        "homestead.level",
+        "unlock.basics",
+        "domain.household",
+        "domain.meals",
+        "domain.cleaning",
+        "domain.inventory",
+        "domain.calendar",
+        "domain.shopping",
+        "domain.health_basic"
+      ],
+      "notes": "Apartment / standard household baseline: planning, cleaning, meals, basic inventory, and simple scheduling.",
+      "refs": {
+        "order": 0,
+        "summary": "Apartment / standard household baseline.",
+        "enabledDomains": [
+          "domain.household",
+          "domain.meals",
+          "domain.cleaning",
+          "domain.inventory",
+          "domain.calendar",
+          "domain.shopping",
+          "domain.health_basic"
+        ],
+        "disabledDomains": [
+          "domain.garden",
+          "domain.animals",
+          "domain.preservation",
+          "domain.butchery",
+          "domain.water",
+          "domain.energy",
+          "domain.waste",
+          "domain.toolshed",
+          "domain.makerspace",
+          "domain.construction",
+          "domain.community"
+        ],
+        "requirements": {
+          "intent": [
+            "Track chores",
+            "Cook meals",
+            "Manage pantry",
+            "Create simple plans"
+          ],
+          "minimumSetup": [
+            "Create household profile",
+            "Add 10+ pantry items (or import)",
+            "Create 3+ recipes (or use catalogs)"
+          ]
+        },
+        "uiFlags": {
+          "nav": {
+            "showGarden": false,
+            "showAnimals": false,
+            "showPreservation": false,
+            "showButchery": false,
+            "showHomesteadOps": false,
+            "showCommunity": false
+          },
+          "features": {
+            "mealPlanner": true,
+            "batchCooking": true,
+            "recipeVault": true,
+            "groceryListGenerator": true,
+            "inventoryBasic": true,
+            "inventoryAdvanced": false,
+            "storageLocationMap": false,
+            "cleaningPlanner": true,
+            "hygieneRoutines": true,
+            "calendarCore": true,
+            "holyDayPlanner": true,
+            "workoutBasics": true,
+            "martialArtsBasics": true,
+            "offlineMode": true,
+            "sync": true
+          },
+          "limits": {
+            "maxHouseholds": 1,
+            "maxMembers": 12,
+            "maxActivePlans": 10,
+            "maxRecipesInVault": 500
+          }
+        }
+      }
+    },
+    {
+      "id": "homestead.level_1",
+      "label": "Level 1 • Prepper Pantry & Batch Systems",
+      "rank": 1,
+      "group": "levels",
+      "status": "active",
+      "tags": [
+        "level.1",
+        "homestead.level",
+        "unlock.storehouse",
+        "domain.household",
+        "domain.meals",
+        "domain.cleaning",
+        "domain.inventory",
+        "domain.calendar",
+        "domain.shopping",
+        "domain.health_basic",
+        "domain.preservation",
+        "domain.toolshed"
+      ],
+      "notes": "Adds deeper inventory + storehouse thinking, preservation basics, and stronger planning loops.",
+      "refs": {
+        "order": 1,
+        "summary": "Storehouse + batch + preservation basics.",
+        "enabledDomains": [
+          "domain.household",
+          "domain.meals",
+          "domain.cleaning",
+          "domain.inventory",
+          "domain.calendar",
+          "domain.shopping",
+          "domain.health_basic",
+          "domain.preservation",
+          "domain.toolshed"
+        ],
+        "disabledDomains": [
+          "domain.garden",
+          "domain.animals",
+          "domain.butchery",
+          "domain.water",
+          "domain.energy",
+          "domain.waste",
+          "domain.makerspace",
+          "domain.construction",
+          "domain.community"
+        ],
+        "requirements": {
+          "intent": [
+            "Start a storehouse",
+            "Batch cook",
+            "Preserve food",
+            "Reduce waste"
+          ],
+          "minimumSetup": [
+            "Add storage zones (pantry/freezer/rootcellar/garage)",
+            "Log 2+ batch cooking sessions",
+            "Log 1+ preservation run (freeze/dehydrate/pickle)"
+          ]
+        },
+        "uiFlags": {
+          "nav": {
+            "showGarden": false,
+            "showAnimals": false,
+            "showPreservation": true,
+            "showButchery": false,
+            "showHomesteadOps": false,
+            "showCommunity": false
+          },
+          "features": {
+            "mealPlanner": true,
+            "batchCooking": true,
+            "recipeVault": true,
+            "groceryListGenerator": true,
+            "inventoryBasic": true,
+            "inventoryAdvanced": true,
+            "storageLocationMap": true,
+            "cleaningPlanner": true,
+            "hygieneRoutines": true,
+            "calendarCore": true,
+            "holyDayPlanner": true,
+            "preservationBasics": true,
+            "pressureCanning": true,
+            "dehydrating": true,
+            "freezingTracker": true,
+            "fermentationBasics": true,
+            "labelPrinter": true,
+            "toolSubstitutionAdvisor": true,
+            "offlineMode": true,
+            "sync": true
+          },
+          "limits": {
+            "maxHouseholds": 3,
+            "maxMembers": 30,
+            "maxActivePlans": 25,
+            "maxRecipesInVault": 2500
+          }
+        }
+      }
+    },
+    {
+      "id": "homestead.level_2",
+      "label": "Level 2 • Garden & Yard Production",
+      "rank": 2,
+      "group": "levels",
+      "status": "active",
+      "tags": [
+        "level.2",
+        "homestead.level",
+        "unlock.garden",
+        "domain.household",
+        "domain.meals",
+        "domain.cleaning",
+        "domain.inventory",
+        "domain.calendar",
+        "domain.shopping",
+        "domain.health_basic",
+        "domain.preservation",
+        "domain.toolshed",
+        "domain.garden",
+        "domain.waste",
+        "domain.water"
+      ],
+      "notes": "Adds garden planning, seed/bed management, harvest logging, and demand ↔ supply loops into inventory.",
+      "refs": {
+        "order": 2,
+        "summary": "Garden planning + harvest logging + inventory sync.",
+        "enabledDomains": [
+          "domain.household",
+          "domain.meals",
+          "domain.cleaning",
+          "domain.inventory",
+          "domain.calendar",
+          "domain.shopping",
+          "domain.health_basic",
+          "domain.preservation",
+          "domain.toolshed",
+          "domain.garden",
+          "domain.waste",
+          "domain.water"
+        ],
+        "disabledDomains": [
+          "domain.animals",
+          "domain.butchery",
+          "domain.energy",
+          "domain.makerspace",
+          "domain.construction",
+          "domain.community"
+        ],
+        "requirements": {
+          "intent": [
+            "Grow food",
+            "Track harvest",
+            "Plan seasons",
+            "Reduce grocery dependence"
+          ],
+          "minimumSetup": [
+            "Create 1+ garden (beds/containers/plots)",
+            "Add 5+ crops to a seasonal plan",
+            "Log 1+ harvest entry"
+          ]
+        },
+        "uiFlags": {
+          "nav": {
+            "showGarden": true,
+            "showAnimals": false,
+            "showPreservation": true,
+            "showButchery": false,
+            "showHomesteadOps": true,
+            "showCommunity": false
+          },
+          "features": {
+            "mealPlanner": true,
+            "batchCooking": true,
+            "recipeVault": true,
+            "groceryListGenerator": true,
+            "inventoryBasic": true,
+            "inventoryAdvanced": true,
+            "storageLocationMap": true,
+            "gardenPlanner": true,
+            "gardenCropCatalog": true,
+            "gardenTasks": true,
+            "harvestLogging": true,
+            "harvestToInventorySync": true,
+            "gardenToMealDemandLink": true,
+            "compostTracker": true,
+            "wasteStreams": true,
+            "waterPlanning": true,
+            "rainCaptureBasics": true,
+            "cleaningPlanner": true,
+            "hygieneRoutines": true,
+            "calendarCore": true,
+            "holyDayPlanner": true,
+            "preservationBasics": true,
+            "pressureCanning": true,
+            "dehydrating": true,
+            "fermentationBasics": true,
+            "labelPrinter": true,
+            "offlineMode": true,
+            "sync": true
+          },
+          "limits": {
+            "maxHouseholds": 5,
+            "maxMembers": 60,
+            "maxActivePlans": 50,
+            "maxRecipesInVault": 5000
+          }
+        }
+      }
+    },
+    {
+      "id": "homestead.level_3",
+      "label": "Level 3 • Animals, Butchery & Full Production Loops",
+      "rank": 3,
+      "group": "levels",
+      "status": "active",
+      "tags": [
+        "level.3",
+        "homestead.level",
+        "unlock.animals",
+        "unlock.butchery",
+        "domain.household",
+        "domain.meals",
+        "domain.cleaning",
+        "domain.inventory",
+        "domain.calendar",
+        "domain.shopping",
+        "domain.health_basic",
+        "domain.preservation",
+        "domain.toolshed",
+        "domain.garden",
+        "domain.waste",
+        "domain.water",
+        "domain.animals",
+        "domain.butchery"
+      ],
+      "notes": "Adds animal systems, breeding/health, feed planning, butchery logs, and full farm-to-storehouse workflows.",
+      "refs": {
+        "order": 3,
+        "summary": "Animals + butchery + full farm-to-storehouse loops.",
+        "enabledDomains": [
+          "domain.household",
+          "domain.meals",
+          "domain.cleaning",
+          "domain.inventory",
+          "domain.calendar",
+          "domain.shopping",
+          "domain.health_basic",
+          "domain.preservation",
+          "domain.toolshed",
+          "domain.garden",
+          "domain.waste",
+          "domain.water",
+          "domain.animals",
+          "domain.butchery"
+        ],
+        "disabledDomains": [
+          "domain.energy",
+          "domain.makerspace",
+          "domain.construction",
+          "domain.community"
+        ],
+        "requirements": {
+          "intent": [
+            "Raise animals",
+            "Track production",
+            "Process meat",
+            "Run a true storehouse"
+          ],
+          "minimumSetup": [
+            "Create 1+ animal profile",
+            "Schedule animal tasks (feed/clean/health)",
+            "Log 1+ butchery or processing event (real or simulated)"
+          ]
+        },
+        "uiFlags": {
+          "nav": {
+            "showGarden": true,
+            "showAnimals": true,
+            "showPreservation": true,
+            "showButchery": true,
+            "showHomesteadOps": true,
+            "showCommunity": false
+          },
+          "features": {
+            "animalProfiles": true,
+            "animalTaskScheduler": true,
+            "breedingTracker": true,
+            "healthTreatments": true,
+            "feedPlanning": true,
+            "butcheringLog": true,
+            "cutSheetForms": true,
+            "butcheryToInventorySync": true,
+            "renderYieldEstimates": true,
+            "mealPlanner": true,
+            "batchCooking": true,
+            "recipeVault": true,
+            "groceryListGenerator": true,
+            "inventoryBasic": true,
+            "inventoryAdvanced": true,
+            "storageLocationMap": true,
+            "gardenPlanner": true,
+            "harvestToInventorySync": true,
+            "preservationBasics": true,
+            "pressureCanning": true,
+            "dehydrating": true,
+            "fermentationBasics": true,
+            "smokingAndCuring": true,
+            "sausageMaking": true,
+            "labelPrinter": true,
+            "wasteStreams": true,
+            "compostTracker": true,
+            "waterPlanning": true,
+            "offlineMode": true,
+            "sync": true
+          },
+          "limits": {
+            "maxHouseholds": 12,
+            "maxMembers": 200,
+            "maxActivePlans": 150,
+            "maxRecipesInVault": 20000
+          }
+        }
+      }
+    },
+    {
+      "id": "homestead.level_4",
+      "label": "Level 4 • Village-Scale Systems",
+      "rank": 4,
+      "group": "levels",
+      "status": "active",
+      "tags": [
+        "level.4",
+        "homestead.level",
+        "unlock.village",
+        "domain.household",
+        "domain.meals",
+        "domain.cleaning",
+        "domain.inventory",
+        "domain.calendar",
+        "domain.shopping",
+        "domain.health_basic",
+        "domain.preservation",
+        "domain.toolshed",
+        "domain.garden",
+        "domain.waste",
+        "domain.water",
+        "domain.animals",
+        "domain.butchery",
+        "domain.energy",
+        "domain.makerspace",
+        "domain.construction",
+        "domain.community"
+      ],
+      "notes": "Adds energy/microgrid concepts, makerspace + construction planning, and community/logistics coordination layers.",
+      "refs": {
+        "order": 4,
+        "summary": "Village-scale coordination + infrastructure planning.",
+        "enabledDomains": [
+          "domain.household",
+          "domain.meals",
+          "domain.cleaning",
+          "domain.inventory",
+          "domain.calendar",
+          "domain.shopping",
+          "domain.health_basic",
+          "domain.preservation",
+          "domain.toolshed",
+          "domain.garden",
+          "domain.waste",
+          "domain.water",
+          "domain.animals",
+          "domain.butchery",
+          "domain.energy",
+          "domain.makerspace",
+          "domain.construction",
+          "domain.community"
+        ],
+        "disabledDomains": [],
+        "requirements": {
+          "intent": [
+            "Operate at scale",
+            "Coordinate projects",
+            "Share resources",
+            "Build infrastructure"
+          ],
+          "minimumSetup": [
+            "Enable multi-household coordination",
+            "Create 1+ logistics/supply plan",
+            "Create 1+ project plan (construction/energy/water)"
+          ]
+        },
+        "uiFlags": {
+          "nav": {
+            "showGarden": true,
+            "showAnimals": true,
+            "showPreservation": true,
+            "showButchery": true,
+            "showHomesteadOps": true,
+            "showCommunity": true
+          },
+          "features": {
+            "communityForum": true,
+            "tierGatedForum": true,
+            "supplyLinesPlanner": true,
+            "enterpriseOrdering": true,
+            "projectOverlayMapping": true,
+            "energyMicrogridPlanner": true,
+            "waterInfrastructurePlanner": true,
+            "makerspaceInventory": true,
+            "constructionPlanner": true,
+            "vlcsLaborCredits": true,
+            "roleBasedOrgEmail": true,
+            "exportsToFamilyFundHub": true,
+            "offlineMode": true,
+            "sync": true
+          },
+          "limits": {
+            "maxHouseholds": 100,
+            "maxMembers": 2000,
+            "maxActivePlans": 1000,
+            "maxRecipesInVault": 100000
+          }
+        }
+      }
+    }
+  ]
+}

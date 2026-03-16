@@ -1,11 +1,17 @@
 // File: C:\Users\larho\suka-smart-assistant\src\ui\pages\scheduling\history.jsx
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 
 // 🔌 Shared services (assumed to exist per SSA conventions)
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags";
-import HubPacketFormatter from "../../hub/HubPacketFormatter";
-import FamilyFundConnector from "../../hub/FamilyFundConnector";
+import eventBus from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // 📈 Charts (project convention: recharts is available)
 import {
@@ -79,7 +85,15 @@ function daysAgoISO(days = 30) {
   return d.toISOString();
 }
 
-const DOMAINS = ["all", "cooking", "cleaning", "garden", "animals", "storehouse", "preservation"];
+const DOMAINS = [
+  "all",
+  "cooking",
+  "cleaning",
+  "garden",
+  "animals",
+  "storehouse",
+  "preservation",
+];
 
 // -----------------------------------------------------------------------------
 // Data access (defensive): we try a service, else fall back to eventBus request.
@@ -101,7 +115,12 @@ async function fetchHistory(filters) {
   if (svc?.getHistory) return svc.getHistory(filters);
   // Request-response via eventBus (the analytics daemon should reply with `analytics.history.result`)
   return new Promise((resolve) => {
-    const payload = { type: "analytics.history.request", ts: nowISO(), source: SOURCE, data: filters };
+    const payload = {
+      type: "analytics.history.request",
+      ts: nowISO(),
+      source: SOURCE,
+      data: filters,
+    };
     const off = eventBus.on("analytics.history.result", (e) => {
       off?.();
       resolve(e?.data || { runs: [], tasks: [] });
@@ -118,7 +137,12 @@ async function fetchHistory(filters) {
 async function fetchCalibration(filters) {
   if (svc?.getCalibrationSummary) return svc.getCalibrationSummary(filters);
   return new Promise((resolve) => {
-    const payload = { type: "analytics.calibration.request", ts: nowISO(), source: SOURCE, data: filters };
+    const payload = {
+      type: "analytics.calibration.request",
+      ts: nowISO(),
+      source: SOURCE,
+      data: filters,
+    };
     const off = eventBus.on("analytics.calibration.result", (e) => {
       off?.();
       resolve(e?.data || {});
@@ -132,7 +156,8 @@ async function fetchCalibration(filters) {
 }
 
 async function applyCalibration(strategy, domain, params) {
-  if (svc?.applyCalibration) return svc.applyCalibration({ strategy, domain, params });
+  if (svc?.applyCalibration)
+    return svc.applyCalibration({ strategy, domain, params });
   // Emit command; listener should update model and reply
   return new Promise((resolve) => {
     const cmd = {
@@ -191,7 +216,11 @@ function reducer(state, action) {
         error: null,
       };
     case "LOAD_ERROR":
-      return { ...state, loading: false, error: action.error || "Failed to load analytics." };
+      return {
+        ...state,
+        loading: false,
+        error: action.error || "Failed to load analytics.",
+      };
     default:
       return state;
   }
@@ -203,12 +232,18 @@ function reducer(state, action) {
 export default function SchedulingHistoryPage() {
   const [filters, setFilters] = useState(initialFilters);
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [calibForm, setCalibForm] = useState({ strategy: "proportional_bias", factor: 0.1 });
+  const [calibForm, setCalibForm] = useState({
+    strategy: "proportional_bias",
+    factor: 0.1,
+  });
 
   const load = useCallback(async () => {
     dispatch({ type: "LOAD_START" });
     try {
-      const [hist, cal] = await Promise.all([fetchHistory(filters), fetchCalibration(filters)]);
+      const [hist, cal] = await Promise.all([
+        fetchHistory(filters),
+        fetchCalibration(filters),
+      ]);
       dispatch({
         type: "LOAD_SUCCESS",
         runs: hist?.runs || [],
@@ -233,22 +268,28 @@ export default function SchedulingHistoryPage() {
       if (filters.domain !== "all" && d.domain !== filters.domain) return;
       dispatch({
         type: "LOAD_SUCCESS",
-        runs: [{ // build minimal row
-          id: d.runId || `${d.sessionId}:${d.ts || nowISO()}`,
-          date: d.ts || nowISO(),
-          domain: d.domain,
-          sessionId: d.sessionId,
-          estimateMin: safeNum(d.estimateMin),
-          actualMin: safeNum(d.actualMin),
-          overrunMin: safeNum(d.actualMin - d.estimateMin),
-          tasks: safeNum(d.taskCount, 0),
-        }, ...(state.runs || [])].slice(0, 250),
+        runs: [
+          {
+            // build minimal row
+            id: d.runId || `${d.sessionId}:${d.ts || nowISO()}`,
+            date: d.ts || nowISO(),
+            domain: d.domain,
+            sessionId: d.sessionId,
+            estimateMin: safeNum(d.estimateMin),
+            actualMin: safeNum(d.actualMin),
+            overrunMin: safeNum(d.actualMin - d.estimateMin),
+            tasks: safeNum(d.taskCount, 0),
+          },
+          ...(state.runs || []),
+        ].slice(0, 250),
         tasks: state.tasks,
         calib: state.calib,
       });
     });
     return () => {
-      try { off?.(); } catch {}
+      try {
+        off?.();
+      } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.domain, state.runs, state.tasks, state.calib]);
@@ -260,13 +301,20 @@ export default function SchedulingHistoryPage() {
       return { onTime: 1, avgOverrun: 0, bias: 0, count: 0 };
     }
     const count = rows.length;
-    const onTimeCount = rows.filter((r) => (r.actualMin || 0) <= (r.estimateMin || 0) + 0.5).length;
+    const onTimeCount = rows.filter(
+      (r) => (r.actualMin || 0) <= (r.estimateMin || 0) + 0.5
+    ).length;
     const onTime = onTimeCount / count;
     const avgOverrun =
-      rows.reduce((acc, r) => acc + safeNum(r.actualMin - r.estimateMin), 0) / count;
-    const bias =
-      rows.reduce((acc, r) => acc + (safeNum(r.actualMin - r.estimateMin) / Math.max(1, r.estimateMin)), 0) /
+      rows.reduce((acc, r) => acc + safeNum(r.actualMin - r.estimateMin), 0) /
       count;
+    const bias =
+      rows.reduce(
+        (acc, r) =>
+          acc +
+          safeNum(r.actualMin - r.estimateMin) / Math.max(1, r.estimateMin),
+        0
+      ) / count;
     return { onTime, avgOverrun, bias, count };
   }, [state.runs]);
 
@@ -277,7 +325,10 @@ export default function SchedulingHistoryPage() {
         .slice()
         .reverse()
         .map((r) => ({
-          x: new Date(r.date).toLocaleDateString([], { month: "numeric", day: "numeric" }),
+          x: new Date(r.date).toLocaleDateString([], {
+            month: "numeric",
+            day: "numeric",
+          }),
           estimate: safeNum(r.estimateMin),
           actual: safeNum(r.actualMin),
           overrun: safeNum(r.actualMin - r.estimateMin),
@@ -313,7 +364,12 @@ export default function SchedulingHistoryPage() {
       type: "ui.calibration.applied",
       ts: nowISO(),
       source: SOURCE,
-      data: { domain: domain || "all", strategy: calibForm.strategy, params, result: res },
+      data: {
+        domain: domain || "all",
+        strategy: calibForm.strategy,
+        params,
+        result: res,
+      },
     };
     eventBus.emit(payload.type, payload);
     eventBus.emit("ui.action", payload);
@@ -336,9 +392,12 @@ export default function SchedulingHistoryPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Scheduling history & calibration</h1>
+          <h1 className="text-lg font-semibold text-slate-900">
+            Scheduling history & calibration
+          </h1>
           <p className="text-sm text-slate-600">
-            Track estimate accuracy, overruns, and tune calibration used by planners.
+            Track estimate accuracy, overruns, and tune calibration used by
+            planners.
           </p>
         </div>
         <Filters filters={filters} setFilters={setFilters} onRefresh={load} />
@@ -346,9 +405,21 @@ export default function SchedulingHistoryPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="On-time rate" value={fmtPct(kpis.onTime)} sub={`${kpis.count} runs`} />
-        <KpiCard label="Avg overrun" value={fmtMin(kpis.avgOverrun)} sub="mean (min)" />
-        <KpiCard label="Estimate bias" value={fmtPct(kpis.bias)} sub="mean signed %" />
+        <KpiCard
+          label="On-time rate"
+          value={fmtPct(kpis.onTime)}
+          sub={`${kpis.count} runs`}
+        />
+        <KpiCard
+          label="Avg overrun"
+          value={fmtMin(kpis.avgOverrun)}
+          sub="mean (min)"
+        />
+        <KpiCard
+          label="Estimate bias"
+          value={fmtPct(kpis.bias)}
+          sub="mean signed %"
+        />
         <KpiCard
           label="Model version"
           value={state.calib?.modelVersion || "—"}
@@ -400,9 +471,12 @@ export default function SchedulingHistoryPage() {
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Calibration controls</h3>
+            <h3 className="text-sm font-semibold text-slate-900">
+              Calibration controls
+            </h3>
             <p className="text-xs text-slate-600">
-              Apply a model tweak based on recent history. This affects future plans.
+              Apply a model tweak based on recent history. This affects future
+              plans.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -417,13 +491,19 @@ export default function SchedulingHistoryPage() {
 
         <div className="p-4 grid md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs text-slate-700 mb-1">Strategy</label>
+            <label className="block text-xs text-slate-700 mb-1">
+              Strategy
+            </label>
             <select
               value={calibForm.strategy}
-              onChange={(e) => setCalibForm((s) => ({ ...s, strategy: e.target.value }))}
+              onChange={(e) =>
+                setCalibForm((s) => ({ ...s, strategy: e.target.value }))
+              }
               className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5 bg-white"
             >
-              <option value="proportional_bias">Proportional bias (scale by %)</option>
+              <option value="proportional_bias">
+                Proportional bias (scale by %)
+              </option>
               <option value="offset_minutes">Fixed offset (± minutes)</option>
               <option value="quantile_fit">Quantile fit (target p90)</option>
             </select>
@@ -431,13 +511,18 @@ export default function SchedulingHistoryPage() {
 
           {calibForm.strategy === "proportional_bias" && (
             <div>
-              <label className="block text-xs text-slate-700 mb-1">Factor (e.g., 0.10 = +10%)</label>
+              <label className="block text-xs text-slate-700 mb-1">
+                Factor (e.g., 0.10 = +10%)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={calibForm.factor}
                 onChange={(e) =>
-                  setCalibForm((s) => ({ ...s, factor: Number(e.target.value) }))
+                  setCalibForm((s) => ({
+                    ...s,
+                    factor: Number(e.target.value),
+                  }))
                 }
                 className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5"
               />
@@ -446,13 +531,18 @@ export default function SchedulingHistoryPage() {
 
           {calibForm.strategy === "offset_minutes" && (
             <div>
-              <label className="block text-xs text-slate-700 mb-1">Offset (minutes)</label>
+              <label className="block text-xs text-slate-700 mb-1">
+                Offset (minutes)
+              </label>
               <input
                 type="number"
                 step="1"
                 value={calibForm.offset || 5}
                 onChange={(e) =>
-                  setCalibForm((s) => ({ ...s, offset: Number(e.target.value) }))
+                  setCalibForm((s) => ({
+                    ...s,
+                    offset: Number(e.target.value),
+                  }))
                 }
                 className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5"
               />
@@ -461,13 +551,18 @@ export default function SchedulingHistoryPage() {
 
           {calibForm.strategy === "quantile_fit" && (
             <div>
-              <label className="block text-xs text-slate-700 mb-1">Target p90 (e.g., 0.85)</label>
+              <label className="block text-xs text-slate-700 mb-1">
+                Target p90 (e.g., 0.85)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={calibForm.targetP90 || 0.85}
                 onChange={(e) =>
-                  setCalibForm((s) => ({ ...s, targetP90: Number(e.target.value) }))
+                  setCalibForm((s) => ({
+                    ...s,
+                    targetP90: Number(e.target.value),
+                  }))
                 }
                 className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5"
               />
@@ -490,7 +585,9 @@ export default function SchedulingHistoryPage() {
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-900">Recent runs</h3>
-          {state.loading && <span className="text-[11px] text-slate-600">Loading…</span>}
+          {state.loading && (
+            <span className="text-[11px] text-slate-600">Loading…</span>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -507,8 +604,18 @@ export default function SchedulingHistoryPage() {
             </thead>
             <tbody>
               {(state.runs || []).map((r) => (
-                <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50/50">
-                  <Td>{new Date(r.date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</Td>
+                <tr
+                  key={r.id}
+                  className="border-t border-slate-100 hover:bg-slate-50/50"
+                >
+                  <Td>
+                    {new Date(r.date).toLocaleString([], {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Td>
                   <Td>{r.domain || "—"}</Td>
                   <Td>
                     <button
@@ -530,7 +637,13 @@ export default function SchedulingHistoryPage() {
                   </Td>
                   <Td className="text-right">{fmtMin(r.estimateMin)}</Td>
                   <Td className="text-right">{fmtMin(r.actualMin)}</Td>
-                  <Td className={`text-right ${safeNum(r.actualMin - r.estimateMin) > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                  <Td
+                    className={`text-right ${
+                      safeNum(r.actualMin - r.estimateMin) > 0
+                        ? "text-red-600"
+                        : "text-emerald-600"
+                    }`}
+                  >
                     {fmtMin(safeNum(r.actualMin - r.estimateMin))}
                   </Td>
                   <Td className="text-right">{r.tasks ?? "—"}</Td>
@@ -626,14 +739,18 @@ function MiniStat({ label, value }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
       <div className="text-xs text-slate-600">{label}</div>
-      <div className="text-base font-semibold text-slate-900 mt-0.5">{value}</div>
+      <div className="text-base font-semibold text-slate-900 mt-0.5">
+        {value}
+      </div>
     </div>
   );
 }
 
 function Th({ children, className = "" }) {
   return (
-    <th className={`text-left text-xs font-semibold px-3 py-2 ${className}`}>{children}</th>
+    <th className={`text-left text-xs font-semibold px-3 py-2 ${className}`}>
+      {children}
+    </th>
   );
 }
 function Td({ children, className = "", colSpan }) {

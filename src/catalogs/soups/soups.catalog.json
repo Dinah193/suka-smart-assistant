@@ -1,0 +1,192 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+  "meta": {
+    "id": "soups.catalog",
+    "type": "catalog",
+    "domain": "soups",
+    "locale": "en-US",
+    "name": "Soups Catalog",
+    "subtitle": "Canonical soup recipe index for SSA",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Index of canonical soup recipe IDs with tags for filtering/search. Items may include optional path/label/group fields in the future."
+    }
+  },
+  "scope": {
+    "catalogType": "recipes",
+    "collection": "soups",
+    "defaultLocale": "en-US"
+  },
+  "defaults": {
+    "itemIdPrefix": "soups.",
+    "tagHints": [
+      "soup",
+      "stew",
+      "batch-cooking",
+      "freezer-friendly",
+      "use-what-you-have"
+    ]
+  },
+  "items": [
+    {
+      "id": "soups.chicken_noodle_soup",
+      "tags": [
+        "soup",
+        "chicken",
+        "noodles",
+        "comfort",
+        "use-what-you-have",
+        "family-friendly",
+        "stovetop",
+        "weeknight"
+      ]
+    },
+    {
+      "id": "soups.beef_vegetable_soup",
+      "tags": [
+        "soup",
+        "beef",
+        "vegetables",
+        "hearty",
+        "batch-cooking",
+        "freezer-friendly",
+        "stovetop",
+        "meal-prep"
+      ]
+    },
+    {
+      "id": "soups.lentil_soup",
+      "tags": [
+        "soup",
+        "lentils",
+        "budget",
+        "high-protein",
+        "vegetarian",
+        "pantry",
+        "stovetop",
+        "purslane-optional"
+      ]
+    },
+    {
+      "id": "soups.split_pea_soup_smoked_turkey",
+      "tags": [
+        "soup",
+        "split-pea",
+        "smoked-turkey",
+        "smoky",
+        "hearty",
+        "batch-cooking",
+        "freezer-friendly",
+        "stovetop"
+      ]
+    },
+    {
+      "id": "soups.tomato_basil_soup",
+      "tags": [
+        "soup",
+        "tomato",
+        "basil",
+        "simple",
+        "grilled-cheese",
+        "family-friendly",
+        "stovetop",
+        "weeknight"
+      ]
+    },
+    {
+      "id": "soups.potato_leek_soup",
+      "tags": [
+        "soup",
+        "potato",
+        "leek",
+        "creamy",
+        "dairy-optional",
+        "dairy-free-option",
+        "simple",
+        "stovetop"
+      ]
+    },
+    {
+      "id": "soups.creamy_chicken_and_rice_soup",
+      "tags": [
+        "soup",
+        "chicken",
+        "rice",
+        "creamy",
+        "family-friendly",
+        "filling",
+        "stovetop",
+        "meal-prep"
+      ]
+    },
+    {
+      "id": "soups.minestrone",
+      "tags": [
+        "soup",
+        "beans",
+        "pasta",
+        "pantry",
+        "vegetarian-optional",
+        "use-what-you-have",
+        "stovetop",
+        "batch-cooking"
+      ]
+    },
+    {
+      "id": "soups.seafood_chowder",
+      "tags": [
+        "soup",
+        "chowder",
+        "seafood",
+        "creamy",
+        "bacon-optional",
+        "smoky-optional",
+        "comfort",
+        "stovetop"
+      ]
+    },
+    {
+      "id": "soups.okra_goat_vegetable_soup",
+      "tags": [
+        "soup",
+        "goat",
+        "okra",
+        "vegetables",
+        "hearty",
+        "stew-like",
+        "stovetop",
+        "freezer-friendly",
+        "meal-prep"
+      ]
+    },
+    {
+      "id": "soups.black_bean_soup",
+      "tags": [
+        "soup",
+        "black-bean",
+        "pantry",
+        "high-fiber",
+        "high-protein",
+        "vegetarian-optional",
+        "cafe-style-vibe",
+        "batch-cooking",
+        "freezer-friendly"
+      ]
+    },
+    {
+      "id": "soups.broccoli_cheddar_soup",
+      "tags": [
+        "soup",
+        "broccoli",
+        "cheddar",
+        "creamy",
+        "cafe-style-vibe",
+        "comfort",
+        "bread-bowl",
+        "family-friendly"
+      ]
+    }
+  ]
+}

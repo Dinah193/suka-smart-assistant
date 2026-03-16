@@ -26,20 +26,24 @@
 //// Soft/defensive dynamic import /////////////////////////////////////////////
 
 async function softImport(path) {
-  try { return await import(path); } catch { return null; }
+  try {
+    return await import(path);
+  } catch {
+    return null;
+  }
 }
 
 //// Dependencies //////////////////////////////////////////////////////////////
 
-let eventBus;                        // required
+let eventBus; // required
 let featureFlags = { familyFundMode: false };
 
-let HouseholdPrefs;                  // optional
-let CalendarService;                 // optional (for availability)
-let InventoryService;                // optional (for constraints)
-let WeatherService;                  // optional (outdoor planning)
-let SessionStore;                    // optional (dedupe sessions)
-let GoalStore;                       // optional (household goals: tidy score, protein targets, etc.)
+let HouseholdPrefs; // optional
+let CalendarService; // optional (for availability)
+let InventoryService; // optional (for constraints)
+let WeatherService; // optional (outdoor planning)
+let SessionStore; // optional (dedupe sessions)
+let GoalStore; // optional (household goals: tidy score, protein targets, etc.)
 
 // Domain micro-planners (all optional, loaded at start)
 // Expected planner signature:
@@ -51,15 +55,16 @@ let AnimalPlanner;
 let PreservationPlanner;
 let StorehousePlanner;
 
-let HubPacketFormatter;              // optional
-let FamilyFundConnector;             // optional
+let HubPacketFormatter; // optional
+let FamilyFundConnector; // optional
 
 //// Utilities /////////////////////////////////////////////////////////////////
 
 const nowISO = () => new Date().toISOString();
 
 function safeId(prefix = "plan") {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+  if (typeof crypto !== "undefined" && crypto.randomUUID)
+    return `${prefix}_${crypto.randomUUID()}`;
   return `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
 }
 
@@ -68,9 +73,19 @@ function emit(type, source, data) {
   eventBus.emit({ type, ts: nowISO(), source, data });
 }
 
-function sanitize(x) { try { return JSON.parse(JSON.stringify(x)); } catch { return undefined; } }
-function safeError(err) { return { name: err?.name || "Error", message: err?.message || String(err) }; }
-function clamp01(x) { return Math.max(0, Math.min(1, Number(x) || 0)); }
+function sanitize(x) {
+  try {
+    return JSON.parse(JSON.stringify(x));
+  } catch {
+    return undefined;
+  }
+}
+function safeError(err) {
+  return { name: err?.name || "Error", message: err?.message || String(err) };
+}
+function clamp01(x) {
+  return Math.max(0, Math.min(1, Number(x) || 0));
+}
 
 async function exportToHubIfEnabled(payload) {
   try {
@@ -93,15 +108,19 @@ const state = {
   lastPlanSummary: null,
   config: {
     // Planning horizon
-    defaultHorizon: { // relative window; exact windows derived from CalendarService if present
-      days: 1,                // daily default
+    defaultHorizon: {
+      // relative window; exact windows derived from CalendarService if present
+      days: 1, // daily default
       includeToday: true,
     },
     weeklyHorizonDays: 7,
     // Scheduling hints
-    autoSchedule: true,       // emit automation.schedule.request for created sessions
+    autoSchedule: true, // emit automation.schedule.request for created sessions
     // Dedupe policy
-    dedupeKey: (s) => `${s.domain}:${(s.meta?.linkedHarvestId || s.meta?.recipeId || s.title || s.id)}`,
+    dedupeKey: (s) =>
+      `${s.domain}:${
+        s.meta?.linkedHarvestId || s.meta?.recipeId || s.title || s.id
+      }`,
     // Guard hints (actual guard enforcement handled by other engines/runtimes)
     preferIndoorWhenBadWeather: true,
     // Output shaping
@@ -119,7 +138,8 @@ let debounceTimer = null;
 async function buildPlanningContext(horizon) {
   const now = new Date();
 
-  const prefs = (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
+  const prefs =
+    (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
   const goals = GoalStore?.get?.() ?? null;
 
   let availability = [];
@@ -127,19 +147,30 @@ async function buildPlanningContext(horizon) {
     try {
       availability = await CalendarService.getAvailabilityWindows({
         days: horizon?.days ?? state.config.defaultHorizon.days,
-        includeToday: horizon?.includeToday ?? state.config.defaultHorizon.includeToday,
+        includeToday:
+          horizon?.includeToday ?? state.config.defaultHorizon.includeToday,
       });
-    } catch {/* noop */}
+    } catch {
+      /* noop */
+    }
   }
 
   let inventorySnapshot = null;
   if (InventoryService?.snapshot) {
-    try { inventorySnapshot = await InventoryService.snapshot(); } catch {/* noop */}
+    try {
+      inventorySnapshot = await InventoryService.snapshot();
+    } catch {
+      /* noop */
+    }
   }
 
   let weather = null;
   if (WeatherService?.getSnapshot) {
-    try { weather = await WeatherService.getSnapshot(); } catch {/* noop */}
+    try {
+      weather = await WeatherService.getSnapshot();
+    } catch {
+      /* noop */
+    }
   }
 
   return {
@@ -203,8 +234,18 @@ function fallbackSession(domain, ctx) {
         session: {
           anchors: [{ type: "meal", label: "dinner", weight: 0.8 }],
           tasks: [
-            { id: safeId("task"), type: "prep", title: "Check pantry", estimatedMinutes: 5 },
-            { id: safeId("task"), type: "cook", title: "One-pan meal", estimatedMinutes: 20 },
+            {
+              id: safeId("task"),
+              type: "prep",
+              title: "Check pantry",
+              estimatedMinutes: 5,
+            },
+            {
+              id: safeId("task"),
+              type: "cook",
+              title: "One-pan meal",
+              estimatedMinutes: 20,
+            },
           ],
         },
       };
@@ -215,7 +256,13 @@ function fallbackSession(domain, ctx) {
         session: {
           anchors: [{ type: "routine", label: "reset", weight: 0.7 }],
           tasks: [
-            { id: safeId("task"), type: "tidy", title: "Surfaces & floors", estimatedMinutes: 15, meta: { noisy: true } },
+            {
+              id: safeId("task"),
+              type: "tidy",
+              title: "Surfaces & floors",
+              estimatedMinutes: 15,
+              meta: { noisy: true },
+            },
           ],
         },
         meta: { noisy: true },
@@ -228,8 +275,18 @@ function fallbackSession(domain, ctx) {
         session: {
           anchors: [{ type: "task", label: "water", weight: 0.7 }],
           tasks: [
-            { id: safeId("task"), type: "water", title: "Water beds/containers", estimatedMinutes: 10 },
-            { id: safeId("task"), type: "inspect", title: "Inspect pests/disease", estimatedMinutes: 10 },
+            {
+              id: safeId("task"),
+              type: "water",
+              title: "Water beds/containers",
+              estimatedMinutes: 10,
+            },
+            {
+              id: safeId("task"),
+              type: "inspect",
+              title: "Inspect pests/disease",
+              estimatedMinutes: 10,
+            },
           ],
         },
       };
@@ -240,8 +297,18 @@ function fallbackSession(domain, ctx) {
         session: {
           anchors: [{ type: "task", label: "animal-care", weight: 0.8 }],
           tasks: [
-            { id: safeId("task"), type: "feed", title: "Feed livestock/poultry", estimatedMinutes: 10 },
-            { id: safeId("task"), type: "check", title: "Water & health check", estimatedMinutes: 10 },
+            {
+              id: safeId("task"),
+              type: "feed",
+              title: "Feed livestock/poultry",
+              estimatedMinutes: 10,
+            },
+            {
+              id: safeId("task"),
+              type: "check",
+              title: "Water & health check",
+              estimatedMinutes: 10,
+            },
           ],
         },
       };
@@ -252,8 +319,18 @@ function fallbackSession(domain, ctx) {
         session: {
           anchors: [{ type: "task", label: "preserve", weight: 0.7 }],
           tasks: [
-            { id: safeId("task"), type: "prep", title: "Prep produce", estimatedMinutes: 10 },
-            { id: safeId("task"), type: "preserve", title: "Freeze or dehydrate", estimatedMinutes: 20 },
+            {
+              id: safeId("task"),
+              type: "prep",
+              title: "Prep produce",
+              estimatedMinutes: 10,
+            },
+            {
+              id: safeId("task"),
+              type: "preserve",
+              title: "Freeze or dehydrate",
+              estimatedMinutes: 20,
+            },
           ],
         },
       };
@@ -264,7 +341,12 @@ function fallbackSession(domain, ctx) {
         session: {
           anchors: [{ type: "task", label: "inventory", weight: 0.6 }],
           tasks: [
-            { id: safeId("task"), type: "audit", title: "Audit top 10 items", estimatedMinutes: 15 },
+            {
+              id: safeId("task"),
+              type: "audit",
+              title: "Audit top 10 items",
+              estimatedMinutes: 15,
+            },
           ],
         },
       };
@@ -278,10 +360,12 @@ function buildWindowFromAvailability(ctx, minutes = 30) {
   const from = now.toISOString();
   const to = new Date(now.getTime() + minutes * 60000).toISOString();
 
-  const avail = Array.isArray(ctx?.calendar?.availability) ? ctx.calendar.availability : [];
+  const avail = Array.isArray(ctx?.calendar?.availability)
+    ? ctx.calendar.availability
+    : [];
   if (avail.length) {
     // Take the first upcoming window; otherwise fallback
-    const first = avail.find(w => new Date(w.to) > now) || avail[0];
+    const first = avail.find((w) => new Date(w.to) > now) || avail[0];
     if (first) return { from: first.from, to: first.to };
   }
   return { from, to };
@@ -304,7 +388,7 @@ function dedupeSessions(sessions, keyFn) {
 
 function limitPerDomain(sessions, limit) {
   const counts = new Map();
-  return sessions.filter(s => {
+  return sessions.filter((s) => {
     const d = s.domain || "unknown";
     const n = counts.get(d) || 0;
     if (n >= limit) return false;
@@ -324,9 +408,17 @@ async function computePlan({ horizon, domains, hints } = {}) {
     hints.preferIndoor = ctx.weather?.outdoorOk === false;
   }
 
-  const targetDomains = domains && domains.length
-    ? domains
-    : ["cooking", "cleaning", "garden", "animal", "preservation", "storehouse"];
+  const targetDomains =
+    domains && domains.length
+      ? domains
+      : [
+          "cooking",
+          "cleaning",
+          "garden",
+          "animal",
+          "preservation",
+          "storehouse",
+        ];
 
   const results = await Promise.all(
     targetDomains.map(async (d) => {
@@ -335,8 +427,8 @@ async function computePlan({ horizon, domains, hints } = {}) {
     })
   );
 
-  let sessions = results.flatMap(r => r.sessions || []);
-  sessions = sessions.map(s => ({
+  let sessions = results.flatMap((r) => r.sessions || []);
+  sessions = sessions.map((s) => ({
     ...s,
     id: s.id || safeId("session"),
     source: s.source || "engines/planEngine",
@@ -361,7 +453,9 @@ async function computePlan({ horizon, domains, hints } = {}) {
 
   // Emit creation + (optional) schedule requests
   for (const s of sessions) {
-    emit(`${s.domain}.session.created`, "engines/planEngine", { session: sanitize(s) });
+    emit(`${s.domain}.session.created`, "engines/planEngine", {
+      session: sanitize(s),
+    });
 
     if (state.config.autoSchedule) {
       emit("automation.schedule.request", "engines/planEngine", {
@@ -379,7 +473,7 @@ async function computePlan({ horizon, domains, hints } = {}) {
     generatedAt: nowISO(),
     horizon: h,
     counts: summarizeCounts(sessions),
-    notes: results.flatMap(r => r.notes || []),
+    notes: results.flatMap((r) => r.notes || []),
   };
 
   // Emit plan.created summary for UI/analytics
@@ -401,7 +495,9 @@ async function computePlan({ horizon, domains, hints } = {}) {
 
 function normalizeHorizon(h) {
   const days = Number(h?.days ?? state.config.defaultHorizon.days);
-  const includeToday = !!(h?.includeToday ?? state.config.defaultHorizon.includeToday);
+  const includeToday = !!(
+    h?.includeToday ?? state.config.defaultHorizon.includeToday
+  );
   return { days: Math.max(1, days), includeToday };
 }
 
@@ -416,13 +512,20 @@ function summarizeCounts(sessions) {
 
 function domainPriority(domain) {
   switch (domain) {
-    case "cooking": return "high";
-    case "animal": return "high";
-    case "garden": return "medium";
-    case "preservation": return "medium";
-    case "cleaning": return "low";
-    case "storehouse": return "low";
-    default: return "low";
+    case "cooking":
+      return "high";
+    case "animal":
+      return "high";
+    case "garden":
+      return "medium";
+    case "preservation":
+      return "medium";
+    case "cleaning":
+      return "low";
+    case "storehouse":
+      return "low";
+    default:
+      return "low";
   }
 }
 
@@ -491,8 +594,8 @@ export async function start(config = {}) {
     hubFmt,
     hubConn,
   ] = await Promise.all([
-    softImport("../services/eventBus.js"),
-    softImport("../config/featureFlags.js"),
+    softImport("../services/events/eventBus.js"),
+    softImport("@/config/featureFlags.json"),
     softImport("../services/HouseholdPrefs.js"),
     softImport("../services/CalendarService.js"),
     softImport("../domain/inventory/InventoryService.js"),
@@ -507,28 +610,28 @@ export async function start(config = {}) {
     softImport("./planners/preservationPlanner.js"),
     softImport("./planners/storehousePlanner.js"),
 
-    softImport("../hub/HubPacketFormatter.js"),
-    softImport("../hub/FamilyFundConnector.js"),
+    softImport("@/services/hub/HubPacketFormatter.js"),
+    softImport("@/services/hub/FamilyFundConnector.js"),
   ]);
 
-  eventBus           = evb?.default || evb || eventBus;
-  featureFlags       = ff?.default || ff || featureFlags;
-  HouseholdPrefs     = prefs?.default || prefs || HouseholdPrefs;
-  CalendarService    = cal?.default || cal || CalendarService;
-  InventoryService   = inv?.default || inv || InventoryService;
-  WeatherService     = weather?.default || weather || WeatherService;
-  SessionStore       = sess?.default || sess || SessionStore;
-  GoalStore          = goals?.default || goals || GoalStore;
+  eventBus = evb?.default || evb || eventBus;
+  featureFlags = ff?.default || ff || featureFlags;
+  HouseholdPrefs = prefs?.default || prefs || HouseholdPrefs;
+  CalendarService = cal?.default || cal || CalendarService;
+  InventoryService = inv?.default || inv || InventoryService;
+  WeatherService = weather?.default || weather || WeatherService;
+  SessionStore = sess?.default || sess || SessionStore;
+  GoalStore = goals?.default || goals || GoalStore;
 
-  CookingPlanner     = cookP?.default || cookP || null;
-  CleaningPlanner    = cleanP?.default || cleanP || null;
-  GardenPlanner      = gardenP?.default || gardenP || null;
-  AnimalPlanner      = animalP?.default || animalP || null;
-  PreservationPlanner= preserveP?.default || preserveP || null;
-  StorehousePlanner  = storeP?.default || storeP || null;
+  CookingPlanner = cookP?.default || cookP || null;
+  CleaningPlanner = cleanP?.default || cleanP || null;
+  GardenPlanner = gardenP?.default || gardenP || null;
+  AnimalPlanner = animalP?.default || animalP || null;
+  PreservationPlanner = preserveP?.default || preserveP || null;
+  StorehousePlanner = storeP?.default || storeP || null;
 
   HubPacketFormatter = hubFmt?.default || hubFmt || HubPacketFormatter;
-  FamilyFundConnector= hubConn?.default || hubConn || FamilyFundConnector;
+  FamilyFundConnector = hubConn?.default || hubConn || FamilyFundConnector;
 
   if (!eventBus?.on || !eventBus?.emit) {
     throw new Error("planEngine requires a functional eventBus with on/emit.");
@@ -544,8 +647,15 @@ export async function start(config = {}) {
   eventBus.on("import.parsed", markDirtyAndDebounce);
 
   // Session lifecycle touches cadence; re-plan after new sessions or executions
-  const domains = ["cooking","cleaning","garden","animal","preservation","storehouse"];
-  domains.forEach(d => {
+  const domains = [
+    "cooking",
+    "cleaning",
+    "garden",
+    "animal",
+    "preservation",
+    "storehouse",
+  ];
+  domains.forEach((d) => {
     eventBus.on(`${d}.session.created`, markDirtyAndDebounce);
     eventBus.on(`${d}.session.updated`, markDirtyAndDebounce);
     eventBus.on(`${d}.session.executed`, markDirtyAndDebounce);
@@ -587,7 +697,10 @@ export async function planDay(hints = {}) {
  */
 export async function planWeek(hints = {}) {
   if (!state.initialized) await start();
-  return computePlan({ horizon: { days: state.config.weeklyHorizonDays, includeToday: true }, hints });
+  return computePlan({
+    horizon: { days: state.config.weeklyHorizonDays, includeToday: true },
+    hints,
+  });
 }
 
 /**

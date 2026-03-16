@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "1.0",
+  "cuisineKey": "aai",
+  "updatedAt": "2026-01-01T11:58:34Z",
+  "techniqueFamilies": [
+    {
+      "key": "southern_smoke",
+      "name": "Southern Smoke",
+      "techniques": [
+        "smoke",
+        "low_slow_roast",
+        "pit_bbq"
+      ],
+      "signatureSides": [
+        "collards",
+        "beans",
+        "cornbread",
+        "slaw"
+      ],
+      "signatureSauces": [
+        "vinegar_mop",
+        "tomato_bbq",
+        "pepper_vinegar"
+      ]
+    },
+    {
+      "key": "sahel_grill_suya",
+      "name": "Sahel Grill (Suya)",
+      "techniques": [
+        "skewer_grill",
+        "direct_grill",
+        "char_broil"
+      ],
+      "signatureSides": [
+        "cabbage",
+        "onion_tomato",
+        "jollof_rice"
+      ],
+      "signatureSauces": [
+        "pepper_sauce",
+        "citrus_finish"
+      ]
+    },
+    {
+      "key": "med_shawarma",
+      "name": "Mediterranean Shawarma Logic",
+      "techniques": [
+        "spit_roast",
+        "sheet_roast",
+        "pan_sear"
+      ],
+      "signatureSides": [
+        "herb_salad",
+        "cucumber",
+        "flatbread"
+      ],
+      "signatureSauces": [
+        "garlic_sauce",
+        "sesame_sauce"
+      ]
+    },
+    {
+      "key": "sephardic_stew",
+      "name": "Sephardic-Compatible Stew Logic",
+      "techniques": [
+        "braise",
+        "stew",
+        "slow_simmer"
+      ],
+      "signatureSides": [
+        "rice",
+        "root_veg"
+      ],
+      "signatureSauces": [
+        "pan_juices",
+        "herb_finish"
+      ]
+    },
+    {
+      "key": "ferment_pickle",
+      "name": "Fermentation & Pickle Logic",
+      "techniques": [
+        "ferment",
+        "quick_pickle"
+      ],
+      "signatureSides": [
+        "okra_pickles",
+        "kraut",
+        "pickled_onion"
+      ],
+      "signatureSauces": [
+        "brine",
+        "chili_oil"
+      ]
+    }
+  ],
+  "overlaps": [
+    {
+      "key": "smoke_x_suya",
+      "name": "Southern Smoke × Suya Grill",
+      "why": "Smoke provides depth; suya rub provides aromatic heat. Use slaw/okra pickles to cut richness.",
+      "recommendedBlends": [
+        "aai_bbq_sweet_smoke",
+        "aai_suya_classic"
+      ],
+      "bestProteins": [
+        "beef",
+        "goat",
+        "lamb"
+      ],
+      "swapMaps": [
+        {
+          "from": "chicken",
+          "to": "goat",
+          "note": "Goat handles strong rubs; cook to tender then char."
+        }
+      ]
+    },
+    {
+      "key": "shawarma_x_plate",
+      "name": "Shawarma × Southern Plate",
+      "why": "Shawarma spice + collards/beans gives familiar comfort with Mediterranean lift.",
+      "recommendedBlends": [
+        "aai_shawarma_brown",
+        "aai_pepper_vinegar"
+      ],
+      "bestProteins": [
+        "lamb",
+        "goat",
+        "beef"
+      ],
+      "swapMaps": [
+        {
+          "from": "pita",
+          "to": "cornbread",
+          "note": "Plate it Southern style; keep sauce bright."
+        }
+      ]
+    },
+    {
+      "key": "stew_x_jollof",
+      "name": "Stew Foundations × Jollof Base",
+      "why": "Tomato-pepper base can drive rice or stew; rotate to avoid repetition.",
+      "recommendedBlends": [
+        "aai_jollof_base",
+        "aai_sephardic_stew_spice"
+      ],
+      "bestProteins": [
+        "beef",
+        "goat"
+      ],
+      "swapMaps": [
+        {
+          "from": "rice",
+          "to": "cauliflower_rice",
+          "note": "Keto option; keep base and protein the same."
+        }
+      ]
+    },
+    {
+      "key": "ferment_x_everything",
+      "name": "Ferment/Pickle as Universal Side",
+      "why": "Fermented/pickled items add crunch and acid, improving variety without randomness.",
+      "recommendedBlends": [
+        "aai_ferment_brine_garlic",
+        "aai_citrus_garlic"
+      ],
+      "bestProteins": [
+        "beef",
+        "lamb",
+        "goat",
+        "fish"
+      ],
+      "swapMaps": [
+        {
+          "from": "coleslaw",
+          "to": "fermented_cabbage",
+          "note": "Same role, more probiotic-friendly."
+        }
+      ]
+    }
+  ],
+  "swapMaps": {
+    "proteinSwaps": [
+      {
+        "from": "chicken",
+        "to": [
+          "goat",
+          "lamb",
+          "beef"
+        ],
+        "rule": "Pick by heat tolerance: suya→beef/goat; shawarma→lamb/goat; stew→beef."
+      },
+      {
+        "from": "pork_bacon",
+        "to": [
+          "beef_bacon",
+          "lamb_bacon"
+        ],
+        "rule": "Use curing/smoking method; adjust fat content."
+      }
+    ],
+    "starchSwaps": [
+      {
+        "from": "white_rice",
+        "to": [
+          "brown_rice",
+          "jollof_rice",
+          "cauliflower_rice"
+        ],
+        "rule": "Diet-mode filter."
+      },
+      {
+        "from": "wheat_bread",
+        "to": [
+          "cornbread",
+          "sorghum_flatbread",
+          "gluten_free_flatbread"
+        ],
+        "rule": "Household preference."
+      }
+    ]
+  }
+}

@@ -15,8 +15,8 @@
  * event listener on `calculator.freezerSpace.requested`.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 // Adjust these imports to match your actual hub helper paths/names
 import { formatForHub } from "@/services/hub/HubPacketFormatter";
 import { sendToHub } from "@/services/hub/FamilyFundConnector";
@@ -88,7 +88,8 @@ async function exportToHubIfEnabled(payload) {
  * @returns {{effectiveCapacity: number, reservedLiters: number, reservePct: number}}
  */
 function computeEffectiveCapacity(freezer, globalReservePct) {
-  const capacity = typeof freezer.capacityLiters === "number" ? freezer.capacityLiters : 0;
+  const capacity =
+    typeof freezer.capacityLiters === "number" ? freezer.capacityLiters : 0;
   const reservePct =
     typeof freezer.reservePct === "number"
       ? freezer.reservePct
@@ -112,18 +113,20 @@ function computeEffectiveCapacity(freezer, globalReservePct) {
 function pickTargetFreezer(workingFreezers, itemWithVolume) {
   const { preferredFreezerId, requiredLiters } = itemWithVolume;
   const candidates = workingFreezers.filter(
-    (f) => f.remainingLiters >= requiredLiters,
+    (f) => f.remainingLiters >= requiredLiters
   );
   if (!candidates.length) return null;
 
   if (preferredFreezerId) {
-    const preferred = candidates.find((f) => f.freezer.freezerId === preferredFreezerId);
+    const preferred = candidates.find(
+      (f) => f.freezer.freezerId === preferredFreezerId
+    );
     if (preferred) return preferred;
   }
 
   // Fallback: freezer with the most remaining capacity
   return candidates.reduce((best, f) =>
-    !best || f.remainingLiters > best.remainingLiters ? f : best,
+    !best || f.remainingLiters > best.remainingLiters ? f : best
   );
 }
 
@@ -142,7 +145,10 @@ function pickTargetZone(freezerZones, itemWithVolume) {
   if (zones.length > 0 && preferredZoneId) {
     const preferred = zones.find((z) => z.zoneId === preferredZoneId);
     if (preferred) {
-      return { zoneId: preferred.zoneId, label: preferred.label || preferred.zoneId };
+      return {
+        zoneId: preferred.zoneId,
+        label: preferred.label || preferred.zoneId,
+      };
     }
   }
 
@@ -161,14 +167,12 @@ function pickTargetZone(freezerZones, itemWithVolume) {
  * @returns {FreezerSpaceCalculatorSchema["properties"]["outputs"]["properties"] & { [key: string]: any }}
  */
 function computeFreezerSpaceCore(inputs) {
-  const {
-    freezers = [],
-    items = [],
-    constraints = {},
-  } = inputs || {};
+  const { freezers = [], items = [], constraints = {} } = inputs || {};
 
   const globalReservePct =
-    typeof constraints?.reservePct === "number" ? constraints.reservePct : undefined;
+    typeof constraints?.reservePct === "number"
+      ? constraints.reservePct
+      : undefined;
 
   /** workingFreezers = array of {
    *  freezer,
@@ -178,10 +182,8 @@ function computeFreezerSpaceCore(inputs) {
    * }
    */
   const workingFreezers = freezers.map((freezer) => {
-    const { effectiveCapacity, reservedLiters, reservePct } = computeEffectiveCapacity(
-      freezer,
-      globalReservePct,
-    );
+    const { effectiveCapacity, reservedLiters, reservePct } =
+      computeEffectiveCapacity(freezer, globalReservePct);
     return {
       freezer,
       effectiveCapacity,
@@ -197,7 +199,8 @@ function computeFreezerSpaceCore(inputs) {
     usageByFreezerId.set(freezer.freezerId, {
       freezerId: freezer.freezerId,
       label: freezer.label || freezer.freezerId,
-      capacityLiters: typeof freezer.capacityLiters === "number" ? freezer.capacityLiters : 0,
+      capacityLiters:
+        typeof freezer.capacityLiters === "number" ? freezer.capacityLiters : 0,
       usedLiters: 0,
       reservedLiters,
       freeLiters: effectiveCapacity,
@@ -242,7 +245,7 @@ function computeFreezerSpaceCore(inputs) {
     // Update working freezer remaining capacity
     target.remainingLiters = Math.max(
       target.remainingLiters - item.requiredLiters,
-      0,
+      0
     );
 
     // Update usage record
@@ -251,7 +254,7 @@ function computeFreezerSpaceCore(inputs) {
       usage.usedLiters += item.requiredLiters;
       usage.freeLiters = Math.max(
         usage.capacityLiters - usage.usedLiters - usage.reservedLiters,
-        0,
+        0
       );
       usage.utilizationPct =
         usage.capacityLiters > 0
@@ -293,18 +296,18 @@ function computeFreezerSpaceCore(inputs) {
   usageArray.forEach((u) => {
     if (u.utilizationPct > 95) {
       warnings.push(
-        `${u.label} is above 95% capacity. Consider moving some items or planning a 'use-first' list.`,
+        `${u.label} is above 95% capacity. Consider moving some items or planning a 'use-first' list.`
       );
     } else if (u.utilizationPct > 90) {
       warnings.push(
-        `${u.label} is above 90% capacity. Monitor defrost cycles and organization.`,
+        `${u.label} is above 90% capacity. Monitor defrost cycles and organization.`
       );
     }
   });
 
   if (overflowItems.length > 0) {
     warnings.push(
-      "Some items could not be placed within the current freezer capacities. Plan a repack session or additional storage.",
+      "Some items could not be placed within the current freezer capacities. Plan a repack session or additional storage."
     );
   }
 
@@ -316,10 +319,12 @@ function computeFreezerSpaceCore(inputs) {
   };
 
   // Build suggested layout array
-  const suggestedLayout = Array.from(layoutByFreezerId.values()).map((layout) => ({
-    freezerId: layout.freezerId,
-    zones: Array.from(layout.zones.values()),
-  }));
+  const suggestedLayout = Array.from(layoutByFreezerId.values()).map(
+    (layout) => ({
+      freezerId: layout.freezerId,
+      zones: Array.from(layout.zones.values()),
+    })
+  );
 
   // Session suggestions
   /** @type {Array<object>} */
@@ -338,7 +343,9 @@ function computeFreezerSpaceCore(inputs) {
     });
   }
 
-  const highUtilizationFreezers = usageArray.filter((u) => u.utilizationPct > 90);
+  const highUtilizationFreezers = usageArray.filter(
+    (u) => u.utilizationPct > 90
+  );
   if (highUtilizationFreezers.length > 0) {
     sessionSuggestions.push({
       id: `freezer_pre_batch_${Date.now()}`,
@@ -362,7 +369,7 @@ function computeFreezerSpaceCore(inputs) {
       freezerId: u.freezerId,
       zoneId: null,
       notes: `Current utilization is ${u.utilizationPct.toFixed(
-        1,
+        1
       )}%. Try to keep this freezer below 90% where possible.`,
       payload: {
         utilizationPct: u.utilizationPct,
@@ -405,7 +412,8 @@ export async function runFreezerSpaceCalculation(requestPayload) {
   if (!Array.isArray(inputs.freezers) || inputs.freezers.length === 0) {
     const error = {
       code: "NO_FREEZERS_DEFINED",
-      message: "FreezerSpaceCalculator requires at least one freezer in inputs.freezers.",
+      message:
+        "FreezerSpaceCalculator requires at least one freezer in inputs.freezers.",
     };
     emitEvent("calculator.freezerSpace.error", { payload, error });
     return { inputs, outputs: null, meta, ok: false, error };
@@ -414,7 +422,8 @@ export async function runFreezerSpaceCalculation(requestPayload) {
   if (!Array.isArray(inputs.items) || inputs.items.length === 0) {
     const error = {
       code: "NO_ITEMS_DEFINED",
-      message: "FreezerSpaceCalculator requires at least one item in inputs.items.",
+      message:
+        "FreezerSpaceCalculator requires at least one item in inputs.items.",
     };
     emitEvent("calculator.freezerSpace.error", { payload, error });
     return { inputs, outputs: null, meta, ok: false, error };
@@ -444,7 +453,10 @@ export async function runFreezerSpaceCalculation(requestPayload) {
     inventoryHints: outputs.inventoryHints,
   });
 
-  if (Array.isArray(outputs.sessionSuggestions) && outputs.sessionSuggestions.length > 0) {
+  if (
+    Array.isArray(outputs.sessionSuggestions) &&
+    outputs.sessionSuggestions.length > 0
+  ) {
     emitEvent("session.request.fromFreezerSpace", {
       calculatorId: "FreezerSpaceCalculator",
       suggestions: outputs.sessionSuggestions,

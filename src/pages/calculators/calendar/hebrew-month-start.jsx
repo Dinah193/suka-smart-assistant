@@ -23,18 +23,23 @@
  *     - Session Planner (holy day prep sessions)
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import eventBus from "@/services/events/eventBus";
+
+// ✅ FIX: your flags live at src/config/featureFlags.json (not a JS module)
+// IMPORTANT: JSON has a default export object (no named exports)
+import featureFlags from "@/config/featureFlags.json";
+
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import HebrewMonthStartCalculatorView from "@/features/calculators/calendar/HebrewMonthStartCalculator.view";
+import HebrewMonthStartCalculatorView from "@/features/calculators/calendar/HebrewMonthStartCalculator.view.jsx";
 
 const CALCULATOR_ID = "calendar.hebrewMonthStart";
+
+// ✅ Derive this safely from JSON (supports either boolean or {enabled:true} shapes)
+const familyFundMode = !!(
+  featureFlags?.familyFundMode === true ||
+  featureFlags?.familyFundMode?.enabled === true
+);
 
 /**
  * @typedef {Object} CandidateStartDate
@@ -59,10 +64,10 @@ const CALCULATOR_ID = "calendar.hebrewMonthStart";
  * @property {string} [moladTime]           // optional molad description
  * @property {string} [moonPhaseName]       // "Full", "First Crescent", etc.
  * @property {string} [sunriseTs]
- * @property {string} [sunsetTs}
+ * @property {string} [sunsetTs]
  * @property {boolean} [meridianPassOk]
  * @property {CandidateStartDate[]} candidateStartDates
- * @property {CandidateStartDate} chosenStartDate
+ * @property {CandidateStartDate|null} chosenStartDate
  * @property {string} reasoningSummary
  * @property {string[]} [warnings]
  * @property {string[]} [notes]
@@ -84,7 +89,7 @@ function emitHebrewMonthStartCompleted(result) {
       data: {
         calculatorId: CALCULATOR_ID,
         result,
-        familyFundMode: !!familyFundMode,
+        familyFundMode,
       },
     });
   } catch (err) {
@@ -110,7 +115,7 @@ function requestCalendarSync(result) {
       data: {
         calculatorId: CALCULATOR_ID,
         result,
-        familyFundMode: !!familyFundMode,
+        familyFundMode,
       },
     });
   } catch (err) {
@@ -136,7 +141,7 @@ function requestFeastPlannerSync(result) {
       data: {
         calculatorId: CALCULATOR_ID,
         result,
-        familyFundMode: !!familyFundMode,
+        familyFundMode,
       },
     });
   } catch (err) {
@@ -162,7 +167,7 @@ function requestStorehouseGoalSync(result) {
       data: {
         calculatorId: CALCULATOR_ID,
         result,
-        familyFundMode: !!familyFundMode,
+        familyFundMode,
       },
     });
   } catch (err) {
@@ -189,7 +194,7 @@ function requestSessionPlannerSync(result) {
       data: {
         calculatorId: CALCULATOR_ID,
         result,
-        familyFundMode: !!familyFundMode,
+        familyFundMode,
       },
     });
   } catch (err) {
@@ -216,8 +221,7 @@ function buildHeaderLabel(result) {
 
 /**
  * Highlight the chosen start date in a small table of candidates.
- * @param {CandidateStartDate[]} candidates
- * @param {CandidateStartDate} chosen
+ * @param {{ candidates: CandidateStartDate[], chosen: CandidateStartDate|null }} props
  */
 function CandidateList({ candidates, chosen }) {
   if (!Array.isArray(candidates) || candidates.length === 0) return null;
@@ -287,6 +291,9 @@ function HebrewMonthStartSummaryCard({
   onStorehouseGoalSync,
   onSessionPlannerSync,
 }) {
+  // ✅ Hooks must be unconditional (React rule of hooks)
+  const headerLabel = useMemo(() => buildHeaderLabel(result), [result]);
+
   if (!result) {
     return (
       <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/75 px-4 py-4 text-xs text-slate-400">
@@ -316,11 +323,6 @@ function HebrewMonthStartSummaryCard({
     warnings,
     notes,
   } = result;
-
-  const headerLabel = useMemo(
-    () => buildHeaderLabel(result),
-    [result]
-  );
 
   return (
     <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/75 px-4 py-4 space-y-3">
@@ -355,9 +357,7 @@ function HebrewMonthStartSummaryCard({
           </span>
           <span className="text-slate-500">
             Hebrew anchor:{" "}
-            <span className="text-slate-100">
-              {anchorHebrewDate || "—"}
-            </span>
+            <span className="text-slate-100">{anchorHebrewDate || "—"}</span>
           </span>
           <span className="text-slate-500 mt-0.5">
             Rule: <span className="text-slate-100">{ruleLabel}</span>
@@ -392,22 +392,14 @@ function HebrewMonthStartSummaryCard({
             {moladTime ? `· Molad ${moladTime}` : ""}
           </span>
           <span className="text-slate-500">
-            Sunrise:{" "}
-            <span className="text-slate-100">
-              {sunriseTs || "—"}
-            </span>{" "}
-            · Sunset:{" "}
-            <span className="text-slate-100">
-              {sunsetTs || "—"}
-            </span>
+            Sunrise: <span className="text-slate-100">{sunriseTs || "—"}</span>{" "}
+            · Sunset: <span className="text-slate-100">{sunsetTs || "—"}</span>
           </span>
           <span className="text-slate-500 mt-0.5">
             Meridian pass:{" "}
             <span
               className={
-                meridianPassOk === false
-                  ? "text-amber-300"
-                  : "text-emerald-300"
+                meridianPassOk === false ? "text-amber-300" : "text-emerald-300"
               }
             >
               {meridianPassOk === false ? "Not satisfied" : "OK / not required"}
@@ -426,7 +418,7 @@ function HebrewMonthStartSummaryCard({
 
       <CandidateList
         candidates={candidateStartDates || []}
-        chosen={chosenStartDate}
+        chosen={chosenStartDate || null}
       />
 
       {Array.isArray(warnings) && warnings.length > 0 && (
@@ -517,14 +509,10 @@ export default function HebrewMonthStartCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.calendar.hebrew-month-start",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.calendar.hebrew-month-start",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -537,7 +525,7 @@ export default function HebrewMonthStartCalculatorPage() {
         ruleId:
           typeof calcResult.ruleId === "string"
             ? calcResult.ruleId
-            : (input?.ruleId || "unknown-rule"),
+            : input?.ruleId || "unknown-rule",
         ruleLabel:
           typeof calcResult.ruleLabel === "string"
             ? calcResult.ruleLabel
@@ -608,9 +596,7 @@ export default function HebrewMonthStartCalculatorPage() {
           typeof calcResult.reasoningSummary === "string"
             ? calcResult.reasoningSummary
             : "",
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };

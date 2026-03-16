@@ -1,13 +1,13 @@
 // C:\Users\larho\suka-smart-assistant\src\features\session\useSessionRunner.js
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { emit } from "../../services/eventBus";
-import { familyFundMode } from "../../services/featureFlags";
+import { emit } from "../../services/events/eventBus";
+import { familyFundMode } from "../../config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "../../services/hub";
 import { db } from "../../services/db"; // Dexie instance (sessions, sessionFavorites, sessionSchedules)
 
 // 🔌 Shim + Orchestrator imports (adjust paths to match your project)
-import { householdOrchestrator } from "../../orchestration/householdOrchestrator";
+import HouseholdOrchestrator from "@/agents/shims/HouseholdOrchestrator";
 import { sessionShim } from "../../agents/shims/sessionShim";
 
 /**
@@ -128,8 +128,7 @@ function computeSessionStats(session) {
  */
 function normalizeSteps(rawSteps = [], domainKey) {
   const preset = DOMAIN_PRESETS[domainKey] || {};
-  const defaultDuration =
-    (preset.defaultDurationMinutes || 30) * 60 * 1000; // ms
+  const defaultDuration = (preset.defaultDurationMinutes || 30) * 60 * 1000; // ms
 
   return rawSteps.map((step, index) => {
     const base = typeof step === "string" ? { label: step } : step || {};
@@ -285,7 +284,11 @@ async function maybeExportToHubOnComplete(session) {
       type: "hub.export.failed",
       ts: nowIso(),
       source: SOURCE,
-      data: { sessionId: session.id, domain: session.domain, error: String(err) },
+      data: {
+        sessionId: session.id,
+        domain: session.domain,
+        error: String(err),
+      },
     });
   }
 }
@@ -554,159 +557,28 @@ export function useSessionRunner({ autoResume = true } = {}) {
   /**
    * PUBLIC API: advance to the next step, marking the current one completed.
    */
-  const completeCurrentStep = useCallback(
-    async () => {
-      if (!activeSession) return null;
+  const completeCurrentStep = useCallback(async () => {
+    if (!activeSession) return null;
 
-      const currentIndex = (activeSession.steps || []).findIndex(
-        (s) => s.status === "running"
-      );
+    const currentIndex = (activeSession.steps || []).findIndex(
+      (s) => s.status === "running"
+    );
 
-      // If none running, start the first pending step
-      if (currentIndex === -1) {
-        const nextIndex = (activeSession.steps || []).findIndex(
-          (s) => s.status === "pending"
-        );
-
-        if (nextIndex === -1) {
-          // No more steps -> complete session
-          const completed = {
-            ...activeSession,
-            status: "completed",
-            completedAt: nowIso(),
-          };
-          const saved = await persistSession(completed);
-          setActiveSession(saved);
-          setIsRunning(false);
-          setIsPaused(false);
-
-          emit({
-            type: "session.completed",
-            ts: nowIso(),
-            source: SOURCE,
-            data: { sessionId: saved.id, domain: saved.domain },
-          });
-
-          // 🔌 Direct hooks for downstream orchestration
-          try {
-            if (householdOrchestrator?.onSessionCompleted) {
-              await householdOrchestrator.onSessionCompleted(saved);
-            }
-            if (sessionShim?.onSessionCompleted) {
-              await sessionShim.onSessionCompleted(saved);
-            }
-          } catch (shimErr) {
-            console.error(
-              "[useSessionRunner] shim/orchestrator onSessionCompleted failed",
-              shimErr
-            );
-            emit({
-              type: "session.shim.onSessionCompleted.failed",
-              ts: nowIso(),
-              source: SOURCE,
-              data: {
-                sessionId: saved.id,
-                domain: saved.domain,
-                error: String(shimErr),
-              },
-            });
-          }
-
-          await tryReleaseWakeLock(wakeLockRef);
-          await maybeExportToHubOnComplete(saved);
-          return saved;
-        }
-
-        const updated = {
-          ...activeSession,
-          steps: activeSession.steps.map((step, idx) =>
-            idx === nextIndex
-              ? { ...step, status: "running", startedAt: nowIso() }
-              : step
-          ),
-        };
-        const saved = await persistSession(updated);
-        setActiveSession(saved);
-
-        emit({
-          type: "session.step.started",
-          ts: nowIso(),
-          source: SOURCE,
-          data: {
-            sessionId: saved.id,
-            domain: saved.domain,
-            stepId: saved.steps[nextIndex].id,
-            index: nextIndex,
-          },
-        });
-
-        return saved;
-      }
-
-      // Mark current running step complete and start the next pending one
+    // If none running, start the first pending step
+    if (currentIndex === -1) {
       const nextIndex = (activeSession.steps || []).findIndex(
-        (s, idx) => idx > currentIndex && s.status === "pending"
+        (s) => s.status === "pending"
       );
 
-      const updatedSteps = activeSession.steps.map((step, idx) => {
-        if (idx === currentIndex) {
-          return {
-            ...step,
-            status: "completed",
-            completedAt: nowIso(),
-          };
-        }
-        if (idx === nextIndex) {
-          return {
-            ...step,
-            status: "running",
-            startedAt: nowIso(),
-          };
-        }
-        return step;
-      });
-
-      const updatedSession = {
-        ...activeSession,
-        steps: updatedSteps,
-      };
-
-      const saved = await persistSession(updatedSession);
-      setActiveSession(saved);
-
-      emit({
-        type: "session.step.completed",
-        ts: nowIso(),
-        source: SOURCE,
-        data: {
-          sessionId: saved.id,
-          domain: saved.domain,
-          stepId: activeSession.steps[currentIndex].id,
-          index: currentIndex,
-        },
-      });
-
-      if (nextIndex !== -1) {
-        emit({
-          type: "session.step.started",
-          ts: nowIso(),
-          source: SOURCE,
-          data: {
-            sessionId: saved.id,
-            domain: saved.domain,
-            stepId: saved.steps[nextIndex].id,
-            index: nextIndex,
-          },
-        });
-      } else {
-        // That was the last step => complete the session
-        const final = {
-          ...saved,
+      if (nextIndex === -1) {
+        // No more steps -> complete session
+        const completed = {
+          ...activeSession,
           status: "completed",
           completedAt: nowIso(),
         };
-        const persistedFinal = await persistSession(final);
-        setActiveSession(persistedFinal);
+        const saved = await persistSession(completed);
+        setActiveSession(saved);
         setIsRunning(false);
         setIsPaused(false);
 
@@ -714,19 +586,16 @@ export function useSessionRunner({ autoResume = true } = {}) {
           type: "session.completed",
           ts: nowIso(),
           source: SOURCE,
-          data: {
-            sessionId: persistedFinal.id,
-            domain: persistedFinal.domain,
-          },
+          data: { sessionId: saved.id, domain: saved.domain },
         });
 
         // 🔌 Direct hooks for downstream orchestration
         try {
           if (householdOrchestrator?.onSessionCompleted) {
-            await householdOrchestrator.onSessionCompleted(persistedFinal);
+            await householdOrchestrator.onSessionCompleted(saved);
           }
           if (sessionShim?.onSessionCompleted) {
-            await sessionShim.onSessionCompleted(persistedFinal);
+            await sessionShim.onSessionCompleted(saved);
           }
         } catch (shimErr) {
           console.error(
@@ -738,55 +607,183 @@ export function useSessionRunner({ autoResume = true } = {}) {
             ts: nowIso(),
             source: SOURCE,
             data: {
-              sessionId: persistedFinal.id,
-              domain: persistedFinal.domain,
+              sessionId: saved.id,
+              domain: saved.domain,
               error: String(shimErr),
             },
           });
         }
 
         await tryReleaseWakeLock(wakeLockRef);
-        await maybeExportToHubOnComplete(persistedFinal);
-
-        return persistedFinal;
+        await maybeExportToHubOnComplete(saved);
+        return saved;
       }
 
+      const updated = {
+        ...activeSession,
+        steps: activeSession.steps.map((step, idx) =>
+          idx === nextIndex
+            ? { ...step, status: "running", startedAt: nowIso() }
+            : step
+        ),
+      };
+      const saved = await persistSession(updated);
+      setActiveSession(saved);
+
+      emit({
+        type: "session.step.started",
+        ts: nowIso(),
+        source: SOURCE,
+        data: {
+          sessionId: saved.id,
+          domain: saved.domain,
+          stepId: saved.steps[nextIndex].id,
+          index: nextIndex,
+        },
+      });
+
       return saved;
-    },
-    [activeSession, persistSession]
-  );
+    }
+
+    // Mark current running step complete and start the next pending one
+    const nextIndex = (activeSession.steps || []).findIndex(
+      (s, idx) => idx > currentIndex && s.status === "pending"
+    );
+
+    const updatedSteps = activeSession.steps.map((step, idx) => {
+      if (idx === currentIndex) {
+        return {
+          ...step,
+          status: "completed",
+          completedAt: nowIso(),
+        };
+      }
+      if (idx === nextIndex) {
+        return {
+          ...step,
+          status: "running",
+          startedAt: nowIso(),
+        };
+      }
+      return step;
+    });
+
+    const updatedSession = {
+      ...activeSession,
+      steps: updatedSteps,
+    };
+
+    const saved = await persistSession(updatedSession);
+    setActiveSession(saved);
+
+    emit({
+      type: "session.step.completed",
+      ts: nowIso(),
+      source: SOURCE,
+      data: {
+        sessionId: saved.id,
+        domain: saved.domain,
+        stepId: activeSession.steps[currentIndex].id,
+        index: currentIndex,
+      },
+    });
+
+    if (nextIndex !== -1) {
+      emit({
+        type: "session.step.started",
+        ts: nowIso(),
+        source: SOURCE,
+        data: {
+          sessionId: saved.id,
+          domain: saved.domain,
+          stepId: saved.steps[nextIndex].id,
+          index: nextIndex,
+        },
+      });
+    } else {
+      // That was the last step => complete the session
+      const final = {
+        ...saved,
+        status: "completed",
+        completedAt: nowIso(),
+      };
+      const persistedFinal = await persistSession(final);
+      setActiveSession(persistedFinal);
+      setIsRunning(false);
+      setIsPaused(false);
+
+      emit({
+        type: "session.completed",
+        ts: nowIso(),
+        source: SOURCE,
+        data: {
+          sessionId: persistedFinal.id,
+          domain: persistedFinal.domain,
+        },
+      });
+
+      // 🔌 Direct hooks for downstream orchestration
+      try {
+        if (householdOrchestrator?.onSessionCompleted) {
+          await householdOrchestrator.onSessionCompleted(persistedFinal);
+        }
+        if (sessionShim?.onSessionCompleted) {
+          await sessionShim.onSessionCompleted(persistedFinal);
+        }
+      } catch (shimErr) {
+        console.error(
+          "[useSessionRunner] shim/orchestrator onSessionCompleted failed",
+          shimErr
+        );
+        emit({
+          type: "session.shim.onSessionCompleted.failed",
+          ts: nowIso(),
+          source: SOURCE,
+          data: {
+            sessionId: persistedFinal.id,
+            domain: persistedFinal.domain,
+            error: String(shimErr),
+          },
+        });
+      }
+
+      await tryReleaseWakeLock(wakeLockRef);
+      await maybeExportToHubOnComplete(persistedFinal);
+
+      return persistedFinal;
+    }
+
+    return saved;
+  }, [activeSession, persistSession]);
 
   /**
    * PUBLIC API: pause session
    */
-  const pauseSession = useCallback(
-    async () => {
-      if (!activeSession) return null;
+  const pauseSession = useCallback(async () => {
+    if (!activeSession) return null;
 
-      const updated = {
-        ...activeSession,
-        status: "paused",
-        updatedAt: nowIso(),
-      };
+    const updated = {
+      ...activeSession,
+      status: "paused",
+      updatedAt: nowIso(),
+    };
 
-      const saved = await persistSession(updated);
-      setActiveSession(saved);
-      setIsPaused(true);
-      setIsRunning(false);
+    const saved = await persistSession(updated);
+    setActiveSession(saved);
+    setIsPaused(true);
+    setIsRunning(false);
 
-      emit({
-        type: "session.paused",
-        ts: nowIso(),
-        source: SOURCE,
-        data: { sessionId: saved.id, domain: saved.domain },
-      });
+    emit({
+      type: "session.paused",
+      ts: nowIso(),
+      source: SOURCE,
+      data: { sessionId: saved.id, domain: saved.domain },
+    });
 
-      await tryReleaseWakeLock(wakeLockRef);
+    await tryReleaseWakeLock(wakeLockRef);
 
-      return saved;
-    },
-    [activeSession, persistSession]
-  );
+    return saved;
+  }, [activeSession, persistSession]);
 
   /**
    * PUBLIC API: resume session
@@ -994,7 +991,11 @@ export function useSessionRunner({ autoResume = true } = {}) {
 
     // Re-acquire wake lock on visibility change if session is running
     const onVisibilityChange = () => {
-      if (document.visibilityState === "visible" && activeSession && isRunning) {
+      if (
+        document.visibilityState === "visible" &&
+        activeSession &&
+        isRunning
+      ) {
         tryAcquireWakeLock(wakeLockRef);
       }
     };

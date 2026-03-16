@@ -160,7 +160,7 @@ try {
   } catch {
     try {
       // eslint-disable-next-line global-require
-      const eb3 = require("../../services/events/eventBus");
+      const eb3 = require("../../services/events/eventBus.js");
       eventBus = eb3?.default || eb3?.eventBus || eb3 || eventBus;
     } catch {}
   }
@@ -207,7 +207,7 @@ try {
 let featureFlags = { familyFundMode: false };
 try {
   // eslint-disable-next-line global-require, import/no-unresolved
-  const ff = require("@/services/featureFlags");
+  const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff?.featureFlags || featureFlags;
 } catch {}
 
@@ -672,7 +672,7 @@ function makeFallbackDraft({ title, windowRange, includeTags, preferences }) {
 /* -------------------------------------------------------------------------- */
 /* Worker client — SAFE LISTENERS + UNSUBS
  * -------------------------------------------------------------------------- */
-function createAgentsClient() {
+function createshimsClient() {
   let worker = null;
   try {
     worker = new Worker(new URL("@/workers/agentsWorker.js", import.meta.url), {
@@ -680,7 +680,7 @@ function createAgentsClient() {
     });
   } catch (e) {
     console.warn(
-      "[agentsClient] worker unavailable, enabling local fallback:",
+      "[shimsClient] worker unavailable, enabling local fallback:",
       e?.message || e
     );
   }
@@ -701,7 +701,7 @@ function createAgentsClient() {
       try {
         if (typeof fn === "function") fn(data);
       } catch (e) {
-        console.error("[agentsClient] listener error:", e);
+        console.error("[shimsClient] listener error:", e);
       }
     });
   };
@@ -824,7 +824,7 @@ function createAgentsClient() {
         return Array.isArray(packs) ? packs : [];
       } catch (e) {
         console.warn(
-          "[agentsClient] listRecipePacks fallback:",
+          "[shimsClient] listRecipePacks fallback:",
           e?.message || e
         );
         return [];
@@ -888,7 +888,7 @@ function createAgentsClient() {
         return result;
       } catch (e) {
         console.warn(
-          "[agentsClient] falling back to local draft:",
+          "[shimsClient] falling back to local draft:",
           e?.message || e
         );
 
@@ -1613,11 +1613,12 @@ function DraftModal({
   onSaveFavorite,
   onSaveSchedule,
   onCookNow,
+  showTimers = false,
 }) {
   if (!open || !draft) return null;
 
   const minutes = draft?.metrics?.estMinutes || 0;
-  const timers = draft?.timers || [];
+  const timers = showTimers ? draft?.timers || [] : [];
   const pulls = draft?.inventory?.pulls || [];
   const missing = draft?.inventory?.missing || [];
   const stations = draft?.stations || [];
@@ -2172,6 +2173,13 @@ export default function CookingPage() {
   });
   const [draft, setDraft] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  // Prevent auto-opening drafts on mount/rehydrate; only open when user explicitly generated one.
+  const draftModalGateRef = useRef({ allow: false, reason: null });
+
+  // Timers should only render inside an explicitly created/started session.
+  const [activeSessionIdForTimers, setActiveSessionIdForTimers] =
+    useState(null);
+  const [sessionDraftForTimers, setSessionDraftForTimers] = useState(null);
   const [busy, setBusy] = useState(false);
 
   // Streaming controls
@@ -2337,6 +2345,25 @@ export default function CookingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Gate DraftModal opening: only after an explicit user-initiated generation event.
+  // CookingSessionPlanner may rehydrate drafts on mount; those should NOT auto-open.
+  useEffect(() => {
+    const off = eventBus.on?.("session.generate.requested", (evt) => {
+      const domain = evt?.data?.domain || evt?.domain;
+      const source = evt?.source || evt?.data?.source;
+      if (domain && String(domain) !== "cooking") return;
+      if (source && String(source) !== "cooking-page") return;
+      draftModalGateRef.current = { allow: true, reason: "generate" };
+    });
+
+    return () => {
+      try {
+        off?.();
+      } catch {}
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Listen to session lifecycle to refresh runnable list
   useEffect(() => {
     refreshRunnable();
@@ -2358,7 +2385,7 @@ export default function CookingPage() {
 
   // create worker + listeners
   useEffect(() => {
-    const client = createAgentsClient();
+    const client = createshimsClient();
     clientRef.current = client;
 
     const off1 = client.onProgress((d) =>
@@ -2368,10 +2395,19 @@ export default function CookingPage() {
     const off2 = client.onDraft(({ draft: newDraft }) => {
       setBusy(false);
       setDraft(newDraft);
-      setModalOpen(true);
+
+      // Only auto-open the DraftModal when the user explicitly requested a generation.
+      const gate = draftModalGateRef.current;
+      const allowOpen = !!gate?.allow;
+      draftModalGateRef.current = { allow: false, reason: null };
+      if (allowOpen) {
+        setModalOpen(true);
+      }
+
+      // Always toast, but keep it non-intrusive on rehydrate.
       setToast({
         tone: "success",
-        text: "Draft ready.",
+        text: allowOpen ? "Draft ready." : "Draft loaded.",
         action: { label: "Open overlay", fn: () => handleOpenOverlay() },
       });
       eventBus.emit?.("ads.context.show", {
@@ -2463,23 +2499,6 @@ export default function CookingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- Auto-generate a session on first load (no clicks required) ---
-  const didAutogenRef = useRef(false);
-  useEffect(() => {
-    if (didAutogenRef.current) return;
-    if (!draft) {
-      didAutogenRef.current = true;
-      const t = setTimeout(() => {
-        try {
-          handleGenerate();
-        } catch {}
-      }, 300);
-      return () => clearTimeout(t);
-    }
-    return undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft]);
-
   // Automation glue
   useAutomationGlue((event) => {
     if (event === "recipe.consolidated") {
@@ -2566,6 +2585,9 @@ export default function CookingPage() {
   const handleGenerate = async () => {
     const client = clientRef.current;
     if (!client) return;
+
+    // This generation is user-initiated, so the resulting draft may auto-open in the modal.
+    draftModalGateRef.current = { allow: true, reason: "generate" };
 
     setBusy(true);
     setDraft(null);
@@ -2823,6 +2845,10 @@ export default function CookingPage() {
   const startRunnerFor = async (session) => {
     const sid = session?.id;
     if (!sid) return;
+
+    // Mark that the user explicitly started/opened a session; timers may render from this point.
+    setActiveSessionIdForTimers(sid);
+    setSessionDraftForTimers(session?.draft || null);
 
     try {
       if (openRunner) {
@@ -4184,22 +4210,35 @@ export default function CookingPage() {
         />
         <CookingSessionPlanner
           onDraftReady={(d) => {
+            // Drafts coming from the planner may be restored/rehydrated on mount.
+            // Only open the modal when there was an explicit user-initiated "Generate".
             setDraft(d);
-            setModalOpen(true);
+            const gate = draftModalGateRef.current;
+            const allowOpen = !!gate?.allow;
+            draftModalGateRef.current = { allow: false, reason: null };
+            if (allowOpen) {
+              setModalOpen(true);
+            } else {
+              setModalOpen(false);
+              setToast({
+                tone: "info",
+                text: "Draft loaded. Click Generate to auto-open, or open manually.",
+              });
+            }
           }}
         />
       </Card>
 
       {/* Timers */}
-      {draft && (
+      {activeSessionIdForTimers && sessionDraftForTimers && (
         <Card className="sv-pad sv-block">
           <SectionHeader
             icon="⏱️"
             title="Multi-Timers"
-            sub="Start timers, get voice alerts, and jump to steps."
+            sub="Timers are available only inside a started session."
           />
           <MultiTimerPanel
-            draft={draft}
+            draft={sessionDraftForTimers}
             stationFilter={stationFilter === "all" ? null : stationFilter}
             onOpenStep={(id) => console.debug("open step", id)}
           />
@@ -4299,13 +4338,6 @@ export default function CookingPage() {
             onClose={() => setToast(null)}
           />
         </div>
-      )}
-      {modalOpen && draft && (
-        <DraftModal
-          open={modalOpen}
-          draft={draft}
-          onClose={() => setModalOpen(false)}
-        />
       )}
 
       {swapOpen && (

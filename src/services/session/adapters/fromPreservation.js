@@ -37,7 +37,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -48,7 +48,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -74,26 +76,30 @@ export function initPreservationAdapter() {
   }
 
   // Main glue: engines/UX ask for a preservation session draft
-  eventBus.on("preservation/requestSession", ({ data }) => {
-    try {
-      const draft = mapPreservationToSession(data);
-      emit("preservation/draftReady", { draft });
-      emit(Events?.SESSION_DRAFT_READY || "session/draftReady", { draft });
+  eventBus.on(
+    "preservation/requestSession",
+    ({ data }) => {
+      try {
+        const draft = mapPreservationToSession(data);
+        emit("preservation/draftReady", { draft });
+        emit(Events?.SESSION_DRAFT_READY || "session/draftReady", { draft });
 
-      exportToHubIfEnabled({
-        type: "preservation/draftReady",
-        ts: new Date().toISOString(),
-        source: "adapter.preservation",
-        data: { draft },
-      });
-    } catch (e) {
-      emit(Events?.SESSION_ERROR || "session/error", {
-        domain: "preservation",
-        error: String(e?.message || e),
-        input: safeSmall(data),
-      });
-    }
-  }, { priority: 1 });
+        exportToHubIfEnabled({
+          type: "preservation/draftReady",
+          ts: new Date().toISOString(),
+          source: "adapter.preservation",
+          data: { draft },
+        });
+      } catch (e) {
+        emit(Events?.SESSION_ERROR || "session/error", {
+          domain: "preservation",
+          error: String(e?.message || e),
+          input: safeSmall(data),
+        });
+      }
+    },
+    { priority: 1 }
+  );
 }
 
 /**
@@ -116,8 +122,12 @@ export function mapPreservationToSession(input = {}) {
   const rolesNeeded = deriveRoles(src, method);
   const steps = deriveSteps(src, method);
   const safety = deriveSafetyFlags(src, method);
-  const outdoor = ["smoke-preserve", "water-bath-canner:outdoor", "pressure-canner:outdoor"].includes(method) ||
-                  hasKind(equipment, "smoker");
+  const outdoor =
+    [
+      "smoke-preserve",
+      "water-bath-canner:outdoor",
+      "pressure-canner:outdoor",
+    ].includes(method) || hasKind(equipment, "smoker");
 
   // 3) Compose scheduler draft
   /** @type {SchedulerDraft} */
@@ -131,16 +141,16 @@ export function mapPreservationToSession(input = {}) {
     durationMin,
     flexibilityMin: src.flexibilityMin ?? 45,
     window, // { startISO?, endISO? }
-    equipment,              // [{ deviceId?, kind?, title? }]
-    ingredients,            // consumables mapped to scheduler "ingredients"
-    rolesNeeded,            // e.g., [{ role:"preserver", count:1 }, { role:"helper", count:1 }]
+    equipment, // [{ deviceId?, kind?, title? }]
+    ingredients, // consumables mapped to scheduler "ingredients"
+    rolesNeeded, // e.g., [{ role:"preserver", count:1 }, { role:"helper", count:1 }]
     steps,
     meta: {
-      method,                           // canonical method id
-      batch: src.batch,                 // { units, weightKg?, jars? }
+      method, // canonical method id
+      batch: src.batch, // { units, weightKg?, jars? }
       sourceUrl: src.sourceUrl,
       recipeId: src.recipeId,
-      hazards: safety.hazards,          // ["botulismRiskLowAcid", ...]
+      hazards: safety.hazards, // ["botulismRiskLowAcid", ...]
       priority: src.priority,
       tags: src.tags,
       // signals to other services
@@ -148,11 +158,13 @@ export function mapPreservationToSession(input = {}) {
       quietSensitive: false,
       planContext: pick(src, ["planDate", "slot", "dayPart"]),
       requiresCooling: /water-bath|pressure-canner|smoke/.test(method),
-      requiresDeviceCooldown: hasKind(equipment, "pressure-canner") || hasKind(equipment, "smoker"),
+      requiresDeviceCooldown:
+        hasKind(equipment, "pressure-canner") || hasKind(equipment, "smoker"),
     },
   };
 
-  if (draft.durationMin <= 0) throw new Error("Invalid duration for preservation draft");
+  if (draft.durationMin <= 0)
+    throw new Error("Invalid duration for preservation draft");
   return draft;
 }
 
@@ -185,9 +197,11 @@ function normalizePresInput(x = {}) {
   const time = x.time || {};
 
   // batch: { jars: {size:'pint|quart|half-pint', count}, weightKg }
-  const batch = isPojo(r.batch) ? r.batch
-              : isPojo(meta.batch) ? meta.batch
-              : undefined;
+  const batch = isPojo(r.batch)
+    ? r.batch
+    : isPojo(meta.batch)
+    ? meta.batch
+    : undefined;
 
   return {
     recipeId: String(r.id || meta.recipeId || ""),
@@ -198,12 +212,12 @@ function normalizePresInput(x = {}) {
     priority: rankPriority(meta.priority || r.priority),
     method: methodAlias(r.method || meta.method),
     // parameters
-    acidPct: num(r.acidPct ?? meta.acidPct),    // vinegar % for pickles
-    saltPct: num(r.saltPct ?? meta.saltPct),    // fermentation or brine %
+    acidPct: num(r.acidPct ?? meta.acidPct), // vinegar % for pickles
+    saltPct: num(r.saltPct ?? meta.saltPct), // fermentation or brine %
     sugarPct: num(r.sugarPct ?? meta.sugarPct), // jams/jellies
     brinePct: num(r.brinePct ?? meta.brinePct),
     headspaceMm: num(r.headspaceMm ?? meta.headspaceMm),
-    altitudeM: num(meta.altitudeM),             // adjust processing time if provided
+    altitudeM: num(meta.altitudeM), // adjust processing time if provided
     batch,
     // timing
     totalMin: minutesFrom(r.totalTime || meta.totalTime),
@@ -225,7 +239,9 @@ function inferMethod(src) {
   const m = String(src.method || "").toLowerCase();
   if (!m) {
     // Guess from ingredients/steps/title
-    const t = `${src.title} ${JSON.stringify(src.steps)} ${JSON.stringify(src.ingredients)}`.toLowerCase();
+    const t = `${src.title} ${JSON.stringify(src.steps)} ${JSON.stringify(
+      src.ingredients
+    )}`.toLowerCase();
     if (/dehydrat|dry/.test(t)) return "dehydrate";
     if (/freeze[- ]?dry/.test(t)) return "freeze-dry";
     if (/pickle|water[- ]?bath/.test(t)) return "water-bath-canner";
@@ -240,14 +256,16 @@ function inferMethod(src) {
   return methodAlias(m);
 }
 function methodAlias(m) {
-  const s = String(m || "").toLowerCase().trim();
+  const s = String(m || "")
+    .toLowerCase()
+    .trim();
   const map = {
-    "waterbath": "water-bath-canner",
+    waterbath: "water-bath-canner",
     "water-bath": "water-bath-canner",
-    "wbc": "water-bath-canner",
-    "pc": "pressure-canner",
-    "pressure": "pressure-canner",
-    "smoke": "smoke-preserve",
+    wbc: "water-bath-canner",
+    pc: "pressure-canner",
+    pressure: "pressure-canner",
+    smoke: "smoke-preserve",
     "freeze-drier": "freeze-dry",
   };
   return map[s] || s;
@@ -259,22 +277,36 @@ function deriveDurationMin(src, method) {
   const jars = src.batch?.jars?.count || 0;
   const weightKg = num(src.batch?.weightKg) || 0;
   switch (method) {
-    case "pressure-canner": return clamp(30 + jars * 8, 45, 240);
-    case "water-bath-canner": return clamp(20 + jars * 6, 30, 180);
-    case "jam-jelly": return clamp(30 + jars * 4, 30, 150);
-    case "ferment": return clamp(40 + Math.ceil(weightKg) * 8, 30, 120);
-    case "dehydrate": return clamp(30 + Math.ceil(weightKg) * 10, 30, 300);
-    case "freeze-dry": return clamp(45 + Math.ceil(weightKg) * 15, 60, 720);
-    case "smoke-preserve": return clamp(60 + Math.ceil(weightKg) * 15, 90, 720);
-    case "vacuum-seal": return clamp(20 + Math.ceil(weightKg) * 4, 15, 120);
-    case "freeze": return clamp(20 + Math.ceil(weightKg) * 3, 15, 90);
-    default: return 60;
+    case "pressure-canner":
+      return clamp(30 + jars * 8, 45, 240);
+    case "water-bath-canner":
+      return clamp(20 + jars * 6, 30, 180);
+    case "jam-jelly":
+      return clamp(30 + jars * 4, 30, 150);
+    case "ferment":
+      return clamp(40 + Math.ceil(weightKg) * 8, 30, 120);
+    case "dehydrate":
+      return clamp(30 + Math.ceil(weightKg) * 10, 30, 300);
+    case "freeze-dry":
+      return clamp(45 + Math.ceil(weightKg) * 15, 60, 720);
+    case "smoke-preserve":
+      return clamp(60 + Math.ceil(weightKg) * 15, 90, 720);
+    case "vacuum-seal":
+      return clamp(20 + Math.ceil(weightKg) * 4, 15, 120);
+    case "freeze":
+      return clamp(20 + Math.ceil(weightKg) * 3, 15, 90);
+    default:
+      return 60;
   }
 }
 
 function deriveWindow(src, durationMin) {
   const s = isISO(src.start) ? src.start : null;
-  const e = isISO(src.end) ? src.end : (s ? new Date(Date.parse(s) + durationMin * 60000).toISOString() : null);
+  const e = isISO(src.end)
+    ? src.end
+    : s
+    ? new Date(Date.parse(s) + durationMin * 60000).toISOString()
+    : null;
   if (!s && !e) return undefined;
   return { startISO: s || undefined, endISO: e || undefined };
 }
@@ -288,14 +320,22 @@ function deriveEquipment(src, method) {
 
   const header = (src.equipment || []).map(norm);
   const implied = [];
-  if (method === "water-bath-canner") implied.push({ kind: "water-bath-canner", title: "Water-Bath Canner" });
-  if (method === "pressure-canner")   implied.push({ kind: "pressure-canner", title: "Pressure Canner" });
-  if (method === "jam-jelly")         implied.push({ kind: "stovetop", title: "Stovetop / Stockpot" });
-  if (method === "dehydrate")         implied.push({ kind: "dehydrator", title: "Dehydrator" });
-  if (method === "freeze-dry")        implied.push({ kind: "freeze-dryer", title: "Freeze Dryer" });
-  if (method === "smoke-preserve")    implied.push({ kind: "smoker", title: "Smoker" });
-  if (method === "vacuum-seal")       implied.push({ kind: "vacuum-sealer", title: "Vacuum Sealer" });
-  if (method === "freeze")            implied.push({ kind: "freezer", title: "Freezer Space" });
+  if (method === "water-bath-canner")
+    implied.push({ kind: "water-bath-canner", title: "Water-Bath Canner" });
+  if (method === "pressure-canner")
+    implied.push({ kind: "pressure-canner", title: "Pressure Canner" });
+  if (method === "jam-jelly")
+    implied.push({ kind: "stovetop", title: "Stovetop / Stockpot" });
+  if (method === "dehydrate")
+    implied.push({ kind: "dehydrator", title: "Dehydrator" });
+  if (method === "freeze-dry")
+    implied.push({ kind: "freeze-dryer", title: "Freeze Dryer" });
+  if (method === "smoke-preserve")
+    implied.push({ kind: "smoker", title: "Smoker" });
+  if (method === "vacuum-seal")
+    implied.push({ kind: "vacuum-sealer", title: "Vacuum Sealer" });
+  if (method === "freeze")
+    implied.push({ kind: "freezer", title: "Freezer Space" });
 
   const all = [...header, ...implied.map(norm)];
   return dedupByKey(all, (e) => e.deviceId || e.kind || e.title);
@@ -309,7 +349,15 @@ function deriveConsumables(src, method) {
     const sku = item?.sku ? String(item.sku) : undefined;
     const qty = num(item?.qty || item?.quantity);
     const unit = String(item?.unit || item?.uom || "");
-    return (id || name) ? { id: id || undefined, sku, name: name || undefined, qty: qty || undefined, unit: unit || undefined } : null;
+    return id || name
+      ? {
+          id: id || undefined,
+          sku,
+          name: name || undefined,
+          qty: qty || undefined,
+          unit: unit || undefined,
+        }
+      : null;
   };
 
   const head = (src.ingredients || []).map(normalize).filter(Boolean);
@@ -320,14 +368,21 @@ function deriveConsumables(src, method) {
   const size = String(src.batch?.jars?.size || "").toLowerCase();
 
   if (jars) {
-    implied.push({ name: `Mason jar ${size || "pint"} (case)`, qty: Math.ceil(jars / 12), unit: "case" });
+    implied.push({
+      name: `Mason jar ${size || "pint"} (case)`,
+      qty: Math.ceil(jars / 12),
+      unit: "case",
+    });
     implied.push({ name: "Lids (new)", qty: jars, unit: "ea" });
     implied.push({ name: "Rings", qty: jars, unit: "ea" });
   }
 
   if (method === "water-bath-canner") {
     implied.push({ name: "White vinegar (5%)", qty: 1, unit: "L" });
-    if (!hasNamed(head, /pectin|sure[-\s]?jell/i) && /jam|jelly/.test(String(src.title).toLowerCase())) {
+    if (
+      !hasNamed(head, /pectin|sure[-\s]?jell/i) &&
+      /jam|jelly/.test(String(src.title).toLowerCase())
+    ) {
       implied.push({ name: "Pectin", qty: 1, unit: "box" });
     }
   }
@@ -360,7 +415,10 @@ function deriveConsumables(src, method) {
 function deriveRoles(src, method) {
   const base = [{ role: "preserver", count: 1 }];
   const manyJars = (src.batch?.jars?.count || 0) > 12;
-  const heavy = method === "pressure-canner" || method === "smoke-preserve" || method === "freeze-dry";
+  const heavy =
+    method === "pressure-canner" ||
+    method === "smoke-preserve" ||
+    method === "freeze-dry";
   if (manyJars || heavy) base.push({ role: "helper", count: 1 });
   return base;
 }
@@ -394,7 +452,10 @@ function deriveSteps(src, method) {
       break;
     case "pressure-canner":
       steps.push({ label: "Hot pack jars", estMin: 25 });
-      steps.push({ label: "Process in pressure canner (includes vent)", estMin: 45 });
+      steps.push({
+        label: "Process in pressure canner (includes vent)",
+        estMin: 45,
+      });
       steps.push({ label: "Cool & de-pressurize", estMin: 30 });
       break;
     case "jam-jelly":
@@ -437,17 +498,28 @@ function deriveSteps(src, method) {
 function deriveSafetyFlags(src, method) {
   const hazards = [];
   const title = String(src.title || "").toLowerCase();
-  const lowAcidProduce = /(green bean|carrot|meat|stock|broth|corn|peas|beet|soup|pumpkin)/.test(title);
-  if (lowAcidProduce && method === "water-bath-canner") hazards.push("botulismRiskLowAcid"); // nudge planner, not a validator
+  const lowAcidProduce =
+    /(green bean|carrot|meat|stock|broth|corn|peas|beet|soup|pumpkin)/.test(
+      title
+    );
+  if (lowAcidProduce && method === "water-bath-canner")
+    hazards.push("botulismRiskLowAcid"); // nudge planner, not a validator
   if (method === "pressure-canner") hazards.push("pressureVesselHot");
   if (method === "smoke-preserve") hazards.push("outdoorFireHeat");
-  if (method === "ferment" && (num(src.saltPct) || 0) < 2) hazards.push("lowSaltFerment");
+  if (method === "ferment" && (num(src.saltPct) || 0) < 2)
+    hazards.push("lowSaltFerment");
   return { hazards };
 }
 
 /* -------------------------------- Helpers ---------------------------------- */
-function hasKind(eq = [], kind) { return (eq || []).some(e => String(e.kind || "").toLowerCase() === String(kind)); }
-function hasNamed(list, re) { return (list || []).some(i => re.test(String(i?.name || ""))); }
+function hasKind(eq = [], kind) {
+  return (eq || []).some(
+    (e) => String(e.kind || "").toLowerCase() === String(kind)
+  );
+}
+function hasNamed(list, re) {
+  return (list || []).some((i) => re.test(String(i?.name || "")));
+}
 function guessKind(name) {
   const s = String(name || "").toLowerCase();
   if (/pressure/.test(s)) return "pressure-canner";
@@ -462,7 +534,11 @@ function guessKind(name) {
 }
 function buildTitle(src, method) {
   const base = src.title || "Preservation Session";
-  const b = src.batch?.jars?.count ? ` • ${src.batch.jars.count} jars` : src.batch?.weightKg ? ` • ${src.batch.weightKg}kg` : "";
+  const b = src.batch?.jars?.count
+    ? ` • ${src.batch.jars.count} jars`
+    : src.batch?.weightKg
+    ? ` • ${src.batch.weightKg}kg`
+    : "";
   return `${base}${b || ""} (${methodLabel(method)})`;
 }
 function methodLabel(m) {
@@ -470,11 +546,11 @@ function methodLabel(m) {
     "water-bath-canner": "Water-Bath",
     "pressure-canner": "Pressure Canner",
     "jam-jelly": "Jam/Jelly",
-    "ferment": "Ferment",
-    "dehydrate": "Dehydrate",
+    ferment: "Ferment",
+    dehydrate: "Dehydrate",
     "freeze-dry": "Freeze-Dry",
     "vacuum-seal": "Vacuum Seal",
-    "freeze": "Freeze",
+    freeze: "Freeze",
     "smoke-preserve": "Smoke-Preserve",
     "general-preserve": "Preserve",
   };
@@ -494,22 +570,28 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const pkt = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(pkt);
-  } catch { /* fail-silent */ }
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* --------------------------------- Utils ----------------------------------- */
-function num(n) { return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined; }
+function num(n) {
+  return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined;
+}
 function minutesFrom(v) {
   if (!v && v !== 0) return undefined;
   if (Number.isFinite(v)) return v;
   const s = String(v).trim().toLowerCase();
   const iso = /^p(t(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?)$/i.exec(s);
   if (iso) {
-    const h = +(iso[2] || 0), m = +(iso[3] || 0), sec = +(iso[4] || 0);
+    const h = +(iso[2] || 0),
+      m = +(iso[3] || 0),
+      sec = +(iso[4] || 0);
     return h * 60 + m + Math.round(sec / 60);
   }
   const hm = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?/.exec(s);
-  if (hm && (hm[1] || hm[2])) return (+(hm[1] || 0)) * 60 + +(hm[2] || 0);
+  if (hm && (hm[1] || hm[2])) return +(hm[1] || 0) * 60 + +(hm[2] || 0);
   const n = +s;
   return Number.isFinite(n) ? n : undefined;
 }
@@ -517,12 +599,22 @@ function clamp(n, lo, hi) {
   const x = Number.isFinite(n) ? n : lo;
   return Math.max(lo, Math.min(hi, x));
 }
-function firstISO(...vals) { return vals.find(isISO) || undefined; }
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
-function arr(v) { return Array.isArray(v) ? v : []; }
-function isPojo(v) { return v && typeof v === "object" && v.constructor === Object; }
+function firstISO(...vals) {
+  return vals.find(isISO) || undefined;
+}
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
+function arr(v) {
+  return Array.isArray(v) ? v : [];
+}
+function isPojo(v) {
+  return v && typeof v === "object" && v.constructor === Object;
+}
 function pick(obj, keys) {
-  const out = {}; for (const k of keys) if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
+  const out = {};
+  for (const k of keys)
+    if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
   return out;
 }
 function rankPriority(v) {
@@ -532,11 +624,13 @@ function rankPriority(v) {
   return "normal";
 }
 function dedupByKey(arr, getKey) {
-  const out = []; const seen = new Set();
+  const out = [];
+  const seen = new Set();
   for (const it of arr) {
     const k = getKey(it);
     if (!k || seen.has(k)) continue;
-    seen.add(k); out.push(it);
+    seen.add(k);
+    out.push(it);
   }
   return out;
 }
@@ -549,20 +643,25 @@ function mergeConsumables(items) {
     if (!key) continue;
     const prev = byKey.get(key);
     if (prev) {
-      const a = num(prev.qty) || 0, b = num(c.qty) || 0;
-      byKey.set(key, { ...prev, qty: (a + b) || undefined });
+      const a = num(prev.qty) || 0,
+        b = num(c.qty) || 0;
+      byKey.set(key, { ...prev, qty: a + b || undefined });
     } else {
       byKey.set(key, c);
     }
   }
   return Array.from(byKey.values());
 }
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function genId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function safeSmall(obj) {
   try {
     const s = JSON.stringify(obj);
     return s && s.length > 2000 ? s.slice(0, 2000) + "…" : s;
-  } catch { return "[unserializable]"; }
+  } catch {
+    return "[unserializable]";
+  }
 }
 
 /* --------------------------------- Exports --------------------------------- */

@@ -22,8 +22,8 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /* -------------------------------------------------------------------------- */
 /* Local helpers                                                              */
@@ -61,13 +61,22 @@ import { familyFundMode } from "@/services/featureFlags";
  * @param {number} [params.labelGermPct]     // label germination %
  * @returns {number}                          // 0–100
  */
-function computeEffectiveViabilityPct({ testGerminated, testTotal, labelGermPct }) {
-  const safeLabel = typeof labelGermPct === "number" && labelGermPct > 0 && labelGermPct <= 100
-    ? labelGermPct
-    : 0;
+function computeEffectiveViabilityPct({
+  testGerminated,
+  testTotal,
+  labelGermPct,
+}) {
+  const safeLabel =
+    typeof labelGermPct === "number" && labelGermPct > 0 && labelGermPct <= 100
+      ? labelGermPct
+      : 0;
 
   let testPct = 0;
-  if (typeof testGerminated === "number" && typeof testTotal === "number" && testTotal > 0) {
+  if (
+    typeof testGerminated === "number" &&
+    typeof testTotal === "number" &&
+    testTotal > 0
+  ) {
     testPct = (testGerminated / testTotal) * 100;
   }
 
@@ -118,7 +127,7 @@ function safeHubExport(envelope) {
 function persistSessionDraft(session) {
   if (!session || typeof session !== "object") return;
 
-  import("@/services/sessions/sessionStore")
+  import("@/services/session/sessionStore")
     .then((mod) => {
       if (mod && typeof mod.upsertSession === "function") {
         return mod.upsertSession(session);
@@ -193,30 +202,41 @@ export function useSeedViabilityPlanning({
       labelGermPct: seedBatch.labelGermPct,
     });
 
-    const quantityOnHand = typeof seedBatch.quantityOnHand === "number" && seedBatch.quantityOnHand > 0
-      ? seedBatch.quantityOnHand
-      : 0;
+    const quantityOnHand =
+      typeof seedBatch.quantityOnHand === "number" &&
+      seedBatch.quantityOnHand > 0
+        ? seedBatch.quantityOnHand
+        : 0;
 
     const theoreticalGerminatedSeeds = Math.floor(
-      quantityOnHand * (effectiveViabilityPct / 100),
+      quantityOnHand * (effectiveViabilityPct / 100)
     );
 
-    const safeTargetPlants = typeof targetPlants === "number" && targetPlants > 0
-      ? targetPlants
-      : 0;
+    const safeTargetPlants =
+      typeof targetPlants === "number" && targetPlants > 0 ? targetPlants : 0;
 
     const recommendedSowingMultiplier =
-      effectiveViabilityPct > 0 ? Math.max(sowingMultiplier, 100 / effectiveViabilityPct) : sowingMultiplier;
+      effectiveViabilityPct > 0
+        ? Math.max(sowingMultiplier, 100 / effectiveViabilityPct)
+        : sowingMultiplier;
 
-    const maxPlantsSupported = safeTargetPlants > 0
-      ? Math.floor(theoreticalGerminatedSeeds / recommendedSowingMultiplier)
-      : theoreticalGerminatedSeeds;
+    const maxPlantsSupported =
+      safeTargetPlants > 0
+        ? Math.floor(theoreticalGerminatedSeeds / recommendedSowingMultiplier)
+        : theoreticalGerminatedSeeds;
 
-    const isShortage = safeTargetPlants > 0 && maxPlantsSupported < safeTargetPlants;
-    const shortagePlants = isShortage ? safeTargetPlants - maxPlantsSupported : 0;
+    const isShortage =
+      safeTargetPlants > 0 && maxPlantsSupported < safeTargetPlants;
+    const shortagePlants = isShortage
+      ? safeTargetPlants - maxPlantsSupported
+      : 0;
 
-    const shouldRefill = effectiveViabilityPct > 0 && effectiveViabilityPct < minViabilityForRefill;
-    const shouldFrontloadSowing = effectiveViabilityPct >= minViabilityForRefill && effectiveViabilityPct < 90;
+    const shouldRefill =
+      effectiveViabilityPct > 0 &&
+      effectiveViabilityPct < minViabilityForRefill;
+    const shouldFrontloadSowing =
+      effectiveViabilityPct >= minViabilityForRefill &&
+      effectiveViabilityPct < 90;
 
     const payload = {
       batchId: seedBatch.id,
@@ -310,7 +330,9 @@ function buildPlantingSessionObject(seedBatch, viability) {
   const session = {
     id: sessionId,
     domain: "garden",
-    title: `Plant ${seedBatch.cropName}${seedBatch.variety ? ` – ${seedBatch.variety}` : ""}`,
+    title: `Plant ${seedBatch.cropName}${
+      seedBatch.variety ? ` – ${seedBatch.variety}` : ""
+    }`,
     source: {
       type: "gardenPlan",
       refId: seedBatch.id,
@@ -325,7 +347,8 @@ function buildPlantingSessionObject(seedBatch, viability) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Look for clear, dry working conditions and available tools.",
+          cueNotes:
+            "Look for clear, dry working conditions and available tools.",
         },
       },
       {
@@ -343,7 +366,9 @@ function buildPlantingSessionObject(seedBatch, viability) {
       {
         id: `${sessionId}:step:3`,
         title: "Sow seeds at adjusted rate",
-        desc: `Sow seeds at ~${viability?.recommendedSowingMultiplier.toFixed?.(2) || 1.1}× the normal rate to account for viability, then cover lightly.`,
+        desc: `Sow seeds at ~${
+          viability?.recommendedSowingMultiplier.toFixed?.(2) || 1.1
+        }× the normal rate to account for viability, then cover lightly.`,
         durationSec: 900,
         blockers: ["inventory", "weather"],
         metadata: {
@@ -404,7 +429,9 @@ function buildRefillSessionObject(seedBatch, viability) {
   const session = {
     id: sessionId,
     domain: "storehouse",
-    title: `Refill seeds – ${seedBatch.cropName}${seedBatch.variety ? ` – ${seedBatch.variety}` : ""}`,
+    title: `Refill seeds – ${seedBatch.cropName}${
+      seedBatch.variety ? ` – ${seedBatch.variety}` : ""
+    }`,
     source: {
       type: "manual",
       refId: seedBatch.id,
@@ -419,7 +446,9 @@ function buildRefillSessionObject(seedBatch, viability) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: `Effective viability: ~${viability?.effectiveViabilityPct.toFixed?.(1) || 0}%`,
+          cueNotes: `Effective viability: ~${
+            viability?.effectiveViabilityPct.toFixed?.(1) || 0
+          }%`,
         },
       },
       {

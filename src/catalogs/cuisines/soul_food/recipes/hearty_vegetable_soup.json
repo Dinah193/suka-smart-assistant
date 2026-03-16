@@ -1,0 +1,126 @@
+{
+  "id": "soul_food_hearty_vegetable_soup",
+  "name": "Hearty Soul Food Vegetable Soup",
+  "servings": 10,
+  "ingredients": [
+    { "item": "neutral oil", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "unsalted butter",
+      "amount": 2,
+      "unit": "tbsp",
+      "prep": "optional for richness"
+    },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    {
+      "item": "carrots",
+      "amount": 4,
+      "unit": "each",
+      "prep": "peeled and sliced"
+    },
+    { "item": "garlic", "amount": 5, "unit": "cloves", "prep": "minced" },
+
+    {
+      "item": "ground beef",
+      "amount": 1.5,
+      "unit": "lb",
+      "prep": "or smoked beef sausage, optional"
+    },
+
+    {
+      "item": "diced tomatoes",
+      "amount": 2,
+      "unit": "cans",
+      "prep": "14-15 oz each"
+    },
+    { "item": "tomato paste", "amount": 2, "unit": "tbsp" },
+
+    {
+      "item": "beef stock",
+      "amount": 8,
+      "unit": "cups",
+      "prep": "or chicken/vegetable stock"
+    },
+
+    {
+      "item": "russet potatoes",
+      "amount": 2,
+      "unit": "large",
+      "prep": "peeled and diced"
+    },
+    {
+      "item": "green beans",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "fresh or frozen"
+    },
+    {
+      "item": "sweet corn",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "fresh or frozen"
+    },
+    { "item": "peas", "amount": 1, "unit": "cup", "prep": "fresh or frozen" },
+
+    {
+      "item": "cabbage",
+      "amount": 0.5,
+      "unit": "head",
+      "prep": "shredded (optional but classic)"
+    },
+    { "item": "okra", "amount": 1, "unit": "cup", "prep": "sliced (optional)" },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "black pepper", "amount": 1, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1.5,
+      "unit": "tsp",
+      "prep": "adjust to taste"
+    },
+
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Saute aromatics: Heat oil (and optional butter) in a large pot over medium heat. Add onion, celery, and carrots. Cook until softened. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 2,
+      "text": "Brown the meat: Add ground beef and cook until browned, breaking it up. Drain excess grease if needed."
+    },
+    {
+      "order": 3,
+      "text": "Build the base: Stir in tomato paste and cook 1 minute. Add diced tomatoes, stock, Worcestershire, bay leaves, thyme, paprika, black pepper, salt, and optional hot sauce. Bring to a gentle boil."
+    },
+    {
+      "order": 4,
+      "text": "Add hearty vegetables: Add diced potatoes, green beans, and corn. Reduce to a simmer and cook until potatoes are tender."
+    },
+    {
+      "order": 5,
+      "text": "Add quick vegetables: Stir in cabbage, peas, and optional okra. Simmer until cabbage is tender and flavors are well blended."
+    },
+    {
+      "order": 6,
+      "text": "Finish: Remove bay leaves. Taste and adjust salt, pepper, and hot sauce. Garnish with parsley and serve hot."
+    }
+  ]
+}

@@ -31,10 +31,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -243,7 +243,10 @@ async function fetchAnimalCareDefaults() {
  * @returns {string[]}
  */
 function resolveFeedingTimes(meta) {
-  if (Array.isArray(meta.feedingDefaultTimes) && meta.feedingDefaultTimes.length) {
+  if (
+    Array.isArray(meta.feedingDefaultTimes) &&
+    meta.feedingDefaultTimes.length
+  ) {
     return meta.feedingDefaultTimes;
   }
   // Simple fallback: morning & evening.
@@ -278,9 +281,7 @@ function buildFeedingTasks(animal, startDate, horizonDays, feedingTimes) {
     const ymd = dateToYMD(d);
 
     const timesForDay =
-      highNeed && feedingTimes.length >= 2
-        ? feedingTimes
-        : [feedingTimes[0]];
+      highNeed && feedingTimes.length >= 2 ? feedingTimes : [feedingTimes[0]];
 
     for (const time of timesForDay) {
       const id = `a_${animal.id}_feeding_${ymd}_${time.replace(":", "")}`;
@@ -379,7 +380,10 @@ function buildBreedingTasks(animal, startDate, horizonDays) {
         const heatWindowStart = addDays(lastHeat, i * cycle - 2);
         const heatWindowEnd = addDays(lastHeat, i * cycle + 2);
         const heatYmd = dateToYMD(heatWindowStart);
-        if (compareYmd(heatYmd, startYmd) >= 0 && compareYmd(heatYmd, endYmd) <= 0) {
+        if (
+          compareYmd(heatYmd, startYmd) >= 0 &&
+          compareYmd(heatYmd, endYmd) <= 0
+        ) {
           const id = `a_${animal.id}_breeding_heatCheck_${heatYmd}`;
           tasks.push({
             id,
@@ -417,7 +421,10 @@ function buildBreedingTasks(animal, startDate, horizonDays) {
     if (serviceDate) {
       const pregCheck = addDays(serviceDate, 35);
       const pregYmd = dateToYMD(pregCheck);
-      if (compareYmd(pregYmd, startYmd) >= 0 && compareYmd(pregYmd, endYmd) <= 0) {
+      if (
+        compareYmd(pregYmd, startYmd) >= 0 &&
+        compareYmd(pregYmd, endYmd) <= 0
+      ) {
         const id = `a_${animal.id}_breeding_pregCheck_${pregYmd}`;
         tasks.push({
           id,
@@ -441,7 +448,9 @@ function buildBreedingTasks(animal, startDate, horizonDays) {
     }
 
     // Pre-birth prep 2 weeks and 1 week before due date.
-    const prepDates = [14, 7].map((daysBefore) => addDays(nominalDue, -daysBefore));
+    const prepDates = [14, 7].map((daysBefore) =>
+      addDays(nominalDue, -daysBefore)
+    );
     prepDates.forEach((date, idx) => {
       const ymd = dateToYMD(date);
       if (compareYmd(ymd, startYmd) < 0 || compareYmd(ymd, endYmd) > 0) return;
@@ -583,7 +592,10 @@ function buildHealthTasks(animal, startDate, horizonDays, meta) {
     const nextYmd = computeNextDueDate(cfg.lastDate, cfg.interval);
     if (!nextYmd) continue;
 
-    if (compareYmd(nextYmd, startYmd) >= 0 && compareYmd(nextYmd, endYmd) <= 0) {
+    if (
+      compareYmd(nextYmd, startYmd) >= 0 &&
+      compareYmd(nextYmd, endYmd) <= 0
+    ) {
       const id = `a_${animal.id}_health_${cfg.key}_${nextYmd}`;
       tasks.push({
         id,

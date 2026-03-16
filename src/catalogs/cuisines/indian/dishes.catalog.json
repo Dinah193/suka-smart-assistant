@@ -1,0 +1,247 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "dishes.indian",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Indian Cuisine — Dishes Catalog",
+    "cuisineId": "cuisines.indian",
+    "description": "Canonical Indian dishes catalog used by SSA planners, search, and UI browse. Covers North, South, and pan-Indian staples with vegetarian and meat-forward balance.",
+    "version": "1.0.0",
+    "author": "SSA",
+    "createdAt": "2026-01-20",
+    "updatedAt": "2026-01-20"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "dish.indian.chicken_tikka_masala",
+      "label": "Chicken Tikka Masala",
+      "aka": ["Murgh Tikka Masala"],
+      "category": "curry",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 35, "totalMins": 60, "handsOffMins": 25 },
+      "servingStyles": ["plated_meals", "stew_and_starch"],
+      "mealArchetypes": ["archetype.curry_and_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ing.chicken"], "chooseOne": true },
+        {
+          "role": "sauce",
+          "items": ["ing.tomato", "ing.cream"],
+          "chooseOne": false
+        },
+        { "role": "spice", "items": ["spice.garam_masala"], "chooseOne": false }
+      ],
+      "techniques": ["tech.marinating", "tech.grilling", "tech.simmering"],
+      "equipmentRecommended": ["equip.grill_pan", "equip.blender"],
+      "equipmentMinimum": ["equip.stovetop_pan"],
+      "ingredientsCore": [
+        "ing.chicken",
+        "ing.tomato",
+        "ing.yogurt",
+        "spice.garam_masala"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": ["indian", "curry", "protein_forward"]
+    },
+
+    {
+      "id": "dish.indian.butter_chicken",
+      "label": "Butter Chicken",
+      "aka": ["Murgh Makhani"],
+      "category": "curry",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 30, "totalMins": 55, "handsOffMins": 25 },
+      "servingStyles": ["plated_meals", "stew_and_starch"],
+      "mealArchetypes": ["archetype.curry_and_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ing.chicken"], "chooseOne": true },
+        {
+          "role": "fat",
+          "items": ["ing.butter", "ing.cream"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["tech.marinating", "tech.simmering"],
+      "equipmentRecommended": ["equip.blender"],
+      "equipmentMinimum": ["equip.stovetop_pan"],
+      "ingredientsCore": ["ing.chicken", "ing.tomato", "ing.butter"],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": ["indian", "curry", "rich"]
+    },
+
+    {
+      "id": "dish.indian.chana_masala",
+      "label": "Chana Masala",
+      "aka": ["Chole"],
+      "category": "legume_curry",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 45, "handsOffMins": 20 },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.legume_curry"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        { "role": "legume", "items": ["ing.chickpeas"], "chooseOne": true },
+        { "role": "spice", "items": ["spice.chana_masala"], "chooseOne": false }
+      ],
+      "techniques": ["tech.simmering"],
+      "equipmentRecommended": ["equip.pressure_cooker"],
+      "equipmentMinimum": ["equip.stovetop_pot"],
+      "ingredientsCore": ["ing.chickpeas", "ing.tomato", "spice.chana_masala"],
+      "allergens": [],
+      "dietFlags": ["vegetarian", "vegan"],
+      "plannerTags": ["indian", "vegetarian", "legumes"]
+    },
+
+    {
+      "id": "dish.indian.dal_tadka",
+      "label": "Dal Tadka",
+      "aka": ["Tarka Dal"],
+      "category": "lentil_dish",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 40, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "stew_and_starch"],
+      "mealArchetypes": ["archetype.dal_and_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        { "role": "legume", "items": ["ing.red_lentils"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.ghee", "ing.oil"], "chooseOne": true }
+      ],
+      "techniques": ["tech.boiling", "tech.tempering"],
+      "equipmentRecommended": ["equip.small_pan"],
+      "equipmentMinimum": ["equip.stovetop_pot"],
+      "ingredientsCore": ["ing.lentils", "ing.ghee", "spice.cumin"],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["vegetarian"],
+      "plannerTags": ["indian", "comfort_food"]
+    },
+
+    {
+      "id": "dish.indian.biryani_chicken",
+      "label": "Chicken Biryani",
+      "aka": [],
+      "category": "rice_dish",
+      "difficulty": 4,
+      "heatTypical": 2,
+      "time": { "activeMins": 45, "totalMins": 90, "handsOffMins": 45 },
+      "servingStyles": ["family_style", "holiday_feasts"],
+      "mealArchetypes": ["archetype.rice_and_protein"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ing.chicken"], "chooseOne": true },
+        { "role": "starch", "items": ["ing.basmati_rice"], "chooseOne": true }
+      ],
+      "techniques": ["tech.layering", "tech.steam_cooking"],
+      "equipmentRecommended": ["equip.heavy_pot"],
+      "equipmentMinimum": ["equip.stovetop_pot"],
+      "ingredientsCore": [
+        "ing.chicken",
+        "ing.basmati_rice",
+        "spice.biryani_masala"
+      ],
+      "allergens": [],
+      "dietFlags": [],
+      "plannerTags": ["indian", "rice", "festive"]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.indian": [
+        "dish.indian.chicken_tikka_masala",
+        "dish.indian.butter_chicken",
+        "dish.indian.chana_masala",
+        "dish.indian.dal_tadka",
+        "dish.indian.biryani_chicken"
+      ]
+    },
+    "byArchetype": {
+      "archetype.curry_and_rice": [
+        "dish.indian.chicken_tikka_masala",
+        "dish.indian.butter_chicken"
+      ],
+      "archetype.legume_curry": ["dish.indian.chana_masala"],
+      "archetype.dal_and_rice": ["dish.indian.dal_tadka"],
+      "archetype.rice_and_protein": ["dish.indian.biryani_chicken"]
+    },
+    "aliasIndex": {
+      "murgh tikka masala": "dish.indian.chicken_tikka_masala",
+      "murgh makhani": "dish.indian.butter_chicken",
+      "chole": "dish.indian.chana_masala",
+      "tarka dal": "dish.indian.dal_tadka"
+    },
+    "keywordIndex": {
+      "curry": [
+        "dish.indian.chicken_tikka_masala",
+        "dish.indian.butter_chicken",
+        "dish.indian.chana_masala"
+      ],
+      "lentils": ["dish.indian.dal_tadka"],
+      "biryani": ["dish.indian.biryani_chicken"]
+    },
+    "tagIndex": {
+      "vegetarian": ["dish.indian.chana_masala", "dish.indian.dal_tadka"],
+      "rice": ["dish.indian.biryani_chicken"],
+      "curry": [
+        "dish.indian.chicken_tikka_masala",
+        "dish.indian.butter_chicken"
+      ]
+    },
+    "bySubprofile": {},
+    "byCategory": {
+      "curry": [
+        "dish.indian.chicken_tikka_masala",
+        "dish.indian.butter_chicken"
+      ],
+      "legume_curry": ["dish.indian.chana_masala"],
+      "lentil_dish": ["dish.indian.dal_tadka"],
+      "rice_dish": ["dish.indian.biryani_chicken"]
+    }
+  }
+}

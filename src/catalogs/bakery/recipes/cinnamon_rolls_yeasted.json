@@ -1,0 +1,285 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.cinnamon_rolls_yeasted",
+    "slug": "cinnamon_rolls_yeasted",
+    "name": "Cinnamon Rolls (Yeasted Sweet Dough Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "bakery",
+      "cinnamon-rolls",
+      "sweet-dough",
+      "yeasted",
+      "breakfast",
+      "brunch",
+      "make-ahead",
+      "freezer-friendly",
+      "family",
+      "celebration"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A canonical yeasted sweet dough cinnamon roll baseline with reliable dough, filling, and bake logic. Includes guidance for either commercial flour or fine fresh-milled flour (choose one). Icing is intentionally left as optional placeholders for later (icing logic module), but basic options are included as optional ingredients/steps."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "baking_dish_9x13", "label": "9x13-inch baking dish" },
+    { "id": "stand_mixer", "label": "Stand mixer (recommended) or hand-knead" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "rolling_pin", "label": "Rolling pin" },
+    { "id": "bench_scraper", "label": "Bench scraper" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    {
+      "id": "thermometer_instant",
+      "label": "Instant-read thermometer (recommended)"
+    },
+    {
+      "id": "dental_floss",
+      "label": "Unflavored dental floss (for clean cuts)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "milk_whole",
+      "label": "Whole milk",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Warm to ~100–110°F (38–43°C)."
+    },
+    {
+      "id": "yeast_instant",
+      "label": "Instant yeast",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 2 1/4 tsp. Active dry can be used; bloom first."
+    },
+    {
+      "id": "sugar_granulated_dough",
+      "label": "Granulated sugar (dough)",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 1/4 cup + 1 tbsp."
+    },
+    {
+      "id": "butter_unsalted_dough",
+      "label": "Unsalted butter, melted and cooled slightly (dough)",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp."
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 1/4 tsp."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR fresh-milled option): bread flour or all-purpose",
+      "amount": { "value": 520, "unit": "g" },
+      "notes": "About 4 1/4 cups AP equivalent. Bread flour gives chewier rolls; AP gives softer. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR commercial option): fine-milled, sifted",
+      "amount": { "value": 520, "unit": "g" },
+      "notes": "Fresh-milled absorbs more. Sift out coarse bran for softer rolls. You may need +15–60 ml additional milk during mixing depending on flour."
+    },
+    {
+      "id": "milk_adjustment_optional",
+      "label": "Extra milk (for fresh-milled flour adjustment)",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Add 15 ml at a time if dough feels dry/stiff; up to ~60 ml total.",
+      "optional": true
+    },
+
+    {
+      "id": "butter_unsalted_filling",
+      "label": "Unsalted butter, very soft (filling)",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp."
+    },
+    {
+      "id": "brown_sugar_filling",
+      "label": "Light brown sugar (filling)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 cup packed."
+    },
+    {
+      "id": "cinnamon_ground",
+      "label": "Ground cinnamon (filling)",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 1/2 tbsp."
+    },
+    {
+      "id": "salt_filling",
+      "label": "Pinch of salt (filling)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "pecans_optional",
+      "label": "Chopped pecans or walnuts (optional)",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "Optional add-in.",
+      "optional": true
+    },
+    {
+      "id": "raisins_optional",
+      "label": "Raisins (optional)",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "Optional add-in.",
+      "optional": true
+    },
+
+    {
+      "id": "cream_pour_optional",
+      "label": "Heavy cream (optional, for ultra-soft rolls)",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": "Optional: pour over rolls just before baking for softer, richer results.",
+      "optional": true
+    },
+
+    {
+      "id": "icing_optional_note",
+      "label": "Optional icing (logic later)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Icing logic will be expanded later. A basic vanilla glaze option is included as optional ingredients/steps.",
+      "optional": true
+    },
+    {
+      "id": "icing_powdered_sugar_optional",
+      "label": "Powdered sugar (optional quick glaze)",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 2 cups.",
+      "optional": true
+    },
+    {
+      "id": "icing_milk_optional",
+      "label": "Milk (optional quick glaze)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "2–3 tbsp, as needed.",
+      "optional": true
+    },
+    {
+      "id": "icing_vanilla_optional",
+      "label": "Vanilla extract (optional quick glaze)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "icing_salt_optional",
+      "label": "Pinch of salt (optional quick glaze)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). For fresh-milled flour, fine-mill and sift coarse bran for softer rolls; expect higher absorption."
+    },
+    {
+      "id": "step_02_warm_milk_activate",
+      "title": "Warm milk and combine with yeast",
+      "body": "Warm milk to about 100–110°F (38–43°C) (warm, not hot). Whisk in sugar and yeast. If using active dry yeast, let stand 5–10 minutes until foamy."
+    },
+    {
+      "id": "step_03_mix_dough",
+      "title": "Mix dough",
+      "body": "Add melted butter and eggs to the milk mixture and whisk. Add flour and salt. Mix until a shaggy dough forms, then knead (mixer with dough hook 6–10 minutes or by hand 10–12 minutes) until smooth and elastic. Dough should be soft and slightly tacky, not dry."
+    },
+    {
+      "id": "step_04_adjust_freshmilled",
+      "title": "Adjust hydration for fresh-milled flour (if needed)",
+      "body": "If dough feels stiff or dry (common with fresh-milled), add extra milk 15 ml at a time (up to ~60 ml) while kneading until dough becomes soft and pliable. If dough is overly sticky, add 10–20 g flour."
+    },
+    {
+      "id": "step_05_first_rise",
+      "title": "First rise",
+      "body": "Place dough in a lightly greased bowl, cover, and let rise until doubled, 60–90 minutes depending on room temperature. Target dough temp after kneading: ~75–80°F (24–27°C)."
+    },
+    {
+      "id": "step_06_make_filling",
+      "title": "Make filling",
+      "body": "Mix brown sugar, cinnamon, and pinch of salt (optional). Have soft butter ready. Prepare optional nuts/raisins if using."
+    },
+    {
+      "id": "step_07_roll_out",
+      "title": "Roll out dough",
+      "body": "Punch down dough and roll into a rectangle about 45x30 cm (18x12 in). Keep thickness even."
+    },
+    {
+      "id": "step_08_fill",
+      "title": "Apply filling",
+      "body": "Spread soft butter evenly over dough, leaving a 1–2 cm (1/2 in) border on one long edge for sealing. Sprinkle cinnamon-sugar evenly. Add nuts/raisins if using."
+    },
+    {
+      "id": "step_09_roll_log",
+      "title": "Roll and seal",
+      "body": "Roll tightly from the long side into a log. Pinch seam to seal. If the dough resists, let it rest 5 minutes and continue."
+    },
+    {
+      "id": "step_10_cut",
+      "title": "Cut rolls",
+      "body": "Cut into 12 equal rolls (about 3.5–4 cm / 1.5 in each). Use unflavored dental floss for clean cuts or a sharp serrated knife."
+    },
+    {
+      "id": "step_11_second_rise",
+      "title": "Second rise (proof)",
+      "body": "Place rolls in a greased 9x13 dish with a little space between. Cover and proof until puffy and touching, 35–75 minutes depending on temperature."
+    },
+    {
+      "id": "step_12_make_ahead_option",
+      "title": "Make-ahead option (overnight)",
+      "body": "After shaping, cover dish tightly and refrigerate 8–16 hours. Next day, let stand at room temperature 45–90 minutes until puffy before baking."
+    },
+    {
+      "id": "step_13_bake_prep",
+      "title": "Bake prep",
+      "body": "Heat oven to 350°F (175°C). Optional: pour heavy cream over rolls just before baking for extra softness."
+    },
+    {
+      "id": "step_14_bake",
+      "title": "Bake",
+      "body": "Bake 22–30 minutes until golden and set. For accuracy, internal temp in center rolls should be ~190°F (88°C). If tops brown too fast, tent with foil."
+    },
+    {
+      "id": "step_15_rest",
+      "title": "Rest briefly",
+      "body": "Cool 10 minutes before icing/glazing (if using)."
+    },
+    {
+      "id": "step_16_optional_glaze_basic",
+      "title": "Optional: basic vanilla glaze (icing logic baseline)",
+      "body": "Whisk powdered sugar with vanilla, pinch of salt, and enough milk to reach a pourable consistency. Drizzle over warm (not hot) rolls."
+    }
+  ],
+  "notes": [
+    "Sweet dough logic: soft, enriched dough should be tacky and elastic. Dry dough yields dense rolls.",
+    "Fresh-milled flour: sift coarse bran for tenderness; expect higher absorption and slightly longer proof times. A short 5–10 minute rest after initial mix can help hydration.",
+    "Proofing logic: Under-proofed rolls tear and bake dense; properly proofed rolls look puffy and spring back slowly when gently pressed.",
+    "Icing logic is intentionally minimal here and will be expanded later (cream cheese frosting, cooked icing, glaze profiles, etc.)."
+  ],
+  "storage": {
+    "roomTemp": "Airtight: 2 days.",
+    "refrigerator": "Airtight: up to 5 days (rewarm for best texture).",
+    "freezer": "Freeze baked rolls (un-iced) up to 2 months. Thaw and rewarm, then glaze."
+  }
+}

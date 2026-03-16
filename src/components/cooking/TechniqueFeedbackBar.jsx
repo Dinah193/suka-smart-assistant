@@ -2,7 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { automation } from "@/services/automation/runtime";
 import { CookingPrefsStore } from "@/store/CookingPrefsStore";
-import { learnFromFeedback, buildChecklist } from "@/agents/cookingStylesAgent";
+import {
+  learnFromFeedback,
+  buildChecklist,
+} from "@/agents/shims/cookingStylesShim";
 
 /**
  * TechniqueFeedbackBar v2
@@ -36,7 +39,10 @@ export default function TechniqueFeedbackBar({
 
   // read sliders from store and stay in sync
   const [sliders, setSliders] = useState(CookingPrefsStore.get().sliders);
-  useEffect(() => CookingPrefsStore.subscribe((s) => setSliders(s.sliders)), []);
+  useEffect(
+    () => CookingPrefsStore.subscribe((s) => setSliders(s.sliders)),
+    []
+  );
 
   // quick delta toggles (users often tweak these)
   const [deltas, setDeltas] = useState({
@@ -106,7 +112,10 @@ export default function TechniqueFeedbackBar({
   }
 
   function setDelta(key, val) {
-    setDeltas((d) => ({ ...d, [key]: typeof val === "boolean" ? val : !d[key] }));
+    setDeltas((d) => ({
+      ...d,
+      [key]: typeof val === "boolean" ? val : !d[key],
+    }));
   }
 
   function NudgeSlider({ k, label }) {
@@ -118,7 +127,9 @@ export default function TechniqueFeedbackBar({
           min="0"
           max="100"
           value={sliders[k]}
-          onChange={(e) => CookingPrefsStore.setSliders({ [k]: Number(e.target.value) })}
+          onChange={(e) =>
+            CookingPrefsStore.setSliders({ [k]: Number(e.target.value) })
+          }
           className="range range-xs flex-1"
           aria-label={`${label} preference`}
         />
@@ -181,7 +192,12 @@ export default function TechniqueFeedbackBar({
                     <li key={row.idx} className="text-xs">
                       <span className="font-semibold mr-1">{row.idx}.</span>
                       {row.label}
-                      {row.duration ? <span className="opacity-70"> &nbsp;• {row.duration}</span> : null}
+                      {row.duration ? (
+                        <span className="opacity-70">
+                          {" "}
+                          &nbsp;• {row.duration}
+                        </span>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -201,7 +217,9 @@ export default function TechniqueFeedbackBar({
             maxLength={140}
           />
           <button
-            className={`btn btn-sm btn-primary rounded-xl ${submitting ? "loading" : ""}`}
+            className={`btn btn-sm btn-primary rounded-xl ${
+              submitting ? "loading" : ""
+            }`}
             onClick={submit}
             disabled={submitting || !cuisine}
             title="Save feedback & learn"
@@ -225,7 +243,8 @@ export default function TechniqueFeedbackBar({
 
       {/* Footer: small hint */}
       <div className="mt-2 text-xs opacity-70 flex items-center gap-2">
-        <kbd className="kbd kbd-xs">1–5</kbd> set rating &middot; <kbd className="kbd kbd-xs">Enter</kbd> save
+        <kbd className="kbd kbd-xs">1–5</kbd> set rating &middot;{" "}
+        <kbd className="kbd kbd-xs">Enter</kbd> save
       </div>
     </div>
   );

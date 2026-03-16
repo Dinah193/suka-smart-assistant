@@ -32,7 +32,7 @@
 //
 
 import eventBus from "./events/eventBus";
-import featureFlags from "../config/featureFlags.json";
+import featureFlags from "@/config/featureFlags.json";
 import HubPacketFormatter from "./hub/HubPacketFormatter";
 import FamilyFundConnector from "./hub/FamilyFundConnector";
 import db from "./db";

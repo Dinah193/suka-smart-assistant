@@ -1,0 +1,484 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.ethiopian.recipes.misir_wat",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Misir Wat (Ethiopian Red Lentil Stew)",
+    "subtitle": "Berbere-forward lentil wot with long-cooked onions and niter kibbeh (or oil).",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Canonical misir wat pattern: onion reduction + berbere bloom + lentil simmer until creamy.",
+        "Designed to be vegan-capable by default (fat choice), while preserving Ethiopian flavor profile.",
+        "SSA-friendly signals included for meal planning and batch cooking."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Ethiopian",
+    "category": "stew",
+    "mealArchetypes": [
+      "stew",
+      "legume_stew",
+      "injera_platter",
+      "plant_forward"
+    ],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.ethiopian",
+      "dish.ethiopian.misir_wot",
+      "style.wot",
+      "signature.berbere",
+      "plant.forward",
+      "vegan.option",
+      "batch.friendly",
+      "leftovers.good",
+      "freezer.friendly",
+      "weeknight.possible"
+    ]
+  },
+
+  "summary": "A deeply savory Ethiopian lentil stew built on slow-cooked onions and berbere, simmered until creamy and traditionally served with injera.",
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.25, "unit": "cups" },
+    "notes": "Serves ~6 with injera/rice; ~8 as part of a multi-dish platter."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 40,
+    "totalMins": 65
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "weeknightPossible": true,
+    "makeAhead": true
+  },
+
+  "tasteProfile": {
+    "heat": "medium",
+    "sweetness": "low",
+    "acidity": "low",
+    "savory": "high",
+    "texture": ["creamy", "stewy"],
+    "aromatics": ["onion", "garlic", "ginger"],
+    "spiceProfile": ["berbere", "paprika", "fenugreek", "chile"],
+    "fatProfile": ["niter_kibbeh_or_neutral_oil"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "tool.heavy_pot",
+        "label": "Heavy pot / Dutch oven",
+        "required": true
+      },
+      {
+        "id": "tool.wooden_spoon",
+        "label": "Wooden spoon or sturdy spatula",
+        "required": true
+      },
+      {
+        "id": "tool.measuring_cups",
+        "label": "Measuring cups",
+        "required": true
+      },
+      {
+        "id": "tool.measuring_spoons",
+        "label": "Measuring spoons",
+        "required": true
+      }
+    ],
+    "recommended": ["tool.kitchen_scale", "tool.timer"],
+    "optional": [
+      {
+        "id": "tool.immersion_blender",
+        "label": "Immersion blender",
+        "required": false,
+        "notes": "Optional: blend a small portion for extra creaminess."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "plant_forward",
+    "vegetarian",
+    "vegan_option",
+    "dairy_optional",
+    "gluten_free"
+  ],
+  "allergens": {
+    "contains": ["dairy_optional"],
+    "notes": [
+      "Use niter kibbeh/ghee for traditional richness (contains dairy).",
+      "Use neutral oil for vegan/dairy-free."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "legume.red_lentils",
+      "label": "Red lentils, rinsed",
+      "role": "base",
+      "amount": { "value": 320, "unit": "g" },
+      "notes": "Rinse until water runs mostly clear to reduce foam."
+    },
+    {
+      "id": "aromatic.onion",
+      "label": "Yellow onions, very finely minced",
+      "role": "aromatic_base",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": [
+        "Misir wat uses a generous onion base; mince fine for a smooth stew.",
+        "Food processor is okay if you pulse to mince (not puree)."
+      ]
+    },
+    {
+      "id": "fat.niter_kibbeh",
+      "label": "Niter kibbeh (spiced clarified butter) OR neutral oil",
+      "role": "fat",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": [
+        "Traditional: niter kibbeh or ghee (dairy).",
+        "Vegan: use 45–60 ml neutral oil."
+      ]
+    },
+    {
+      "id": "aromatic.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "aromatic.ginger",
+      "label": "Fresh ginger, minced",
+      "role": "aromatic",
+      "amount": { "value": 8, "unit": "g" }
+    },
+    {
+      "id": "spice.berbere",
+      "label": "Berbere spice blend",
+      "role": "spice_core",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": [
+        "Typical range: 12–24 g depending on blend heat.",
+        "Add in 2 additions to bloom without scorching."
+      ]
+    },
+    {
+      "id": "umami.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Optional but common; boosts color and savory depth."
+    },
+    {
+      "id": "spice.paprika",
+      "label": "Paprika (sweet)",
+      "role": "spice_support",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true,
+      "notes": "Optional: adds color if your berbere is mild."
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "Plus more to taste."
+    },
+    {
+      "id": "liquid.water",
+      "label": "Water or vegetable stock",
+      "role": "liquid",
+      "amount": { "value": 1200, "unit": "ml" },
+      "notes": "Use water for a clean berbere-forward profile; stock for richer body."
+    },
+    {
+      "id": "acid.lemon_juice",
+      "label": "Lemon juice (optional, to brighten)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true,
+      "notes": "A small splash at the end can lift flavors."
+    },
+    {
+      "id": "starch.injera",
+      "label": "Injera, for serving",
+      "role": "serving_base",
+      "amount": { "value": 6, "unit": "servings" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Base",
+      "items": ["legume.red_lentils", "liquid.water"]
+    },
+    {
+      "id": "group.wot_base",
+      "label": "Wot base (onion reduction + aromatics + berbere)",
+      "items": [
+        "aromatic.onion",
+        "fat.niter_kibbeh",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "umami.tomato_paste",
+        "spice.paprika",
+        "salt.kosher"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish & serving",
+      "items": ["acid.lemon_juice", "starch.injera"]
+    }
+  ],
+
+  "methods": [
+    "method.onion_reduction",
+    "method.bloom_spices_in_fat",
+    "method.simmer",
+    "method.stew"
+  ],
+
+  "notes": [
+    "Texture control: for thicker stew, simmer uncovered for the last 8–12 minutes.",
+    "If lentils thicken too much, thin with hot water a little at a time.",
+    "If foam rises early, skim lightly; rinsing lentils helps reduce foam."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.very_creamy",
+      "label": "Extra creamy",
+      "changes": {
+        "technique": "Blend 1–2 cups of cooked stew with an immersion blender, then stir back in."
+      }
+    },
+    {
+      "id": "variation.hotter",
+      "label": "Hotter misir wat",
+      "changes": {
+        "berbere": "Increase berbere to 24 g, or add a pinch of cayenne if your berbere is mild."
+      }
+    },
+    {
+      "id": "variation.oil_only_vegan",
+      "label": "Vegan",
+      "changes": {
+        "fat": "Use neutral oil instead of niter kibbeh/ghee; verify stock is vegetable-only."
+      }
+    }
+  ],
+
+  "safety": {
+    "cooling": {
+      "notes": [
+        "Cool leftovers quickly and refrigerate within 2 hours.",
+        "Reheat to a simmer before serving."
+      ]
+    },
+    "storage": {
+      "fridgeDays": 5,
+      "freezerMonths": 3
+    }
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "4-5 days",
+      "notes": "Flavors deepen after resting overnight."
+    },
+    "freezer": {
+      "duration": "up to 3 months",
+      "notes": "Freeze in portions; thaw overnight and reheat gently with a splash of water."
+    }
+  },
+
+  "pairings": {
+    "serveWith": [
+      { "id": "dish.ethiopian.injera", "label": "Injera" },
+      { "id": "dish.ethiopian.gomen", "label": "Gomen (Ethiopian greens)" },
+      {
+        "id": "dish.ethiopian.atkilt",
+        "label": "Atkilt wat (cabbage-potato-carrot)"
+      }
+    ],
+    "fallbacks": [{ "id": "starch.rice", "label": "Rice (fallback base)" }]
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Rinse lentils", "timeMins": 3 },
+      { "task": "Mince onions very fine", "timeMins": 8 },
+      { "task": "Measure spices and aromatics", "timeMins": 4 }
+    ],
+    "leftoversPlan": [
+      "Day 2: Serve with greens and rice.",
+      "Day 3: Thin slightly and use as a sauce over roasted vegetables."
+    ]
+  },
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Rinse lentils",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Rinse red lentils in a fine mesh strainer until the water runs mostly clear.",
+        "Set aside to drain."
+      ],
+      "checks": ["Lentils are rinsed and draining."]
+    },
+    {
+      "id": "step_02",
+      "title": "Begin onion reduction (dry, then fat)",
+      "activeMins": 10,
+      "handsOffMins": 8,
+      "instructions": [
+        "Add minced onions to a heavy pot over medium heat.",
+        "Cook, stirring often, until onions release moisture and begin to soften and reduce.",
+        "If onions start to stick, add 2–3 tbsp water and scrape the bottom; continue reducing."
+      ],
+      "timers": [{ "label": "Initial onion cook", "minutes": 8 }],
+      "checks": ["Onions are softened and reduced; no browning."]
+    },
+    {
+      "id": "step_03",
+      "title": "Add fat and cook onions until jammy",
+      "activeMins": 7,
+      "handsOffMins": 10,
+      "instructions": [
+        "Add niter kibbeh/ghee (or neutral oil).",
+        "Cook on medium-low, stirring frequently, until onions are jammy and aromatic and moisture has mostly cooked off."
+      ],
+      "timers": [{ "label": "Jammy onion base", "minutes": 10 }],
+      "checks": ["Onions are thick and glossy; raw onion smell is gone."]
+    },
+    {
+      "id": "step_04",
+      "title": "Bloom aromatics and berbere",
+      "activeMins": 6,
+      "handsOffMins": 2,
+      "instructions": [
+        "Stir in garlic and ginger; cook 30–60 seconds until fragrant.",
+        "Add berbere in 2 additions, stirring constantly to bloom.",
+        "If using tomato paste, add it now and cook 1–2 minutes to deepen flavor and color."
+      ],
+      "timers": [{ "label": "Bloom spices", "minutes": 2 }],
+      "checks": ["Spices are fragrant and not scorched."]
+    },
+    {
+      "id": "step_05",
+      "title": "Add water and lentils, then simmer",
+      "activeMins": 6,
+      "handsOffMins": 25,
+      "instructions": [
+        "Add water (or vegetable stock) and stir to dissolve the onion-spice base into the liquid.",
+        "Add rinsed lentils and bring to a gentle simmer.",
+        "Simmer partially covered, stirring occasionally, until lentils break down and stew becomes creamy."
+      ],
+      "timers": [{ "label": "Lentil simmer", "minutes": 25 }],
+      "checks": ["Lentils are very soft and the stew looks creamy."]
+    },
+    {
+      "id": "step_06",
+      "title": "Adjust texture and season",
+      "activeMins": 6,
+      "handsOffMins": 6,
+      "instructions": [
+        "Stir in salt and simmer 3–6 minutes so seasoning integrates.",
+        "If stew is too thick, add hot water a splash at a time; if too thin, simmer uncovered to reduce.",
+        "Optional: add a small splash of lemon juice to brighten."
+      ],
+      "timers": [{ "label": "Final adjust", "minutes": 6 }],
+      "checks": ["Stew is seasoned, creamy, and spoonable."]
+    },
+    {
+      "id": "step_07",
+      "title": "Serve",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Serve hot with injera (traditional) or rice (fallback).",
+        "For platter-style meals, pair with greens (gomen) and vegetable stews."
+      ],
+      "checks": ["Stew is hot and ready to serve."]
+    }
+  ],
+
+  "adaptations": [
+    {
+      "id": "adapt.dairy_free_fat_swap",
+      "kind": "swap",
+      "when": { "avoidAllergens": ["dairy"] },
+      "change": {
+        "from": "fat.niter_kibbeh",
+        "to": "fat.neutral_oil",
+        "notes": "Use neutral oil; keep bloom step the same."
+      }
+    },
+    {
+      "id": "adapt.reduce_heat",
+      "kind": "adjust",
+      "when": { "heatPreference": "mild" },
+      "change": {
+        "field": "spice.berbere",
+        "notes": "Use 10–12 g berbere and add paprika for color."
+      }
+    },
+    {
+      "id": "adapt.thicken_or_thin",
+      "kind": "adjust",
+      "when": { "desiredTexture": "thicker_or_thinner" },
+      "change": {
+        "notes": "Simmer uncovered to thicken; add hot water to thin."
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.ethiopian",
+    "dishId": "dish.ethiopian.misir_wot",
+    "aliases": [
+      "misir wat",
+      "misir wot",
+      "ethiopian lentil stew",
+      "red lentil wot"
+    ],
+    "ingredientIdHints": [
+      "legume.red_lentils",
+      "spice.berbere",
+      "aromatic.onion",
+      "aromatic.garlic",
+      "aromatic.ginger"
+    ],
+    "equipmentIdHints": ["tool.heavy_pot"],
+    "methodIdHints": [
+      "method.onion_reduction",
+      "method.bloom_spices_in_fat",
+      "method.simmer"
+    ]
+  }
+}

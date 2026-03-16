@@ -19,7 +19,7 @@
 //   not only from MealPlanner plans
 //
 // ASSUMPTIONS
-// - eventBus exists at src/services/eventBus.js
+// - eventBus exists at src/services/events/eventBus.js
 // - featureFlags.json exists and includes "familyFundMode"
 // - HubPacketFormatter + FamilyFundConnector exist and are importable
 // - A SessionStore / dataGateway exists to persist session records
@@ -49,10 +49,10 @@
 //   status: "pending" | "in-progress" | "completed"
 // }
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatMealSessionForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatMealSessionForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // Defensive soft imports – you already have engines/stores for meals
 let SessionStore;
@@ -191,7 +191,11 @@ const MealSessionGenerator = {
     });
 
     // inventory update event (if actuals contain usedIngredients)
-    if (actuals && Array.isArray(actuals.usedIngredients) && actuals.usedIngredients.length) {
+    if (
+      actuals &&
+      Array.isArray(actuals.usedIngredients) &&
+      actuals.usedIngredients.length
+    ) {
       const invEvt = emitEvent("inventory.updated", {
         sourceSessionId: sessionId,
         deltas: actuals.usedIngredients.map((ing) => ({
@@ -205,7 +209,11 @@ const MealSessionGenerator = {
     }
 
     // optional: preservation completed
-    if (actuals && Array.isArray(actuals.preservation) && actuals.preservation.length) {
+    if (
+      actuals &&
+      Array.isArray(actuals.preservation) &&
+      actuals.preservation.length
+    ) {
       const presEvt = emitEvent("preservation.completed", {
         sessionId,
         items: actuals.preservation,
@@ -238,7 +246,9 @@ function groupMeals(meals, policy) {
   if (policy === "cuisine") {
     const map = {};
     meals.forEach((m) => {
-      const key = (m.tags && m.tags.find((t) => t.startsWith("cuisine:"))) || "cuisine:default";
+      const key =
+        (m.tags && m.tags.find((t) => t.startsWith("cuisine:"))) ||
+        "cuisine:default";
       if (!map[key]) map[key] = [];
       map[key].push(m);
     });
@@ -278,7 +288,10 @@ async function buildSessionFromMeals(meals, ctx = {}) {
         domains: ["storehouse", "inventory", "garden", "animal"],
       });
     } catch (e) {
-      console.warn("[MealSessionGenerator] InventoryMapper failed, using raw ingredients", e);
+      console.warn(
+        "[MealSessionGenerator] InventoryMapper failed, using raw ingredients",
+        e
+      );
     }
   }
 
@@ -287,7 +300,11 @@ async function buildSessionFromMeals(meals, ctx = {}) {
 
   // 4. Optionally attach preservation (e.g., auto-suggest "can broth", "dehydrate herbs")
   let preservation = [];
-  if (ctx.attachPreservation && PreservationLinker && typeof PreservationLinker.link === "function") {
+  if (
+    ctx.attachPreservation &&
+    PreservationLinker &&
+    typeof PreservationLinker.link === "function"
+  ) {
     try {
       preservation = await PreservationLinker.link(meals, mappedIngredients);
     } catch (e) {
@@ -385,7 +402,8 @@ function makeSessionTitle(meals, policy) {
   }
   if (policy === "cuisine") {
     const cuisineTag =
-      meals.find((m) => m.tags && m.tags.find((t) => t.startsWith("cuisine:")))
+      meals
+        .find((m) => m.tags && m.tags.find((t) => t.startsWith("cuisine:")))
         ?.tags?.find((t) => t.startsWith("cuisine:")) || "Mixed";
     return `Batch Cook — ${cuisineTag.replace("cuisine:", "")}`;
   }
@@ -431,7 +449,10 @@ async function persistSession(session) {
       await SessionStore.save(session);
       return session;
     } catch (e) {
-      console.warn("[MealSessionGenerator] persistSession failed, returning session only", e);
+      console.warn(
+        "[MealSessionGenerator] persistSession failed, returning session only",
+        e
+      );
       return session;
     }
   }

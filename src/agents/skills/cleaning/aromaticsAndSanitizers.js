@@ -26,7 +26,7 @@
  * - Falls back gracefully when unknown products/surfaces are encountered.
  */
 
-import { emit } from "@/services/eventBus"; // safe-optional, swallowed if not present
+import { emit } from "@/services/events/eventBus"; // safe-optional, swallowed if not present
 
 /* --------------------------------- Types ---------------------------------- */
 /**
@@ -69,11 +69,26 @@ export function registerAromaticProfile(name, profile) {
 }
 
 /* Seed common aromatic families */
-registerAromaticProfile("citrus", { family: "citrus", volatility: "high", synonyms: ["lemon", "orange", "lime", "citrus"] });
-registerAromaticProfile("pine", { family: "pine", volatility: "medium", synonyms: ["pine", "conifer", "evergreen"] });
+registerAromaticProfile("citrus", {
+  family: "citrus",
+  volatility: "high",
+  synonyms: ["lemon", "orange", "lime", "citrus"],
+});
+registerAromaticProfile("pine", {
+  family: "pine",
+  volatility: "medium",
+  synonyms: ["pine", "conifer", "evergreen"],
+});
 registerAromaticProfile("floral", { family: "floral", volatility: "medium" });
-registerAromaticProfile("herbal", { family: "herbal", volatility: "low", synonyms: ["thyme", "lavender", "tea tree", "eucalyptus"] });
-registerAromaticProfile("unscented", { family: "unscented", volatility: "low" });
+registerAromaticProfile("herbal", {
+  family: "herbal",
+  volatility: "low",
+  synonyms: ["thyme", "lavender", "tea tree", "eucalyptus"],
+});
+registerAromaticProfile("unscented", {
+  family: "unscented",
+  volatility: "low",
+});
 
 /* ---------------------------- Sanitizers Registry -------------------------- */
 /**
@@ -106,7 +121,7 @@ registerSanitizer("bleach", {
   label: "Sodium hypochlorite ~5.25–6%",
   stockConc: 0.055,
   targetConc: 0.0001, // ~1000 ppm for household disinfection
-  epaDwellSec: 60,    // 1 min common; some labels longer — override per brand if needed
+  epaDwellSec: 60, // 1 min common; some labels longer — override per brand if needed
   notForSurfaces: ["wool", "silk", "unsealed wood", "stone (marble/granite)"],
   notes: "Never mix with ammonia or acids. Rinse food-contact surfaces.",
 });
@@ -116,7 +131,7 @@ registerSanitizer("quat", {
   label: "Quaternary ammonium compound",
   stockConc: 0.01,
   targetConc: 0.0002, // example 200 ppm
-  epaDwellSec: 600,   // often 10 min; check label
+  epaDwellSec: 600, // often 10 min; check label
   notForSurfaces: ["unfinished wood"],
   notes: "Some pathogens require longer dwell; check label.",
 });
@@ -124,9 +139,9 @@ registerSanitizer("quat", {
 registerSanitizer("alcohol", {
   kind: "alcohol",
   label: "Ethyl/Isopropyl 70% v/v",
-  stockConc: 0.70,
-  targetConc: 0.70,  // use as sold
-  epaDwellSec: 30,   // 30-60s typical
+  stockConc: 0.7,
+  targetConc: 0.7, // use as sold
+  epaDwellSec: 30, // 30-60s typical
   notForSurfaces: ["unfinished wood", "acrylic (crazing risk)"],
   notes: "Highly flammable; ensure ventilation.",
 });
@@ -171,9 +186,24 @@ export function registerSurfacePolicy(surfaceName, policy) {
 }
 
 /* Common surfaces */
-registerSurfacePolicy("natural stone", { name: "natural stone", forbid: ["acidic", "bleach", "vinegar"], prefer: ["quat", "alcohol", "peroxide"], note: "Acids etch; bleach can discolor." });
-registerSurfacePolicy("unfinished wood", { name: "unfinished wood", forbid: ["alcohol", "bleach", "quat"], prefer: ["peroxide"], note: "Avoid swelling/drying; spot test." });
-registerSurfacePolicy("food contact", { name: "food contact", forbid: [], prefer: ["bleach", "quat", "peroxide", "alcohol"], note: "Rinse if label requires." });
+registerSurfacePolicy("natural stone", {
+  name: "natural stone",
+  forbid: ["acidic", "bleach", "vinegar"],
+  prefer: ["quat", "alcohol", "peroxide"],
+  note: "Acids etch; bleach can discolor.",
+});
+registerSurfacePolicy("unfinished wood", {
+  name: "unfinished wood",
+  forbid: ["alcohol", "bleach", "quat"],
+  prefer: ["peroxide"],
+  note: "Avoid swelling/drying; spot test.",
+});
+registerSurfacePolicy("food contact", {
+  name: "food contact",
+  forbid: [],
+  prefer: ["bleach", "quat", "peroxide", "alcohol"],
+  note: "Rinse if label requires.",
+});
 
 /* --------------------------- Compatibility Rules --------------------------- */
 
@@ -193,15 +223,21 @@ addCompatibilityRule((prods) => {
   const out = { ok: true, warnings: [], hazards: [] };
   if (has("bleach") && (has("ammonia") || has("quat"))) {
     out.ok = false;
-    out.hazards.push("Do NOT mix bleach with ammonia/quats: toxic chloramines.");
+    out.hazards.push(
+      "Do NOT mix bleach with ammonia/quats: toxic chloramines."
+    );
   }
   if (has("bleach") && (has("vinegar") || has("acid") || has("toilet bowl"))) {
     out.ok = false;
-    out.hazards.push("Do NOT mix bleach with acids (vinegar/toilet cleaners): chlorine gas.");
+    out.hazards.push(
+      "Do NOT mix bleach with acids (vinegar/toilet cleaners): chlorine gas."
+    );
   }
   if (has("peroxide") && has("vinegar")) {
     out.ok = false;
-    out.hazards.push("Do NOT combine peroxide with vinegar: forms peracetic acid.");
+    out.hazards.push(
+      "Do NOT combine peroxide with vinegar: forms peracetic acid."
+    );
   }
   return out;
 });
@@ -221,12 +257,18 @@ export function addVentilationAdvisor(fn) {
 addVentilationAdvisor(({ aromaticsMatch, sanitizerProfile }) => {
   const out = {};
   if (aromaticsMatch?.volatility === "high") {
-    out.cue = "Open a window or run exhaust fan while using high-volatility cleaners.";
+    out.cue =
+      "Open a window or run exhaust fan while using high-volatility cleaners.";
   }
   if (sanitizerProfile?.kind === "alcohol") {
-    out.cue = (out.cue ? out.cue + " " : "") + "Keep away from flames/heat; allow vapors to disperse.";
+    out.cue =
+      (out.cue ? out.cue + " " : "") +
+      "Keep away from flames/heat; allow vapors to disperse.";
   }
-  if (sanitizerProfile?.kind === "bleach" || sanitizerProfile?.kind === "quat") {
+  if (
+    sanitizerProfile?.kind === "bleach" ||
+    sanitizerProfile?.kind === "quat"
+  ) {
     out.ppe = ["gloves"];
   }
   return out;
@@ -247,35 +289,68 @@ export function evaluateAromaticsPolicy(productName, prefs = {}) {
   // fragrance-free supersedes
   if (prefs.fragranceFree) {
     if (!/unscented|fragrance\s*free/i.test(productName)) {
-      return { allowed: false, reason: "Household is fragrance free", suggested: toUnscented(productName) };
+      return {
+        allowed: false,
+        reason: "Household is fragrance free",
+        suggested: toUnscented(productName),
+      };
     }
   }
 
   // brand allow/deny
-  if (Array.isArray(prefs.disallowedBrands) && brandMatch(productName, prefs.disallowedBrands)) {
+  if (
+    Array.isArray(prefs.disallowedBrands) &&
+    brandMatch(productName, prefs.disallowedBrands)
+  ) {
     return { allowed: false, reason: "Brand disallowed" };
   }
-  if (Array.isArray(prefs.allowedBrands) && !brandMatch(productName, prefs.allowedBrands)) {
+  if (
+    Array.isArray(prefs.allowedBrands) &&
+    !brandMatch(productName, prefs.allowedBrands)
+  ) {
     // If allow list exists, deny unmatched scented items unless "unscented"
     if (!/unscented|fragrance\s*free/i.test(productName)) {
-      return { allowed: false, reason: "Brand not on allow-list", suggested: toUnscented(productName) };
+      return {
+        allowed: false,
+        reason: "Brand not on allow-list",
+        suggested: toUnscented(productName),
+      };
     }
   }
 
   // aromatic family deny
   const fam = matchAromaticFamily(productName);
-  if (fam && Array.isArray(prefs.disallowedNotes) && prefs.disallowedNotes.some((n) => fam.family === norm(n))) {
-    return { allowed: false, reason: `Disallowed aromatic note: ${fam.family}`, suggested: "unscented" };
+  if (
+    fam &&
+    Array.isArray(prefs.disallowedNotes) &&
+    prefs.disallowedNotes.some((n) => fam.family === norm(n))
+  ) {
+    return {
+      allowed: false,
+      reason: `Disallowed aromatic note: ${fam.family}`,
+      suggested: "unscented",
+    };
   }
 
   // aerosols
-  if (prefs.avoidAerosols && /aerosol|propellant|spray can/i.test(productName)) {
-    return { allowed: false, reason: "Aerosol avoided by preference", suggested: "pump/squeeze bottle variant" };
+  if (
+    prefs.avoidAerosols &&
+    /aerosol|propellant|spray can/i.test(productName)
+  ) {
+    return {
+      allowed: false,
+      reason: "Aerosol avoided by preference",
+      suggested: "pump/squeeze bottle variant",
+    };
   }
 
   // asthma sensitivity: prefer low volatility
   if (prefs.asthmaSensitive && fam?.volatility === "high") {
-    return { allowed: false, reason: "High volatility not recommended for asthma", suggested: "unscented/low-VOC alternative" };
+    return {
+      allowed: false,
+      reason: "High volatility not recommended for asthma",
+      suggested: "unscented/low-VOC alternative",
+    };
   }
 
   return { allowed: true };
@@ -289,15 +364,30 @@ export function evaluateAromaticsPolicy(productName, prefs = {}) {
  */
 export function computeDilution(sanitizerName, opts = {}) {
   const s = SANITIZERS.get(norm(sanitizerName));
-  if (!s) return { stockMl: 0, waterMl: 0, targetConc: 0, batchVolumeMl: 0, note: "Unknown sanitizer" };
-  const target = Number.isFinite(opts.desiredConc) ? opts.desiredConc : s.targetConc;
+  if (!s)
+    return {
+      stockMl: 0,
+      waterMl: 0,
+      targetConc: 0,
+      batchVolumeMl: 0,
+      note: "Unknown sanitizer",
+    };
+  const target = Number.isFinite(opts.desiredConc)
+    ? opts.desiredConc
+    : s.targetConc;
   const batch = Math.max(1, Math.round(Number(opts.batchVolumeMl) || 1000));
 
   // simple C1V1 = C2V2
   const stockMl = (target / (s.stockConc || 1)) * batch;
   const clampStock = clampNum(stockMl, 0, batch);
   const waterMl = Math.max(0, batch - clampStock);
-  return { stockMl: round(clampStock, 1), waterMl: round(waterMl, 1), targetConc: target, batchVolumeMl: batch, note: s.notes || "" };
+  return {
+    stockMl: round(clampStock, 1),
+    waterMl: round(waterMl, 1),
+    targetConc: target,
+    batchVolumeMl: batch,
+    note: s.notes || "",
+  };
 }
 
 /**
@@ -308,9 +398,13 @@ export function computeDilution(sanitizerName, opts = {}) {
  */
 export function getDwellTime(sanitizerName, opts = {}) {
   const s = SANITIZERS.get(norm(sanitizerName));
-  if (!s) return { dwellSec: 0, warnings: ["Unknown sanitizer"], surfaceOk: true };
+  if (!s)
+    return { dwellSec: 0, warnings: ["Unknown sanitizer"], surfaceOk: true };
 
-  const dwell = Math.max(0, Math.round(Number(opts.labelOverrideSec || s.epaDwellSec || 0)));
+  const dwell = Math.max(
+    0,
+    Math.round(Number(opts.labelOverrideSec || s.epaDwellSec || 0))
+  );
   const warn = [];
 
   if (opts.surface) {
@@ -358,7 +452,12 @@ export function suggestSubstitution(productName, opts = {}) {
   if (surface) {
     const surf = SURFACE_POLICY.get(norm(surface));
     const s = SANITIZERS.get(norm(productName));
-    if (surf && s && Array.isArray(surf.forbid) && surf.forbid.includes(s.kind)) {
+    if (
+      surf &&
+      s &&
+      Array.isArray(surf.forbid) &&
+      surf.forbid.includes(s.kind)
+    ) {
       const kind = surf.prefer?.[0];
       const alt = kind ? findSanitizerByKind(kind) : null;
       if (alt) return { name: alt.name, reason: `Preferred for ${surf.name}` };
@@ -380,38 +479,64 @@ export function applyAromaticsAndSanitizersToSteps(steps = [], opts = {}) {
   const out = steps.map((s) => clone(s));
 
   for (const step of out) {
-    const supplies = Array.isArray(step?.metadata?.supplies) ? step.metadata.supplies : [];
+    const supplies = Array.isArray(step?.metadata?.supplies)
+      ? step.metadata.supplies
+      : [];
     if (!supplies.length) continue;
 
     // Compatibility check across all listed supplies in the step
     const comp = checkCompatibility(supplies);
     if (!comp.ok) {
-      step.blockers = Array.from(new Set([...(step.blockers || []), "equipment"]));
-      addNote(notes, `Compatibility hazard in step "${step.title}": ${comp.hazards.join(" ")}`);
+      step.blockers = Array.from(
+        new Set([...(step.blockers || []), "equipment"])
+      );
+      addNote(
+        notes,
+        `Compatibility hazard in step "${step.title}": ${comp.hazards.join(
+          " "
+        )}`
+      );
     }
 
     for (const name of supplies) {
       // Fragrance policy
       const arom = evaluateAromaticsPolicy(name, prefs);
       if (!arom.allowed) {
-        addNote(notes, `Fragrance policy: "${name}" → ${arom.reason}. Suggest: ${arom.suggested || "unscented"}.`);
+        addNote(
+          notes,
+          `Fragrance policy: "${name}" → ${arom.reason}. Suggest: ${
+            arom.suggested || "unscented"
+          }.`
+        );
       }
 
       // Sanitizer dwell & ventilation
       const san = SANITIZERS.get(norm(name));
       const fam = matchAromaticFamily(name);
-      const vent = runVentAdvisors({ step, aromaticsMatch: fam, sanitizerProfile: san });
+      const vent = runVentAdvisors({
+        step,
+        aromaticsMatch: fam,
+        sanitizerProfile: san,
+      });
 
       if (san) {
         const dwell = getDwellTime(name, { surface: opts.surface });
         if (dwell.dwellSec > 0) {
           step.metadata = step.metadata || {};
           step.metadata.donenessCue = "timer";
-          step.metadata.cueNotes = joinCues(step.metadata.cueNotes, `Maintain wet contact for ${formatSeconds(dwell.dwellSec)}.`);
+          step.metadata.cueNotes = joinCues(
+            step.metadata.cueNotes,
+            `Maintain wet contact for ${formatSeconds(dwell.dwellSec)}.`
+          );
           step.durationSec = Math.max(step.durationSec || 0, dwell.dwellSec);
         }
         if (!dwell.surfaceOk) {
-          addNote(notes, `Surface caution: ${name} not recommended on ${opts.surface || "this surface"}.`);
+          addNote(
+            notes,
+            `Surface caution: ${name} not recommended on ${
+              opts.surface || "this surface"
+            }.`
+          );
         }
       }
 
@@ -421,7 +546,10 @@ export function applyAromaticsAndSanitizersToSteps(steps = [], opts = {}) {
       }
       if (Array.isArray(vent?.ppe) && vent.ppe.length) {
         step.metadata = step.metadata || {};
-        step.metadata.cueNotes = joinCues(step.metadata.cueNotes, `PPE: ${vent.ppe.join(", ")}`);
+        step.metadata.cueNotes = joinCues(
+          step.metadata.cueNotes,
+          `PPE: ${vent.ppe.join(", ")}`
+        );
       }
     }
   }
@@ -445,7 +573,11 @@ function matchAromaticFamily(productName) {
   const low = norm(productName);
   for (const [key, prof] of AROMATICS) {
     if (low.includes(key)) return prof;
-    if (Array.isArray(prof.synonyms) && prof.synonyms.some((s) => low.includes(norm(s)))) return prof;
+    if (
+      Array.isArray(prof.synonyms) &&
+      prof.synonyms.some((s) => low.includes(norm(s)))
+    )
+      return prof;
   }
   return null;
 }
@@ -456,12 +588,15 @@ function brandMatch(productName, list) {
 }
 
 function toUnscented(name) {
-  const base = name.replace(/\b(lemon|citrus|lavender|pine|floral|fresh)\b/gi, "").trim();
+  const base = name
+    .replace(/\b(lemon|citrus|lavender|pine|floral|fresh)\b/gi, "")
+    .trim();
   return `${base} (Unscented)`.replace(/\s+/g, " ").trim();
 }
 
 function findSanitizerByKind(kind) {
-  for (const [name, s] of SANITIZERS) if (s.kind === kind) return { name, profile: s };
+  for (const [name, s] of SANITIZERS)
+    if (s.kind === kind) return { name, profile: s };
   return null;
 }
 
@@ -493,12 +628,37 @@ function formatSeconds(sec) {
 
 /* ------------------------------ Utils / Core ------------------------------- */
 
-function norm(s) { return String(s || "").toLowerCase().trim(); }
-function addNote(buf, text) { if (text) buf.push(text); }
-function clone(v) { try { return structuredClone(v); } catch { return JSON.parse(JSON.stringify(v)); } }
-function clampNum(n, min, max) { const v = Number(n); if (!Number.isFinite(v)) return min; return Math.min(Math.max(v, min), max); }
-function round(n, places = 0) { const p = Math.pow(10, places); return Math.round(n * p) / p; }
-function safeCall(fn, ...args) { try { return fn?.(...args); } catch { return null; } }
+function norm(s) {
+  return String(s || "")
+    .toLowerCase()
+    .trim();
+}
+function addNote(buf, text) {
+  if (text) buf.push(text);
+}
+function clone(v) {
+  try {
+    return structuredClone(v);
+  } catch {
+    return JSON.parse(JSON.stringify(v));
+  }
+}
+function clampNum(n, min, max) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return min;
+  return Math.min(Math.max(v, min), max);
+}
+function round(n, places = 0) {
+  const p = Math.pow(10, places);
+  return Math.round(n * p) / p;
+}
+function safeCall(fn, ...args) {
+  try {
+    return fn?.(...args);
+  } catch {
+    return null;
+  }
+}
 
 /* --------------------------------- Export ---------------------------------- */
 

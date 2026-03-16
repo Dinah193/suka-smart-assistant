@@ -26,7 +26,7 @@
 // - A single call to `run(importPayload, ctx)` returns { tags, score, reasons }
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.js exists
 // - src/services/hub/HubPacketFormatter.js and src/services/hub/FamilyFundConnector.js exist
 // - src/knowledge/KnowledgeGraph.js exists
@@ -37,8 +37,8 @@
 //
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 import knowledgeGraph from "@/knowledge/KnowledgeGraph.js";
 
 // soft Hub deps (optional, fail silently in browser-only builds)
@@ -112,7 +112,15 @@ function hasWord(txt, list) {
 // Tag dictionaries (basic, extend as needed)
 // -----------------------------------------------------------------------------
 const MEAL_TYPES = {
-  breakfast: ["breakfast", "pancake", "waffle", "omelet", "scramble", "frittata", "morning"],
+  breakfast: [
+    "breakfast",
+    "pancake",
+    "waffle",
+    "omelet",
+    "scramble",
+    "frittata",
+    "morning",
+  ],
   lunch: ["lunch", "sandwich", "wrap", "salad bowl", "midday"],
   dinner: ["dinner", "supper", "stew", "roast", "casserole"],
   snack: ["snack", "bars", "energy bite"],
@@ -122,14 +130,29 @@ const MEAL_TYPES = {
 
 const SEASON_TAGS = {
   spring: ["spring", "asparagus", "peas", "radish"],
-  summer: ["summer", "grill", "bbq", "tomato", "cucumber", "watermelon", "zucchini"],
+  summer: [
+    "summer",
+    "grill",
+    "bbq",
+    "tomato",
+    "cucumber",
+    "watermelon",
+    "zucchini",
+  ],
   fall: ["fall", "autumn", "pumpkin", "squash", "apple", "cider"],
   winter: ["winter", "stew", "soup", "chili", "slow cooker"],
 };
 
 const CUISINE_TAGS = {
   african: ["jollof", "suya", "injera", "egusi", "groundnut"],
-  african_israelite: ["lamb", "goat", "kush", "ethiop", "paleo-hebrew", "torah meal"],
+  african_israelite: [
+    "lamb",
+    "goat",
+    "kush",
+    "ethiop",
+    "paleo-hebrew",
+    "torah meal",
+  ],
   mediterranean: ["olive", "feta", "tahini", "pita", "mezze"],
   middle_eastern: ["shawarma", "falafel", "hummus", "za'atar", "sumac"],
   southern_us: ["grits", "biscuit", "okra", "collard", "gumbo"],
@@ -148,7 +171,16 @@ const ANIMAL_CLIMATE = {
   cold: ["highland", "yak"],
 };
 
-const PRESERVATION_HINTS = ["can", "canning", "ferment", "dehydrate", "smoke", "cure", "pickle", "preserve"];
+const PRESERVATION_HINTS = [
+  "can",
+  "canning",
+  "ferment",
+  "dehydrate",
+  "smoke",
+  "cure",
+  "pickle",
+  "preserve",
+];
 
 // -----------------------------------------------------------------------------
 // TagEngine class
@@ -182,11 +214,23 @@ class TagEngine {
       this._tagRecipe(importPayload, text, tags, reasons, context);
     } else if (kind === "cleaning" || kind === "cleaningPlan") {
       this._tagCleaning(importPayload, text, tags, reasons);
-    } else if (kind === "garden" || kind === "gardenPlan" || kind === "gardenCare") {
+    } else if (
+      kind === "garden" ||
+      kind === "gardenPlan" ||
+      kind === "gardenCare"
+    ) {
       this._tagGarden(importPayload, text, tags, reasons, context);
-    } else if (kind === "animal" || kind === "animalPlan" || kind === "butcherySession") {
+    } else if (
+      kind === "animal" ||
+      kind === "animalPlan" ||
+      kind === "butcherySession"
+    ) {
       this._tagAnimal(importPayload, text, tags, reasons, context);
-    } else if (kind === "storehouse" || kind === "storehouseStock" || kind === "storehouseGoal") {
+    } else if (
+      kind === "storehouse" ||
+      kind === "storehouseStock" ||
+      kind === "storehouseGoal"
+    ) {
       this._tagStorehouse(importPayload, text, tags, reasons);
     } else if (kind === "video") {
       this._tagVideo(importPayload, text, tags, reasons);
@@ -226,7 +270,9 @@ class TagEngine {
   // ---------------------------------------------------------------------------
   _tagRecipe(payload, text, tags, reasons, context) {
     const title = norm(payload.title);
-    const ingredients = Array.isArray(payload.ingredients) ? payload.ingredients : [];
+    const ingredients = Array.isArray(payload.ingredients)
+      ? payload.ingredients
+      : [];
 
     tags.add("type:recipe");
     reasons.push("Recipe domain detected.");
@@ -238,9 +284,16 @@ class TagEngine {
     this._inferCuisine({ title, text, ingredients }, tags, reasons);
 
     // preservation relevance (sauces, tomato, peppers, greens)
-    if (hasWord(text, PRESERVATION_HINTS) || ingredients.some((ing) => hasWord(norm(ing.name || ing), ["tomato", "pepper", "greens"]))) {
+    if (
+      hasWord(text, PRESERVATION_HINTS) ||
+      ingredients.some((ing) =>
+        hasWord(norm(ing.name || ing), ["tomato", "pepper", "greens"])
+      )
+    ) {
       tags.add("preservation:relevant");
-      reasons.push("Contains ingredients or wording suitable for preservation.");
+      reasons.push(
+        "Contains ingredients or wording suitable for preservation."
+      );
     }
 
     // climate / garden potential – can we grow ingredients?
@@ -269,7 +322,10 @@ class TagEngine {
       tags.add("cleaning:laundry");
       reasons.push("Cleaning tasks mention laundry.");
     }
-    if (title.includes("declutter") || hasWord(text, ["declutter", "organize", "purge"])) {
+    if (
+      title.includes("declutter") ||
+      hasWord(text, ["declutter", "organize", "purge"])
+    ) {
       tags.add("cleaning:declutter");
       reasons.push("Decluttering content.");
     }
@@ -310,7 +366,10 @@ class TagEngine {
     }
 
     // garden care imports
-    if (payload.__importType === "gardenCare" || hasWord(text, ["prune", "weed", "water"])) {
+    if (
+      payload.__importType === "gardenCare" ||
+      hasWord(text, ["prune", "weed", "water"])
+    ) {
       tags.add("garden:care");
       reasons.push("Garden maintenance task detected.");
     }
@@ -363,9 +422,17 @@ class TagEngine {
       const name = norm(it.item || it.name || "");
       if (!name) continue;
 
-      if (name.includes("grain") || name.includes("flour") || name.includes("oat")) {
+      if (
+        name.includes("grain") ||
+        name.includes("flour") ||
+        name.includes("oat")
+      ) {
         tags.add("storehouse:section:dry-goods");
-      } else if (name.includes("lamb") || name.includes("beef") || name.includes("goat")) {
+      } else if (
+        name.includes("lamb") ||
+        name.includes("beef") ||
+        name.includes("goat")
+      ) {
         tags.add("storehouse:section:frozen");
       } else if (name.includes("oil") || name.includes("fat")) {
         tags.add("storehouse:section:pantry");
@@ -413,11 +480,18 @@ class TagEngine {
 
     // fallback for eggs, lamb/bacon breakfasts (user preference)
     const ingNames = (ingredients || []).map((i) => norm(i.name || i));
-    if (ingNames.some((n) => n.includes("egg")) && !tags.has("meal:breakfast")) {
+    if (
+      ingNames.some((n) => n.includes("egg")) &&
+      !tags.has("meal:breakfast")
+    ) {
       tags.add("meal:breakfast");
-      reasons.push("Contains eggs, tagging as breakfast (per user preference).");
+      reasons.push(
+        "Contains eggs, tagging as breakfast (per user preference)."
+      );
     }
-    if (ingNames.some((n) => n.includes("lamb bacon") || n.includes("beef bacon"))) {
+    if (
+      ingNames.some((n) => n.includes("lamb bacon") || n.includes("beef bacon"))
+    ) {
       tags.add("meal:breakfast");
       reasons.push("Contains lamb/beef bacon, tagging as breakfast.");
     }

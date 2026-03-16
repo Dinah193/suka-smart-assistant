@@ -35,7 +35,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -48,7 +48,8 @@ try {
 
 const nowISO = () => new Date().toISOString();
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
-const clone = (obj) => (obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj);
+const clone = (obj) =>
+  obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj;
 
 function emit(type, source, data) {
   eventBus.emit({ type, ts: nowISO(), source, data });
@@ -229,7 +230,7 @@ function computeTimes(nodesById, order) {
         const pred = sched.get(p.id);
         if (!pred) return acc;
 
-        const predDur = Math.max(0, (nodesById.get(p.id)?.duration) || 0);
+        const predDur = Math.max(0, nodesById.get(p.id)?.duration || 0);
         // Constraint translation (simplified, zero-negative lag):
         //  FS: start >= pred.finish + lag         -> esCand = pred.ef + lag
         //  SS: start >= pred.start + lag          -> esCand = pred.es + lag
@@ -257,7 +258,16 @@ function computeTimes(nodesById, order) {
     }
 
     const ef = es + dur;
-    sched.set(id, { id, es, ef, ls: Infinity, lf: Infinity, slack: 0, level: 0, critical: false });
+    sched.set(id, {
+      id,
+      es,
+      ef,
+      ls: Infinity,
+      lf: Infinity,
+      slack: 0,
+      level: 0,
+      critical: false,
+    });
   }
 
   // Assign levels (longest distance in edges count from roots)
@@ -304,13 +314,13 @@ function computeTimes(nodesById, order) {
         let lfC = acc;
         switch (s.type) {
           case "SS":
-            lfC = Math.min(acc, (succ.ls - lag) + dur); // derive via ls then back to lf
+            lfC = Math.min(acc, succ.ls - lag + dur); // derive via ls then back to lf
             break;
           case "FF":
             lfC = Math.min(acc, succ.lf - lag);
             break;
           case "SF":
-            lfC = Math.min(acc, (succ.lf - lag) + dur);
+            lfC = Math.min(acc, succ.lf - lag + dur);
             break;
           case "FS":
           default:
@@ -376,7 +386,7 @@ function findCriticalPath(nodesById, order, schedule) {
     let bestVal = schedule.get(u)?.ef || 0;
     for (const v of children) {
       const sub = dfs(v);
-      const val = (schedule.get(v)?.ef || 0);
+      const val = schedule.get(v)?.ef || 0;
       if (val >= bestVal) {
         bestVal = val;
         best = [u, ...sub];
@@ -413,8 +423,14 @@ async function planSchedule(tasks = [], links = [], opts = {}) {
   const graph = buildGraph(tasks, links);
   if (!graph.order) {
     // cycle event already emitted by buildGraph
-    return { order: null, schedule: null, criticalPath: [], makespan: 0, graph };
-    }
+    return {
+      order: null,
+      schedule: null,
+      criticalPath: [],
+      makespan: 0,
+      graph,
+    };
+  }
 
   const { schedule, makespan } = computeTimes(graph.nodesById, graph.order);
   const criticalPath = findCriticalPath(graph.nodesById, graph.order, schedule);
@@ -507,8 +523,13 @@ function serializeSchedule(schedMap) {
   for (const [id, r] of schedMap) {
     arr.push({
       id,
-      es: r.es, ef: r.ef, ls: r.ls, lf: r.lf, slack: r.slack,
-      level: r.level, critical: r.critical,
+      es: r.es,
+      ef: r.ef,
+      ls: r.ls,
+      lf: r.lf,
+      slack: r.slack,
+      level: r.level,
+      critical: r.critical,
     });
   }
   return arr;

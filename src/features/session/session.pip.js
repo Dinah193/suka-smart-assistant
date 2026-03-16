@@ -42,8 +42,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
@@ -53,7 +53,9 @@ let FamilyFundConnector = null;
     const m2 = await import("@/services/hub/FamilyFundConnector");
     HubPacketFormatter = m1?.default || null;
     FamilyFundConnector = m2?.default || null;
-  } catch { /* no-op */ }
+  } catch {
+    /* no-op */
+  }
 })();
 
 const SOURCE = "features.session.pip";
@@ -61,7 +63,11 @@ const isoNow = () => new Date().toISOString();
 
 function emit(type, data = {}) {
   const payload = { type, ts: isoNow(), source: SOURCE, data };
-  try { eventBus?.emit?.(payload); } catch { /* no-op */ }
+  try {
+    eventBus?.emit?.(payload);
+  } catch {
+    /* no-op */
+  }
   if (featureFlags?.familyFundMode) exportToHubIfEnabled(payload);
   return payload;
 }
@@ -72,12 +78,16 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }
 
 function apiSupported() {
   try {
-    return typeof window !== "undefined" && "documentPictureInPicture" in window;
+    return (
+      typeof window !== "undefined" && "documentPictureInPicture" in window
+    );
   } catch {
     return false;
   }
@@ -85,8 +95,8 @@ function apiSupported() {
 
 /* --------------------------------- State ---------------------------------- */
 
-let pipWindow = null;        // The PiP window handle
-let lastState = null;        // Cached state for redraws/restores
+let pipWindow = null; // The PiP window handle
+let lastState = null; // Cached state for redraws/restores
 let actionListenerBound = false;
 
 /**
@@ -102,7 +112,7 @@ function setState(s = {}) {
     totalSteps: Number.isFinite(+s.totalSteps) ? +s.totalSteps : 0,
     paused: !!s.paused,
     elapsedSec: Number.isFinite(+s.elapsedSec) ? +s.elapsedSec : 0,
-    cue: s.cue || null,               // e.g., donenessCue or temp
+    cue: s.cue || null, // e.g., donenessCue or temp
     tempTargetF: Number.isFinite(+s.tempTargetF) ? +s.tempTargetF : null,
   };
 }
@@ -111,7 +121,7 @@ function setState(s = {}) {
 
 function pipHtml() {
   // Minimal, readable HUD; styles are inlined for portability.
-  return /* html */`
+  return /* html */ `
 <!doctype html>
 <html>
 <head>
@@ -259,7 +269,10 @@ function bindGlobalActionListener() {
     const msg = event?.data || {};
     if (!msg || msg.type !== "SSA_PIP_ACTION") return;
 
-    const payload = emit("ui.pip.action", { action: msg.action, tsRemote: msg.ts });
+    const payload = emit("ui.pip.action", {
+      action: msg.action,
+      tsRemote: msg.ts,
+    });
     // Hub mirroring handled by emit()
     // No direct control changes here; SessionRunner should respond (prev/pause/next/close/focus)
   });
@@ -267,7 +280,10 @@ function bindGlobalActionListener() {
 
 async function createPipWindow({ width = 380, height = 220 } = {}) {
   const html = pipHtml();
-  const pip = await window.documentPictureInPicture.requestWindow({ width, height });
+  const pip = await window.documentPictureInPicture.requestWindow({
+    width,
+    height,
+  });
   // Write content to the PiP document
   pip.document.open();
   pip.document.write(html);
@@ -279,14 +295,18 @@ function postStateToPip() {
   if (!pipWindow || !lastState) return;
   try {
     pipWindow.postMessage({ type: "SSA_PIP_UPDATE", state: lastState }, "*");
-  } catch { /* no-op */ }
+  } catch {
+    /* no-op */
+  }
 }
 
 function focusPip() {
   try {
     pipWindow?.focus?.();
     emit("ui.pip.focused", {});
-  } catch { /* no-op */ }
+  } catch {
+    /* no-op */
+  }
 }
 
 /* --------------------------------- API ------------------------------------ */
@@ -303,13 +323,18 @@ async function open(session, opts = {}) {
   const s = {
     sessionId: session?.id ?? null,
     title: session?.title ?? "Session",
-    stepTitle: session?.steps?.[session?.progress?.currentStepIndex || 0]?.title ?? "",
+    stepTitle:
+      session?.steps?.[session?.progress?.currentStepIndex || 0]?.title ?? "",
     stepIdx: Number(session?.progress?.currentStepIndex || 0),
     totalSteps: Array.isArray(session?.steps) ? session.steps.length : 0,
     paused: session?.status === "paused",
     elapsedSec: Number(session?.progress?.elapsedSec || 0),
-    cue: session?.steps?.[session?.progress?.currentStepIndex || 0]?.metadata?.donenessCue ?? null,
-    tempTargetF: session?.steps?.[session?.progress?.currentStepIndex || 0]?.metadata?.tempTargetF ?? null,
+    cue:
+      session?.steps?.[session?.progress?.currentStepIndex || 0]?.metadata
+        ?.donenessCue ?? null,
+    tempTargetF:
+      session?.steps?.[session?.progress?.currentStepIndex || 0]?.metadata
+        ?.tempTargetF ?? null,
   };
   setState(s);
 
@@ -322,8 +347,12 @@ async function open(session, opts = {}) {
     }
 
     pipWindow = await createPipWindow(opts.window || {});
-    pipWindow.addEventListener?.("pagehide", () => { /* pagehide fires on close */ close(); });
-    pipWindow.addEventListener?.("unload", () => { close(); });
+    pipWindow.addEventListener?.("pagehide", () => {
+      /* pagehide fires on close */ close();
+    });
+    pipWindow.addEventListener?.("unload", () => {
+      close();
+    });
 
     postStateToPip();
 
@@ -331,7 +360,10 @@ async function open(session, opts = {}) {
     // hub mirrored by emit()
     return pipWindow;
   } catch (err) {
-    emit("ui.pip.error", { phase: "open", message: String(err?.message || err) });
+    emit("ui.pip.error", {
+      phase: "open",
+      message: String(err?.message || err),
+    });
     return null;
   }
 }
@@ -349,15 +381,24 @@ async function update(session, step, { paused, elapsedSec } = {}) {
   setState({
     sessionId: session?.id ?? lastState?.sessionId,
     title: session?.title ?? lastState?.title,
-    stepTitle: step?.title ?? session?.steps?.[idx]?.title ?? lastState?.stepTitle,
+    stepTitle:
+      step?.title ?? session?.steps?.[idx]?.title ?? lastState?.stepTitle,
     stepIdx: Number.isFinite(idx) ? idx : lastState?.stepIdx || 0,
     totalSteps: total || lastState?.totalSteps || 0,
     paused: typeof paused === "boolean" ? paused : !!lastState?.paused,
-    elapsedSec: Number.isFinite(+elapsedSec) ? +elapsedSec : (Number(session?.progress?.elapsedSec) || lastState?.elapsedSec || 0),
-    cue: step?.metadata?.donenessCue ?? session?.steps?.[idx]?.metadata?.donenessCue ?? lastState?.cue ?? null,
-    tempTargetF: Number.isFinite(+step?.metadata?.tempTargetF) ? +step.metadata.tempTargetF :
-                Number.isFinite(+session?.steps?.[idx]?.metadata?.tempTargetF) ? +session.steps[idx].metadata.tempTargetF :
-                (lastState?.tempTargetF ?? null),
+    elapsedSec: Number.isFinite(+elapsedSec)
+      ? +elapsedSec
+      : Number(session?.progress?.elapsedSec) || lastState?.elapsedSec || 0,
+    cue:
+      step?.metadata?.donenessCue ??
+      session?.steps?.[idx]?.metadata?.donenessCue ??
+      lastState?.cue ??
+      null,
+    tempTargetF: Number.isFinite(+step?.metadata?.tempTargetF)
+      ? +step.metadata.tempTargetF
+      : Number.isFinite(+session?.steps?.[idx]?.metadata?.tempTargetF)
+      ? +session.steps[idx].metadata.tempTargetF
+      : lastState?.tempTargetF ?? null,
   });
 
   try {
@@ -371,7 +412,10 @@ async function update(session, step, { paused, elapsedSec } = {}) {
     });
     return true;
   } catch (err) {
-    emit("ui.pip.error", { phase: "update", message: String(err?.message || err) });
+    emit("ui.pip.error", {
+      phase: "update",
+      message: String(err?.message || err),
+    });
     return false;
   }
 }
@@ -403,7 +447,9 @@ function close() {
   if (!pipWindow) return;
   try {
     pipWindow.close?.();
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   pipWindow = null;
   emit("ui.pip.closed", { sessionId: lastState?.sessionId ?? null });
 }

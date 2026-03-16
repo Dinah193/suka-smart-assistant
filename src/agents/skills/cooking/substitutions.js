@@ -21,7 +21,7 @@
  * - addCanonicalizer() to improve name matching.
  */
 
-import { emit } from "@/services/eventBus"; // optional: emit 'substitution.queried' etc. (not required)
+import { emit } from "../../../services/events/eventBus.js"; // optional: emit 'substitution.queried' etc. (not required)
 let reasoner = null; // Optional async fallback; set via setReasoner(fn)
 
 /** ----------------------------- Canonicalization --------------------------- */
@@ -31,35 +31,41 @@ const canonicalizers = [
   // Lowercase & trim
   (s) => s.toLowerCase().trim(),
   // Strip punctuation
-  (s) => s.replace(/[().,/-]/g, " ").replace(/\s+/g, " ").trim(),
+  (s) =>
+    s
+      .replace(/[().,/-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
   // Singularize simple plurals
-  (s) => s.replace(/\b(tomatoes)\b/g, "tomato")
-          .replace(/\b(potatoes)\b/g, "potato")
-          .replace(/\b(eggs)\b/g, "egg")
-          .replace(/\b(onions)\b/g, "onion"),
+  (s) =>
+    s
+      .replace(/\b(tomatoes)\b/g, "tomato")
+      .replace(/\b(potatoes)\b/g, "potato")
+      .replace(/\b(eggs)\b/g, "egg")
+      .replace(/\b(onions)\b/g, "onion"),
   // Aliases
   (s) => ALIASES[s] || s,
 ];
 
 /** Simple alias map for common names */
 const ALIASES = {
-  "scallion": "green onion",
+  scallion: "green onion",
   "spring onion": "green onion",
   "bell pepper": "sweet pepper",
-  "capsicum": "sweet pepper",
+  capsicum: "sweet pepper",
   "brown sugar": "light brown sugar",
   "caster sugar": "superfine sugar",
   "bicarbonate of soda": "baking soda",
-  "cornflour": "cornstarch",
+  cornflour: "cornstarch",
   "confectioners sugar": "powdered sugar",
   "icing sugar": "powdered sugar",
   "minced beef": "ground beef",
   "minced lamb": "ground lamb",
-  "garbanzo": "chickpea",
+  garbanzo: "chickpea",
   "garbanzo bean": "chickpea",
-  "courgette": "zucchini",
-  "aubergine": "eggplant",
-  "cilantro": "coriander leaf",
+  courgette: "zucchini",
+  aubergine: "eggplant",
+  cilantro: "coriander leaf",
   "coriander leaves": "coriander leaf",
 };
 
@@ -72,7 +78,11 @@ export function addCanonicalizer(fn) {
 export function canonicalizeIngredient(name) {
   if (!name || typeof name !== "string") return "";
   return canonicalizers.reduce((acc, fn) => {
-    try { return fn(acc); } catch { return acc; }
+    try {
+      return fn(acc);
+    } catch {
+      return acc;
+    }
   }, name);
 }
 
@@ -91,8 +101,21 @@ export function canonicalizeIngredient(name) {
 
 /** Disallowed by Torah-safe mode; keep small and explicit. */
 const TORAH_UNCLEAN = new Set([
-  "pork","ham","bacon","prosciutto","lard (porcine)","gelatin (porcine)","gelatin (fish-unknown)",
-  "shrimp","crab","lobster","clam","oyster","scallop","squid","octopus"
+  "pork",
+  "ham",
+  "bacon",
+  "prosciutto",
+  "lard (porcine)",
+  "gelatin (porcine)",
+  "gelatin (fish-unknown)",
+  "shrimp",
+  "crab",
+  "lobster",
+  "clam",
+  "oyster",
+  "scallop",
+  "squid",
+  "octopus",
 ]);
 
 /** Flag helpers */
@@ -103,13 +126,15 @@ function applyDietaryGuards(suggestion, constraints) {
   if (constraints?.dairyFree && flags.dairy) suggestion._reject = true;
   if (constraints?.glutenFree && flags.gluten) suggestion._reject = true;
   if (Array.isArray(constraints?.allergens)) {
-    for (const a of constraints.allergens) if (allergens.has(a)) suggestion._reject = true;
+    for (const a of constraints.allergens)
+      if (allergens.has(a)) suggestion._reject = true;
   }
   const torahSafe = constraints?.torahSafe !== false; // default true
   if (torahSafe && (!("torahSafe" in flags) || flags.torahSafe === false)) {
     // If we can determine it's unclean by name, reject.
     const name = (suggestion.substitute?.name || "").toLowerCase();
-    if ([...TORAH_UNCLEAN].some((u) => name.includes(u))) suggestion._reject = true;
+    if ([...TORAH_UNCLEAN].some((u) => name.includes(u)))
+      suggestion._reject = true;
   }
   return suggestion;
 }
@@ -152,7 +177,11 @@ export function registerSubstitutions(forName, suggestions) {
  * @param {{useReasoner?:boolean, minLocalCount?:number, minLocalConfidence?:number}} [options]
  * @returns {Promise<Array<SubSuggestion>>}
  */
-export async function findSubstitutions(forName, constraints = {}, options = {}) {
+export async function findSubstitutions(
+  forName,
+  constraints = {},
+  options = {}
+) {
   const key = canonicalizeIngredient(forName);
   const useReasoner = options.useReasoner !== false; // default true
   const minLocalCount = options.minLocalCount ?? 1;
@@ -168,18 +197,28 @@ export async function findSubstitutions(forName, constraints = {}, options = {})
   // Heuristic: if we only have few or low-confidence options, augment with Reasoner if available
   const needReasoner =
     useReasoner &&
-    (!local.length || local.length < minLocalCount || Math.max(...local.map((s) => s.confidence), 0) < minLocalConfidence);
+    (!local.length ||
+      local.length < minLocalCount ||
+      Math.max(...local.map((s) => s.confidence), 0) < minLocalConfidence);
 
   let remote = [];
   if (needReasoner && typeof reasoner === "function") {
     try {
-      remote = (await reasoner({
-        for: forName,
-        canonicalKey: key,
-        constraints: { ...constraints, torahSafe: constraints?.torahSafe !== false },
-      })) || [];
-      remote = remote.map(normSuggestion).map((s) => ({ ...s, source: s.source || "reasoner" }));
-      remote = remote.map((s) => applyDietaryGuards(s, constraints)).filter((s) => !s._reject);
+      remote =
+        (await reasoner({
+          for: forName,
+          canonicalKey: key,
+          constraints: {
+            ...constraints,
+            torahSafe: constraints?.torahSafe !== false,
+          },
+        })) || [];
+      remote = remote
+        .map(normSuggestion)
+        .map((s) => ({ ...s, source: s.source || "reasoner" }));
+      remote = remote
+        .map((s) => applyDietaryGuards(s, constraints))
+        .filter((s) => !s._reject);
     } catch (e) {
       // Silent failure by contract
       // console.warn("[substitutions] Reasoner failed:", e);
@@ -194,7 +233,12 @@ export async function findSubstitutions(forName, constraints = {}, options = {})
       type: "substitution.queried",
       ts: new Date().toISOString(),
       source: "cooking.substitutions",
-      data: { for: forName, canonicalKey: key, localCount: local.length, remoteCount: remote.length }
+      data: {
+        for: forName,
+        canonicalKey: key,
+        localCount: local.length,
+        remoteCount: remote.length,
+      },
     });
   } catch {}
 
@@ -226,11 +270,17 @@ function normSuggestion(s) {
   if (!forName || !subName) return null;
   const out = {
     for: { name: forName, ...(s.for?.form ? { form: s.for.form } : {}) },
-    substitute: { name: subName, ...(s.substitute?.form ? { form: s.substitute.form } : {}) },
+    substitute: {
+      name: subName,
+      ...(s.substitute?.form ? { form: s.substitute.form } : {}),
+    },
     ratio: normalizeRatio(s.ratio),
     notes: s.notes || "",
     confidence: clampNum(s.confidence, 0, 1, 0.75),
-    flags: { ...(s.flags || {}), torahSafe: inferTorahSafety(subName, s.flags) },
+    flags: {
+      ...(s.flags || {}),
+      torahSafe: inferTorahSafety(subName, s.flags),
+    },
     source: s.source || "local",
   };
   return out;
@@ -239,12 +289,20 @@ function normSuggestion(s) {
 function normalizeRatio(r) {
   if (r == null) return 1;
   if (typeof r === "number" && isFinite(r) && r > 0) return r;
-  if (r && typeof r === "object" && typeof r.from === "string" && typeof r.to === "string") return { from: r.from, to: r.to };
+  if (
+    r &&
+    typeof r === "object" &&
+    typeof r.from === "string" &&
+    typeof r.to === "string"
+  )
+    return { from: r.from, to: r.to };
   return 1;
 }
 
 function clampNum(n, min, max, fallback) {
-  return typeof n === "number" && isFinite(n) ? Math.max(min, Math.min(n, max)) : fallback;
+  return typeof n === "number" && isFinite(n)
+    ? Math.max(min, Math.min(n, max))
+    : fallback;
 }
 
 function inferTorahSafety(name, flags) {
@@ -264,7 +322,9 @@ function dedupeByName(arr) {
   const seen = new Set();
   const out = [];
   for (const s of arr) {
-    const key = `${s.for.name}__${s.substitute.name}__${typeof s.ratio === "number" ? s.ratio : JSON.stringify(s.ratio)}`;
+    const key = `${s.for.name}__${s.substitute.name}__${
+      typeof s.ratio === "number" ? s.ratio : JSON.stringify(s.ratio)
+    }`;
     if (!seen.has(key)) {
       seen.add(key);
       out.push(s);
@@ -274,7 +334,11 @@ function dedupeByName(arr) {
 }
 
 function clone(v) {
-  try { return structuredClone(v); } catch { return JSON.parse(JSON.stringify(v)); }
+  try {
+    return structuredClone(v);
+  } catch {
+    return JSON.parse(JSON.stringify(v));
+  }
 }
 
 /** ------------------------------- Seeding ---------------------------------- */
@@ -285,107 +349,357 @@ function seedLocalTable() {
 
   // Oils & fats (Torah-safe)
   add("butter", [
-    { for: "butter", substitute: { name: "olive oil" }, ratio: 0.75, notes: "Use 3/4 oil per 1 butter (by volume). Baking may change texture.", flags: { dairy: false } },
-    { for: "butter", substitute: { name: "ghee" }, ratio: 1, notes: "Clarified; similar flavor. Check dairy constraints.", flags: { dairy: true } },
-    { for: "butter", substitute: { name: "coconut oil" }, ratio: 1, notes: "Solid at room temp; works in baking.", flags: { nut: false, dairy: false } },
+    {
+      for: "butter",
+      substitute: { name: "olive oil" },
+      ratio: 0.75,
+      notes: "Use 3/4 oil per 1 butter (by volume). Baking may change texture.",
+      flags: { dairy: false },
+    },
+    {
+      for: "butter",
+      substitute: { name: "ghee" },
+      ratio: 1,
+      notes: "Clarified; similar flavor. Check dairy constraints.",
+      flags: { dairy: true },
+    },
+    {
+      for: "butter",
+      substitute: { name: "coconut oil" },
+      ratio: 1,
+      notes: "Solid at room temp; works in baking.",
+      flags: { nut: false, dairy: false },
+    },
   ]);
 
   // Milk & cream
   add("milk", [
-    { for: "milk", substitute: { name: "oat milk" }, ratio: 1, notes: "Neutral flavor, good in sauces.", flags: { dairy: false } },
-    { for: "milk", substitute: { name: "almond milk" }, ratio: 1, notes: "Slight nut flavor.", flags: { dairy: false, nut: true, allergen: ["almond"] } },
-    { for: "milk", substitute: { name: "soy milk" }, ratio: 1, notes: "Higher protein; may curdle with acid.", flags: { dairy: false, allergen: ["soy"] } },
+    {
+      for: "milk",
+      substitute: { name: "oat milk" },
+      ratio: 1,
+      notes: "Neutral flavor, good in sauces.",
+      flags: { dairy: false },
+    },
+    {
+      for: "milk",
+      substitute: { name: "almond milk" },
+      ratio: 1,
+      notes: "Slight nut flavor.",
+      flags: { dairy: false, nut: true, allergen: ["almond"] },
+    },
+    {
+      for: "milk",
+      substitute: { name: "soy milk" },
+      ratio: 1,
+      notes: "Higher protein; may curdle with acid.",
+      flags: { dairy: false, allergen: ["soy"] },
+    },
   ]);
 
   add("heavy cream", [
-    { for: "heavy cream", substitute: { name: "evaporated milk" }, ratio: 1, notes: "Lighter body than cream.", flags: { dairy: true } },
-    { for: "heavy cream", substitute: { name: "coconut cream" }, ratio: 1, notes: "Dairy-free; coconut aroma.", flags: { dairy: false } },
-    { for: "heavy cream", substitute: { name: "milk + butter" }, ratio: { from: "3/4 cup milk", to: "1/4 cup melted butter" }, notes: "Mix to approximate fat content.", flags: { dairy: true } },
+    {
+      for: "heavy cream",
+      substitute: { name: "evaporated milk" },
+      ratio: 1,
+      notes: "Lighter body than cream.",
+      flags: { dairy: true },
+    },
+    {
+      for: "heavy cream",
+      substitute: { name: "coconut cream" },
+      ratio: 1,
+      notes: "Dairy-free; coconut aroma.",
+      flags: { dairy: false },
+    },
+    {
+      for: "heavy cream",
+      substitute: { name: "milk + butter" },
+      ratio: { from: "3/4 cup milk", to: "1/4 cup melted butter" },
+      notes: "Mix to approximate fat content.",
+      flags: { dairy: true },
+    },
   ]);
 
   // Eggs (baking)
   add("egg", [
-    { for: "egg", substitute: { name: "ground flax + water", form: "1 tbsp flax + 3 tbsp water" }, ratio: { from: "1 egg", to: "1 flax egg" }, notes: "Bind & moisture; not for meringue.", flags: { dairy: false } },
-    { for: "egg", substitute: { name: "applesauce (unsweetened)" }, ratio: { from: "1 egg", to: "1/4 cup" }, notes: "Moisture; reduce sugar slightly.", flags: {} },
-    { for: "egg", substitute: { name: "silken tofu (blended)" }, ratio: { from: "1 egg", to: "1/4 cup" }, notes: "Neutral; good binder in cakes.", flags: { allergen: ["soy"] } },
+    {
+      for: "egg",
+      substitute: {
+        name: "ground flax + water",
+        form: "1 tbsp flax + 3 tbsp water",
+      },
+      ratio: { from: "1 egg", to: "1 flax egg" },
+      notes: "Bind & moisture; not for meringue.",
+      flags: { dairy: false },
+    },
+    {
+      for: "egg",
+      substitute: { name: "applesauce (unsweetened)" },
+      ratio: { from: "1 egg", to: "1/4 cup" },
+      notes: "Moisture; reduce sugar slightly.",
+      flags: {},
+    },
+    {
+      for: "egg",
+      substitute: { name: "silken tofu (blended)" },
+      ratio: { from: "1 egg", to: "1/4 cup" },
+      notes: "Neutral; good binder in cakes.",
+      flags: { allergen: ["soy"] },
+    },
   ]);
 
   // Flours
   add("all-purpose flour", [
-    { for: "all-purpose flour", substitute: { name: "bread flour" }, ratio: 1, notes: "Higher protein; chewier.", flags: { gluten: true } },
-    { for: "all-purpose flour", substitute: { name: "spelt flour" }, ratio: 1, notes: "Nutty flavor; lower gluten strength.", flags: { gluten: true } },
-    { for: "all-purpose flour", substitute: { name: "gluten-free blend" }, ratio: 1, notes: "Use a 1:1 baking blend with xanthan.", flags: { gluten: false } },
+    {
+      for: "all-purpose flour",
+      substitute: { name: "bread flour" },
+      ratio: 1,
+      notes: "Higher protein; chewier.",
+      flags: { gluten: true },
+    },
+    {
+      for: "all-purpose flour",
+      substitute: { name: "spelt flour" },
+      ratio: 1,
+      notes: "Nutty flavor; lower gluten strength.",
+      flags: { gluten: true },
+    },
+    {
+      for: "all-purpose flour",
+      substitute: { name: "gluten-free blend" },
+      ratio: 1,
+      notes: "Use a 1:1 baking blend with xanthan.",
+      flags: { gluten: false },
+    },
   ]);
 
   // Sweeteners
   add("granulated sugar", [
-    { for: "granulated sugar", substitute: { name: "light brown sugar" }, ratio: 1, notes: "Adds molasses flavor & moisture." },
-    { for: "granulated sugar", substitute: { name: "honey" }, ratio: 0.75, notes: "Use 3/4 honey; reduce liquid slightly; lower bake temp ~25°F." },
-    { for: "granulated sugar", substitute: { name: "maple syrup" }, ratio: 0.75, notes: "Reduce liquid ~3 tbsp per cup syrup." },
+    {
+      for: "granulated sugar",
+      substitute: { name: "light brown sugar" },
+      ratio: 1,
+      notes: "Adds molasses flavor & moisture.",
+    },
+    {
+      for: "granulated sugar",
+      substitute: { name: "honey" },
+      ratio: 0.75,
+      notes: "Use 3/4 honey; reduce liquid slightly; lower bake temp ~25°F.",
+    },
+    {
+      for: "granulated sugar",
+      substitute: { name: "maple syrup" },
+      ratio: 0.75,
+      notes: "Reduce liquid ~3 tbsp per cup syrup.",
+    },
   ]);
 
   // Aromatics & herbs
   add("fresh garlic", [
-    { for: "fresh garlic", substitute: { name: "garlic powder" }, ratio: { from: "1 clove", to: "1/4 tsp" }, notes: "Bloom in fat for best flavor." },
-    { for: "fresh garlic", substitute: { name: "granulated garlic" }, ratio: { from: "1 clove", to: "1/3 tsp" }, notes: "Slightly coarser than powder." },
-    { for: "fresh garlic", substitute: { name: "shallot" }, ratio: 1, notes: "Different profile; milder sweetness." },
+    {
+      for: "fresh garlic",
+      substitute: { name: "garlic powder" },
+      ratio: { from: "1 clove", to: "1/4 tsp" },
+      notes: "Bloom in fat for best flavor.",
+    },
+    {
+      for: "fresh garlic",
+      substitute: { name: "granulated garlic" },
+      ratio: { from: "1 clove", to: "1/3 tsp" },
+      notes: "Slightly coarser than powder.",
+    },
+    {
+      for: "fresh garlic",
+      substitute: { name: "shallot" },
+      ratio: 1,
+      notes: "Different profile; milder sweetness.",
+    },
   ]);
 
   add("onion", [
-    { for: "onion", substitute: { name: "shallot" }, ratio: 1, notes: "Sweeter, less pungent." },
-    { for: "onion", substitute: { name: "leek (white part)" }, ratio: 1, notes: "Delicate, great in soups." },
-    { for: "onion", substitute: { name: "green onion" }, ratio: 1, notes: "Use more white portion for aromatics." },
+    {
+      for: "onion",
+      substitute: { name: "shallot" },
+      ratio: 1,
+      notes: "Sweeter, less pungent.",
+    },
+    {
+      for: "onion",
+      substitute: { name: "leek (white part)" },
+      ratio: 1,
+      notes: "Delicate, great in soups.",
+    },
+    {
+      for: "onion",
+      substitute: { name: "green onion" },
+      ratio: 1,
+      notes: "Use more white portion for aromatics.",
+    },
   ]);
 
   // Acids
   add("lemon juice", [
-    { for: "lemon juice", substitute: { name: "white wine vinegar" }, ratio: 0.5, notes: "Vinegar is stronger; start with half." },
-    { for: "lemon juice", substitute: { name: "apple cider vinegar" }, ratio: 0.5, notes: "Fruity tang." },
-    { for: "lemon juice", substitute: { name: "lime juice" }, ratio: 1, notes: "Similar acidity; different aroma." },
+    {
+      for: "lemon juice",
+      substitute: { name: "white wine vinegar" },
+      ratio: 0.5,
+      notes: "Vinegar is stronger; start with half.",
+    },
+    {
+      for: "lemon juice",
+      substitute: { name: "apple cider vinegar" },
+      ratio: 0.5,
+      notes: "Fruity tang.",
+    },
+    {
+      for: "lemon juice",
+      substitute: { name: "lime juice" },
+      ratio: 1,
+      notes: "Similar acidity; different aroma.",
+    },
   ]);
 
   // Salts & umami (Torah-safe, fish-safe optional)
   add("anchovy", [
-    { for: "anchovy", substitute: { name: "miso paste" }, ratio: 1, notes: "Umami depth without fish; watch salt.", flags: { allergen: ["soy"] } },
-    { for: "anchovy", substitute: { name: "olive tapenade" }, ratio: 1, notes: "Briny, savory profile." },
-    { for: "anchovy", substitute: { name: "fish sauce" }, ratio: 1, notes: "If allowed; intense—use sparingly.", flags: {} },
+    {
+      for: "anchovy",
+      substitute: { name: "miso paste" },
+      ratio: 1,
+      notes: "Umami depth without fish; watch salt.",
+      flags: { allergen: ["soy"] },
+    },
+    {
+      for: "anchovy",
+      substitute: { name: "olive tapenade" },
+      ratio: 1,
+      notes: "Briny, savory profile.",
+    },
+    {
+      for: "anchovy",
+      substitute: { name: "fish sauce" },
+      ratio: 1,
+      notes: "If allowed; intense—use sparingly.",
+      flags: {},
+    },
   ]);
 
   // Meat preferences (lamb/goat → beef, and vice versa)
   add("ground beef", [
-    { for: "ground beef", substitute: { name: "ground lamb" }, ratio: 1, notes: "Richer flavor; great in stews/kofta.", flags: {} },
-    { for: "ground beef", substitute: { name: "ground goat" }, ratio: 1, notes: "Lean; don’t overcook.", flags: {} },
-    { for: "ground beef", substitute: { name: "ground turkey (dark)" }, ratio: 1, notes: "Lean; add fat or moisture.", flags: {} },
+    {
+      for: "ground beef",
+      substitute: { name: "ground lamb" },
+      ratio: 1,
+      notes: "Richer flavor; great in stews/kofta.",
+      flags: {},
+    },
+    {
+      for: "ground beef",
+      substitute: { name: "ground goat" },
+      ratio: 1,
+      notes: "Lean; don’t overcook.",
+      flags: {},
+    },
+    {
+      for: "ground beef",
+      substitute: { name: "ground turkey (dark)" },
+      ratio: 1,
+      notes: "Lean; add fat or moisture.",
+      flags: {},
+    },
   ]);
 
   add("ground lamb", [
-    { for: "ground lamb", substitute: { name: "ground beef" }, ratio: 1, notes: "Milder, widely available.", flags: {} },
-    { for: "ground lamb", substitute: { name: "ground goat" }, ratio: 1, notes: "Similar to lamb; leaner.", flags: {} },
+    {
+      for: "ground lamb",
+      substitute: { name: "ground beef" },
+      ratio: 1,
+      notes: "Milder, widely available.",
+      flags: {},
+    },
+    {
+      for: "ground lamb",
+      substitute: { name: "ground goat" },
+      ratio: 1,
+      notes: "Similar to lamb; leaner.",
+      flags: {},
+    },
   ]);
 
   add("goat", [
-    { for: "goat", substitute: { name: "lamb" }, ratio: 1, notes: "Comparable flavor; adjust fat." },
-    { for: "goat", substitute: { name: "beef chuck" }, ratio: 1, notes: "For stews; longer braise ok." },
+    {
+      for: "goat",
+      substitute: { name: "lamb" },
+      ratio: 1,
+      notes: "Comparable flavor; adjust fat.",
+    },
+    {
+      for: "goat",
+      substitute: { name: "beef chuck" },
+      ratio: 1,
+      notes: "For stews; longer braise ok.",
+    },
   ]);
 
   // Broths
   add("chicken broth", [
-    { for: "chicken broth", substitute: { name: "vegetable broth" }, ratio: 1, notes: "Neutral; add umami (miso/mushroom)." },
-    { for: "chicken broth", substitute: { name: "water + bouillon" }, ratio: 1, notes: "Adjust salt to taste." },
+    {
+      for: "chicken broth",
+      substitute: { name: "vegetable broth" },
+      ratio: 1,
+      notes: "Neutral; add umami (miso/mushroom).",
+    },
+    {
+      for: "chicken broth",
+      substitute: { name: "water + bouillon" },
+      ratio: 1,
+      notes: "Adjust salt to taste.",
+    },
   ]);
 
   // Thickeners
   add("cornstarch", [
-    { for: "cornstarch", substitute: { name: "arrowroot starch" }, ratio: 1, notes: "Glossy finish; avoid long boil." },
-    { for: "cornstarch", substitute: { name: "potato starch" }, ratio: 1, notes: "Good freeze-thaw stability." },
-    { for: "cornstarch", substitute: { name: "all-purpose flour" }, ratio: 2, notes: "Use ~2x flour vs cornstarch; simmer to cook out." },
+    {
+      for: "cornstarch",
+      substitute: { name: "arrowroot starch" },
+      ratio: 1,
+      notes: "Glossy finish; avoid long boil.",
+    },
+    {
+      for: "cornstarch",
+      substitute: { name: "potato starch" },
+      ratio: 1,
+      notes: "Good freeze-thaw stability.",
+    },
+    {
+      for: "cornstarch",
+      substitute: { name: "all-purpose flour" },
+      ratio: 2,
+      notes: "Use ~2x flour vs cornstarch; simmer to cook out.",
+    },
   ]);
 
   // Spice stand-ins (examples)
   add("cumin", [
-    { for: "cumin", substitute: { name: "coriander seed" }, ratio: 1, notes: "Lighter citrusy tone." },
-    { for: "cumin", substitute: { name: "caraway" }, ratio: 0.75, notes: "Stronger; start with less." },
-    { for: "cumin", substitute: { name: "chili powder (blend)" }, ratio: 1, notes: "Contains cumin; adjust salt." },
+    {
+      for: "cumin",
+      substitute: { name: "coriander seed" },
+      ratio: 1,
+      notes: "Lighter citrusy tone.",
+    },
+    {
+      for: "cumin",
+      substitute: { name: "caraway" },
+      ratio: 0.75,
+      notes: "Stronger; start with less.",
+    },
+    {
+      for: "cumin",
+      substitute: { name: "chili powder (blend)" },
+      ratio: 1,
+      notes: "Contains cumin; adjust salt.",
+    },
   ]);
 }
 
@@ -395,19 +709,9 @@ function dedupeStr(a) {
   return Array.from(new Set(a));
 }
 
-/** De-dupe suggestions by pair name */
-function dedupeByName(list) {
-  const seen = new Set();
-  const out = [];
-  for (const s of list) {
-    const key = `${s.for.name}__${s.substitute.name}__${typeof s.ratio === "number" ? s.ratio : JSON.stringify(s.ratio)}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      out.push(s);
-    }
-  }
-  return out;
-}
+// ✅ FIX: Removed the duplicate dedupeByName definition that caused
+// "The symbol 'dedupeByName' has already been declared" during build.
+// (The primary dedupeByName implementation already exists above.)
 
 /** ------------------------------- Reasoner --------------------------------- */
 
@@ -416,7 +720,7 @@ function dedupeByName(list) {
  *   setReasoner(async ({ for, canonicalKey, constraints }) => Array<SubSuggestion>)
  *
  * Example integration (not included here):
- *   import { askReasoner } from "@/agents/reasoner";
+ *   import { askReasoner } from "@/agents/runtime/reasoner";
  *   setReasoner(askReasoner);
  */
 

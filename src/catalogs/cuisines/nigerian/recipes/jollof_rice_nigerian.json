@@ -1,0 +1,493 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.recipes.jollof_rice_nigerian",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Nigerian Jollof Rice",
+    "subtitle": "Smoky party-style jollof with blended pepper-tomato base, reduced and cooked by absorption",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.canonical",
+      "notes": [
+        "Canonical SSA-style Nigerian Jollof Rice recipe designed for deterministic planning and adaptation.",
+        "Built around blended red pepper + tomato base reduced in oil before rice absorption cooking."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "nigerian",
+    "category": "main",
+    "mealArchetypes": ["archetype.rice_dish", "archetype.one_pot"],
+    "servingStyles": ["family_style", "party_pan"],
+    "plannerTags": [
+      "dish.jollof",
+      "dish.nigerian.jollof_rice",
+      "one_pot",
+      "rice",
+      "tomato_base",
+      "pepper_base",
+      "absorption",
+      "batch_friendly",
+      "leftovers_good"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.5, "unit": "cups" },
+    "notes": "Makes about 9 cups cooked jollof (varies by rice type and simmer intensity)."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 55,
+    "totalMins": 80
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": "ok_if_portioned",
+    "onePot": true,
+    "spiceLevel": "medium_hot",
+    "smokyPreferred": true
+  },
+  "tasteProfile": {
+    "heatTypical": 3.5,
+    "sweetness": "low",
+    "acidity": "medium",
+    "umami": "medium_high",
+    "smoky": "medium",
+    "textureGoal": "separate_grains_not_mushy"
+  },
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.pot_heavy",
+        "label": "Heavy-bottom pot with lid (Dutch oven preferred)",
+        "required": true,
+        "notes": "Prevents scorching during reduction + absorption cooking."
+      },
+      { "id": "equipment.blender", "label": "Blender", "required": true },
+      { "id": "equipment.knife", "label": "Chef’s knife", "required": true },
+      { "id": "equipment.board", "label": "Cutting board", "required": true }
+    ],
+    "optional": [
+      {
+        "id": "equipment.sheet_pan",
+        "label": "Sheet pan",
+        "required": false,
+        "notes": "For oven-finishing if you want extra smoky party jollof."
+      },
+      {
+        "id": "equipment.oven",
+        "label": "Oven",
+        "required": false,
+        "notes": "Optional finishing step to deepen flavor and reduce wetness."
+      }
+    ],
+    "recommended": [
+      "equipment.pot_heavy",
+      "equipment.blender",
+      "equipment.spoon_wooden"
+    ],
+    "minimum": ["equipment.pot_heavy", "equipment.blender"]
+  },
+  "allergens": [],
+  "dietFlags": ["diet.gluten_free", "diet.dairy_free"],
+  "ingredients": [
+    {
+      "id": "ingredient.rice_parboiled",
+      "label": "Parboiled long-grain rice (preferred)",
+      "role": "base",
+      "amount": { "value": 3, "unit": "cups" },
+      "notes": [
+        "Parboiled long-grain is the classic Nigerian jollof choice for separate grains.",
+        "If using jasmine, reduce total liquid slightly and shorten final simmer."
+      ]
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "base",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": "Frying the paste in oil deepens color and reduces raw tomato taste."
+    },
+    {
+      "id": "ingredient.diced_tomatoes",
+      "label": "Canned whole tomatoes or diced tomatoes",
+      "role": "base",
+      "amount": { "value": 14, "unit": "oz" }
+    },
+    {
+      "id": "ingredient.red_bell_pepper",
+      "label": "Red bell peppers (tatashe)",
+      "role": "base",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, divided",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "One onion for blending, one for sauté base."
+    },
+    {
+      "id": "ingredient.scotch_bonnet",
+      "label": "Scotch bonnet (or habanero), optional",
+      "role": "heat",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Use 1 for medium-hot; omit for mild. Remove seeds for less heat."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Fresh ginger",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Grated or roughly chopped for blending."
+    },
+    {
+      "id": "ingredient.oil",
+      "label": "Neutral oil (or half neutral + half palm oil)",
+      "role": "fat",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Palm oil is optional; it adds color and a deeper West African profile."
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.thyme_dried",
+      "label": "Dried thyme",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.curry_powder",
+      "label": "Curry powder (Nigerian-style)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (smoked if available)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.white_pepper",
+      "label": "White pepper (or black pepper)",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Start with 2 tsp; adjust after adding stock."
+    },
+    {
+      "id": "ingredient.stock_chicken",
+      "label": "Chicken stock (or beef/vegetable stock)",
+      "role": "liquid",
+      "amount": { "value": 3.5, "unit": "cups" },
+      "notes": [
+        "Liquid amount is a target; final amount depends on rice brand and how wet your pepper base is.",
+        "If your blended base is very watery, use closer to 3 cups stock."
+      ]
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water, as needed",
+      "role": "liquid",
+      "optional": true,
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "Only add if needed during absorption phase (avoid making rice mushy)."
+    },
+    {
+      "id": "ingredient.bouillon_cube",
+      "label": "Seasoning cubes (Maggi/Knorr), optional",
+      "role": "umami",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Optional—use if your household prefers the classic seasoning-cube profile."
+    },
+    {
+      "id": "ingredient.butter",
+      "label": "Butter (optional finishing)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Not traditional for all households, but common as a richness booster."
+    },
+    {
+      "id": "ingredient.spring_onion",
+      "label": "Sliced scallions (optional garnish)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "title": "Pepper-Tomato Base (blend)",
+      "items": [
+        "ingredient.diced_tomatoes",
+        "ingredient.red_bell_pepper",
+        "ingredient.onion",
+        "ingredient.scotch_bonnet",
+        "ingredient.garlic",
+        "ingredient.ginger"
+      ],
+      "notes": "Blend until smooth. Thicker base = better flavor and less soggy rice."
+    },
+    {
+      "title": "Pot Base + Rice",
+      "items": [
+        "ingredient.oil",
+        "ingredient.tomato_paste",
+        "ingredient.thyme_dried",
+        "ingredient.curry_powder",
+        "ingredient.paprika",
+        "ingredient.bay_leaf",
+        "ingredient.rice_parboiled",
+        "ingredient.stock_chicken",
+        "ingredient.salt",
+        "ingredient.bouillon_cube"
+      ],
+      "notes": "Reduce the blended base in oil before adding rice for classic jollof depth."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_rice",
+      "title": "Rinse and prep the rice",
+      "activeMins": 6,
+      "body": "Rinse rice under cool water until the water runs mostly clear. Drain well. Set aside. (Optional: soak 10 minutes, then drain—helps grains stay separate.)",
+      "checks": [
+        "Rice is well drained (less surface starch).",
+        "No standing water in the colander."
+      ]
+    },
+    {
+      "id": "step_02_blend_base",
+      "title": "Blend the pepper-tomato base",
+      "activeMins": 7,
+      "body": "In a blender, combine tomatoes, red bell peppers, 1 onion (roughly chopped), garlic, ginger, and optional scotch bonnet. Blend until smooth. If the mixture is extremely watery, simmer it separately for 5–10 minutes to reduce before using.",
+      "checks": [
+        "Base is smooth (no large pepper chunks).",
+        "If very watery, you have a reduction plan."
+      ]
+    },
+    {
+      "id": "step_03_fry_onion_and_paste",
+      "title": "Build the pot base: sauté onions and fry tomato paste",
+      "activeMins": 8,
+      "handsOffMins": 2,
+      "body": "Heat oil in a heavy pot over medium heat. Add the remaining chopped onion and cook 3–4 minutes until softened. Stir in tomato paste and fry 2–3 minutes, stirring constantly, until the paste darkens slightly and smells less raw.",
+      "timers": [
+        { "label": "Sauté onion", "minutes": 4 },
+        { "label": "Fry tomato paste", "minutes": 3 }
+      ],
+      "checks": [
+        "Tomato paste has deepened in color.",
+        "No scorching on the bottom of the pot."
+      ]
+    },
+    {
+      "id": "step_04_reduce_blended_base",
+      "title": "Add blended base and reduce (key jollof step)",
+      "activeMins": 4,
+      "handsOffMins": 20,
+      "body": "Pour in the blended pepper-tomato base. Stir well. Add thyme, curry powder, paprika, bay leaves, and optional seasoning cube. Reduce over medium-low heat, uncovered, stirring occasionally, until the sauce is thicker, darker, and the oil begins to separate slightly at the edges (about 15–25 minutes).",
+      "timers": [{ "label": "Reduce pepper base", "minutes": 20 }],
+      "checks": [
+        "Sauce looks thicker (not watery).",
+        "Oil begins to show at the edges (light separation)."
+      ]
+    },
+    {
+      "id": "step_05_add_stock_and_adjust",
+      "title": "Add stock and adjust seasoning",
+      "activeMins": 4,
+      "body": "Stir in salt and 3 cups of stock first. Bring to a gentle simmer. Taste carefully (it will be strong). Adjust salt/seasoning now. Add remaining stock only if the base is quite thick; your goal is enough liquid to cook the rice by absorption without making it wet.",
+      "checks": [
+        "Flavor is strong but balanced (it will mellow with rice).",
+        "Liquid level seems appropriate for absorption cooking."
+      ]
+    },
+    {
+      "id": "step_06_add_rice_absorption",
+      "title": "Add rice and cook by absorption",
+      "activeMins": 4,
+      "handsOffMins": 25,
+      "body": "Add drained rice and stir until every grain is coated. Reduce heat to low, cover tightly, and cook 20 minutes without opening the lid. If your lid is loose, seal with foil under the lid to trap steam.",
+      "timers": [{ "label": "Covered simmer (do not open)", "minutes": 20 }],
+      "checks": [
+        "Rice is evenly distributed and coated.",
+        "Heat is low enough to avoid scorching."
+      ]
+    },
+    {
+      "id": "step_07_steam_finish_and_fluff",
+      "title": "Steam-finish, fluff, and fix dryness if needed",
+      "activeMins": 6,
+      "handsOffMins": 10,
+      "body": "After 20 minutes, quickly open and check. If rice is still firm and dry, sprinkle 2–4 tbsp water around the edges (not too much), cover again, and cook 5–10 minutes more. Turn off heat and let rest 5 minutes. Fluff with a fork or wooden spoon. Optional: stir in 1 tbsp butter for richness.",
+      "timers": [
+        { "label": "Extra cook if needed", "minutes": 8 },
+        { "label": "Rest off heat", "minutes": 5 }
+      ],
+      "checks": [
+        "Rice is tender and grains are separate.",
+        "No wet puddles at the bottom."
+      ]
+    },
+    {
+      "id": "step_08_optional_party_smoke_finish",
+      "title": "Optional: party-style smoky finish (oven)",
+      "activeMins": 2,
+      "handsOffMins": 15,
+      "body": "For a smoky party-jollof vibe: transfer jollof to a wide oven-safe pan, spread evenly, and bake at 350°F for 10–15 minutes to dry slightly and deepen flavor. Watch carefully to avoid burning. (Optional step.)",
+      "temperature": {
+        "type": "oven",
+        "value": 350,
+        "unit": "F",
+        "notes": "Only if oven is available."
+      },
+      "timers": [{ "label": "Oven finish (optional)", "minutes": 12 }],
+      "checks": [
+        "Top looks slightly drier and more aromatic.",
+        "No burnt edges unless desired."
+      ]
+    },
+    {
+      "id": "step_09_serve",
+      "title": "Serve",
+      "activeMins": 2,
+      "body": "Serve hot as a main or alongside grilled chicken, beef, fish, or fried plantains (dodo). Optional garnish: sliced scallions.",
+      "checks": ["Serve hot for best aroma and texture."]
+    }
+  ],
+  "pairings": {
+    "mains": [
+      "cuisines.nigerian.recipes.suya",
+      "cuisines.nigerian.recipes.pepper_soup_goat",
+      "cuisines.nigerian.recipes.fried_plantains_dodo"
+    ],
+    "sides": [
+      "cuisines.nigerian.recipes.moi_moi",
+      "cuisines.nigerian.recipes.coleslaw"
+    ],
+    "notes": "Jollof pairs well with grilled meats/fish and fried plantains; add a crisp salad/coleslaw for contrast."
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 4,
+      "notes": "Cool quickly, store in shallow containers. Reheat until steaming hot."
+    },
+    "freezer": {
+      "maxMonths": 2,
+      "notes": "Portion and freeze. Thaw overnight in fridge before reheating."
+    },
+    "reheat": {
+      "notes": [
+        "Microwave: splash of water, cover, heat until hot.",
+        "Stovetop: add 1–2 tbsp water, cover, steam on low."
+      ]
+    }
+  },
+  "planner": {
+    "batchNotes": [
+      "Double recipe in a large heavy pot; reduce base longer to avoid soggy rice.",
+      "For events, cook 1 day ahead; reheat covered with a splash of water."
+    ],
+    "shoppingHints": [
+      "Parboiled long-grain rice is strongly preferred for texture.",
+      "Smoked paprika boosts party-jollof flavor if you are not oven-finishing."
+    ],
+    "skillFocus": ["reduction", "absorption_rice", "seasoning_balance"]
+  },
+  "safety": {
+    "notes": [
+      "Cool rice quickly (within 1 hour if possible) to reduce food safety risk.",
+      "Reheat leftovers until steaming hot throughout."
+    ]
+  },
+  "notes": [
+    "Key success factor: reduce the blended pepper base until thicker and slightly oily before adding rice.",
+    "If your jollof tastes too sharp, it likely needs more reduction time or a pinch more salt.",
+    "If rice is mushy, you used too much liquid or base was too watery."
+  ],
+  "variations": [
+    {
+      "id": "variation_chicken_jollof",
+      "label": "Chicken Jollof (one-pot)",
+      "notes": "Brown chicken pieces first, remove, build base, then nestle chicken on top of rice before covering. Ensure chicken reaches safe internal temperature.",
+      "adapt": {
+        "addIngredients": [
+          {
+            "id": "ingredient.chicken_thighs",
+            "label": "Chicken thighs/drumsticks",
+            "amount": { "value": 2.5, "unit": "lb" }
+          }
+        ],
+        "equipment": { "recommended": ["equipment.pot_heavy"] }
+      }
+    },
+    {
+      "id": "variation_vegetable_jollof",
+      "label": "Vegetable Jollof",
+      "notes": "Add mixed vegetables near the end so they don’t overcook.",
+      "adapt": {
+        "addIngredients": [
+          {
+            "id": "ingredient.mixed_vegetables",
+            "label": "Mixed vegetables (peas/carrots/green beans)",
+            "amount": { "value": 1.5, "unit": "cups" }
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    "technique.blend_base",
+    "technique.reduce_pepper_mix",
+    "technique.rice_absorption",
+    "technique.simmer"
+  ],
+  "compat": {
+    "cuisineId": "cuisines.nigerian",
+    "dishId": "dish.nigerian.jollof_rice",
+    "preferredIngredientIds": [
+      "ingredient.rice_parboiled",
+      "ingredient.red_bell_pepper",
+      "ingredient.scotch_bonnet",
+      "ingredient.palm_oil"
+    ],
+    "keywords": [
+      "jollof",
+      "nigerian jollof",
+      "party jollof",
+      "smoky jollof",
+      "tomato pepper base",
+      "absorption rice"
+    ]
+  }
+}

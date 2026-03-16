@@ -35,7 +35,8 @@ const slugify = (s) =>
 
 function arraysShallowEqual(a, b) {
   if (a === b) return true;
-  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length)
+    return false;
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
   return true;
 }
@@ -86,7 +87,10 @@ async function optionalNutrition() {
 const CUISINE_PATTERNS = [
   [/(mediterranean|greek|lebanese|levant|levantine)/i, "Mediterranean"],
   [/(soul\s?food|southern\b)/i, "Soul Food"],
-  [/(west\s*africa|nigerian|ghanaian|senegalese|ivorian|malian)/i, "West African"],
+  [
+    /(west\s*africa|nigerian|ghanaian|senegalese|ivorian|malian)/i,
+    "West African",
+  ],
   [/\bcajun\b/i, "Cajun"],
   [/\bcreole\b/i, "Creole"],
   [/\b(bbq|barbecue)\b/i, "BBQ"],
@@ -113,19 +117,18 @@ function inferCuisines({ name, tags, category }) {
 /* ------------------------------ Normalization ----------------------------- */
 function mapRecipeIn(r = {}) {
   // id/name/url/image → many shapes accepted
-  const id =
-    normId(
-      r?.id ||
-        r?.sourceUrl ||
-        r?.url ||
-        `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-    );
+  const id = normId(
+    r?.id ||
+      r?.sourceUrl ||
+      r?.url ||
+      `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+  );
   const name = normName(r?.name || r?.title);
   const tags = arr(r?.tags || r?.keywords).map(normName);
   const sourceUrl = r?.sourceUrl || r?.url || undefined;
   const imageCandidate = Array.isArray(r?.imageUrl || r?.image)
     ? (r?.imageUrl || r?.image)[0]
-    : (r?.imageUrl || r?.image);
+    : r?.imageUrl || r?.image;
   const imageUrl = imageCandidate || undefined;
 
   const normalized = {
@@ -215,7 +218,9 @@ function mergeRecipes(base, incoming) {
     // UX/meta (preserve usage, increment if explicitly passed)
     usageCount: Number.isFinite(b.usageCount) ? b.usageCount : a.usageCount,
     lastUsedAt: choose(a.lastUsedAt, b.lastUsedAt),
-    favoriteScore: Number.isFinite(b.favoriteScore) ? b.favoriteScore : a.favoriteScore,
+    favoriteScore: Number.isFinite(b.favoriteScore)
+      ? b.favoriteScore
+      : a.favoriteScore,
     origin: choose(a.origin, b.origin),
     streetFood: a.streetFood || !!b.streetFood,
     foodTruckReady: a.foodTruckReady || !!b.foodTruckReady,
@@ -253,8 +258,13 @@ export const useRecipeStore = create(
 
         const exists =
           prev.some((r) => normId(r.id) === rid) ||
-          (!!nextRec.name && prev.some((r) => r.name === nextRec.name || (r.slug && r.slug === nextRec.slug))) ||
-          (!!nextRec.sourceUrl && prev.some((r) => r.sourceUrl && r.sourceUrl === nextRec.sourceUrl));
+          (!!nextRec.name &&
+            prev.some(
+              (r) =>
+                r.name === nextRec.name || (r.slug && r.slug === nextRec.slug)
+            )) ||
+          (!!nextRec.sourceUrl &&
+            prev.some((r) => r.sourceUrl && r.sourceUrl === nextRec.sourceUrl));
 
         if (exists) return; // no-op (use upsertRecipe to merge)
         get()._pushHistory({ recipes: prev, tags: get().tags });
@@ -351,7 +361,12 @@ export const useRecipeStore = create(
         const prev = get().recipes;
         const next = prev.map((r) =>
           normId(r.id) === rid
-            ? { ...r, favoriteScore: (r.favoriteScore || 0) + (r.favoriteScore > 0 ? -weight : weight) }
+            ? {
+                ...r,
+                favoriteScore:
+                  (r.favoriteScore || 0) +
+                  (r.favoriteScore > 0 ? -weight : weight),
+              }
             : r
         );
         if (next !== prev) {
@@ -364,7 +379,9 @@ export const useRecipeStore = create(
       /* --------------------------- Selection UX -------------------------- */
       toggleSelectRecipe: (id) => {
         const rid = normId(id);
-        const next = get().recipes.map((r) => (normId(r.id) === rid ? { ...r, isSelected: !r.isSelected } : r));
+        const next = get().recipes.map((r) =>
+          normId(r.id) === rid ? { ...r, isSelected: !r.isSelected } : r
+        );
         set({ recipes: next });
       },
       clearSelections: () => {
@@ -403,7 +420,8 @@ export const useRecipeStore = create(
           return { ...r, tags: [...tags, ensuredTag.name] };
         });
 
-        if (changed || nextTags !== prevTags) set({ recipes: nextRecipes, tags: nextTags });
+        if (changed || nextTags !== prevTags)
+          set({ recipes: nextRecipes, tags: nextTags });
       },
 
       removeTagFromRecipe: (recipeId, tagName) => {
@@ -413,7 +431,9 @@ export const useRecipeStore = create(
         let changed = false;
         const next = prev.map((r) => {
           if (normId(r.id) !== rid) return r;
-          const filtered = (r.tags || []).filter((t) => lower(t) !== lower(label));
+          const filtered = (r.tags || []).filter(
+            (t) => lower(t) !== lower(label)
+          );
           if (filtered.length === (r.tags || []).length) return r;
           changed = true;
           return { ...r, tags: filtered };
@@ -430,10 +450,14 @@ export const useRecipeStore = create(
         const toExists = prevTags.some((t) => lower(t.name) === lower(to));
         const nextTags = toExists
           ? prevTags.filter((t) => lower(t.name) !== lower(from))
-          : prevTags.map((t) => (lower(t.name) === lower(from) ? { ...t, name: to } : t));
+          : prevTags.map((t) =>
+              lower(t.name) === lower(from) ? { ...t, name: to } : t
+            );
 
         const nextRecipes = get().recipes.map((r) => {
-          const mapped = (r.tags || []).map((t) => (lower(t) === lower(from) ? to : t));
+          const mapped = (r.tags || []).map((t) =>
+            lower(t) === lower(from) ? to : t
+          );
           return { ...r, tags: uniq(mapped.map(normName)) };
         });
 
@@ -442,11 +466,15 @@ export const useRecipeStore = create(
 
       /* ------------------------------ Lists ------------------------------ */
       getRecipesByCategory: () =>
-        [...get().recipes].sort((a, b) => (a.category || "").localeCompare(b.category || "")),
+        [...get().recipes].sort((a, b) =>
+          (a.category || "").localeCompare(b.category || "")
+        ),
       getSelectedRecipes: () => get().recipes.filter((r) => r.isSelected),
 
       setRecipes: (newRecipes) => {
-        const next = Array.isArray(newRecipes) ? newRecipes.map(mapRecipeIn) : [];
+        const next = Array.isArray(newRecipes)
+          ? newRecipes.map(mapRecipeIn)
+          : [];
         const prev = get().recipes;
         if (arraysShallowEqual(prev, next)) return;
         get()._pushHistory({ recipes: prev, tags: get().tags });
@@ -459,7 +487,8 @@ export const useRecipeStore = create(
       },
 
       /* ------------------------ Import / Export JSON ---------------------- */
-      exportJson: () => JSON.stringify({ recipes: get().recipes, tags: get().tags }, null, 2),
+      exportJson: () =>
+        JSON.stringify({ recipes: get().recipes, tags: get().tags }, null, 2),
       importJson: (json) => {
         try {
           const obj = typeof json === "string" ? JSON.parse(json) : json;
@@ -469,7 +498,11 @@ export const useRecipeStore = create(
           const prevTags = get().tags;
           const merged = [...prevTags];
           for (const t of tags) {
-            if (!merged.some((x) => lower(x.name) === lower(String(t?.name || "")))) {
+            if (
+              !merged.some(
+                (x) => lower(x.name) === lower(String(t?.name || ""))
+              )
+            ) {
               merged.push({ id: t?.id || Date.now(), name: normName(t?.name) });
             }
           }
@@ -531,14 +564,22 @@ export const useRecipeStore = create(
         get()._pushHistory({ recipes: list, tags: get().tags });
         seen.forEach((v) => result.push(v));
         set({ recipes: result });
-        emitEvent("recipes/mergedDuplicates", { before: list.length, after: result.length });
+        emitEvent("recipes/mergedDuplicates", {
+          before: list.length,
+          after: result.length,
+        });
       },
 
       /* -------------------------- Inventory helper ------------------------ */
       getMissingFromInventory: async (recipeId) => {
         const rid = normId(recipeId);
         const recipe = (get().recipes || []).find((r) => normId(r.id) === rid);
-        if (!recipe || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0) return [];
+        if (
+          !recipe ||
+          !Array.isArray(recipe.ingredients) ||
+          recipe.ingredients.length === 0
+        )
+          return [];
         const inv = await optionalInventory();
         if (!inv || !inv.getInventoryItems) return recipe.ingredients; // assume all missing if no inventory
         const items = await inv.getInventoryItems();
@@ -555,8 +596,12 @@ export const useRecipeStore = create(
        * Avoid/Allergen aware when NutritionGoalsStore is available.
        */
       searchRecipes: async (query) => {
-        const avoid = (await optionalNutrition())
-          ?.useNutritionGoalsStore?.getState?.()?.avoidList || { allergens: [], ingredients: [] };
+        const avoid = (
+          await optionalNutrition()
+        )?.useNutritionGoalsStore?.getState?.()?.avoidList || {
+          allergens: [],
+          ingredients: [],
+        };
         const avoidSet = new Set([
           ...arr(avoid.allergens).map(lower),
           ...arr(avoid.ingredients).map(lower),
@@ -570,8 +615,13 @@ export const useRecipeStore = create(
           return list.filter((r) => {
             if (textIncludes(r.name || "", q)) return true;
             if (r.category && textIncludes(r.category, q)) return true;
-            if (Array.isArray(r.tags) && r.tags.some((t) => textIncludes(t, q))) return true;
-            if (Array.isArray(r.ingredients) && r.ingredients.some((ing) => textIncludes(ing?.name || "", q))) return true;
+            if (Array.isArray(r.tags) && r.tags.some((t) => textIncludes(t, q)))
+              return true;
+            if (
+              Array.isArray(r.ingredients) &&
+              r.ingredients.some((ing) => textIncludes(ing?.name || "", q))
+            )
+              return true;
             return false;
           });
         }
@@ -600,21 +650,38 @@ export const useRecipeStore = create(
 
           if (hasAvoid) return false;
 
-          const hasCuisine = !wantCuisine.size || cuisines.some((c) => wantCuisine.has(c));
+          const hasCuisine =
+            !wantCuisine.size || cuisines.some((c) => wantCuisine.has(c));
           const okTime = !maxTime || time <= maxTime;
-          const hasEquip = !wantEquip.size || equip.some((e) => wantEquip.has(e));
+          const hasEquip =
+            !wantEquip.size || equip.some((e) => wantEquip.has(e));
           const hasTags = !wantTags.size || tags.some((t) => wantTags.has(t));
           const hasDiet = !wantDiet.size || diets.some((d) => wantDiet.has(d));
           const okText =
             !text ||
             lower(r.name || "").includes(text) ||
-            (r.ingredients || []).some((i) => lower(i?.name || "").includes(text)) ||
+            (r.ingredients || []).some((i) =>
+              lower(i?.name || "").includes(text)
+            ) ||
             (r.category && lower(r.category).includes(text));
 
-          const okStreet = q.streetFood == null ? true : !!r.streetFood === !!q.streetFood;
-          const okTruck = q.foodTruckReady == null ? true : !!r.foodTruckReady === !!q.foodTruckReady;
+          const okStreet =
+            q.streetFood == null ? true : !!r.streetFood === !!q.streetFood;
+          const okTruck =
+            q.foodTruckReady == null
+              ? true
+              : !!r.foodTruckReady === !!q.foodTruckReady;
 
-          return hasCuisine && okTime && hasEquip && hasTags && hasDiet && okText && okStreet && okTruck;
+          return (
+            hasCuisine &&
+            okTime &&
+            hasEquip &&
+            hasTags &&
+            hasDiet &&
+            okText &&
+            okStreet &&
+            okTruck
+          );
         });
 
         // Rank: favorites & recency first, then time-fit
@@ -628,7 +695,8 @@ export const useRecipeStore = create(
           return tA - tB;
         });
 
-        if (Number.isFinite(q.limit) && q.limit > 0) out = out.slice(0, q.limit);
+        if (Number.isFinite(q.limit) && q.limit > 0)
+          out = out.slice(0, q.limit);
         return out;
       },
 
@@ -660,7 +728,9 @@ export const useRecipeStore = create(
 
         // Fusion sprinkle
         if (fusionWith && fusionWith.length) {
-          const fusionPool = (await get().searchRecipes({ cuisines: fusionWith, limit: 30 })) || [];
+          const fusionPool =
+            (await get().searchRecipes({ cuisines: fusionWith, limit: 30 })) ||
+            [];
           pool = uniq([...pool, ...fusionPool]);
         }
 
@@ -671,7 +741,9 @@ export const useRecipeStore = create(
             score:
               (r.favoriteScore || 0) * 2 +
               (r.usageCount || 0) * 0.5 +
-              (r.cuisines || []).includes("West African") ? 1 : 0,
+              (r.cuisines || []).includes("West African")
+                ? 1
+                : 0,
           }))
           .sort((a, b) => b.score - a.score)
           .map((x) => x.r);
@@ -690,7 +762,9 @@ export const useRecipeStore = create(
       /* --------------------------- Quick helpers -------------------------- */
       getByTag: (tagName) => {
         const t = normName(tagName);
-        return get().recipes.filter((r) => (r.tags || []).some((x) => lower(x) === lower(t)));
+        return get().recipes.filter((r) =>
+          (r.tags || []).some((x) => lower(x) === lower(t))
+        );
       },
       getIndexById: () => indexById(get().recipes),
 
@@ -702,7 +776,12 @@ export const useRecipeStore = create(
         const curr = { recipes: get().recipes, tags: get().tags };
         const future = get()._future.slice();
         future.push(curr);
-        set({ recipes: snap.recipes, tags: snap.tags, _history: hist, _future: future });
+        set({
+          recipes: snap.recipes,
+          tags: snap.tags,
+          _history: hist,
+          _future: future,
+        });
         emitEvent("recipes/undo", {});
       },
       redo: () => {
@@ -711,7 +790,12 @@ export const useRecipeStore = create(
         const next = future.pop();
         const hist = get()._history.slice();
         hist.push({ recipes: get().recipes, tags: get().tags });
-        set({ recipes: next.recipes, tags: next.tags, _history: hist, _future: future });
+        set({
+          recipes: next.recipes,
+          tags: next.tags,
+          _history: hist,
+          _future: future,
+        });
         emitEvent("recipes/redo", {});
       },
     }),
@@ -724,7 +808,9 @@ export const useRecipeStore = create(
 
         // v1/2/3 → v4: normalize + add new fields with safe defaults
         if (ver < 4) {
-          const oldRecipes = Array.isArray(persisted.recipes) ? persisted.recipes : [];
+          const oldRecipes = Array.isArray(persisted.recipes)
+            ? persisted.recipes
+            : [];
           const oldTags = Array.isArray(persisted.tags) ? persisted.tags : [];
           persisted.recipes = oldRecipes.map((r) => {
             const n = mapRecipeIn(r);
@@ -737,7 +823,9 @@ export const useRecipeStore = create(
             // new defaults
             n.usageCount = Number.isFinite(n.usageCount) ? n.usageCount : 0;
             n.lastUsedAt = n.lastUsedAt || null;
-            n.favoriteScore = Number.isFinite(n.favoriteScore) ? n.favoriteScore : 0;
+            n.favoriteScore = Number.isFinite(n.favoriteScore)
+              ? n.favoriteScore
+              : 0;
             n.origin = n.origin || "user";
             n.streetFood = !!n.streetFood;
             n.foodTruckReady = !!n.foodTruckReady;
@@ -878,3 +966,103 @@ export const useRecipeActions = () =>
     }),
     shallow
   );
+
+/* -------------------------------------------------------------------------- */
+/* Compatibility exports (used by template builders)                           */
+/* -------------------------------------------------------------------------- */
+
+/** Return the full recipe list (snapshot). */
+export function getAll() {
+  return useRecipeStore.getState().recipes || [];
+}
+
+/** Get a recipe by id (or null). */
+export function getById(id) {
+  if (!id) return null;
+  const recipes = useRecipeStore.getState().recipes || [];
+  return recipes.find((r) => r?.id === id) || null;
+}
+
+/** Alias for getById, historically used by some templates. */
+export function getRecipe(id) {
+  return getById(id);
+}
+
+/**
+ * savePreferences
+ * Stores per-recipe preference overrides (eg. doneness/texture).
+ * This is a light-weight ...
+ */
+export function savePreferences(recipeId, prefs = {}) {
+  if (!recipeId) return false;
+  const state = useRecipeStore.getState();
+  const recipes = state.recipes || [];
+  const idx = recipes.findIndex((r) => r?.id === recipeId);
+  if (idx < 0) return false;
+  const current = recipes[idx];
+  const meta = { ...(current.meta || {}) };
+  meta.preferences = { ...(meta.preferences || {}), ...(prefs || {}) };
+  state.updateRecipe?.(recipeId, { meta });
+  return true;
+}
+
+/**
+ * getTimerCorrections
+ * Returns any per-recipe timer correction map previously saved via
+ * savePreferences or other callers. Defaults to {}.
+ */
+export function getTimerCorrections(recipeId) {
+  const r = getById(recipeId);
+  return r?.meta?.timerCorrections &&
+    typeof r.meta.timerCorrections === "object"
+    ? r.meta.timerCorrections
+    : r?.meta?.preferences?.timerCorrections &&
+      typeof r.meta.preferences.timerCorrections === "object"
+    ? r.meta.preferences.timerCorrections
+    : {};
+}
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Namespace export expected by orchestrators (e.g., mealPlanEngine)         */
+/* -------------------------------------------------------------------------- */
+/**
+ * Some orchestrators import `{ Recipes }` from "@/store/RecipeStore".
+ * Provide a stable namespace object without changing existing exports.
+ */
+export const Recipes = {
+  // store / hooks
+  useRecipeStore,
+  useRecipes,
+  useRecipeTags,
+  useRecipeActions,
+
+  // snapshots / CRUD
+  getRecipes,
+  listRecipes,
+  getAll,
+  getById,
+  getRecipe,
+  setRecipes,
+  addRecipe,
+  upsertRecipe,
+  upsertManyRecipes,
+  removeTagFromRecipe,
+  renameTag,
+  resetRecipes,
+
+  // lists / selection
+  getRecipesByCategory,
+  getSelectedRecipes,
+  getByTag,
+
+  // operations
+  searchRecipes,
+  mergeDuplicateRecipes,
+  getMissingFromInventory,
+  recommendRecipes,
+  addFromUrl,
+
+  // per-recipe preferences helpers
+  savePreferences,
+  getTimerCorrections,
+};

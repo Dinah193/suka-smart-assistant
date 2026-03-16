@@ -1,0 +1,572 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.caribbean.recipes.curry_goat",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Curry Goat",
+    "subtitle": "Jamaican-style curry goat with aromatics, thyme, Scotch bonnet, and rich gravy",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.caribbean",
+      "notes": [
+        "Canonical SSA Caribbean baseline curry goat.",
+        "Designed for deterministic planning + adaptation (stovetop braise; pressure cooker variant included)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Caribbean",
+    "subprofiles": ["cuisines.caribbean"],
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.braise",
+      "archetype.stew",
+      "archetype.family_dinner"
+    ],
+    "servingStyles": ["family_style", "plated", "with_rice"],
+    "plannerTags": [
+      "caribbean",
+      "curry",
+      "goat",
+      "braise",
+      "stew",
+      "batch_friendly",
+      "leftovers_good",
+      "freezer_friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 with rice; 4–5 if served as a hearty stew. Recipe scales well for batch cooking."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 130,
+    "totalMins": 165
+  },
+
+  "difficulty": 5,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "spiceLevel": "medium_hot",
+    "makeAhead": {
+      "bestNextDay": true,
+      "marinateHoursRecommended": 4
+    }
+  },
+
+  "tasteProfile": {
+    "dominant": ["curry", "thyme", "allspice", "savory"],
+    "supporting": ["scallion", "ginger", "garlic", "pepper_heat"],
+    "heat": 3,
+    "acid": "low",
+    "sweetness": "low",
+    "salt": "medium"
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equip.heavy_pot_dutch_oven",
+        "label": "Heavy pot or Dutch oven",
+        "required": true,
+        "notes": "A tight-fitting lid helps the goat braise tender."
+      },
+      {
+        "id": "equip.knife",
+        "label": "Chef’s knife",
+        "required": true
+      },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      },
+      {
+        "id": "equip.spoon",
+        "label": "Wooden spoon",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.pressure_cooker",
+        "label": "Pressure cooker / Instant Pot",
+        "required": false,
+        "notes": "Optional faster tenderness; see variation."
+      },
+      {
+        "id": "equip.mortar_pestle",
+        "label": "Mortar & pestle",
+        "required": false,
+        "notes": "Nice for crushing allspice/pepper and blooming curry."
+      }
+    ],
+    "minimum": [
+      "equip.heavy_pot_dutch_oven",
+      "equip.knife",
+      "equip.cutting_board"
+    ],
+    "recommended": ["equip.pressure_cooker"]
+  },
+
+  "dietFlags": ["diet.gluten_free", "diet.low_carb"],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "ing.goat_stew_meat",
+      "label": "Goat meat, bone-in stew cut",
+      "role": "protein",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": [
+        "Shoulder/leg cuts are ideal. Bone-in gives richer gravy.",
+        "Trim only excess surface fat; some fat is good for braising."
+      ]
+    },
+    {
+      "id": "ing.lime",
+      "label": "Lime juice",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": [
+        "Used for cleaning/seasoning goat. Vinegar can substitute.",
+        "If you prefer less tang, reduce to 1 tbsp."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": ["Adjust to taste; broth and curry blends vary in saltiness."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ing.allspice",
+      "label": "Allspice (ground) or crushed pimento berries",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["If using whole pimento, crush 6–8 berries."]
+    },
+    {
+      "id": "ing.thyme",
+      "label": "Fresh thyme",
+      "role": "herb",
+      "amount": { "value": 6, "unit": "sprig" },
+      "notes": ["Or use 2 tsp dried thyme."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 5, "unit": "clove" }
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.scallion",
+      "label": "Scallions (green onions), chopped",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "each" }
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ing.carrot",
+      "label": "Carrot, diced (optional)",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": [
+        "Optional sweetness/body in gravy. Traditional versions may omit."
+      ]
+    },
+    {
+      "id": "ing.curry_powder_jamaican",
+      "label": "Jamaican curry powder",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": [
+        "Choose a curry blend you like. Jamaican curry is often turmeric-forward.",
+        "If using very strong curry powder, start with 1.5 tbsp."
+      ]
+    },
+    {
+      "id": "ing.curry_powder_extra",
+      "label": "Additional curry powder (to bloom in oil)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "Optional but recommended: blooming curry in oil deepens flavor and color."
+      ]
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil (or coconut oil)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.scotch_bonnet",
+      "label": "Scotch bonnet pepper (whole or sliced)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": [
+        "Keep whole for gentler heat; slice for hotter.",
+        "Habanero is a common substitute."
+      ]
+    },
+    {
+      "id": "ing.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": ["Optional: helps deepen color and savory notes in the gravy."]
+    },
+    {
+      "id": "ing.stock_beef_or_chicken",
+      "label": "Stock (beef or chicken) or water",
+      "role": "braising_liquid",
+      "amount": { "value": 4, "unit": "cup" },
+      "notes": [
+        "Start with 4 cups; add more as needed to keep goat mostly submerged.",
+        "Water is fine; stock gives richer body."
+      ]
+    },
+    {
+      "id": "ing.potato",
+      "label": "Potatoes, peeled and cut into chunks",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true,
+      "notes": [
+        "Optional: classic in many curry goat pots. Add near the end to avoid mush."
+      ]
+    },
+    {
+      "id": "ing.coconut_milk",
+      "label": "Coconut milk (optional)",
+      "role": "body",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": [
+        "Not traditional in every Jamaican version; adds creaminess and softens heat."
+      ]
+    },
+    {
+      "id": "ing.vinegar",
+      "label": "White vinegar (optional alternative to lime)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "grp.goat_and_seasoning",
+      "label": "Goat + Seasoning",
+      "items": [
+        "ing.goat_stew_meat",
+        "ing.lime",
+        "ing.salt_kosher",
+        "ing.black_pepper",
+        "ing.allspice",
+        "ing.thyme",
+        "ing.garlic",
+        "ing.ginger",
+        "ing.scallion",
+        "ing.curry_powder_jamaican"
+      ]
+    },
+    {
+      "id": "grp.braise_base",
+      "label": "Braise Base",
+      "items": [
+        "ing.oil_neutral",
+        "ing.onion",
+        "ing.carrot",
+        "ing.curry_powder_extra",
+        "ing.tomato_paste",
+        "ing.scotch_bonnet",
+        "ing.stock_beef_or_chicken"
+      ]
+    },
+    {
+      "id": "grp.finishers_optional",
+      "label": "Optional Finishers",
+      "items": ["ing.potato", "ing.coconut_milk", "ing.vinegar"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.clean_and_season_goat",
+      "title": "Clean and season the goat",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Rinse goat pieces quickly under cool water if needed; drain well.",
+        "Toss goat with lime juice (or 1 tbsp vinegar), 1 tsp salt, black pepper, allspice, half the thyme, half the garlic, half the ginger, and half the scallions.",
+        "Cover and marinate at least 1 hour (best 4–12 hours) for deeper flavor."
+      ],
+      "timers": [{ "label": "Marinate (minimum)", "minutes": 60 }]
+    },
+    {
+      "id": "step.brown_goat",
+      "title": "Brown the goat for depth",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat oil in a heavy pot/Dutch oven over medium-high heat.",
+        "Shake excess marinade from goat pieces (reserve marinade) and brown goat in batches 2–4 minutes per side until well colored.",
+        "Transfer browned goat to a plate; reduce heat to medium."
+      ],
+      "checks": [
+        "Goat is deeply browned (not gray)",
+        "Pot has browned bits (fond) but not burnt"
+      ]
+    },
+    {
+      "id": "step.bloom_curry_and_aromatics",
+      "title": "Bloom curry and build aromatics",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add diced onion (and carrot if using) to the pot; sauté 3–4 minutes until softened.",
+        "Stir in remaining garlic, ginger, and scallions; cook 30–60 seconds until fragrant.",
+        "Optional but recommended: add the extra 1 tbsp curry powder and stir 30–60 seconds to bloom in oil.",
+        "If using tomato paste, stir it in and cook 1 minute to darken slightly."
+      ],
+      "checks": [
+        "Curry smells toasted/fragrant (not raw)",
+        "Garlic is fragrant but not scorched"
+      ]
+    },
+    {
+      "id": "step.deglaze_and_braise",
+      "title": "Deglaze and braise until tender",
+      "activeMins": 5,
+      "handsOffMins": 110,
+      "instructions": [
+        "Return browned goat (and any juices) to the pot. Add reserved marinade.",
+        "Add stock/water to mostly cover the goat. Add remaining thyme and the Scotch bonnet (whole for gentler heat).",
+        "Bring to a simmer, then cover and reduce heat to maintain a gentle simmer.",
+        "Braise 1 hour 30 minutes to 2 hours, stirring occasionally, until goat is tender and easily pulls from bone."
+      ],
+      "timers": [
+        { "label": "Initial braise (check tenderness)", "minutes": 90 },
+        { "label": "Continue braise if needed", "minutes": 30 }
+      ],
+      "checks": [
+        "Stew stays at a gentle simmer (not a hard boil)",
+        "Liquid level remains adequate; add splashes of water/stock as needed",
+        "Goat is tender before adding potatoes"
+      ]
+    },
+    {
+      "id": "step.add_potatoes_optional",
+      "title": "Add potatoes (optional) and finish gravy",
+      "activeMins": 5,
+      "handsOffMins": 25,
+      "instructions": [
+        "If using potatoes, add them once goat is mostly tender (usually after ~90 minutes).",
+        "Simmer uncovered 20–30 minutes until potatoes are tender and gravy thickens.",
+        "If using coconut milk, stir in during the last 5 minutes (do not hard-boil after adding)."
+      ],
+      "timers": [{ "label": "Potatoes cook + gravy reduce", "minutes": 25 }],
+      "checks": [
+        "Potatoes are tender but not falling apart",
+        "Gravy coats a spoon"
+      ]
+    },
+    {
+      "id": "step.adjust_and_serve",
+      "title": "Adjust seasoning and serve",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove Scotch bonnet (if left whole) and thyme stems (if using sprigs).",
+        "Taste and adjust salt. If you want brighter finish, add a small squeeze of lime.",
+        "Serve hot with rice (white rice, rice & peas) and/or fried plantains."
+      ]
+    }
+  ],
+
+  "methods": ["technique.braise", "technique.simmer"],
+
+  "pairings": {
+    "sides": [
+      "caribbean.rice_and_peas",
+      "caribbean.steam_cabbage",
+      "caribbean.fried_plantains",
+      "caribbean.festival"
+    ],
+    "condiments": ["caribbean.pickle_vegetables", "caribbean.pepper_sauce"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Cool within 2 hours. Store in airtight container. Flavor improves overnight.",
+      "maxDays": 4
+    },
+    "freezer": {
+      "guidance": "Freeze in portions with gravy. Thaw overnight in fridge; reheat gently.",
+      "maxMonths": 3
+    },
+    "reheat": {
+      "best": [
+        "Stovetop on low with a splash of water/stock",
+        "Covered in oven at 325°F until hot"
+      ]
+    }
+  },
+
+  "planner": {
+    "course": "main",
+    "dishId": "caribbean.curry_goat",
+    "batchNotes": [
+      "Double batch is efficient: the same braise time yields more portions.",
+      "Freeze in 2-serving containers for quick future meals."
+    ],
+    "leftovers": [
+      "Serve over rice or with flatbread",
+      "Shred and use for curry-goat tacos/wraps",
+      "Reduce gravy and serve as a thick stew"
+    ]
+  },
+
+  "summary": "Classic Caribbean curry goat: browned, then gently braised with Jamaican curry, thyme, aromatics, and optional Scotch bonnet until deeply tender in a rich gravy.",
+
+  "keywords": [
+    "curry goat",
+    "jamaican curry goat",
+    "caribbean",
+    "goat stew",
+    "braised goat",
+    "scotch bonnet",
+    "thyme",
+    "allspice",
+    "batch cooking"
+  ],
+
+  "tags": [
+    "cuisine.caribbean",
+    "caribbean",
+    "goat",
+    "curry",
+    "stew",
+    "braise",
+    "batch_friendly",
+    "leftovers_good",
+    "freezer_friendly",
+    "gluten_free",
+    "low_carb"
+  ],
+
+  "safety": {
+    "handling": [
+      "Keep raw meat refrigerated; marinate in the fridge, not on the counter.",
+      "Avoid cross-contamination: sanitize board/knife after raw goat.",
+      "Bring stew to a full simmer when reheating; reheat until piping hot."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.pressure_cooker",
+      "label": "Pressure cooker / Instant Pot version",
+      "when": { "hasEquipment": "equip.pressure_cooker" },
+      "adapt": {
+        "notes": [
+          "Use Sauté to brown goat and bloom curry/aromatics as written.",
+          "Add liquid (start with 3 cups). Pressure cook High 35 minutes; natural release 15 minutes.",
+          "Simmer on Sauté to reduce gravy; add potatoes after pressure step and simmer until tender."
+        ]
+      }
+    },
+    {
+      "id": "var.milder_heat",
+      "label": "Milder heat",
+      "when": { "prefersHeat": "low" },
+      "adapt": {
+        "notes": [
+          "Skip Scotch bonnet or leave whole and remove early.",
+          "Increase thyme and scallion for aroma without heat."
+        ]
+      }
+    },
+    {
+      "id": "var.extra_spicy",
+      "label": "Extra spicy",
+      "when": { "prefersHeat": "high" },
+      "adapt": {
+        "notes": [
+          "Slice Scotch bonnet (gloves recommended) and add half during braise, half at the end.",
+          "Serve with pepper sauce."
+        ]
+      }
+    },
+    {
+      "id": "var.no_potatoes",
+      "label": "No potatoes (more traditional in some households)",
+      "when": { "avoidStarchInPot": true },
+      "adapt": {
+        "notes": [
+          "Skip potatoes and serve with rice & peas, yams, or dumplings instead.",
+          "Reduce uncovered 10–15 minutes for thicker gravy."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.caribbean.recipes.curry_goat",
+    "aliases": [
+      "jamaican curry goat",
+      "curry goat stew",
+      "caribbean curry goat"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.braise", "technique.simmer"],
+      "coreIngredients": [
+        "ing.goat_stew_meat",
+        "ing.curry_powder_jamaican",
+        "ing.thyme",
+        "ing.garlic",
+        "ing.ginger",
+        "ing.scallion",
+        "ing.onion"
+      ]
+    }
+  }
+}

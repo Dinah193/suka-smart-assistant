@@ -1,0 +1,421 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.ethiopian.recipes.shiro",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Shiro Wat (Ethiopian Chickpea Stew)",
+    "subtitle": "Creamy, aromatic chickpea flour stew—weeknight-friendly and perfect with injera.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Baseline shiro wat tuned for SSA catalogs with deterministic steps and optional heat controls.",
+        "Uses chickpea flour (shiro powder). If you have a spiced shiro mix, reduce berbere/salt accordingly.",
+        "Texture is adjustable from pourable to thick scoopable by changing simmer time and water."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Ethiopian",
+    "category": "stew",
+    "mealArchetypes": [
+      "stew",
+      "legume_stew",
+      "sauce",
+      "injera_pairing",
+      "vegan_main"
+    ],
+    "servingStyles": ["family_style", "platter", "meal_prep"],
+    "plannerTags": [
+      "cuisine.ethiopian",
+      "dish.ethiopian.shiro_wat",
+      "stew",
+      "vegan",
+      "dairy_free",
+      "gluten_free",
+      "weeknight.friendly",
+      "batch.friendly",
+      "injera_pairing"
+    ]
+  },
+
+  "summary": "Shiro is a smooth Ethiopian stew made from chickpea flour simmered with onion, garlic, and berbere, often enriched with niter kibbeh or oil.",
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "Serves 4–6 as a main with injera; 6–8 as part of a platter."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": "high",
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "weeknightPossible": true,
+    "onePot": true
+  },
+
+  "tasteProfile": {
+    "heat": "medium",
+    "sourness": "low",
+    "aroma": ["toasted_onion", "garlic", "berbere", "legume_nutty"],
+    "texture": ["creamy", "smooth", "velvety"],
+    "finish": ["warm_spice", "savory"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "tool.saucepan_or_pot",
+        "label": "Medium saucepan or pot",
+        "required": true
+      },
+      {
+        "id": "tool.wooden_spoon",
+        "label": "Wooden spoon or spatula",
+        "required": true
+      },
+      { "id": "tool.whisk", "label": "Whisk", "required": true }
+    ],
+    "recommended": [
+      "tool.kitchen_scale",
+      "tool.measuring_cups",
+      "tool.microplane"
+    ],
+    "optional": [
+      {
+        "id": "tool.immersion_blender",
+        "label": "Immersion blender (optional)",
+        "required": false,
+        "notes": "Not needed if you whisk well; can help if onions are chunky."
+      }
+    ]
+  },
+
+  "dietFlags": ["vegan", "dairy_free", "gluten_free"],
+  "allergens": {
+    "mayContain": [],
+    "notes": [
+      "Naturally gluten-free if chickpea flour is not cross-contaminated.",
+      "If using commercial shiro powder blends, check for additives and allergens."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "oil.neutral",
+      "label": "Neutral oil (or niter kibbeh if not vegan)",
+      "role": "fat",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": [
+        "Traditional versions may use niter kibbeh (spiced clarified butter).",
+        "For vegan shiro, use neutral oil or olive oil."
+      ]
+    },
+    {
+      "id": "vegetable.onion",
+      "label": "Yellow onion, finely diced (or grated)",
+      "role": "aromatic",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": [
+        "Finely diced helps the stew become smooth; grating speeds this up.",
+        "Onion quantity is key for authentic body and sweetness."
+      ]
+    },
+    {
+      "id": "vegetable.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" }
+    },
+    {
+      "id": "vegetable.ginger",
+      "label": "Ginger, grated (optional but recommended)",
+      "role": "aromatic",
+      "amount": { "value": 8, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "spice.berbere",
+      "label": "Berbere spice blend",
+      "role": "spice",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": [
+        "Adjust to heat tolerance and whether your shiro powder is already seasoned.",
+        "For mild, start at 6 g; for hot, increase to 18 g."
+      ]
+    },
+    {
+      "id": "spice.paprika",
+      "label": "Paprika (optional, for color if berbere is mild)",
+      "role": "spice",
+      "amount": { "value": 4, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "tomato.paste",
+      "label": "Tomato paste",
+      "role": "body",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true,
+      "notes": [
+        "Optional but common; adds sweetness and depth.",
+        "If using highly seasoned shiro powder, you can omit."
+      ]
+    },
+    {
+      "id": "legume.chickpea_flour",
+      "label": "Chickpea flour (shiro powder)",
+      "role": "thickener",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": [
+        "This recipe assumes plain chickpea flour + spices.",
+        "If using a packaged shiro mix, reduce added spices and salt to taste."
+      ]
+    },
+    {
+      "id": "water",
+      "label": "Water (or light vegetable broth)",
+      "role": "liquid",
+      "amount": { "value": 1000, "unit": "ml" },
+      "notes": [
+        "Start with 900–1000 ml; add more for a thinner shiro.",
+        "Shiro thickens as it simmers and again as it cools."
+      ]
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": [
+        "Seasoned shiro powders may already contain salt—add gradually and taste."
+      ]
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black pepper (optional)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "spice.korarima_or_cardamom",
+      "label": "Korarima (Ethiopian cardamom) or ground cardamom (pinch, optional)",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true,
+      "notes": "A small amount adds a distinctive Ethiopian aroma."
+    },
+    {
+      "id": "spice.kosseret",
+      "label": "Kosseret (optional herb; substitute dried oregano in tiny pinch)",
+      "role": "herb",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "garnish.green_chili",
+      "label": "Green chili or jalapeño, sliced (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.stew",
+    "method.sweat_aromatics",
+    "method.spice_bloom",
+    "method.whisk_thicken"
+  ],
+
+  "notes": [
+    "Keep heat moderate and whisk frequently after adding flour to prevent lumps and sticking.",
+    "If shiro gets too thick, loosen with hot water 60–120 ml at a time.",
+    "Flavor improves after a short rest; reheat gently and loosen as needed."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.extra_rich",
+      "label": "Extra-rich shiro (non-vegan)",
+      "changes": {
+        "fat": "Use 45 ml niter kibbeh instead of oil.",
+        "finish": "Stir in 1–2 tbsp niter kibbeh at the end for aroma."
+      }
+    },
+    {
+      "id": "variation.tomato_forward",
+      "label": "Tomato-forward shiro",
+      "changes": {
+        "tomato": "Increase tomato paste to 45 g and add 150 g crushed tomato; simmer 5 minutes before adding flour."
+      }
+    },
+    {
+      "id": "variation.mild",
+      "label": "Mild shiro",
+      "changes": {
+        "spice": "Use 6 g berbere, include paprika for color, and omit green chili garnish."
+      }
+    },
+    {
+      "id": "variation.chunky_house_style",
+      "label": "Chunky house-style shiro",
+      "changes": {
+        "onion": "Dice onion slightly larger and cook longer; skip blending/extra whisking."
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Chickpea flour must be simmered to cook out raw flavor; keep at a gentle simmer for at least 10–12 minutes after thickening.",
+      "Cool leftovers quickly and refrigerate promptly."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "up to 4 days",
+      "notes": "Store airtight. Reheat gently and loosen with water."
+    },
+    "freezer": {
+      "duration": "up to 2 months",
+      "notes": "Freeze in portions. Thaw in fridge overnight and reheat gently, whisking smooth."
+    }
+  },
+
+  "pairings": {
+    "primary": ["dish.ethiopian.injera"],
+    "classicSides": [
+      "dish.ethiopian.misir_wat",
+      "dish.ethiopian.gomen",
+      "dish.ethiopian.atakilt_wat"
+    ],
+    "garnish": ["garnish.green_chili"]
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.ethiopian",
+    "dishId": "dish.ethiopian.shiro_wat",
+    "aliases": ["shiro", "shiro wat", "shiro wot", "chickpea stew"],
+    "ingredientIdHints": [
+      "legume.chickpea_flour",
+      "spice.berbere",
+      "tomato.paste"
+    ],
+    "methodIdHints": ["method.stew", "method.whisk_thicken"]
+  },
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat the onion",
+      "domain": "stovetop",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat oil (or niter kibbeh) in a medium pot over medium heat.",
+        "Add onion with a pinch of salt and cook, stirring frequently, until very soft and translucent (6–10 minutes).",
+        "If the pot gets dry, add 1–2 tbsp water and keep cooking—onion softness helps make shiro smooth."
+      ],
+      "checks": [
+        "Onion is very soft, not browned heavily.",
+        "No scorching on pot bottom."
+      ],
+      "timers": [{ "label": "Sweat onion", "minutes": 8 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Add aromatics and bloom spices",
+      "domain": "stovetop",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Stir in garlic (and ginger if using) and cook 30–60 seconds until fragrant.",
+        "Add berbere (and paprika if using) and stir constantly for 30–45 seconds to bloom spices.",
+        "If using tomato paste, add it now and cook 1–2 minutes until it darkens slightly and smells sweet."
+      ],
+      "checks": [
+        "Aromatics smell fragrant (not burnt).",
+        "Spices are evenly coated in fat and onion."
+      ],
+      "timers": [{ "label": "Bloom spices", "minutes": 2 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Add water and bring to a simmer",
+      "domain": "stovetop",
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "instructions": [
+        "Add about 750 ml of the water and whisk to loosen any browned bits.",
+        "Bring to a gentle simmer."
+      ],
+      "timers": [{ "label": "Bring to simmer", "minutes": 5 }],
+      "checks": ["Liquid is gently simmering, not violently boiling."]
+    },
+    {
+      "id": "step_04",
+      "title": "Whisk in chickpea flour (prevent lumps)",
+      "domain": "stovetop",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Reduce heat to medium-low.",
+        "While whisking continuously, sprinkle chickpea flour into the simmering liquid in a steady stream.",
+        "Keep whisking until smooth—break up any lumps immediately."
+      ],
+      "checks": [
+        "Mixture is smooth with no visible dry pockets or flour lumps.",
+        "Pot bottom is not sticking."
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Simmer to cook and thicken",
+      "domain": "stovetop",
+      "activeMins": 3,
+      "handsOffMins": 15,
+      "instructions": [
+        "Simmer gently 12–15 minutes, stirring every 1–2 minutes (shiro can stick).",
+        "Adjust texture with remaining water: add 60–120 ml at a time to reach your preferred consistency.",
+        "Add salt gradually, tasting as you go (especially if using a seasoned shiro mix).",
+        "Optional: add a pinch of korarima/cardamom and/or kosseret near the end."
+      ],
+      "timers": [{ "label": "Simmer shiro", "minutes": 15 }],
+      "checks": [
+        "Raw flour taste is gone; flavor is savory and aromatic.",
+        "Consistency is creamy (spoon-coating) and pourable/scoopable as desired."
+      ]
+    },
+    {
+      "id": "step_06",
+      "title": "Rest and serve",
+      "domain": "serve",
+      "activeMins": 2,
+      "handsOffMins": 3,
+      "instructions": [
+        "Turn off heat and rest 2–3 minutes; whisk once more to smooth.",
+        "Serve hot with injera. Garnish with sliced green chili if desired."
+      ],
+      "timers": [{ "label": "Rest before serving", "minutes": 3 }],
+      "checks": ["Shiro is smooth, glossy, and aromatic."]
+    }
+  ]
+}

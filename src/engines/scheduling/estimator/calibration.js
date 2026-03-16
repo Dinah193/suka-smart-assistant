@@ -15,7 +15,7 @@
  *  - cooking, cleaning, garden, animals, preservation, storehouse
  *  - plus "generic" as a safe fallback
  *
- * Events (via src/services/eventBus.js) — payload: { type, ts, source, data }
+ * Events (via src/services/events/eventBus.js) — payload: { type, ts, source, data }
  *  - scheduling.calibration.applied
  *  - scheduling.calibration.updated
  *  - scheduling.calibration.error
@@ -46,24 +46,60 @@ const DOMAINS = /** @type {const} */ ([
  */
 const DOMAIN_HINTS = {
   cooking: {
-    priors: { alpha: 0.20 },
-    resources: ["waterLiters", "kWh", "BTU", "gasUnits", "washLoads", "pansUsed"],
+    priors: { alpha: 0.2 },
+    resources: [
+      "waterLiters",
+      "kWh",
+      "BTU",
+      "gasUnits",
+      "washLoads",
+      "pansUsed",
+    ],
   },
   cleaning: {
     priors: { alpha: 0.25 },
-    resources: ["waterLiters", "kWh", "mlDetergent", "padsUsed", "bags", "disinfectMinutes"],
+    resources: [
+      "waterLiters",
+      "kWh",
+      "mlDetergent",
+      "padsUsed",
+      "bags",
+      "disinfectMinutes",
+    ],
   },
   garden: {
-    priors: { alpha: 0.30 },
-    resources: ["waterLiters", "fertilizerGrams", "compostKg", "mulchBags", "kWh", "fuelLiters"],
+    priors: { alpha: 0.3 },
+    resources: [
+      "waterLiters",
+      "fertilizerGrams",
+      "compostKg",
+      "mulchBags",
+      "kWh",
+      "fuelLiters",
+    ],
   },
   animals: {
-    priors: { alpha: 0.30 },
-    resources: ["feedKg", "waterLiters", "beddingKg", "medDoseMl", "kWh", "fuelLiters"],
+    priors: { alpha: 0.3 },
+    resources: [
+      "feedKg",
+      "waterLiters",
+      "beddingKg",
+      "medDoseMl",
+      "kWh",
+      "fuelLiters",
+    ],
   },
   preservation: {
     priors: { alpha: 0.22 },
-    resources: ["jars", "lids", "kWh", "BTU", "saltGrams", "vinegarMl", "smokeHours"],
+    resources: [
+      "jars",
+      "lids",
+      "kWh",
+      "BTU",
+      "saltGrams",
+      "vinegarMl",
+      "smokeHours",
+    ],
   },
   storehouse: {
     priors: { alpha: 0.18 },
@@ -82,7 +118,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -123,7 +159,9 @@ function emit(type, source, data) {
 
 /** Ensure domain is one of our supported values; else map to 'generic' */
 function normalizeDomain(domain) {
-  const d = String(domain || "").toLowerCase().trim();
+  const d = String(domain || "")
+    .toLowerCase()
+    .trim();
   return DOMAINS.includes(d) ? d : "generic";
 }
 
@@ -131,9 +169,16 @@ function normalizeDomain(domain) {
  * Build a calibration bucket key.
  * Stable, evolvable: add fields as needed.
  */
-function buildKey({ domain, taskType, equipment = [], householdId = "default" }) {
+function buildKey({
+  domain,
+  taskType,
+  equipment = [],
+  householdId = "default",
+}) {
   const d = normalizeDomain(domain);
-  const equip = Array.isArray(equipment) ? equipment.slice().sort().join("|") : String(equipment || "");
+  const equip = Array.isArray(equipment)
+    ? equipment.slice().sort().join("|")
+    : String(equipment || "");
   return [d, String(taskType || "any"), equip, String(householdId)].join("::");
 }
 
@@ -225,7 +270,9 @@ async function getOrCreateCalibration(key, meta = {}) {
       meta: {
         domain,
         taskType: meta.taskType || "any",
-        equipment: Array.isArray(meta.equipment) ? meta.equipment.slice().sort() : [],
+        equipment: Array.isArray(meta.equipment)
+          ? meta.equipment.slice().sort()
+          : [],
         householdId: meta.householdId || "default",
         createdAt: nowISO(),
         updatedAt: nowISO(),
@@ -264,21 +311,37 @@ async function applyCalibration(rawEstimate, ctx = {}) {
 
   // Duration
   if (durationFields.hasAny) {
-    const durEst = durationFields.center || durationFields.min || durationFields.max || 0;
-    const corrected = clampMin(durEst * cal.duration.mult + cal.duration.add, 0);
+    const durEst =
+      durationFields.center || durationFields.min || durationFields.max || 0;
+    const corrected = clampMin(
+      durEst * cal.duration.mult + cal.duration.add,
+      0
+    );
     // Re-project corrected center back to min/max if provided
     if (isNum(durationFields.min) && isNum(durationFields.max)) {
       const span = Math.max(1, durationFields.max - durationFields.min);
       const center = (durationFields.min + durationFields.max) / 2;
       const factor = center ? corrected / center : cal.duration.mult;
-      adjusted.durationMin = Math.round(clampMin(durationFields.min * factor + cal.duration.add, 0));
-      adjusted.durationMax = Math.round(clampMin(durationFields.max * factor + cal.duration.add, 0));
-      adjusted.durationSpan = Math.round(adjusted.durationMax - adjusted.durationMin);
-      adjusted.duration = Math.round((adjusted.durationMin + adjusted.durationMax) / 2);
+      adjusted.durationMin = Math.round(
+        clampMin(durationFields.min * factor + cal.duration.add, 0)
+      );
+      adjusted.durationMax = Math.round(
+        clampMin(durationFields.max * factor + cal.duration.add, 0)
+      );
+      adjusted.durationSpan = Math.round(
+        adjusted.durationMax - adjusted.durationMin
+      );
+      adjusted.duration = Math.round(
+        (adjusted.durationMin + adjusted.durationMax) / 2
+      );
     } else if (isNum(estimate.durationMin)) {
-      adjusted.durationMin = Math.round(clampMin(estimate.durationMin * cal.duration.mult + cal.duration.add, 0));
+      adjusted.durationMin = Math.round(
+        clampMin(estimate.durationMin * cal.duration.mult + cal.duration.add, 0)
+      );
     } else if (isNum(estimate.durationMax)) {
-      adjusted.durationMax = Math.round(clampMin(estimate.durationMax * cal.duration.mult + cal.duration.add, 0));
+      adjusted.durationMax = Math.round(
+        clampMin(estimate.durationMax * cal.duration.mult + cal.duration.add, 0)
+      );
     } else if (isNum(estimate.duration)) {
       adjusted.duration = Math.round(corrected);
     }
@@ -286,7 +349,10 @@ async function applyCalibration(rawEstimate, ctx = {}) {
 
   // Effort
   if (isNum(estimate.effortScore)) {
-    adjusted.effortScore = clampMin(estimate.effortScore * cal.effort.mult + cal.effort.add, 0);
+    adjusted.effortScore = clampMin(
+      estimate.effortScore * cal.effort.mult + cal.effort.add,
+      0
+    );
   }
 
   // Resources (generic; hints are advisory only)
@@ -326,7 +392,12 @@ async function applyCalibration(rawEstimate, ctx = {}) {
 async function updateCalibration(args = {}) {
   const source = "engines/scheduling/estimator/calibration.update";
   try {
-    const { ctx = {}, originalEstimate = {}, actuals = {}, options = {} } = args;
+    const {
+      ctx = {},
+      originalEstimate = {},
+      actuals = {},
+      options = {},
+    } = args;
     const domain = normalizeDomain(ctx.domain);
     const key = buildKey({ ...ctx, domain });
     const cal = await getOrCreateCalibration(key, { ...ctx, domain });
@@ -335,14 +406,18 @@ async function updateCalibration(args = {}) {
     const domainAlpha = DOMAIN_HINTS[domain]?.priors?.alpha;
     const chosenAlpha =
       options.alpha ??
-      (cal.samples < 3 && isNum(domainAlpha) ? domainAlpha : cal.alpha ?? DEFAULT_ALPHA);
+      (cal.samples < 3 && isNum(domainAlpha)
+        ? domainAlpha
+        : cal.alpha ?? DEFAULT_ALPHA);
 
     const alpha = boundAlpha(chosenAlpha);
     const protect = options.protect !== false; // default true
 
     // Duration learning
     const estDur = pickEstimatedDuration(originalEstimate);
-    const actDur = isNum(actuals.durationMinutes) ? actuals.durationMinutes : null;
+    const actDur = isNum(actuals.durationMinutes)
+      ? actuals.durationMinutes
+      : null;
     if (isNum(estDur) && isNum(actDur) && estDur > 0) {
       const ratio = clampRatio(actDur / estDur, protect);
       // EWMA on multiplicative factor; light additive correction on average bias
@@ -352,10 +427,18 @@ async function updateCalibration(args = {}) {
     }
 
     // Effort learning
-    if (isNum(originalEstimate.effortScore) && isNum(actuals.effortScore) && originalEstimate.effortScore > 0) {
-      const eratio = clampRatio(actuals.effortScore / originalEstimate.effortScore, protect);
+    if (
+      isNum(originalEstimate.effortScore) &&
+      isNum(actuals.effortScore) &&
+      originalEstimate.effortScore > 0
+    ) {
+      const eratio = clampRatio(
+        actuals.effortScore / originalEstimate.effortScore,
+        protect
+      );
       cal.effort.mult = ewma(cal.effort.mult, eratio, alpha);
-      const ebias = actuals.effortScore - originalEstimate.effortScore * cal.effort.mult;
+      const ebias =
+        actuals.effortScore - originalEstimate.effortScore * cal.effort.mult;
       cal.effort.add = ewma(cal.effort.add, ebias, alpha * 0.5);
     }
 
@@ -379,15 +462,23 @@ async function updateCalibration(args = {}) {
     await saveCalibration(cal);
 
     const snapshot = snapshotForEmit(cal);
-    const payload = { calibrationKey: key, snapshot, context: { ...ctx, domain } };
+    const payload = {
+      calibrationKey: key,
+      snapshot,
+      context: { ...ctx, domain },
+    };
     emit("scheduling.calibration.updated", source, payload);
     // Optional hub export (learning data is “household data” by spec)
     await exportToHubIfEnabled({ action: "calibration.updated", ...payload });
     return snapshot;
   } catch (err) {
-    emit("scheduling.calibration.error", "engines/scheduling/estimator/calibration.update", {
-      message: String(err?.message || err),
-    });
+    emit(
+      "scheduling.calibration.error",
+      "engines/scheduling/estimator/calibration.update",
+      {
+        message: String(err?.message || err),
+      }
+    );
     return null;
   }
 }

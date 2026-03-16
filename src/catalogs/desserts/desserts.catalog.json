@@ -1,0 +1,160 @@
+{
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "catalog",
+    "id": "catalog.desserts",
+    "name": "Desserts Catalog",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "description": "Canonical desserts catalog: index of dessert recipe IDs with tags for discovery, filtering, and meal planning.",
+    "locale": "en-US"
+  },
+  "items": [
+    {
+      "id": "desserts.classic_chocolate_chip_cookies",
+      "tags": [
+        "dessert",
+        "cookie",
+        "classic",
+        "chocolate-chip",
+        "baking",
+        "family",
+        "kid-friendly",
+        "baseline",
+        "freezer-friendly"
+      ]
+    },
+    {
+      "id": "desserts.vanilla_layer_cake",
+      "tags": [
+        "dessert",
+        "cake",
+        "vanilla",
+        "birthday",
+        "celebration",
+        "layer-cake",
+        "stacking",
+        "foundation",
+        "baking",
+        "freezer-friendly"
+      ]
+    },
+    {
+      "id": "desserts.chocolate_fudge_brownies",
+      "tags": [
+        "dessert",
+        "brownies",
+        "chocolate",
+        "fudge",
+        "dense",
+        "baseline",
+        "baking",
+        "pan-bake",
+        "freezer-friendly"
+      ]
+    },
+    {
+      "id": "desserts.banana_pudding_southern",
+      "tags": [
+        "dessert",
+        "banana-pudding",
+        "southern",
+        "soul-food",
+        "classic",
+        "custard",
+        "no-bake",
+        "make-ahead",
+        "family",
+        "high-cultural-relevance"
+      ]
+    },
+    {
+      "id": "desserts.apple_pie_classic",
+      "tags": [
+        "dessert",
+        "pie",
+        "apple-pie",
+        "classic",
+        "canonical",
+        "crust",
+        "filling",
+        "baking",
+        "holiday",
+        "celebration"
+      ]
+    },
+    {
+      "id": "desserts.peach_cobbler",
+      "tags": [
+        "dessert",
+        "cobbler",
+        "peach",
+        "southern",
+        "baked-fruit",
+        "popular",
+        "canonical",
+        "comfort-food",
+        "make-ahead"
+      ]
+    },
+    {
+      "id": "desserts.rice_pudding",
+      "tags": [
+        "dessert",
+        "rice-pudding",
+        "budget-friendly",
+        "global",
+        "comfort-food",
+        "stovetop",
+        "baked-variant",
+        "make-ahead",
+        "pantry"
+      ]
+    },
+    {
+      "id": "desserts.bread_pudding_vanilla_sauce",
+      "tags": [
+        "dessert",
+        "bread-pudding",
+        "leftover-bread",
+        "baked",
+        "custard",
+        "vanilla-sauce",
+        "budget-friendly",
+        "bakery-pairing",
+        "make-ahead",
+        "comfort-food"
+      ]
+    },
+    {
+      "id": "desserts.cheesecake_new_york_style",
+      "tags": [
+        "dessert",
+        "cheesecake",
+        "new-york-style",
+        "custard",
+        "baking-precision",
+        "water-bath",
+        "make-ahead",
+        "celebration"
+      ]
+    },
+    {
+      "id": "desserts.mahogany_cake",
+      "tags": [
+        "dessert",
+        "cake",
+        "mahogany-cake",
+        "southern",
+        "chocolate",
+        "layer-cake",
+        "celebration",
+        "baking",
+        "foundation"
+      ]
+    }
+  ]
+}

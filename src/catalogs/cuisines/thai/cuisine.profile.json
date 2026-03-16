@@ -1,0 +1,1073 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Thai",
+    "shortName": "Thai",
+    "description": "Bright, aromatic Thai cooking built on balance: salty-sweet-sour-spicy with fresh herbs, citrus, chile heat, and umami from fish sauce, shrimp paste, and fermented seasonings. Common forms include curries, stir-fries, soups, salads, and rice/noodle bowls.",
+    "originRegions": ["Southeast Asia"],
+    "regions": ["Thailand", "Southeast Asia"],
+    "primaryCountriesAndIslands": ["Thailand"],
+    "tags": [
+      "cuisine.thai",
+      "region.southeast_asia",
+      "style.balanced",
+      "flavor.herb_forward",
+      "flavor.citrus_forward",
+      "technique.stir_fry",
+      "technique.curry",
+      "weeknight.friendly",
+      "batch.friendly"
+    ],
+    "icon": "cuisine_thai",
+    "colorHint": "lime_chili",
+    "author": "SSA Catalog",
+    "version": "1.0.0",
+    "status": "canonical",
+    "updatedAt": "2026-01-21T00:00:00.000Z",
+    "source": {
+      "curation": "SSA canonical cuisine profile",
+      "maintainer": "SSA",
+      "license": "proprietary",
+      "attribution": "Compiled from common culinary references; not a verbatim copy of any single source.",
+      "kind": "curated",
+      "author": "SSA",
+      "origin": "internal",
+      "type": "cuisine_profile",
+      "notes": "IDs are SSA-catalog style; ingredient/equipment IDs should map to SSA ingredient & equipment catalogs.",
+      "url": null
+    },
+    "family": {
+      "parent": "cuisines.southeast_asian",
+      "siblings": [
+        "cuisines.vietnamese",
+        "cuisines.laotian",
+        "cuisines.cambodian"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.malaysian",
+          "reason": "Shared aromatics (lemongrass, lime leaf), coconut curries, and noodle dishes."
+        },
+        {
+          "id": "cuisines.chinese_southern",
+          "reason": "Shared stir-fry techniques and some noodle/rice preparations; different balance system and seasonings."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "thai.central",
+        "name": "Central Thai",
+        "signatureNotes": "Balanced sweet-sour-salty; coconut curries; fragrant jasmine rice; herbal salads.",
+        "commonSauceBases": [
+          "thai.red_curry_paste",
+          "thai.green_curry_paste",
+          "thai.tom_yum_base"
+        ]
+      },
+      {
+        "id": "thai.northern",
+        "name": "Northern Thai",
+        "signatureNotes": "Herbal, earthy, less sweet; grilled meats; khao soi-style curries/noodles; fermented notes.",
+        "commonSauceBases": ["thai.northern_curry_paste", "thai.nam_prik"]
+      },
+      {
+        "id": "thai.isan",
+        "name": "Isan (Northeastern Thai)",
+        "signatureNotes": "Spicy, sour, toasted rice powder, fermented fish sauce; grilled meats; salads like larb and som tam.",
+        "commonSauceBases": ["thai.nam_pla_prik", "thai.fermented_fish_sauce"]
+      },
+      {
+        "id": "thai.southern",
+        "name": "Southern Thai",
+        "signatureNotes": "Hotter chiles; turmeric; robust curries; seafood; pungent aromatics.",
+        "commonSauceBases": [
+          "thai.yellow_curry_paste",
+          "thai.southern_curry_paste"
+        ]
+      }
+    ],
+    "regionHints": ["Bangkok", "Chiang Mai", "Isan", "Phuket"],
+    "countryHints": ["Thailand"]
+  },
+
+  "tags": [
+    "cuisine.thai",
+    "profile.cuisine",
+    "planner.supported",
+    "flavor.balance",
+    "heat.variable"
+  ],
+
+  "notes": [
+    "This profile is designed for SSA meal planning (archetypes/templates), pantry tiering, and substitution hints.",
+    "Heat level in Thai cooking varies widely; planner defaults assume medium heat but supports easy adjustment."
+  ],
+
+  "plannerDefaults": {
+    "mealRoles": [
+      "role.base",
+      "role.protein",
+      "role.veg",
+      "role.greens",
+      "role.sauce",
+      "role.garnish",
+      "role.side"
+    ],
+    "batchFriendly": true,
+    "freezerFriendly": true,
+    "defaultHeatLevel": "medium",
+    "defaultServingStyle": ["bowls", "street_food", "one_pot"],
+    "defaultStaples": [
+      "ingredient.jasmine_rice",
+      "ingredient.rice_noodles",
+      "ingredient.coconut_milk",
+      "ingredient.fish_sauce",
+      "ingredient.lime",
+      "ingredient.garlic",
+      "ingredient.ginger",
+      "ingredient.galangal",
+      "ingredient.lemongrass",
+      "ingredient.kefir_lime_leaf",
+      "ingredient.thai_basil",
+      "ingredient.cilantro",
+      "ingredient.chile_fresh",
+      "ingredient.chile_dried",
+      "ingredient.palm_sugar",
+      "ingredient.soy_sauce_light"
+    ],
+    "inventorySignals": [
+      "signal.curry_paste_on_hand",
+      "signal.fresh_herbs_on_hand",
+      "signal.limes_on_hand",
+      "signal.coconut_milk_on_hand"
+    ],
+    "makeAheadNotes": [
+      "Curry pastes and fried aromatics freeze well in small portions.",
+      "Cook jasmine rice in batches; refresh by steaming or microwaving with a splash of water.",
+      "Many Thai soups are best assembled fresh; prep aromatics and broth base ahead."
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "balanced_salty_sour_sweet_spicy",
+      "bright_citrus",
+      "fresh_herbs",
+      "fermented_umami",
+      "coconut_richness"
+    ],
+    "aromaticsCore": [
+      "ingredient.garlic",
+      "ingredient.shallot",
+      "ingredient.ginger",
+      "ingredient.galangal",
+      "ingredient.lemongrass",
+      "ingredient.kefir_lime_leaf",
+      "ingredient.cilantro_stems"
+    ],
+    "spiceCore": [
+      "ingredient.chile_fresh",
+      "ingredient.chile_dried",
+      "ingredient.white_pepper",
+      "ingredient.coriander_seed",
+      "ingredient.cumin",
+      "ingredient.turmeric"
+    ],
+    "umamiBuilders": [
+      "ingredient.fish_sauce",
+      "ingredient.shrimp_paste",
+      "ingredient.oyster_sauce",
+      "ingredient.soy_sauce_light",
+      "ingredient.tamarind_paste",
+      "ingredient.dried_shrimp"
+    ],
+    "acidOptions": [
+      "ingredient.lime_juice",
+      "ingredient.tamarind_paste",
+      "ingredient.rice_vinegar",
+      "ingredient.green_mango",
+      "ingredient.pineapple"
+    ],
+    "sweetBalanceOptions": [
+      "ingredient.palm_sugar",
+      "ingredient.brown_sugar",
+      "ingredient.honey"
+    ],
+    "heatOptions": [
+      "ingredient.chile_fresh",
+      "ingredient.chile_flakes",
+      "ingredient.chile_paste",
+      "ingredient.white_pepper"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Basics to produce Thai-inspired bowls, quick stir-fries, and simple soups.",
+      "items": [
+        "ingredient.jasmine_rice",
+        "ingredient.soy_sauce_light",
+        "ingredient.garlic",
+        "ingredient.lime",
+        "ingredient.chile_flakes",
+        "ingredient.brown_sugar",
+        "ingredient.neutral_oil"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core Thai flavor balance and common building blocks for curries and salads.",
+      "items": [
+        "ingredient.fish_sauce",
+        "ingredient.coconut_milk",
+        "ingredient.rice_noodles",
+        "ingredient.rice_vinegar",
+        "ingredient.tamarind_paste",
+        "ingredient.lemongrass",
+        "ingredient.ginger",
+        "ingredient.cilantro",
+        "ingredient.thai_basil"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional aromatics and umami boosters for more authentic profiles.",
+      "items": [
+        "ingredient.galangal",
+        "ingredient.kefir_lime_leaf",
+        "ingredient.shrimp_paste",
+        "ingredient.oyster_sauce",
+        "ingredient.dried_shrimp",
+        "ingredient.palm_sugar",
+        "ingredient.roasted_rice_powder",
+        "ingredient.thai_chile_bird"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for specific regional dishes and deeper authenticity.",
+      "items": [
+        "ingredient.fermented_fish_sauce",
+        "ingredient.thai_eggplant",
+        "ingredient.long_beans",
+        "ingredient.green_papaya",
+        "ingredient.banana_blossom",
+        "ingredient.satay_peanut_sauce",
+        "ingredient.thai_black_soy_sauce",
+        "ingredient.preserved_radish"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.stir_fry",
+      "method.curry_simmer",
+      "method.soup_simmer",
+      "method.pound_paste",
+      "method.grill",
+      "method.steam"
+    ],
+    "common": [
+      "method.quick_pickling",
+      "method.fry_aromatics",
+      "method.reduce_sauce",
+      "method.toss_salad",
+      "method.braise"
+    ],
+    "notes": [
+      "Many Thai dishes rely on staging: fry aromatics/paste, bloom spices, then build liquid and finish with herbs and acids off-heat.",
+      "Balance is typically adjusted at the end: salt (fish sauce), acid (lime/tamarind), sweet (palm sugar), heat (fresh chiles)."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "thai.curry_over_rice",
+      "label": "Curry over rice",
+      "description": "Coconut or non-coconut curry served with jasmine rice; often finished with fresh herbs and lime.",
+      "commonExamples": ["Green curry", "Red curry", "Panang-style curry"],
+      "defaults": {
+        "riceOptions": ["ingredient.jasmine_rice"],
+        "proteinOptions": [
+          "ingredient.chicken_thigh",
+          "ingredient.shrimp",
+          "ingredient.tofu_firm"
+        ],
+        "vegOptions": [
+          "ingredient.bell_pepper",
+          "ingredient.bamboo_shoots",
+          "ingredient.thai_eggplant"
+        ],
+        "garnishOptions": [
+          "ingredient.thai_basil",
+          "ingredient.cilantro",
+          "ingredient.lime_wedges"
+        ],
+        "pairings": ["thai.nam_pla_prik", "thai.quick_cucumber_salad"]
+      }
+    },
+    {
+      "id": "thai.noodle_bowl",
+      "label": "Noodle bowl",
+      "description": "Rice noodles or wheat noodles with a sauce or broth, topped with herbs and crunchy garnishes.",
+      "commonExamples": [
+        "Pad Thai",
+        "Drunken noodles",
+        "Boat noodle-style bowls"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "ingredient.rice_noodles",
+          "ingredient.wide_rice_noodles"
+        ],
+        "proteinOptions": [
+          "ingredient.chicken",
+          "ingredient.beef",
+          "ingredient.tofu_firm",
+          "ingredient.shrimp"
+        ],
+        "vegOptions": [
+          "ingredient.bean_sprouts",
+          "ingredient.chinese_broccoli",
+          "ingredient.carrot"
+        ],
+        "garnishOptions": [
+          "ingredient.crushed_peanuts",
+          "ingredient.lime_wedges",
+          "ingredient.cilantro"
+        ],
+        "pairings": ["thai.prik_pon", "thai.vinegar_chile_condiment"]
+      }
+    },
+    {
+      "id": "thai.sour_spicy_soup",
+      "label": "Sour & spicy soup",
+      "description": "Brothy soups driven by lemongrass, lime leaf, galangal, and chile; finished with lime and herbs.",
+      "commonExamples": ["Tom yum", "Tom kha"],
+      "defaults": {
+        "baseOptions": [
+          "ingredient.chicken_stock",
+          "ingredient.seafood_stock",
+          "ingredient.vegetable_stock"
+        ],
+        "proteinOptions": [
+          "ingredient.shrimp",
+          "ingredient.chicken",
+          "ingredient.mushrooms"
+        ],
+        "vegOptions": [
+          "ingredient.mushrooms",
+          "ingredient.tomato",
+          "ingredient.onion"
+        ],
+        "garnishOptions": ["ingredient.cilantro", "ingredient.lime_juice"],
+        "pairings": ["ingredient.jasmine_rice"]
+      }
+    },
+    {
+      "id": "thai.som_tam_style_salad",
+      "label": "Pounded salad (som tam style)",
+      "description": "Bright, crunchy salads often pounded/tossed with lime, fish sauce, chile, and a touch of sweetness.",
+      "commonExamples": [
+        "Som tam (papaya salad)",
+        "Mango salad",
+        "Cucumber salad"
+      ],
+      "defaults": {
+        "vegOptions": [
+          "ingredient.green_papaya",
+          "ingredient.green_mango",
+          "ingredient.cucumber"
+        ],
+        "proteinOptions": [
+          "ingredient.dried_shrimp",
+          "ingredient.peanuts",
+          "ingredient.grilled_chicken"
+        ],
+        "garnishOptions": ["ingredient.cilantro", "ingredient.lime_wedges"],
+        "pairings": ["ingredient.sticky_rice", "thai.grilled_meat_plate"]
+      }
+    },
+    {
+      "id": "thai.grilled_meat_plate",
+      "label": "Grilled meat with dipping sauce",
+      "description": "Grilled or pan-grilled meats served with a sharp dipping sauce and sticky rice or vegetables.",
+      "commonExamples": ["Gai yang", "Moo ping"],
+      "defaults": {
+        "proteinOptions": [
+          "ingredient.chicken_thigh",
+          "ingredient.pork_shoulder",
+          "ingredient.beef_skirt"
+        ],
+        "sideOptions": [
+          "ingredient.sticky_rice",
+          "thai.cucumber_salad",
+          "thai.herb_plate"
+        ],
+        "sauceOptions": ["thai.nam_jim_jaew", "thai.nam_pla_prik"],
+        "garnishOptions": ["ingredient.cilantro", "ingredient.lime_wedges"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ingredient.jasmine_rice",
+      "ingredient.sticky_rice",
+      "ingredient.rice_noodles",
+      "ingredient.coconut_milk",
+      "ingredient.fish_sauce",
+      "ingredient.lime",
+      "ingredient.lemongrass",
+      "ingredient.kefir_lime_leaf",
+      "ingredient.galangal",
+      "ingredient.thai_basil",
+      "ingredient.cilantro",
+      "ingredient.mint",
+      "ingredient.chile_fresh",
+      "ingredient.palm_sugar",
+      "ingredient.peanuts",
+      "ingredient.bean_sprouts"
+    ],
+    "optional_traditional": [
+      "ingredient.shrimp_paste",
+      "ingredient.dried_shrimp",
+      "ingredient.roasted_rice_powder",
+      "ingredient.fermented_fish_sauce",
+      "ingredient.thai_black_soy_sauce"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid.heavy_dairy",
+        "label": "Heavy dairy",
+        "reason": "Traditional Thai cooking typically uses coconut for richness; dairy can mute herbal aromatics and balance."
+      },
+      {
+        "id": "avoid.excessive_wheat_thickening",
+        "label": "Flour-heavy thickening",
+        "reason": "Thai sauces are usually reduced/emulsified rather than thickened with roux or large flour slurries."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredient.chicken_thigh",
+        "options": [
+          "ingredient.chicken_breast",
+          "ingredient.turkey_thigh",
+          "ingredient.tofu_firm"
+        ],
+        "notes": "Thighs stay juicier in curries; if using breast, add later and avoid overcooking."
+      },
+      {
+        "for": "ingredient.shrimp",
+        "options": [
+          "ingredient.chicken",
+          "ingredient.fish_white",
+          "ingredient.mushrooms"
+        ],
+        "notes": "Use seafood stock or add extra umami if swapping to non-seafood proteins."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "ingredient.jasmine_rice",
+        "options": [
+          "ingredient.sticky_rice",
+          "ingredient.brown_rice",
+          "ingredient.cauliflower_rice"
+        ],
+        "notes": "Sticky rice pairs especially well with grilled meats and Isan-style dishes."
+      },
+      {
+        "for": "ingredient.rice_noodles",
+        "options": [
+          "ingredient.wide_rice_noodles",
+          "ingredient.glass_noodles",
+          "ingredient.zucchini_noodles"
+        ],
+        "notes": "Adjust soak/cook times; keep noodle texture springy and avoid overhydration."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ingredient.coconut_milk",
+        "options": [
+          "ingredient.coconut_cream",
+          "ingredient.cashew_cream",
+          "ingredient.oat_cream"
+        ],
+        "notes": "Coconut cream is richer; thin with water/stock. Non-coconut creams change aroma; compensate with extra herbs/acid."
+      }
+    ],
+    "notes": [
+      "For fish sauce substitutes: use soy sauce + a small amount of anchovy paste (if allowed) or seaweed/shiitake for vegetarian umami.",
+      "For galangal substitutes: ginger is acceptable but less floral; add a little lime leaf or lemongrass to compensate.",
+      "For kaffir lime leaves: use lime zest + a small piece of lemongrass (not identical, but keeps citrus top notes)."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "thai.template.green_curry_bowl",
+      "label": "Green curry bowl",
+      "archetypeId": "thai.curry_over_rice",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.chicken_thigh",
+            "ingredient.tofu_firm",
+            "ingredient.shrimp"
+          ],
+          "chooseOne": true,
+          "notes": "Pick one protein; tofu pairs well with extra vegetables."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "ingredient.bell_pepper",
+            "ingredient.thai_eggplant",
+            "ingredient.zucchini"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "thai.green_curry_paste",
+            "ingredient.coconut_milk",
+            "ingredient.fish_sauce"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.thai_basil",
+            "ingredient.lime_wedges",
+            "ingredient.chile_fresh"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Fry curry paste in oil until fragrant before adding coconut milk.",
+        "Finish with herbs and lime off-heat for brightest flavor."
+      ]
+    },
+    {
+      "id": "thai.template.pad_thai_plate",
+      "label": "Pad Thai-style noodle plate",
+      "archetypeId": "thai.noodle_bowl",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": ["ingredient.rice_noodles"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.shrimp",
+            "ingredient.chicken",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "ingredient.bean_sprouts",
+            "ingredient.green_onion"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "ingredient.tamarind_paste",
+            "ingredient.fish_sauce",
+            "ingredient.palm_sugar"
+          ],
+          "chooseOne": false,
+          "notes": "Balance sauce: sour (tamarind), salty (fish sauce), sweet (palm sugar), heat (chile)."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.crushed_peanuts",
+            "ingredient.lime_wedges",
+            "ingredient.cilantro"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Soak noodles until pliable; finish in the wok/pan so they absorb sauce without turning mushy."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "thai.safety.fish_sauce_shellfish",
+      "label": "Fish sauce / shrimp paste allergens",
+      "notes": [
+        "Fish sauce contains fish and may include traces of shellfish depending on brand/processing.",
+        "Shrimp paste contains shellfish. Use vegetarian alternatives when needed."
+      ]
+    },
+    {
+      "id": "thai.safety.peanut_allergy",
+      "label": "Peanut allergy awareness",
+      "notes": [
+        "Peanuts are common in sauces and garnishes (Pad Thai, satay, salads).",
+        "Substitute with toasted sesame or pumpkin seeds where appropriate; avoid cross-contact."
+      ]
+    },
+    {
+      "id": "thai.safety.herb_wash",
+      "label": "Fresh herb handling",
+      "notes": [
+        "Wash herbs thoroughly and dry well; add at the end to preserve aroma and reduce wilt."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "thai curry",
+      "tom yum",
+      "tom kha",
+      "pad thai",
+      "pad see ew",
+      "larb",
+      "som tam",
+      "nam prik",
+      "satay",
+      "jasmine rice"
+    ],
+    "commonAlternateNames": [
+      "Thai cuisine",
+      "Siamese food",
+      "Isan food",
+      "Northern Thai",
+      "Southern Thai"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "ingredient.lime",
+      "ingredient.cilantro",
+      "ingredient.thai_basil",
+      "ingredient.mint",
+      "ingredient.lemongrass",
+      "ingredient.garlic",
+      "ingredient.shallot",
+      "ingredient.chile_fresh"
+    ],
+    "proteinsCommon": [
+      "ingredient.chicken_thigh",
+      "ingredient.shrimp",
+      "ingredient.pork_shoulder",
+      "ingredient.tofu_firm",
+      "ingredient.fish_white"
+    ],
+    "produceCommon": [
+      "ingredient.bean_sprouts",
+      "ingredient.cucumber",
+      "ingredient.carrot",
+      "ingredient.bell_pepper",
+      "ingredient.mushrooms",
+      "ingredient.onion",
+      "ingredient.long_beans"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ingredient.galangal",
+        "fallbacks": ["ingredient.ginger", "ingredient.lemongrass"],
+        "note": "Galangal is more floral and peppery than ginger; add a bit of extra citrus (lime leaf/zest) when substituting."
+      },
+      {
+        "ingredient": "ingredient.kefir_lime_leaf",
+        "fallbacks": ["ingredient.lime_zest", "ingredient.lemongrass"],
+        "note": "Use lime zest sparingly; avoid bitter white pith."
+      },
+      {
+        "ingredient": "ingredient.palm_sugar",
+        "fallbacks": ["ingredient.brown_sugar", "ingredient.coconut_sugar"],
+        "note": "Palm sugar has caramel notes; brown sugar is a workable substitute for balance."
+      }
+    ],
+    "staples": {
+      "sauces_and_umami": [
+        "ingredient.fish_sauce",
+        "ingredient.soy_sauce_light",
+        "ingredient.oyster_sauce",
+        "ingredient.tamarind_paste"
+      ],
+      "curry_bases": [
+        "thai.red_curry_paste",
+        "thai.green_curry_paste",
+        "thai.yellow_curry_paste"
+      ],
+      "noodles_and_rice": [
+        "ingredient.jasmine_rice",
+        "ingredient.sticky_rice",
+        "ingredient.rice_noodles",
+        "ingredient.wide_rice_noodles"
+      ],
+      "sweeteners": ["ingredient.palm_sugar"]
+    },
+    "coreStaples": {
+      "spices": [
+        "ingredient.white_pepper",
+        "ingredient.coriander_seed",
+        "ingredient.cumin",
+        "ingredient.turmeric"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "isan": [
+        "ingredient.roasted_rice_powder",
+        "ingredient.fermented_fish_sauce"
+      ],
+      "southern": ["ingredient.turmeric_fresh", "ingredient.dried_chile_large"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.stir_fry",
+      "method.simmer",
+      "method.reduce_sauce",
+      "method.steam",
+      "method.grill"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "thai.build_curry",
+        "name": "Build a coconut curry",
+        "steps": [
+          "step.fry_paste",
+          "step.bloom_aromatics",
+          "step.add_coconut",
+          "step.simmer",
+          "step.balance_finish"
+        ],
+        "notes": "Fry paste in oil, add coconut milk gradually, simmer proteins/veg gently, then balance with fish sauce, sugar, and finish with herbs/acid."
+      },
+      {
+        "id": "thai.balance_sauce",
+        "name": "Balance Thai sauce",
+        "steps": [
+          "step.salty",
+          "step.sour",
+          "step.sweet",
+          "step.heat",
+          "step.finish_herbs"
+        ],
+        "notes": "Adjust in small amounts; finish off-heat for brightest lime/herb character."
+      }
+    ],
+    "equipmentAffinity": {
+      "best": [
+        "equipment.wok",
+        "equipment.mortar_pestle",
+        "equipment.rice_cooker"
+      ],
+      "helpful": [
+        "equipment.cast_iron_skillet",
+        "equipment.steamer_basket",
+        "equipment.blender"
+      ],
+      "notes": "A mortar and pestle improves curry pastes; a blender is a workable modern substitute."
+    },
+    "signatureMethods": [
+      "Frying curry paste until fragrant (oil separation) before adding liquids.",
+      "Finishing soups and salads with lime and herbs off-heat to preserve volatile aromatics."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.wok",
+      "equipment.rice_cooker",
+      "equipment.sharp_knife"
+    ],
+    "optionalButHelpful": [
+      "equipment.mortar_pestle",
+      "equipment.steamer_basket",
+      "equipment.fine_mesh_strainer",
+      "equipment.grill_pan",
+      "equipment.kitchen_scale"
+    ],
+    "notes": [
+      "If no wok: use a wide skillet and keep batches small to avoid steaming.",
+      "Rice cooker streamlines jasmine/sticky rice production for weeknight planning."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.fish",
+      "allergen.shellfish",
+      "allergen.peanut",
+      "allergen.soy"
+    ],
+    "dietCompatibility": {
+      "diet.gluten_free": "Many Thai dishes are naturally gluten-free if soy sauce is gluten-free; check bottled sauces.",
+      "diet.dairy_free": "Typically dairy-free; richness comes from coconut.",
+      "diet.vegetarian": "Possible with tofu/veg and vegetarian fish-sauce substitutes; watch shrimp paste and oyster sauce.",
+      "diet.vegan": "Use tofu/veg and vegan umami boosters; avoid fish sauce/shrimp paste/oyster sauce."
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "thai.pad_thai",
+        "name": "Pad Thai",
+        "subprofiles": ["thai.central"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Tamarind-forward noodle dish balanced with fish sauce and palm sugar; finished with peanuts and lime."
+      },
+      {
+        "id": "thai.green_curry",
+        "name": "Green Curry (Gaeng Keow Wan)",
+        "subprofiles": ["thai.central"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Herbaceous coconut curry; finish with Thai basil."
+      },
+      {
+        "id": "thai.tom_yum",
+        "name": "Tom Yum",
+        "subprofiles": ["thai.central", "thai.southern"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Sour-spicy soup with lemongrass, galangal, lime leaf; finish with lime juice."
+      },
+      {
+        "id": "thai.tom_kha",
+        "name": "Tom Kha",
+        "subprofiles": ["thai.central"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Coconut-lime soup; aromatic and creamy without dairy."
+      },
+      {
+        "id": "thai.som_tam",
+        "name": "Som Tam (Papaya Salad)",
+        "subprofiles": ["thai.isan"],
+        "difficulty": "intermediate",
+        "heatTypical": 4,
+        "notes": "Pounded salad with strong lime, chile heat, and salty fermented notes."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "thai.mango_sticky_rice",
+        "name": "Mango Sticky Rice",
+        "subprofiles": ["thai.central"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Sweet coconut sticky rice with ripe mango; a common Thai dessert."
+      },
+      {
+        "id": "thai.thai_iced_tea",
+        "name": "Thai Iced Tea",
+        "subprofiles": ["thai.central"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Sweet tea drink; often made with spiced tea mix and milk (optional)."
+      }
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "ingredient.jasmine_rice",
+      "ingredient.sticky_rice",
+      "ingredient.rice_noodles"
+    ],
+    "typicalVegSides": [
+      "thai.quick_cucumber_salad",
+      "thai.herb_plate",
+      "ingredient.steamed_vegetables"
+    ],
+    "typicalCondiments": [
+      "thai.nam_pla_prik",
+      "thai.prik_pon",
+      "thai.vinegar_chile_condiment"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "ingredient.grilled_chicken",
+        "pair": [
+          "thai.nam_jim_jaew",
+          "ingredient.sticky_rice",
+          "thai.som_tam_style_salad"
+        ],
+        "note": "Isan-style plate: grilled meat + spicy-tangy dip + sticky rice + crunchy salad."
+      },
+      {
+        "with": "thai.green_curry_paste",
+        "pair": [
+          "ingredient.coconut_milk",
+          "ingredient.thai_basil",
+          "ingredient.lime_wedges"
+        ],
+        "note": "Herb-forward curry paste shines with coconut and fresh basil; finish with lime."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "thai.anti_pairing.heavy_cream",
+        "avoid": ["ingredient.heavy_cream"],
+        "note": "Heavy cream can mute herbal aromatics; prefer coconut milk/cream for richness."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "thai.sub.fish_sauce_veg",
+        "replace": ["ingredient.fish_sauce"],
+        "with": ["ingredient.soy_sauce_light", "ingredient.mushroom_powder"],
+        "ratio": 1,
+        "notes": "Vegetarian swap: soy sauce for salt + mushroom powder for umami. Adjust acidity and sweetness to maintain balance."
+      },
+      {
+        "id": "thai.sub.kaffir_lime_leaf",
+        "replace": ["ingredient.kefir_lime_leaf"],
+        "with": ["ingredient.lime_zest", "ingredient.lemongrass"],
+        "ratio": 0.5,
+        "notes": "Use half-amount zest to avoid bitterness; add lemongrass for lift."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "thai.method.no_wok",
+        "whenNoEquipment": ["equipment.wok"],
+        "adapt": "method.stir_fry_skillet",
+        "notes": "Use a wide skillet; keep ingredients in smaller batches to prevent steaming."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "thai.batch.curry_paste",
+        "name": "Batch curry paste portions",
+        "makes": "thai.curry_paste_portions",
+        "freezerFriendly": true,
+        "notes": "Freeze paste in tablespoon portions; speeds up curries and stir-fries."
+      },
+      {
+        "id": "thai.batch.rice",
+        "name": "Cook rice for 2–3 days",
+        "makes": "ingredient.cooked_jasmine_rice",
+        "freezerFriendly": true,
+        "notes": "Cook extra rice; chill promptly. Reheat by steaming or microwaving with a splash of water."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use store-bought curry paste + coconut milk + quick veg for 20–30 minute curries.",
+      "Prep herb box (cilantro, basil, mint) washed/dried so finishing steps are instant.",
+      "Keep lime, fish sauce, and palm/brown sugar as a 'balance kit' for quick final adjustments."
+    ],
+    "seasonality": [
+      {
+        "season": "season.summer",
+        "focus": [
+          "ingredient.cucumber",
+          "ingredient.mango",
+          "ingredient.basil",
+          "ingredient.mint"
+        ]
+      },
+      {
+        "season": "season.winter",
+        "focus": [
+          "ingredient.coconut_milk",
+          "ingredient.soups_broths",
+          "ingredient.lemongrass",
+          "ingredient.ginger"
+        ]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Build a Thai weeknight bowl",
+        "items": [
+          "thai.template.green_curry_bowl",
+          "thai.template.pad_thai_plate",
+          "thai.curry_over_rice"
+        ]
+      },
+      {
+        "title": "Bright soups & salads",
+        "items": [
+          "thai.sour_spicy_soup",
+          "thai.som_tam_style_salad",
+          "thai.tom_yum"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "tom yum",
+      "tom kha",
+      "green curry",
+      "red curry",
+      "pad thai",
+      "larb",
+      "som tam",
+      "nam jim",
+      "jasmine rice"
+    ],
+    "colorHints": {
+      "primary": "lime",
+      "accent": "chili_red",
+      "neutral": "coconut_cream"
+    },
+    "iconHints": ["icon.lime", "icon.chili", "icon.wok", "icon.rice_bowl"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.thai",
+      "region.southeast_asia",
+      "style.balanced"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.bowl.standard",
+      "plate.rice_and_curry",
+      "plate.noodle_bowl"
+    ],
+    "notes": [
+      "If your SSA install does not include plate templates referenced here, map them in a compat layer or remove these IDs."
+    ]
+  }
+}

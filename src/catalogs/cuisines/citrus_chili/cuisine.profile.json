@@ -1,0 +1,890 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.citrus_chili",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Citrus & Chili",
+    "shortName": "Citrus/Chili",
+    "description": "Bright, citrus-forward cooking with chili heat and fresh aromatics. Built around lime/lemon/orange, chiles (fresh and dried), garlic, onion, and quick marinades. Flexible overlay cuisine for poultry, seafood, vegetables, and grilled meats with crisp finishes and punchy sauces.",
+    "tags": [
+      "cuisine.citrus_chili",
+      "profile.overlay",
+      "flavor.citrus_forward",
+      "flavor.chili_forward",
+      "weeknight.friendly",
+      "grill.friendly",
+      "marinade.friendly",
+      "sauce.forward"
+    ],
+    "icon": "icon.citrus_chili",
+    "colorHint": "citrus_chili.sunburst",
+    "regions": ["Global (overlay)"],
+    "originRegions": [
+      "Caribbean",
+      "Latin America",
+      "Southeast Asia (influence)",
+      "Mediterranean (influence)"
+    ],
+    "source": {
+      "curation": "SSA canonical overlay profile (deterministic planner + adapter support).",
+      "maintainer": "ssa.catalogs",
+      "license": "proprietary",
+      "attribution": "Original synthesis for SSA from common citrus-chili traditions.",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "ssa.cuisines.citrus_chili",
+      "type": "curated",
+      "notes": "Use as an overlay on proteins/veg across cuisines when the household wants bright citrus acid + chili heat and fresh aromatics."
+    },
+    "family": {
+      "parent": "cuisines.overlays",
+      "siblings": [
+        "cuisines.herb_garlic",
+        "cuisines.ginger_soy",
+        "cuisines.smoky_bbq"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.caribbean",
+          "reason": "Shared lime/chili/garlic patterns and sauce finishes."
+        },
+        {
+          "id": "cuisines.mexican",
+          "reason": "Shared citrus + chile + garlic foundations, especially in marinades and salsas."
+        },
+        {
+          "id": "cuisines.southeast_asian",
+          "reason": "Shared hot-sour balance and aromatic herb finishes (lime + chili + herbs)."
+        }
+      ]
+    },
+    "version": "1.0.0",
+    "author": "SSA",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "status": "canonical"
+  },
+
+  "plannerDefaults": {
+    "servingStyles": ["grill_and_sides", "bowls", "plates", "street_food"],
+    "weeknightBias": "High: quick marinades, fast sauces, high-heat cooking; minimal long simmers.",
+    "leftoversStrategy": "opportunistic",
+    "batchCookingBias": {
+      "level": "medium",
+      "bestBatches": [
+        "batch.citrus_chili_marinade",
+        "batch.citrus_chili_sauce",
+        "batch.pickled_onions_quick",
+        "batch.chili_lime_butter"
+      ],
+      "notes": "Batch the sauces and marinades; cook proteins fresh for best texture."
+    },
+    "spiceHeatDefault": 3,
+    "saltinessDefault": "medium",
+    "sournessDefault": "high",
+    "sweetnessDefault": "low",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": [
+      "fat.avocado_oil",
+      "fat.olive_oil",
+      "fat.ghee",
+      "fat.butter"
+    ],
+    "primaryStarches": [
+      "starch.rice",
+      "starch.plantain",
+      "starch.potato",
+      "starch.flatbread",
+      "starch.tortilla_corn"
+    ],
+    "primaryProteins": [
+      "protein.chicken",
+      "protein.shrimp",
+      "protein.fish_white",
+      "protein.salmon",
+      "protein.goat",
+      "protein.beef",
+      "protein.pork"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.grilled_protein_plus_sauce",
+      "archetype.sheet_pan_roast",
+      "archetype.skewer_and_sides",
+      "archetype.shrimp_or_fish_skillet",
+      "archetype.bowl_meal"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.grill_protein_veg_starch",
+      "plate.bowl_protein_starch_crunch",
+      "plate.sheet_pan_protein_veg"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Bright citrus acid (lime/lemon/orange) with clean chili heat and fresh aromatics.",
+      "Fast sauces: crema-style, vinaigrettes, citrus-chili butter, pepper sauces.",
+      "Balance rule: citrus + salt + fat + chili; add a small sweetener only if needed."
+    ],
+    "aromaticsCore": [
+      "ing.garlic",
+      "ing.onion",
+      "ing.green_onion",
+      "ing.cilantro",
+      "ing.parsley",
+      "ing.ginger",
+      "ing.lime_zest",
+      "ing.orange_zest"
+    ],
+    "spiceCore": [
+      "spice.chili_powder",
+      "spice.cayenne",
+      "spice.paprika",
+      "spice.black_pepper",
+      "spice.cumin",
+      "spice.coriander"
+    ],
+    "umamiBuilders": [
+      "umami.soy_sauce",
+      "umami.fish_sauce",
+      "umami.anchovy_paste",
+      "umami.tomato_paste",
+      "umami.chicken_bouillon"
+    ],
+    "acidOptions": [
+      "acid.lime_juice",
+      "acid.lemon_juice",
+      "acid.orange_juice",
+      "acid.vinegar_white",
+      "acid.vinegar_apple_cider"
+    ],
+    "sweetBalanceOptions": [
+      "sweet.honey",
+      "sweet.brown_sugar",
+      "sweet.agave",
+      "sweet.pineapple_juice"
+    ],
+    "heatOptions": [
+      "chili.jalapeno",
+      "chili.serrano",
+      "chili.habanero",
+      "chili.scotch_bonnet",
+      "chili.crushed_red_pepper",
+      "chili.dried_chili_flakes"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum to cook citrus-chili meals (acid + heat + salt + fat).",
+      "items": [
+        "acid.lime_juice",
+        "spice.chili_powder",
+        "spice.black_pepper",
+        "ing.garlic",
+        "ing.onion",
+        "fat.olive_oil",
+        "seasoning.salt_kosher"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry for sauces, marinades, and quick finishes.",
+      "items": [
+        "acid.lemon_juice",
+        "acid.vinegar_apple_cider",
+        "sweet.honey",
+        "umami.soy_sauce",
+        "spice.cumin",
+        "spice.coriander",
+        "spice.paprika",
+        "chili.crushed_red_pepper",
+        "ing.cilantro",
+        "ing.lime_zest",
+        "ing.orange",
+        "fat.avocado_oil"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional boosts (pepper sauces, fresh chiles, tropical sweet balance).",
+      "items": [
+        "chili.habanero",
+        "chili.scotch_bonnet",
+        "umami.fish_sauce",
+        "sweet.brown_sugar",
+        "sweet.pineapple_juice",
+        "ing.ginger",
+        "ing.green_onion"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for distinct regional expressions.",
+      "items": [
+        "condiment.hot_sauce_pepper",
+        "condiment.achiote_paste",
+        "condiment.adobo_seasoning",
+        "spice.sumac",
+        "acid.yuzu_juice",
+        "sweet.passionfruit"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "technique.grill",
+      "technique.pan_sear",
+      "technique.roast_high_heat",
+      "technique.quick_marinade",
+      "technique.sauce_finish",
+      "technique.saute"
+    ],
+    "common": [
+      "technique.sheet_pan",
+      "technique.skewer",
+      "technique.baste",
+      "technique.vinaigrette",
+      "technique.quick_pickling"
+    ],
+    "notes": [
+      "Use high heat for char + bright finish; add citrus at the end to keep it fresh.",
+      "For marinades: avoid long acidic soaks for delicate fish; use short marination windows."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.grilled_protein_plus_sauce",
+      "label": "Grilled Protein + Citrus-Chili Sauce",
+      "description": "Grilled or pan-seared protein finished with a citrus-chili sauce or butter and served with a simple starch + veg.",
+      "commonExamples": [
+        "Lime-chili grilled chicken",
+        "Garlic-lime shrimp",
+        "Citrus-chili salmon"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.shrimp",
+          "protein.fish_white",
+          "protein.salmon",
+          "protein.beef"
+        ],
+        "starchOptions": ["starch.rice", "starch.plantain", "starch.flatbread"],
+        "vegOptions": [
+          "veg.bell_pepper",
+          "veg.zucchini",
+          "veg.onion",
+          "veg.cabbage"
+        ],
+        "sauceOptions": [
+          "sauce.citrus_chili_vinaigrette",
+          "sauce.citrus_chili_butter"
+        ]
+      }
+    },
+    {
+      "id": "archetype.sheet_pan_roast",
+      "label": "Sheet Pan Citrus-Chili Roast",
+      "description": "Protein and vegetables roasted hot, finished with citrus and herbs; fast weeknight pattern.",
+      "commonExamples": [
+        "Citrus-chili chicken thighs with onions and peppers",
+        "Roasted vegetables with lime-chili dressing"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.pork",
+          "protein.sausage"
+        ],
+        "vegOptions": [
+          "veg.bell_pepper",
+          "veg.onion",
+          "veg.broccoli",
+          "veg.cauliflower"
+        ],
+        "starchOptions": ["starch.potato", "starch.rice"],
+        "pairings": ["side.quick_pickled_onions", "side.simple_slaw"]
+      }
+    },
+    {
+      "id": "archetype.bowl_meal",
+      "label": "Citrus-Chili Bowl Meal",
+      "description": "Starch base + protein + crunchy veg + citrus-chili sauce; modular and pantry-friendly.",
+      "commonExamples": [
+        "Rice bowl with chili-lime chicken",
+        "Plantain bowl with spicy shrimp and slaw"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "starch.rice",
+          "starch.plantain",
+          "starch.tortilla_corn"
+        ],
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.shrimp",
+          "protein.beans"
+        ],
+        "vegOptions": [
+          "veg.cabbage",
+          "veg.onion",
+          "veg.cucumber",
+          "veg.tomato"
+        ],
+        "sauceOptions": [
+          "sauce.citrus_chili_vinaigrette",
+          "sauce.creamy_citrus_chili",
+          "sauce.hot_sauce"
+        ]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ing.garlic",
+      "ing.onion",
+      "ing.cilantro",
+      "ing.lime",
+      "ing.lemon",
+      "ing.orange",
+      "chili.jalapeno",
+      "chili.serrano",
+      "chili.habanero",
+      "fat.olive_oil",
+      "fat.avocado_oil"
+    ],
+    "optional_traditional": [
+      "chili.scotch_bonnet",
+      "sweet.pineapple_juice",
+      "umami.fish_sauce",
+      "condiment.hot_sauce_pepper"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid.long_acid_marinade_delicate_fish",
+        "label": "Long acidic marinades for delicate fish",
+        "reason": "Acid can ‘cook’ the surface and degrade texture; use short marinades (5–20 minutes) or sauce finishes."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.fish_white",
+        "options": ["protein.shrimp", "protein.chicken"],
+        "notes": "When fish is unavailable, shrimp keeps the bright profile; chicken works for sheet-pan and grill patterns."
+      },
+      {
+        "for": "protein.goat",
+        "options": ["protein.lamb", "protein.beef"],
+        "notes": "Goat is less common in citrus-chili overlays, but when used, treat like lamb/beef and finish with citrus-chili sauce."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "starch.plantain",
+        "options": ["starch.rice", "starch.potato"],
+        "notes": "Plantain is a natural sweet-balance starch; rice/potato are neutral and take sauce well."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "thickener.cornstarch",
+        "options": ["thickener.arrowroot", "thickener.flour"],
+        "notes": "Use arrowroot for glossy sauces; flour for roux-like thickening."
+      }
+    ],
+    "notes": [
+      "If fresh chiles aren’t available, use dried flakes + a little paprika + extra citrus zest.",
+      "If lime is missing, lemon works; add a touch of orange zest to restore brightness."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.citrus_chili.grill_plate",
+      "label": "Grill Plate (Protein + Veg + Starch + Sauce)",
+      "archetypeId": "archetype.grilled_protein_plus_sauce",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.shrimp",
+            "protein.salmon",
+            "protein.beef"
+          ],
+          "chooseOne": true,
+          "notes": "Prefer high-heat cooking + sauce finish."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "veg.bell_pepper",
+            "veg.zucchini",
+            "veg.onion",
+            "veg.cabbage"
+          ],
+          "chooseOne": true,
+          "notes": "Char or quick-saute."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "starch.rice",
+            "starch.plantain",
+            "starch.potato",
+            "starch.flatbread"
+          ],
+          "chooseOne": true,
+          "notes": "Pick a starch that can catch sauce."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.citrus_chili_vinaigrette",
+            "sauce.citrus_chili_butter",
+            "sauce.hot_sauce"
+          ],
+          "chooseOne": true,
+          "notes": "Finish with citrus after heat for freshest flavor."
+        }
+      ],
+      "prepNotes": [
+        "Make sauce first; cook protein last.",
+        "If using a marinade, reserve some (clean portion) as finishing sauce."
+      ]
+    },
+    {
+      "id": "template.citrus_chili.bowl",
+      "label": "Bowl Meal (Base + Protein + Crunch + Sauce)",
+      "archetypeId": "archetype.bowl_meal",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": [
+            "starch.rice",
+            "starch.plantain",
+            "starch.tortilla_corn"
+          ],
+          "chooseOne": true,
+          "notes": "Rice = neutral; plantain = sweet balance; tortillas = street-food style."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.shrimp",
+            "protein.beans"
+          ],
+          "chooseOne": true,
+          "notes": "Use a quick citrus-chili seasoning."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "veg.cabbage",
+            "veg.cucumber",
+            "veg.tomato",
+            "veg.onion"
+          ],
+          "chooseOne": false,
+          "notes": "Add at least one crunchy/fresh component."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.citrus_chili_vinaigrette",
+            "sauce.creamy_citrus_chili",
+            "sauce.hot_sauce"
+          ],
+          "chooseOne": true,
+          "notes": "Creamy sauce tempers heat; vinaigrette keeps it sharp."
+        }
+      ],
+      "prepNotes": [
+        "Quick-pickle onions while cooking the base.",
+        "Add citrus zest to the sauce for stronger aroma."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.chili_handling",
+      "label": "Hot chili handling",
+      "notes": [
+        "Wear gloves when cutting hot chiles (habanero/scotch bonnet).",
+        "Avoid touching eyes; wash hands and surfaces thoroughly."
+      ]
+    },
+    {
+      "id": "safety.acid_marinade_timing",
+      "label": "Acidic marinade timing",
+      "notes": [
+        "Limit acidic marinades for fish/seafood to short windows to avoid mushy texture.",
+        "For chicken/pork, longer marinades are fine; keep refrigerated."
+      ]
+    },
+    {
+      "id": "safety.cross_contamination",
+      "label": "Cross contamination",
+      "notes": [
+        "If reserving marinade as sauce, keep a separate clean portion before adding raw protein.",
+        "Cook proteins to safe internal temperatures per SSA doneness profiles."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "chili lime",
+      "lemon chili",
+      "orange chili",
+      "citrus marinade",
+      "spicy citrus sauce",
+      "hot sour",
+      "zesty"
+    ],
+    "commonAlternateNames": [
+      "chili-lime",
+      "chile-lime",
+      "citrus heat",
+      "hot-sour citrus"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "ing.lime",
+      "ing.lemon",
+      "ing.orange",
+      "ing.garlic",
+      "ing.onion",
+      "ing.cilantro",
+      "chili.jalapeno"
+    ],
+    "proteinsCommon": [
+      "protein.chicken",
+      "protein.shrimp",
+      "protein.fish_white",
+      "protein.salmon"
+    ],
+    "produceCommon": [
+      "veg.bell_pepper",
+      "veg.onion",
+      "veg.cabbage",
+      "veg.cucumber",
+      "veg.tomato"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "chili.scotch_bonnet",
+        "fallbacks": ["chili.habanero", "chili.serrano"],
+        "note": "Scotch bonnet is ideal for Caribbean-leaning citrus-chili. Habanero is closest; serrano is milder."
+      },
+      {
+        "ingredient": "acid.lime_juice",
+        "fallbacks": ["acid.lemon_juice"],
+        "note": "Lime is primary; lemon works with added zest for brightness."
+      }
+    ],
+    "coreStaples": {
+      "oils": ["fat.olive_oil", "fat.avocado_oil"],
+      "salts": ["seasoning.salt_kosher"],
+      "spices": ["spice.chili_powder", "spice.cumin", "spice.black_pepper"],
+      "umami": ["umami.soy_sauce"]
+    },
+    "optionalRegionalStaples": {
+      "pepperSauces": ["condiment.hot_sauce_pepper"],
+      "sweetBalance": ["sweet.pineapple_juice", "sweet.brown_sugar"],
+      "extraAcids": ["acid.vinegar_apple_cider"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "technique.grill",
+      "technique.pan_sear",
+      "technique.roast_high_heat",
+      "technique.quick_marinade",
+      "technique.sauce_finish"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.quick_marinade_citrus_chili",
+        "name": "Quick Citrus-Chili Marinade",
+        "steps": [
+          "step.combine_acid_salt_heat",
+          "step.add_fat_and_aromatics",
+          "step.short_marinade_window",
+          "step.reserve_clean_sauce",
+          "step.cook_hot_finish_citrus"
+        ],
+        "notes": "Core pattern: citrus + salt + chili + aromatics; add oil; marinate briefly; finish with fresh citrus/zest."
+      },
+      {
+        "id": "process.citrus_chili_finish_sauce",
+        "name": "Citrus-Chili Finish Sauce",
+        "steps": [
+          "step.mix_acid_heat_fat",
+          "step.adjust_salt",
+          "step.finish_with_zest_herbs"
+        ],
+        "notes": "Use for grilled proteins, roasted vegetables, and bowls. Add citrus at the end."
+      }
+    ],
+    "signatureMethods": [
+      "Finish with fresh citrus juice and zest after cooking for a brighter top-note.",
+      "Use chili heat as an accent; control intensity with seeds and type of chile.",
+      "Use a small sweetener only to balance harsh acid/heat (not to make it sweet)."
+    ],
+    "equipmentAffinity": {
+      "bestFor": {
+        "equip.grill": ["technique.grill", "technique.baste", "technique.char"],
+        "equip.cast_iron_skillet": ["technique.pan_sear", "technique.baste"],
+        "equip.sheet_pan": ["technique.sheet_pan", "technique.roast_high_heat"]
+      },
+      "niceToHave": {
+        "equip.microplane": ["zest", "aroma_boost"],
+        "equip.citrus_juicer": ["fast_sauce", "marinade"]
+      }
+    }
+  },
+
+  "equipment": {
+    "recommended": [
+      "equip.grill",
+      "equip.cast_iron_skillet",
+      "equip.sheet_pan",
+      "equip.microplane",
+      "equip.citrus_juicer",
+      "equip.tongs",
+      "equip.instant_read_thermometer"
+    ],
+    "optionalButHelpful": ["equip.splatter_screen", "equip.skewers"],
+    "notes": [
+      "High heat tools (grill/cast iron) suit this profile best; finish sauces keep flavor bright.",
+      "A microplane/zester noticeably improves the citrus top-note."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": ["allergen.citrus", "allergen.fish_sauce_optional"],
+    "dietCompatibility": {
+      "diet.gluten_free": "Most patterns are naturally gluten-free; verify sauces (soy sauce) or use GF tamari.",
+      "diet.low_carb": "Works well with protein + veg + citrus sauces; choose low-carb bases.",
+      "diet.dairy_free": "Use olive/avocado oil and skip crema-based sauces or use dairy-free alternatives."
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.citrus_chili.grilled_chicken",
+        "name": "Citrus-Chili Grilled Chicken",
+        "difficulty": 2,
+        "heatTypical": 3,
+        "notes": "Quick marinade; grill hot; finish with lime and herbs."
+      },
+      {
+        "id": "dish.citrus_chili.garlic_lime_shrimp",
+        "name": "Garlic-Lime Chili Shrimp",
+        "difficulty": 2,
+        "heatTypical": 3,
+        "notes": "Fast skillet; finish with lime + chili butter."
+      },
+      {
+        "id": "dish.citrus_chili.roasted_veg",
+        "name": "Roasted Vegetables with Citrus-Chili Vinaigrette",
+        "difficulty": 1,
+        "heatTypical": 2,
+        "notes": "High-heat roast; toss with vinaigrette at the end."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.citrus_chili.limeade_chili_salt_rim",
+        "name": "Limeade with Chili-Salt Rim (optional)",
+        "difficulty": 1,
+        "heatTypical": 1,
+        "notes": "Optional beverage pattern; not required for core cooking."
+      }
+    ],
+    "examples": [
+      "Chili-lime chicken thighs",
+      "Citrus-chili salmon with slaw",
+      "Spicy citrus shrimp tacos",
+      "Charred vegetables with lime dressing"
+    ],
+    "mealPatterns": [
+      "High-heat cook + fresh citrus finish",
+      "Quick marinade + reserved sauce",
+      "Bowl meals with crunchy veg + bright sauce"
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "starch.rice",
+      "starch.plantain",
+      "starch.tortilla_corn",
+      "starch.potato"
+    ],
+    "typicalVegSides": [
+      "side.simple_slaw",
+      "side.quick_pickled_onions",
+      "side.grilled_veg"
+    ],
+    "typicalCondiments": [
+      "condiment.hot_sauce_pepper",
+      "condiment.citrus_chili_salsa"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "protein.chicken",
+        "pair": ["acid.lime_juice", "chili.jalapeno", "ing.cilantro"],
+        "note": "Classic chili-lime chicken pattern; finish with fresh herbs."
+      },
+      {
+        "with": "protein.shrimp",
+        "pair": ["acid.lemon_juice", "ing.garlic", "chili.serrano"],
+        "note": "Shrimp takes garlic + lemon well; keep cook time short."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.too_much_sweet",
+        "avoid": ["sweet.brown_sugar", "sweet.honey"],
+        "note": "Avoid over-sweetening; use sweeteners only to balance sharp acid/heat."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.lime_to_lemon",
+        "whenMissing": ["acid.lime_juice"],
+        "use": ["acid.lemon_juice"],
+        "ratio": 1,
+        "notes": "Use lemon 1:1; add lime zest if available or a touch of orange zest for brightness."
+      },
+      {
+        "id": "sub.scotch_bonnet_to_habanero",
+        "whenMissing": ["chili.scotch_bonnet"],
+        "use": ["chili.habanero"],
+        "ratio": 1,
+        "notes": "Habanero is closest to scotch bonnet; adjust quantity for heat."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.no_grill_pan_sear",
+        "whenNoEquipment": ["equip.grill"],
+        "adapt": "technique.pan_sear",
+        "notes": "Use cast iron for sear/char; finish with citrus-chili sauce."
+      },
+      {
+        "id": "method.no_cast_iron_roast",
+        "whenNoEquipment": ["equip.cast_iron_skillet"],
+        "adapt": "technique.sheet_pan",
+        "notes": "Roast protein/veg hot on sheet pan; finish with citrus and herbs."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.citrus_chili_marinade",
+        "name": "Citrus-Chili Marinade Base",
+        "makes": "sauce.citrus_chili_marinade_base",
+        "freezerFriendly": false,
+        "notes": "Mix a base without fresh citrus; add juice/zest at use time for brightest flavor."
+      },
+      {
+        "id": "batch.pickled_onions_quick",
+        "name": "Quick Pickled Onions",
+        "makes": "side.quick_pickled_onions",
+        "freezerFriendly": false,
+        "notes": "Great crunch/acid balance for bowls and grilled plates."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use a dry rub (chili + salt + zest) and finish with lime at the end instead of marinating.",
+      "Make a 2-minute vinaigrette: citrus + oil + salt + chili flakes + minced garlic.",
+      "Roast vegetables at high heat and toss with citrus only after cooking."
+    ],
+    "seasonality": [
+      {
+        "season": "season.summer",
+        "focus": ["veg.grilling_mix", "protein.shrimp", "protein.chicken"]
+      },
+      {
+        "season": "season.winter",
+        "focus": ["protein.chicken", "protein.pork", "veg.cabbage"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Fast Citrus-Chili Winners",
+        "items": [
+          "dish.citrus_chili.garlic_lime_shrimp",
+          "dish.citrus_chili.grilled_chicken",
+          "dish.citrus_chili.roasted_veg"
+        ]
+      },
+      {
+        "title": "Sauces & Finishes",
+        "items": [
+          "sauce.citrus_chili_vinaigrette",
+          "sauce.citrus_chili_butter",
+          "side.quick_pickled_onions"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "chili lime",
+      "chile lime",
+      "zesty",
+      "hot sour",
+      "citrus sauce",
+      "pepper sauce",
+      "lime garlic"
+    ],
+    "colorHints": {
+      "primary": "citrus.yellow",
+      "accent": "chili.red",
+      "neutral": "char.black"
+    },
+    "iconHints": ["icon.citrus", "icon.chili", "icon.lime", "icon.grill"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.citrus_chili",
+      "flavor.citrus_forward",
+      "flavor.chili_forward"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.grill_protein_veg_starch",
+      "plate.bowl_protein_starch_crunch"
+    ],
+    "notes": [
+      "Overlay profile: can be applied to other cuisines’ dishes as a finishing style.",
+      "Adapters should prioritize adding citrus at end-of-cook steps to preserve aroma."
+    ]
+  }
+}

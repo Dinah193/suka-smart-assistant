@@ -18,39 +18,55 @@
 
 let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
 let timeMath = null;
 try {
   timeMath = require("@/services/session/utils/timeMath.js");
   timeMath = (timeMath && (timeMath.default || timeMath)) || null;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
 let scheduleDebug = null;
 try {
   scheduleDebug = require("@/services/session/utils/scheduleDebug.js");
-  scheduleDebug = (scheduleDebug && (scheduleDebug.default || scheduleDebug)) || null;
-} catch (_e) { /* no-op */ }
+  scheduleDebug =
+    (scheduleDebug && (scheduleDebug.default || scheduleDebug)) || null;
+} catch (_e) {
+  /* no-op */
+}
 
 let pausePolicies = null; // optional; used to avoid pinging during withhold windows
 try {
   pausePolicies = require("@/services/session/policies/pausePolicies.js");
-  pausePolicies = (pausePolicies && (pausePolicies.default || pausePolicies)) || null;
-} catch (_e) { /* no-op */ }
+  pausePolicies =
+    (pausePolicies && (pausePolicies.default || pausePolicies)) || null;
+} catch (_e) {
+  /* no-op */
+}
 
 const isBrowser = typeof window !== "undefined";
 const now = () => Date.now();
 
-const d = scheduleDebug?.withDomain ? scheduleDebug.withDomain("reminders") : {
-  debug() {}, info() {}, warn() {}, error() {}, trace() {}
-};
+const d = scheduleDebug?.withDomain
+  ? scheduleDebug.withDomain("reminders")
+  : {
+      debug() {},
+      info() {},
+      warn() {},
+      error() {},
+      trace() {},
+    };
 
 const DEFAULTS = Object.freeze({
   level: "info", // "success" | "info" | "warn" | "error"
   domain: "meals",
-  size: "md",    // modal sizes: "sm" | "md" | "lg" | "xl"
+  size: "md", // modal sizes: "sm" | "md" | "lg" | "xl"
   blocking: false,
   requireInteraction: false,
   sticky: false,
@@ -65,8 +81,8 @@ const LEVEL_ICON = {
 };
 
 function toMs(v) {
-  if (!timeMath) return (typeof v === "number" ? v : 0);
-  return timeMath.toMs ? timeMath.toMs(v) : (typeof v === "number" ? v : 0);
+  if (!timeMath) return typeof v === "number" ? v : 0;
+  return timeMath.toMs ? timeMath.toMs(v) : typeof v === "number" ? v : 0;
 }
 
 function humanize(ms) {
@@ -76,7 +92,9 @@ function humanize(ms) {
 
 function nextAligned(ts, every) {
   if (!timeMath) return ts;
-  return timeMath.nextTickAligned ? timeMath.nextTickAligned({ fromTs: ts, everyMs: every }) : ts;
+  return timeMath.nextTickAligned
+    ? timeMath.nextTickAligned({ fromTs: ts, everyMs: every })
+    : ts;
 }
 
 function canUseSystemNotifications() {
@@ -108,13 +126,16 @@ function speak(text) {
 }
 
 let _id = 0;
-const genId = (prefix = "rem") => `${prefix}_${(++_id).toString(36)}_${Math.floor(Math.random()*1e6).toString(36)}`;
+const genId = (prefix = "rem") =>
+  `${prefix}_${(++_id).toString(36)}_${Math.floor(Math.random() * 1e6).toString(
+    36
+  )}`;
 
 class ReminderManager {
   constructor() {
-    this.timers = new Map();     // id -> timeout handle
-    this.lastByTag = new Map();  // tag -> lastTs
-    this.modals = new Map();     // modalId -> resolver
+    this.timers = new Map(); // id -> timeout handle
+    this.lastByTag = new Map(); // tag -> lastTs
+    this.modals = new Map(); // modalId -> resolver
     this.initialized = false;
   }
 
@@ -150,15 +171,15 @@ class ReminderManager {
       level = DEFAULTS.level,
       domain = DEFAULTS.domain,
       icon = LEVEL_ICON[level] || "🔔",
-      actions = [],              // [{ id, label, href?, intent? }]
-      tag,                       // string to dedupe/throttle
+      actions = [], // [{ id, label, href?, intent? }]
+      tag, // string to dedupe/throttle
       throttleMs = DEFAULTS.throttleMs,
       requireInteraction = DEFAULTS.requireInteraction,
       sticky = DEFAULTS.sticky,
-      voiceText,                 // optional string to TTS
-      when = null,               // absolute ms or relative string
-      alignEvery = null,         // "30s" | "5m"
-      policyContext = null,      // optional pausePolicies context
+      voiceText, // optional string to TTS
+      when = null, // absolute ms or relative string
+      alignEvery = null, // "30s" | "5m"
+      policyContext = null, // optional pausePolicies context
     } = opts;
 
     // Policy guard (optional)
@@ -168,17 +189,25 @@ class ReminderManager {
         if (decision?.block) {
           d.warn("policy-block", { reason: decision.reason, title, message });
           // Emit NBA suggestion instead of interrupting
-          eventBus.emit?.("nba.updated", { domain, actions: decision.suggestedActions || [] });
+          eventBus.emit?.("nba.updated", {
+            domain,
+            actions: decision.suggestedActions || [],
+          });
           return null;
         }
-      } catch (_e) { /* ignore */ }
+      } catch (_e) {
+        /* ignore */
+      }
     }
 
     // Throttle/dedupe by tag
     if (tag && throttleMs > 0) {
       const last = this.lastByTag.get(tag) || 0;
       if (now() - last < throttleMs) {
-        d.debug("throttled", { tag, remaining: humanize(throttleMs - (now() - last)) });
+        d.debug("throttled", {
+          tag,
+          remaining: humanize(throttleMs - (now() - last)),
+        });
         return null;
       }
     }
@@ -196,12 +225,38 @@ class ReminderManager {
     const id = genId("ntf");
 
     if (fireAt <= now() + 15) {
-      this._deliverNotify({ id, title, message, icon, level, domain, actions, requireInteraction, sticky, voiceText, tag, throttleMs });
+      this._deliverNotify({
+        id,
+        title,
+        message,
+        icon,
+        level,
+        domain,
+        actions,
+        requireInteraction,
+        sticky,
+        voiceText,
+        tag,
+        throttleMs,
+      });
     } else {
       const delay = Math.max(0, fireAt - now());
       d.debug("timer:set", { id, fireAt, in: humanize(delay), title });
       const handle = setTimeout(() => {
-        this._deliverNotify({ id, title, message, icon, level, domain, actions, requireInteraction, sticky, voiceText, tag, throttleMs });
+        this._deliverNotify({
+          id,
+          title,
+          message,
+          icon,
+          level,
+          domain,
+          actions,
+          requireInteraction,
+          sticky,
+          voiceText,
+          tag,
+          throttleMs,
+        });
         this.timers.delete(id);
       }, delay);
       this.timers.set(id, handle);
@@ -211,25 +266,47 @@ class ReminderManager {
 
   cancel(id) {
     const t = this.timers.get(id);
-    if (t) { clearTimeout(t); this.timers.delete(id); d.info("timer:cancel", { id }); }
+    if (t) {
+      clearTimeout(t);
+      this.timers.delete(id);
+      d.info("timer:cancel", { id });
+    }
   }
 
   cancelAll() {
-    for (const [id, t] of this.timers.entries()) { clearTimeout(t); }
+    for (const [id, t] of this.timers.entries()) {
+      clearTimeout(t);
+    }
     this.timers.clear();
     d.info("timer:cancel-all");
   }
 
   async _deliverNotify(payload) {
-    const { id, title, message, icon, level, domain, actions, requireInteraction, sticky, voiceText, tag, throttleMs } = payload;
+    const {
+      id,
+      title,
+      message,
+      icon,
+      level,
+      domain,
+      actions,
+      requireInteraction,
+      sticky,
+      voiceText,
+      tag,
+      throttleMs,
+    } = payload;
 
     // Mark throttle timestamp
     if (tag && throttleMs > 0) this.lastByTag.set(tag, now());
 
     // Try System Notification first if user granted
     let usedSystem = false;
-    if (isBrowser && ("Notification" in window)) {
-      if (Notification.permission === "granted" || await ensureSystemPermission()) {
+    if (isBrowser && "Notification" in window) {
+      if (
+        Notification.permission === "granted" ||
+        (await ensureSystemPermission())
+      ) {
         try {
           const n = new Notification(title || "Reminder", {
             body: message || "",
@@ -244,10 +321,17 @@ class ReminderManager {
             n.onclick = () => {
               const a = actions[0];
               if (a?.href && isBrowser) window.open(a.href, "_blank");
-              eventBus.emit?.("ui.toast.action", { id, actionId: a?.id || "primary", intent: a?.intent || null, domain });
+              eventBus.emit?.("ui.toast.action", {
+                id,
+                actionId: a?.id || "primary",
+                intent: a?.intent || null,
+                domain,
+              });
             };
           }
-        } catch (_e) { usedSystem = false; }
+        } catch (_e) {
+          usedSystem = false;
+        }
       }
     }
 
@@ -268,7 +352,13 @@ class ReminderManager {
     if (voiceText) speak(voiceText);
 
     // Analytics hook
-    eventBus.emit?.("reminder.fired", { id, channel: usedSystem ? "system" : "toast", title, domain, level });
+    eventBus.emit?.("reminder.fired", {
+      id,
+      channel: usedSystem ? "system" : "toast",
+      title,
+      domain,
+      level,
+    });
 
     d.debug("notify:fired", { id, title, level, usedSystem });
   }
@@ -285,15 +375,19 @@ class ReminderManager {
       level = "info",
       size = DEFAULTS.size,
       blocking = DEFAULTS.blocking,
-      actions = [
-        { id: "ok", label: "OK", intent: "primary" },
-      ],
+      actions = [{ id: "ok", label: "OK", intent: "primary" }],
       domain = DEFAULTS.domain,
       icon = LEVEL_ICON[level] || "🪄",
     } = opts;
 
     const id = genId("mod");
-    d.info("modal:show", { id, title, size, blocking, actionsLen: actions.length });
+    d.info("modal:show", {
+      id,
+      title,
+      size,
+      blocking,
+      actionsLen: actions.length,
+    });
 
     return new Promise((resolve) => {
       this.modals.set(id, { resolve });
@@ -305,7 +399,7 @@ class ReminderManager {
         level,
         size,
         blocking,
-        actions,    // [{ id, label, intent, href? }]
+        actions, // [{ id, label, intent, href? }]
         domain,
         icon,
         // optional affordances for keyboard handlers in UI
@@ -327,9 +421,21 @@ class ReminderManager {
    * confirm({ title, body, okLabel, cancelLabel }) → Promise<boolean>
    */
   async confirm(opts = {}) {
-    const { title = "Are you sure?", body = "", okLabel = "Confirm", cancelLabel = "Cancel", level = "warn", domain = DEFAULTS.domain } = opts;
+    const {
+      title = "Are you sure?",
+      body = "",
+      okLabel = "Confirm",
+      cancelLabel = "Cancel",
+      level = "warn",
+      domain = DEFAULTS.domain,
+    } = opts;
     const action = await this.modal({
-      title, body, level, domain, size: "sm", blocking: false,
+      title,
+      body,
+      level,
+      domain,
+      size: "sm",
+      blocking: false,
       actions: [
         { id: "ok", label: okLabel, intent: "primary" },
         { id: "cancel", label: cancelLabel, intent: "ghost" },
@@ -343,7 +449,14 @@ class ReminderManager {
    * Your UI should render a text input when payload.meta.kind === "prompt".
    */
   async prompt(opts = {}) {
-    const { title = "Enter value", body = "", placeholder = "", submitLabel = "Submit", level = "info", domain = DEFAULTS.domain } = opts;
+    const {
+      title = "Enter value",
+      body = "",
+      placeholder = "",
+      submitLabel = "Submit",
+      level = "info",
+      domain = DEFAULTS.domain,
+    } = opts;
     const id = genId("mod");
     return new Promise((resolve) => {
       this.modals.set(id, { resolve });

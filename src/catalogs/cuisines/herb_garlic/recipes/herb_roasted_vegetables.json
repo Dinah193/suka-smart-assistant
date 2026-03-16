@@ -1,0 +1,501 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic.recipes.herb_roasted_vegetables",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Herb-Roasted Vegetables",
+    "subtitle": "Sheet-pan roasted vegetables with garlic, herbs, lemon, and olive oil (Herb & Garlic style)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Canonical SSA Herb & Garlic roasted vegetables baseline.",
+        "Deterministic sheet-pan method with swap-friendly vegetable roles and oven timing bands."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Herb & Garlic",
+    "subprofiles": ["cuisines.herb_garlic"],
+    "category": "side",
+    "mealArchetypes": [
+      "archetype.sheet_pan",
+      "archetype.roasted_vegetables",
+      "archetype.side_dish"
+    ],
+    "servingStyles": ["family_style", "plated"],
+    "plannerTags": [
+      "herb_garlic",
+      "garlic_forward",
+      "herb_forward",
+      "lemony",
+      "roasted",
+      "sheet_pan",
+      "weeknight",
+      "batch_friendly",
+      "leftovers_good",
+      "freezer_limited"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a side, or 3–4 as a main with grains/beans/protein."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": 2,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "makeAhead": {
+      "prepAheadHours": 24,
+      "bestFresh": true
+    }
+  },
+
+  "tasteProfile": {
+    "dominant": ["garlic", "fresh_herbs", "olive_oil"],
+    "supporting": ["lemon", "black_pepper", "roasty_sweetness"],
+    "heat": 0,
+    "acid": "low_medium",
+    "salt": "medium"
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equip.oven",
+        "label": "Oven",
+        "required": true
+      },
+      {
+        "id": "equip.sheet_pan",
+        "label": "Sheet pan",
+        "required": true,
+        "notes": "Use a large sheet pan to avoid overcrowding (better browning)."
+      },
+      {
+        "id": "equip.mixing_bowl",
+        "label": "Large mixing bowl",
+        "required": true
+      },
+      {
+        "id": "equip.knife",
+        "label": "Chef’s knife",
+        "required": true
+      },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.parchment",
+        "label": "Parchment paper",
+        "required": false,
+        "notes": "Easier cleanup; browning is still good."
+      },
+      {
+        "id": "equip.rack",
+        "label": "Roasting rack",
+        "required": false,
+        "notes": "Optional; usually not necessary for vegetables."
+      }
+    ],
+    "minimum": [
+      "equip.oven",
+      "equip.sheet_pan",
+      "equip.knife",
+      "equip.cutting_board"
+    ],
+    "recommended": ["equip.parchment"]
+  },
+
+  "dietFlags": [
+    "diet.vegan",
+    "diet.vegetarian",
+    "diet.gluten_free",
+    "diet.dairy_free"
+  ],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "ing.vegetable_broccoli",
+      "label": "Broccoli florets",
+      "role": "veg_crucifer",
+      "amount": { "value": 3, "unit": "cup" },
+      "notes": [
+        "Cut florets into bite-size pieces; keep stems sliced thin so they roast evenly."
+      ]
+    },
+    {
+      "id": "ing.vegetable_zucchini",
+      "label": "Zucchini, thick half-moons",
+      "role": "veg_soft",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": ["Cut 1/2-inch thick so it roasts instead of steaming."]
+    },
+    {
+      "id": "ing.vegetable_bell_pepper",
+      "label": "Bell pepper, 1-inch pieces",
+      "role": "veg_soft",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ing.vegetable_red_onion",
+      "label": "Red onion, wedges",
+      "role": "veg_aromatic",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ing.vegetable_carrot",
+      "label": "Carrots, sliced on a bias",
+      "role": "veg_hard",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": ["Cut similar thickness so they finish with the broccoli."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": ["Use enough oil to coat; dry vegetables won’t brown as well."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced (or grated)",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" },
+      "notes": [
+        "Add halfway through roasting if you prefer less risk of garlic scorching."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" }
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "ing.thyme",
+      "label": "Fresh thyme leaves (or dried thyme)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": ["Or 1 tsp dried thyme."]
+    },
+    {
+      "id": "ing.rosemary",
+      "label": "Fresh rosemary, finely chopped (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Rosemary is potent—keep it fine and light."]
+    },
+    {
+      "id": "ing.parsley",
+      "label": "Fresh parsley, chopped (optional garnish)",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": ["Use zest (optional) + juice to finish."]
+    },
+    {
+      "id": "ing.red_pepper_flakes",
+      "label": "Crushed red pepper flakes (optional)",
+      "role": "heat",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "grp.veg_mix",
+      "label": "Vegetables",
+      "items": [
+        "ing.vegetable_broccoli",
+        "ing.vegetable_zucchini",
+        "ing.vegetable_bell_pepper",
+        "ing.vegetable_red_onion",
+        "ing.vegetable_carrot"
+      ]
+    },
+    {
+      "id": "grp.seasoning",
+      "label": "Herb & Garlic Seasoning",
+      "items": [
+        "ing.olive_oil",
+        "ing.garlic",
+        "ing.salt_kosher",
+        "ing.black_pepper",
+        "ing.thyme",
+        "ing.rosemary",
+        "ing.red_pepper_flakes"
+      ]
+    },
+    {
+      "id": "grp.finish",
+      "label": "Finish",
+      "items": ["ing.lemon", "ing.parsley"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.preheat_pan",
+      "title": "Preheat oven and sheet pan",
+      "activeMins": 3,
+      "handsOffMins": 7,
+      "instructions": [
+        "Heat oven to 425°F.",
+        "Place an empty sheet pan in the oven while it preheats (hot pan helps browning).",
+        "Optional: line with parchment after removing (be careful—hot pan)."
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 425,
+        "unit": "F",
+        "notes": "High heat for caramelization."
+      },
+      "timers": [{ "label": "Oven preheat + pan heat", "minutes": 10 }]
+    },
+    {
+      "id": "step.toss_veg",
+      "title": "Toss vegetables with oil, garlic, and herbs",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a large bowl, combine vegetables.",
+        "Add olive oil, salt, black pepper, thyme, and optional rosemary/red pepper flakes.",
+        "Add garlic now for stronger roasted-garlic flavor, OR add it halfway through roasting to reduce scorching risk.",
+        "Toss until everything is evenly coated."
+      ],
+      "checks": [
+        "Vegetables evenly coated with oil and seasoning",
+        "Pieces are cut to similar thickness for even roasting"
+      ]
+    },
+    {
+      "id": "step.roast_first_stage",
+      "title": "Roast (first stage) and stir",
+      "activeMins": 2,
+      "handsOffMins": 15,
+      "instructions": [
+        "Carefully remove the hot sheet pan from the oven.",
+        "Spread vegetables in a single layer with space between pieces (avoid overcrowding).",
+        "Roast 15 minutes, then stir/flip for even browning."
+      ],
+      "timers": [{ "label": "Roast stage 1", "minutes": 15 }]
+    },
+    {
+      "id": "step.add_garlic_if_delayed_finish_roast",
+      "title": "Add garlic (if delayed) and finish roasting",
+      "activeMins": 3,
+      "handsOffMins": 10,
+      "instructions": [
+        "If you held the garlic, sprinkle it over vegetables now and toss quickly on the pan.",
+        "Roast 8–12 minutes more, until vegetables are tender with browned edges.",
+        "Hard vegetables (carrots) should be fork-tender; broccoli should have crisped tips."
+      ],
+      "timers": [{ "label": "Roast stage 2", "minutes": 10 }],
+      "checks": [
+        "Broccoli has browned tips",
+        "Carrots are tender",
+        "Pan is not watery/steamy (overcrowding)"
+      ]
+    },
+    {
+      "id": "step.finish_lemon_herbs",
+      "title": "Finish with lemon and herbs",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove pan from oven.",
+        "Squeeze fresh lemon juice over the vegetables (start with 1–2 tbsp).",
+        "Optional: add a pinch of lemon zest and sprinkle with chopped parsley.",
+        "Taste and adjust salt/pepper."
+      ]
+    }
+  ],
+
+  "methods": ["technique.roast", "technique.sheet_pan"],
+
+  "pairings": {
+    "mains": [
+      "cuisines.herb_garlic.recipes.garlic_herb_roast_chicken",
+      "herb_garlic.lemon_garlic_salmon",
+      "herb_garlic.garlic_herb_pork_tenderloin"
+    ],
+    "starches": [
+      "cuisines.herb_garlic.recipes.garlic_mashed_potatoes",
+      "herb_garlic.lemon_herb_rice_pilaf",
+      "grain.quinoa"
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Cool and store airtight. Best within 2–3 days. Re-crisp in oven/air fryer.",
+      "maxDays": 3
+    },
+    "freezer": {
+      "guidance": "Not ideal (texture softens). If freezing, use in soups/stews after thawing.",
+      "maxMonths": 2
+    },
+    "reheat": {
+      "best": [
+        "Oven 425°F on a sheet pan 6–10 minutes",
+        "Air fryer 380°F 4–7 minutes",
+        "Skillet on medium-high with a small oil splash"
+      ],
+      "avoid": ["Covered microwave reheat (steams and softens browning)"]
+    }
+  },
+
+  "planner": {
+    "dishId": "herb_garlic.herb_roasted_vegetables",
+    "course": "side",
+    "batchNotes": [
+      "Prep vegetables up to 24 hours ahead and store covered in the fridge (keep broccoli separate if you want peak texture).",
+      "Use two pans if doubling to avoid overcrowding."
+    ],
+    "leftovers": [
+      "Toss into grain bowls with lemon vinaigrette",
+      "Fold into omelets/frittata",
+      "Blend into soup base with stock"
+    ]
+  },
+
+  "summary": "Sheet-pan Herb & Garlic roasted vegetables with garlic, thyme, olive oil, and a lemon finish—swap-friendly and weeknight reliable.",
+
+  "keywords": [
+    "roasted vegetables",
+    "sheet pan vegetables",
+    "garlic",
+    "herbs",
+    "lemon",
+    "olive oil",
+    "weeknight side"
+  ],
+
+  "tags": [
+    "cuisine.herb_garlic",
+    "herb_garlic",
+    "garlic_forward",
+    "herb_forward",
+    "lemony",
+    "side",
+    "sheet_pan",
+    "roasted",
+    "weeknight",
+    "batch_friendly",
+    "leftovers_good",
+    "vegan",
+    "vegetarian",
+    "gluten_free",
+    "dairy_free"
+  ],
+
+  "safety": {
+    "handling": [
+      "Use caution with hot sheet pan when removing/adding parchment.",
+      "Cool leftovers promptly and refrigerate within 2 hours."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.all_hard_veg",
+      "label": "All hard vegetables (carrots, potatoes, Brussels sprouts)",
+      "when": { "vegMix": "hard" },
+      "adapt": {
+        "notes": [
+          "Cut into 1-inch chunks and roast 30–40 minutes total, stirring once.",
+          "Add garlic at the halfway point for best flavor without scorching."
+        ]
+      }
+    },
+    {
+      "id": "var.all_soft_veg",
+      "label": "All soft vegetables (zucchini, peppers, mushrooms)",
+      "when": { "vegMix": "soft" },
+      "adapt": {
+        "notes": [
+          "Roast 15–22 minutes total to avoid over-softening.",
+          "Keep pieces larger and avoid overcrowding."
+        ]
+      }
+    },
+    {
+      "id": "var.parmesan_finish",
+      "label": "Parmesan finish (not dairy-free)",
+      "when": { "wantsCheesyFinish": true },
+      "adapt": {
+        "notes": [
+          "After roasting, sprinkle 1/3 cup grated Parmesan and return to oven 1–2 minutes to melt.",
+          "Adjust allergens to include dairy."
+        ],
+        "allergens": ["allergen.dairy"]
+      }
+    },
+    {
+      "id": "var.balsamic",
+      "label": "Balsamic-herb finish",
+      "when": { "wantsSweetAcid": true },
+      "adapt": {
+        "notes": [
+          "Replace lemon juice with 1–2 tsp balsamic vinegar at finish.",
+          "Great with onions, mushrooms, and peppers."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.herb_garlic.recipes.herb_roasted_vegetables",
+    "aliases": [
+      "garlic herb roasted vegetables",
+      "herb roasted veggies",
+      "sheet pan herb vegetables"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.roast", "technique.sheet_pan"],
+      "coreIngredients": [
+        "ing.olive_oil",
+        "ing.garlic",
+        "ing.thyme",
+        "ing.lemon"
+      ]
+    }
+  }
+}

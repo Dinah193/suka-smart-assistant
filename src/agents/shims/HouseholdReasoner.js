@@ -583,7 +583,7 @@ export async function reason(request) {
  * -----------
  * Optional convenience hook if you want to pump eventBus events directly into
  * this reasoner (e.g. inventory.updated → evaluate meal sessions).
- * You can wire this in src/services/eventBus if desired.
+ * You can wire this in src/services/events/eventBus if desired.
  */
 export async function handleEvent(event) {
   const safe = event && typeof event === "object" ? event : {};

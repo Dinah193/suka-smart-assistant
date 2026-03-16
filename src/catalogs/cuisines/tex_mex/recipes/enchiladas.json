@@ -1,0 +1,591 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.enchiladas",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tex-Mex Enchiladas (Red Sauce + Cheese + Chicken or Beef)",
+    "subtitle": "Saucy, cheesy baked enchiladas with a classic Tex-Mex chili-cumin profile; weeknight-friendly and scalable.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Built for deterministic planning: clear yields, equipment minimums, and optional components separated.",
+        "Ingredient IDs are SSA-friendly tokens; update to match your canonical ingredient catalog IDs as needed."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.casserole_bake",
+      "archetype.enchiladas",
+      "archetype.protein_plus_starch"
+    ],
+    "servingStyles": ["family_style", "baked"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "dish.enchiladas",
+      "oven.bake",
+      "batch.friendly",
+      "leftovers.friendly",
+      "freezer.friendly"
+    ],
+    "subprofiles": ["texmex.classic", "texmex.red_sauce"]
+  },
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "enchiladas" },
+    "notes": "Makes 12 enchiladas (2 per serving). Use a 9x13 pan."
+  },
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 25,
+    "totalMins": 55
+  },
+  "difficulty": "intermediate",
+  "summary": "Baked Tex-Mex enchiladas with a quick homemade red enchilada sauce, rolled tortillas, melty cheese, and a savory filling. Make ahead, freeze well, and reheat beautifully.",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "heatTypical": 2,
+    "kidFriendly": true,
+    "messLevel": "medium_high"
+  },
+  "tasteProfile": {
+    "salt": 3,
+    "acid": 2,
+    "sweet": 1,
+    "heat": 2,
+    "umami": 3,
+    "notes": ["chili_cumin_forward", "tomato_chile", "cheesy_finish"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.oven",
+      "equipment.saucepan",
+      "equipment.skillet",
+      "equipment.whisk",
+      "equipment.baking_dish_9x13",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.measuring_cups",
+      "equipment.measuring_spoons"
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.instant_read_thermometer",
+      "equipment.food_processor",
+      "equipment.box_grater",
+      "equipment.tongs"
+    ],
+    "optional": [
+      {
+        "id": "equipment.stand_mixer",
+        "label": "Stand mixer",
+        "required": false,
+        "notes": "Useful for shredding cooked chicken quickly (paddle attachment)."
+      }
+    ]
+  },
+  "dietFlags": ["diet.omnivore"],
+  "allergens": [
+    "allergen.dairy",
+    "allergen.gluten_optional",
+    "allergen.nightshades"
+  ],
+  "ingredientGroups": [
+    {
+      "id": "group.sauce",
+      "label": "Quick red enchilada sauce",
+      "items": [
+        "ingredient.oil_neutral",
+        "ingredient.flour_all_purpose",
+        "ingredient.chili_powder",
+        "ingredient.cumin",
+        "ingredient.garlic_powder",
+        "ingredient.oregano_dried",
+        "ingredient.tomato.paste",
+        "ingredient.broth.chicken_or_veg",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.apple_cider_vinegar"
+      ]
+    },
+    {
+      "id": "group.filling",
+      "label": "Filling",
+      "items": [
+        "ingredient.chicken.cooked_shredded",
+        "ingredient.onion.white",
+        "ingredient.garlic",
+        "ingredient.green_chiles_canned",
+        "ingredient.cumin",
+        "ingredient.chili_powder",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.lime"
+      ]
+    },
+    {
+      "id": "group.assembly",
+      "label": "Assembly",
+      "items": [
+        "ingredient.tortilla.corn_or_flour",
+        "ingredient.cheese.monterey_jack",
+        "ingredient.cheese.cheddar",
+        "ingredient.cilantro",
+        "ingredient.sour_cream"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (avocado/canola/vegetable)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.flour_all_purpose",
+      "label": "All-purpose flour",
+      "role": "thickener",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "For gluten-free: use a 1:1 GF flour blend or cornstarch slurry (see variation)."
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 2.5, "unit": "tbsp" },
+      "notes": "Use mild for kid-friendly; add cayenne if you want extra heat."
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.garlic_powder",
+      "label": "Garlic powder",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.oregano_dried",
+      "label": "Dried oregano",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.tomato.paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.broth.chicken_or_veg",
+      "label": "Chicken broth (or vegetable broth)",
+      "role": "liquid",
+      "amount": { "value": 2, "unit": "cups" },
+      "notes": "Low-sodium preferred; adjust salt at the end."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" },
+      "notes": "Divided across sauce and filling; adjust to taste."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.apple_cider_vinegar",
+      "label": "Apple cider vinegar (or lime juice)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Brightens the sauce. Lime juice works well too."
+    },
+
+    {
+      "id": "ingredient.chicken.cooked_shredded",
+      "label": "Cooked shredded chicken",
+      "role": "protein",
+      "amount": { "value": 3, "unit": "cups" },
+      "notes": "Rotisserie chicken is perfect. Swap with cooked ground beef or beans (see variations)."
+    },
+    {
+      "id": "ingredient.onion.white",
+      "label": "White onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "About 1 medium onion."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.green_chiles_canned",
+      "label": "Diced green chiles (canned)",
+      "role": "flavor",
+      "amount": { "value": 4, "unit": "oz" },
+      "notes": "Mild heat and classic Tex-Mex flavor.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.cumin_filling",
+      "label": "Ground cumin (for filling)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.chili_powder_filling",
+      "label": "Chili powder (for filling)",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime juice",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Optional but recommended to brighten the filling.",
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.tortilla.corn_or_flour",
+      "label": "Tortillas (corn preferred; flour works too)",
+      "role": "starch",
+      "amount": { "value": 12, "unit": "each" },
+      "notes": "Corn tortillas are classic enchilada style. Flour tortillas roll easily but can get softer."
+    },
+    {
+      "id": "ingredient.cheese.monterey_jack",
+      "label": "Monterey Jack cheese, shredded",
+      "role": "cheese",
+      "amount": { "value": 2, "unit": "cups" }
+    },
+    {
+      "id": "ingredient.cheese.cheddar",
+      "label": "Cheddar cheese, shredded",
+      "role": "cheese",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "Swap with Colby Jack if preferred."
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped (for garnish)",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.sour_cream",
+      "label": "Sour cream (for serving)",
+      "role": "garnish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.preheat",
+      "title": "Preheat oven + prep pan",
+      "activeMins": 2,
+      "instructions": [
+        "Heat oven to 375°F (190°C).",
+        "Lightly oil a 9x13 baking dish or spray with cooking spray."
+      ],
+      "temperature": { "type": "oven", "value": 375, "unit": "F" }
+    },
+    {
+      "id": "step.make_sauce",
+      "title": "Make quick red enchilada sauce",
+      "activeMins": 10,
+      "handsOffMins": 5,
+      "instructions": [
+        "In a saucepan over medium heat, warm the oil.",
+        "Whisk in flour and cook 60–90 seconds until lightly toasty (do not brown too dark).",
+        "Whisk in chili powder, cumin, garlic powder, and oregano; cook 20–30 seconds to bloom.",
+        "Whisk in tomato paste until smooth.",
+        "Gradually whisk in broth. Bring to a gentle simmer, whisking until smooth and slightly thickened (3–5 minutes).",
+        "Season with salt and pepper, then stir in vinegar (or lime). Taste and adjust."
+      ],
+      "timers": [
+        { "label": "Toast roux", "minutes": 1.5 },
+        { "label": "Simmer sauce", "minutes": 4 }
+      ],
+      "checks": [
+        "Sauce is smooth (no flour lumps)",
+        "Sauce coats a spoon lightly (not paste-thick)",
+        "Flavor is chili-forward but balanced"
+      ]
+    },
+    {
+      "id": "step.make_filling",
+      "title": "Cook aromatics + season filling",
+      "activeMins": 10,
+      "instructions": [
+        "In a skillet over medium heat, add a small splash of oil if needed.",
+        "Cook diced onion until softened (3–4 minutes). Add minced garlic and cook 30 seconds.",
+        "Add shredded chicken and diced green chiles (optional).",
+        "Season with cumin, chili powder, and a pinch of salt/pepper. Toss to combine and warm through.",
+        "Finish with lime juice (optional). Taste and adjust seasoning."
+      ],
+      "timers": [
+        { "label": "Soften onions", "minutes": 4 },
+        { "label": "Warm filling", "minutes": 2 }
+      ],
+      "checks": [
+        "Filling tastes seasoned even before cheese/sauce",
+        "No raw garlic bite (only 30 seconds cooking needed)"
+      ]
+    },
+    {
+      "id": "step.soften_tortillas",
+      "title": "Soften tortillas for rolling",
+      "activeMins": 5,
+      "instructions": [
+        "For corn tortillas: warm each tortilla in a dry skillet 15–20 seconds per side until pliable, OR microwave stacked under a damp paper towel for 30–45 seconds.",
+        "For flour tortillas: warm briefly in skillet or microwave just until flexible.",
+        "Keep warmed tortillas covered with a towel to stay soft."
+      ],
+      "checks": [
+        "Tortillas bend without cracking",
+        "Stack kept covered to avoid drying"
+      ]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble enchiladas",
+      "activeMins": 10,
+      "instructions": [
+        "Spread about 1/2 cup enchilada sauce in the bottom of the baking dish.",
+        "Fill each tortilla with ~1/4 cup chicken mixture and a small sprinkle of cheese, then roll snugly and place seam-side down in the dish.",
+        "Pour remaining sauce evenly over the rolled enchiladas.",
+        "Top with remaining cheese."
+      ],
+      "checks": [
+        "Seams are down (prevents unrolling)",
+        "Sauce covers tortillas (prevents drying)",
+        "Cheese is evenly distributed"
+      ]
+    },
+    {
+      "id": "step.bake",
+      "title": "Bake until bubbly",
+      "activeMins": 2,
+      "handsOffMins": 20,
+      "instructions": [
+        "Bake at 375°F until the sauce is bubbling and cheese is fully melted, 18–22 minutes.",
+        "For more browning, broil 1–2 minutes at the end (watch closely).",
+        "Rest 5–10 minutes before serving to set."
+      ],
+      "timers": [
+        { "label": "Bake enchiladas", "minutes": 20 },
+        { "label": "Rest before serving", "minutes": 7 }
+      ],
+      "checks": [
+        "Cheese melted edge-to-edge",
+        "Sauce bubbling at the sides",
+        "Enchiladas hold together after resting"
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve + garnish",
+      "activeMins": 3,
+      "instructions": [
+        "Top with chopped cilantro (optional).",
+        "Serve with sour cream and lime wedges if desired.",
+        "Pair with rice, beans, or a simple salad."
+      ]
+    }
+  ],
+  "methods": [
+    "method.whisk",
+    "method.simmer",
+    "method.saute",
+    "method.roll",
+    "method.bake"
+  ],
+  "pairings": {
+    "suggestedSides": [
+      "texmex.rice.spanish_rice",
+      "texmex.beans.refried",
+      "texmex.salad.simple_cabbage_lime"
+    ],
+    "condiments": [
+      "condiment.salsa",
+      "condiment.pickled_jalapenos",
+      "condiment.hot_sauce"
+    ],
+    "drinks": [
+      "drink.agua_fresca",
+      "drink.citrus_sparkling_water",
+      "drink.iced_tea"
+    ]
+  },
+  "storage": {
+    "makeAhead": {
+      "notes": [
+        "Assemble enchiladas (without baking) up to 24 hours ahead; cover and refrigerate.",
+        "Add 5–10 minutes bake time if baking from cold."
+      ]
+    },
+    "fridge": {
+      "duration": "3-4 days",
+      "notes": "Cool, cover, and refrigerate. Reheat covered to keep moist."
+    },
+    "freezer": {
+      "duration": "2-3 months",
+      "notes": [
+        "Freeze baked or unbaked. Wrap tightly (plastic + foil).",
+        "Thaw overnight in fridge if possible for best texture."
+      ]
+    },
+    "reheat": [
+      "Oven: cover with foil, bake at 350°F for 20–30 minutes until hot.",
+      "Microwave: cover and heat in 60–90 second bursts until hot."
+    ]
+  },
+  "safety": {
+    "notes": [
+      "If using chicken, ensure it is fully cooked before assembly (165°F / 74°C).",
+      "Reheat leftovers to 165°F / 74°C.",
+      "Refrigerate leftovers within 2 hours."
+    ]
+  },
+  "planner": {
+    "batchPrep": [
+      "Double the sauce and freeze half for future enchiladas.",
+      "Shred chicken ahead (or use rotisserie) to reduce active time."
+    ],
+    "leftovers": {
+      "remixIdeas": [
+        "Enchilada bowls (rice + chopped enchilada + extra sauce)",
+        "Stuffed baked potatoes topped with chopped enchilada",
+        "Enchilada quesadillas (use leftover filling/cheese)"
+      ]
+    }
+  },
+  "variations": [
+    {
+      "id": "variation.ground_beef",
+      "label": "Ground beef enchiladas",
+      "when": { "protein": "beef" },
+      "adapt": {
+        "swap": [
+          {
+            "from": "ingredient.chicken.cooked_shredded",
+            "to": "ingredient.beef.ground",
+            "notes": "Use 1 lb ground beef browned and drained; season with the same spices."
+          }
+        ],
+        "notes": [
+          "Add 1/2 cup drained black beans for stretch and fiber (optional)."
+        ]
+      }
+    },
+    {
+      "id": "variation.vegetarian_beans",
+      "label": "Vegetarian bean enchiladas",
+      "when": { "diet": "vegetarian" },
+      "adapt": {
+        "swap": [
+          {
+            "from": "ingredient.chicken.cooked_shredded",
+            "to": "ingredient.beans.black",
+            "notes": "Use ~3 cups cooked black beans; mash 1/3 for binding."
+          }
+        ],
+        "notes": [
+          "Add sautéed bell peppers and corn to the filling if desired.",
+          "Use vegetable broth for the sauce."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free_sauce",
+      "label": "Gluten-free enchilada sauce",
+      "when": { "diet": "gluten_free" },
+      "adapt": {
+        "notes": [
+          "Replace flour with 1 tbsp cornstarch slurry: whisk 1 tbsp cornstarch with 2 tbsp cold broth, then whisk into simmering sauce and cook 2–3 minutes.",
+          "Or use a 1:1 gluten-free flour blend in the roux."
+        ]
+      }
+    },
+    {
+      "id": "variation.green_sauce",
+      "label": "Green enchiladas (salsa verde style)",
+      "when": { "preference": "green_sauce" },
+      "adapt": {
+        "notes": [
+          "Swap red sauce for salsa verde + a little broth to thin, then top with Monterey Jack.",
+          "Add extra lime and cilantro for brightness."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": ["cuisine.tex_mex", "dish.enchiladas", "oven.bake"],
+    "ingredientIds": [
+      "ingredient.oil_neutral",
+      "ingredient.flour_all_purpose",
+      "ingredient.chili_powder",
+      "ingredient.cumin",
+      "ingredient.garlic_powder",
+      "ingredient.oregano_dried",
+      "ingredient.tomato.paste",
+      "ingredient.broth.chicken_or_veg",
+      "ingredient.chicken.cooked_shredded",
+      "ingredient.onion.white",
+      "ingredient.garlic",
+      "ingredient.green_chiles_canned",
+      "ingredient.tortilla.corn_or_flour",
+      "ingredient.cheese.monterey_jack",
+      "ingredient.cheese.cheddar"
+    ],
+    "methodIds": [
+      "method.whisk",
+      "method.simmer",
+      "method.saute",
+      "method.roll",
+      "method.bake"
+    ],
+    "equipmentIds": [
+      "equipment.oven",
+      "equipment.saucepan",
+      "equipment.skillet",
+      "equipment.whisk",
+      "equipment.baking_dish_9x13"
+    ],
+    "search": {
+      "keywords": [
+        "enchiladas",
+        "tex-mex enchiladas",
+        "red enchilada sauce",
+        "baked enchiladas",
+        "chicken enchiladas"
+      ],
+      "aliases": ["cheesy enchiladas", "enchiladas rojas", "family enchiladas"]
+    }
+  }
+}

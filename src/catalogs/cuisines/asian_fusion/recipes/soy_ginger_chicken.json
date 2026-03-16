@@ -1,0 +1,434 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.asian_fusion.soy_ginger_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Soy-Ginger Chicken",
+    "subtitle": "Savory-sweet chicken with ginger, garlic, and a glossy soy sauce finish.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "SSA canonical: weeknight-ready, batch-friendly, pairs with rice/noodles and quick greens.",
+        "Includes stove-top and oven fallback notes; supports thigh or breast."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.asian_fusion",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.plates",
+      "archetype.bowls",
+      "archetype.stir_fry"
+    ],
+    "servingStyles": [
+      "serving.plates",
+      "serving.family_style",
+      "serving.bowls"
+    ],
+    "plannerTags": [
+      "asian_fusion",
+      "soy_ginger",
+      "chicken",
+      "weeknight",
+      "stovetop",
+      "one_pan",
+      "batch_friendly",
+      "leftovers"
+    ]
+  },
+
+  "summary": "Tender chicken glazed in a soy-ginger-garlic sauce. Fast enough for a weeknight and perfect over rice with crisp-tender vegetables.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "About 4 portions with rice and a vegetable side."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "totalMins": 35,
+    "handsOffMins": 15
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "onePan": true
+  },
+
+  "tasteProfile": {
+    "salty": 3,
+    "sweet": 2,
+    "sour": 1,
+    "spicy": 0,
+    "umami": 4,
+    "signature": ["soy", "ginger", "garlic"],
+    "finish": ["sesame_optional", "scallion_optional"]
+  },
+
+  "equipment": {
+    "minimum": ["tool.pan_large", "tool.knife", "tool.board", "tool.tongs"],
+    "recommended": [
+      "tool.instant_read_thermometer",
+      "tool.small_bowl",
+      "tool.whisk",
+      "tool.microplane"
+    ],
+    "optional": [
+      {
+        "id": "tool.wok",
+        "label": "Wok",
+        "required": false,
+        "notes": "Works well for quick sauce reduction and tossing with vegetables."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.dairy_free"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame_optional"],
+    "mayContain": [],
+    "notes": [
+      "Use tamari for gluten-free. Confirm any broth or chili sauce used is gluten-free if applicable."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "chicken.thighs_boneless_skinless",
+      "label": "Chicken thighs, boneless skinless (or breasts)",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": [
+        "Thighs stay juicier. If using breast, avoid overcooking; see temp checks."
+      ]
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": ["Use less if your soy sauce is very salty; adjust at the end."]
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": [
+        "Used as a light coating for browning + a small amount for thickening sauce."
+      ]
+    },
+    {
+      "id": "oil.neutral",
+      "label": "Neutral oil (avocado, grapeseed, or canola)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ginger.fresh",
+      "label": "Fresh ginger, grated or minced",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "onion.green",
+      "label": "Green onions, sliced (whites and greens separated)",
+      "amount": { "value": 4, "unit": "each" },
+      "optional": true
+    },
+
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 0.33, "unit": "cup" }
+    },
+    {
+      "id": "honey_or_brown_sugar",
+      "label": "Honey or brown sugar",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": ["Honey gives shine; brown sugar gives deeper caramel notes."]
+    },
+    {
+      "id": "vinegar.rice",
+      "label": "Rice vinegar",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": ["Balances sweetness and lifts the soy."]
+    },
+    {
+      "id": "water_or_broth",
+      "label": "Water or chicken broth",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "sesame_oil",
+      "label": "Toasted sesame oil",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Add at the end for aroma."]
+    },
+
+    {
+      "id": "sesame_seeds.optional",
+      "label": "Toasted sesame seeds (garnish)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "chili_flakes.optional",
+      "label": "Red pepper flakes or chili crisp (optional heat)",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "broccoli.optional",
+      "label": "Optional: broccoli florets (quick one-pan add-in)",
+      "amount": { "value": 3, "unit": "cups" },
+      "optional": true,
+      "notes": [
+        "If adding, steam-sauté after searing chicken using a splash of water, then toss into glaze."
+      ]
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken",
+      "items": [
+        "chicken.thighs_boneless_skinless",
+        "salt",
+        "pepper.black",
+        "cornstarch",
+        "oil.neutral"
+      ]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Soy-Ginger Sauce",
+      "items": [
+        "ginger.fresh",
+        "garlic",
+        "soy_sauce",
+        "honey_or_brown_sugar",
+        "vinegar.rice",
+        "water_or_broth",
+        "sesame_oil",
+        "chili_flakes.optional"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish (Optional)",
+      "items": ["onion.green", "sesame_seeds.optional", "broccoli.optional"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep_chicken",
+      "title": "Prep and lightly coat the chicken",
+      "instructions": [
+        "Pat chicken dry. Cut into bite-size pieces (about 1-inch).",
+        "Season with salt and black pepper.",
+        "Sprinkle 1 tbsp cornstarch over chicken and toss to coat lightly (this helps browning and thickens glaze)."
+      ],
+      "checks": [
+        "Chicken pieces should be evenly coated with a thin, dusty layer—no wet clumps."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step.mix_sauce",
+      "title": "Mix the sauce",
+      "instructions": [
+        "In a bowl, whisk soy sauce, honey/brown sugar, rice vinegar, and water/broth.",
+        "Whisk in ginger and garlic.",
+        "If you want a thicker glaze, whisk in remaining 1/2 tbsp cornstarch (optional for extra glossy sauce)."
+      ],
+      "activeMins": 4,
+      "notes": [
+        "If you prefer a lighter sauce, skip extra cornstarch and reduce longer in the pan."
+      ]
+    },
+    {
+      "id": "step.sear_chicken",
+      "title": "Sear the chicken",
+      "instructions": [
+        "Heat a large skillet over medium-high heat. Add neutral oil.",
+        "Add chicken in a single layer (work in batches if needed). Sear 2–3 minutes per side until browned.",
+        "Transfer browned chicken to a plate (it may not be fully cooked yet)."
+      ],
+      "timers": [
+        { "label": "Sear side 1", "minutes": 3 },
+        { "label": "Sear side 2", "minutes": 2 }
+      ],
+      "checks": [
+        "Chicken should have browned edges; avoid overcrowding (steaming prevents browning)."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step.optional_broccoli",
+      "title": "Optional: quick steam-sauté broccoli",
+      "instructions": [
+        "If using broccoli: add broccoli florets to the pan and stir 30 seconds.",
+        "Add 2–3 tbsp water, cover, and steam 2 minutes.",
+        "Uncover and stir until water evaporates; transfer broccoli to the chicken plate."
+      ],
+      "timers": [{ "label": "Steam broccoli", "minutes": 2 }],
+      "activeMins": 3,
+      "handsOffMins": 2
+    },
+    {
+      "id": "step.glaze_finish",
+      "title": "Glaze and finish",
+      "instructions": [
+        "Lower heat to medium. Pour sauce into the pan and bring to a simmer.",
+        "Return chicken (and broccoli if using) to the pan and toss to coat.",
+        "Simmer 3–6 minutes until chicken is cooked through and sauce is glossy and lightly thickened.",
+        "Turn off heat. Stir in toasted sesame oil (if using).",
+        "Garnish with sliced green onion greens and sesame seeds. Add chili flakes/chili crisp if desired."
+      ],
+      "timers": [{ "label": "Simmer in sauce", "minutes": 5 }],
+      "checks": [
+        "Chicken doneness: 165°F (74°C) internal temperature (breast), 170–175°F (77–80°C) for thighs is ideal texture.",
+        "Sauce should cling to chicken; if too thick, add 1–2 tbsp water; if too thin, simmer 1–2 minutes longer."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 3
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "recipes.asian_fusion.fried_rice",
+      "dish.steamed_rice",
+      "dish.noodles_simple",
+      "dish.sauteed_greens_garlic",
+      "dish.cucumber_salad"
+    ],
+    "garnishAddOns": [
+      "condiment.chili_crisp",
+      "condiment.sriracha",
+      "condiment.lime_wedge"
+    ]
+  },
+
+  "planner": {
+    "bestFor": ["weeknight", "meal_prep", "leftover_remix"],
+    "leftovers": {
+      "remixIdeas": [
+        "Slice and serve over noodles with extra green onions.",
+        "Turn into lettuce wraps with shredded carrots and cucumber.",
+        "Add to a rice bowl with quick pickled veg."
+      ]
+    }
+  },
+
+  "storage": {
+    "refrigerator": {
+      "duration": "4 days",
+      "notes": [
+        "Store in a shallow container for faster cooling.",
+        "Sauce thickens when cold; loosen when reheating with a splash of water."
+      ]
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": [
+        "Freeze in portions. Thaw overnight in the fridge for best texture.",
+        "Chicken breast can dry slightly after freezing; thighs hold up best."
+      ]
+    },
+    "reheat": {
+      "skillet": "Medium heat with 1–2 tbsp water; cover 1 minute, then stir until hot.",
+      "microwave": "Cover; heat in 60-second bursts, stirring between."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cook chicken to safe internal temperature (165°F / 74°C minimum).",
+      "Cool leftovers quickly and refrigerate promptly."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.orange_soy_ginger",
+      "label": "Orange Soy-Ginger Chicken",
+      "notes": "Replace 1/4 cup water/broth with orange juice and add 1 tsp orange zest. Reduce sugar slightly."
+    },
+    {
+      "id": "var.spicy_gochujang",
+      "label": "Spicy Gochujang Twist",
+      "notes": "Add 1 tbsp gochujang to sauce; increase water/broth by 2 tbsp to keep it pourable."
+    },
+    {
+      "id": "var.tofu",
+      "label": "Crispy Tofu Version",
+      "notes": "Use extra-firm tofu cubes, coat with cornstarch, pan-fry until crisp, then glaze as directed."
+    }
+  ],
+
+  "notes": [
+    "If sauce tastes too salty: add a squeeze of citrus or 1–2 tbsp water and a touch more honey.",
+    "If sauce tastes flat: add 1 tsp more vinegar or a tiny pinch of salt (only after tasting).",
+    "For extra ginger punch: add 1 tsp fresh grated ginger at the end off heat."
+  ],
+
+  "methods": ["method.sear", "method.simmer", "method.glaze"],
+
+  "compat": {
+    "cuisineId": "cuisines.asian_fusion",
+    "dishId": "dish.soy_ginger_chicken",
+    "search": {
+      "keywords": [
+        "soy ginger chicken",
+        "ginger garlic chicken",
+        "glazed chicken",
+        "weeknight chicken",
+        "rice bowl chicken"
+      ],
+      "aliases": [
+        "ginger soy chicken",
+        "soy garlic chicken",
+        "ginger chicken glaze"
+      ]
+    },
+    "planner": {
+      "pairsWellWith": [
+        "dish.steamed_rice",
+        "dish.fried_rice",
+        "dish.quick_veg"
+      ],
+      "inventorySignals": [
+        "ingredient.soy_sauce",
+        "ingredient.ginger_fresh",
+        "ingredient.garlic",
+        "protein.chicken"
+      ]
+    }
+  }
+}

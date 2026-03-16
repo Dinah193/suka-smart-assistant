@@ -1,0 +1,213 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.oxtail_stew.v1",
+    "name": "Soul Food Oxtail Stew",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Deeply browned oxtails braised low and slow with aromatics into a rich gravy-style stew. Includes optional thickening step."
+    },
+    "tags": [
+      "soul_food",
+      "oxtails",
+      "oxtail_stew",
+      "braise",
+      "stew",
+      "comfort_food",
+      "sunday_dinner",
+      "gravy"
+    ],
+    "allergens": ["wheat"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": true
+    },
+    "summary": "Fall-off-the-bone oxtails braised with onion, garlic, herbs, and broth until the sauce turns into a rich, glossy gravy.",
+    "difficulty": "medium",
+    "servings": {
+      "count": 6,
+      "unit": "servings"
+    },
+    "yield": "About 6 servings",
+    "timing": {
+      "prepMinutes": 25,
+      "inactiveMinutes": 0,
+      "cookMinutes": 210,
+      "totalMinutes": 235
+    },
+    "equipment": [
+      {
+        "id": "dutch_oven",
+        "label": "Dutch oven (6–8 qt) with lid",
+        "required": true
+      },
+      { "id": "tongs", "label": "Tongs", "required": true },
+      { "id": "cutting_board", "label": "Cutting board", "required": true },
+      { "id": "chef_knife", "label": "Chef's knife", "required": true },
+      { "id": "wooden_spoon", "label": "Wooden spoon", "required": true }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Braising is complete when oxtails are very tender and meat releases easily from bone (often 190°F+).",
+        "Cool leftovers quickly and refrigerate within 2 hours."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "oxtails",
+      "label": "Oxtails",
+      "amount": { "value": 3.5, "unit": "lb" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour (for dredging; optional but helps browning)",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "yellow_onion",
+      "label": "Yellow onion, chopped",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "celery",
+      "label": "Celery, chopped",
+      "amount": { "value": 2, "unit": "stalk" }
+    },
+    {
+      "id": "carrot",
+      "label": "Carrot, chopped",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic cloves, minced",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "beef_broth",
+      "label": "Beef broth (or chicken broth)",
+      "amount": { "value": 4, "unit": "cup" }
+    },
+    {
+      "id": "worces_tershire",
+      "label": "Worcestershire sauce",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf",
+      "amount": { "value": 2, "unit": "leaf" }
+    },
+    {
+      "id": "dried_thyme",
+      "label": "Dried thyme",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch (optional thickener)",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "water",
+      "label": "Water (for slurry; optional thickener)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_season",
+      "title": "Season oxtails",
+      "body": "Pat oxtails dry. Season with salt, pepper, garlic powder, onion powder, and paprika. Optional: lightly dredge in flour, shaking off excess."
+    },
+    {
+      "id": "step_02_brown",
+      "title": "Brown oxtails deeply",
+      "body": "Heat oil in a Dutch oven over medium-high. Brown oxtails in batches 3–5 minutes per side until deeply browned. Transfer browned oxtails to a plate."
+    },
+    {
+      "id": "step_03_saute_aromatics",
+      "title": "Sauté aromatics",
+      "body": "Reduce heat to medium. Add onion, celery, and carrot to the pot. Cook 6–8 minutes, scraping up browned bits, until softened. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "id": "step_04_tomato_paste",
+      "title": "Cook tomato paste",
+      "body": "Stir in tomato paste and cook 1–2 minutes until it darkens slightly and smells roasted."
+    },
+    {
+      "id": "step_05_deglaze_braise",
+      "title": "Add broth and braise",
+      "body": "Return oxtails to the pot. Add broth, Worcestershire, bay leaves, and thyme. Bring to a simmer, then cover and cook on low heat for 2.5–3.5 hours, until very tender. Stir occasionally and keep liquid at a gentle simmer."
+    },
+    {
+      "id": "step_06_reduce",
+      "title": "Reduce sauce",
+      "body": "Remove lid for the last 20–30 minutes to reduce and thicken the sauce into a gravy-like consistency. Skim excess fat if desired."
+    },
+    {
+      "id": "step_07_optional_thicken",
+      "title": "Optional: thicken with slurry",
+      "body": "If you want a thicker gravy, whisk cornstarch with water to make a slurry. Stir into simmering sauce and cook 2–4 minutes until thickened."
+    },
+    {
+      "id": "step_08_finish",
+      "title": "Finish and serve",
+      "body": "Remove bay leaves. Taste and adjust seasoning. Serve oxtails and gravy over rice, mashed potatoes, or alongside greens and cornbread."
+    }
+  ]
+}

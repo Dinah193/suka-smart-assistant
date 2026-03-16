@@ -1,0 +1,299 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.tomato_basil_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Tomato Basil Soup",
+    "subtitle": "Simple, popular comfort soup • perfect with grilled cheese",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "SSA-friendly baseline. Supports pantry tomatoes, fresh tomatoes, dairy or dairy-free finish, and batch/freezer workflows."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "comfort",
+      "vegetarian",
+      "stovetop",
+      "quick",
+      "freezer-friendly",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl", "mug"],
+    "plannerTags": [
+      "tomato soup",
+      "basil",
+      "grilled cheese",
+      "vegetarian",
+      "quick soup"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~10–12 cups depending on simmer and blending."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 25,
+    "totalMins": 40
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["medium/large pot", "knife", "cutting board", "stirring spoon"],
+    "recommended": ["immersion blender (or countertop blender)", "ladle"],
+    "optional": [
+      "fine mesh strainer (silky texture)",
+      "microplane (for garlic)"
+    ]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["dairy"],
+  "signals": {
+    "vegetarian": true,
+    "quick": true,
+    "freezerFriendly": true,
+    "useWhatYouHave": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "acidity": "medium",
+    "richness": "low-to-medium",
+    "sweetness": "low-to-medium",
+    "notes": "Tomato-forward, aromatic basil, optional cream for richness, optional sugar/honey to balance acidity."
+  },
+
+  "ingredients": [
+    {
+      "id": "oil_or_butter",
+      "label": "Olive oil or butter",
+      "role": "cook",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 1 tablespoon. Use butter for richer flavor."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "carrot_optional",
+      "label": "Carrot, diced (optional, adds sweetness)",
+      "role": "aromatic",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 small."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 3 cloves."
+    },
+    {
+      "id": "tomato_paste_optional",
+      "label": "Tomato paste (optional, deeper flavor)",
+      "role": "base",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "crushed_tomatoes",
+      "label": "Crushed tomatoes (canned)",
+      "role": "base",
+      "amount": { "value": 800, "unit": "g" },
+      "notes": "2 (14–15 oz) cans, or 1 large (28 oz) can."
+    },
+    {
+      "id": "broth",
+      "label": "Vegetable broth (or water + bouillon), low-sodium preferred",
+      "role": "liquid",
+      "amount": { "value": 720, "unit": "g" },
+      "notes": "About 3 cups."
+    },
+    {
+      "id": "bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start with ~1 teaspoon; adjust at end based on broth."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "basil_fresh",
+      "label": "Fresh basil leaves",
+      "role": "finish",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": "About 1 loosely packed cup. Add at end to preserve aroma."
+    },
+    {
+      "id": "sugar_optional",
+      "label": "Sugar or honey (optional, balances acidity)",
+      "role": "finish",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 teaspoons to taste."
+    },
+    {
+      "id": "cream_optional",
+      "label": "Heavy cream (optional)",
+      "role": "finish",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. For creamy tomato basil soup."
+    },
+    {
+      "id": "milk_optional",
+      "label": "Whole milk (optional alternative to cream)",
+      "role": "finish",
+      "amount": { "value": 180, "unit": "g" },
+      "optional": true,
+      "notes": "About 3/4 cup. Warm gently; avoid hard boil."
+    },
+    {
+      "id": "coconut_milk_optional",
+      "label": "Coconut milk (optional dairy-free creamy option)",
+      "role": "finish",
+      "amount": { "value": 160, "unit": "g" },
+      "optional": true,
+      "notes": "About 2/3 cup. Choose unsweetened."
+    },
+    {
+      "id": "parmesan_optional",
+      "label": "Grated Parmesan (optional, serving)",
+      "role": "finish",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "For topping; omit for dairy-free."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "Heat oil (or butter) in a pot over medium heat.",
+        "Add onion (and carrot if using). Cook 6–8 minutes until softened and lightly translucent.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Cook onion/carrot", "mins": 7 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Build tomato base",
+      "instructions": [
+        "If using tomato paste, stir it in and cook 1 minute to deepen flavor.",
+        "Add crushed tomatoes, broth, bay leaf (optional), salt, and pepper.",
+        "Bring to a gentle simmer."
+      ],
+      "activeMins": 5,
+      "timers": [{ "label": "Cook tomato paste", "mins": 1 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Simmer",
+      "instructions": [
+        "Simmer 20–25 minutes, partially covered, stirring occasionally.",
+        "Taste: if tomatoes are very acidic, add a little sugar/honey (optional)."
+      ],
+      "handsOffMins": 22,
+      "timers": [{ "label": "Simmer soup", "mins": 22 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Blend and add basil",
+      "instructions": [
+        "Remove bay leaf if used.",
+        "Blend until smooth using an immersion blender (or carefully blend in batches in a countertop blender).",
+        "Stir in fresh basil and blend briefly (or finely chop basil and stir in for flecks)."
+      ],
+      "activeMins": 7
+    },
+    {
+      "id": "step_05",
+      "title": "Optional creamy finish and final seasoning",
+      "instructions": [
+        "For creamy soup, lower heat and stir in cream, milk, or coconut milk (choose one).",
+        "Warm gently—avoid a hard boil after adding dairy.",
+        "Taste and adjust salt, pepper, and sweetness. Serve hot."
+      ],
+      "activeMins": 5
+    }
+  ],
+
+  "planner": {
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "freezerPortionSizeCups": 2,
+      "bestPractices": [
+        "For best freezing, freeze the soup before adding dairy; add cream/milk when reheating.",
+        "Cool quickly and portion into flat freezer bags or containers for efficient stacking."
+      ]
+    },
+    "useWhatYouHaveLogic": {
+      "notes": "If no fresh basil: use 1–2g dried basil added during simmer. If no broth: use water + bouillon; season at the end."
+    },
+    "pairingLogic": {
+      "classicPair": "Grilled cheese sandwich",
+      "otherPairings": [
+        "buttermilk biscuits",
+        "garlic toast",
+        "focaccia",
+        "croutons"
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 5 days. If dairy added, reheat gently.",
+    "freezer": "Freeze up to 3 months. Prefer freezing without dairy; add dairy on reheat.",
+    "reheat": "Reheat to a gentle simmer, stirring often; thin with broth/water if needed."
+  },
+
+  "notes": [
+    "Tomato quality varies; if the soup tastes flat, add a pinch more salt and a small splash of vinegar or lemon juice (optional) for lift.",
+    "For extra richness without dairy, blend in 30–60g cooked white beans (optional idea) — keep in mind this is not listed as an ingredient in this baseline."
+  ],
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions. No disallowed 'toppings' property used."
+  }
+}

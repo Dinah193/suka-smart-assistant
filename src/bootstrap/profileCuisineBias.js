@@ -20,15 +20,44 @@
 let logger = { info: () => {}, warn: () => {}, error: () => {} };
 let usdaDefaults;
 let eventBus;
-let PreferencesStore, HouseholdProfileStore, FavoritesStore, MealHistoryStore, InventoryStore;
-try { ({ logger } = await import("@/utils/logger")); } catch {}
-try { ({ usdaDefaults } = await import("@/services/nutrition/usdaDefaults")); } catch {}
-try { ({ eventBus } = await import("@/services/automation/eventBus")); } catch {}
-try { ({ usePreferencesStore: PreferencesStore } = await import("@/store/PreferencesStore")); } catch {}
-try { ({ useHouseholdProfile: HouseholdProfileStore } = await import("@/store/HouseholdProfileStore")); } catch {}
-try { ({ useFavoritesStore: FavoritesStore } = await import("@/store/FavoritesStore")); } catch {}
-try { ({ useMealHistoryStore: MealHistoryStore } = await import("@/store/MealHistoryStore")); } catch {}
-try { ({ Inventory } = await import("@/store/InventoryStore")); InventoryStore = Inventory; } catch {}
+let PreferencesStore,
+  HouseholdProfileStore,
+  FavoritesStore,
+  MealHistoryStore,
+  InventoryStore;
+try {
+  ({ logger } = await import("@/utils/logger"));
+} catch {}
+try {
+  ({ usdaDefaults } = await import("@/services/nutrition/usdaDefaults"));
+} catch {}
+try {
+  ({ eventBus } = await import("@/services/automation/eventBus"));
+} catch {}
+try {
+  ({ usePreferencesStore: PreferencesStore } = await import(
+    "@/store/PreferencesStore"
+  ));
+} catch {}
+try {
+  ({ useHouseholdProfile: HouseholdProfileStore } = await import(
+    "@/store/HouseholdProfileStore"
+  ));
+} catch {}
+try {
+  ({ useFavoritesStore: FavoritesStore } = await import(
+    "@/store/favoritesStore.js"
+  ));
+} catch {}
+try {
+  ({ useMealHistoryStore: MealHistoryStore } = await import(
+    "@/store/MealHistoryStore"
+  ));
+} catch {}
+try {
+  ({ Inventory } = await import("@/store/InventoryStore"));
+  InventoryStore = Inventory;
+} catch {}
 
 /* ----------------------------------------------------------------------------
    Constants
@@ -40,22 +69,47 @@ const KNOWN_PACKS = new Set(["africanAmerican", "westAfrican"]); // keep expanda
 const CUISINE_CUES = {
   africanAmerican: {
     rx: /(collard|black[-\s]?eyed|mac.*cheese|grits|catfish|sweet\s?potato|smoked\s?turkey|rice\s?&\s?gravy|soul[-\s]?food)/i,
-    tags: new Set(["african-american","soul-food","collards","black-eyed-peas","grits","catfish","mac-and-cheese","sweet-potato","bbq"])
+    tags: new Set([
+      "african-american",
+      "soul-food",
+      "collards",
+      "black-eyed-peas",
+      "grits",
+      "catfish",
+      "mac-and-cheese",
+      "sweet-potato",
+      "bbq",
+    ]),
   },
   westAfrican: {
     rx: /(jollof|waakye|egusi|fufu|eba|garri|palm\s?oil|okra|yam|cassava|suya|pepper\s?soup|millet)/i,
-    tags: new Set(["west-african","egusi","suya","palm-oil","fufu","eba","garri","jollof","waakye","okra","yam","cassava","millet","stew"])
-  }
+    tags: new Set([
+      "west-african",
+      "egusi",
+      "suya",
+      "palm-oil",
+      "fufu",
+      "eba",
+      "garri",
+      "jollof",
+      "waakye",
+      "okra",
+      "yam",
+      "cassava",
+      "millet",
+      "stew",
+    ]),
+  },
 };
 
 // Blend weights used to combine signals (sum to ~1 but we re-normalize anyway)
 const WEIGHTS = {
-  profileActive: 0.38,     // household-set active cuisines
-  profilePrimary: 0.16,    // strong push for primary cuisine (if present)
-  favorites: 0.18,         // items the household saves/requests
-  historyNovelty: 0.12,    // "avoid repetition" -> subtract recent over-served cuisines
-  inventoryPantry: 0.10,   // what's on-hand nudges toward those cuisines
-  seasonalCalendar: 0.06   // (optional) calendar constraints (e.g., passoverMode)
+  profileActive: 0.38, // household-set active cuisines
+  profilePrimary: 0.16, // strong push for primary cuisine (if present)
+  favorites: 0.18, // items the household saves/requests
+  historyNovelty: 0.12, // "avoid repetition" -> subtract recent over-served cuisines
+  inventoryPantry: 0.1, // what's on-hand nudges toward those cuisines
+  seasonalCalendar: 0.06, // (optional) calendar constraints (e.g., passoverMode)
 };
 
 // How far back to consider "recent meals" (days)
@@ -67,11 +121,11 @@ const EPHEMERAL_TTL_MS = 1000 * 60 * 60 * 3; // 3 hours
 /* ----------------------------------------------------------------------------
    State
 ---------------------------------------------------------------------------- */
-let _bias = null;                 // cached normalized map
+let _bias = null; // cached normalized map
 let _packs = new Set(DEFAULT_PACKS);
 let _lastRecalc = 0;
-const _ephemeral = new Map();     // contextId -> { weights, expiresAt }
-let _inventorySnapshot = null;    // last pulled inventory (cheap summary)
+const _ephemeral = new Map(); // contextId -> { weights, expiresAt }
+let _inventorySnapshot = null; // last pulled inventory (cheap summary)
 
 /* ----------------------------------------------------------------------------
    Utilities
@@ -93,7 +147,7 @@ function normalizeWeights(map = {}) {
   if (sum <= 0) {
     // default balanced over active packs; bias towards active
     const active = _packs.size ? Array.from(_packs) : DEFAULT_PACKS;
-    active.forEach(k => out[k] = 1 / active.length);
+    active.forEach((k) => (out[k] = 1 / active.length));
     sum = active.length > 0 ? 1 : 1;
   }
   // normalize
@@ -113,20 +167,23 @@ function cueScoreFromTags(name = "", tags = []) {
   const low = String(name).toLowerCase();
   for (const [pack, cues] of Object.entries(CUISINE_CUES)) {
     if (cues.rx?.test(low)) s[pack] += 1;
-    for (const t of (tags || [])) if (cues.tags.has(toKey(t))) s[pack] += 1;
+    for (const t of tags || []) if (cues.tags.has(toKey(t))) s[pack] += 1;
   }
   return s;
 }
 
 function inferCuisineKeyFromItem(item = {}) {
   // Prefer explicit key if present
-  if (item.cuisineKey && KNOWN_PACKS.has(item.cuisineKey)) return item.cuisineKey;
+  if (item.cuisineKey && KNOWN_PACKS.has(item.cuisineKey))
+    return item.cuisineKey;
   // Prefer nutrition resolver flags if present
   if (item.cuisine?.africanAmerican) return "africanAmerican";
   if (item.cuisine?.westAfrican) return "westAfrican";
   // Try name/tags
   const scores = cueScoreFromTags(item.name || item.title, item.tags);
-  return scores.africanAmerican >= scores.westAfrican ? "africanAmerican" : "westAfrican";
+  return scores.africanAmerican >= scores.westAfrican
+    ? "africanAmerican"
+    : "westAfrican";
 }
 
 /* ----------------------------------------------------------------------------
@@ -142,9 +199,10 @@ function packsFromProfile(profile = {}) {
   const b = profile?.cuisine?.active;
   const c = profile?.food?.cuisines?.active;
   for (const arr of [a, b, c]) {
-    if (Array.isArray(arr)) arr.forEach(p => KNOWN_PACKS.has(p) && out.add(p));
+    if (Array.isArray(arr))
+      arr.forEach((p) => KNOWN_PACKS.has(p) && out.add(p));
   }
-  if (!out.size) DEFAULT_PACKS.forEach(p => out.add(p));
+  if (!out.size) DEFAULT_PACKS.forEach((p) => out.add(p));
   return out;
 }
 
@@ -159,8 +217,11 @@ function favoritesSignal() {
   const favs = FavoritesStore?.getState?.()?.food?.favorites || [];
   const tally = { africanAmerican: 0, westAfrican: 0 };
   for (const f of favs) {
-    const key = f.cuisine && KNOWN_PACKS.has(f.cuisine) ? f.cuisine : inferCuisineKeyFromItem(f);
-    tally[key] += (Number(f.weight) || 1);
+    const key =
+      f.cuisine && KNOWN_PACKS.has(f.cuisine)
+        ? f.cuisine
+        : inferCuisineKeyFromItem(f);
+    tally[key] += Number(f.weight) || 1;
   }
   return normalizeWeights(tally);
 }
@@ -170,12 +231,14 @@ function historySignal() {
   const until = Date.now();
   const since = until - HISTORY_WINDOW_DAYS * 24 * 3600 * 1000;
   const hist = MealHistoryStore?.getRange
-    ? (MealHistoryStore.getRange(since, until) || [])
-    : (MealHistoryStore?.getState?.()?.events || []).filter(e => (e.servedAt || 0) >= since);
+    ? MealHistoryStore.getRange(since, until) || []
+    : (MealHistoryStore?.getState?.()?.events || []).filter(
+        (e) => (e.servedAt || 0) >= since
+      );
 
   const counts = { africanAmerican: 0, westAfrican: 0 };
   for (const e of hist) {
-    for (const it of (e.items || [])) {
+    for (const it of e.items || []) {
       const key = inferCuisineKeyFromItem(it);
       counts[key] += 1;
     }
@@ -185,21 +248,28 @@ function historySignal() {
   if (!total) return { africanAmerican: 0.5, westAfrican: 0.5 };
   const inv = {
     africanAmerican: (total - counts.africanAmerican) / total,
-    westAfrican: (total - counts.westAfrican) / total
+    westAfrican: (total - counts.westAfrican) / total,
   };
   return normalizeWeights(inv);
 }
 
 async function inventorySignal(householdId) {
   try {
-    const snap = householdId ? await InventoryStore?.snapshot?.(householdId) : null;
+    const snap = householdId
+      ? await InventoryStore?.snapshot?.(householdId)
+      : null;
     const items = snap?.items || _inventorySnapshot?.items || [];
     if (snap) _inventorySnapshot = snap;
     const tally = { africanAmerican: 0, westAfrican: 0 };
     for (const it of items) {
       const key = inferCuisineKeyFromItem({ name: it.name, tags: it.tags });
       // weight by qty presence (binary bump) and perishability (if present)
-      const qty = Number(it.qty || (Array.isArray(it.lots) ? it.lots.reduce((a,b)=>a+(b.qty||0),0) : 0));
+      const qty = Number(
+        it.qty ||
+          (Array.isArray(it.lots)
+            ? it.lots.reduce((a, b) => a + (b.qty || 0), 0)
+            : 0)
+      );
       if (qty > 0) tally[key] += Math.min(1, qty);
     }
     return normalizeWeights(tally);
@@ -210,7 +280,7 @@ async function inventorySignal(householdId) {
 
 function seasonalCalendarSignal() {
   const prefs = PreferencesStore?.getState?.() || {};
-  const passover = !!(prefs?.calendar?.passoverMode);
+  const passover = !!prefs?.calendar?.passoverMode;
   // Very light nudge away from chametz-heavy cuisines if passoverMode
   // (both packs include some chametz items; we just apply a tiny uniform penalty)
   if (!passover) return { africanAmerican: 0.5, westAfrican: 0.5 };
@@ -232,7 +302,9 @@ async function recomputeBias({ householdId } = {}) {
     // Profile active = equal distribution across active packs
     const activeArr = Array.from(_packs);
     const profileActive = {};
-    activeArr.forEach(k => { profileActive[k] = 1 / activeArr.length; });
+    activeArr.forEach((k) => {
+      profileActive[k] = 1 / activeArr.length;
+    });
     mergeAdd(blended, profileActive, WEIGHTS.profileActive);
 
     // Profile primary
@@ -246,14 +318,19 @@ async function recomputeBias({ householdId } = {}) {
     mergeAdd(blended, historySignal(), WEIGHTS.historyNovelty);
 
     // Inventory
-    mergeAdd(blended, await inventorySignal(householdId), WEIGHTS.inventoryPantry);
+    mergeAdd(
+      blended,
+      await inventorySignal(householdId),
+      WEIGHTS.inventoryPantry
+    );
 
     // Seasonal/Calendar
     mergeAdd(blended, seasonalCalendarSignal(), WEIGHTS.seasonalCalendar);
 
     // Ephemeral/contextual tweaks
     pruneEphemeral();
-    for (const { weights } of _ephemeral.values()) mergeAdd(blended, weights, 1);
+    for (const { weights } of _ephemeral.values())
+      mergeAdd(blended, weights, 1);
 
     _bias = normalizeWeights(blended);
     _lastRecalc = now();
@@ -264,7 +341,7 @@ async function recomputeBias({ householdId } = {}) {
     // Fallback to active packs equal weights
     const fallback = {};
     const arr = Array.from(_packs.size ? _packs : new Set(DEFAULT_PACKS));
-    arr.forEach(k => fallback[k] = 1 / arr.length);
+    arr.forEach((k) => (fallback[k] = 1 / arr.length));
     _bias = normalizeWeights(fallback);
     return _bias;
   }
@@ -275,7 +352,8 @@ async function recomputeBias({ householdId } = {}) {
 ---------------------------------------------------------------------------- */
 function pruneEphemeral() {
   const t = now();
-  for (const [k, v] of _ephemeral) if (!v || v.expiresAt <= t) _ephemeral.delete(k);
+  for (const [k, v] of _ephemeral)
+    if (!v || v.expiresAt <= t) _ephemeral.delete(k);
 }
 
 /**
@@ -296,7 +374,10 @@ function pushEphemeral(contextId, weights, ttlMs = EPHEMERAL_TTL_MS) {
 }
 
 function clearEphemeral(contextId) {
-  if (!contextId) { _ephemeral.clear(); return true; }
+  if (!contextId) {
+    _ephemeral.clear();
+    return true;
+  }
   _ephemeral.delete(contextId);
   _bias = null;
   return true;
@@ -310,7 +391,7 @@ export const profileCuisineBias = {
    * Get normalized cuisine bias. Triggers recompute if stale or forced.
    */
   async getCuisineBias({ force = false, householdId } = {}) {
-    if (!_bias || force || (now() - _lastRecalc > 1000 * 60 * 10)) {
+    if (!_bias || force || now() - _lastRecalc > 1000 * 60 * 10) {
       return await recomputeBias({ householdId });
     }
     return _bias;
@@ -323,17 +404,21 @@ export const profileCuisineBias = {
    * @param options { bias?, boost?: number } boost controls strength (default 0.6)
    */
   async rerankByCuisine(candidates = [], getCuisineKey, options = {}) {
-    const bias = options.bias || await this.getCuisineBias({});
+    const bias = options.bias || (await this.getCuisineBias({}));
     const boost = typeof options.boost === "number" ? options.boost : 0.6;
 
-    return (candidates || []).map(item => {
-      const key = getCuisineKey ? getCuisineKey(item) : inferCuisineKeyFromItem(item);
-      const w = clamp01(key && bias[key] != null ? bias[key] : 0.5);
-      const baseScore = Number(item.score || item.rating || 0);
-      // Intuition: newScore = base*(1 - boost) + w*boost
-      const score = (baseScore * (1 - boost)) + (w * boost);
-      return { ...item, cuisineKey: key, cuisineBias: w, score };
-    }).sort((a, b) => (b.score || 0) - (a.score || 0));
+    return (candidates || [])
+      .map((item) => {
+        const key = getCuisineKey
+          ? getCuisineKey(item)
+          : inferCuisineKeyFromItem(item);
+        const w = clamp01(key && bias[key] != null ? bias[key] : 0.5);
+        const baseScore = Number(item.score || item.rating || 0);
+        // Intuition: newScore = base*(1 - boost) + w*boost
+        const score = baseScore * (1 - boost) + w * boost;
+        return { ...item, cuisineKey: key, cuisineBias: w, score };
+      })
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
   },
 
   /**
@@ -347,9 +432,11 @@ export const profileCuisineBias = {
    * Manually set active packs (also updates usdaDefaults if available).
    */
   setActivePacks(packs = []) {
-    const next = packs.filter(p => KNOWN_PACKS.has(p));
+    const next = packs.filter((p) => KNOWN_PACKS.has(p));
     _packs = new Set(next.length ? next : DEFAULT_PACKS);
-    try { usdaDefaults?.setActiveCuisinePacks?.(Array.from(_packs)); } catch {}
+    try {
+      usdaDefaults?.setActiveCuisinePacks?.(Array.from(_packs));
+    } catch {}
     _bias = null;
     emitCuisinePackChanged();
     return this.getActivePacks();
@@ -361,7 +448,9 @@ export const profileCuisineBias = {
   applyHouseholdProfile(profile = {}) {
     const next = packsFromProfile(profile);
     _packs = next.size ? next : new Set(DEFAULT_PACKS);
-    try { usdaDefaults?.applyHouseholdProfile?.(profile); } catch {}
+    try {
+      usdaDefaults?.applyHouseholdProfile?.(profile);
+    } catch {}
     _bias = null;
     emitCuisinePackChanged();
     return this.getActivePacks();
@@ -369,7 +458,7 @@ export const profileCuisineBias = {
 
   /** Ephemeral/context bias controls */
   pushEphemeral,
-  clearEphemeral
+  clearEphemeral,
 };
 
 export default profileCuisineBias;
@@ -378,7 +467,11 @@ export default profileCuisineBias;
    Event wiring
 ---------------------------------------------------------------------------- */
 function emitCuisinePackChanged() {
-  try { eventBus?.emit?.("cuisine.packs.changed", { packs: profileCuisineBias.getActivePacks() }); } catch {}
+  try {
+    eventBus?.emit?.("cuisine.packs.changed", {
+      packs: profileCuisineBias.getActivePacks(),
+    });
+  } catch {}
 }
 
 // Auto-listen to profile/prefs/favorites/history changes and recompute
@@ -418,7 +511,10 @@ try {
   if (hp) profileCuisineBias.applyHouseholdProfile(hp);
   await profileCuisineBias.getCuisineBias({ force: true });
 } catch (e) {
-  logger.warn?.("[profileCuisineBias] event wiring failed (ok to ignore in bootstrap)", e);
+  logger.warn?.(
+    "[profileCuisineBias] event wiring failed (ok to ignore in bootstrap)",
+    e
+  );
 }
 
 /* ----------------------------------------------------------------------------

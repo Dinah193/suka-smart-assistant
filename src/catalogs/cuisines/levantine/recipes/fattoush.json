@@ -1,0 +1,281 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.levantine.fattoush",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Fattoush (Levantine Bread Salad)",
+    "description": "Bright, crunchy Levantine salad with toasted pita, crisp vegetables, fresh herbs, and a tangy sumac-lemon dressing.",
+    "tags": [
+      "cuisine.levantine",
+      "salad",
+      "fattoush",
+      "vegetarian",
+      "vegan",
+      "dairy_free",
+      "weeknight.friendly",
+      "fresh",
+      "summer"
+    ]
+  },
+
+  "summary": "Fattoush is a classic Levantine salad built around crunchy vegetables, fresh herbs, and shards of toasted or fried pita. The signature flavor comes from sumac in the dressing (tangy, lemony) and a bright lemon-garlic vinaigrette. For best texture, keep the pita separate until serving so it stays crisp.",
+
+  "yields": {
+    "servings": 6,
+    "makes": "1 large salad bowl (about 10–12 cups)"
+  },
+
+  "timing": {
+    "activeMins": 20,
+    "totalMins": 25,
+    "notes": "Toast pita while chopping vegetables to keep it fast."
+  },
+
+  "diet": {
+    "tags": ["vegan", "vegetarian", "dairy_free", "egg_free", "nut_free"],
+    "notes": "Use gluten-free pita/crackers for gluten-free."
+  },
+
+  "methods": ["chop", "toast", "whisk"],
+
+  "compat": {
+    "kitchenCapabilitiesAnyOf": ["oven", "stovetop_optional"],
+    "notes": "Pita can be toasted in oven or crisped in a skillet."
+  },
+
+  "allergens": ["wheat"],
+
+  "safety": {
+    "foodSafetyNotes": [
+      "Wash and dry greens and herbs thoroughly.",
+      "Dress salad just before serving for best texture."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.pita",
+      "label": "Crispy pita",
+      "ingredientIds": [
+        "ing.pita",
+        "ing.olive_oil_pita",
+        "ing.salt_pita_optional"
+      ]
+    },
+    {
+      "id": "group.salad",
+      "label": "Salad",
+      "ingredientIds": [
+        "ing.romaine",
+        "ing.cucumber",
+        "ing.tomato",
+        "ing.radish_optional",
+        "ing.green_onion_optional",
+        "ing.mint_fresh_optional",
+        "ing.parsley_flat_leaf",
+        "ing.bell_pepper_optional"
+      ]
+    },
+    {
+      "id": "group.dressing",
+      "label": "Sumac-lemon dressing",
+      "ingredientIds": [
+        "ing.lemon_juice",
+        "ing.olive_oil",
+        "ing.sumac",
+        "ing.garlic",
+        "ing.pomegranate_molasses_optional",
+        "ing.salt_kosher",
+        "ing.black_pepper"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.pita",
+      "label": "Pita bread",
+      "amount": { "value": 2, "unit": "count" },
+      "notes": "Split and cut into bite-size pieces."
+    },
+    {
+      "id": "ing.olive_oil_pita",
+      "label": "Olive oil (for pita)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 Tbsp."
+    },
+    {
+      "id": "ing.salt_pita_optional",
+      "label": "Salt (for pita) (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "A pinch."
+    },
+
+    {
+      "id": "ing.romaine",
+      "label": "Romaine lettuce, chopped",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 2 small heads or 1 large."
+    },
+    {
+      "id": "ing.cucumber",
+      "label": "Cucumber, chopped",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 1 large cucumber."
+    },
+    {
+      "id": "ing.tomato",
+      "label": "Tomatoes, chopped",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 2 large tomatoes. Use ripe, flavorful tomatoes."
+    },
+    {
+      "id": "ing.radish_optional",
+      "label": "Radishes, thinly sliced (optional)",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 5–6 radishes."
+    },
+    {
+      "id": "ing.green_onion_optional",
+      "label": "Green onions, sliced (optional)",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2–3 green onions."
+    },
+    {
+      "id": "ing.mint_fresh_optional",
+      "label": "Fresh mint, chopped (optional)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 Tbsp chopped."
+    },
+    {
+      "id": "ing.parsley_flat_leaf",
+      "label": "Flat-leaf parsley, chopped",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "About 1/2 cup loosely packed."
+    },
+    {
+      "id": "ing.bell_pepper_optional",
+      "label": "Bell pepper, chopped (optional)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 1 medium pepper."
+    },
+
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 75, "unit": "ml" },
+      "notes": "About 5 Tbsp."
+    },
+    {
+      "id": "ing.sumac",
+      "label": "Ground sumac",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp (signature flavor)."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic clove, finely grated",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 clove."
+    },
+    {
+      "id": "ing.pomegranate_molasses_optional",
+      "label": "Pomegranate molasses (optional)",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp. Adds depth and sweet-tart balance."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp; adjust to taste."
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Ground black pepper",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.toast_pita",
+      "title": "Toast the pita",
+      "instructions": [
+        "Heat oven to 375°F / 190°C.",
+        "Toss pita pieces with olive oil and a pinch of salt (optional).",
+        "Spread on a sheet pan and toast 8–12 minutes, stirring once, until crisp and golden.",
+        "Cool completely so it stays crunchy."
+      ],
+      "timers": [{ "id": "timer.toast", "label": "Toast pita", "minutes": 10 }]
+    },
+    {
+      "id": "step.chop_veg",
+      "title": "Chop the vegetables and herbs",
+      "instructions": [
+        "Chop romaine, cucumber, tomatoes, and any optional vegetables.",
+        "Chop parsley (and mint if using).",
+        "Keep vegetables cold/crisp while pita cools."
+      ]
+    },
+    {
+      "id": "step.make_dressing",
+      "title": "Make the dressing",
+      "instructions": [
+        "In a bowl or jar, whisk together lemon juice, olive oil, sumac, grated garlic, pomegranate molasses (optional), salt, and black pepper.",
+        "Taste and adjust: more lemon for brightness, more salt for pop, more sumac for tang."
+      ]
+    },
+    {
+      "id": "step.toss",
+      "title": "Toss and serve",
+      "instructions": [
+        "In a large bowl, combine vegetables and herbs.",
+        "Add dressing and toss to coat.",
+        "Add toasted pita right before serving (or serve pita on the side so it stays crisp longer).",
+        "Serve immediately."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Texture tip: Add pita at the last moment. If making ahead, store pita separately in an airtight container.",
+    "Herb ratio: Parsley is essential; mint adds classic Levantine lift. Adjust to taste.",
+    "Flavor balance: Sumac provides the signature tang; pomegranate molasses adds sweet-tart depth but is optional."
+  ],
+
+  "variations": [
+    {
+      "id": "var.fried_pita",
+      "label": "Fried pita (more traditional, richer)",
+      "changes": [
+        "Instead of oven-toasting, shallow-fry pita pieces in 1/4 inch oil until golden.",
+        "Drain on paper towels and season lightly with salt."
+      ]
+    },
+    {
+      "id": "var.add_purslane",
+      "label": "Add purslane (if available)",
+      "changes": ["Add 1 cup purslane leaves for an authentic, lemony bite."]
+    },
+    {
+      "id": "var.add_sumac_on_top",
+      "label": "Extra sumac finish",
+      "changes": [
+        "Sprinkle an additional 1/2 tsp sumac over the salad just before serving."
+      ]
+    }
+  ]
+}

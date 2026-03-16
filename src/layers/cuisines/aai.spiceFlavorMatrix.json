@@ -1,0 +1,683 @@
+{
+  "schemaVersion": "1.0",
+  "cuisineKey": "aai",
+  "updatedAt": "2026-01-01T11:58:34Z",
+  "heatLevels": [
+    "none",
+    "mild",
+    "medium",
+    "hot"
+  ],
+  "blends": [
+    {
+      "key": "aai_suya_classic",
+      "name": "Suya Classic",
+      "heat": "hot",
+      "notes": "Peanut-free default unless user allows; warm aromatics + pepper.",
+      "ingredients": [
+        "ground ginger",
+        "smoked paprika",
+        "cayenne",
+        "black pepper",
+        "onion powder",
+        "garlic powder",
+        "ground coriander",
+        "ground cloves (pinch)",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "lamb",
+          "goat"
+        ],
+        "techniques": [
+          "grill",
+          "skewer",
+          "broil"
+        ],
+        "sides": [
+          "cabbage slaw",
+          "jollof-style rice",
+          "roasted sweet potato"
+        ],
+        "sauces": [
+          "lemon-garlic drizzle",
+          "pepper sauce"
+        ]
+      }
+    },
+    {
+      "key": "aai_suya_peanut",
+      "name": "Suya Peanut",
+      "heat": "hot",
+      "notes": "Traditional peanut nuance; omit if nut allergy.",
+      "ingredients": [
+        "roasted peanut powder",
+        "ground ginger",
+        "cayenne",
+        "black pepper",
+        "paprika",
+        "onion powder",
+        "garlic powder",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "goat"
+        ],
+        "techniques": [
+          "grill",
+          "skewer"
+        ],
+        "sides": [
+          "cabbage slaw",
+          "okra"
+        ],
+        "sauces": [
+          "pepper sauce"
+        ]
+      }
+    },
+    {
+      "key": "aai_shawarma_brown",
+      "name": "Shawarma Brown",
+      "heat": "medium",
+      "notes": "Shawarma-style layering tuned for beef/lamb/goat.",
+      "ingredients": [
+        "ground cumin",
+        "ground coriander",
+        "smoked paprika",
+        "cinnamon (pinch)",
+        "allspice",
+        "black pepper",
+        "turmeric",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "lamb",
+          "goat",
+          "beef"
+        ],
+        "techniques": [
+          "roast",
+          "grill",
+          "pan-sear"
+        ],
+        "sides": [
+          "herb salad",
+          "cucumber",
+          "flatbread"
+        ],
+        "sauces": [
+          "tahini-like sesame sauce",
+          "garlic sauce"
+        ]
+      }
+    },
+    {
+      "key": "aai_bbq_sweet_smoke",
+      "name": "BBQ Sweet Smoke",
+      "heat": "mild",
+      "notes": "Southern BBQ rub; sugar optional (keto).",
+      "ingredients": [
+        "smoked paprika",
+        "black pepper",
+        "garlic powder",
+        "onion powder",
+        "mustard powder",
+        "brown sugar (optional)",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "lamb",
+          "goat"
+        ],
+        "techniques": [
+          "smoke",
+          "grill",
+          "roast"
+        ],
+        "sides": [
+          "collards",
+          "beans",
+          "cornbread"
+        ],
+        "sauces": [
+          "vinegar mop",
+          "tomato bbq"
+        ]
+      }
+    },
+    {
+      "key": "aai_pepper_vinegar",
+      "name": "Pepper Vinegar",
+      "heat": "medium",
+      "notes": "Finishing acid for greens/beans.",
+      "ingredients": [
+        "apple cider vinegar",
+        "chili flakes",
+        "salt",
+        "black pepper"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "lamb"
+        ],
+        "techniques": [
+          "braise",
+          "stew"
+        ],
+        "sides": [
+          "collards",
+          "black-eyed peas"
+        ],
+        "sauces": [
+          "pepper vinegar"
+        ]
+      }
+    },
+    {
+      "key": "aai_herb_garden",
+      "name": "Herb Garden",
+      "heat": "mild",
+      "notes": "Mediterranean herb-forward blend.",
+      "ingredients": [
+        "oregano",
+        "thyme",
+        "parsley",
+        "garlic powder",
+        "lemon zest",
+        "salt",
+        "black pepper"
+      ],
+      "affinities": {
+        "proteins": [
+          "fish",
+          "lamb",
+          "goat"
+        ],
+        "techniques": [
+          "roast",
+          "grill"
+        ],
+        "sides": [
+          "tomato-cucumber salad",
+          "roasted okra"
+        ],
+        "sauces": [
+          "lemon-olive oil"
+        ]
+      }
+    },
+    {
+      "key": "aai_okra_tomato_base",
+      "name": "Okra Tomato Base",
+      "heat": "mild",
+      "notes": "Stew base for okra/gumbo-like pots without shellfish.",
+      "ingredients": [
+        "onion",
+        "garlic",
+        "tomato",
+        "okra",
+        "thyme",
+        "bay leaf",
+        "smoked paprika",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "lamb",
+          "goat",
+          "fish"
+        ],
+        "techniques": [
+          "stew"
+        ],
+        "sides": [
+          "rice",
+          "cornbread"
+        ],
+        "sauces": [
+          "stew base"
+        ]
+      }
+    },
+    {
+      "key": "aai_jollof_base",
+      "name": "Jollof Base",
+      "heat": "medium",
+      "notes": "West African tomato-pepper base; heat adjustable.",
+      "ingredients": [
+        "tomato paste",
+        "tomato",
+        "red bell pepper",
+        "onion",
+        "garlic",
+        "ginger",
+        "thyme",
+        "bay leaf",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "goat",
+          "lamb"
+        ],
+        "techniques": [
+          "braise",
+          "stew"
+        ],
+        "sides": [
+          "rice"
+        ],
+        "sauces": [
+          "jollof base"
+        ]
+      }
+    },
+    {
+      "key": "aai_sephardic_stew_spice",
+      "name": "Sephardic Stew Spice",
+      "heat": "medium",
+      "notes": "Warm spice for long simmers.",
+      "ingredients": [
+        "cumin",
+        "paprika",
+        "turmeric",
+        "black pepper",
+        "coriander",
+        "cinnamon (pinch)",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "lamb",
+          "beef",
+          "goat"
+        ],
+        "techniques": [
+          "stew",
+          "braise"
+        ],
+        "sides": [
+          "rice",
+          "root veg"
+        ],
+        "sauces": [
+          "pan juices"
+        ]
+      }
+    },
+    {
+      "key": "aai_citrus_garlic",
+      "name": "Citrus Garlic Finish",
+      "heat": "mild",
+      "notes": "Bright finishing drizzle.",
+      "ingredients": [
+        "lemon juice",
+        "garlic",
+        "olive oil",
+        "salt",
+        "black pepper"
+      ],
+      "affinities": {
+        "proteins": [
+          "fish",
+          "lamb",
+          "goat"
+        ],
+        "techniques": [
+          "grill",
+          "roast"
+        ],
+        "sides": [
+          "salad",
+          "slaw"
+        ],
+        "sauces": [
+          "citrus garlic"
+        ]
+      }
+    },
+    {
+      "key": "aai_berbere_like",
+      "name": "Berbere-like (Torah-safe)",
+      "heat": "hot",
+      "notes": "Ethiopian-inspired heat; no prohibited ingredients.",
+      "ingredients": [
+        "paprika",
+        "cayenne",
+        "fenugreek",
+        "ginger",
+        "coriander",
+        "cumin",
+        "cloves (pinch)",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "goat",
+          "lamb"
+        ],
+        "techniques": [
+          "stew",
+          "braise",
+          "roast"
+        ],
+        "sides": [
+          "greens",
+          "root veg"
+        ],
+        "sauces": [
+          "stew base"
+        ]
+      }
+    },
+    {
+      "key": "aai_black_pepper_molasses",
+      "name": "Black Pepper + Molasses",
+      "heat": "medium",
+      "notes": "Sweet heat; sugar optional.",
+      "ingredients": [
+        "black pepper",
+        "molasses (optional)",
+        "mustard",
+        "vinegar",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef"
+        ],
+        "techniques": [
+          "smoke",
+          "roast"
+        ],
+        "sides": [
+          "beans",
+          "slaw"
+        ],
+        "sauces": [
+          "bbq glaze"
+        ]
+      }
+    },
+    {
+      "key": "aai_smoke_chili_lime",
+      "name": "Smoke Chili Lime",
+      "heat": "medium",
+      "notes": "Taco-ish but AAI-friendly.",
+      "ingredients": [
+        "smoked paprika",
+        "chili powder",
+        "lime zest",
+        "garlic powder",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "goat",
+          "beef",
+          "fish"
+        ],
+        "techniques": [
+          "grill",
+          "pan-sear"
+        ],
+        "sides": [
+          "cabbage",
+          "sweet potato"
+        ],
+        "sauces": [
+          "lime crema (if dairy allowed)"
+        ]
+      }
+    },
+    {
+      "key": "aai_braise_aromatics",
+      "name": "Braise Aromatics",
+      "heat": "mild",
+      "notes": "All-purpose braise/stew base.",
+      "ingredients": [
+        "onion",
+        "garlic",
+        "celery",
+        "bell pepper",
+        "thyme",
+        "bay leaf",
+        "salt",
+        "black pepper"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "goat",
+          "lamb"
+        ],
+        "techniques": [
+          "braise",
+          "stew"
+        ],
+        "sides": [
+          "rice",
+          "cornbread"
+        ],
+        "sauces": [
+          "pan gravy"
+        ]
+      }
+    },
+    {
+      "key": "aai_breakfast_sage",
+      "name": "Breakfast Sage (Sausage)",
+      "heat": "mild",
+      "notes": "For beef/lamb breakfast sausage.",
+      "ingredients": [
+        "sage",
+        "black pepper",
+        "garlic powder",
+        "onion powder",
+        "salt",
+        "thyme"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "lamb",
+          "goat"
+        ],
+        "techniques": [
+          "sausage",
+          "pan-fry"
+        ],
+        "sides": [
+          "eggs",
+          "waffles"
+        ],
+        "sauces": [
+          "pan drippings"
+        ]
+      }
+    },
+    {
+      "key": "aai_ferment_brine_garlic",
+      "name": "Ferment Brine + Garlic",
+      "heat": "mild",
+      "notes": "Ferment/pickle brine template.",
+      "ingredients": [
+        "salt",
+        "water",
+        "garlic",
+        "dill (optional)",
+        "chili (optional)"
+      ],
+      "affinities": {
+        "proteins": [],
+        "techniques": [
+          "ferment",
+          "pickle"
+        ],
+        "sides": [
+          "okra pickles",
+          "cabbage kraut"
+        ],
+        "sauces": [
+          "brine"
+        ]
+      }
+    },
+    {
+      "key": "aai_stock_roast_bones",
+      "name": "Roasted Bone Stock Base",
+      "heat": "mild",
+      "notes": "Method flavor base (not a spice).",
+      "ingredients": [
+        "roasted bones",
+        "onion",
+        "garlic",
+        "bay",
+        "peppercorn",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "beef",
+          "lamb",
+          "goat"
+        ],
+        "techniques": [
+          "stock",
+          "broth"
+        ],
+        "sides": [
+          "soups"
+        ],
+        "sauces": [
+          "gravy"
+        ]
+      }
+    },
+    {
+      "key": "aai_mint_cilantro_chermoula",
+      "name": "Mint-Cilantro Chermoula",
+      "heat": "medium",
+      "notes": "North African herb sauce.",
+      "ingredients": [
+        "cilantro",
+        "mint",
+        "garlic",
+        "lemon",
+        "cumin",
+        "olive oil",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "lamb",
+          "fish",
+          "goat"
+        ],
+        "techniques": [
+          "grill",
+          "roast"
+        ],
+        "sides": [
+          "salad",
+          "roasted veg"
+        ],
+        "sauces": [
+          "chermoula"
+        ]
+      }
+    },
+    {
+      "key": "aai_harissa_like",
+      "name": "Harissa-like Pepper Paste",
+      "heat": "hot",
+      "notes": "Heat paste; adjust for household.",
+      "ingredients": [
+        "roasted red pepper",
+        "chili",
+        "garlic",
+        "cumin",
+        "coriander",
+        "olive oil",
+        "salt"
+      ],
+      "affinities": {
+        "proteins": [
+          "lamb",
+          "beef",
+          "fish"
+        ],
+        "techniques": [
+          "roast",
+          "grill"
+        ],
+        "sides": [
+          "veg",
+          "rice"
+        ],
+        "sauces": [
+          "pepper paste"
+        ]
+      }
+    }
+  ],
+  "rules": {
+    "dietModeAdjustments": {
+      "keto": {
+        "avoidTags": [
+          "highStarch",
+          "sugarAdded"
+        ],
+        "preferTags": [
+          "lowCarb",
+          "leafyGreens",
+          "grill",
+          "roast",
+          "braise"
+        ]
+      },
+      "carnivore": {
+        "avoidTags": [
+          "vegHeavy",
+          "grain",
+          "legume",
+          "highStarch"
+        ],
+        "preferTags": [
+          "meatHeavy",
+          "broth",
+          "sausage",
+          "roast",
+          "smoke"
+        ]
+      },
+      "vegetarian": {
+        "avoidTags": [
+          "meatHeavy"
+        ],
+        "preferTags": [
+          "vegHeavy",
+          "legume",
+          "grain",
+          "ferment",
+          "stew"
+        ]
+      },
+      "OMAD": {
+        "notes": "Favor one substantial plate + optional broth/salad; avoid multi-course complexity."
+      }
+    }
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.apple_pie_classic",
+    "slug": "apple_pie_classic",
+    "name": "Classic Apple Pie (Canonical)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "dessert",
+      "pie",
+      "apple-pie",
+      "classic",
+      "canonical",
+      "crust",
+      "filling",
+      "baking",
+      "holiday",
+      "celebration"
+    ],
+    "allergens": ["wheat", "dairy"],
+    "description": "A canonical double-crust apple pie with reliable crust + filling logic: flaky butter crust, structured filling that slices cleanly, and bake workflow designed to avoid a soggy bottom. Includes guidance for both commercial all-purpose flour and fresh-milled flour (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "pie_dish_9in", "label": "9-inch pie dish" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "pastry_cutter", "label": "Pastry cutter or fork" },
+    { "id": "rolling_pin", "label": "Rolling pin" },
+    { "id": "bench_scraper", "label": "Bench scraper (optional)" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "paring_knife", "label": "Paring knife" },
+    { "id": "peeler", "label": "Vegetable peeler" },
+    { "id": "large_skillet", "label": "Large skillet (for optional pre-cook)" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "pastry_brush", "label": "Pastry brush" },
+    { "id": "sheet_pan", "label": "Sheet pan (for baking on)" },
+    { "id": "foil", "label": "Foil (for shielding edges)" }
+  ],
+  "ingredients": [
+    {
+      "id": "crust_flour_ap_option",
+      "label": "All-purpose flour (Option A — crust flour; use this OR the fresh-milled option)",
+      "amount": { "value": 315, "unit": "g" },
+      "notes": "About 2 1/2 cups. Weighing is best for consistent crust."
+    },
+    {
+      "id": "crust_flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — crust flour; use this OR the AP option)",
+      "amount": { "value": 315, "unit": "g" },
+      "notes": "Fresh-milled flour can absorb more and may include more bran. For a flakier crust, sift out the largest bran, or increase water slightly and rest dough longer."
+    },
+    {
+      "id": "crust_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "crust_sugar",
+      "label": "Granulated sugar",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tbsp; optional but improves browning and flavor."
+    },
+    {
+      "id": "crust_butter_unsalted",
+      "label": "Unsalted butter, very cold, cubed",
+      "amount": { "value": 225, "unit": "g" },
+      "notes": "About 2 sticks. Keep cold for flakiness."
+    },
+    {
+      "id": "crust_ice_water",
+      "label": "Ice water",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": "Start with 75 ml and add as needed; total varies by flour and humidity."
+    },
+    {
+      "id": "crust_vinegar_optional",
+      "label": "Apple cider vinegar (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp; can help tenderness and handling.",
+      "optional": true
+    },
+
+    {
+      "id": "apples",
+      "label": "Apples (mix of tart + sweet), peeled, cored, sliced",
+      "amount": { "value": 1400, "unit": "g" },
+      "notes": "About 3–3.5 lb (6–8 medium). Suggested mix: Granny Smith + Honeycrisp or Fuji."
+    },
+    {
+      "id": "sugar_brown",
+      "label": "Light brown sugar",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3/4 cup."
+    },
+    {
+      "id": "sugar_granulated_filling",
+      "label": "Granulated sugar",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "About 1/4 cup. Adjust for apple sweetness."
+    },
+    {
+      "id": "cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "nutmeg_optional",
+      "label": "Ground nutmeg (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/4 tsp.",
+      "optional": true
+    },
+    {
+      "id": "salt_filling",
+      "label": "Kosher salt",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Lemon juice",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 tbsp; balances sweetness and reduces browning."
+    },
+    {
+      "id": "cornstarch_or_tapioca",
+      "label": "Cornstarch (or tapioca starch)",
+      "amount": { "value": 28, "unit": "g" },
+      "notes": "About 3 tbsp. Thickener for sliceable filling."
+    },
+    {
+      "id": "butter_filling",
+      "label": "Unsalted butter (for dotting)",
+      "amount": { "value": 28, "unit": "g" },
+      "notes": "About 2 tbsp."
+    },
+    {
+      "id": "vanilla_optional",
+      "label": "Vanilla extract (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+
+    {
+      "id": "egg_wash_egg",
+      "label": "Egg (for egg wash)",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "egg_wash_milk",
+      "label": "Milk or cream (for egg wash)",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "coarse_sugar_optional",
+      "label": "Coarse sugar (optional topping)",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_choose_crust_flour",
+      "title": "Choose your crust flour option",
+      "body": "Use either the all-purpose flour OR the fresh-milled flour for the crust (not both). Fresh-milled flour may need slightly more water and benefits from a longer rest for hydration."
+    },
+    {
+      "id": "step_02_make_crust",
+      "title": "Make the double crust dough",
+      "body": "In a large bowl, whisk chosen flour with salt and sugar. Cut in very cold butter until you have a mix of pea-size and almond-size pieces (some flakes are good). Stir vinegar into ice water if using. Drizzle in 75 ml ice water and toss with a fork; add more 1 tbsp (15 ml) at a time until dough holds together when squeezed (it should look shaggy, not wet)."
+    },
+    {
+      "id": "step_03_rest_crust",
+      "title": "Divide and chill",
+      "body": "Divide dough into two discs (one slightly larger for the bottom crust). Wrap tightly and refrigerate at least 1 hour (2 hours ideal). Fresh-milled dough may benefit from 2–4 hours to hydrate."
+    },
+    {
+      "id": "step_04_make_filling",
+      "title": "Make the apple filling",
+      "body": "In a large bowl, toss sliced apples with lemon juice. Add brown sugar, granulated sugar, cinnamon, nutmeg (if using), salt, and cornstarch/tapioca. Toss until apples are evenly coated. Stir in vanilla if using."
+    },
+    {
+      "id": "step_05_optional_precook",
+      "title": "Optional: pre-cook filling to reduce shrink and soggy crust",
+      "body": "For a more stable, sliceable pie with less gap: cook the apple mixture in a large skillet over medium heat 6–10 minutes, stirring, until apples soften slightly and juices thicken. Cool to room temp before filling the pie."
+    },
+    {
+      "id": "step_06_roll_bottom_crust",
+      "title": "Roll bottom crust and line dish",
+      "body": "On a lightly floured surface, roll the larger dough disc into a 12–13 inch circle. Transfer to a 9-inch pie dish, gently lifting to avoid stretching. Trim to a 1-inch overhang."
+    },
+    {
+      "id": "step_07_fill",
+      "title": "Fill and dot butter",
+      "body": "Add apple filling, mounding slightly in the center. Dot with butter."
+    },
+    {
+      "id": "step_08_roll_top_crust",
+      "title": "Top crust (solid or lattice)",
+      "body": "Roll second dough disc into an 11–12 inch circle. Lay over filling for a solid top and cut vents, or cut into strips for a lattice. Trim and seal edges, then crimp."
+    },
+    {
+      "id": "step_09_chill_before_bake",
+      "title": "Chill the assembled pie",
+      "body": "Chill the assembled pie 15–30 minutes to firm the butter in the crust (helps flakiness and shape). Place a sheet pan on the lower rack while oven heats."
+    },
+    {
+      "id": "step_10_egg_wash",
+      "title": "Egg wash and sugar (optional)",
+      "body": "Whisk egg with milk/cream and brush on top crust. Sprinkle coarse sugar if using. If you skip egg wash, the crust will still bake fine but will be less glossy."
+    },
+    {
+      "id": "step_11_bake_hot_then_lower",
+      "title": "Bake (hot start, then lower)",
+      "body": "Heat oven to 425°F (220°C). Bake pie on the preheated sheet pan for 20 minutes. Then reduce oven to 375°F (190°C) and bake 35–55 minutes more, until crust is deep golden and filling is bubbling thickly through the vents (bubbling is the doneness signal for set thickener). Shield edges with foil if browning too fast."
+    },
+    {
+      "id": "step_12_cool_set",
+      "title": "Cool completely to set filling",
+      "body": "Cool on a rack at least 3 hours before slicing. Cutting early releases juices and makes the pie runny. For clean slices, let it fully cool."
+    }
+  ],
+  "notes": [
+    "Crust logic: Keep butter cold, avoid overworking, and chill dough to relax gluten. A hot oven start sets layers for flakiness.",
+    "Filling logic: Thickener must reach a full simmer (visible bubbling) to set; otherwise the filling can be runny.",
+    "Apple choice: Mixing tart + sweet apples gives balanced flavor and better texture.",
+    "Fresh-milled flour: Sifting out the largest bran helps flakiness. Fresh-milled dough may need slightly more water and a longer rest to hydrate."
+  ],
+  "storage": {
+    "roomTemp": "Covered: up to 2 days.",
+    "refrigerator": "Covered: up to 5 days.",
+    "freezer": "Wrapped airtight: up to 2 months. Thaw in refrigerator overnight."
+  }
+}

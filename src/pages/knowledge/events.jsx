@@ -1,6 +1,13 @@
 /* eslint-disable no-console */
 // C:\Users\larho\suka-smart-assistant\src\pages\knowledge\events.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback, Suspense } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  Suspense,
+} from "react";
 
 /**
  * knowledge/events.jsx — Events Knowledge Page
@@ -13,7 +20,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback, Suspense } fr
  *
  * REQUIREMENTS MET
  * - Forward-thinking: works even if EventCatalog or the bus are unavailable.
- * - Automated: subscribes to src/services/eventBus.js and listens for payloads
+ * - Automated: subscribes to src/services/events/eventBus.js and listens for payloads
  *   shaped like { type, ts, source, data } (ISO timestamps).
  * - Efficient/Defensive: soft-imports, guards, memoized aggregations, bounded
  *   in-memory buffers, and early returns on malformed events.
@@ -30,7 +37,9 @@ try {
 
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch {}
 
 let Config = { get: (k, fallback) => fallback };
@@ -66,14 +75,22 @@ function nanoid(len = 10) {
   return out;
 }
 function validateEvent(evt) {
-  return !!evt && typeof evt === "object" && typeof evt.type === "string" && evt.type.trim();
+  return (
+    !!evt &&
+    typeof evt === "object" &&
+    typeof evt.type === "string" &&
+    evt.type.trim()
+  );
 }
 function normalizeEvent(evt) {
   return {
     id: evt.id || `${evt.type}:${evt.ts || NOW_ISO()}:${nanoid(6)}`,
     type: String(evt.type),
     ts: ensureISO(evt.ts),
-    source: typeof evt.source === "string" && evt.source.trim() ? evt.source : "unknown",
+    source:
+      typeof evt.source === "string" && evt.source.trim()
+        ? evt.source
+        : "unknown",
     data: typeof evt.data === "object" && evt.data !== null ? evt.data : {},
     __raw: evt,
   };
@@ -119,11 +136,14 @@ function useEventKPIs({ enabled = true, max = 1000 } = {}) {
   const [events, setEvents] = useState([]);
   const unsubsRef = useRef([]);
 
-  const append = useCallback((evt) => {
-    if (!validateEvent(evt)) return;
-    const n = normalizeEvent(evt);
-    setEvents((prev) => [n, ...prev].slice(0, max));
-  }, [max]);
+  const append = useCallback(
+    (evt) => {
+      if (!validateEvent(evt)) return;
+      const n = normalizeEvent(evt);
+      setEvents((prev) => [n, ...prev].slice(0, max));
+    },
+    [max]
+  );
 
   useEffect(() => {
     if (!enabled || !eventBus) return;
@@ -169,7 +189,9 @@ function useEventKPIs({ enabled = true, max = 1000 } = {}) {
     unsubsRef.current = localUnsubs;
     return () => {
       unsubsRef.current.forEach((fn) => {
-        try { fn?.(); } catch {}
+        try {
+          fn?.();
+        } catch {}
       });
       unsubsRef.current = [];
     };
@@ -216,7 +238,9 @@ function useEventKPIs({ enabled = true, max = 1000 } = {}) {
 // ---------------------------- Export Utilities ------------------------------
 function downloadJSON(filename, obj) {
   try {
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(obj, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -231,47 +255,59 @@ function downloadJSON(filename, obj) {
 // ----------------------------- Page Component -------------------------------
 export default function KnowledgeEventsPage() {
   const [live, setLive] = useState(true);
-  const { events, kpis, clear, append } = useEventKPIs({ enabled: live, max: 1000 });
+  const { events, kpis, clear, append } = useEventKPIs({
+    enabled: live,
+    max: 1000,
+  });
 
-  const emitTest = useCallback((type) => {
-    const payload = {
-      type,
-      ts: NOW_ISO(),
-      source: "KnowledgeEvents",
-      data:
-        type === "inventory.updated"
-          ? { sku: "TEST-ITEM", delta: +2, reason: "manual.adjustment" }
-          : type === "garden.harvest.logged"
-          ? { crop: "kale", qty: "1.2 lb", bed: "B2" }
-          : type === "meal.executed"
-          ? { sessionId: nanoid(8), recipes: 2, servings: 6 }
-          : type === "import.parsed"
-          ? { domain: "recipe", count: 5, origin: "clipboard" }
-          : type === "preservation.completed"
-          ? { method: "pressure-canning", item: "broth", jars: 7 }
-          : { ok: true },
-    };
+  const emitTest = useCallback(
+    (type) => {
+      const payload = {
+        type,
+        ts: NOW_ISO(),
+        source: "KnowledgeEvents",
+        data:
+          type === "inventory.updated"
+            ? { sku: "TEST-ITEM", delta: +2, reason: "manual.adjustment" }
+            : type === "garden.harvest.logged"
+            ? { crop: "kale", qty: "1.2 lb", bed: "B2" }
+            : type === "meal.executed"
+            ? { sessionId: nanoid(8), recipes: 2, servings: 6 }
+            : type === "import.parsed"
+            ? { domain: "recipe", count: 5, origin: "clipboard" }
+            : type === "preservation.completed"
+            ? { method: "pressure-canning", item: "broth", jars: 7 }
+            : { ok: true },
+      };
 
-    // Prefer real bus
-    if (eventBus?.emit) {
-      try {
-        eventBus.emit(payload);
-      } catch (e) {
-        console.warn("[knowledge/events] bus.emit failed; appending locally", e);
+      // Prefer real bus
+      if (eventBus?.emit) {
+        try {
+          eventBus.emit(payload);
+        } catch (e) {
+          console.warn(
+            "[knowledge/events] bus.emit failed; appending locally",
+            e
+          );
+          append(payload);
+        }
+      } else {
         append(payload);
       }
-    } else {
-      append(payload);
-    }
 
-    if (isHouseholdMutation(type)) {
-      // fire-and-forget
-      exportToHubIfEnabled(payload);
-    }
-  }, [append]);
+      if (isHouseholdMutation(type)) {
+        // fire-and-forget
+        exportToHubIfEnabled(payload);
+      }
+    },
+    [append]
+  );
 
   const exportAll = useCallback(() => {
-    downloadJSON(`ssa-events-${new Date().toISOString().replace(/[:.]/g, "-")}.json`, events);
+    downloadJSON(
+      `ssa-events-${new Date().toISOString().replace(/[:.]/g, "-")}.json`,
+      events
+    );
   }, [events]);
 
   const hasBus = !!eventBus;
@@ -283,26 +319,40 @@ export default function KnowledgeEventsPage() {
           <div>
             <h1 className="text-xl md:text-2xl font-semibold">Events</h1>
             <p className="text-sm text-neutral-600">
-              Live knowledge view of SSA’s event pipeline — imports → intelligence → automation → (optional) hub export.
+              Live knowledge view of SSA’s event pipeline — imports →
+              intelligence → automation → (optional) hub export.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
-              className={`rounded-xl border px-3 py-2 text-sm ${live ? "bg-green-50 border-green-300" : "bg-neutral-50"}`}
+              className={`rounded-xl border px-3 py-2 text-sm ${
+                live ? "bg-green-50 border-green-300" : "bg-neutral-50"
+              }`}
               onClick={() => setLive((v) => !v)}
               aria-pressed={live}
               title={live ? "Pause stream" : "Resume stream"}
             >
               {live ? "Streaming" : "Paused"}
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={clear}>Clear</button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={exportAll}>Export JSON</button>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={clear}
+            >
+              Clear
+            </button>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={exportAll}
+            >
+              Export JSON
+            </button>
           </div>
         </div>
 
         {!hasBus && (
           <div className="mt-2 text-xs border border-amber-300 bg-amber-50 text-amber-800 rounded-lg p-2">
-            ⚠️ eventBus not detected. KPIs will reflect only locally emitted test events.
+            ⚠️ eventBus not detected. KPIs will reflect only locally emitted
+            test events.
           </div>
         )}
       </header>
@@ -352,7 +402,9 @@ export default function KnowledgeEventsPage() {
         <div className="rounded-2xl border p-3">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="text-sm font-medium">Emit test events</div>
-            <div className="text-xs text-neutral-500">Verifies bus wiring + hub export hook</div>
+            <div className="text-xs text-neutral-500">
+              Verifies bus wiring + hub export hook
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
@@ -382,7 +434,8 @@ export default function KnowledgeEventsPage() {
           <div className="text-sm font-medium">Event stream</div>
           {!EventCatalog && (
             <span className="text-xs text-neutral-500">
-              EventCatalog component not found. The KPI stream above still works.
+              EventCatalog component not found. The KPI stream above still
+              works.
             </span>
           )}
         </div>
@@ -391,14 +444,20 @@ export default function KnowledgeEventsPage() {
           {EventCatalog ? (
             <Suspense
               fallback={
-                <div className="p-4 text-sm text-neutral-600">Loading EventCatalog…</div>
+                <div className="p-4 text-sm text-neutral-600">
+                  Loading EventCatalog…
+                </div>
               }
             >
               <EventCatalog />
             </Suspense>
           ) : (
             <div className="p-4 text-sm text-neutral-600">
-              To enable the full explorer, add <code className="px-1 rounded bg-neutral-100">src/features/events/EventCatalog.jsx</code>.
+              To enable the full explorer, add{" "}
+              <code className="px-1 rounded bg-neutral-100">
+                src/features/events/EventCatalog.jsx
+              </code>
+              .
             </div>
           )}
         </div>
@@ -407,12 +466,30 @@ export default function KnowledgeEventsPage() {
       {/* Help / Docs */}
       <section className="mb-8">
         <details className="rounded-2xl border p-3">
-          <summary className="cursor-pointer text-sm font-medium">How this page fits into SSA</summary>
+          <summary className="cursor-pointer text-sm font-medium">
+            How this page fits into SSA
+          </summary>
           <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
-            <li><strong>Imports →</strong> External data is normalized by ImportRouter/ImportService and emitted as <code>import.parsed</code>.</li>
-            <li><strong>Intelligence →</strong> Engines derive sessions and update inventory/storehouse, emitting <code>*.updated</code>, <code>*.created</code>.</li>
-            <li><strong>Automation →</strong> The runtime schedules sessions; completions emit <code>*.completed</code> and domain signals like <code>garden.harvest.logged</code>.</li>
-            <li><strong>Hub export (optional) →</strong> When familyFundMode is enabled, mutation events are formatted and sent to the Hub using existing connectors.</li>
+            <li>
+              <strong>Imports →</strong> External data is normalized by
+              ImportRouter/ImportService and emitted as{" "}
+              <code>import.parsed</code>.
+            </li>
+            <li>
+              <strong>Intelligence →</strong> Engines derive sessions and update
+              inventory/storehouse, emitting <code>*.updated</code>,{" "}
+              <code>*.created</code>.
+            </li>
+            <li>
+              <strong>Automation →</strong> The runtime schedules sessions;
+              completions emit <code>*.completed</code> and domain signals like{" "}
+              <code>garden.harvest.logged</code>.
+            </li>
+            <li>
+              <strong>Hub export (optional) →</strong> When familyFundMode is
+              enabled, mutation events are formatted and sent to the Hub using
+              existing connectors.
+            </li>
           </ul>
         </details>
       </section>

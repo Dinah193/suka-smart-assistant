@@ -1,12 +1,18 @@
 // File: C:\Users\larho\suka-smart-assistant\src\ui\components\scheduling\ResourceConflictModal.jsx
-import React, { useEffect, useMemo, useReducer, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useCallback,
+} from "react";
 import PropTypes from "prop-types";
 
 // 🔌 Shared services (assumed to exist per SSA conventions)
-import eventBus from "../../../services/eventBus";
+import eventBus from "../../../services/events/eventBus";
 import featureFlags from "../../../config/featureFlags";
-import HubPacketFormatter from "../../../hub/HubPacketFormatter";
-import FamilyFundConnector from "../../../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * ResourceConflictModal
@@ -52,7 +58,10 @@ function fmtTimeRange(aISO, bISO) {
     const a = new Date(aISO);
     const b = new Date(bISO);
     const opts = { hour: "2-digit", minute: "2-digit" };
-    return `${a.toLocaleTimeString([], opts)}–${b.toLocaleTimeString([], opts)}`;
+    return `${a.toLocaleTimeString([], opts)}–${b.toLocaleTimeString(
+      [],
+      opts
+    )}`;
   } catch {
     return `${aISO}–${bISO}`;
   }
@@ -77,7 +86,7 @@ function normalizeConflict(conflict) {
       traits: c.resource?.traits || [], // e.g., ["heat","stovetop"], ["adult","lift>50lb"]
     },
     // The overlapping bookings
-    overlaps: Array.isArray(c.overlaps) ? c.overlaps : (c.bookings || []),
+    overlaps: Array.isArray(c.overlaps) ? c.overlaps : c.bookings || [],
     window: {
       start: c.window?.start || c.start || null,
       end: c.window?.end || c.end || null,
@@ -212,8 +221,7 @@ export default function ResourceConflictModal({
       type: "INIT",
       payload: {
         targetBookingId: firstBookingId,
-        offsetMins:
-          (alternatives?.shiftMins && alternatives.shiftMins[0]) || 5,
+        offsetMins: (alternatives?.shiftMins && alternatives.shiftMins[0]) || 5,
         queueOrder: (c.overlaps || []).map((o) => o.bookingId),
       },
     });
@@ -285,10 +293,12 @@ export default function ResourceConflictModal({
     isCompatible(c.resource, r, c.constraints)
   );
 
-  const shiftOptions = (alternatives?.shiftMins || [5, 10, 15, 30]).map((m) => ({
-    value: m,
-    label: `±${m} min`,
-  }));
+  const shiftOptions = (alternatives?.shiftMins || [5, 10, 15, 30]).map(
+    (m) => ({
+      value: m,
+      label: `±${m} min`,
+    })
+  );
 
   return (
     <div
@@ -328,7 +338,9 @@ export default function ResourceConflictModal({
           <StrategySelector
             strategies={STRATEGIES}
             value={form.strategyKey}
-            onChange={(v) => dispatch({ type: "SET", key: "strategyKey", value: v })}
+            onChange={(v) =>
+              dispatch({ type: "SET", key: "strategyKey", value: v })
+            }
           />
         </section>
 
@@ -337,7 +349,9 @@ export default function ResourceConflictModal({
           <BookingPicker
             overlaps={c.overlaps}
             value={form.targetBookingId}
-            onChange={(v) => dispatch({ type: "SET", key: "targetBookingId", value: v })}
+            onChange={(v) =>
+              dispatch({ type: "SET", key: "targetBookingId", value: v })
+            }
           />
 
           {form.strategyKey === "shift" && (
@@ -345,8 +359,12 @@ export default function ResourceConflictModal({
               options={shiftOptions}
               offsetMins={form.offsetMins}
               direction={form.offsetDirection}
-              onOffsetChange={(v) => dispatch({ type: "SET", key: "offsetMins", value: Number(v) })}
-              onDirectionChange={(v) => dispatch({ type: "SET", key: "offsetDirection", value: v })}
+              onOffsetChange={(v) =>
+                dispatch({ type: "SET", key: "offsetMins", value: Number(v) })
+              }
+              onDirectionChange={(v) =>
+                dispatch({ type: "SET", key: "offsetDirection", value: v })
+              }
             />
           )}
 
@@ -355,14 +373,18 @@ export default function ResourceConflictModal({
               current={c.resource}
               options={reassignables}
               value={form.targetResourceId}
-              onChange={(v) => dispatch({ type: "SET", key: "targetResourceId", value: v })}
+              onChange={(v) =>
+                dispatch({ type: "SET", key: "targetResourceId", value: v })
+              }
             />
           )}
 
           {form.strategyKey === "split" && (
             <SplitControls
               ratio={form.splitRatio}
-              onChange={(v) => dispatch({ type: "SET", key: "splitRatio", value: Number(v) })}
+              onChange={(v) =>
+                dispatch({ type: "SET", key: "splitRatio", value: Number(v) })
+              }
             />
           )}
 
@@ -377,7 +399,9 @@ export default function ResourceConflictModal({
           {form.strategyKey === "parallel" && (
             <ParallelControls
               value={form.guardNote}
-              onChange={(v) => dispatch({ type: "SET", key: "guardNote", value: v })}
+              onChange={(v) =>
+                dispatch({ type: "SET", key: "guardNote", value: v })
+              }
             />
           )}
         </section>
@@ -449,13 +473,17 @@ function SummaryCard({ conflict }) {
   return (
     <div className="rounded-xl border border-slate-200 p-3 bg-slate-50/60">
       <div className="text-sm font-medium text-slate-900">
-        {resource.name} <span className="text-xs text-slate-500">({resource.type})</span>
+        {resource.name}{" "}
+        <span className="text-xs text-slate-500">({resource.type})</span>
       </div>
       <div className="text-xs text-slate-600 mt-1">
         Domain: <span className="font-medium">{domain}</span>
         {window?.start && window?.end && (
           <>
-            {" · "}Window: <span className="font-mono">{fmtTimeRange(window.start, window.end)}</span>
+            {" · "}Window:{" "}
+            <span className="font-mono">
+              {fmtTimeRange(window.start, window.end)}
+            </span>
           </>
         )}
       </div>
@@ -466,9 +494,13 @@ function SummaryCard({ conflict }) {
             className="text-xs text-slate-800 flex items-center justify-between gap-2 bg-white rounded-lg border border-slate-200 px-2 py-1"
           >
             <span className="truncate">
-              <span className="font-medium">{b.label || b.taskName || b.sessionName || "Task"}</span>{" "}
+              <span className="font-medium">
+                {b.label || b.taskName || b.sessionName || "Task"}
+              </span>{" "}
               <span className="text-slate-500">#{b.bookingId}</span>
-              {b.sessionId && <span className="text-slate-500"> · S:{b.sessionId}</span>}
+              {b.sessionId && (
+                <span className="text-slate-500"> · S:{b.sessionId}</span>
+              )}
             </span>
             <span className="font-mono text-[11px] text-slate-700">
               {b.start && b.end ? fmtTimeRange(b.start, b.end) : "unscheduled"}
@@ -523,7 +555,7 @@ function BookingPicker({ overlaps, value, onChange }) {
       >
         {items.map((b) => (
           <option key={b.bookingId} value={b.bookingId}>
-            {(b.label || b.taskName || "Task")} #{b.bookingId}
+            {b.label || b.taskName || "Task"} #{b.bookingId}
           </option>
         ))}
       </select>
@@ -536,7 +568,13 @@ BookingPicker.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-function ShiftControls({ options, offsetMins, direction, onOffsetChange, onDirectionChange }) {
+function ShiftControls({
+  options,
+  offsetMins,
+  direction,
+  onOffsetChange,
+  onDirectionChange,
+}) {
   return (
     <div className="flex items-center flex-wrap gap-2">
       <label className="text-xs text-slate-700">Offset:</label>
@@ -566,7 +604,8 @@ function ShiftControls({ options, offsetMins, direction, onOffsetChange, onDirec
 }
 ShiftControls.propTypes = {
   options: PropTypes.array.isRequired,
-  offsetMins: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  offsetMins: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
   direction: PropTypes.string.isRequired,
   onOffsetChange: PropTypes.func.isRequired,
   onDirectionChange: PropTypes.func.isRequired,
@@ -621,7 +660,9 @@ function SplitControls({ ratio, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         className="text-xs border border-slate-300 rounded-lg px-2 py-1 w-20"
       />
-      <span className="text-[11px] text-slate-600">First part share (0.1–0.9)</span>
+      <span className="text-[11px] text-slate-600">
+        First part share (0.1–0.9)
+      </span>
     </div>
   );
 }
@@ -676,7 +717,7 @@ function QueueControls({ overlaps, order, onChange }) {
               className="flex items-center justify-between gap-2 bg-white rounded-lg border border-slate-200 px-2 py-1"
             >
               <span className="text-xs text-slate-800 truncate">
-                {(b?.label || b?.taskName || "Task")} #{id}
+                {b?.label || b?.taskName || "Task"} #{id}
               </span>
               <span className="flex items-center gap-1">
                 <button
@@ -711,11 +752,17 @@ QueueControls.propTypes = {
 function isCompatible(fromResource, toResource, constraints = {}) {
   if (!toResource || !fromResource) return false;
   // Simple heuristic: match type, and if constraints exist, ensure traits cover them.
-  if (fromResource.type && toResource.type && fromResource.type !== toResource.type) {
+  if (
+    fromResource.type &&
+    toResource.type &&
+    fromResource.type !== toResource.type
+  ) {
     return false;
   }
-  if (constraints.mustBeAdult && !(toResource.traits || []).includes("adult")) return false;
-  if (constraints.minTemp && !(toResource.traits || []).includes("heat")) return false;
+  if (constraints.mustBeAdult && !(toResource.traits || []).includes("adult"))
+    return false;
+  if (constraints.minTemp && !(toResource.traits || []).includes("heat"))
+    return false;
   // More sophisticated matching can be added (capacity, power, rack-level, etc.)
   return true;
 }

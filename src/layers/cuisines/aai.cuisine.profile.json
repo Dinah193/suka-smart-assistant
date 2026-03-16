@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "1.0",
+  "key": "aai",
+  "name": "African American Israelite (AAI) Cuisine",
+  "shortName": "AAI Cuisine",
+  "description": "A Torah-lawful cuisine stream blending African American Southern foodways with West African, Mediterranean, and Sephardic-compatible techniques and flavor logic. Scripture-only food-law constraints; no rabbinic sources.",
+  "streams": [
+    "southern",
+    "west_african",
+    "mediterranean",
+    "sephardic_compatible"
+  ],
+  "principles": {
+    "torahFoodLaw": {
+      "summary": "Use only clean land animals (chew cud + split hoof) and clean fish (fins + scales). Exclude swine, shellfish, scavengers, and blood. Keep this as metadata for SSA enforcement.",
+      "scriptureRefs": [
+        "Leviticus 11",
+        "Deuteronomy 14",
+        "Leviticus 17:10-14"
+      ],
+      "excludeCategories": [
+        "pork",
+        "shellfish",
+        "catfish",
+        "eels",
+        "shark",
+        "ravenousBirds",
+        "blood",
+        "carrion"
+      ],
+      "allowedLandProteins": [
+        "beef",
+        "lamb",
+        "goat",
+        "venison",
+        "bison"
+      ],
+      "allowedPoultryAssumptionNote": "SSA should allow poultry only if the household marks it as clean by their own standard; AAI profile does not require poultry.",
+      "allowedFish": [
+        "salmon",
+        "cod",
+        "tilapia",
+        "trout",
+        "haddock",
+        "snapper"
+      ]
+    },
+    "identityMarkers": [
+      "smoke+grill foundations (Southern + Sahel grill logic)",
+      "stew and pot foundations (beans, okra, greens, bone broths)",
+      "spice-layering (dry rubs + aromatic bases + finishing acids)",
+      "preservation-first thinking (cure/smoke/ferment/can → cook fast)",
+      "plate logic: protein + greens/legume + starch + sauce + fresh crunch"
+    ],
+    "dietModesSupported": [
+      "normal",
+      "keto",
+      "carnivore",
+      "vegetarian",
+      "OMAD"
+    ]
+  },
+  "defaults": {
+    "enabledByDefault": false,
+    "spiceHeatLevel": "medium",
+    "rotation": {
+      "cooldownDays": 7,
+      "avoidSamePrimaryProteinConsecutive": true,
+      "rotateTechniques": true,
+      "rotateSpiceProfiles": true
+    }
+  },
+  "tags": [
+    "torah-safe",
+    "southern",
+    "west-african",
+    "mediterranean",
+    "sephardic-compatible",
+    "preservation",
+    "smoke",
+    "grill",
+    "stew"
+  ]
+}

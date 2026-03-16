@@ -20,10 +20,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import ButcheryWeightCalculatorView from "@/features/calculators/gardenAnimal/ButcheryWeightCalculator.view";
+import ButcheryWeightCalculatorView from "@/features/calculators/gardenAnimal/ButcheryWeightCalculator/ButcheryWeightCalculator.view.jsx";
 
 const CALCULATOR_ID = "gardenAnimal.butcheryWeight";
 
@@ -212,7 +212,8 @@ function requestSessionPlannerSync(result) {
  * @param {AnimalCarcassInput[] | undefined} animals
  */
 function buildAnimalLabel(animals) {
-  if (!Array.isArray(animals) || animals.length === 0) return "Selected animals";
+  if (!Array.isArray(animals) || animals.length === 0)
+    return "Selected animals";
   const bySpecies = animals.reduce((acc, a) => {
     if (!a || !a.species) return acc;
     const key = a.species.toLowerCase();
@@ -499,14 +500,10 @@ export default function ButcheryWeightCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.gardenAnimal.butchery-weight",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.butchery-weight",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -564,9 +561,7 @@ export default function ButcheryWeightCalculatorPage() {
           typeof calcResult.recommendedAction === "string"
             ? calcResult.recommendedAction
             : undefined,
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };
@@ -575,7 +570,10 @@ export default function ButcheryWeightCalculatorPage() {
       emitButcheryWeightCompleted(normalized);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("[butchery-weight.jsx] Butchery Weight calculator error", err);
+      console.error(
+        "[butchery-weight.jsx] Butchery Weight calculator error",
+        err
+      );
       setError(
         err && err.message
           ? err.message

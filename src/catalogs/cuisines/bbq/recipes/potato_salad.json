@@ -1,0 +1,312 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.potato_salad",
+    "type": "recipe",
+    "name": "BBQ Potato Salad (Creamy, Tangy, Make-Ahead)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Classic BBQ-side potato salad: creamy, slightly tangy, with crunchy add-ins.",
+        "Designed to be made ahead and served chilled; improves after resting.",
+        "Supports Southern-style options (sweet relish, mustard-forward) and dill/herb variation."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "side",
+    "mealArchetypes": ["cookout", "smoke_day", "potluck", "meal_prep"],
+    "servingStyles": ["bbq_plate", "buffet", "family_style"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "side",
+      "make_ahead",
+      "cold_side",
+      "potluck_friendly",
+      "starch"
+    ]
+  },
+  "yield": {
+    "servings": 10,
+    "notes": "Serves 8–12 as a side depending on the spread."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 35,
+    "totalMins": 90
+  },
+  "difficulty": "beginner",
+  "equipment": {
+    "minimum": [
+      "equipment.stockpot",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.mixing_bowl"
+    ],
+    "recommended": [
+      "equipment.colander",
+      "equipment.slotted_spoon",
+      "equipment.measuring_spoons",
+      "equipment.measuring_cups"
+    ],
+    "optional": ["equipment.mandoline_optional"]
+  },
+  "allergens": ["eggs"],
+  "ingredients": [
+    {
+      "id": "ingredients.potatoes",
+      "label": "Yukon Gold or red potatoes",
+      "qty": 3,
+      "unit": "lb",
+      "notes": "Waxier potatoes hold shape. Peel if desired (optional). Cut into 3/4-inch chunks.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt (for boiling water)",
+      "qty": 1.5,
+      "unit": "tbsp",
+      "notes": "Season the water well; adjust to taste.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.eggs",
+      "label": "Large eggs",
+      "qty": 5,
+      "unit": "each",
+      "notes": "Hard-boiled; chop or slice for garnish.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.mayonnaise",
+      "label": "Mayonnaise",
+      "qty": 1,
+      "unit": "cup",
+      "notes": "Use a good mayo. For lighter, sub part with Greek yogurt or sour cream.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.yellow_mustard",
+      "label": "Yellow mustard",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Classic BBQ potato salad flavor. Dijon works for a sharper version.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar",
+      "qty": 1.5,
+      "unit": "tbsp",
+      "notes": "Adds tang; can swap with pickle juice for extra bite.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.sugar",
+      "label": "Sugar",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Optional—balances tang (especially if using vinegar-forward BBQ mains).",
+      "optional": true
+    },
+    {
+      "id": "ingredients.celery",
+      "label": "Celery, finely diced",
+      "qty": 2,
+      "unit": "stalk",
+      "notes": "Crunch.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.red_onion",
+      "label": "Red onion, finely diced",
+      "qty": 0.33,
+      "unit": "cup",
+      "notes": "Or use sweet onion. Rinse diced onion under cold water to mellow if desired.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.sweet_pickle_relish",
+      "label": "Sweet pickle relish",
+      "qty": 0.25,
+      "unit": "cup",
+      "notes": "Classic Southern style. Substitute diced dill pickles for less sweet.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.dill_pickle_juice",
+      "label": "Pickle juice (optional)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Use in place of some vinegar for extra punch.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.celery_seed",
+      "label": "Celery seed",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Old-school potato salad note; optional but recommended if you have it.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Paprika",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "For flavor + garnish. Smoked paprika is nice with BBQ.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "To taste.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.garlic_powder",
+      "label": "Garlic powder",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Optional background flavor.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.green_onions",
+      "label": "Green onions, thinly sliced (optional garnish)",
+      "qty": 2,
+      "unit": "each",
+      "optional": true
+    },
+    {
+      "id": "ingredients.fresh_dill",
+      "label": "Fresh dill, chopped (optional herb version)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Swap in for a dill-forward version with dill pickles and Dijon.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.boil_eggs",
+      "title": "Hard-boil the eggs",
+      "body": "Place eggs in a saucepan and cover with cold water by 1 inch. Bring to a boil, cover, and turn off heat. Let sit 10–12 minutes. Transfer to an ice bath, cool, peel, and chop.",
+      "timers": [
+        { "label": "Eggs resting time", "mins": 12 },
+        { "label": "Ice bath cool down", "mins": 5 }
+      ]
+    },
+    {
+      "id": "step.boil_potatoes",
+      "title": "Boil the potatoes",
+      "body": "Add cut potatoes to a large pot and cover with cold water by 1 inch. Salt the water. Bring to a gentle boil and cook until potatoes are fork-tender but not falling apart, about 10–14 minutes depending on size. Drain well.",
+      "timers": [{ "label": "Boil potatoes", "mins": 12 }]
+    },
+    {
+      "id": "step.cool_potatoes",
+      "title": "Cool and season the potatoes",
+      "body": "Let potatoes steam-dry in the colander 2–3 minutes, then spread on a sheet pan to cool 10 minutes. While still warm, sprinkle lightly with a pinch of salt and (optional) a splash of vinegar or pickle juice for better flavor absorption.",
+      "timers": [{ "label": "Potatoes cooling", "mins": 10 }]
+    },
+    {
+      "id": "step.make_dressing",
+      "title": "Mix the dressing",
+      "body": "In a large bowl, whisk mayonnaise, mustard, vinegar (or pickle juice), sugar (optional), celery seed (optional), garlic powder (optional), black pepper, and paprika. Taste and adjust: more mustard for bite, more vinegar for tang, a pinch of salt if needed.",
+      "timers": []
+    },
+    {
+      "id": "step.fold_in",
+      "title": "Fold everything together",
+      "body": "Add cooled potatoes to the bowl. Add celery, onion, relish/pickles if using, and most of the chopped eggs (reserve a little for garnish). Fold gently until coated. Don’t overmix or the potatoes will get gummy.",
+      "timers": []
+    },
+    {
+      "id": "step.chill",
+      "title": "Chill for best flavor",
+      "body": "Cover and refrigerate at least 1 hour (preferably 3–4 hours) to let flavors meld. Before serving, stir gently and adjust seasoning. Garnish with reserved egg, paprika, and green onions if desired.",
+      "timers": [{ "label": "Chill time (minimum)", "mins": 60 }]
+    }
+  ],
+  "pairings": {
+    "mains": [
+      {
+        "id": "cuisines.bbq.recipes.smoked_brisket",
+        "label": "Smoked Brisket"
+      },
+      { "id": "cuisines.bbq.recipes.bbq_ribs", "label": "BBQ Ribs" },
+      { "id": "cuisines.bbq.recipes.pulled_pork", "label": "Pulled Pork" },
+      {
+        "id": "cuisines.bbq.recipes.smoked_chicken",
+        "label": "Smoked Chicken"
+      },
+      { "id": "cuisines.bbq.recipes.bbq_sausage", "label": "BBQ Sausage" },
+      { "id": "cuisines.bbq.recipes.smoked_fish", "label": "Smoked Fish" }
+    ],
+    "sides": [
+      { "id": "cuisines.bbq.recipes.coleslaw", "label": "BBQ Cole Slaw" },
+      { "id": "cuisines.bbq.recipes.baked_beans", "label": "BBQ Baked Beans" }
+    ]
+  },
+  "storage": {
+    "refrigerate": {
+      "instructions": "Store covered in the refrigerator. Keep cold at service; return to fridge promptly.",
+      "maxDays": 4
+    },
+    "notes": "Food safety: avoid leaving out >2 hours (or >1 hour if very hot outside)."
+  },
+  "planner": {
+    "batchable": true,
+    "makeAhead": true,
+    "leftoversFriendly": true,
+    "serveModes": [
+      {
+        "id": "serveMode.bbq_plate",
+        "label": "BBQ Plate Side",
+        "notes": "Classic side for brisket, ribs, pulled pork, smoked chicken, and sausage."
+      },
+      {
+        "id": "serveMode.potluck",
+        "label": "Potluck Bowl",
+        "notes": "Make the night before for best flavor. Keep chilled on ice at outdoor events."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "style_southern_mustard_forward",
+      "notes": [
+        "Increase yellow mustard to 3 tbsp; add 1/2 tsp turmeric for color (optional).",
+        "Use sweet relish + a pinch of sugar for classic sweet-tang balance."
+      ]
+    },
+    {
+      "kind": "style_dill_herb",
+      "notes": [
+        "Swap sweet relish for diced dill pickles; use Dijon instead of yellow mustard.",
+        "Add fresh dill and a splash of pickle juice; reduce sugar or omit."
+      ]
+    },
+    {
+      "kind": "lighter_version",
+      "notes": [
+        "Replace 1/3–1/2 of the mayo with Greek yogurt or sour cream.",
+        "Add extra vinegar/pickle juice to maintain tang."
+      ]
+    },
+    {
+      "kind": "texture_control",
+      "notes": [
+        "Do not overboil: potatoes should be fork-tender but hold shape.",
+        "Fold gently; cool potatoes before mixing to avoid gummy texture."
+      ]
+    }
+  ]
+}

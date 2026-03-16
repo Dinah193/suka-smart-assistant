@@ -26,7 +26,6 @@
 // - You can extend DOMAIN_EXPORT_RULES below to support new SSA domains.
 // -----------------------------------------------------------------------------
 
-
 /* eslint-disable no-console */
 
 const isBrowser = typeof window !== "undefined";
@@ -51,7 +50,7 @@ try {
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
   // eslint-disable-next-line global-require
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -72,19 +71,18 @@ try {
   // optional
 }
 
-
 // ------------------------------ Constants ------------------------------------
 const DB_NAME = "suka-smart-assistant";
 const DB_VERSION = 1;
 
 // We will create logical tables if Dexie is available
 const DEXIE_SCHEMA = {
-  imports: "++id, type, url, createdAt",              // normalized imports
-  sessions: "++id, domain, sessionId, createdAt",     // generated sessions
-  inventory: "++id, key, updatedAt",                  // inventory entries
-  storehouse: "++id, key, updatedAt",                 // pantry / storehouse
-  settings: "key",                                    // app/user prefs
-  cache: "key"                                        // misc
+  imports: "++id, type, url, createdAt", // normalized imports
+  sessions: "++id, domain, sessionId, createdAt", // generated sessions
+  inventory: "++id, key, updatedAt", // inventory entries
+  storehouse: "++id, key, updatedAt", // pantry / storehouse
+  settings: "key", // app/user prefs
+  cache: "key", // misc
 };
 
 // Domains that – when written – should ALSO be piped to Hub (if enabled)
@@ -98,7 +96,6 @@ const DOMAIN_EXPORT_RULES = [
   "preservation",
   // you can add "construction", "logistics", "susu" later
 ];
-
 
 // ------------------------------ Helpers --------------------------------------
 function nowIso() {
@@ -134,13 +131,12 @@ async function exportToHubIfEnabled(domain, action, payload) {
   try {
     await dataGateway.exportIfEnabled(domain, action, payload, {
       source: "storageService",
-      storedAt: nowIso()
+      storedAt: nowIso(),
     });
   } catch (_e) {
     // must fail silently
   }
 }
-
 
 // ------------------------------ Dexie setup ----------------------------------
 let dexieDb = null;
@@ -151,7 +147,6 @@ function initDexie() {
   db.version(DB_VERSION).stores(DEXIE_SCHEMA);
   return db;
 }
-
 
 // ------------------------------ Fallback storage -----------------------------
 // For environments with no Dexie AND no localforage → use localStorage
@@ -181,9 +176,8 @@ const localStorageStore = {
   async clear() {
     if (!isBrowser) return;
     window.localStorage.clear();
-  }
+  },
 };
-
 
 // ------------------------------ Core Service ---------------------------------
 export const storageService = {
@@ -202,7 +196,7 @@ export const storageService = {
     if (localforage) {
       localforage.config({
         name: DB_NAME,
-        storeName: "suka_store"
+        storeName: "suka_store",
       });
       emitSSA("storage.init", { engine: "localforage", dbName: DB_NAME });
       return { engine: "localforage" };
@@ -229,10 +223,14 @@ export const storageService = {
         key,
         value,
         domain,
-        updatedAt: nowIso()
+        updatedAt: nowIso(),
       };
       await table.put(payload);
-      emitSSA("storage.write", { domain, key, size: value ? JSON.stringify(value).length : 0 });
+      emitSSA("storage.write", {
+        domain,
+        key,
+        size: value ? JSON.stringify(value).length : 0,
+      });
 
       // export if householdy
       await exportToHubIfEnabled(domain, "updated", { key, value });
@@ -324,7 +322,11 @@ export const storageService = {
       const table = dexieDb[domain] || dexieDb.cache;
       const all = await table.toArray();
       emitSSA("storage.list", { domain, count: all.length });
-      return all.map((x) => ({ key: x.key, value: x.value, updatedAt: x.updatedAt }));
+      return all.map((x) => ({
+        key: x.key,
+        value: x.value,
+        updatedAt: x.updatedAt,
+      }));
     }
 
     if (localforage) {
@@ -364,7 +366,7 @@ export const storageService = {
         key: it.key,
         value: it.value,
         domain,
-        updatedAt: nowIso()
+        updatedAt: nowIso(),
       }));
       await table.bulkPut(toPut);
       emitSSA("storage.write.bulk", { domain, count: items.length });
@@ -435,7 +437,7 @@ export const storageService = {
     const snapshot = {
       exportedAt: nowIso(),
       engine: dexieDb ? "dexie" : localforage ? "localforage" : "localStorage",
-      data: {}
+      data: {},
     };
 
     if (dexieDb) {
@@ -482,7 +484,10 @@ export const storageService = {
         const arr = snapshot.data[d];
         if (!Array.isArray(arr)) continue;
         // eslint-disable-next-line no-await-in-loop
-        await this.bulkSet(d, arr.map((x) => ({ key: x.key, value: x.value })));
+        await this.bulkSet(
+          d,
+          arr.map((x) => ({ key: x.key, value: x.value }))
+        );
       }
     } else {
       // fallback – import as localStorage prefixes
@@ -503,9 +508,8 @@ export const storageService = {
     }
 
     emitSSA("storage.imported", { domains: Object.keys(snapshot.data || {}) });
-  }
+  },
 };
-
 
 // auto-init in browser so early imports can write
 if (isBrowser) {

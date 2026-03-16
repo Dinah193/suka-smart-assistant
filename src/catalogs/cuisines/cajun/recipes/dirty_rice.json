@@ -1,0 +1,103 @@
+{
+  "id": "cajun_dirty_rice",
+  "name": "Cajun Dirty Rice",
+  "servings": 6,
+  "ingredients": [
+    {
+      "item": "long-grain white rice",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "rinsed"
+    },
+    { "item": "chicken stock", "amount": 4, "unit": "cups" },
+
+    { "item": "neutral oil", "amount": 1, "unit": "tbsp" },
+    { "item": "unsalted butter", "amount": 2, "unit": "tbsp" },
+
+    { "item": "ground pork", "amount": 0.5, "unit": "lb" },
+    {
+      "item": "chicken livers",
+      "amount": 0.5,
+      "unit": "lb",
+      "prep": "finely chopped"
+    },
+
+    {
+      "item": "yellow onion",
+      "amount": 1,
+      "unit": "medium",
+      "prep": "finely diced"
+    },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "medium",
+      "prep": "finely diced"
+    },
+    { "item": "celery", "amount": 2, "unit": "stalks", "prep": "finely diced" },
+    { "item": "garlic", "amount": 4, "unit": "cloves", "prep": "minced" },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "Cajun seasoning", "amount": 2, "unit": "tsp" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "black pepper", "amount": 0.75, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 0.5,
+      "unit": "tsp",
+      "prep": "adjust to taste"
+    },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Cook the rice: In a saucepan, bring chicken stock to a boil. Add rinsed rice, reduce heat to low, cover, and cook until tender and liquid is absorbed. Remove from heat and keep covered."
+    },
+    {
+      "order": 2,
+      "text": "Brown the meats: Heat oil and butter in a large skillet over medium-high heat. Add ground pork and cook until browned, breaking it up finely."
+    },
+    {
+      "order": 3,
+      "text": "Add chicken livers: Stir in chopped chicken livers. Cook, stirring frequently, until they break down and coat the meat mixture, forming the characteristic dark color."
+    },
+    {
+      "order": 4,
+      "text": "Saute the trinity: Add onion, bell pepper, and celery. Cook until very soft and aromatic. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 5,
+      "text": "Season: Stir in bay leaves, Cajun seasoning, thyme, paprika, black pepper, salt, Worcestershire sauce, and optional hot sauce. Cook 1–2 minutes to bloom spices."
+    },
+    {
+      "order": 6,
+      "text": "Combine with rice: Add cooked rice to the skillet. Fold gently until evenly coated and heated through. Adjust seasoning as needed."
+    },
+    {
+      "order": 7,
+      "text": "Finish and serve: Remove bay leaves. Garnish with green onions and parsley. Serve hot as a main dish or side."
+    }
+  ]
+}

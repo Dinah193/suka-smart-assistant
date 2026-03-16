@@ -37,7 +37,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -48,7 +48,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -77,25 +79,29 @@ export function initCleaningAdapter() {
   }
 
   // Main glue: when cleaning engines request a session, map and emit draft
-  eventBus.on(Events?.CLEANING_REQUEST_SESSION || "cleaning/requestSession", ({ data }) => {
-    try {
-      const draft = mapCleaningToSession(data);
-      emit(Events?.CLEANING_DRAFT_READY || "cleaning/draftReady", { draft });
-      // optional hub mirror (creating a draft is a household data change)
-      exportToHubIfEnabled({
-        type: "cleaning/draftReady",
-        ts: new Date().toISOString(),
-        source: "adapter.cleaning",
-        data: { draft },
-      });
-    } catch (e) {
-      emit(Events?.SESSION_ERROR || "session/error", {
-        domain: "cleaning",
-        error: String(e?.message || e),
-        input: safeSmall(data),
-      });
-    }
-  }, { priority: 1 });
+  eventBus.on(
+    Events?.CLEANING_REQUEST_SESSION || "cleaning/requestSession",
+    ({ data }) => {
+      try {
+        const draft = mapCleaningToSession(data);
+        emit(Events?.CLEANING_DRAFT_READY || "cleaning/draftReady", { draft });
+        // optional hub mirror (creating a draft is a household data change)
+        exportToHubIfEnabled({
+          type: "cleaning/draftReady",
+          ts: new Date().toISOString(),
+          source: "adapter.cleaning",
+          data: { draft },
+        });
+      } catch (e) {
+        emit(Events?.SESSION_ERROR || "session/error", {
+          domain: "cleaning",
+          error: String(e?.message || e),
+          input: safeSmall(data),
+        });
+      }
+    },
+    { priority: 1 }
+  );
 }
 
 /**
@@ -118,7 +124,9 @@ export function mapCleaningToSession(input = {}) {
   const steps = deriveSteps(src);
   const zones = deriveZones(src);
   const noisy = inferNoisy(equipment, steps);
-  const outdoor = zones.some(z => /garage|porch|patio|deck|exterior|yard/i.test(z.name || ""));
+  const outdoor = zones.some((z) =>
+    /garage|porch|patio|deck|exterior|yard/i.test(z.name || "")
+  );
 
   // 3) Compose scheduler draft
   /** @type {SchedulerDraft} */
@@ -132,10 +140,10 @@ export function mapCleaningToSession(input = {}) {
     durationMin,
     flexibilityMin: src.flexibilityMin ?? 30,
     window, // { startISO?, endISO? }
-    equipment,      // [{ deviceId?, kind?, title? }]
+    equipment, // [{ deviceId?, kind?, title? }]
     ingredients: consumables, // align with scheduler field name
-    rolesNeeded,    // e.g., [{ role:"cleaner", count:1 }]
-    steps,          // normalized steps with estimates
+    rolesNeeded, // e.g., [{ role:"cleaner", count:1 }]
+    steps, // normalized steps with estimates
     meta: {
       routineId: src.routineId,
       sourceUrl: src.sourceUrl,
@@ -143,7 +151,7 @@ export function mapCleaningToSession(input = {}) {
       tags: src.tags,
       sensitivity: src.sensitivity, // "fragranceFree"|"bleachOk"|...
       zones,
-      hazards: src.hazards,         // e.g., "ammonia", "bleach", "wetFloor"
+      hazards: src.hazards, // e.g., "ammonia", "bleach", "wetFloor"
       priority: src.priority,
       planContext: pick(src, ["planDate", "slot", "dayPart"]),
       quietSensitive: noisy, // hint for calendar/people device placement
@@ -151,7 +159,8 @@ export function mapCleaningToSession(input = {}) {
   };
 
   // 4) Minimal validation
-  if (draft.durationMin <= 0) throw new Error("Invalid duration for cleaning draft");
+  if (draft.durationMin <= 0)
+    throw new Error("Invalid duration for cleaning draft");
 
   return draft;
 }
@@ -186,9 +195,11 @@ function normalizeCleaningInput(x = {}) {
   const meta = x.meta || r.meta || {};
 
   // Flatten tasks; allow [{label, zone, estMin, equipment, consumables}] or string[]
-  const tasks = Array.isArray(r.tasks) ? r.tasks
-             : Array.isArray(checklist.tasks) ? checklist.tasks
-             : [];
+  const tasks = Array.isArray(r.tasks)
+    ? r.tasks
+    : Array.isArray(checklist.tasks)
+    ? checklist.tasks
+    : [];
 
   return {
     routineId: String(r.id || meta.routineId || ""),
@@ -220,31 +231,40 @@ function normalizeCleaningInput(x = {}) {
 function deriveDurationMin(src) {
   if (num(src.totalMin)) return clamp(num(src.totalMin), 5, 8 * 60);
   // Otherwise sum task estimates; fallback 45
-  const sum = (src.tasks || []).reduce((acc, t) => acc + (num(t?.estMin) || 0), 0);
+  const sum = (src.tasks || []).reduce(
+    (acc, t) => acc + (num(t?.estMin) || 0),
+    0
+  );
   return clamp(sum || 45, 5, 8 * 60);
 }
 
 function deriveWindow(src, durationMin) {
   const s = isISO(src.start) ? src.start : null;
-  const e = isISO(src.end) ? src.end : (s ? new Date(Date.parse(s) + durationMin * 60000).toISOString() : null);
+  const e = isISO(src.end)
+    ? src.end
+    : s
+    ? new Date(Date.parse(s) + durationMin * 60000).toISOString()
+    : null;
   if (!s && !e) return undefined;
   return { startISO: s || undefined, endISO: e || undefined };
 }
 
 function deriveEquipment(src) {
   // Normalize to { deviceId?, kind?, title? }
-  const fromHeader = (src.equipment || []).map(eq => ({
+  const fromHeader = (src.equipment || []).map((eq) => ({
     deviceId: eq?.deviceId ? String(eq.deviceId) : undefined,
     kind: eq?.kind ? String(eq.kind) : guessDeviceKind(eq?.name || eq?.title),
     title: eq?.title || eq?.name || undefined,
   }));
 
   // Tasks may add equipment
-  const fromTasks = (src.tasks || []).flatMap(t => arr(t.equipment).map(eq => ({
-    deviceId: eq?.deviceId ? String(eq.deviceId) : undefined,
-    kind: eq?.kind ? String(eq.kind) : guessDeviceKind(eq?.name || eq?.title),
-    title: eq?.title || eq?.name || undefined,
-  })));
+  const fromTasks = (src.tasks || []).flatMap((t) =>
+    arr(t.equipment).map((eq) => ({
+      deviceId: eq?.deviceId ? String(eq.deviceId) : undefined,
+      kind: eq?.kind ? String(eq.kind) : guessDeviceKind(eq?.name || eq?.title),
+      title: eq?.title || eq?.name || undefined,
+    }))
+  );
 
   // Deduplicate by (deviceId || kind || title)
   const all = [...fromHeader, ...fromTasks];
@@ -253,7 +273,8 @@ function deriveEquipment(src) {
   for (const e of all) {
     const key = e.deviceId || e.kind || e.title;
     if (!key || seen.has(key)) continue;
-    seen.add(key); unique.push(e);
+    seen.add(key);
+    unique.push(e);
   }
   return unique;
 }
@@ -266,11 +287,21 @@ function deriveConsumables(src) {
     const sku = item?.sku ? String(item.sku) : undefined;
     const qty = num(item?.qty || item?.quantity);
     const unit = String(item?.unit || item?.uom || "");
-    return (id || name) ? { id: id || undefined, sku, name: name || undefined, qty: qty || undefined, unit: unit || undefined } : null;
+    return id || name
+      ? {
+          id: id || undefined,
+          sku,
+          name: name || undefined,
+          qty: qty || undefined,
+          unit: unit || undefined,
+        }
+      : null;
   };
 
   const fromHeader = (src.consumables || []).map(normalize).filter(Boolean);
-  const fromTasks = (src.tasks || []).flatMap(t => arr(t.consumables).map(normalize).filter(Boolean));
+  const fromTasks = (src.tasks || []).flatMap((t) =>
+    arr(t.consumables).map(normalize).filter(Boolean)
+  );
   // Dedup by id/sku/name; sum quantities when same id/sku
   const byKey = new Map();
   for (const c of [...fromHeader, ...fromTasks]) {
@@ -278,8 +309,9 @@ function deriveConsumables(src) {
     if (!key) continue;
     const prev = byKey.get(key);
     if (prev) {
-      const a = num(prev.qty) || 0, b = num(c.qty) || 0;
-      byKey.set(key, { ...prev, qty: (a + b) || undefined });
+      const a = num(prev.qty) || 0,
+        b = num(c.qty) || 0;
+      byKey.set(key, { ...prev, qty: a + b || undefined });
     } else {
       byKey.set(key, c);
     }
@@ -294,7 +326,7 @@ function deriveRoles(src) {
   const long = (num(src.totalMin) || 0) > 120 || zonesCount > 5;
   if (long) base.push({ role: "helper", count: 1 });
   // If hazards include bleach/ammonia → require adult
-  if ((src.hazards || []).some(h => /bleach|ammonia|acid/i.test(String(h)))) {
+  if ((src.hazards || []).some((h) => /bleach|ammonia|acid/i.test(String(h)))) {
     base.push({ role: "adult-supervisor", count: 1 });
   }
   return base;
@@ -302,7 +334,10 @@ function deriveRoles(src) {
 
 function deriveSteps(src) {
   // Prefer explicit task list
-  const tasks = Array.isArray(src.tasks) && src.tasks.length ? src.tasks : guessTasksFromZones(src);
+  const tasks =
+    Array.isArray(src.tasks) && src.tasks.length
+      ? src.tasks
+      : guessTasksFromZones(src);
   return tasks.map((t, i) => ({
     idx: i + 1,
     label: String(t?.label || t?.text || t || `Task ${i + 1}`),
@@ -313,26 +348,40 @@ function deriveSteps(src) {
 
 function deriveZones(src) {
   // Normalize zones to { name, priority?, notes? }
-  const zones = (src.zones || []).map(z => ({
-    name: String(z?.name || z || ""),
-    priority: rankPriority(z?.priority || "normal"),
-    notes: z?.notes ? String(z.notes) : undefined,
-  })).filter(z => z.name);
+  const zones = (src.zones || [])
+    .map((z) => ({
+      name: String(z?.name || z || ""),
+      priority: rankPriority(z?.priority || "normal"),
+      notes: z?.notes ? String(z.notes) : undefined,
+    }))
+    .filter((z) => z.name);
 
   // Derive from tasks if empty
   if (!zones.length) {
-    const names = new Set((src.tasks || []).map(t => String(t?.zone || "").trim()).filter(Boolean));
-    return Array.from(names).map(n => ({ name: n, priority: "normal" }));
+    const names = new Set(
+      (src.tasks || []).map((t) => String(t?.zone || "").trim()).filter(Boolean)
+    );
+    return Array.from(names).map((n) => ({ name: n, priority: "normal" }));
   }
   return zones;
 }
 
 function inferNoisy(equipment, steps) {
-  const kinds = new Set((equipment || []).map(e => (e.kind || "").toLowerCase()));
-  const noisyEq = ["vacuum", "shop-vac", "carpet-cleaner", "pressure-washer", "blower"];
-  if (noisyEq.some(k => kinds.has(k))) return true;
+  const kinds = new Set(
+    (equipment || []).map((e) => (e.kind || "").toLowerCase())
+  );
+  const noisyEq = [
+    "vacuum",
+    "shop-vac",
+    "carpet-cleaner",
+    "pressure-washer",
+    "blower",
+  ];
+  if (noisyEq.some((k) => kinds.has(k))) return true;
   // heuristic: steps mention "vacuum", "scrub with machine"
-  const noisyStep = (steps || []).some(s => /vacuum|extractor|machine scrub/i.test(String(s.label || "")));
+  const noisyStep = (steps || []).some((s) =>
+    /vacuum|extractor|machine scrub/i.test(String(s.label || ""))
+  );
   return noisyStep;
 }
 
@@ -351,17 +400,24 @@ function guessDeviceKind(name) {
 function guessTasksFromZones(src) {
   // Provide a generic workflow if tasks aren’t listed
   const zones = deriveZones(src);
-  if (!zones.length) return [{ label: "General tidy + wipe surfaces", estMin: 20 }];
-  return zones.flatMap((z) => ([
+  if (!zones.length)
+    return [{ label: "General tidy + wipe surfaces", estMin: 20 }];
+  return zones.flatMap((z) => [
     { label: `Tidy ${z.name}`, zone: z.name, estMin: 10 },
     { label: `Dust & wipe ${z.name}`, zone: z.name, estMin: 10 },
     { label: `Floors: vacuum/mop ${z.name}`, zone: z.name, estMin: 10 },
-  ]));
+  ]);
 }
 
 function buildTitle(src, zones) {
   const base = src.title || "Cleaning Session";
-  const zoneText = zones && zones.length ? ` • ${zones.slice(0, 3).map(z => z.name).join(", ")}${zones.length > 3 ? "…" : ""}` : "";
+  const zoneText =
+    zones && zones.length
+      ? ` • ${zones
+          .slice(0, 3)
+          .map((z) => z.name)
+          .join(", ")}${zones.length > 3 ? "…" : ""}`
+      : "";
   return `${base}${zoneText}`;
 }
 
@@ -378,22 +434,28 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const pkt = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(pkt);
-  } catch { /* fail-silent */ }
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* --------------------------------- Utils ----------------------------------- */
-function num(n) { return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined; }
+function num(n) {
+  return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined;
+}
 function minutesFrom(v) {
   if (!v && v !== 0) return undefined;
   if (Number.isFinite(v)) return v;
   const s = String(v).trim().toLowerCase();
   const iso = /^p(t(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?)$/i.exec(s);
   if (iso) {
-    const h = +(iso[2] || 0), m = +(iso[3] || 0), sec = +(iso[4] || 0);
+    const h = +(iso[2] || 0),
+      m = +(iso[3] || 0),
+      sec = +(iso[4] || 0);
     return h * 60 + m + Math.round(sec / 60);
   }
   const hm = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?/.exec(s);
-  if (hm && (hm[1] || hm[2])) return (+(hm[1] || 0)) * 60 + +(hm[2] || 0);
+  if (hm && (hm[1] || hm[2])) return +(hm[1] || 0) * 60 + +(hm[2] || 0);
   const n = +s;
   return Number.isFinite(n) ? n : undefined;
 }
@@ -401,12 +463,19 @@ function clamp(n, lo, hi) {
   const x = Number.isFinite(n) ? n : lo;
   return Math.max(lo, Math.min(hi, x));
 }
-function firstISO(...vals) { return vals.find(isISO) || undefined; }
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
-function arr(v) { return Array.isArray(v) ? v : []; }
+function firstISO(...vals) {
+  return vals.find(isISO) || undefined;
+}
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
+function arr(v) {
+  return Array.isArray(v) ? v : [];
+}
 function pick(obj, keys) {
   const out = {};
-  for (const k of keys) if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
+  for (const k of keys)
+    if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
   return out;
 }
 function rankPriority(v) {
@@ -415,12 +484,16 @@ function rankPriority(v) {
   if (["low", "3"].includes(s)) return "low";
   return "normal";
 }
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function genId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function safeSmall(obj) {
   try {
     const s = JSON.stringify(obj);
     return s && s.length > 2000 ? s.slice(0, 2000) + "…" : s;
-  } catch { return "[unserializable]"; }
+  } catch {
+    return "[unserializable]";
+  }
 }
 
 /* --------------------------------- Exports --------------------------------- */

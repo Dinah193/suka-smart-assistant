@@ -1,0 +1,994 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19",
+  "meta": {
+    "id": "cuisines.ghanaian",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Ghanaian",
+    "shortName": "Ghanaian",
+    "description": "Bold, savory Ghanaian cooking anchored by pepper-forward sauces, palm oil depth, aromatic ginger-garlic bases, fermented corn/cassava staples, smoky fish, and comforting soups/stews served with starches.",
+    "originRegions": ["West Africa"],
+    "regions": ["Ghana"],
+    "primaryCountriesAndIslands": ["Ghana"],
+    "tags": [
+      "cuisine.ghanaian",
+      "cuisine.west_african",
+      "profile.stew_and_starch",
+      "pepper_forward",
+      "palm_oil",
+      "fish_friendly",
+      "fermented_staples",
+      "batch.friendly"
+    ],
+    "icon": "cuisine",
+    "colorHint": "earth_red",
+    "heritageNotes": [
+      "Commonly served as soups and stews paired with starches (swallows, rice, kenkey, banku).",
+      "Pepper sauces (shito, fresh pepper blends) and smoked fish are frequent flavor anchors.",
+      "Fermentation is culturally important in staples like kenkey and banku."
+    ],
+    "author": "Suka Smart Assistant",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19",
+    "status": "canonical",
+    "source": {
+      "curation": "ssa",
+      "maintainer": "Suka Smart Assistant",
+      "license": "proprietary",
+      "attribution": "Curated profile; traditional Ghanaian patterns summarized for SSA planning.",
+      "kind": "curation",
+      "author": "Suka Smart Assistant",
+      "origin": "West Africa (Ghana)",
+      "type": "cuisine_profile",
+      "notes": "Designed as a planner-oriented cuisine profile with pantry tiers, archetypes, and substitution guidance."
+    },
+    "family": {
+      "parent": "cuisines.west_african",
+      "siblings": ["cuisines.nigerian"],
+      "overlapsWith": [
+        {
+          "id": "cuisines.nigerian",
+          "reason": "Shared West African pepper bases, palm oil usage, fish/seafood integration, and stew-and-starch serving patterns."
+        },
+        {
+          "id": "cuisines.creole",
+          "reason": "Overlap in pepper-forward stews, seafood usage, and layered aromatics, though seasoning blends differ."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.ghanaian.akan",
+        "name": "Akan (Ashanti/Fante)",
+        "signatureNotes": "Groundnut soup, palm nut soup, light soup, and fish/seafood stews; often paired with fufu or rice.",
+        "commonSauceBases": [
+          "base.tomato_pepper",
+          "base.palm_nut",
+          "base.groundnut"
+        ]
+      },
+      {
+        "id": "cuisines.ghanaian.ga_dangme",
+        "name": "Ga-Dangme (Greater Accra)",
+        "signatureNotes": "Kenkey and fish, pepper sauces, and okro stews; strong coastal fish traditions.",
+        "commonSauceBases": ["base.tomato_pepper", "base.okro"]
+      },
+      {
+        "id": "cuisines.ghanaian.ewe",
+        "name": "Ewe (Volta)",
+        "signatureNotes": "Banku and tilapia, pepper sauces, and greens-forward soups/stews; smoked fish is frequent.",
+        "commonSauceBases": ["base.tomato_pepper", "base.greens", "base.okro"]
+      }
+    ],
+    "regionHints": ["West Africa", "Ghana"],
+    "countryHints": ["Ghana"]
+  },
+  "notes": [
+    "SSA canonical Ghanaian cuisine profile.",
+    "IDs are lowercase and match ^[a-z0-9_.-]+$.",
+    "Dish archetype defaults must only use allowed keys from schema (no fatOptions/sweetBalanceOptions/spiceOptions)."
+  ],
+  "plannerDefaults": {
+    "servingStyles": [
+      "stew_and_starch",
+      "one_pot",
+      "family_style",
+      "bowls",
+      "holiday_feasts"
+    ],
+    "weeknightBias": "One-pot soups/stews and quick pepper sauces; rely on smoked fish and pantry bases for speed.",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "batch.light_soup_base",
+        "batch.groundnut_soup_base",
+        "batch.palm_nut_soup_base",
+        "batch.shito",
+        "batch.jollof_base"
+      ],
+      "notes": "Many Ghanaian soups and sauces freeze well and reheat successfully; batch bases improve weeknight execution."
+    },
+    "spiceHeatDefault": 3,
+    "saltinessDefault": 3,
+    "sournessDefault": 2,
+    "sweetnessDefault": 1,
+    "umamiDefault": 4,
+    "oilUseDefault": 3,
+    "preferredCookingFats": [
+      "ingredient.palm_oil",
+      "ingredient.peanut_oil",
+      "ingredient.vegetable_oil"
+    ],
+    "primaryStarches": [
+      "ingredient.rice",
+      "ingredient.yam",
+      "ingredient.cassava",
+      "ingredient.plantain_green",
+      "ingredient.cornmeal",
+      "ingredient.gari"
+    ],
+    "primaryProteins": [
+      "ingredient.goat_meat",
+      "ingredient.chicken",
+      "ingredient.beef",
+      "ingredient.fish",
+      "ingredient.smoked_fish",
+      "ingredient.shrimp_dried",
+      "ingredient.eggs"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.soup_and_swallow",
+      "archetype.stew_and_rice",
+      "archetype.grill_and_pepper",
+      "archetype.beans_and_plantain",
+      "archetype.breakfast_porridge"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.stew_and_starch",
+      "plate.soup_and_swallow",
+      "plate.grill_and_sides"
+    ]
+  },
+  "flavorSystem": {
+    "signatureNotes": [
+      "Pepper-forward sauces (fresh pepper blends and shito) balanced by aromatics and savory depth from smoked fish or dried seafood.",
+      "Palm oil and groundnut-based soups provide richness; ginger-garlic-onion is a common aromatic backbone.",
+      "Fermented staples (kenkey, banku) and smoked proteins create a layered, comforting profile."
+    ],
+    "aromaticsCore": [
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.ginger",
+      "ingredient.scallions"
+    ],
+    "spiceCore": [
+      "ingredient.black_pepper",
+      "ingredient.white_pepper",
+      "ingredient.cayenne",
+      "ingredient.paprika",
+      "ingredient.clove",
+      "ingredient.nutmeg"
+    ],
+    "umamiBuilders": [
+      "ingredient.smoked_fish",
+      "ingredient.dried_shrimp",
+      "ingredient.stockfish",
+      "ingredient.bouillon",
+      "ingredient.fermented_seasoning"
+    ],
+    "acidOptions": [
+      "ingredient.lime",
+      "ingredient.lemon",
+      "ingredient.tomato",
+      "ingredient.tamarind"
+    ],
+    "sweetBalanceOptions": [
+      "ingredient.onion",
+      "ingredient.ripe_plantain",
+      "ingredient.corn",
+      "ingredient.sweet_potato"
+    ],
+    "heatOptions": [
+      "ingredient.scotch_bonnet",
+      "ingredient.habanero",
+      "ingredient.chili_flakes"
+    ]
+  },
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum to cook Ghanaian-adjacent meals with common grocery staples and simple substitutions.",
+      "items": [
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.ginger",
+        "ingredient.tomato_paste",
+        "ingredient.tomatoes_canned",
+        "ingredient.peanut_butter_natural",
+        "ingredient.rice",
+        "ingredient.vegetable_oil",
+        "ingredient.black_pepper",
+        "ingredient.salt",
+        "ingredient.bouillon",
+        "ingredient.scotch_bonnet"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry that unlocks the most common Ghanaian soups, stews, and pepper sauces with authentic direction.",
+      "items": [
+        "ingredient.palm_oil",
+        "ingredient.dried_shrimp",
+        "ingredient.smoked_fish",
+        "ingredient.groundnut_paste",
+        "ingredient.cornmeal",
+        "ingredient.gari",
+        "ingredient.plantain_green",
+        "ingredient.yam",
+        "ingredient.cassava",
+        "ingredient.okra",
+        "ingredient.spinach",
+        "ingredient.lime",
+        "ingredient.peanut_oil"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional staples and hard-to-find items that enable more region-specific cooking and deeper authenticity.",
+      "items": [
+        "ingredient.palm_nut_concentrate",
+        "ingredient.fermented_corn_dough",
+        "ingredient.fermented_cassava_dough",
+        "ingredient.kontomire",
+        "ingredient.ayoyo",
+        "ingredient.dawadawa",
+        "ingredient.koobi",
+        "ingredient.keta_school_boys",
+        "ingredient.prekese"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for advanced fidelity, ceremonial dishes, and niche regional preparations.",
+      "items": [
+        "ingredient.shito_base",
+        "ingredient.smomie",
+        "ingredient.akpeteshie",
+        "ingredient.shea_butter_foodgrade"
+      ]
+    }
+  },
+  "techniquesEmphasis": {
+    "primary": [
+      "method.simmer",
+      "method.stew",
+      "method.grill",
+      "method.fry",
+      "method.blend"
+    ],
+    "common": [
+      "method.boil",
+      "method.smoke",
+      "method.braise",
+      "method.toast",
+      "method.ferment"
+    ],
+    "notes": [
+      "Pepper bases are frequently blended and cooked down to remove rawness.",
+      "Soups are built by simmering proteins first, then enriching the broth with tomato/pepper or groundnut/palm nut bases.",
+      "Starch pairings are treated as a co-equal component (soup-and-swallow pattern)."
+    ]
+  },
+  "dishArchetypes": [
+    {
+      "id": "archetype.soup_and_swallow",
+      "label": "Soup and swallow",
+      "description": "A deep, savory soup (groundnut, palm nut, light soup, or okro) paired with a starch base such as fufu, banku, or kenkey.",
+      "commonExamples": [
+        "Groundnut soup + fufu",
+        "Palm nut soup + rice balls/omo tuo",
+        "Light soup + fufu",
+        "Okro stew + banku"
+      ],
+      "defaults": {
+        "starchOptions": [
+          "ingredient.cassava",
+          "ingredient.plantain_green",
+          "ingredient.cornmeal",
+          "ingredient.fermented_corn_dough",
+          "ingredient.fermented_cassava_dough",
+          "ingredient.yam"
+        ],
+        "proteinOptions": [
+          "ingredient.goat_meat",
+          "ingredient.beef",
+          "ingredient.chicken",
+          "ingredient.fish",
+          "ingredient.smoked_fish"
+        ],
+        "greensOptions": ["ingredient.spinach", "ingredient.kontomire"],
+        "baseOptions": [
+          "base.tomato_pepper",
+          "base.groundnut",
+          "base.palm_nut",
+          "base.okro"
+        ],
+        "thickenerOptions": ["ingredient.groundnut_paste", "ingredient.okra"],
+        "garnishOptions": ["condiment.fresh_pepper_sauce", "condiment.shito"]
+      }
+    },
+    {
+      "id": "archetype.stew_and_rice",
+      "label": "Stew and rice",
+      "description": "Tomato-pepper stew or jollof-style rice served with protein and optional fried plantains.",
+      "commonExamples": [
+        "Jollof rice + chicken",
+        "Tomato stew + rice",
+        "Waakye (rice and beans) + shito + sides"
+      ],
+      "defaults": {
+        "riceOptions": ["ingredient.rice"],
+        "proteinOptions": [
+          "ingredient.chicken",
+          "ingredient.beef",
+          "ingredient.fish"
+        ],
+        "sideOptions": ["ingredient.plantain_ripe", "side.salad_simple"],
+        "sauceOptions": ["sauce.tomato_stew", "condiment.shito"]
+      }
+    },
+    {
+      "id": "archetype.grill_and_pepper",
+      "label": "Grill and pepper sauce",
+      "description": "Charred/grilled protein (often fish) served with fresh pepper sauce and a starch (banku/kenkey/rice).",
+      "commonExamples": [
+        "Grilled tilapia + banku + pepper",
+        "Grilled chicken + rice + shito"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "ingredient.fish",
+          "ingredient.chicken",
+          "ingredient.goat_meat"
+        ],
+        "starchOptions": [
+          "ingredient.fermented_corn_dough",
+          "ingredient.fermented_cassava_dough",
+          "ingredient.rice",
+          "ingredient.yam"
+        ],
+        "garnishOptions": [
+          "condiment.fresh_pepper_sauce",
+          "condiment.shito",
+          "ingredient.onion"
+        ]
+      }
+    },
+    {
+      "id": "archetype.beans_and_plantain",
+      "label": "Beans and plantain",
+      "description": "Beans/legumes paired with plantains and spicy condiments; hearty, budget-friendly, and meal-prep friendly.",
+      "commonExamples": [
+        "Red-red (beans stew) + fried plantain",
+        "Gari and beans + shito"
+      ],
+      "defaults": {
+        "legumeOptions": [
+          "ingredient.black_eyed_peas",
+          "ingredient.kidney_beans",
+          "ingredient.pinto_beans"
+        ],
+        "starchOptions": [
+          "ingredient.plantain_ripe",
+          "ingredient.gari",
+          "ingredient.rice"
+        ],
+        "garnishOptions": ["condiment.shito", "ingredient.onion"]
+      }
+    },
+    {
+      "id": "archetype.breakfast_porridge",
+      "label": "Breakfast porridge",
+      "description": "Warm porridges and drinks (e.g., koko) often paired with bread or small bites.",
+      "commonExamples": [
+        "Hausa koko (spiced millet porridge)",
+        "Corn porridge"
+      ],
+      "defaults": {
+        "grainOptions": ["ingredient.millet", "ingredient.cornmeal"],
+        "garnishOptions": [
+          "ingredient.ginger",
+          "ingredient.clove",
+          "ingredient.nutmeg"
+        ],
+        "pairings": ["side.bread", "side.koose"]
+      }
+    }
+  ],
+  "ingredientPreferences": {
+    "preferred": [
+      "ingredient.palm_oil",
+      "ingredient.groundnut_paste",
+      "ingredient.peanut_butter_natural",
+      "ingredient.smoked_fish",
+      "ingredient.dried_shrimp",
+      "ingredient.ginger",
+      "ingredient.garlic",
+      "ingredient.onion",
+      "ingredient.scotch_bonnet",
+      "ingredient.tomato_paste",
+      "ingredient.okra"
+    ],
+    "optional_traditional": [
+      "ingredient.palm_nut_concentrate",
+      "ingredient.prekese",
+      "ingredient.dawadawa",
+      "ingredient.koobi",
+      "ingredient.kontomire",
+      "ingredient.ayoyo"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid.heavy_cream",
+        "label": "Heavy cream",
+        "reason": "Not typical in Ghanaian savory profiles; can mute pepper-and-smoke character. If needed, use small amounts of coconut milk in specific dishes."
+      },
+      {
+        "id": "avoid.excess_soy_sauce",
+        "label": "Excess soy sauce",
+        "reason": "Not a core seasoning driver; bouillon/dried seafood and long simmering provide the expected umami."
+      }
+    ]
+  },
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredient.goat_meat",
+        "options": ["ingredient.beef", "ingredient.lamb", "ingredient.chicken"],
+        "notes": "Goat is classic for many soups; beef/lamb give similar depth; chicken shortens cook time."
+      },
+      {
+        "for": "ingredient.smoked_fish",
+        "options": [
+          "ingredient.fish",
+          "ingredient.canned_mackerel",
+          "ingredient.dried_shrimp"
+        ],
+        "notes": "If smoked fish is unavailable, use firm fresh fish and reinforce umami with dried shrimp or a small amount of bouillon."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "ingredient.fermented_corn_dough",
+        "options": [
+          "ingredient.cornmeal",
+          "ingredient.gari",
+          "ingredient.rice"
+        ],
+        "notes": "Kenkey/banku are fermented; if unavailable, serve soup/stew with rice, boiled yam, or a simple cornmeal starch."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ingredient.palm_nut_concentrate",
+        "options": ["ingredient.palm_oil", "base.tomato_pepper"],
+        "notes": "Palm nut concentrate is distinct; when missing, shift to palm-oil pepper stew or groundnut soup patterns rather than forcing an imitation."
+      },
+      {
+        "for": "ingredient.groundnut_paste",
+        "options": ["ingredient.peanut_butter_natural"],
+        "notes": "Natural peanut butter works well; avoid sweetened peanut butter."
+      }
+    ],
+    "notes": [
+      "Ghanaian cooking tolerates practical substitutions as long as the aromatic base (onion/ginger/garlic), pepper heat, and umami (smoked fish/dried seafood) remain present."
+    ]
+  },
+  "mealTemplates": [
+    {
+      "id": "template.groundnut_soup_fufu",
+      "label": "Groundnut soup + fufu",
+      "archetypeId": "archetype.soup_and_swallow",
+      "components": [
+        {
+          "role": "stew_base",
+          "ingredientIds": ["base.groundnut", "base.tomato_pepper"],
+          "chooseOne": false,
+          "notes": "Groundnut soup often starts with a tomato/pepper base then enriches with groundnut paste."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.goat_meat",
+            "ingredient.beef",
+            "ingredient.chicken"
+          ],
+          "chooseOne": true,
+          "notes": "Goat or beef for depth; chicken for faster weeknight version."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "ingredient.cassava",
+            "ingredient.plantain_green",
+            "ingredient.yam"
+          ],
+          "chooseOne": true,
+          "notes": "Fufu is often a cassava/plantain blend; yam-based swallow also pairs well."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": ["condiment.fresh_pepper_sauce", "condiment.shito"],
+          "chooseOne": true,
+          "notes": "Serve pepper sauce on the side to let diners control heat."
+        }
+      ],
+      "prepNotes": [
+        "Batch cook groundnut base and freeze in 2-cup portions.",
+        "Cook protein first to build stock; add base after meat is tender."
+      ]
+    },
+    {
+      "id": "template.grilled_tilapia_banku_pepper",
+      "label": "Grilled fish + banku/kenkey + pepper",
+      "archetypeId": "archetype.grill_and_pepper",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": ["ingredient.fish"],
+          "chooseOne": false,
+          "notes": "Tilapia is classic; any firm fish works."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "ingredient.fermented_corn_dough",
+            "ingredient.fermented_cassava_dough",
+            "ingredient.rice"
+          ],
+          "chooseOne": true,
+          "notes": "Banku/kenkey if available; rice is the common fallback."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": ["condiment.fresh_pepper_sauce"],
+          "chooseOne": false,
+          "notes": "Fresh pepper sauce with onions and citrus is the hallmark pairing."
+        }
+      ],
+      "prepNotes": [
+        "Blend pepper sauce and store 3–4 days refrigerated.",
+        "Marinate fish with aromatics; grill hot for charred edges."
+      ]
+    },
+    {
+      "id": "template.red_red_plantain",
+      "label": "Red-red (beans stew) + fried plantain",
+      "archetypeId": "archetype.beans_and_plantain",
+      "components": [
+        {
+          "role": "legume",
+          "ingredientIds": [
+            "ingredient.black_eyed_peas",
+            "ingredient.kidney_beans"
+          ],
+          "chooseOne": true,
+          "notes": "Use cooked beans; stew builds flavor with palm oil and pepper base."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["ingredient.plantain_ripe"],
+          "chooseOne": false,
+          "notes": "Ripe plantains are key for sweet balance."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": ["condiment.shito"],
+          "chooseOne": false,
+          "notes": "Shito adds smoky heat."
+        }
+      ],
+      "prepNotes": [
+        "Batch cook beans; refrigerate or freeze in meal portions.",
+        "Fry plantains fresh for best texture; air-fry is an acceptable shortcut."
+      ]
+    }
+  ],
+  "safetyNotes": [
+    {
+      "id": "safety.smoked_fish_bones",
+      "label": "Smoked fish and dried seafood bones",
+      "notes": [
+        "Rinse smoked fish and dried seafood; remove visible bones before adding to soups/stews.",
+        "When serving, warn diners if small bones may remain."
+      ]
+    },
+    {
+      "id": "safety.pepper_handling",
+      "label": "Hot pepper handling",
+      "notes": [
+        "Use gloves when handling scotch bonnet/habanero; avoid touching eyes/face.",
+        "For milder heat, add pepper whole and remove after simmering."
+      ]
+    },
+    {
+      "id": "safety.palm_oil_storage",
+      "label": "Palm oil storage",
+      "notes": [
+        "Store palm oil sealed away from heat and light to reduce rancidity.",
+        "If palm oil smells bitter or stale, discard."
+      ]
+    }
+  ],
+  "searchHints": {
+    "keywords": [
+      "Ghanaian",
+      "Ghana",
+      "West African",
+      "groundnut soup",
+      "light soup",
+      "palm nut soup",
+      "red-red",
+      "waakye",
+      "banku",
+      "kenkey",
+      "shito",
+      "koko"
+    ],
+    "commonAlternateNames": ["Ga", "Akan", "Ashanti", "Fante", "Ewe", "Volta"]
+  },
+  "pantry": {
+    "freshCore": [
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.ginger",
+      "ingredient.tomato",
+      "ingredient.lime",
+      "ingredient.scotch_bonnet",
+      "ingredient.okra",
+      "ingredient.spinach"
+    ],
+    "proteinsCommon": [
+      "ingredient.goat_meat",
+      "ingredient.chicken",
+      "ingredient.beef",
+      "ingredient.fish",
+      "ingredient.smoked_fish",
+      "ingredient.dried_shrimp",
+      "ingredient.eggs"
+    ],
+    "produceCommon": [
+      "ingredient.onion",
+      "ingredient.tomato",
+      "ingredient.bell_pepper",
+      "ingredient.okra",
+      "ingredient.plantain_ripe",
+      "ingredient.plantain_green",
+      "ingredient.yam",
+      "ingredient.cassava",
+      "ingredient.spinach"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ingredient.palm_nut_concentrate",
+        "fallbacks": ["ingredient.palm_oil"],
+        "note": "Palm nut concentrate may be hard to find; favor palm-oil tomato stews and groundnut soups when unavailable."
+      },
+      {
+        "ingredient": "ingredient.kontomire",
+        "fallbacks": ["ingredient.spinach"],
+        "note": "Kontomire (cocoyam leaves) can be substituted with spinach or a spinach/collards mix."
+      },
+      {
+        "ingredient": "ingredient.fermented_corn_dough",
+        "fallbacks": ["ingredient.cornmeal", "ingredient.rice"],
+        "note": "Kenkey/banku require fermented dough; cornmeal starch or rice are common fallbacks outside West Africa."
+      }
+    ]
+  },
+  "techniques": {
+    "coreMethods": [
+      "method.simmer",
+      "method.stew",
+      "method.blend",
+      "method.grill",
+      "method.fry"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.pepper_base_reduce",
+        "name": "Pepper base reduction",
+        "steps": [
+          "step.blend_pepper_onion_tomato",
+          "step.reduce_until_raw_smell_gone",
+          "step.fry_in_oil_or_palm_oil"
+        ],
+        "notes": "Reducing blended pepper/tomato removes rawness and concentrates sweetness before adding proteins or thickeners."
+      },
+      {
+        "id": "process.soup_build_protein_stock",
+        "name": "Soup build with protein stock",
+        "steps": [
+          "step.simmer_protein_with_aromatics",
+          "step.add_base_and_thickeners",
+          "step.finish_with_smoked_fish_or_pepper"
+        ],
+        "notes": "Many Ghanaian soups begin with simmered protein to build a flavorful stock before enrichment."
+      }
+    ],
+    "equipmentAffinity": {
+      "preferred": [
+        "tool.blender",
+        "tool.dutch_oven",
+        "tool.grill",
+        "tool.mortar_pestle"
+      ],
+      "notes": [
+        "A blender is central for pepper bases and soup foundations.",
+        "Charcoal grilling creates hallmark smoky flavor for fish and meats."
+      ]
+    }
+  },
+  "equipment": {
+    "recommended": [
+      "tool.blender",
+      "tool.dutch_oven",
+      "tool.skilet_large",
+      "tool.grill"
+    ],
+    "optionalButHelpful": [
+      "tool.pressure_cooker",
+      "tool.mortar_pestle",
+      "tool.steamer"
+    ],
+    "notes": [
+      "Pressure cooker speeds up goat/beef for soups.",
+      "Mortar and pestle is useful for traditional pepper and spice pastes."
+    ]
+  },
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.fish",
+      "allergen.shellfish",
+      "allergen.peanut"
+    ],
+    "dietCompatibility": {
+      "gluten_free": "Many core dishes are gluten-free when paired with GF starches; confirm processed bouillon and blends.",
+      "dairy_free": "Most savory dishes are naturally dairy-free.",
+      "vegetarian": "Possible with beans/groundnut soups and vegetable stews; maintain umami with mushrooms/fermented seasonings."
+    }
+  },
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.groundnut_soup",
+        "name": "Groundnut Soup",
+        "subprofiles": ["cuisines.ghanaian.akan"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Peanut-forward soup often built on a pepper-tomato base with goat, chicken, or beef."
+      },
+      {
+        "id": "dish.light_soup",
+        "name": "Light Soup",
+        "subprofiles": ["cuisines.ghanaian.akan", "cuisines.ghanaian.ewe"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Peppery, aromatic soup often served with fufu."
+      },
+      {
+        "id": "dish.palm_nut_soup",
+        "name": "Palm Nut Soup",
+        "subprofiles": ["cuisines.ghanaian.akan"],
+        "difficulty": "advanced",
+        "heatTypical": 3,
+        "notes": "Rich palm fruit soup; often paired with rice balls (omo tuo) or fufu."
+      },
+      {
+        "id": "dish.red_red",
+        "name": "Red-Red (Beans Stew)",
+        "subprofiles": ["cuisines.ghanaian.akan"],
+        "difficulty": "beginner",
+        "heatTypical": 2,
+        "notes": "Beans stew commonly served with fried ripe plantains."
+      },
+      {
+        "id": "dish.waakye",
+        "name": "Waakye",
+        "subprofiles": [
+          "cuisines.ghanaian.ga_dangme",
+          "cuisines.ghanaian.akan"
+        ],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Rice and beans meal served with shito and assorted sides."
+      },
+      {
+        "id": "dish.grilled_tilapia_banku",
+        "name": "Grilled Tilapia with Banku/Kenkey and Pepper",
+        "subprofiles": ["cuisines.ghanaian.ga_dangme"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Charred fish with fermented starch and fresh pepper sauce."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.koko",
+        "name": "Hausa Koko (Spiced Millet Porridge)",
+        "subprofiles": [
+          "cuisines.ghanaian.akan",
+          "cuisines.ghanaian.ga_dangme"
+        ],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Warm breakfast porridge often flavored with ginger and spices."
+      }
+    ]
+  },
+  "pairingRules": {
+    "typicalStarches": [
+      "ingredient.cassava",
+      "ingredient.plantain_green",
+      "ingredient.yam",
+      "ingredient.rice",
+      "ingredient.fermented_corn_dough",
+      "ingredient.fermented_cassava_dough",
+      "ingredient.gari"
+    ],
+    "typicalVegSides": ["side.salad_simple", "side.pickled_onion"],
+    "typicalCondiments": ["condiment.shito", "condiment.fresh_pepper_sauce"],
+    "typicalFlavorPairings": [
+      {
+        "with": "dish.groundnut_soup",
+        "pair": [
+          "ingredient.cassava",
+          "ingredient.plantain_green",
+          "ingredient.yam"
+        ],
+        "note": "Groundnut soup pairs best with fufu/swallow textures that carry the rich broth."
+      },
+      {
+        "with": "dish.grilled_tilapia_banku",
+        "pair": [
+          "condiment.fresh_pepper_sauce",
+          "ingredient.onion",
+          "ingredient.lime"
+        ],
+        "note": "Fresh pepper sauce, onions, and citrus brighten grilled fish and fermented starches."
+      },
+      {
+        "with": "dish.red_red",
+        "pair": ["ingredient.plantain_ripe", "condiment.shito"],
+        "note": "Sweet fried plantains balance the savory beans; shito adds smoky heat."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "antipairing.delicate_creamy_sauces",
+        "avoid": ["ingredient.heavy_cream", "sauce.alfredo"],
+        "note": "Creamy dairy-forward sauces generally clash with Ghanaian pepper-smoke profiles; prefer coconut-based richness only where culturally appropriate."
+      }
+    ]
+  },
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.groundnut_paste_to_peanut_butter",
+        "whenMissing": ["ingredient.groundnut_paste"],
+        "use": ["ingredient.peanut_butter_natural"],
+        "notes": "Use unsweetened natural peanut butter as the closest widely-available substitute."
+      },
+      {
+        "id": "sub.kontomire_to_spinach",
+        "whenMissing": ["ingredient.kontomire"],
+        "use": ["ingredient.spinach"],
+        "ratio": 1,
+        "notes": "Spinach is an accessible substitute; mix with collards for a more robust greens profile."
+      },
+      {
+        "id": "sub.palm_nut_concentrate_to_style_shift",
+        "whenMissing": ["ingredient.palm_nut_concentrate"],
+        "use": ["ingredient.palm_oil"],
+        "notes": "Shift toward palm-oil tomato stew or groundnut soup styles rather than attempting an exact palm nut soup replication."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "sub.grill_to_broil_or_pan_sear",
+        "whenNoEquipment": ["tool.grill"],
+        "adapt": "method.broil",
+        "notes": "Use broiler for char; finish with a hot pan sear if needed."
+      }
+    ]
+  },
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.shito",
+        "name": "Shito (black pepper sauce) batch",
+        "makes": "condiment.shito",
+        "freezerFriendly": true,
+        "notes": "Make a large batch; store refrigerated in small jars or freeze in portions."
+      },
+      {
+        "id": "batch.groundnut_soup_base",
+        "name": "Groundnut soup base",
+        "makes": "base.groundnut",
+        "freezerFriendly": true,
+        "notes": "Freeze in 2-cup portions; reheat and add protein/stock as needed."
+      },
+      {
+        "id": "batch.light_soup_base",
+        "name": "Light soup pepper base",
+        "makes": "base.tomato_pepper",
+        "freezerFriendly": true,
+        "notes": "Cook down blended pepper base; freeze for quick weeknight soups."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Keep blended pepper base and shito ready to cut cook time in half.",
+      "Use smoked fish and dried shrimp to add depth quickly without long reductions.",
+      "Pressure cook goat/beef, then finish soups with pepper base and aromatics on the stove."
+    ],
+    "seasonality": [
+      {
+        "season": "season.hot",
+        "focus": ["dish.grilled_tilapia_banku", "condiment.fresh_pepper_sauce"]
+      },
+      {
+        "season": "season.cool",
+        "focus": ["dish.groundnut_soup", "dish.light_soup"]
+      }
+    ]
+  },
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Start here",
+        "items": [
+          "dish.groundnut_soup",
+          "dish.red_red",
+          "dish.grilled_tilapia_banku",
+          "dish.waakye"
+        ]
+      },
+      {
+        "title": "Core condiments",
+        "items": ["condiment.shito", "condiment.fresh_pepper_sauce"]
+      }
+    ],
+    "searchBoostTerms": [
+      "groundnut",
+      "shito",
+      "banku",
+      "kenkey",
+      "waakye",
+      "red-red",
+      "light soup",
+      "palm nut soup",
+      "koko"
+    ],
+    "iconHints": ["icon.pepper", "icon.pot", "icon.fish", "icon.plantain"],
+    "colorHints": {
+      "primary": "earth_red",
+      "secondary": "palm_orange",
+      "accent": "pepper_green"
+    }
+  },
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.ghanaian",
+      "cuisine.west_african",
+      "stew_and_starch",
+      "pepper_forward"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.stew_and_starch",
+      "plate.soup_and_swallow"
+    ],
+    "notes": [
+      "Prefer SSA default plate templates that support stew-and-starch and soup-and-swallow patterns."
+    ]
+  }
+}

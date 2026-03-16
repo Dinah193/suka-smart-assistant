@@ -40,10 +40,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -508,8 +508,7 @@ const BASE_RATIO_TABLES = {
       species: "lamb",
       style: "extra-lean",
       label: "Extra Lean Lamb Sausage",
-      description:
-        "Lean lamb sausage; binder helps avoid crumbly texture.",
+      description: "Lean lamb sausage; binder helps avoid crumbly texture.",
       leanFrac: 0.88,
       fatFrac: 0.12,
       saltFrac: 0.017,
@@ -1149,7 +1148,10 @@ async function fetchCustomRatioProfile(species, style) {
     }
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[animals/sausageRatios] Failed to load custom profile:", err);
+    console.error(
+      "[animals/sausageRatios] Failed to load custom profile:",
+      err
+    );
   }
   return null;
 }
@@ -1172,7 +1174,10 @@ export async function saveCustomRatioProfile(profile) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[animals/sausageRatios] Failed to save custom profile:", err);
+    console.error(
+      "[animals/sausageRatios] Failed to save custom profile:",
+      err
+    );
   }
 }
 
@@ -1346,9 +1351,10 @@ export async function planSausageBatch(speciesInput, batchKg, options = {}) {
     ).toFixed(0)} g.`
   );
   notes.push(
-    `Lean: ${leanKg.toFixed(2)} kg, Fat: ${fatKg.toFixed(
-      2
-    )} kg (approx ${(leanKg / batchKg * 100).toFixed(1)}% lean).`
+    `Lean: ${leanKg.toFixed(2)} kg, Fat: ${fatKg.toFixed(2)} kg (approx ${(
+      (leanKg / batchKg) *
+      100
+    ).toFixed(1)}% lean).`
   );
   notes.push(
     `Salt: ${saltKg.toFixed(2)} kg (~${(
@@ -1363,20 +1369,16 @@ export async function planSausageBatch(speciesInput, batchKg, options = {}) {
 
   if (liquidKg > 0) {
     notes.push(
-      `Liquid/ice: ${liquidKg.toFixed(
-        2
-      )} kg (${(effectiveProfile.liquidFrac * 100).toFixed(
-        1
-      )}% of batch) for protein extraction and texture.`
+      `Liquid/ice: ${liquidKg.toFixed(2)} kg (${(
+        effectiveProfile.liquidFrac * 100
+      ).toFixed(1)}% of batch) for protein extraction and texture.`
     );
   }
   if (binderKg > 0) {
     notes.push(
-      `Binder/emulsifier: ${binderKg.toFixed(
-        2
-      )} kg (${(effectiveProfile.binderFrac * 100).toFixed(
-        1
-      )}% of batch).`
+      `Binder/emulsifier: ${binderKg.toFixed(2)} kg (${(
+        effectiveProfile.binderFrac * 100
+      ).toFixed(1)}% of batch).`
     );
   }
 

@@ -31,7 +31,7 @@
  *   by inspecting `node.domain` or `step.meta`.
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import {
   getIndexedPlanningGraph,
   getNodeById,
@@ -144,7 +144,9 @@ export async function runPlanningFlow(flowDef, options = {}) {
     throw new Error("[planningFlowEngine] flowDef is required");
   }
   if (!Array.isArray(flowDef.steps) || flowDef.steps.length === 0) {
-    throw new Error("[planningFlowEngine] flowDef.steps must be a non-empty array");
+    throw new Error(
+      "[planningFlowEngine] flowDef.steps must be a non-empty array"
+    );
   }
 
   const { signal, context = {}, onStepLifecycle } = options;
@@ -169,7 +171,10 @@ export async function runPlanningFlow(flowDef, options = {}) {
     }
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.warn("[planningFlowEngine] Failed to load Planning Graph index", err);
+    console.warn(
+      "[planningFlowEngine] Failed to load Planning Graph index",
+      err
+    );
   }
 
   for (let i = 0; i < flowDef.steps.length; i++) {
@@ -177,7 +182,14 @@ export async function runPlanningFlow(flowDef, options = {}) {
 
     // Respect cancellation
     if (signal?.aborted) {
-      const cancelledResult = buildStepResult(flowDef, step, i, "cancelled", null, null);
+      const cancelledResult = buildStepResult(
+        flowDef,
+        step,
+        i,
+        "cancelled",
+        null,
+        null
+      );
       stepResults.push(cancelledResult);
 
       emitFlowEvent("planningFlow.aborted", {
@@ -323,16 +335,21 @@ async function executeFlowStep({
   const kind = step.kind || "noop";
 
   // Attach node (if available) for domain-aware logic
-  const node = step.nodeId && graphIndex
-    ? getNodeById(graphIndex, step.nodeId)
-    : null;
+  const node =
+    step.nodeId && graphIndex ? getNodeById(graphIndex, step.nodeId) : null;
 
   switch (kind) {
     case "calculator":
       return executeCalculatorStep({ flowDef, step, stepIndex, node, context });
 
     case "sessionTemplate":
-      return executeSessionTemplateStep({ flowDef, step, stepIndex, node, context });
+      return executeSessionTemplateStep({
+        flowDef,
+        step,
+        stepIndex,
+        node,
+        context,
+      });
 
     case "note":
       return executeNoteStep({ flowDef, step, stepIndex, node, context });
@@ -474,13 +491,7 @@ async function executeSessionTemplateStep({
  * @param {PlanningFlowContext} params.context
  * @returns {Promise<{ status: FlowStepStatus, data?: any }>}
  */
-async function executeNoteStep({
-  flowDef,
-  step,
-  stepIndex,
-  node,
-  context,
-}) {
+async function executeNoteStep({ flowDef, step, stepIndex, node, context }) {
   const data = {
     flowId: flowDef.id,
     flowLabel: flowDef.label,

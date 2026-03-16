@@ -3,6 +3,9 @@ import React, { useEffect, useMemo, useState, Suspense } from "react";
 import DashboardSection from "@/components/layout/DashboardSection";
 import RecipeConsolidatorCard from "@/components/home/RecipeConsolidatorCard";
 import HouseholdProfile from "@/components/home/HouseholdProfile";
+import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
+import CuisineProfileCard from "@/components/cuisine/CuisineProfileCard";
+import { getFeatureFlag } from "@/config";
 import { automation } from "@/services/automation/runtime"; // shared automation runtime
 
 /* ✅ QuickAdd (cross-domain) */
@@ -493,6 +496,32 @@ export default function HomePage() {
   };
 
   /* ---------------------------------------------------------------------- */
+  /* ✅ Home-only trigger: Start a Household Session                          */
+  /* - This ONLY triggers from Home.                                         */
+  /* - App.jsx now mounts the SessionRunner host ONLY on "/" so other pages  */
+  /*   cannot auto-open the Session Builder.                                 */
+  /* - We emit session.play.requested; the host will open the builder modal  */
+  /*   or fallback to /:domain/play/:id.                                     */
+  /* ---------------------------------------------------------------------- */
+  const startHouseholdSession = (domain = "cooking") => {
+    const id = (() => {
+      try {
+        return crypto?.randomUUID?.();
+      } catch {
+        return null;
+      }
+    })();
+
+    fire("session.play.requested", {
+      source: "home",
+      domain,
+      id: id || `draft_${Date.now()}`,
+      startMode: "builder",
+      reason: "manual",
+    });
+  };
+
+  /* ---------------------------------------------------------------------- */
   /* recent activity                                                         */
   /* ---------------------------------------------------------------------- */
   const [recent, setRecent] = useState([]);
@@ -822,6 +851,67 @@ export default function HomePage() {
                     Quick Add
                   </button>
 
+                  {/* ✅ HOME-ONLY TRIGGER: Start a Household Session
+                      - No other pages can auto-open it because App.jsx mounts the SessionRunner host ONLY on "/"
+                      - This button is the only trigger and only exists on Home.
+                  */}
+                  <details className="relative">
+                    <summary className="btn btn--ghost" role="button">
+                      Start a Household Session
+                    </summary>
+                    <div
+                      className="card"
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 8px)",
+                        left: 0,
+                        zIndex: 30,
+                        minWidth: 260,
+                        padding: 10,
+                      }}
+                    >
+                      <div
+                        className="text-xs home-muted"
+                        style={{ marginBottom: 8 }}
+                      >
+                        Choose a domain (or start with Cooking by default).
+                      </div>
+                      <div
+                        className="btn-bar"
+                        style={{ flexDirection: "column", gap: 8 }}
+                      >
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => startHouseholdSession("cooking")}
+                        >
+                          🍳 Cooking Session
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => startHouseholdSession("cleaning")}
+                        >
+                          🧼 Cleaning Session
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => startHouseholdSession("garden")}
+                        >
+                          🌿 Garden Session
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => startHouseholdSession("animals")}
+                        >
+                          🐾 Animals Session
+                        </button>
+                      </div>
+                    </div>
+                  </details>
+
                   <HomeActionMenu
                     onMealPlanning={startMealPlanning}
                     onCleaning={startCleaning}
@@ -908,6 +998,16 @@ export default function HomePage() {
               />
             </div>
           </div>
+        </DashboardSection>
+
+        <DashboardSection
+          id="realtime-coordination"
+          title="Realtime Suggestions"
+          subtitle="Live coordination queue and report summary for your active household/family scope."
+          dense
+          tone="alt"
+        >
+          <RealtimeCoordinationPanel />
         </DashboardSection>
 
         {/* BRING THINGS INTO YOUR HOUSEHOLD */}
@@ -1401,6 +1501,42 @@ export default function HomePage() {
             )}
           </ul>
         </DashboardSection>
+
+        {getFeatureFlag("cuisineProfiles.enabled") !== false &&
+        getFeatureFlag("cuisineProfiles.enableCuisineProfilesUI") !== false &&
+        getFeatureFlag("cuisineProfiles.enableAAICuisineProfile") !== false ? (
+          <DashboardSection title="Cuisine">
+            <div className="grid lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-1">
+                <CuisineProfileCard
+                  householdId="default"
+                  cuisineKey="aai"
+                  onOpenPreferences={() => {}}
+                />
+              </div>
+              <div className="lg:col-span-2 card">
+                <div className="text-sm font-semibold">
+                  AAI Cuisine is ready to drive meal planning rhythms
+                </div>
+                <div className="text-xs text-[hsl(var(--text-subtle))] mt-1">
+                  Deterministic “random-like” rotation, spice matrix, technique
+                  overlaps, and scripture-only feast-day suggestions.
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    className="btn btn--primary btn--sm"
+                    href="/household/meals"
+                  >
+                    Open Meals • Cuisine
+                  </a>
+                  <span className="chip">Rotation + cooldowns</span>
+                  <span className="chip">Preservation crosslinks</span>
+                  <span className="chip">Explainability</span>
+                </div>
+              </div>
+            </div>
+          </DashboardSection>
+        ) : null}
 
         {/* ✅ Mount QuickAddModal once (Home is OK; App root is even better later) */}
         <QuickAddModal />

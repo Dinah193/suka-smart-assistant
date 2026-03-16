@@ -50,7 +50,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -83,9 +83,16 @@ function isoNow() {
 
 function uuid(prefix = "calf") {
   try {
-    return globalThis?.crypto?.randomUUID?.() || `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return (
+      globalThis?.crypto?.randomUUID?.() ||
+      `${prefix}_${Date.now().toString(36)}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+    );
   } catch {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 }
 
@@ -98,20 +105,31 @@ function emit(type, data) {
 }
 
 async function exportToHubIfEnabled(payload) {
-  if (!featureFlags?.familyFundMode || !HubPacketFormatter || !FamilyFundConnector) return;
+  if (
+    !featureFlags?.familyFundMode ||
+    !HubPacketFormatter ||
+    !FamilyFundConnector
+  )
+    return;
   try {
-    const packet = HubPacketFormatter.formatCalibrationChange?.(payload) || payload;
+    const packet =
+      HubPacketFormatter.formatCalibrationChange?.(payload) || payload;
     await FamilyFundConnector.send?.(packet);
   } catch (err) {
     // Silent fail by design
-    console.warn("[CalibrationRepo] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[CalibrationRepo] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
 function ensureDB() {
   const ok = db && typeof db === "object" && db.calibrationFactors;
   if (!ok) {
-    throw new Error("Dexie table 'calibrationFactors' is required. Ensure '@/db' defines it.");
+    throw new Error(
+      "Dexie table 'calibrationFactors' is required. Ensure '@/db' defines it."
+    );
   }
 }
 
@@ -130,16 +148,19 @@ function normalizeScope(scope = {}) {
     "deviceId",
     "roomId",
     "domain",
-    "method",     // e.g., "roast", "boil", "mop", "sanitize", "till"
+    "method", // e.g., "roast", "boil", "mop", "sanitize", "till"
     "ingredient", // e.g., "goat_shoulder", "glass", "tile", "soil_clay"
     "recipeId",
-    "model",      // e.g., appliance model, sensor model
+    "model", // e.g., appliance model, sensor model
   ];
   const out = {};
   for (const k of keep) {
     const v = scope?.[k];
-    if (v === undefined || v === null) { out[k] = null; continue; }
-    out[k] = typeof v === "string" ? (v.trim() || null) : v;
+    if (v === undefined || v === null) {
+      out[k] = null;
+      continue;
+    }
+    out[k] = typeof v === "string" ? v.trim() || null : v;
   }
   return out;
 }
@@ -153,7 +174,8 @@ function normalizeScope(scope = {}) {
  *  - confidence: heuristic 0..1 about trust in this factor
  */
 function normalizeFactor(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid factor payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid factor payload." };
 
   const now = isoNow();
   const key = String(input.key || "").trim();
@@ -206,7 +228,17 @@ function inferUnitFromKey(key) {
  * Precedence from most specific → general (left earlier = stronger):
  * [ deviceId, resourceId, roomId, recipeId, ingredient, method, domain, model, householdId, (global nulls) ]
  */
-const PRECEDENCE = ["deviceId", "resourceId", "roomId", "recipeId", "ingredient", "method", "domain", "model", "householdId"];
+const PRECEDENCE = [
+  "deviceId",
+  "resourceId",
+  "roomId",
+  "recipeId",
+  "ingredient",
+  "method",
+  "domain",
+  "model",
+  "householdId",
+];
 
 /**
  * scoreSpecificity(scope, target)
@@ -242,7 +274,15 @@ const CalibrationRepo = {
 
     // Attempt to find an existing row for same key + exact scope match
     const existing = await this._findExact(rec.key, rec.scope);
-    const toSave = existing ? { ...existing, ...rec, id: existing.id, createdAt: existing.createdAt, updatedAt: isoNow() } : rec;
+    const toSave = existing
+      ? {
+          ...existing,
+          ...rec,
+          id: existing.id,
+          createdAt: existing.createdAt,
+          updatedAt: isoNow(),
+        }
+      : rec;
 
     try {
       await db.calibrationFactors.put(toSave);
@@ -256,8 +296,14 @@ const CalibrationRepo = {
         note: "setFactor",
       });
 
-      const payload = { action: existing ? "factor.update" : "factor.create", factor: toSave };
-      emit(existing ? "calibration.factor_updated" : "calibration.factor_created", payload);
+      const payload = {
+        action: existing ? "factor.update" : "factor.create",
+        factor: toSave,
+      };
+      emit(
+        existing ? "calibration.factor_updated" : "calibration.factor_created",
+        payload
+      );
       await exportToHubIfEnabled(payload);
       return { ok: true, data: toSave };
     } catch (err) {
@@ -271,7 +317,8 @@ const CalibrationRepo = {
    */
   async setFactors(list = []) {
     ensureDB();
-    if (!Array.isArray(list) || !list.length) return { ok: false, error: "Nothing to set." };
+    if (!Array.isArray(list) || !list.length)
+      return { ok: false, error: "Nothing to set." };
     const normalized = [];
     for (const f of list) {
       const n = normalizeFactor(f);
@@ -284,13 +331,27 @@ const CalibrationRepo = {
       const toSave = [];
       for (const rec of normalized) {
         const ex = await this._findExact(rec.key, rec.scope);
-        toSave.push(ex ? { ...ex, ...rec, id: ex.id, createdAt: ex.createdAt, updatedAt: isoNow() } : rec);
+        toSave.push(
+          ex
+            ? {
+                ...ex,
+                ...rec,
+                id: ex.id,
+                createdAt: ex.createdAt,
+                updatedAt: isoNow(),
+              }
+            : rec
+        );
       }
 
       await db.calibrationFactors.bulkPut(toSave);
 
       for (let i = 0; i < toSave.length; i++) {
-        const ex = await this._findExact(toSave[i].key, toSave[i].scope, toSave[i].id);
+        const ex = await this._findExact(
+          toSave[i].key,
+          toSave[i].scope,
+          toSave[i].id
+        );
         await this._appendHistorySafe({
           factorId: toSave[i].id,
           key: toSave[i].key,
@@ -302,7 +363,11 @@ const CalibrationRepo = {
         });
       }
 
-      const payload = { action: "factor.bulk_upsert", count: toSave.length, keys: toSave.map(f => f.key) };
+      const payload = {
+        action: "factor.bulk_upsert",
+        count: toSave.length,
+        keys: toSave.map((f) => f.key),
+      };
       emit("calibration.factors_bulk_upserted", payload);
       await exportToHubIfEnabled(payload);
       return { ok: true, data: toSave.map((r) => r.id) };
@@ -359,9 +424,27 @@ const CalibrationRepo = {
       }
     }
 
-    if (!best) return { ok: true, data: { key, value: defaultValue, unit: inferUnitFromKey(key) || null, source: "default" } };
+    if (!best)
+      return {
+        ok: true,
+        data: {
+          key,
+          value: defaultValue,
+          unit: inferUnitFromKey(key) || null,
+          source: "default",
+        },
+      };
 
-    return { ok: true, data: { key: best.key, value: best.value, unit: best.unit || null, source: "calibration", factor: best } };
+    return {
+      ok: true,
+      data: {
+        key: best.key,
+        value: best.value,
+        unit: best.unit || null,
+        source: "calibration",
+        factor: best,
+      },
+    };
   },
 
   /**
@@ -372,8 +455,21 @@ const CalibrationRepo = {
     if (!Array.isArray(items) || !items.length) return { ok: true, data: [] };
     const out = [];
     for (const it of items) {
-      const r = await this.getEffectiveFactor({ key: it.key, scope, defaultValue: it.defaultValue ?? null });
-      out.push(r.ok ? r.data : { key: it.key, value: it.defaultValue ?? null, unit: null, source: "default" });
+      const r = await this.getEffectiveFactor({
+        key: it.key,
+        scope,
+        defaultValue: it.defaultValue ?? null,
+      });
+      out.push(
+        r.ok
+          ? r.data
+          : {
+              key: it.key,
+              value: it.defaultValue ?? null,
+              unit: null,
+              source: "default",
+            }
+      );
     }
     return { ok: true, data: out };
   },
@@ -384,7 +480,14 @@ const CalibrationRepo = {
    *   For offsets: delta = observed - expected  (e.g., oven temp bias)
    *   For scale factors: if key ends with ".scale", delta = observed/expected
    */
-  async recordOutcome({ key, expected, observed, scope = {}, unit = null, learning = {} } = {}) {
+  async recordOutcome({
+    key,
+    expected,
+    observed,
+    scope = {},
+    unit = null,
+    learning = {},
+  } = {}) {
     ensureDB();
     if (expected === undefined || observed === undefined) {
       return { ok: false, error: "expected and observed are required." };
@@ -392,7 +495,7 @@ const CalibrationRepo = {
     const isScale = key.endsWith(".scale") || key.endsWith(".ratio");
     const delta = isScale
       ? safeDiv(observed, expected, 1) // multiplicative
-      : (Number(observed) - Number(expected)); // additive offset
+      : Number(observed) - Number(expected); // additive offset
 
     // Load current factor (or create)
     const current = await this._findExact(key, normalizeScope(scope));
@@ -402,13 +505,19 @@ const CalibrationRepo = {
       ? (1 - alpha) * prev + alpha * delta
       : (1 - alpha) * prev + alpha * delta;
 
-    const confidence = clamp01((current?.confidence ?? 0.5) + (learning.confidenceBoost ?? 0.02));
+    const confidence = clamp01(
+      (current?.confidence ?? 0.5) + (learning.confidenceBoost ?? 0.02)
+    );
 
     const payload = {
       id: current?.id,
       key,
       value: numOr(delta, next), // store the learned param (offset/scale)
-      unit: unit || current?.unit || inferUnitFromKey(key) || (isScale ? "ratio" : null),
+      unit:
+        unit ||
+        current?.unit ||
+        inferUnitFromKey(key) ||
+        (isScale ? "ratio" : null),
       alpha,
       confidence,
       scope: normalizeScope(scope),
@@ -419,7 +528,14 @@ const CalibrationRepo = {
     const saveRes = await this.setFactor(payload);
     if (!saveRes.ok) return saveRes;
 
-    const evt = { action: "factor.learned", key, expected, observed, delta, factor: saveRes.data };
+    const evt = {
+      action: "factor.learned",
+      key,
+      expected,
+      observed,
+      delta,
+      factor: saveRes.data,
+    };
     emit("calibration.factor_learned", evt);
     await exportToHubIfEnabled(evt);
 
@@ -430,7 +546,12 @@ const CalibrationRepo = {
    * decay({ key?, scopeFilter?, toward?, rate? })
    * - Nudges factors toward a target (e.g., regress to neutral) by rate (0..1).
    */
-  async decay({ key = null, scopeFilter = null, toward = null, rate = 0.05 } = {}) {
+  async decay({
+    key = null,
+    scopeFilter = null,
+    toward = null,
+    rate = 0.05,
+  } = {}) {
     ensureDB();
     const list = await this.getFactors({ key, scopeFilter });
     if (!list.ok) return list;
@@ -438,9 +559,15 @@ const CalibrationRepo = {
 
     let changed = 0;
     for (const f of list.data) {
-      const tgt = toward ?? (f.key.endsWith(".scale") || f.key.endsWith(".ratio") ? 1 : 0);
+      const tgt =
+        toward ??
+        (f.key.endsWith(".scale") || f.key.endsWith(".ratio") ? 1 : 0);
       const next = f.value + clamp01(rate) * (tgt - Number(f.value || 0));
-      await db.calibrationFactors.put({ ...f, value: next, updatedAt: isoNow() });
+      await db.calibrationFactors.put({
+        ...f,
+        value: next,
+        updatedAt: isoNow(),
+      });
       await this._appendHistorySafe({
         factorId: f.id,
         key: f.key,
@@ -449,11 +576,18 @@ const CalibrationRepo = {
         delta: diffsafe(f.value, next),
         scope: f.scope,
         note: "decay",
-  });
+      });
       changed++;
     }
 
-    const payload = { action: "factor.decay", count: changed, key, scopeFilter, toward, rate };
+    const payload = {
+      action: "factor.decay",
+      count: changed,
+      key,
+      scopeFilter,
+      toward,
+      rate,
+    };
     emit("calibration.factors_decayed", payload);
     await exportToHubIfEnabled(payload);
     return { ok: true, data: changed };
@@ -501,7 +635,10 @@ const CalibrationRepo = {
   async exportJSON({ key = null, scopeFilter = null } = {}) {
     const res = await this.getFactors({ key, scopeFilter });
     if (!res.ok) return res;
-    return { ok: true, data: JSON.stringify({ exportedAt: isoNow(), items: res.data }, null, 2) };
+    return {
+      ok: true,
+      data: JSON.stringify({ exportedAt: isoNow(), items: res.data }, null, 2),
+    };
   },
 
   /**
@@ -515,7 +652,11 @@ const CalibrationRepo = {
     } catch {
       return { ok: false, error: "Invalid JSON." };
     }
-    const items = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
+    const items = Array.isArray(payload?.items)
+      ? payload.items
+      : Array.isArray(payload)
+      ? payload
+      : [];
     if (!items.length) return { ok: false, error: "Nothing to import." };
     return this.setFactors(items);
   },

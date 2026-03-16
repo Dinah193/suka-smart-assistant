@@ -1,0 +1,441 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.recipes.papa_a_la_huancaina",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Papa a la Huancaína",
+    "subtitle": "Boiled potatoes with creamy ají amarillo cheese sauce",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Classic Peruvian starter/salad: potatoes topped with huancaína sauce, typically served with lettuce, hard-boiled egg, and olives.",
+        "This version includes deterministic substitutions for ají amarillo, queso fresco, and evaporated milk."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Peruvian",
+    "subprofiles": [
+      "cuisines.peruvian",
+      "aji_amarillo_forward",
+      "starter",
+      "salad_plate"
+    ],
+    "category": "appetizer",
+    "mealArchetypes": [
+      "meal_archetype.cold_plate",
+      "meal_archetype.starter",
+      "meal_archetype.side"
+    ],
+    "servingStyles": ["cold", "plated", "salad_style"],
+    "plannerTags": [
+      "cuisine.peruvian",
+      "appetizer",
+      "starter",
+      "cold_plate",
+      "potatoes",
+      "aji_amarillo",
+      "cheese_sauce",
+      "make_ahead",
+      "party_friendly"
+    ]
+  },
+
+  "summary": "A classic Peruvian dish of tender potatoes served cool or room temperature, topped with a silky, slightly spicy ají amarillo cheese sauce, often garnished with egg and olives.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a starter/side; 4 as a light meal."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 20,
+    "totalMins": 40
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": false
+  },
+
+  "tasteProfile": {
+    "primary": ["creamy", "savory", "bright", "mildly_spicy"],
+    "heat": {
+      "typical": 2,
+      "range": [0, 4],
+      "note": "Adjust by the amount/strength of ají amarillo."
+    },
+    "texture": ["silky_sauce", "tender_potatoes"],
+    "balance": ["rich", "slightly_tangy", "pepper_fruity"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.stovetop",
+      "equipment.pot",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.blender_or_food_processor",
+      "equipment.measuring_cups"
+    ],
+    "recommended": [
+      "equipment.fine_mesh_strainer",
+      "equipment.whisk",
+      "equipment.sauce_spatula"
+    ],
+    "optional": [
+      {
+        "id": "equipment.immersion_blender",
+        "label": "Immersion blender",
+        "notes": "Works well if you make the sauce in a tall container."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian"],
+  "allergens": {
+    "common": ["allergen.dairy", "allergen.egg"],
+    "notes": [
+      "Contains dairy (cheese + milk) and egg (garnish).",
+      "Gluten-free if you use gluten-free crackers/bread for the sauce."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.potatoes_yukon_gold",
+      "label": "Yellow potatoes (Yukon gold or similar), scrubbed",
+      "role": "base",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": "Peruvian yellow potatoes are ideal; Yukon gold is the best common substitute."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.5, "unit": "tsp" },
+      "notes": "Includes salt for boiling water and sauce; adjust to taste depending on cheese saltiness."
+    },
+
+    {
+      "id": "ingredient.aji_amarillo_paste",
+      "label": "Ají amarillo paste (or ají amarillo from jar)",
+      "role": "pepper",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Start with 2 tbsp if sensitive to heat or if paste is strong."
+    },
+    {
+      "id": "ingredient.onion_red",
+      "label": "Red onion, roughly chopped",
+      "role": "aromatic",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": "Optional in some home versions; adds bite. If using, blend thoroughly."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic",
+      "role": "aromatic",
+      "optional": true,
+      "amount": { "value": 1, "unit": "clove" },
+      "notes": "Optional; keep minimal so it doesn't dominate."
+    },
+
+    {
+      "id": "ingredient.queso_fresco",
+      "label": "Queso fresco (or mild farmer cheese), crumbled",
+      "role": "dairy",
+      "amount": { "value": 8, "unit": "oz" },
+      "notes": "Substitute: feta (rinse + squeeze dry) or ricotta salata for a tangier profile."
+    },
+    {
+      "id": "ingredient.evaporated_milk",
+      "label": "Evaporated milk",
+      "role": "dairy",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": "Substitute: whole milk + 2 tbsp cream; or half-and-half."
+    },
+    {
+      "id": "ingredient.vegetable_oil",
+      "label": "Neutral oil (or light olive oil)",
+      "role": "emulsifier",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Helps the sauce emulsify and become glossy."
+    },
+
+    {
+      "id": "ingredient.crackers_saltines",
+      "label": "Saltine crackers (or white bread), torn",
+      "role": "thickener",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "For gluten-free, use GF crackers. Bread option: ~1/2 cup soft white bread."
+    },
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Lime juice",
+      "role": "acid",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Optional but brightens; adjust based on cheese tang."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.lettuce",
+      "label": "Leaf lettuce (for plating)",
+      "role": "plating",
+      "optional": true,
+      "amount": { "value": 6, "unit": "leaf" }
+    },
+    {
+      "id": "ingredient.eggs",
+      "label": "Hard-boiled eggs, halved",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 3, "unit": "each" }
+    },
+    {
+      "id": "ingredient.olives_black",
+      "label": "Black olives",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Peruvian botija olives are traditional; use any good black olives."
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.potatoes",
+      "label": "Potatoes",
+      "items": ["ingredient.potatoes_yukon_gold", "ingredient.salt_kosher"]
+    },
+    {
+      "id": "group.huancaina_sauce",
+      "label": "Huancaína sauce",
+      "items": [
+        "ingredient.aji_amarillo_paste",
+        "ingredient.onion_red",
+        "ingredient.garlic",
+        "ingredient.queso_fresco",
+        "ingredient.evaporated_milk",
+        "ingredient.vegetable_oil",
+        "ingredient.crackers_saltines",
+        "ingredient.lime_juice",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "id": "group.garnish",
+      "label": "Traditional garnish (optional)",
+      "items": [
+        "ingredient.lettuce",
+        "ingredient.eggs",
+        "ingredient.olives_black"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_cook_potatoes",
+      "title": "Boil the potatoes",
+      "instructions": [
+        "Place potatoes in a pot and cover with cold water by at least 1 inch.",
+        "Salt the water lightly (about 1 tsp).",
+        "Bring to a boil, then reduce to a steady simmer until potatoes are tender when pierced.",
+        "Drain, cool slightly, then peel (optional) and slice 1/2-inch thick."
+      ],
+      "timers": [{ "label": "Simmer potatoes", "minutes": 18 }],
+      "checks": [
+        "Knife slides into potato with slight resistance (not falling apart).",
+        "Slices hold shape."
+      ]
+    },
+    {
+      "id": "step.002_build_sauce_base",
+      "title": "Blend the sauce base",
+      "instructions": [
+        "Add ají amarillo paste, queso fresco, crackers (or bread), and evaporated milk to a blender.",
+        "Add optional onion and garlic if using.",
+        "Blend until very smooth; scrape down sides as needed."
+      ],
+      "timers": [{ "label": "Blend sauce base", "minutes": 2 }],
+      "checks": ["Sauce is smooth with no cracker chunks."]
+    },
+    {
+      "id": "step.003_emulsify_and_adjust",
+      "title": "Emulsify, season, and adjust thickness",
+      "instructions": [
+        "With blender running on low, drizzle in oil to emulsify and make the sauce glossy.",
+        "Taste and season with remaining salt (start with 1/2 tsp, then adjust).",
+        "Add optional lime juice and black pepper to balance richness.",
+        "If too thick, add 1–2 tbsp milk/water at a time. If too thin, blend in 1–2 more crackers."
+      ],
+      "timers": [{ "label": "Emulsify + adjust", "minutes": 3 }],
+      "checks": [
+        "Sauce coats the back of a spoon (nappe).",
+        "Flavor is creamy, slightly spicy, and balanced (not overly salty)."
+      ]
+    },
+    {
+      "id": "step.004_plate",
+      "title": "Plate and garnish",
+      "instructions": [
+        "Arrange lettuce leaves on a plate (optional).",
+        "Layer sliced potatoes on top.",
+        "Spoon huancaína sauce generously over potatoes.",
+        "Garnish with hard-boiled egg halves and black olives if desired.",
+        "Serve cool or at room temperature."
+      ],
+      "checks": [
+        "Sauce is thick enough to cling to potatoes; plate looks clean and bright."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "peruvian.salsa_criolla",
+      "peruvian.chicha_morada",
+      "light_salad"
+    ],
+    "menuIdeas": [
+      "Starter before lomo saltado or pollo a la brasa",
+      "Side for grilled meats and simple rice"
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "3 days",
+      "notes": "Store sauce separately if possible for best texture; stir before serving."
+    },
+    "makeAhead": {
+      "notes": [
+        "Sauce can be made 24 hours ahead; it thickens in the fridge. Loosen with a splash of milk before serving.",
+        "Potatoes can be boiled ahead; store peeled/sliced covered in the fridge."
+      ]
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Boil and slice potatoes", "mins": 25 },
+      { "task": "Blend and adjust sauce", "mins": 10 },
+      { "task": "Boil eggs (optional)", "mins": 12 }
+    ],
+    "weeknightTips": [
+      "Use pre-cooked potatoes and eggs for a fast plate.",
+      "Make sauce once and use it as a dip/spread for sandwiches or roasted vegetables."
+    ],
+    "scalingNotes": [
+      "Sauce scales linearly; blender needs enough volume—use a smaller jar for half batches."
+    ]
+  },
+
+  "methods": [
+    "technique.boil",
+    "technique.blend",
+    "technique.emulsify",
+    "technique.plating"
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.peruvian",
+    "dishId": "peruvian.papa_a_la_huancaina",
+    "search": {
+      "aliases": [
+        "papa a la huancaina",
+        "huancaina sauce potatoes",
+        "aji amarillo cheese sauce"
+      ],
+      "keywords": [
+        "potatoes",
+        "aji amarillo",
+        "queso fresco",
+        "evaporated milk",
+        "starter",
+        "cold"
+      ]
+    }
+  },
+
+  "notes": [
+    "Ají amarillo varies by brand; some pastes are very salty or very spicy. Adjust salt/heat accordingly.",
+    "If your sauce tastes bitter, the ají paste may be strong—add more cheese/milk and a touch of lime to balance.",
+    "For a more traditional flavor, add a small piece of fresh ají amarillo (seeded) if available and blend well."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.spice_mild",
+      "label": "Very mild version",
+      "when": { "heat": ["low"] },
+      "adapt": {
+        "notes": [
+          "Use 1–2 tbsp ají amarillo paste and increase cheese to 10 oz.",
+          "Add 1–2 tsp lime juice to keep it bright without heat."
+        ]
+      }
+    },
+    {
+      "id": "variation.no_crackers",
+      "label": "No-cracker thickener (bread or potato)",
+      "when": { "restriction": ["no_crackers"] },
+      "adapt": {
+        "notes": [
+          "Use 1/2 cup soft white bread instead of crackers, OR blend in 1/2 of a cooked potato slice to thicken.",
+          "Adjust salt after thickening."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free",
+      "label": "Gluten-free",
+      "when": { "diet": ["gluten_free"] },
+      "adapt": {
+        "notes": [
+          "Use gluten-free crackers as the thickener, or thicken with a small portion of cooked potato.",
+          "Verify ají paste has no gluten-containing additives."
+        ]
+      }
+    },
+    {
+      "id": "variation_sauce_as_dip",
+      "label": "Use as dip/spread",
+      "when": { "use": ["dip"] },
+      "adapt": {
+        "notes": [
+          "Make sauce slightly thicker by adding 2–3 extra crackers.",
+          "Serve with crudités, chips, roasted potatoes, or as a sandwich spread."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Keep sauce refrigerated (dairy). Do not leave at room temperature for extended periods.",
+      "Use clean utensils to avoid cross-contamination when serving buffet-style."
+    ]
+  }
+}

@@ -6,8 +6,8 @@
 // ✅ UPDATED (Shopping Mode): adds Shopping schedule remap + shopping scan evaluation + receipt-gated commit hooks
 
 import EventEmitter from "eventemitter3";
-/* ✅ NEW: wire CookingSessionShim */
-import { bootstrapCookingSessionShim } from "@/agents/shims/cookingSessionShim";
+/* ✅ NEW: wire cookingSessionShim */
+import { bootstrapcookingSessionShim } from "@/agents/shims/cookingSessionShim";
 
 /* ────────────────────────────── tiny utils ─────────────────────────────── */
 const isBrowser = typeof window !== "undefined";
@@ -86,7 +86,7 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) {
       if (import.meta.env?.DEV) {
         console.warn(
-          "[automation.runtime] familyFundMode enabled, but src/connectors/HubPacketFormatter.js or src/connectors/FamilyFundConnector.js is missing. Skipping export."
+          "[automation.runtime] familyFundMode enabled, but src/connectors/HubPacketFormatter.js or src/connectors/FamilyFundConnector.js is missing. Skipping export.",
         );
       }
       return;
@@ -127,9 +127,8 @@ let bus = {
     // Import pipeline wiring: import.created → parse → blueprint → session
     // ---------------------------------------------------------------------
     try {
-      const { default: HouseholdOrchestrator } = await import(
-        "@/agents/shims/HouseholdOrchestrator"
-      );
+      const { default: HouseholdOrchestrator } =
+        await import("@/agents/shims/HouseholdOrchestrator");
 
       // Avoid double-binding in HMR
       if (!bus.__importPipelineBound) {
@@ -169,7 +168,7 @@ let bus = {
               .toArray();
 
             const top = (maps || []).sort(
-              (a, b) => (b.confidence || 0) - (a.confidence || 0)
+              (a, b) => (b.confidence || 0) - (a.confidence || 0),
             )[0];
             const threshold = Number(cfg?.importAutoSessionThreshold ?? 0.65);
 
@@ -206,7 +205,7 @@ let bus = {
             if (import.meta?.env?.DEV)
               console.warn(
                 "[automation] session.generate.fromImport failed",
-                err
+                err,
               );
           }
         });
@@ -549,7 +548,9 @@ class AutomationRuntime extends EventEmitter {
         timer = setTimeout(() => {
           this.off("event", handler);
           reject(
-            new Error(`onceEvent("${expected}") timed out after ${timeoutMs}ms`)
+            new Error(
+              `onceEvent("${expected}") timed out after ${timeoutMs}ms`,
+            ),
           );
         }, timeoutMs);
       }
@@ -583,7 +584,7 @@ class AutomationRuntime extends EventEmitter {
       });
     } catch (e) {
       console.warn(
-        `[automation] onRegister("${tpl.id}") failed: ${e?.message || e}`
+        `[automation] onRegister("${tpl.id}") failed: ${e?.message || e}`,
       );
     }
 
@@ -601,7 +602,7 @@ class AutomationRuntime extends EventEmitter {
         console.warn(
           "[automation] Skipping invalid template:",
           c,
-          `(shape: ${shape})`
+          `(shape: ${shape})`,
         );
       } else ok++;
     }
@@ -624,13 +625,13 @@ class AutomationRuntime extends EventEmitter {
             console.warn(
               `[automation] Failed to register template from "${key}": ${
                 e?.message || e
-              }`
+              }`,
             );
           }
         }
         return count;
       },
-      30
+      30,
     );
   }
 
@@ -791,7 +792,7 @@ class AutomationRuntime extends EventEmitter {
     };
     this._queue.push(task);
     this._queue.sort(
-      (a, b) => b.priority - a.priority || a.enqueuedAt - b.enqueuedAt
+      (a, b) => b.priority - a.priority || a.enqueuedAt - b.enqueuedAt,
     );
     this._persist();
     this._pump();
@@ -849,11 +850,11 @@ class AutomationRuntime extends EventEmitter {
     const beforeWrapped = compose(this._middlewares.before, core);
     const afterWrapped = compose(
       this._middlewares.after,
-      async (tplId, ctx, runOpts) => beforeWrapped(tplId, ctx, runOpts)
+      async (tplId, ctx, runOpts) => beforeWrapped(tplId, ctx, runOpts),
     );
     const finalWrapped = compose(
       this._middlewares.finally,
-      async (tplId, ctx, runOpts) => afterWrapped(tplId, ctx, runOpts)
+      async (tplId, ctx, runOpts) => afterWrapped(tplId, ctx, runOpts),
     );
 
     const retry = tpl.retry && typeof tpl.retry === "object" ? tpl.retry : null;
@@ -930,11 +931,11 @@ class AutomationRuntime extends EventEmitter {
                     () =>
                       rej(
                         new Error(
-                          `runTemplate("${id}") timeout after ${timeoutMs}ms`
-                        )
+                          `runTemplate("${id}") timeout after ${timeoutMs}ms`,
+                        ),
                       ),
-                    timeoutMs
-                  )
+                    timeoutMs,
+                  ),
                 ),
               ])
             : runner();
@@ -961,7 +962,7 @@ class AutomationRuntime extends EventEmitter {
 
   async runTagged(tag, ctx = {}, options = {}) {
     const mats = this.getTemplates().filter((t) =>
-      (t.tags || []).includes(tag)
+      (t.tags || []).includes(tag),
     );
     for (const t of mats) {
       await this._runTemplateInternal(t.id, ctx, options);
@@ -1087,7 +1088,7 @@ class AutomationRuntime extends EventEmitter {
   }
   listSchedules() {
     return Array.from(this._userSchedules.values()).sort((a, b) =>
-      (a.title || "").localeCompare(b.title || "")
+      (a.title || "").localeCompare(b.title || ""),
     );
   }
   runScheduleNow(id, ctx = {}) {
@@ -1111,7 +1112,7 @@ class AutomationRuntime extends EventEmitter {
           ? { everyMinutes: s.rule.minutes }
           : {
               at: `${String(s.rule.hh).padStart(2, "0")}:${String(
-                s.rule.mm
+                s.rule.mm,
               ).padStart(2, "0")}`,
               days: s.rule.days || null,
             },
@@ -1273,7 +1274,7 @@ class AutomationRuntime extends EventEmitter {
         v,
       ]),
       userSchedules: Array.from(this._userSchedules.entries()).map(
-        ([id, v]) => [id, v]
+        ([id, v]) => [id, v],
       ),
       queue: this._queue.map((t) => ({
         id: t.id,
@@ -1324,19 +1325,19 @@ let shimsBootstrapped = false;
 
 /**
  * Bootstraps domain shims that need eventBus listeners.
- * Currently: CookingSessionShim.
+ * Currently: cookingSessionShim.
  */
 export function bootstrapAutomation() {
   if (shimsBootstrapped) return;
   shimsBootstrapped = true;
 
   try {
-    bootstrapCookingSessionShim();
+    bootstrapcookingSessionShim();
   } catch (e) {
     if (import.meta.env?.DEV) {
       console.warn(
-        "[automation.runtime] Failed to bootstrap CookingSessionShim",
-        e
+        "[automation.runtime] Failed to bootstrap cookingSessionShim",
+        e,
       );
     }
   }
@@ -1359,6 +1360,14 @@ export function emitDraftApproved({
 }
 export function emitProgress(taskId, phase, pct) {
   return automation.emitEvent("progress", { taskId, phase, pct });
+}
+
+/* ✅ COMPAT EXPORTS (for legacy imports like: import { on, emit } from runtime) */
+export function on(topic, handler) {
+  return automation.onTopic(topic, handler);
+}
+export function emit(topic, payload) {
+  return automation.emitEvent(topic, payload);
 }
 
 /* ─────────────────────── opinionated middlewares ───────────────────────── */
@@ -1521,7 +1530,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // cooking / batch
@@ -1541,7 +1550,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // garden
@@ -1562,7 +1571,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // animals / butchery
@@ -1583,7 +1592,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // inventory
@@ -1603,7 +1612,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // storehouse (Goals Planner) – distinct from inventory
@@ -1623,7 +1632,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // mealplan → schedule a refresh or application
@@ -1646,7 +1655,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // Scan • Compare • Trust (pricebook, circular scrape, coupon checks)
@@ -1661,7 +1670,7 @@ automation.registerTrigger(({ ctx, on }) => {
         ctx: p.ctx || { source: p.source || "bookmarklet" },
         meta: { domain: "scan-compare-trust", tier: p.tier || null },
       });
-    })
+    }),
   );
 
   // Import → Planner (Pinterest, recipe sites, garden sites, store / grocery inspiration)
@@ -1680,7 +1689,7 @@ automation.registerTrigger(({ ctx, on }) => {
           tier: p.tier || null,
         },
       });
-    })
+    }),
   );
 
   // co-op / collab / Family Fund Hub – “many hands make light work”
@@ -1702,7 +1711,7 @@ automation.registerTrigger(({ ctx, on }) => {
           hubOnly: !!p.hubOnly,
         },
       });
-    })
+    }),
   );
 
   // ✅ Shopping Mode (scan while shopping, price/coupon/recall/ingredients checks)
@@ -1731,7 +1740,7 @@ automation.registerTrigger(({ ctx, on }) => {
           hubOnly: !!p.hubOnly,
         },
       });
-    })
+    }),
   );
 
   return () =>
@@ -1880,7 +1889,7 @@ automation.addRule({
     async run(ctx) {
       if (!CleaningPlanManager?.generateRoutine) {
         console.warn(
-          "[automation.cleaning] CleaningPlanManager.generateRoutine unavailable"
+          "[automation.cleaning] CleaningPlanManager.generateRoutine unavailable",
         );
         return { ok: false, reason: "manager-missing" };
       }
@@ -1940,9 +1949,8 @@ automation.addRule({
 
       let ShoppingEvaluator = null;
       try {
-        const mod = await import(
-          "@/features/shopping/services/ShoppingEvaluator"
-        );
+        const mod =
+          await import("@/features/shopping/services/ShoppingEvaluator");
         ShoppingEvaluator = mod?.default ?? mod;
       } catch {}
 
@@ -1996,9 +2004,8 @@ automation.addRule({
 
       let evaluator = null;
       try {
-        const mod = await import(
-          "@/features/shopping/services/ShoppingEvaluator"
-        );
+        const mod =
+          await import("@/features/shopping/services/ShoppingEvaluator");
         evaluator = mod?.default ?? mod;
       } catch {}
 
@@ -2006,9 +2013,8 @@ automation.addRule({
       // (kept defensive so this file doesn’t require those modules).
       let sct = null;
       try {
-        const mod = await import(
-          "@/app/features/scan-compare-trust/services/SCTOrchestrator"
-        );
+        const mod =
+          await import("@/app/features/scan-compare-trust/services/SCTOrchestrator");
         sct = mod?.default ?? mod;
       } catch {}
 
@@ -2077,9 +2083,8 @@ automation.addRule({
 
       let ReceiptCommitService = null;
       try {
-        const mod = await import(
-          "@/features/shopping/services/ReceiptCommitService"
-        );
+        const mod =
+          await import("@/features/shopping/services/ReceiptCommitService");
         ReceiptCommitService = mod?.default ?? mod;
       } catch {}
 
@@ -2130,7 +2135,7 @@ automation.addRule({
 if (isBrowser) {
   queueMicrotask(() => {
     try {
-      // ✅ Ensure shims (including CookingSessionShim) are wired up
+      // ✅ Ensure shims (including cookingSessionShim) are wired up
       bootstrapAutomation();
     } catch {}
     try {
@@ -2138,3 +2143,5 @@ if (isBrowser) {
     } catch {}
   });
 }
+
+/* NOTE: Keep all other code the same. */

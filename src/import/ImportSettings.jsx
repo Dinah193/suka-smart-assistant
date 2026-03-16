@@ -28,7 +28,7 @@
 // -----------------------------------------------------------------------------
 
 import React, { useEffect, useState } from "react";
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import config from "../config";
 
 // -----------------------------------------------------------------------------
@@ -53,15 +53,22 @@ const LS_KEY = "ssa.import.settings";
 async function exportToHubIfEnabled(settings) {
   try {
     const flags =
-      (config && (config.featureFlags || (typeof config === "function" ? config().featureFlags : {}))) ||
+      (config &&
+        (config.featureFlags ||
+          (typeof config === "function" ? config().featureFlags : {}))) ||
       config.featureFlags ||
       {};
-    const familyFundMode = flags.familyFundMode === true || flags.familyFundMode === "true";
+    const familyFundMode =
+      flags.familyFundMode === true || flags.familyFundMode === "true";
     if (!familyFundMode) return;
     if (!settings?.autoExportToHub) return;
 
-    const { default: HubPacketFormatter } = await import("../services/HubPacketFormatter.js");
-    const { default: FamilyFundConnector } = await import("../services/FamilyFundConnector.js");
+    const { default: HubPacketFormatter } = await import(
+      "@/services/hub/HubPacketFormatter.js"
+    );
+    const { default: FamilyFundConnector } = await import(
+      "@/services/hub/FamilyFundConnector.js"
+    );
 
     const packet = HubPacketFormatter.format({
       kind: "import.settings.updated",
@@ -70,7 +77,10 @@ async function exportToHubIfEnabled(settings) {
     });
     await FamilyFundConnector.send(packet);
   } catch (err) {
-    console.warn("[ImportSettings] Hub telemetry failed (silent):", err?.message || err);
+    console.warn(
+      "[ImportSettings] Hub telemetry failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -127,8 +137,18 @@ function Toggle({ label, description, checked, onChange, disabled = false }) {
         />
       </span>
       <span className="flex flex-col gap-[2px]">
-        <span className={`text-sm ${disabled ? "text-slate-400" : "text-slate-900"}`}>{label}</span>
-        {description ? <span className="text-xs text-slate-400 leading-snug">{description}</span> : null}
+        <span
+          className={`text-sm ${
+            disabled ? "text-slate-400" : "text-slate-900"
+          }`}
+        >
+          {label}
+        </span>
+        {description ? (
+          <span className="text-xs text-slate-400 leading-snug">
+            {description}
+          </span>
+        ) : null}
       </span>
     </label>
   );
@@ -141,7 +161,9 @@ export default function ImportSettings({ compact = false }) {
   const [settings, setSettings] = useState(() => loadSettings());
   const [familyFundMode, setFamilyFundMode] = useState(() => {
     const flags =
-      (config && (config.featureFlags || (typeof config === "function" ? config().featureFlags : {}))) ||
+      (config &&
+        (config.featureFlags ||
+          (typeof config === "function" ? config().featureFlags : {}))) ||
       config.featureFlags ||
       {};
     return flags.familyFundMode === true || flags.familyFundMode === "true";
@@ -150,10 +172,14 @@ export default function ImportSettings({ compact = false }) {
   // keep an eye on external changes to config (rare, but could be hot-loaded)
   useEffect(() => {
     const flags =
-      (config && (config.featureFlags || (typeof config === "function" ? config().featureFlags : {}))) ||
+      (config &&
+        (config.featureFlags ||
+          (typeof config === "function" ? config().featureFlags : {}))) ||
       config.featureFlags ||
       {};
-    setFamilyFundMode(flags.familyFundMode === true || flags.familyFundMode === "true");
+    setFamilyFundMode(
+      flags.familyFundMode === true || flags.familyFundMode === "true"
+    );
   }, []);
 
   const updateSetting = (key, value) => {
@@ -176,8 +202,12 @@ export default function ImportSettings({ compact = false }) {
     >
       {!compact ? (
         <div className="mb-2">
-          <p className="text-[10px] uppercase tracking-wide text-slate-400">Import settings</p>
-          <p className="text-xs text-slate-500">Control how SSA handles new imports.</p>
+          <p className="text-[10px] uppercase tracking-wide text-slate-400">
+            Import settings
+          </p>
+          <p className="text-xs text-slate-500">
+            Control how SSA handles new imports.
+          </p>
         </div>
       ) : null}
 
@@ -225,8 +255,9 @@ export default function ImportSettings({ compact = false }) {
 
       {!compact ? (
         <p className="mt-3 text-[10px] text-slate-400 leading-snug">
-          These settings are saved locally in your browser ({LS_KEY}). Other SSA modules (ImportService,
-          automation.runtime) will read them to decide what to do automatically.
+          These settings are saved locally in your browser ({LS_KEY}). Other SSA
+          modules (ImportService, automation.runtime) will read them to decide
+          what to do automatically.
         </p>
       ) : null}
     </div>

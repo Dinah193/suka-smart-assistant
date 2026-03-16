@@ -21,8 +21,8 @@
  * preservation / cooking / shopping sessions as needed.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 // Adjust paths to match your actual hub helper locations.
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
@@ -85,11 +85,19 @@ function deriveTargetQty(item, minimumParLevels, safetyStockRules) {
         if (isFiniteNumber(rule.minDaysOfCover)) {
           target = Math.max(target, rule.minDaysOfCover);
         }
-      } else if (appliesTo === "category" && rule.category && item.category === rule.category) {
+      } else if (
+        appliesTo === "category" &&
+        rule.category &&
+        item.category === rule.category
+      ) {
         if (isFiniteNumber(rule.minDaysOfCover)) {
           target = Math.max(target, rule.minDaysOfCover);
         }
-      } else if (appliesTo === "item" && rule.itemId && item.itemId === rule.itemId) {
+      } else if (
+        appliesTo === "item" &&
+        rule.itemId &&
+        item.itemId === rule.itemId
+      ) {
         if (isFiniteNumber(rule.minDaysOfCover)) {
           target = Math.max(target, rule.minDaysOfCover);
         }
@@ -174,18 +182,21 @@ function buildHubExportPayload(input, output) {
     householdId: input.householdId || null,
     planningHorizonDays: input.planningHorizonDays,
     summary: {
-      totalLines: output.aggregatedRefillSummary?.totalLines ?? output.refillLines.length,
-      totalEstimatedCost: output.aggregatedRefillSummary?.totalEstimatedCost ?? null,
-      highUrgencyCount: output.aggregatedRefillSummary?.highUrgencyCount ?? null
+      totalLines:
+        output.aggregatedRefillSummary?.totalLines ?? output.refillLines.length,
+      totalEstimatedCost:
+        output.aggregatedRefillSummary?.totalEstimatedCost ?? null,
+      highUrgencyCount:
+        output.aggregatedRefillSummary?.highUrgencyCount ?? null,
     },
     context: {
-      familyPreferences: input.familyPreferences || null
+      familyPreferences: input.familyPreferences || null,
     },
     payload: {
       refillLines: output.refillLines,
       priorityBaskets: output.priorityBaskets,
-      timelineHints: output.timelineHints
-    }
+      timelineHints: output.timelineHints,
+    },
   };
 
   try {
@@ -218,8 +229,8 @@ async function exportToHubIfEnabled(hubPayload) {
         source: "calculators/storehouseMeals/StorehouseRefillCalculator.shim",
         data: {
           module: "storehouseRefill",
-          success: true
-        }
+          success: true,
+        },
       });
     }
   } catch {
@@ -238,7 +249,7 @@ export function computeStorehouseRefillPlan(input) {
     storehouseSnapshot,
     minimumParLevels = {},
     safetyStockRules = [],
-    priceBookSnapshot = []
+    priceBookSnapshot = [],
   } = input || {};
 
   const refillLines = [];
@@ -248,7 +259,7 @@ export function computeStorehouseRefillPlan(input) {
     totalRefillQty: 0,
     totalEstimatedCost: 0,
     highUrgencyCount: 0,
-    stockoutRiskCount: 0
+    stockoutRiskCount: 0,
   };
 
   /** @type {Record<string, import("./StorehouseRefillCalculator.schema.json").definitions.RefillBasket>} */
@@ -261,7 +272,7 @@ export function computeStorehouseRefillPlan(input) {
       aggregatedRefillSummary: summary,
       priorityBaskets: [],
       timelineHints: [],
-      hubExportPayload: null
+      hubExportPayload: null,
     };
   }
 
@@ -299,7 +310,7 @@ export function computeStorehouseRefillPlan(input) {
       refillQty,
       urgency,
       reasonCodes: ["belowPar"],
-      notes: item.notes || ""
+      notes: item.notes || "",
     };
 
     if (reservedQty > 0) {
@@ -330,13 +341,13 @@ export function computeStorehouseRefillPlan(input) {
           priority: "medium",
           storeId: storeKey,
           lines: [],
-          estimatedCost: 0
+          estimatedCost: 0,
         };
       }
 
       basketsByStore[storeKey].lines.push({
         itemId: item.itemId,
-        refillQty
+        refillQty,
       });
 
       basketsByStore[storeKey].estimatedCost += lineCost;
@@ -360,7 +371,7 @@ export function computeStorehouseRefillPlan(input) {
         riskIfDelayed:
           urgency === "critical"
             ? "High risk of stockout if purchase is delayed."
-            : "Moderate risk of stockout if purchase is delayed."
+            : "Moderate risk of stockout if purchase is delayed.",
       });
     }
 
@@ -375,9 +386,7 @@ export function computeStorehouseRefillPlan(input) {
     ) {
       const hairNote =
         "This item can support Black hair + scalp health when used in a balanced nutrition plan.";
-      line.notes = line.notes
-        ? `${line.notes} ${hairNote}`
-        : hairNote;
+      line.notes = line.notes ? `${line.notes} ${hairNote}` : hairNote;
     }
 
     refillLines.push(line);
@@ -387,7 +396,7 @@ export function computeStorehouseRefillPlan(input) {
     const highRisk = basket.lines.length > 0 && summary.highUrgencyCount > 0;
     return {
       ...basket,
-      priority: highRisk ? "high" : basket.priority
+      priority: highRisk ? "high" : basket.priority,
     };
   });
 
@@ -397,7 +406,7 @@ export function computeStorehouseRefillPlan(input) {
     aggregatedRefillSummary: summary,
     priorityBaskets,
     timelineHints,
-    hubExportPayload: null
+    hubExportPayload: null,
   };
 
   return output;
@@ -435,10 +444,10 @@ export async function runStorehouseRefillCalculation(input) {
     data: {
       inputMeta: {
         householdId: input.householdId || null,
-        planningHorizonDays: input.planningHorizonDays
+        planningHorizonDays: input.planningHorizonDays,
       },
-      summary: output.aggregatedRefillSummary
-    }
+      summary: output.aggregatedRefillSummary,
+    },
   });
 
   // Optionally export to Hub (fire-and-forget)
@@ -450,5 +459,5 @@ export async function runStorehouseRefillCalculation(input) {
 
 export default {
   computeStorehouseRefillPlan,
-  runStorehouseRefillCalculation
+  runStorehouseRefillCalculation,
 };

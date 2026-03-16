@@ -1,0 +1,1270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "file:///src/schemas/cuisine.profile.schema.json",
+  "title": "SSA • Cuisine Profile Schema",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": ["$schema", "schemaVersion"],
+
+  "allOf": [
+    {
+      "anyOf": [
+        { "required": ["updatedAt"] },
+        {
+          "required": ["meta"],
+          "properties": { "meta": { "required": ["updatedAt"] } }
+        }
+      ]
+    },
+    {
+      "anyOf": [
+        { "required": ["plannerDefaults", "flavorSystem"] },
+        { "required": ["planning", "flavorSystem"] },
+        { "required": ["identity", "flavorMatrix"] }
+      ]
+    },
+    {
+      "anyOf": [
+        { "required": ["meta"] },
+        { "required": ["id", "title", "domain", "locale"] }
+      ]
+    }
+  ],
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference used by JSON tooling (may be a relative path in catalogs).",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version of the data contract for this catalog.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "ISO-8601 date or datetime.",
+      "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+    },
+
+    "domain": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "locale": { "$ref": "#/$defs/Locale" },
+    "id": { "$ref": "#/$defs/Id" },
+    "title": { "$ref": "#/$defs/ShortText" },
+    "tags": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Id" },
+      "default": []
+    },
+
+    "notes": {
+      "type": "array",
+      "description": "Human-readable notes for maintainers.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "plannerDefaults": { "$ref": "#/$defs/PlannerDefaults" },
+
+    "flavorSystem": { "$ref": "#/$defs/FlavorSystem" },
+
+    "pantryTiers": { "$ref": "#/$defs/PantryTiers" },
+    "techniquesEmphasis": { "$ref": "#/$defs/TechniquesEmphasis" },
+
+    "dishArchetypes": {
+      "type": "array",
+      "description": "Common meal archetypes for the cuisine used by the planner as building blocks.",
+      "items": { "$ref": "#/$defs/DishArchetype" },
+      "default": []
+    },
+    "ingredientPreferences": { "$ref": "#/$defs/IngredientPreferences" },
+
+    "substitutionGuidance": {
+      "description": "Cuisine-aware substitution rules (not the global substitution catalog). Supports legacy array form and newer structured object form.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SubstitutionRule" },
+          "default": []
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "proteinSubstitutions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/StructuredSubstitution" },
+              "default": []
+            },
+            "sideSubstitutions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/StructuredSubstitution" },
+              "default": []
+            },
+            "thickenerSubstitutions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/StructuredSubstitution" },
+              "default": []
+            },
+            "notes": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/SafeText" },
+              "default": []
+            }
+          },
+          "default": {}
+        }
+      ]
+    },
+
+    "mealTemplates": {
+      "type": "array",
+      "description": "High-level meal templates that reference ingredient IDs and archetypes.",
+      "items": { "$ref": "#/$defs/MealTemplate" },
+      "default": []
+    },
+
+    "safetyNotes": {
+      "type": "array",
+      "description": "Cuisine-specific safety notes (allergens/handling).",
+      "items": { "$ref": "#/$defs/SafetyNote" },
+      "default": []
+    },
+
+    "searchHints": { "$ref": "#/$defs/SearchHints" },
+
+    "pantry": { "$ref": "#/$defs/Pantry" },
+    "techniques": { "$ref": "#/$defs/Techniques" },
+    "equipment": { "$ref": "#/$defs/Equipment" },
+    "dietAndAllergens": { "$ref": "#/$defs/DietAndAllergens" },
+    "signatureDishes": { "$ref": "#/$defs/SignatureDishes" },
+    "pairingRules": { "$ref": "#/$defs/PairingRules" },
+    "substitutions": { "$ref": "#/$defs/Substitutions" },
+    "planningHints": { "$ref": "#/$defs/PlanningHints" },
+    "ui": { "$ref": "#/$defs/UI" },
+    "compat": { "$ref": "#/$defs/Compat" },
+
+    "identity": {
+      "type": "object",
+      "description": "Optional richer identity block used by newer cuisine profiles.",
+      "additionalProperties": true
+    },
+    "planning": {
+      "type": "object",
+      "description": "Optional richer planning block used by newer cuisine profiles.",
+      "additionalProperties": true
+    },
+    "flavorSystemV2": {
+      "type": "object",
+      "description": "Optional alias field for future use; not required. Prefer flavorSystem.",
+      "additionalProperties": true
+    },
+    "dietaryAdaptation": {
+      "type": "object",
+      "description": "Optional richer dietary adaptation block used by newer cuisine profiles.",
+      "additionalProperties": true
+    },
+    "substitutionGuidanceV2": {
+      "type": "object",
+      "description": "Optional richer substitution guidance block used by newer cuisine profiles.",
+      "additionalProperties": true
+    },
+    "qualityAndSafety": {
+      "type": "object",
+      "description": "Optional richer quality & safety block used by newer cuisine profiles.",
+      "additionalProperties": true
+    },
+    "canonicalDishIds": {
+      "type": "object",
+      "description": "Optional richer canonical dish id groups used by newer cuisine profiles.",
+      "additionalProperties": true
+    },
+
+    "flavorProfile": {
+      "type": "object",
+      "description": "Legacy field (permissive). Prefer flavorSystem.",
+      "additionalProperties": true
+    },
+    "coreTechniques": {
+      "type": "array",
+      "description": "Legacy field (permissive). Prefer techniques/coreMethods.",
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    },
+    "ingredientSystem": {
+      "type": "object",
+      "description": "Legacy field (permissive). Prefer pantry/ingredientPreferences.",
+      "additionalProperties": true
+    },
+    "pairings": {
+      "type": "object",
+      "description": "Legacy field (permissive). Prefer pairingRules.",
+      "additionalProperties": true
+    },
+    "tooling": {
+      "type": "object",
+      "description": "Legacy field (permissive). Prefer equipment/techniques.equipmentAffinity.",
+      "additionalProperties": true
+    },
+    "adaptationRules": {
+      "type": "object",
+      "description": "Legacy field (permissive). Prefer substitutions/substitutionGuidance.",
+      "additionalProperties": true
+    },
+    "plannerHints": {
+      "type": "object",
+      "description": "Legacy field (permissive). Prefer planningHints/plannerDefaults.",
+      "additionalProperties": true
+    },
+
+    "flavorMatrix": {
+      "type": "object",
+      "description": "Newer cuisine profiles: structured flavor matrix (permissive).",
+      "additionalProperties": true
+    },
+    "staples": {
+      "type": "object",
+      "description": "Newer cuisine profiles: pantry/fridge/freezer staples (permissive).",
+      "additionalProperties": true
+    },
+    "proteins": {
+      "type": "object",
+      "description": "Newer cuisine profiles: protein patterns (permissive).",
+      "additionalProperties": true
+    },
+    "carbsAndBases": {
+      "type": "object",
+      "description": "Newer cuisine profiles: carbs/bases patterns (permissive).",
+      "additionalProperties": true
+    },
+    "nutritionBias": {
+      "type": "object",
+      "description": "Newer cuisine profiles: nutrition tendencies (permissive).",
+      "additionalProperties": true
+    },
+    "compatibility": {
+      "type": "object",
+      "description": "Newer cuisine profiles: planner/capability compatibility (permissive).",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "SafeText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+    "Locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 35
+    },
+    "RatingLevel": {
+      "type": "string",
+      "enum": ["none", "low", "medium", "high"]
+    },
+    "TasteLevel": {
+      "type": "string",
+      "enum": ["none", "low", "medium", "high"]
+    },
+    "ServingStyle": {
+      "type": "string",
+      "enum": [
+        "family_style",
+        "one_pot",
+        "stew_and_starch",
+        "grill_and_sides",
+        "bowls",
+        "plates",
+        "street_food",
+        "snacks",
+        "breakfast",
+        "plated_meals",
+        "holiday_feasts"
+      ]
+    },
+    "Difficulty": {
+      "type": "string",
+      "enum": ["beginner", "intermediate", "advanced"]
+    },
+
+    "ArchetypeRole": {
+      "description": "Role labels for meal components. Allows the core enum set while permitting future/extension roles as ids (e.g., noodle, broth).",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "starch",
+            "protein",
+            "veg",
+            "greens",
+            "legume",
+            "sauce",
+            "stew_base",
+            "base",
+            "thickener",
+            "fat",
+            "spice",
+            "garnish",
+            "side",
+            "other"
+          ]
+        },
+        { "$ref": "#/$defs/Id" }
+      ]
+    },
+
+    "TasteScalar": {
+      "anyOf": [
+        { "$ref": "#/$defs/TasteLevel" },
+        { "type": "integer", "minimum": 0, "maximum": 5 }
+      ]
+    },
+
+    "StructuredSubstitution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["for", "options"],
+      "properties": {
+        "for": { "$ref": "#/$defs/Id" },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Id" }
+        },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "anyOf": [{ "required": ["label"] }, { "required": ["name"] }],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "cuisine_profile" },
+        "domain": {
+          "type": "string",
+          "description": "Optional in some catalogs; recommended.",
+          "minLength": 1,
+          "maxLength": 40,
+          "default": "cuisines"
+        },
+        "locale": { "$ref": "#/$defs/Locale" },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "name": { "$ref": "#/$defs/ShortText" },
+
+        "shortName": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/SafeText" },
+
+        "subtitle": { "$ref": "#/$defs/SafeText" },
+        "originRegions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+
+        "regions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+        "primaryCountriesAndIslands": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        },
+        "icon": { "$ref": "#/$defs/ShortText" },
+        "colorHint": { "$ref": "#/$defs/ShortText" },
+        "heritageNotes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SafeText" },
+          "default": []
+        },
+
+        "cuisine": { "$ref": "#/$defs/Id" },
+        "region": { "$ref": "#/$defs/ShortText" },
+        "version": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "author": { "$ref": "#/$defs/ShortText" },
+        "createdAt": {
+          "type": "string",
+          "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+        },
+        "updatedAt": {
+          "type": "string",
+          "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+        },
+        "status": { "$ref": "#/$defs/ShortText" },
+
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "curation": { "$ref": "#/$defs/ShortText" },
+            "maintainer": { "$ref": "#/$defs/ShortText" },
+            "license": { "$ref": "#/$defs/ShortText" },
+            "attribution": { "$ref": "#/$defs/ShortText" },
+
+            "kind": { "$ref": "#/$defs/ShortText" },
+            "author": { "$ref": "#/$defs/ShortText" },
+            "origin": { "$ref": "#/$defs/ShortText" },
+
+            "type": { "$ref": "#/$defs/ShortText" },
+            "notes": { "$ref": "#/$defs/SafeText" },
+
+            "url": {
+              "type": ["string", "null"],
+              "format": "uri",
+              "default": null
+            }
+          },
+          "default": {}
+        },
+
+        "family": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parent": { "$ref": "#/$defs/Id" },
+            "siblings": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Id" },
+              "default": []
+            },
+            "overlapsWith": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "reason"],
+                "properties": {
+                  "id": { "$ref": "#/$defs/Id" },
+                  "reason": { "$ref": "#/$defs/SafeText" }
+                }
+              },
+              "default": []
+            }
+          },
+          "default": {}
+        },
+
+        "subprofiles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Subprofile" },
+          "default": []
+        },
+        "regionHints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+        "countryHints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        }
+      }
+    },
+
+    "Subprofile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "signatureNotes": { "$ref": "#/$defs/SafeText" },
+        "commonSauceBases": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        }
+      }
+    },
+
+    "PlannerDefaults": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "servingStyles",
+            "weeknightBias",
+            "leftoversStrategy",
+            "batchCookingBias",
+            "spiceHeatDefault",
+            "saltinessDefault",
+            "sournessDefault",
+            "sweetnessDefault",
+            "umamiDefault",
+            "oilUseDefault",
+            "preferredCookingFats",
+            "primaryStarches",
+            "primaryProteins",
+            "defaultMealArchetypes"
+          ],
+          "properties": {
+            "servingStyles": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/ServingStyle" }
+            },
+            "weeknightBias": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "leftoversStrategy": {
+              "type": "string",
+              "enum": ["none", "opportunistic", "planned", "batch_and_remix"]
+            },
+            "batchCookingBias": {
+              "anyOf": [
+                { "$ref": "#/$defs/RatingLevel" },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["level"],
+                  "properties": {
+                    "level": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "bestBatches": { "$ref": "#/$defs/IdArray" },
+                    "notes": { "$ref": "#/$defs/SafeText" }
+                  }
+                }
+              ]
+            },
+            "spiceHeatDefault": { "$ref": "#/$defs/TasteScalar" },
+            "saltinessDefault": { "$ref": "#/$defs/TasteScalar" },
+            "sournessDefault": { "$ref": "#/$defs/TasteScalar" },
+            "sweetnessDefault": { "$ref": "#/$defs/TasteScalar" },
+            "umamiDefault": { "$ref": "#/$defs/TasteScalar" },
+            "oilUseDefault": { "$ref": "#/$defs/TasteScalar" },
+            "preferredCookingFats": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/Id" }
+            },
+            "primaryStarches": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/Id" }
+            },
+            "primaryProteins": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/Id" }
+            },
+            "defaultMealArchetypes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/Id" }
+            },
+            "defaultPlateTemplateIds": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Id" },
+              "default": []
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "PlannerDefaults (V2, permissive) used by newer cuisine profiles.",
+          "additionalProperties": true,
+          "properties": {
+            "mealRoles": { "$ref": "#/$defs/IdArray" },
+            "batchFriendly": { "type": "boolean" },
+            "freezerFriendly": { "type": "boolean" },
+            "defaultHeatLevel": { "$ref": "#/$defs/ShortText" },
+            "defaultServingStyle": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Id" },
+              "default": []
+            },
+            "defaultStaples": { "$ref": "#/$defs/IdArray" },
+            "inventorySignals": { "$ref": "#/$defs/IdArray" },
+            "makeAheadNotes": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/SafeText" },
+              "default": []
+            }
+          }
+        }
+      ]
+    },
+
+    "FlavorSystem": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "signatureNotes",
+            "aromaticsCore",
+            "spiceCore",
+            "umamiBuilders",
+            "acidOptions",
+            "sweetBalanceOptions",
+            "heatOptions"
+          ],
+          "properties": {
+            "signatureNotes": {
+              "anyOf": [
+                { "$ref": "#/$defs/SafeText" },
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": { "$ref": "#/$defs/ShortText" }
+                }
+              ]
+            },
+            "aromaticsCore": { "$ref": "#/$defs/IdArray" },
+            "spiceCore": { "$ref": "#/$defs/IdArray" },
+            "umamiBuilders": { "$ref": "#/$defs/IdArray" },
+            "acidOptions": { "$ref": "#/$defs/IdArray" },
+            "sweetBalanceOptions": { "$ref": "#/$defs/IdArray" },
+            "heatOptions": { "$ref": "#/$defs/IdArray" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "signatureAromatics",
+            "signatureSpices",
+            "signatureUmami",
+            "signatureAcids"
+          ],
+          "properties": {
+            "signatureAromatics": { "$ref": "#/$defs/IdArray" },
+            "signatureHerbs": { "$ref": "#/$defs/IdArray" },
+            "signatureSpices": { "$ref": "#/$defs/IdArray" },
+            "signatureSeasoningBlends": { "$ref": "#/$defs/IdArray" },
+            "signatureUmami": { "$ref": "#/$defs/IdArray" },
+            "signatureAcids": { "$ref": "#/$defs/IdArray" },
+            "signatureSweeteners": { "$ref": "#/$defs/IdArray" },
+            "heatDefaults": { "type": "object", "additionalProperties": true },
+            "saltDefaults": { "type": "object", "additionalProperties": true },
+            "textureDefaults": { "$ref": "#/$defs/IdArray" }
+          }
+        },
+        {
+          "type": "object",
+          "description": "FlavorSystem (V2, Cajun/modern profiles) — permissive but expects an identity block.",
+          "additionalProperties": true,
+          "required": ["identity"],
+          "properties": {
+            "identity": { "type": "object", "additionalProperties": true },
+            "bases": {
+              "type": "array",
+              "items": { "type": "object", "additionalProperties": true },
+              "default": []
+            },
+            "aromatics": { "$ref": "#/$defs/IdArray" },
+            "spices": { "$ref": "#/$defs/IdArray" },
+            "herbs": { "$ref": "#/$defs/IdArray" },
+            "finishes": { "$ref": "#/$defs/IdArray" },
+            "thickeners": { "$ref": "#/$defs/IdArray" },
+            "fats": { "$ref": "#/$defs/IdArray" },
+            "acids": { "$ref": "#/$defs/IdArray" },
+            "heat": { "type": "object", "additionalProperties": true },
+            "proteinPatterns": {
+              "type": "array",
+              "items": { "type": "object", "additionalProperties": true },
+              "default": []
+            },
+            "styleNotes": {
+              "type": "array",
+              "items": { "type": "object", "additionalProperties": true },
+              "default": []
+            }
+          }
+        }
+      ]
+    },
+
+    "PantryTiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tier0_minimum": { "$ref": "#/$defs/PantryTier" },
+        "tier1_core": { "$ref": "#/$defs/PantryTier" },
+        "tier2_traditional": { "$ref": "#/$defs/PantryTier" },
+        "tier3_specialty": { "$ref": "#/$defs/PantryTier" }
+      },
+      "default": {}
+    },
+    "PantryTier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "items"],
+      "properties": {
+        "description": { "$ref": "#/$defs/ShortText" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Id" }
+        }
+      }
+    },
+
+    "TechniquesEmphasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "common", "notes"],
+      "properties": {
+        "primary": { "$ref": "#/$defs/IdArray" },
+        "common": { "$ref": "#/$defs/IdArray" },
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        }
+      }
+    },
+
+    "DishArchetype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "description", "commonExamples", "defaults"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "description": { "$ref": "#/$defs/SafeText" },
+        "commonExamples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "starchOptions": { "$ref": "#/$defs/IdArray" },
+            "proteinOptions": { "$ref": "#/$defs/IdArray" },
+
+            "legumeOptions": {
+              "type": "array",
+              "description": "Legume-based components commonly paired with this archetype (e.g., beans, lentils, peas).",
+              "items": { "$ref": "#/$defs/Id" },
+              "default": []
+            },
+
+            "greensOptions": { "$ref": "#/$defs/IdArray" },
+            "vegOptions": { "$ref": "#/$defs/IdArray" },
+            "sideOptions": { "$ref": "#/$defs/IdArray" },
+            "riceOptions": { "$ref": "#/$defs/IdArray" },
+            "baseOptions": { "$ref": "#/$defs/IdArray" },
+
+            "stew_baseOptions": {
+              "description": "Stew/soup base dish options commonly paired with this archetype (e.g., lentil soup, chicken lemon soup).",
+              "$ref": "#/$defs/IdArray"
+            },
+
+            "thickenerOptions": { "$ref": "#/$defs/IdArray" },
+            "sauceOptions": { "$ref": "#/$defs/IdArray" },
+            "grainOptions": { "$ref": "#/$defs/IdArray" },
+            "garnishOptions": { "$ref": "#/$defs/IdArray" },
+            "pairings": { "$ref": "#/$defs/IdArray" }
+          },
+          "default": {}
+        }
+      }
+    },
+
+    "IngredientPreferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preferred": { "$ref": "#/$defs/IdArray" },
+        "optional_traditional": { "$ref": "#/$defs/IdArray" },
+        "avoid_or_limit": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AvoidItem" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "AvoidItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "reason": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "SubstitutionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "whenMissing", "useInstead", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "whenMissing": { "$ref": "#/$defs/IdArrayMin1" },
+        "useInstead": { "$ref": "#/$defs/IdArrayMin1" },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "MealTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "archetypeId", "components"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "archetypeId": { "$ref": "#/$defs/Id" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/MealComponent" }
+        },
+        "prepNotes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        }
+      }
+    },
+    "MealComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "ingredientIds"],
+      "properties": {
+        "role": { "$ref": "#/$defs/ArchetypeRole" },
+        "ingredientIds": { "$ref": "#/$defs/IdArrayMin1" },
+        "chooseOne": { "type": "boolean", "default": false },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "SafetyNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SafeText" }
+        }
+      }
+    },
+
+    "SearchHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+        "commonAlternateNames": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+
+    "Pantry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "staples": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+        "freshCore": { "$ref": "#/$defs/IdArray" },
+        "proteinsCommon": { "$ref": "#/$defs/IdArray" },
+        "produceCommon": { "$ref": "#/$defs/IdArray" },
+        "availabilityNotes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AvailabilityNote" },
+          "default": []
+        },
+
+        "coreStaples": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+        "optionalRegionalStaples": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        }
+      },
+      "default": {}
+    },
+    "AvailabilityNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ingredient", "fallbacks", "note"],
+      "properties": {
+        "ingredient": { "$ref": "#/$defs/Id" },
+        "fallbacks": { "$ref": "#/$defs/IdArrayMin1" },
+        "note": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "Techniques": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "coreMethods": { "$ref": "#/$defs/IdArray" },
+        "hallmarkProcesses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/HallmarkProcess" },
+          "default": []
+        },
+
+        "coreTechniques": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": true },
+          "default": []
+        },
+        "equipmentAffinity": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+
+        "core": {
+          "type": "array",
+          "description": "Newer profiles may use `techniques.core` as the primary techniques list.",
+          "items": { "type": "object", "additionalProperties": true },
+          "default": []
+        },
+        "signatureMethods": {
+          "type": "array",
+          "description": "Newer profiles may include signature method notes as strings.",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "HallmarkProcess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "steps"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "steps": { "$ref": "#/$defs/IdArrayMin1" },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "Equipment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recommended": { "$ref": "#/$defs/IdArray" },
+        "optionalButHelpful": { "$ref": "#/$defs/IdArray" },
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SafeText" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+
+    "DietAndAllergens": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "commonAllergens": { "$ref": "#/$defs/IdArray" },
+        "dietCompatibility": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        }
+      },
+      "default": {}
+    },
+
+    "SignatureDishes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "core": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SignatureDish" },
+          "default": []
+        },
+        "dessertsAndDrinks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SignatureDish" },
+          "default": []
+        },
+
+        "examples": {
+          "type": "array",
+          "description": "Newer profiles may list example dishes as strings.",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+        "mealPatterns": {
+          "type": "array",
+          "description": "Newer profiles may list meal patterns as strings.",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "SignatureDish": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "subprofiles": { "$ref": "#/$defs/IdArray" },
+        "difficulty": {
+          "anyOf": [
+            { "type": "integer", "minimum": 0, "maximum": 5 },
+            { "$ref": "#/$defs/Difficulty" }
+          ]
+        },
+        "heatTypical": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "PairingRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "typicalStarches": { "$ref": "#/$defs/IdArray" },
+        "typicalVegSides": { "$ref": "#/$defs/IdArray" },
+        "typicalCondiments": { "$ref": "#/$defs/IdArray" },
+        "typicalFlavorPairings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FlavorPairing" },
+          "default": []
+        },
+        "antiPairings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AntiPairing" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "FlavorPairing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["with", "pair"],
+      "properties": {
+        "with": { "$ref": "#/$defs/Id" },
+        "pair": { "$ref": "#/$defs/IdArrayMin1" },
+        "note": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+    "AntiPairing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "avoid", "note"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "avoid": { "$ref": "#/$defs/IdArrayMin1" },
+        "note": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "Substitutions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ingredientRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/IngredientSubRule" },
+          "default": []
+        },
+        "methodRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MethodSubRule" },
+          "default": []
+        },
+
+        "rules": {
+          "type": "array",
+          "description": "Newer profiles may store substitutions as a simple rules array.",
+          "items": { "type": "object", "additionalProperties": true },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "IngredientSubRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "whenMissing": { "$ref": "#/$defs/IdArrayMin1" },
+        "whenHealthFlag": { "$ref": "#/$defs/IdArrayMin1" },
+        "use": { "$ref": "#/$defs/IdArrayMin1" },
+        "replace": { "$ref": "#/$defs/IdArrayMin1" },
+        "with": { "$ref": "#/$defs/IdArrayMin1" },
+        "ratio": { "type": "number", "minimum": 0 },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+    "MethodSubRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "adapt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "whenNoEquipment": { "$ref": "#/$defs/IdArrayMin1" },
+        "whenHasEquipment": { "$ref": "#/$defs/IdArrayMin1" },
+        "adapt": { "$ref": "#/$defs/Id" },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+
+    "PlanningHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "batchFriendly": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/BatchHint" },
+          "default": []
+        },
+        "weeknightShortcuts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SafeText" },
+          "default": []
+        },
+        "seasonality": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SeasonalityHint" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "BatchHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "makes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "makes": { "$ref": "#/$defs/Id" },
+        "freezerFriendly": { "type": "boolean", "default": false },
+        "notes": { "$ref": "#/$defs/SafeText" }
+      }
+    },
+    "SeasonalityHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["season", "focus"],
+      "properties": {
+        "season": { "$ref": "#/$defs/Id" },
+        "focus": { "$ref": "#/$defs/IdArrayMin1" }
+      }
+    },
+
+    "UI": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "heroSuggestions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/HeroSuggestion" },
+          "default": []
+        },
+        "searchBoostTerms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ShortText" },
+          "default": []
+        },
+
+        "colorHints": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+        "iconHints": { "$ref": "#/$defs/IdArray" }
+      },
+      "default": {}
+    },
+    "HeroSuggestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "items"],
+      "properties": {
+        "title": { "$ref": "#/$defs/ShortText" },
+        "items": { "$ref": "#/$defs/IdArrayMin1" }
+      }
+    },
+
+    "Compat": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recipeTagDefaults": { "$ref": "#/$defs/IdArray" },
+        "defaultPlateTemplateIds": { "$ref": "#/$defs/IdArray" },
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SafeText" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+
+    "IdArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Id" },
+      "default": []
+    },
+    "IdArrayMin1": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Id" }
+    }
+  }
+}

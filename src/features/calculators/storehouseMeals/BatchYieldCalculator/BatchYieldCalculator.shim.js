@@ -20,8 +20,8 @@
  * - No direct DOM usage; safe to call while SessionRunner or other flows are active.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /**
@@ -123,13 +123,16 @@ function computeScaleFactor(
  * @param {object} portioningPreferences
  * @returns {object}
  */
-function computeBatchPortionYield(baseYield, scaleFactor, portioningPreferences) {
+function computeBatchPortionYield(
+  baseYield,
+  scaleFactor,
+  portioningPreferences
+) {
   const baseServings = toNumberOrNull(baseYield?.servings) || 1;
   const baseServingGrams = toNumberOrNull(baseYield?.servingSizeGrams) || 250;
 
   const totalServingsRaw = baseServings * (scaleFactor || 1);
-  const rounding =
-    portioningPreferences?.portionRoundingMode || "floor";
+  const rounding = portioningPreferences?.portionRoundingMode || "floor";
 
   let totalServings;
   if (rounding === "ceil") {
@@ -150,28 +153,28 @@ function computeBatchPortionYield(baseYield, scaleFactor, portioningPreferences)
   let readyToEatServings = toNumberOrNull(dist.readyToEatServings);
   let preservedServings = toNumberOrNull(dist.preservedServings);
 
-  if (
-    readyToEatServings == null &&
-    preservedServings == null
-  ) {
+  if (readyToEatServings == null && preservedServings == null) {
     readyToEatServings = Math.min(4, totalServings);
     preservedServings = Math.max(0, totalServings - readyToEatServings);
   } else {
     if (readyToEatServings == null) {
-      readyToEatServings = Math.max(0, totalServings - (preservedServings || 0));
+      readyToEatServings = Math.max(
+        0,
+        totalServings - (preservedServings || 0)
+      );
     }
     if (preservedServings == null) {
-      preservedServings = Math.max(0, totalServings - (readyToEatServings || 0));
+      preservedServings = Math.max(
+        0,
+        totalServings - (readyToEatServings || 0)
+      );
     }
 
     const sum = readyToEatServings + preservedServings;
     if (sum > totalServings && sum > 0) {
       const factor = totalServings / sum;
       readyToEatServings = Math.round(readyToEatServings * factor);
-      preservedServings = Math.max(
-        0,
-        totalServings - readyToEatServings
-      );
+      preservedServings = Math.max(0, totalServings - readyToEatServings);
     }
   }
 
@@ -220,9 +223,9 @@ function computeBatchContainerPlan(
     );
 
     const portionsPerContainer =
-      totalServings / batchScalingTarget.targetContainers.reduce(
-        (sum, tc) =>
-          sum + (toNumberOrNull(tc.count) || 0),
+      totalServings /
+      batchScalingTarget.targetContainers.reduce(
+        (sum, tc) => sum + (toNumberOrNull(tc.count) || 0),
         1
       );
 
@@ -264,8 +267,7 @@ function computeBatchContainerPlan(
   for (const container of sorted) {
     if (remainingServings <= 0) break;
 
-    const approxWeight =
-      toNumberOrNull(container.approxFoodWeightGrams) || 0;
+    const approxWeight = toNumberOrNull(container.approxFoodWeightGrams) || 0;
     const servingSizeGrams =
       toNumberOrNull(batchPortionYield?.servingSizeGrams) || 250;
     const approxServingsPerContainer = approxWeight
@@ -320,8 +322,7 @@ function computeInventoryDelta(ingredients, scaleFactor, containerPlan) {
 
   const itemsProduced = Array.isArray(containerPlan)
     ? containerPlan.map((cp, index) => ({
-        inventoryItemId:
-          cp.containerTypeId || `batch-container-${index}`,
+        inventoryItemId: cp.containerTypeId || `batch-container-${index}`,
         label: cp.label || "Batch Container",
         quantityChange: cp.count || 0,
         unit: "container",
@@ -389,9 +390,7 @@ function computeBatchNutritionPerPortion(
     ? +(proteinPerDay / 3).toFixed(1)
     : null;
 
-  const hairTarget = toNumberOrNull(
-    hairSupportTargets?.hairSupportScoreTarget
-  );
+  const hairTarget = toNumberOrNull(hairSupportTargets?.hairSupportScoreTarget);
   const hairSupportScorePerServing = hairTarget
     ? Math.min(100, Math.max(0, hairTarget / totalServings))
     : null;
@@ -595,7 +594,16 @@ export async function runBatchYieldCalculator(payload) {
   }
 }
 
+/**
+ * Back-compat export:
+ * Some callers import `runBatchYieldCalculation` (older name).
+ * Keep this alias so builds don't break.
+ */
+export const runBatchYieldCalculation = runBatchYieldCalculator;
+
 export default {
   run: runBatchYieldCalculator,
+  // back-compat (default export surface)
+  runBatchYieldCalculation,
   calculate: calculateBatchYield,
 };

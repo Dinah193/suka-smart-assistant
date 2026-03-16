@@ -1,0 +1,332 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.carne_asada",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Carne Asada",
+    "subtitle": "Citrus-garlic marinated steak, grilled (or seared) hot and fast for tacos, bowls, and platters",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "main",
+    "mealArchetypes": ["archetype.grill", "archetype.steak", "archetype.tacos"],
+    "servingStyles": ["plated", "tacos", "bowl", "family_style"],
+    "plannerTags": [
+      "course.main",
+      "weeknight_possible",
+      "meal_prep",
+      "high_protein"
+    ]
+  },
+  "summary": "Classic carne asada with a bright citrus-garlic marinade and hot-and-fast cooking for tender, flavorful slices. SSA baseline includes grill and stovetop methods, plus options for tacos and bowls.",
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 170, "unit": "g" },
+    "notes": "Serves 6 as a main (about 6 oz cooked steak per person)."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 120,
+    "totalMins": 140
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": "marinade",
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "raw_marinated_only"
+  },
+  "tasteProfile": {
+    "savory": 4,
+    "spicy": 2,
+    "acidic": 3,
+    "rich": 3
+  },
+  "equipment": {
+    "minimum": ["equipment.bowl", "equipment.tongs", "equipment.knife"],
+    "recommended": [
+      "equipment.grill",
+      "equipment.cast_iron_skillet",
+      "equipment.instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "equipment.vacuum_sealer",
+        "label": "Vacuum Sealer",
+        "notes": "Great for freezing steak in marinade for future meals"
+      }
+    ]
+  },
+  "dietFlags": ["diet.gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.flank_steak",
+      "label": "Flank steak (or skirt steak)",
+      "role": "protein",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "Flank is thicker; skirt cooks even faster. Trim excess surface fat/silverskin."
+    },
+    {
+      "id": "ingredient.orange_juice",
+      "label": "Orange juice (fresh preferred)",
+      "role": "marinade.citrus",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Lime juice",
+      "role": "marinade.citrus",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": "About 2–3 limes"
+    },
+    {
+      "id": "ingredient.oil_olive",
+      "label": "Olive oil",
+      "role": "marinade.fat",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "marinade.aromatic",
+      "amount": { "value": 6, "unit": "cloves" },
+      "notes": "Minced or grated"
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Fresh cilantro",
+      "role": "marinade.herb",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Chopped; omit if you dislike cilantro"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "marinade.aromatic",
+      "amount": { "value": 0.5, "unit": "medium" },
+      "optional": true,
+      "notes": "Finely grated or very finely chopped"
+    },
+    {
+      "id": "ingredient.jalapeno",
+      "label": "Jalapeño",
+      "role": "marinade.heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Minced; remove seeds for less heat"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder (or ancho chile powder)",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.paprika_smoked",
+      "label": "Smoked paprika",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Start with 2 tsp; adjust to taste and steak thickness"
+    },
+
+    {
+      "id": "ingredient.lime",
+      "label": "Limes (for serving)",
+      "role": "finish.acid",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro (for serving)",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Steak",
+      "items": ["ingredient.flank_steak"]
+    },
+    {
+      "label": "Marinade",
+      "items": [
+        "ingredient.orange_juice",
+        "ingredient.lime_juice",
+        "ingredient.oil_olive",
+        "ingredient.garlic",
+        "ingredient.cilantro",
+        "ingredient.onion_white",
+        "ingredient.jalapeno",
+        "ingredient.cumin_ground",
+        "ingredient.chili_powder",
+        "ingredient.paprika_smoked",
+        "ingredient.black_pepper",
+        "ingredient.salt"
+      ]
+    },
+    {
+      "label": "Finish (Optional)",
+      "items": ["ingredient.lime", "ingredient.cilantro"]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.mix_marinade",
+      "title": "Mix the marinade",
+      "activeMins": 8,
+      "body": "In a bowl, whisk orange juice, lime juice, olive oil, garlic, and seasonings. If using cilantro, onion, and jalapeño, stir them in. Taste: it should be tangy, salty, and strongly seasoned (it will mellow on the meat)."
+    },
+    {
+      "id": "step.marinate",
+      "title": "Marinate the steak",
+      "activeMins": 5,
+      "handsOffMins": 120,
+      "body": "Place steak in a zip-top bag or shallow dish. Pour in marinade and coat well. Refrigerate 1–4 hours (best balance). For skirt steak (thin), aim for 45–120 minutes. Do not marinate overnight with high citrus unless you prefer a softer texture.",
+      "timers": [{ "label": "Marinate", "minutes": 120 }],
+      "checks": [
+        "Steak is evenly coated",
+        "Marinade time matches cut thickness"
+      ]
+    },
+    {
+      "id": "step.preheat",
+      "title": "Preheat grill or skillet",
+      "activeMins": 5,
+      "body": "Remove steak from fridge 15–20 minutes before cooking. Preheat grill to high (very hot) or heat a cast-iron skillet over medium-high until smoking lightly. Pat steak lightly—leave some marinade clinging but avoid puddles to reduce steaming."
+    },
+    {
+      "id": "step.cook",
+      "title": "Cook hot and fast",
+      "activeMins": 10,
+      "body": "Grill or sear steak 3–6 minutes per side depending on thickness. Target internal temp: 125–130°F (52–54°C) for medium-rare, 135°F (57°C) for medium. For skirt steak, watch closely; it cooks quickly.",
+      "timers": [{ "label": "Per side (typical)", "minutes": 4 }],
+      "checks": [
+        "Good char on exterior",
+        "Internal temp hits target for doneness"
+      ],
+      "temperature": {
+        "type": "internal",
+        "value": 130,
+        "unit": "F",
+        "notes": "Target 125–130°F for medium-rare; rest will carry over"
+      }
+    },
+    {
+      "id": "step.rest_slice",
+      "title": "Rest and slice against the grain",
+      "activeMins": 7,
+      "handsOffMins": 8,
+      "body": "Rest steak 8–10 minutes. Slice thinly across the grain (important for tenderness). Squeeze lime over slices and garnish with cilantro if desired.",
+      "timers": [{ "label": "Rest steak", "minutes": 9 }],
+      "checks": [
+        "Sliced across the grain",
+        "Juices redistributed after resting"
+      ]
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.no_grill",
+      "label": "No-Grill Stovetop Method",
+      "notes": "Use a cast-iron skillet or heavy pan. Sear with good ventilation. You can finish in a 425°F oven for thicker cuts if needed."
+    },
+    {
+      "id": "variation.taco_mode",
+      "label": "Taco Mode",
+      "notes": "Chop sliced steak into bite-size pieces. Serve with warm corn tortillas, diced onion, cilantro, salsa, and lime."
+    },
+    {
+      "id": "variation.bowl_mode",
+      "label": "Bowl Mode",
+      "notes": "Serve over rice and beans with pico de gallo, avocado, and salsa. Great for meal prep."
+    },
+    {
+      "id": "variation.milder",
+      "label": "Milder / Kid-Friendly",
+      "notes": "Omit jalapeño and chipotle/paprika. Keep citrus + garlic + salt as the main profile."
+    },
+    {
+      "id": "variation.freezer_marinade",
+      "label": "Freezer Pack",
+      "notes": "Combine steak + marinade in a freezer bag and freeze up to 2 months. Thaw in fridge 24 hours, then cook. This doubles as marinating time."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Store cooked sliced steak 3–4 days. Reheat gently or eat cold in salads/tacos.",
+    "freezing": "Freeze raw steak in marinade (recommended). Cooked steak can be frozen but may dry out; reheat gently with a splash of broth.",
+    "reheat": "Warm briefly in a skillet with a splash of water/broth; avoid overcooking."
+  },
+  "safety": {
+    "notes": [
+      "Discard leftover marinade that touched raw meat (do not reuse without boiling).",
+      "Use a thermometer for best doneness and food safety."
+    ]
+  },
+  "pairings": {
+    "sides": ["mexican.rice_and_beans", "mexican.elote", "mexican.guacamole"],
+    "toppings": [
+      "mexican.salsa_roja",
+      "mexican.pico_de_gallo",
+      "mexican.salsa_verde"
+    ],
+    "drinks": ["mexican.agua_fresca_jamaica", "mexican.horchata"]
+  },
+  "planner": {
+    "preferredFor": ["weeknight", "meal_prep", "taco_night"],
+    "scalesWell": true,
+    "prepNotes": [
+      "Marinade can be mixed 2–3 days ahead.",
+      "Slice across the grain for tenderness—especially for flank/skirt."
+    ],
+    "leftoversPlan": "Use leftovers in breakfast tacos, salads, burrito bowls, or chilaquiles topping."
+  },
+  "methods": [
+    "technique.marinade",
+    "technique.grill",
+    "technique.sear",
+    "technique.rest_slice"
+  ],
+  "compat": {
+    "dishId": "mexican.carne_asada",
+    "aliases": ["carne asada", "grilled steak", "taco steak", "asada"]
+  },
+  "notes": [
+    "Citrus marinades work quickly; avoid overly long marination on thin cuts to prevent mushy texture.",
+    "For best char, keep heat high and surface relatively dry (pat off excess marinade).",
+    "If you prefer a more 'street-style' profile, add a pinch of oregano and a splash of beer to the marinade."
+  ]
+}

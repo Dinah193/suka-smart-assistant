@@ -37,7 +37,7 @@ let sessionsStore = null;
 
 try {
   // eslint-disable-next-line import/no-unresolved
-  const eventBus = require("@/services/eventBus");
+  const eventBus = require("@/services/events/eventBus");
   if (eventBus && typeof eventBus.emit === "function") {
     emit = eventBus.emit;
   }
@@ -48,7 +48,7 @@ try {
 try {
   // eslint-disable-next-line import/no-unresolved
   // Expecting an object with upsertSession(session) or save(session)
-  sessionsStore = require("@/services/sessions/sessionStore");
+  sessionsStore = require("@/services/session/sessionStore");
 } catch {
   // no-op; we'll guard before use
 }
@@ -172,7 +172,7 @@ function requestSessionStart(session) {
       type: "session.requested", // Runner listens for this at app root
       ts: nowIso(),
       source: "features/calculators/AnimalFeedCalculator.hooks",
-      data: { session }
+      data: { session },
     });
   } catch {
     // ignore
@@ -222,7 +222,7 @@ export function buildFeedSessionFromResult(result) {
       `Feed components:`,
       ...feedLines,
       "",
-      `Planning horizon: ${horizon} day(s).`
+      `Planning horizon: ${horizon} day(s).`,
     ];
 
     /** @type {SessionStep} */
@@ -236,8 +236,9 @@ export function buildFeedSessionFromResult(result) {
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: "Confirm all animals have access to clean water and feed bunk is not overcrowded."
-      }
+        cueNotes:
+          "Confirm all animals have access to clean water and feed bunk is not overcrowded.",
+      },
     };
 
     steps.push(step);
@@ -250,27 +251,27 @@ export function buildFeedSessionFromResult(result) {
     title: "Feed Animals – Today’s Round",
     source: {
       type: "animalTask",
-      refId: null
+      refId: null,
     },
     steps,
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt,
-    updatedAt: createdAt
+    updatedAt: createdAt,
   };
 
   return session;
@@ -337,7 +338,7 @@ export function useAnimalFeedPlanningLinks(feedPlanResult) {
         shortageItems: [],
         storehouseRefillPlan: null,
         meatYieldCandidates: [],
-        summary: null
+        summary: null,
       };
     }
 
@@ -366,8 +367,8 @@ export function useAnimalFeedPlanningLinks(feedPlanResult) {
               projectedShortageKg: d.projectedShortageKg,
               projectedUsageKg: d.projectedUsageKg,
               currentInventoryKg: d.currentInventoryKg,
-              estimatedRunoutDate: d.estimatedRunoutDate
-            }))
+              estimatedRunoutDate: d.estimatedRunoutDate,
+            })),
           };
 
     // Meat yield planning:
@@ -391,7 +392,7 @@ export function useAnimalFeedPlanningLinks(feedPlanResult) {
           count: a.count || 1,
           role: a.role || a.class || "meat",
           location: a.location || null,
-          pressureScore
+          pressureScore,
         };
       })
       .sort((a, b) => {
@@ -409,7 +410,7 @@ export function useAnimalFeedPlanningLinks(feedPlanResult) {
       meatCandidateCount: meatYieldCandidates.length,
       totalAsFedKgPerDay: feedPlanResult.analytics?.totalAsFedKgPerDay ?? null,
       estimatedFeedCostPerDay:
-        feedPlanResult.analytics?.estimatedFeedCostPerDay ?? null
+        feedPlanResult.analytics?.estimatedFeedCostPerDay ?? null,
     };
 
     return {
@@ -417,7 +418,7 @@ export function useAnimalFeedPlanningLinks(feedPlanResult) {
       shortageItems,
       storehouseRefillPlan,
       meatYieldCandidates,
-      summary
+      summary,
     };
   }, [feedPlanResult]);
 }

@@ -53,17 +53,17 @@
 // (Adjust paths to match your project aliases as needed.)
 // -----------------------------------------------------------------------------
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import { HubPacketFormatter } from "@/services/HubPacketFormatter";
-import { FamilyFundConnector } from "@/services/FamilyFundConnector";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 // Runtime enforcement & helpers
-import { checkBudget } from "@/agents/runtime/budget";
-import { isReasonerAllowed } from "@/agents/runtime/gating";
-import { applyConfidenceRules } from "@/agents/runtime/confidence";
-import { applyFreshnessRules } from "@/agents/runtime/freshness";
+import { checkBudget } from "@/agents/runtime/reasoner/budget";
+import { isReasonerAllowed } from "@/reasoner/gating";
+import { applyConfidenceRules } from "@/agents/runtime/reasoner/confidence";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness";
 
 // Context selectors (Dexie-backed)
 import {
@@ -73,26 +73,17 @@ import {
 } from "@/agents/runtime/selectors";
 
 // Cache layer
-import {
-  getMemoized,
-  setMemoized,
-} from "@/agents/runtime/cache/memo";
-import {
-  makeSausageCacheKey,
-} from "@/agents/runtime/cache/keys";
+import { getMemoized, setMemoized } from "@/agents/runtime/reasoner/cache/memo";
+import { makeSausageCacheKey } from "@/agents/runtime/reasoner/cache/keys";
 
 // Mode mapping + Reasoner + schema validator
 import {
   resolveSausageMode, // (req: ShimRequest) => { mode: string, schemaId: string }
-} from "@/agents/shims/sausage/modes/map";
+} from "@/agents/modes/map";
 
-import {
-  callReasoner,
-} from "@/agents/runtime/reasonerDriver";
+import { callReasoner } from "@/agents/runtime/reasonerDriver";
 
-import {
-  validateModeOutput,
-} from "@/agents/runtime/schemaValidator";
+import { validateModeOutput } from "@/agents/runtime/schemaValidator";
 
 // Optional: session composition & guard evaluation if you later want
 // sausage planning to produce runnable sessions for SessionRunner.
@@ -100,7 +91,7 @@ import {
 /*
 import {
   composeSausageSession,
-} from "@/skills/sessions/compose";
+} from "@agents/skills/sessions/compose";
 
 import {
   evaluateGuardsForSession,
@@ -176,16 +167,16 @@ function buildPromptForMode(req, mode, context) {
   const { intent, input } = req;
 
   const torahProfile =
-    context?.torahProfile ||
-    context?.torahDietaryProfile ||
-    {};
+    context?.torahProfile || context?.torahDietaryProfile || {};
   const household = context?.household || {};
   const sabbathWindows = context?.sabbathWindows || [];
   const timezone = household.timezone || "America/New_York";
 
   // System prompt: Sausage planner with TIP + Sabbath guard expectations
   const systemPrompt =
-    (context?.modeConfig && context.modeConfig.prompts && context.modeConfig.prompts.system) ||
+    (context?.modeConfig &&
+      context.modeConfig.prompts &&
+      context.modeConfig.prompts.system) ||
     [
       "You are the Sausage & Forcemeat Planner for an African American Israelite household.",
       "Apply the household Torah Integrity Policy (TIP) and scheduling safeguards as follows:",
@@ -279,9 +270,7 @@ function normalizeResult(intent, raw, context) {
   const out = raw || {};
   const household = context?.household || {};
   const torahProfile =
-    context?.torahProfile ||
-    context?.torahDietaryProfile ||
-    {};
+    context?.torahProfile || context?.torahDietaryProfile || {};
 
   // Basic derived torah summary for convenience
   const torahSummary = out.torahSummary || {
@@ -410,7 +399,9 @@ export async function invokeShim(req) {
       ok: false,
       mode: "sausage.none",
       data: { error: "Missing ShimRequest" },
-      warnings: [{ code: "bad_request", message: "Request object is required." }],
+      warnings: [
+        { code: "bad_request", message: "Request object is required." },
+      ],
       debug,
     });
   }
@@ -422,7 +413,9 @@ export async function invokeShim(req) {
       ok: false,
       mode: "sausage.none",
       data: { error: "Missing domain or intent" },
-      warnings: [{ code: "bad_request", message: "domain and intent are required." }],
+      warnings: [
+        { code: "bad_request", message: "domain and intent are required." },
+      ],
       debug,
     });
   }
@@ -430,9 +423,7 @@ export async function invokeShim(req) {
   // Resolve mode via modes/map.js (with defensive fallback)
   let modeInfo = null;
   try {
-    modeInfo = resolveSausageMode
-      ? resolveSausageMode(req)
-      : null;
+    modeInfo = resolveSausageMode ? resolveSausageMode(req) : null;
   } catch (err) {
     debug.push({
       stage: "resolveMode",
@@ -449,13 +440,9 @@ export async function invokeShim(req) {
   };
 
   const mode =
-    modeInfo?.mode ||
-    fallbackModeMap[intent] ||
-    "sausage.generic.v1";
+    modeInfo?.mode || fallbackModeMap[intent] || "sausage.generic.v1";
 
-  const schemaId =
-    modeInfo?.schemaId ||
-    `sausage.${mode}.delta.schema.json`;
+  const schemaId = modeInfo?.schemaId || `sausage.${mode}.delta.schema.json`;
 
   debug.push({ stage: "modeSelected", mode, schemaId, intent, domain });
 
@@ -529,7 +516,8 @@ export async function invokeShim(req) {
   } catch (err) {
     warnings.push({
       code: "context_error",
-      message: "Failed to load full sausage context; proceeding with partial context.",
+      message:
+        "Failed to load full sausage context; proceeding with partial context.",
     });
     debug.push({
       stage: "contextError",
@@ -639,7 +627,10 @@ export async function invokeShim(req) {
     return buildShimResponse({
       ok: false,
       mode,
-      data: { error: "Reasoner call failed", detail: err?.message || String(err) },
+      data: {
+        error: "Reasoner call failed",
+        detail: err?.message || String(err),
+      },
       warnings,
       debug,
     });
@@ -791,7 +782,9 @@ export async function invokeShim(req) {
  * @returns {Promise<ShimResponse>}
  */
 export async function invokeSausageCommand(command, payload = {}) {
-  const cmd = String(command || "").toLowerCase().trim();
+  const cmd = String(command || "")
+    .toLowerCase()
+    .trim();
   const map = {
     planbatch: "sausage.planBatch",
     plan: "sausage.planBatch",

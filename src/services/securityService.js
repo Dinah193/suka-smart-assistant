@@ -24,7 +24,6 @@
 //
 // -----------------------------------------------------------------------------
 
-
 /* eslint-disable no-console */
 
 const isBrowser = typeof window !== "undefined";
@@ -33,7 +32,7 @@ const isBrowser = typeof window !== "undefined";
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
   // eslint-disable-next-line global-require
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -47,25 +46,23 @@ try {
 let HubPacketFormatter = null;
 try {
   // eslint-disable-next-line global-require
-  const f = require("@/services/HubPacketFormatter");
+  const f = require("@/services/hub/HubPacketFormatter");
   HubPacketFormatter = f.HubPacketFormatter || f.default || f || null;
 } catch (_e) {}
 
 let FamilyFundConnector = null;
 try {
   // eslint-disable-next-line global-require
-  const c = require("@/services/FamilyFundConnector");
+  const c = require("@/services/hub/FamilyFundConnector");
   FamilyFundConnector = c.FamilyFundConnector || c.default || c || null;
 } catch (_e) {}
 
-
 // ------------------------------ Constants ------------------------------------
 const STORAGE_KEY = "suka.security.keys.v1";
-const DEFAULT_ALG = "HMAC-SHA256";      // for signatures
-const DEFAULT_ENC = "AES-GCM";          // for encryption
-const DEFAULT_KEY_ID = "ssa-local-1";   // first local key
+const DEFAULT_ALG = "HMAC-SHA256"; // for signatures
+const DEFAULT_ENC = "AES-GCM"; // for encryption
+const DEFAULT_KEY_ID = "ssa-local-1"; // first local key
 const SOURCE = "securityService";
-
 
 // ------------------------------ Helpers --------------------------------------
 function nowIso() {
@@ -142,9 +139,9 @@ function loadKeyRegistry() {
           // in real deployment, you would *not* store secrets like this in plaintext
           // here we do it because we're offline-first and no backend was defined
           secret: toBase64(randomBytes(32)),
-          createdAt: nowIso()
-        }
-      }
+          createdAt: nowIso(),
+        },
+      },
     };
   }
   try {
@@ -158,9 +155,9 @@ function loadKeyRegistry() {
             alg: DEFAULT_ALG,
             enc: DEFAULT_ENC,
             secret: toBase64(randomBytes(32)),
-            createdAt: nowIso()
-          }
-        }
+            createdAt: nowIso(),
+          },
+        },
       };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reg));
       return reg;
@@ -175,9 +172,9 @@ function loadKeyRegistry() {
           alg: DEFAULT_ALG,
           enc: DEFAULT_ENC,
           secret: toBase64(randomBytes(32)),
-          createdAt: nowIso()
-        }
-      }
+          createdAt: nowIso(),
+        },
+      },
     };
   }
 }
@@ -221,7 +218,6 @@ async function deriveEncKey(secretB64) {
   }
 }
 
-
 // ------------------------------ Core Service ---------------------------------
 export const securityService = {
   /**
@@ -242,7 +238,7 @@ export const securityService = {
       alg,
       enc,
       secret: toBase64(randomBytes(32)),
-      createdAt: nowIso()
+      createdAt: nowIso(),
     };
     reg.activeKeyId = newId;
     saveKeyRegistry(reg);
@@ -264,12 +260,13 @@ export const securityService = {
         signature: null,
         keyId: activeKeyId,
         alg: keyEntry?.alg || DEFAULT_ALG,
-        insecure: true
+        insecure: true,
       };
     }
 
     const { secret, alg } = keyEntry;
-    const messageStr = typeof payload === "string" ? payload : JSON.stringify(payload);
+    const messageStr =
+      typeof payload === "string" ? payload : JSON.stringify(payload);
 
     // if Web Crypto is available
     if (isBrowser && window.crypto?.subtle) {
@@ -291,7 +288,9 @@ export const securityService = {
 
     // fallback – weak HMAC-ish (NOT for prod, but keeps the pipeline)
     const weak = toBase64(
-      new TextEncoder().encode(`${messageStr}.${secret}.${activeKeyId}`).slice(0, 32)
+      new TextEncoder()
+        .encode(`${messageStr}.${secret}.${activeKeyId}`)
+        .slice(0, 32)
     );
     return { signature: weak, keyId: activeKeyId, alg, insecure: true };
   },
@@ -316,7 +315,8 @@ export const securityService = {
     const reg = loadKeyRegistry();
     const activeKeyId = keyId || reg.activeKeyId;
     const keyEntry = reg.keys[activeKeyId];
-    const dataStr = typeof payload === "string" ? payload : JSON.stringify(payload);
+    const dataStr =
+      typeof payload === "string" ? payload : JSON.stringify(payload);
 
     if (!keyEntry) {
       emitSSA("security.error", { reason: "missing-key", keyId: activeKeyId });
@@ -325,7 +325,7 @@ export const securityService = {
         iv: null,
         keyId: activeKeyId,
         alg: DEFAULT_ENC,
-        insecure: true
+        insecure: true,
       };
     }
 
@@ -345,7 +345,7 @@ export const securityService = {
           iv: toBase64(iv),
           keyId: activeKeyId,
           alg: enc,
-          insecure: false
+          insecure: false,
         };
       } catch (err) {
         console.warn("[securityService] encrypt error, falling back:", err);
@@ -358,7 +358,7 @@ export const securityService = {
       iv: null,
       keyId: activeKeyId,
       alg: enc,
-      insecure: true
+      insecure: true,
     };
   },
 
@@ -373,7 +373,10 @@ export const securityService = {
 
     // STEP 1: format
     let formatted = payload;
-    if (HubPacketFormatter && typeof HubPacketFormatter.formatPacket === "function") {
+    if (
+      HubPacketFormatter &&
+      typeof HubPacketFormatter.formatPacket === "function"
+    ) {
       try {
         formatted = HubPacketFormatter.formatPacket(payload);
       } catch (_e) {
@@ -393,8 +396,8 @@ export const securityService = {
         signature: sig.signature,
         keyId: sig.keyId,
         alg: sig.alg,
-        insecure: !!sig.insecure
-      }
+        insecure: !!sig.insecure,
+      },
     };
 
     // STEP 3: encrypt, if asked
@@ -406,11 +409,15 @@ export const securityService = {
         iv: enc.iv,
         keyId: enc.keyId,
         alg: enc.alg,
-        insecure: !!enc.insecure
+        insecure: !!enc.insecure,
       };
     }
 
-    emitSSA("security.packet.built", { encrypt, keyId: sig.keyId, insecure: envelope.data.insecure });
+    emitSSA("security.packet.built", {
+      encrypt,
+      keyId: sig.keyId,
+      insecure: envelope.data.insecure,
+    });
     return envelope;
   },
 
@@ -422,27 +429,38 @@ export const securityService = {
     if (!featureFlags.familyFundMode) {
       // not in hub mode – return packet but do not send
       const pkt = await this.buildSecurePacket(payload, opts);
-      emitSSA("security.packet.skipped-hub", { reason: "familyFundMode=false" });
+      emitSSA("security.packet.skipped-hub", {
+        reason: "familyFundMode=false",
+      });
       return { sent: false, packet: pkt };
     }
 
     const packet = await this.buildSecurePacket(payload, opts);
-    if (!FamilyFundConnector || typeof FamilyFundConnector.send !== "function") {
-      emitSSA("security.packet.skipped-hub", { reason: "no-FamilyFundConnector" });
+    if (
+      !FamilyFundConnector ||
+      typeof FamilyFundConnector.send !== "function"
+    ) {
+      emitSSA("security.packet.skipped-hub", {
+        reason: "no-FamilyFundConnector",
+      });
       return { sent: false, packet };
     }
 
     try {
       await FamilyFundConnector.send(packet);
-      emitSSA("security.packet.sent", { keyId: packet.data.keyId, encrypted: packet.data.encrypted === true });
+      emitSSA("security.packet.sent", {
+        keyId: packet.data.keyId,
+        encrypted: packet.data.encrypted === true,
+      });
       return { sent: true, packet };
     } catch (err) {
-      emitSSA("security.packet.send-failed", { error: err?.message || String(err) });
+      emitSSA("security.packet.send-failed", {
+        error: err?.message || String(err),
+      });
       return { sent: false, packet, error: err };
     }
-  }
+  },
 };
-
 
 // auto-register a first init event in browser
 if (isBrowser) {

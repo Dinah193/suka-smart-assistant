@@ -1,0 +1,1109 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.tex_mex",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Tex-Mex",
+    "shortName": "Tex-Mex",
+    "description": "Bold, crowd-pleasing Mexican-American comfort food built around chiles, cumin, garlic, lime, cheese, and tortillas—tacos, enchiladas, fajitas, queso, and big trays made for weeknights and gatherings.",
+    "originRegions": ["Texas", "Northern Mexico (borderlands)"],
+    "regions": ["Southwestern US", "Borderlands"],
+    "primaryCountriesAndIslands": ["United States", "Mexico"],
+    "tags": [
+      "cuisine.tex_mex",
+      "profile.bold",
+      "profile.cheesy_optional",
+      "profile.weeknight_friendly",
+      "profile.batch_friendly",
+      "profile.family_style",
+      "profile.tortilla_based",
+      "profile.salsa_forward"
+    ],
+    "icon": "utensils",
+    "colorHint": "chili_red",
+    "heritageNotes": [
+      "Tex-Mex is a regional, evolving border cuisine shaped by local ingredients, commercial spice blends, and family-style service.",
+      "It overlaps with Northern Mexican flavors but uses a distinct pantry (yellow cheese, flour tortillas, chili powder blends) and comfort-food formats (queso, nacho trays)."
+    ],
+    "version": "1.0.0",
+    "author": "SSA Catalog",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA Canonical Cuisine Profile",
+      "maintainer": "SSA",
+      "license": "internal",
+      "attribution": "Compiled from common Tex-Mex pantry patterns and meal archetypes for deterministic planning.",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "curated",
+      "type": "cuisine_profile",
+      "notes": "Designed for planners: taco nights, sheet-pan fajitas, enchilada trays, beans + rice bases, salsa/queso finish logic."
+    },
+    "family": {
+      "parent": "cuisines.mexican",
+      "siblings": ["cuisines.southwestern", "cuisines.new_mexican"],
+      "overlapsWith": [
+        {
+          "id": "cuisines.southwestern",
+          "reason": "Shared chiles, cumin, lime, grilled meats, and bean/rice sides; Tex-Mex leans heavier on cheese, flour tortillas, and chili powder blends."
+        },
+        {
+          "id": "cuisines.creole",
+          "reason": "Occasional overlap in one-pot comfort patterns and spice-forward flavor building, but ingredient sets and archetypes differ."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.tex_mex.subprofile.taco_night",
+        "name": "Taco Night Core",
+        "signatureNotes": "Fast proteins, crunchy/fresh toppings, salsa + lime, flexible shells (corn/flour).",
+        "commonSauceBases": [
+          "sauce.salsa_roja",
+          "sauce.salsa_verde",
+          "sauce.crema_lime"
+        ]
+      },
+      {
+        "id": "cuisines.tex_mex.subprofile.fajita_style",
+        "name": "Fajita & Grill Style",
+        "signatureNotes": "Sizzling strips with onions/peppers, citrus, cumin, char, and warm tortillas.",
+        "commonSauceBases": [
+          "sauce.fajita_marinade",
+          "sauce.salsa_roja",
+          "sauce.chipotle_crema"
+        ]
+      },
+      {
+        "id": "cuisines.tex_mex.subprofile.queso_tray",
+        "name": "Queso, Nachos & Party Trays",
+        "signatureNotes": "Cheese-forward, snackable, shareable; queso/beans/meat + toppings.",
+        "commonSauceBases": [
+          "sauce.queso",
+          "sauce.salsa_roja",
+          "sauce.pico_de_gallo"
+        ]
+      },
+      {
+        "id": "cuisines.tex_mex.subprofile.enchilada_bake",
+        "name": "Enchiladas & Bakes",
+        "signatureNotes": "Saucy trays, chili gravy or enchilada sauce, baked cheese top.",
+        "commonSauceBases": [
+          "sauce.enchilada_red",
+          "sauce.chili_gravy",
+          "sauce.enchilada_green"
+        ]
+      }
+    ],
+    "regionHints": ["Texas", "Borderlands", "Southwest"],
+    "countryHints": ["US", "Mexico"]
+  },
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "family_style",
+      "street_food",
+      "plates",
+      "bowls",
+      "holiday_feasts"
+    ],
+    "weeknightBias": "high",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "batch.tex_mex.taco_meat",
+        "batch.tex_mex.pinto_beans",
+        "batch.tex_mex.spanish_rice",
+        "batch.tex_mex.enchilada_sauce",
+        "batch.tex_mex.fajita_veg"
+      ],
+      "notes": "Tex-Mex excels at batch prep: proteins + beans + rice + sauces become tacos, bowls, nachos, enchiladas, salads."
+    },
+    "spiceHeatDefault": "medium",
+    "saltinessDefault": "medium",
+    "sournessDefault": "medium",
+    "sweetnessDefault": "low",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": [
+      "fat.avocado_oil",
+      "fat.lard_optional",
+      "fat.olive_oil",
+      "fat.butter_optional"
+    ],
+    "primaryStarches": [
+      "base.flour_tortillas",
+      "base.corn_tortillas",
+      "base.rice",
+      "base.tortilla_chips"
+    ],
+    "primaryProteins": [
+      "protein.beef",
+      "protein.chicken",
+      "protein.pork",
+      "protein.beans",
+      "protein.shrimp_optional"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.tacos",
+      "archetype.fajitas",
+      "archetype.burrito_bowls",
+      "archetype.enchiladas",
+      "archetype.nachos",
+      "archetype.chili_optional",
+      "archetype.quesadilla",
+      "archetype.taco_salad_optional"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.tex_mex.taco_plate",
+      "plate.tex_mex.bowl_plate",
+      "plate.tex_mex.tray_plate"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Chile + cumin warmth",
+      "Garlic-onion savory base",
+      "Lime brightness",
+      "Smoky paprika/chipotle accents",
+      "Salsa/queso finishes",
+      "Fresh crunch from pico/jalapeño/cilantro"
+    ],
+    "aromaticsCore": [
+      "aromatic.onion",
+      "aromatic.garlic",
+      "aromatic.scallion_optional",
+      "aromatic.cilantro_optional"
+    ],
+    "spiceCore": [
+      "spice.cumin",
+      "spice.chili_powder_blend",
+      "spice.smoked_paprika",
+      "spice.oregano_mexican_optional",
+      "spice.black_pepper",
+      "spice.coriander_optional"
+    ],
+    "umamiBuilders": [
+      "umami.tomato_paste",
+      "umami.stock_chicken",
+      "umami.stock_beef",
+      "umami.soy_sauce_optional"
+    ],
+    "acidOptions": [
+      "acid.lime",
+      "acid.vinegar_cider",
+      "acid.pickled_jalapeno_brine_optional"
+    ],
+    "sweetBalanceOptions": [
+      "sweetener.honey_optional",
+      "sweetener.brown_sugar_optional",
+      "sweetener.agave_optional"
+    ],
+    "heatOptions": [
+      "heat.jalapeno",
+      "heat.serrano_optional",
+      "heat.chipotle_in_adobo_optional",
+      "heat.cayenne_optional"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Enough for taco night / bowls with quick seasoning and a simple salsa finish.",
+      "items": [
+        "spice.chili_powder_blend",
+        "spice.cumin",
+        "spice.garlic_powder_optional",
+        "spice.onion_powder_optional",
+        "spice.black_pepper",
+        "salt.kosher",
+        "acid.lime",
+        "pantry.canned_diced_tomatoes",
+        "pantry.tomato_paste",
+        "base.flour_tortillas",
+        "base.corn_tortillas",
+        "base.rice",
+        "pantry.black_beans",
+        "pantry.pinto_beans",
+        "fat.avocado_oil",
+        "condiment.salsa_store",
+        "dairy.cheddar_optional"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core Tex-Mex pantry for frequent meals: sauces, beans, rice, chips, and toppings.",
+      "items": [
+        "spice.smoked_paprika",
+        "spice.oregano_mexican_optional",
+        "spice.coriander_optional",
+        "heat.jalapeno",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "produce.bell_pepper",
+        "produce.lime",
+        "produce.cilantro_optional",
+        "base.tortilla_chips",
+        "base.taco_shells_optional",
+        "pantry.canned_green_chiles",
+        "pantry.chicken_stock",
+        "pantry.beef_stock",
+        "pantry.corn",
+        "pantry.pickled_jalapenos_optional",
+        "dairy.monterey_jack_optional",
+        "dairy.sour_cream_optional",
+        "condiment.hot_sauce_optional"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Deeper flavor: chili gravy, homemade enchilada sauces, char/grill, and salsas.",
+      "items": [
+        "pantry.dried_chiles_optional",
+        "heat.chipotle_in_adobo_optional",
+        "pantry.annatto_optional",
+        "pantry.masa_harina_optional",
+        "fat.lard_optional",
+        "pantry.cocoa_powder_optional",
+        "pantry.apple_cider_vinegar",
+        "pantry.worcestershire_optional",
+        "pantry.canned_refried_beans_optional"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty and party extras: queso styles, smoked meats, and niche toppings.",
+      "items": [
+        "dairy.velveeta_style_optional",
+        "dairy.american_cheese_optional",
+        "pantry.roasted_poblano_optional",
+        "pantry.cotija_optional",
+        "pantry.pickled_red_onions_optional",
+        "pantry.tajin_optional"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.sear",
+      "method.saute",
+      "method.roast",
+      "method.simmer",
+      "method.grill_optional",
+      "method.braise_optional"
+    ],
+    "common": [
+      "method.toast_spices",
+      "method.deglaze",
+      "method.reduce",
+      "method.char_optional",
+      "method.assemble"
+    ],
+    "notes": [
+      "Tex-Mex often builds flavor fast: toast spices, sauté onion/garlic, brown protein, then finish with salsa/acid/cheese.",
+      "Tray bakes (enchiladas/nachos) are a key format: sauce + cheese + quick bake."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.tex_mex.tacos",
+      "label": "Tacos (Street-Food + Family Style)",
+      "description": "Seasoned protein + warm tortillas + salsa/acid + crunchy/fresh toppings. Highly flexible for leftovers and pantry-first planning.",
+      "commonExamples": [
+        "Ground beef tacos",
+        "Chicken tacos",
+        "Bean tacos",
+        "Carnitas-style tacos (shortcut)"
+      ],
+      "defaults": {
+        "baseOptions": ["base.corn_tortillas", "base.flour_tortillas"],
+        "proteinOptions": [
+          "protein.beef",
+          "protein.chicken",
+          "protein.pork",
+          "protein.beans"
+        ],
+        "sauceOptions": [
+          "sauce.salsa_roja",
+          "sauce.salsa_verde",
+          "sauce.pico_de_gallo"
+        ],
+        "garnishOptions": [
+          "garnish.cilantro_optional",
+          "garnish.onion_diced",
+          "garnish.lime_wedges",
+          "garnish.jalapeno_sliced_optional",
+          "garnish.cheese_shredded_optional",
+          "garnish.sour_cream_optional"
+        ],
+        "pairings": ["side.spanish_rice", "side.beans", "side.chips_salsa"]
+      }
+    },
+    {
+      "id": "archetype.tex_mex.fajitas",
+      "label": "Fajitas (Sizzling Skillet)",
+      "description": "Sautéed/seared strips + onions/peppers with cumin-lime seasoning; served with tortillas and toppings.",
+      "commonExamples": [
+        "Chicken fajitas",
+        "Steak fajitas",
+        "Shrimp fajitas (quick)"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.beef",
+          "protein.shrimp_optional"
+        ],
+        "vegOptions": ["produce.onion", "produce.bell_pepper"],
+        "baseOptions": ["base.flour_tortillas", "base.corn_tortillas"],
+        "sauceOptions": [
+          "sauce.fajita_marinade",
+          "sauce.salsa_roja",
+          "sauce.chipotle_crema"
+        ],
+        "garnishOptions": [
+          "garnish.lime_wedges",
+          "garnish.cilantro_optional",
+          "garnish.cheese_shredded_optional"
+        ],
+        "pairings": [
+          "side.spanish_rice",
+          "side.beans",
+          "side.guacamole_optional"
+        ]
+      }
+    },
+    {
+      "id": "archetype.tex_mex.enchiladas",
+      "label": "Enchiladas (Saucy Tray Bake)",
+      "description": "Filled tortillas rolled and baked under red/green sauce with cheese top—ideal for batch cooking and leftovers.",
+      "commonExamples": [
+        "Cheese enchiladas",
+        "Chicken enchiladas",
+        "Beef enchiladas",
+        "Bean enchiladas"
+      ],
+      "defaults": {
+        "baseOptions": ["base.corn_tortillas", "base.flour_tortillas_optional"],
+        "proteinOptions": ["protein.chicken", "protein.beef", "protein.beans"],
+        "sauceOptions": [
+          "sauce.enchilada_red",
+          "sauce.enchilada_green",
+          "sauce.chili_gravy_optional"
+        ],
+        "garnishOptions": [
+          "garnish.cilantro_optional",
+          "garnish.onion_diced_optional",
+          "garnish.sour_cream_optional"
+        ],
+        "pairings": [
+          "side.spanish_rice",
+          "side.beans",
+          "side.salad_simple_optional"
+        ]
+      }
+    },
+    {
+      "id": "archetype.tex_mex.nachos",
+      "label": "Nachos (Tray + Party Food)",
+      "description": "Chips + beans + protein + cheese, baked and finished with salsa/crema and fresh toppings.",
+      "commonExamples": [
+        "Loaded nachos",
+        "Queso nachos",
+        "Bean & cheese nachos"
+      ],
+      "defaults": {
+        "baseOptions": ["base.tortilla_chips"],
+        "proteinOptions": [
+          "protein.beef",
+          "protein.chicken",
+          "protein.pork",
+          "protein.beans"
+        ],
+        "sauceOptions": [
+          "sauce.queso_optional",
+          "sauce.salsa_roja",
+          "sauce.pico_de_gallo"
+        ],
+        "garnishOptions": [
+          "garnish.jalapeno_sliced_optional",
+          "garnish.cilantro_optional",
+          "garnish.sour_cream_optional",
+          "garnish.lime_wedges"
+        ],
+        "pairings": [
+          "side.guacamole_optional",
+          "side.beans",
+          "side.rice_optional"
+        ]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "spice.chili_powder_blend",
+      "spice.cumin",
+      "spice.smoked_paprika",
+      "aromatic.onion",
+      "aromatic.garlic",
+      "acid.lime",
+      "produce.bell_pepper",
+      "pantry.canned_diced_tomatoes",
+      "pantry.tomato_paste",
+      "base.flour_tortillas",
+      "base.corn_tortillas",
+      "base.rice",
+      "pantry.black_beans",
+      "pantry.pinto_beans",
+      "dairy.cheddar_optional",
+      "dairy.monterey_jack_optional",
+      "dairy.sour_cream_optional",
+      "condiment.salsa_store"
+    ],
+    "optional_traditional": [
+      "pantry.canned_green_chiles",
+      "heat.jalapeno",
+      "heat.chipotle_in_adobo_optional",
+      "pantry.dried_chiles_optional",
+      "fat.lard_optional",
+      "pantry.masa_harina_optional"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid.sugar_heavy_sauces",
+        "label": "Sugar-heavy sauces",
+        "reason": "Tex-Mex is generally savory and chile-forward; sweetness is used sparingly to balance acidity/heat."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.beef",
+        "options": [
+          "protein.turkey_optional",
+          "protein.chicken",
+          "protein.beans"
+        ],
+        "notes": "Swap based on availability: turkey for lean ground, chicken for fajitas/enchiladas, beans for vegetarian."
+      },
+      {
+        "for": "protein.chicken",
+        "options": ["protein.pork", "protein.beef", "protein.beans"],
+        "notes": "Use pork for carnitas-style shreds, beef for taco meat, beans for budget/vegetarian."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "side.spanish_rice",
+        "options": ["side.rice_plain", "side.cauli_rice_optional"],
+        "notes": "Plain rice + salsa works as a shortcut. Cauli rice for low-carb."
+      },
+      {
+        "for": "side.beans",
+        "options": [
+          "side.refried_beans_optional",
+          "side.black_beans",
+          "side.pinto_beans"
+        ],
+        "notes": "Refried is richest; black beans are clean/firm; pinto beans are classic and creamy when simmered."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "thickener.flour",
+        "options": ["thickener.cornstarch", "thickener.masa_harina_optional"],
+        "notes": "Cornstarch thickens sauces quickly; masa harina adds corn flavor and body for chili/enchilada sauces."
+      }
+    ],
+    "notes": [
+      "Flour vs corn tortillas: flour for fajitas/burritos; corn for enchiladas/tacos. Either can work depending on preference.",
+      "Dairy is common but optional: replace sour cream with lime-cashew crema or omit; use dairy-free shreds if needed."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.tex_mex.taco_plate",
+      "label": "Taco Plate (Protein + Tortillas + Toppings)",
+      "archetypeId": "archetype.tex_mex.tacos",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.beef",
+            "protein.chicken",
+            "protein.pork",
+            "protein.beans"
+          ],
+          "chooseOne": true,
+          "notes": "Ground or shredded. Season with chili powder + cumin + garlic."
+        },
+        {
+          "role": "base",
+          "ingredientIds": ["base.corn_tortillas", "base.flour_tortillas"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.salsa_roja",
+            "sauce.salsa_verde",
+            "sauce.pico_de_gallo",
+            "sauce.queso_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "garnish.lime_wedges",
+            "garnish.onion_diced",
+            "garnish.cilantro_optional",
+            "garnish.cheese_shredded_optional"
+          ],
+          "chooseOne": false,
+          "notes": "Add at least 1 fresh/crunchy topping for balance."
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "side.beans",
+            "side.spanish_rice",
+            "side.chips_salsa"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Warm tortillas in a dry skillet for best texture.",
+        "Finish with lime for brightness."
+      ]
+    },
+    {
+      "id": "template.tex_mex.fajita_night",
+      "label": "Fajita Night (Sautéed Strips + Peppers/Onions)",
+      "archetypeId": "archetype.tex_mex.fajitas",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.beef",
+            "protein.shrimp_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "ingredientIds": ["produce.onion", "produce.bell_pepper"],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "ingredientIds": ["base.flour_tortillas", "base.corn_tortillas"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.fajita_marinade",
+            "sauce.salsa_roja",
+            "sauce.chipotle_crema"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "side.spanish_rice",
+            "side.beans",
+            "side.salad_simple_optional"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Cook veg hot and fast for char without steaming.",
+        "Add lime at the end to keep brightness."
+      ]
+    },
+    {
+      "id": "template.tex_mex.enchilada_tray",
+      "label": "Enchilada Tray (Batch + Leftovers)",
+      "archetypeId": "archetype.tex_mex.enchiladas",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": ["protein.chicken", "protein.beef", "protein.beans"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "ingredientIds": [
+            "base.corn_tortillas",
+            "base.flour_tortillas_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.enchilada_red",
+            "sauce.enchilada_green",
+            "sauce.chili_gravy_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "ingredientIds": ["dairy.cheese_shredded_optional"],
+          "chooseOne": false,
+          "notes": "Cheese optional; omit or use dairy-free."
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "side.beans",
+            "side.spanish_rice",
+            "side.salad_simple_optional"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Make extra: enchiladas reheat well and freeze well if sauce is not overly watery."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.tex_mex.dairy_allergens",
+      "label": "Dairy + Gluten Awareness",
+      "notes": [
+        "Cheese/sour cream are common but optional; flag for dairy-free adaptation.",
+        "Flour tortillas contain gluten; use corn tortillas or certified GF tortillas when needed."
+      ]
+    },
+    {
+      "id": "safety.tex_mex.chile_handling",
+      "label": "Chile Handling",
+      "notes": [
+        "Wear gloves when handling hot peppers; avoid touching eyes.",
+        "Wash hands and tools thoroughly after cutting chiles."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "tacos",
+      "fajitas",
+      "enchiladas",
+      "queso",
+      "nachos",
+      "burrito bowls",
+      "chili",
+      "salsa",
+      "cumin",
+      "chili powder"
+    ],
+    "commonAlternateNames": ["TexMex", "Tex Mex", "Texas-Mexican"]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "produce.lime",
+      "produce.onion",
+      "produce.garlic",
+      "produce.bell_pepper",
+      "produce.cilantro_optional"
+    ],
+    "proteinsCommon": [
+      "protein.beef",
+      "protein.chicken",
+      "protein.pork",
+      "protein.beans"
+    ],
+    "produceCommon": [
+      "produce.onion",
+      "produce.bell_pepper",
+      "produce.jalapeno_optional",
+      "produce.avocado_optional",
+      "produce.tomato_optional"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "produce.cilantro_optional",
+        "fallbacks": ["garnish.green_onion_optional", "garnish.lime_wedges"],
+        "note": "If cilantro is unavailable or disliked, lean on green onion + lime for fresh finish."
+      },
+      {
+        "ingredient": "produce.avocado_optional",
+        "fallbacks": ["sauce.crema_lime", "sauce.salsa_verde"],
+        "note": "Guacamole is optional; crema or salsa keeps the dish balanced."
+      }
+    ],
+    "coreStaples": {
+      "spices": [
+        "spice.chili_powder_blend",
+        "spice.cumin",
+        "spice.smoked_paprika",
+        "spice.black_pepper",
+        "salt.kosher"
+      ],
+      "canned": [
+        "pantry.canned_diced_tomatoes",
+        "pantry.tomato_paste",
+        "pantry.black_beans",
+        "pantry.pinto_beans",
+        "pantry.canned_green_chiles"
+      ],
+      "bases": [
+        "base.flour_tortillas",
+        "base.corn_tortillas",
+        "base.rice",
+        "base.tortilla_chips"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "thickeners": ["pantry.masa_harina_optional"],
+      "chiles": [
+        "pantry.dried_chiles_optional",
+        "heat.chipotle_in_adobo_optional"
+      ],
+      "extras": ["pantry.pickled_jalapenos_optional", "pantry.tajin_optional"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.saute",
+      "method.sear",
+      "method.roast",
+      "method.simmer",
+      "method.assemble"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.tex_mex.quick_taco_meat",
+        "name": "Quick Taco Meat (Skillet)",
+        "steps": [
+          "step.brown_protein",
+          "step.toast_spices",
+          "step.simmer_with_tomato",
+          "step.finish_with_lime"
+        ],
+        "notes": "Brown meat, bloom spices, add a little tomato + water/stock, simmer briefly, finish with lime/salsa."
+      },
+      {
+        "id": "process.tex_mex.fajita_pan",
+        "name": "Fajita Skillet (High Heat)",
+        "steps": [
+          "step.sear_protein",
+          "step.char_veg",
+          "step.deglaze",
+          "step.finish_with_citrus"
+        ],
+        "notes": "Cook protein hot, then peppers/onions fast; deglaze and finish with lime."
+      },
+      {
+        "id": "process.tex_mex.enchilada_tray",
+        "name": "Enchilada Tray Bake",
+        "steps": [
+          "step.warm_tortillas",
+          "step.fill_roll",
+          "step.sauce_cover",
+          "step.bake",
+          "step.rest_slice"
+        ],
+        "notes": "Sauce + bake format for easy batch and leftovers."
+      }
+    ],
+    "equipmentAffinity": {
+      "tool.cast_iron_skillet": "high",
+      "tool.sheet_pan": "high",
+      "tool.dutch_oven": "medium",
+      "tool.slow_cooker_optional": "medium",
+      "tool.grill_optional": "medium"
+    },
+    "signatureMethods": [
+      "Toast/bloom spice blends in fat for 20–40 seconds before adding liquids.",
+      "Finish with lime/salsa after cooking to keep brightness."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.cast_iron_skillet",
+      "tool.sheet_pan",
+      "tool.saucepan",
+      "tool.tongs",
+      "tool.knife",
+      "tool.board",
+      "tool.microplane_optional",
+      "tool.instant_read_thermometer_optional"
+    ],
+    "optionalButHelpful": [
+      "tool.grill_optional",
+      "tool.slow_cooker_optional",
+      "tool.rice_cooker_optional",
+      "tool.blender_optional"
+    ],
+    "notes": [
+      "A hot, wide skillet prevents steaming fajita vegetables.",
+      "Sheet-pan Tex-Mex (fajitas/nachos) is a reliable weeknight fallback."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": ["allergen.dairy_optional", "allergen.gluten_optional"],
+    "dietCompatibility": {
+      "diet.gluten_free": "Use corn tortillas/chips and verify spice blends/sauces.",
+      "diet.dairy_free": "Skip cheese/sour cream or replace with dairy-free; use salsa + lime for finish.",
+      "diet.low_carb": "Use bowls over greens/cauli rice; skip tortillas/chips."
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.tex_mex.tacos",
+        "name": "Tacos (Beef/Chicken/Bean)",
+        "subprofiles": ["cuisines.tex_mex.subprofile.taco_night"],
+        "difficulty": "beginner",
+        "heatTypical": 2,
+        "notes": "Fast assembly pattern; great for leftovers and pantry planning."
+      },
+      {
+        "id": "dish.tex_mex.fajitas",
+        "name": "Chicken or Steak Fajitas",
+        "subprofiles": ["cuisines.tex_mex.subprofile.fajita_style"],
+        "difficulty": "beginner",
+        "heatTypical": 2,
+        "notes": "High-heat skillet or sheet-pan; lime finish."
+      },
+      {
+        "id": "dish.tex_mex.enchiladas",
+        "name": "Enchiladas (Red/Green/Chili Gravy)",
+        "subprofiles": ["cuisines.tex_mex.subprofile.enchilada_bake"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Batch-friendly tray bake; freezes well."
+      },
+      {
+        "id": "dish.tex_mex.queso_nachos",
+        "name": "Queso + Nachos Tray",
+        "subprofiles": ["cuisines.tex_mex.subprofile.queso_tray"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Party-food format; adjust heat with jalapeños/hot sauce."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.tex_mex.horchata_optional",
+        "name": "Horchata (Optional)",
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Optional drink pairing; not required for core planning."
+      }
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "base.flour_tortillas",
+      "base.corn_tortillas",
+      "base.rice",
+      "base.tortilla_chips"
+    ],
+    "typicalVegSides": [
+      "side.salad_simple_optional",
+      "side.fajita_veg",
+      "side.corn_salad_optional"
+    ],
+    "typicalCondiments": [
+      "condiment.salsa_store",
+      "condiment.hot_sauce_optional",
+      "condiment.pickled_jalapenos_optional"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "protein.beef",
+        "pair": [
+          "spice.chili_powder_blend",
+          "spice.cumin",
+          "acid.lime",
+          "umami.tomato_paste"
+        ],
+        "note": "Beef + chili/cumin + tomato + lime forms the classic taco meat backbone."
+      },
+      {
+        "with": "protein.chicken",
+        "pair": [
+          "acid.lime",
+          "spice.cumin",
+          "spice.smoked_paprika",
+          "heat.jalapeno_optional"
+        ],
+        "note": "Chicken fajita profiles lean on citrus + cumin + mild smoke."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.over_sweet",
+        "avoid": ["sweetener.agave_optional", "sweetener.honey_optional"],
+        "note": "Keep sweetness minimal; use it only to balance heat/acidity, not as a primary note."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.tex_mex.tortillas_gluten_free",
+        "whenHealthFlag": ["diet.gluten_free"],
+        "replace": ["base.flour_tortillas"],
+        "with": ["base.corn_tortillas", "base.gf_tortillas_optional"],
+        "notes": "Default to corn tortillas for GF; verify chips and spice blends are GF."
+      },
+      {
+        "id": "sub.tex_mex.sour_cream_dairy_free",
+        "whenHealthFlag": ["diet.dairy_free"],
+        "replace": ["dairy.sour_cream_optional"],
+        "with": [
+          "sauce.crema_lime_dairy_free_optional",
+          "condiment.salsa_store"
+        ],
+        "notes": "Use salsa + lime to keep brightness; dairy-free crema optional."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "sub.tex_mex.grill_to_skillet",
+        "whenNoEquipment": ["tool.grill_optional"],
+        "adapt": "method.sear",
+        "notes": "If no grill, use a hot skillet or sheet-pan roast for char and browning."
+      }
+    ],
+    "rules": [
+      {
+        "type": "note",
+        "id": "sub.tex_mex.queso_optional",
+        "notes": "Cheese-heavy dishes can be planned as optional add-ons; keep a salsa-forward path for dairy-free households."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.tex_mex.taco_meat",
+        "name": "Skillet Taco Meat",
+        "makes": "component.tex_mex.taco_meat",
+        "freezerFriendly": true,
+        "notes": "Batch cook ground meat or shredded chicken; reuse for tacos, nachos, bowls, and enchiladas."
+      },
+      {
+        "id": "batch.tex_mex.pinto_beans",
+        "name": "Pinto Beans (Pot or Slow Cooker)",
+        "makes": "component.tex_mex.pinto_beans",
+        "freezerFriendly": true,
+        "notes": "Cook a large pot; portion and freeze. Mash some into refried-style beans."
+      },
+      {
+        "id": "batch.tex_mex.spanish_rice",
+        "name": "Spanish/Mexican Rice",
+        "makes": "component.tex_mex.spanish_rice",
+        "freezerFriendly": true,
+        "notes": "Cook rice with tomato + stock; reheat with a splash of water."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use store salsa as the sauce base: salsa + cumin + garlic can season chicken or beans fast.",
+      "Sheet-pan fajitas: roast chicken/peppers/onions at high heat, finish with lime.",
+      "Nachos are a planned leftovers meal: chips + warmed beans + leftover protein + toppings."
+    ],
+    "seasonality": [
+      {
+        "season": "season.summer",
+        "focus": [
+          "produce.tomato_optional",
+          "produce.cilantro_optional",
+          "produce.lime"
+        ]
+      },
+      {
+        "season": "season.winter",
+        "focus": ["pantry.beans", "pantry.canned_diced_tomatoes", "base.rice"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Weeknight Tex-Mex",
+        "items": [
+          "dish.tex_mex.tacos",
+          "dish.tex_mex.fajitas",
+          "dish.tex_mex.queso_nachos"
+        ]
+      },
+      {
+        "title": "Batch & Tray Meals",
+        "items": ["dish.tex_mex.enchiladas", "dish.tex_mex.queso_nachos"]
+      }
+    ],
+    "searchBoostTerms": [
+      "taco",
+      "fajita",
+      "enchilada",
+      "queso",
+      "nachos",
+      "cumin",
+      "chili powder",
+      "salsa"
+    ],
+    "colorHints": {
+      "primary": "chili_red",
+      "accent": "lime_green",
+      "secondary": "golden_corn"
+    },
+    "iconHints": [
+      "icon.taco",
+      "icon.pepper",
+      "icon.lime",
+      "icon.cheese_optional"
+    ]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.tex_mex",
+      "profile.weeknight_friendly",
+      "profile.batch_friendly"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.tex_mex.taco_plate",
+      "plate.tex_mex.bowl_plate",
+      "plate.tex_mex.tray_plate"
+    ],
+    "notes": [
+      "This profile assumes SSA ingredient IDs exist for common Tex-Mex items; if your ingredient catalog differs, map IDs via alias/normalization in the cuisine ruleset.",
+      "Dairy-heavy items are always marked optional to support dairy-free adaptation paths."
+    ]
+  }
+}

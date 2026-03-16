@@ -44,7 +44,7 @@ import React, { useMemo, useState } from "react";
 /* ------------------------------ Optional deps (defensive) ------------------------------ */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -106,11 +106,19 @@ const fmtDate = (iso) => {
 function normalize(item = {}, householdAllergens = []) {
   const s = item.safety || {};
   const recalls = Array.isArray(s.recalls) ? s.recalls : [];
-  const allergensDetected = (s.allergensDetected || []).map((x) => String(x).toLowerCase());
-  const householdSet = new Set((householdAllergens || []).map((x) => String(x).toLowerCase()));
-  const allergensUserRisk = allergensDetected.filter((a) => householdSet.has(a));
+  const allergensDetected = (s.allergensDetected || []).map((x) =>
+    String(x).toLowerCase()
+  );
+  const householdSet = new Set(
+    (householdAllergens || []).map((x) => String(x).toLowerCase())
+  );
+  const allergensUserRisk = allergensDetected.filter((a) =>
+    householdSet.has(a)
+  );
 
-  const harmfulIngredients = Array.isArray(s.harmfulIngredients) ? s.harmfulIngredients : [];
+  const harmfulIngredients = Array.isArray(s.harmfulIngredients)
+    ? s.harmfulIngredients
+    : [];
   const clean = Array.isArray(s.clean) ? s.clean : [];
 
   return {
@@ -152,7 +160,9 @@ function WatchScheduleButton({ item }) {
     setBusy(true);
     try {
       const payload = {
-        label: `Watch recalls/alerts: ${item.brand || ""} ${item.name || item.upc || ""}`.trim(),
+        label: `Watch recalls/alerts: ${item.brand || ""} ${
+          item.name || item.upc || ""
+        }`.trim(),
         when: "weekly", // your scheduler or RRULE can refine this
         meta: { upc: item.upc, domain: "safety" },
         createdAt: Date.now(),
@@ -189,7 +199,9 @@ function ReplacementSessionButton({ item }) {
     try {
       const payload = {
         type: "shopping",
-        label: `Replacement for ${item.brand || ""} ${item.name || item.upc || ""}`.trim(),
+        label: `Replacement for ${item.brand || ""} ${
+          item.name || item.upc || ""
+        }`.trim(),
         items: [
           {
             upc: item.upc,
@@ -231,12 +243,21 @@ function ReplacementSessionButton({ item }) {
  * @param {boolean} [props.compact]  // if true, show badges only (no label text); click opens popover
  * @param {boolean} [props.showActions] // show Watch/Replacement buttons in popover
  */
-export default function SafetyBadges({ item = {}, compact = false, showActions = true }) {
-  const household = useHouseholdAllergens ? useHouseholdAllergens() : { list: [] };
-  const { recalls, allergensDetected, allergensUserRisk, harmfulIngredients, clean } = useMemo(
-    () => normalize(item, household?.list || []),
-    [item, household]
-  );
+export default function SafetyBadges({
+  item = {},
+  compact = false,
+  showActions = true,
+}) {
+  const household = useHouseholdAllergens
+    ? useHouseholdAllergens()
+    : { list: [] };
+  const {
+    recalls,
+    allergensDetected,
+    allergensUserRisk,
+    harmfulIngredients,
+    clean,
+  } = useMemo(() => normalize(item, household?.list || []), [item, household]);
 
   const [open, setOpen] = useState(false);
 
@@ -256,7 +277,10 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
 
   const openDetails = () => {
     setOpen(true);
-    eventBus.emit("safety:details:open", { upc: item.upc, context: "SafetyBadges" });
+    eventBus.emit("safety:details:open", {
+      upc: item.upc,
+      context: "SafetyBadges",
+    });
     analytics.track("safety_details_opened", { upc: item.upc });
   };
 
@@ -264,14 +288,15 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
   const nodes = [];
 
   if (hasRecall) {
-    const label = compact ? "Recall" : `Recall${worstSeverity !== "info" ? ` (${worstSeverity})` : ""}`;
+    const label = compact
+      ? "Recall"
+      : `Recall${worstSeverity !== "info" ? ` (${worstSeverity})` : ""}`;
     nodes.push(
-      badge(
-        "recall",
-        label,
-        tone[worstSeverity] || tone.moderate,
-        { onClick: openDetails, role: "button", title: "View recall details" }
-      )
+      badge("recall", label, tone[worstSeverity] || tone.moderate, {
+        onClick: openDetails,
+        role: "button",
+        title: "View recall details",
+      })
     );
   }
 
@@ -284,12 +309,11 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
       ? `Allergen risk (You: ${allergensUserRisk.join(", ")})`
       : `Allergens (${allergensDetected.join(", ")})`;
     nodes.push(
-      badge(
-        "allergens",
-        label,
-        hasUserRisk ? tone.high : tone.low,
-        { onClick: openDetails, role: "button", title: "View allergen details" }
-      )
+      badge("allergens", label, hasUserRisk ? tone.high : tone.low, {
+        onClick: openDetails,
+        role: "button",
+        title: "View allergen details",
+      })
     );
   }
 
@@ -297,12 +321,11 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
     const high = harmfulIngredients.some((h) => h.risk === "high");
     const sev = high ? "high" : "moderate";
     nodes.push(
-      badge(
-        "harmful",
-        compact ? "Harmful" : "Harmful ingredients",
-        tone[sev],
-        { onClick: openDetails, role: "button", title: "View ingredient details" }
-      )
+      badge("harmful", compact ? "Harmful" : "Harmful ingredients", tone[sev], {
+        onClick: openDetails,
+        role: "button",
+        title: "View ingredient details",
+      })
     );
   }
 
@@ -310,7 +333,11 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
     nodes.push(
       badge(
         "clean",
-        compact ? "Clean" : `Clean: ${clean.slice(0, 2).join(", ")}${clean.length > 2 ? "…" : ""}`,
+        compact
+          ? "Clean"
+          : `Clean: ${clean.slice(0, 2).join(", ")}${
+              clean.length > 2 ? "…" : ""
+            }`,
         tone.good,
         { onClick: openDetails, role: "button", title: "View more labels" }
       )
@@ -320,12 +347,11 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
   // If nothing, show a neutral “No alerts” badge (still clickable to open details)
   if (!nodes.length) {
     nodes.push(
-      badge(
-        "none",
-        compact ? "OK" : "No safety alerts",
-        tone.neutral,
-        { onClick: openDetails, role: "button", title: "View details" }
-      )
+      badge("none", compact ? "OK" : "No safety alerts", tone.neutral, {
+        onClick: openDetails,
+        role: "button",
+        title: "View details",
+      })
     );
   }
 
@@ -337,25 +363,39 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
         <div className="font-semibold flex items-center gap-2">
           <span>Recalls</span>
           {hasRecall ? (
-            <span className={`text-[10px] px-1 py-0.5 rounded border ${tone[worstSeverity]}`}>
+            <span
+              className={`text-[10px] px-1 py-0.5 rounded border ${tone[worstSeverity]}`}
+            >
               {worstSeverity}
             </span>
           ) : (
-            <span className={`text-[10px] px-1 py-0.5 rounded border ${tone.neutral}`}>none</span>
+            <span
+              className={`text-[10px] px-1 py-0.5 rounded border ${tone.neutral}`}
+            >
+              none
+            </span>
           )}
         </div>
         {hasRecall ? (
           <ul className="mt-1 space-y-2">
             {recalls.map((r) => (
-              <li key={r.id || `${r.authority}-${r.announcedISO || ""}`} className="border rounded-md p-2">
+              <li
+                key={r.id || `${r.authority}-${r.announcedISO || ""}`}
+                className="border rounded-md p-2"
+              >
                 <div className="text-xs text-gray-600">
                   {r.authority || "Authority"} • {r.severity || "info"} •{" "}
-                  {fmtDate(r.updatedISO) || fmtDate(r.announcedISO) || "date n/a"}
+                  {fmtDate(r.updatedISO) ||
+                    fmtDate(r.announcedISO) ||
+                    "date n/a"}
                 </div>
                 {r.reason ? <div className="mt-1">{r.reason}</div> : null}
                 {Array.isArray(r.affectedLots) && r.affectedLots.length ? (
                   <div className="mt-1 text-xs">
-                    Lots: <span className="font-mono">{r.affectedLots.join(", ")}</span>
+                    Lots:{" "}
+                    <span className="font-mono">
+                      {r.affectedLots.join(", ")}
+                    </span>
                   </div>
                 ) : null}
                 {Array.isArray(r.sources) && r.sources.length ? (
@@ -370,7 +410,10 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
                           target="_blank"
                           rel="noreferrer"
                           onClick={() =>
-                            analytics.track("safety_source_opened", { upc: item.upc, url: s.url })
+                            analytics.track("safety_source_opened", {
+                              upc: item.upc,
+                              url: s.url,
+                            })
                           }
                         >
                           {s.label || s.url}
@@ -390,7 +433,10 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
                         recallId: r.id,
                         source: "SafetyBadges",
                       });
-                      analytics.track("safety_recall_acknowledged", { upc: item.upc, id: r.id });
+                      analytics.track("safety_recall_acknowledged", {
+                        upc: item.upc,
+                        id: r.id,
+                      });
                     }}
                   >
                     Acknowledge
@@ -403,7 +449,10 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
                         recallId: r.id,
                         source: "SafetyBadges",
                       });
-                      analytics.track("safety_recall_history_open", { upc: item.upc, id: r.id });
+                      analytics.track("safety_recall_history_open", {
+                        upc: item.upc,
+                        id: r.id,
+                      });
                     }}
                   >
                     View history
@@ -413,7 +462,9 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
             ))}
           </ul>
         ) : (
-          <div className="text-xs text-gray-600 mt-1">No recalls reported for this item.</div>
+          <div className="text-xs text-gray-600 mt-1">
+            No recalls reported for this item.
+          </div>
         )}
       </section>
 
@@ -421,14 +472,18 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
       <section className="mb-3">
         <div className="font-semibold">Allergens</div>
         {!hasAllergen ? (
-          <div className="text-xs text-gray-600 mt-1">None detected from label scan.</div>
+          <div className="text-xs text-gray-600 mt-1">
+            None detected from label scan.
+          </div>
         ) : (
           <>
             <div className="mt-1">
               Detected:{" "}
               <span className="text-xs">
                 {allergensDetected.map((a) => (
-                  <span key={a} className="mr-2">{a}</span>
+                  <span key={a} className="mr-2">
+                    {a}
+                  </span>
                 ))}
               </span>
             </div>
@@ -437,7 +492,9 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
                 Household risk: {allergensUserRisk.join(", ")}
               </div>
             ) : (
-              <div className="mt-1 text-xs text-emerald-700">No household matches.</div>
+              <div className="mt-1 text-xs text-emerald-700">
+                No household matches.
+              </div>
             )}
           </>
         )}
@@ -454,8 +511,12 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
               <li key={`${h.name}-${i}`} className="flex justify-between gap-3">
                 <div>
                   <span className="font-medium">{h.name}</span>
-                  {h.category ? <span className="ml-1 text-gray-600">({h.category})</span> : null}
-                  {h.source ? <span className="ml-1 text-gray-500">[{h.source}]</span> : null}
+                  {h.category ? (
+                    <span className="ml-1 text-gray-600">({h.category})</span>
+                  ) : null}
+                  {h.source ? (
+                    <span className="ml-1 text-gray-500">[{h.source}]</span>
+                  ) : null}
                 </div>
                 <span
                   className={`px-1 rounded border ${
@@ -478,7 +539,10 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
         ) : (
           <div className="mt-1 text-xs flex flex-wrap">
             {clean.map((c) => (
-              <span key={c} className="mr-2 mb-1 px-1 py-0.5 rounded border border-emerald-300 text-emerald-700">
+              <span
+                key={c}
+                className="mr-2 mb-1 px-1 py-0.5 rounded border border-emerald-300 text-emerald-700"
+              >
                 {c}
               </span>
             ))}
@@ -494,7 +558,10 @@ export default function SafetyBadges({ item = {}, compact = false, showActions =
           <button
             className="px-2 py-1 rounded-md border hover:shadow-sm text-xs"
             onClick={() => {
-              eventBus.emit("safety:report:submit", { upc: item.upc, source: "SafetyBadges" });
+              eventBus.emit("safety:report:submit", {
+                upc: item.upc,
+                source: "SafetyBadges",
+              });
               analytics.track("safety_report_start", { upc: item.upc });
               setOpen(false);
             }}

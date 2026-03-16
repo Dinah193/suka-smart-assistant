@@ -33,47 +33,38 @@
 /* Imports                                                                    */
 /* -------------------------------------------------------------------------- */
 
-import { emit as emitEventBus } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEventBus } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
-import { enforceBudget } from "@/agents/runtime/budget";
-import { canCallReasoner } from "@/agents/runtime/gating";
-import { enforceConfidence } from "@/agents/runtime/confidence";
+import { enforceBudget } from "@/agents/runtime/reasoner/budget";
+import { canCallReasoner } from "@/reasoner/gating";
+import { enforceConfidence } from "@/agents/runtime/reasoner/confidence";
 
 import {
   selectSoilWaterContext, // implement/extend this in selectors.js
 } from "@/agents/runtime/selectors";
 
-import { applyFreshnessRules } from "@/agents/runtime/freshness";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness";
 
-import {
-  getMemo,
-  setMemo,
-} from "@/agents/runtime/cache/memo";
+import { getMemo, setMemo } from "@/agents/runtime/reasoner/cache/memo";
 
 import {
   makeSoilWaterCacheKey, // from cache/keys.js
-} from "@/agents/runtime/cache/keys";
+} from "@/agents/runtime/reasoner/cache/keys";
 
 import { getModeForIntent } from "@/agents/modes/map";
-import { validateModeOutput } from "@/agents/modes/validator";
-import { buildPromptForMode } from "@/agents/prompts/builder";
-import { callReasoner } from "@/agents/reasoner";
+import { validateModeOutput } from "@/agents/runtime/reasoner/modes/validator";
+import { buildPromptForMode } from "@/agents/runtime/reasoner/prompts/builder";
+import { callReasoner } from "@/agents/runtime/reasoner";
 
-import {
-  composeSession,
-} from "@/agents/skills/sessions/compose";
+import { composeSession } from "@/agents/skills/sessions/compose";
 
-import {
-  evaluateGuards,
-} from "@/agents/guards/guardsEvaluate";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
 
-import {
-  sessionsDb,
-} from "@/db/sessions";
+import { sessionsDb } from "@/db/sessions";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -140,7 +131,10 @@ function validateShimRequestShape(req) {
     };
   }
   if (!req.intent || typeof req.intent !== "string") {
-    return { ok: false, reason: "Missing or invalid intent (expected non-empty string)." };
+    return {
+      ok: false,
+      reason: "Missing or invalid intent (expected non-empty string).",
+    };
   }
   if (!req.input || typeof req.input !== "object") {
     return { ok: false, reason: "Missing input object." };
@@ -155,7 +149,9 @@ function validateShimRequestShape(req) {
  * @returns {string}
  */
 function normalizeIntent(intent) {
-  const s = String(intent || "").trim().toLowerCase();
+  const s = String(intent || "")
+    .trim()
+    .toLowerCase();
 
   const map = {
     ingestmoisture: "ingestMoisture",
@@ -270,9 +266,7 @@ async function normalizeReasonerOutput({ intent, validated, input, context }) {
 
   let session;
   const sessionDraft =
-    validated.sessionDraft ||
-    validated.irrigationSessionDraft ||
-    null;
+    validated.sessionDraft || validated.irrigationSessionDraft || null;
 
   // Only some intents are expected to generate an interactive session,
   // e.g. an “Irrigation Run” or “Maintenance Sweep”.
@@ -400,11 +394,16 @@ export async function invokeShim(req) {
   debug.push({ stage: "mode.resolved", mode });
 
   // 3. Gating (e.g., global on/off, Sabbath-aware Reasoner gating)
-  const gatingDecision = await canCallReasoner({ domain: "garden", intent, runtime });
+  const gatingDecision = await canCallReasoner({
+    domain: "garden",
+    intent,
+    runtime,
+  });
   debug.push({ stage: "gating.checked", gatingDecision });
 
   if (!gatingDecision.allowed) {
-    const reason = gatingDecision.reason || "Reasoner call not allowed by gating rules.";
+    const reason =
+      gatingDecision.reason || "Reasoner call not allowed by gating rules.";
     warnings.push(reason);
     return makeShimResponse({
       ok: false,
@@ -465,7 +464,9 @@ export async function invokeShim(req) {
     });
 
     if (!confidenceOk) {
-      warnings.push("Cached result rejected by confidence rules; making fresh Reasoner call.");
+      warnings.push(
+        "Cached result rejected by confidence rules; making fresh Reasoner call."
+      );
       debug.push({ stage: "cache.confidenceRejected" });
     } else {
       return makeShimResponse({
@@ -496,7 +497,9 @@ export async function invokeShim(req) {
   debug.push({ stage: "budget.checked", budgetOk });
 
   if (!budgetOk.allowed) {
-    const reason = budgetOk.reason || "Budget exhausted or unavailable for this Reasoner call.";
+    const reason =
+      budgetOk.reason ||
+      "Budget exhausted or unavailable for this Reasoner call.";
     warnings.push(reason);
     return makeShimResponse({
       ok: false,
@@ -679,13 +682,18 @@ export async function invokeShim(req) {
  * @returns {Promise<ShimResponse>}
  */
 export async function handleSoilWaterCommand(command, payload = {}) {
-  let intent = typeof command === "string"
-    ? command
-    : command?.command || command?.type || "planIrrigation";
+  let intent =
+    typeof command === "string"
+      ? command
+      : command?.command || command?.type || "planIrrigation";
 
   intent = normalizeIntent(intent);
 
-  if (typeof command === "object" && command?.payload && !Object.keys(payload || {}).length) {
+  if (
+    typeof command === "object" &&
+    command?.payload &&
+    !Object.keys(payload || {}).length
+  ) {
     // eslint-disable-next-line no-param-reassign
     payload = command.payload;
   }

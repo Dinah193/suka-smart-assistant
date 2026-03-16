@@ -1,0 +1,198 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "notes": [
+    "Canonical dish catalog for Citrus & Chili cuisine profile",
+    "Balanced for bright acids, chili heat, and fast-cooking proteins"
+  ],
+
+  "meta": {
+    "id": "cuisines.citrus_chili.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Citrus & Chili — Dishes",
+    "cuisineId": "cuisines.citrus_chili",
+    "version": "1.0.0",
+    "author": "SSA Canonical",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "citrus_chili_chicken",
+      "label": "Citrus Chili Chicken",
+      "aka": ["lime chili chicken", "lemon chili chicken"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 3,
+      "time": {
+        "activeMins": 20,
+        "totalMins": 35,
+        "handsOffMins": 10
+      },
+      "servingStyles": ["plated_meals", "weeknight"],
+      "mealArchetypes": ["protein_forward"],
+      "signals": {
+        "batchFriendly": "medium",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["chicken_thighs", "chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["lime_juice", "lemon_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["chili_flakes", "fresh_chili"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["pan_sear", "quick_marinade"],
+      "equipmentRecommended": ["cast_iron_skillet"],
+      "equipmentMinimum": ["skillet"],
+      "ingredientsCore": [
+        "chicken",
+        "citrus_juice",
+        "chili",
+        "garlic",
+        "olive_oil"
+      ],
+      "allergens": [],
+      "dietFlags": ["gluten_free", "low_carb"],
+      "plannerTags": ["bright", "spicy", "fast"]
+    },
+
+    {
+      "id": "citrus_chili_shrimp",
+      "label": "Citrus Chili Shrimp",
+      "aka": ["chili lime shrimp"],
+      "category": "main",
+      "difficulty": 1,
+      "heatTypical": 4,
+      "time": {
+        "activeMins": 15,
+        "totalMins": 20,
+        "handsOffMins": 5
+      },
+      "servingStyles": ["bowls", "plates"],
+      "mealArchetypes": ["protein_forward"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["shrimp"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["lime_juice", "orange_juice"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["quick_saute"],
+      "equipmentRecommended": ["skillet"],
+      "equipmentMinimum": ["skillet"],
+      "ingredientsCore": ["shrimp", "citrus_juice", "chili", "garlic"],
+      "allergens": ["shellfish"],
+      "dietFlags": ["gluten_free", "pescatarian"],
+      "plannerTags": ["high_heat", "quick"]
+    },
+
+    {
+      "id": "chili_citrus_roasted_vegetables",
+      "label": "Chili Citrus Roasted Vegetables",
+      "aka": ["spicy citrus vegetables"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 2,
+      "time": {
+        "activeMins": 15,
+        "totalMins": 40,
+        "handsOffMins": 25
+      },
+      "servingStyles": ["family_style"],
+      "mealArchetypes": ["veg_forward"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": ["bell_pepper", "zucchini", "carrot"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["lemon_zest", "orange_zest"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["roast"],
+      "equipmentRecommended": ["sheet_pan"],
+      "equipmentMinimum": ["oven"],
+      "ingredientsCore": ["vegetables", "olive_oil", "citrus_zest", "chili"],
+      "allergens": [],
+      "dietFlags": ["vegan", "gluten_free"],
+      "plannerTags": ["roasted", "batch_friendly"]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.citrus_chili": [
+        "citrus_chili_chicken",
+        "citrus_chili_shrimp",
+        "chili_citrus_roasted_vegetables"
+      ]
+    },
+    "byArchetype": {
+      "protein_forward": ["citrus_chili_chicken", "citrus_chili_shrimp"],
+      "veg_forward": ["chili_citrus_roasted_vegetables"]
+    },
+    "aliasIndex": {
+      "lime chili chicken": "citrus_chili_chicken",
+      "chili lime shrimp": "citrus_chili_shrimp"
+    },
+    "keywordIndex": {
+      "citrus": [
+        "citrus_chili_chicken",
+        "citrus_chili_shrimp",
+        "chili_citrus_roasted_vegetables"
+      ],
+      "chili": ["citrus_chili_chicken", "citrus_chili_shrimp"]
+    },
+    "tagIndex": {
+      "spicy": ["citrus_chili_chicken", "citrus_chili_shrimp"],
+      "weeknight": ["citrus_chili_chicken", "citrus_chili_shrimp"]
+    }
+  }
+}

@@ -43,7 +43,7 @@ import React, { useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlanningGraph } from "./usePlanningGraph";
 // Event bus contract: emit({ type, ts, source, data })
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./usePlanningGraph").PlanningNode} PlanningNode

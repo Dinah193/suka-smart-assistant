@@ -20,7 +20,7 @@
  */
 
 import eventBus from "@/services/events/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import featureFlags from "@/config/featureFlags.json";
 
 import { normalizeOccurrence } from "./normalizeOccurrence.js";
 import { planKey, sessionId, calendarEventId } from "./ids.js";
@@ -91,11 +91,11 @@ async function exportToHubIfEnabled(
     if (!featureFlags?.familyFundMode) return;
 
     const fmtMod =
-      (await safeImport("@/hub/HubPacketFormatter.js")) ||
+      (await safeImport("@/services/hub/HubPacketFormatter.js")) ||
       (await safeImport("@/services/hub/HubPacketFormatter.js"));
 
     const connMod =
-      (await safeImport("@/hub/FamilyFundConnector.js")) ||
+      (await safeImport("@/services/hub/FamilyFundConnector.js")) ||
       (await safeImport("@/services/hub/FamilyFundConnector.js"));
 
     const HubPacketFormatter = fmtMod?.default || fmtMod?.HubPacketFormatter;

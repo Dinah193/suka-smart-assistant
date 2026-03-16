@@ -7,29 +7,41 @@
   const isBrowser = typeof window !== "undefined";
   const now = () => Date.now();
 
-  let eventBus = { on(){}, off(){}, emit(){} };
+  let eventBus = { on() {}, off() {}, emit() {} };
   try {
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
   // Optional helpers: provides withholdsForDomain(domain) that's consumed elsewhere
   let scheduleHelpers = null;
-  try { scheduleHelpers = require("@/services/scheduleHelpers"); } catch (_e) {}
+  try {
+    scheduleHelpers = require("@/services/scheduleHelpers");
+  } catch (_e) {}
 
   // Optional runtime for toasts/banners
   let automation = null;
-  try { automation = (require("@/services/automation/runtime") || {}).automation || null; } catch (_e) {}
+  try {
+    automation =
+      (require("@/services/automation/runtime") || {}).automation || null;
+  } catch (_e) {}
 
   // Optional Relative Scheduler to pause anchors when weather blocks a step
   let relativeScheduler = null;
-  try { relativeScheduler = (require("@/services/session/RelativeScheduler") || {}).relativeScheduler || null; } catch (_e) {}
+  try {
+    relativeScheduler =
+      (require("@/services/session/RelativeScheduler") || {})
+        .relativeScheduler || null;
+  } catch (_e) {}
 
   // Optional weather client: prefer your internal client if present
   // Expected shape:
   //   await weatherClient.getForecast({ lat, lon, units, horizonHours }) -> { hourly:[{ts, pop, rainMm, windKph, gustKph, tempC, rh, uv, ...}], daily:[...], updatedAt }
   let weatherClient = null;
-  try { weatherClient = (require("@/services/weather/weatherClient") || {}).weatherClient || null; } catch (_e) {}
+  try {
+    weatherClient =
+      (require("@/services/weather/weatherClient") || {}).weatherClient || null;
+  } catch (_e) {}
 
   // ------------------------------ Storage utils -------------------------------
   const K = {
@@ -37,11 +49,26 @@
     CACHE: "suka:weatherGuard:cache:v1", // { coords:{lat,lon}, forecast, at }
   };
   const safeJSON = {
-    parse: (s, f = null) => { try { return JSON.parse(s); } catch { return f; } },
-    stringify: (o) => { try { return JSON.stringify(o); } catch { return "{}"; } },
+    parse: (s, f = null) => {
+      try {
+        return JSON.parse(s);
+      } catch {
+        return f;
+      }
+    },
+    stringify: (o) => {
+      try {
+        return JSON.stringify(o);
+      } catch {
+        return "{}";
+      }
+    },
   };
-  const load = (key, fallback) => isBrowser ? (safeJSON.parse(localStorage.getItem(key), fallback)) : fallback;
-  const save = (key, val) => { if (isBrowser) localStorage.setItem(key, safeJSON.stringify(val)); };
+  const load = (key, fallback) =>
+    isBrowser ? safeJSON.parse(localStorage.getItem(key), fallback) : fallback;
+  const save = (key, val) => {
+    if (isBrowser) localStorage.setItem(key, safeJSON.stringify(val));
+  };
 
   // ------------------------------ Preferences / Defaults ----------------------
   // Tuned for common household/garden tasks. All thresholds are user-tweakable via setPrefs().
@@ -57,36 +84,40 @@
     thresholds: {
       // Watering is wasteful if decent rain is likely soon; POP/precip windows define "soon"
       watering: {
-        lookAheadHours: 12,         // see next half day
-        minPopPct: 40,              // probability-of-precip (%) to decide skip
-        minExpectedMm: 3,           // if expected precip >= X mm (or ~0.12 in), skip watering
+        lookAheadHours: 12, // see next half day
+        minPopPct: 40, // probability-of-precip (%) to decide skip
+        minExpectedMm: 3, // if expected precip >= X mm (or ~0.12 in), skip watering
       },
       spraying: {
         lookAheadHours: 6,
-        maxWindKph: 20,             // ~12 mph, above this drift risk is high
+        maxWindKph: 20, // ~12 mph, above this drift risk is high
         maxGustKph: 30,
-        maxUvIndex: 7,              // avoid spraying in strong sun/UV (leaf burn)
-        minDryHoursBefore: 1,       // require at least 1h dry before
-        minDryHoursAfter: 2,        // require at least 2h dry after
+        maxUvIndex: 7, // avoid spraying in strong sun/UV (leaf burn)
+        minDryHoursBefore: 1, // require at least 1h dry before
+        minDryHoursAfter: 2, // require at least 2h dry after
       },
       transplanting: {
         lookAheadHours: 24,
-        maxHeatIndexC: 32,          // avoid high heat stress days
-        frostRisk: true,            // block if frost advisory or forecast temp < 1°C/34°F
+        maxHeatIndexC: 32, // avoid high heat stress days
+        frostRisk: true, // block if frost advisory or forecast temp < 1°C/34°F
       },
       mowing: {
         lookAheadHours: 6,
-        recentRainHours: 3,         // if it rained in last 3h, grass likely wet → delay
-        maxWindKph: 35,             // safety for debris/wind
-      }
+        recentRainHours: 3, // if it rained in last 3h, grass likely wet → delay
+        maxWindKph: 35, // safety for debris/wind
+      },
     },
 
     // NBA suggestion messages (per action)
     messages: {
-      wateringSkip: "Rain is likely soon. Skipping watering saves water and prevents overwatering.",
-      sprayingDelay: "Winds or UV are high. Delay spraying to avoid drift or leaf burn.",
-      transplantingDelay: "Frost/heat risk detected. Shift transplanting to a safer window.",
-      mowingDelay: "Recent rain or high winds. Delay mowing until conditions improve.",
+      wateringSkip:
+        "Rain is likely soon. Skipping watering saves water and prevents overwatering.",
+      sprayingDelay:
+        "Winds or UV are high. Delay spraying to avoid drift or leaf burn.",
+      transplantingDelay:
+        "Frost/heat risk detected. Shift transplanting to a safer window.",
+      mowingDelay:
+        "Recent rain or high winds. Delay mowing until conditions improve.",
     },
 
     // How often to refresh forecast (ms)
@@ -96,7 +127,7 @@
     domainMap: {
       garden: ["watering", "spraying", "transplanting", "mowing"],
       // animals/cleaning/meals not gated by weather here, but can be added later
-    }
+    },
   };
 
   let prefs = Object.assign({}, DEFAULTS, load(K.PREFS, {}));
@@ -112,36 +143,47 @@
   function setCache(next) {
     cache = next;
     save(K.CACHE, cache);
-    eventBus.emit("weather.forecast.cached", { at: cache.at, coords: cache.coords });
+    eventBus.emit("weather.forecast.cached", {
+      at: cache.at,
+      coords: cache.coords,
+    });
   }
 
   // ------------------------------ Utility: Units ------------------------------
-  function mmToIn(mm) { return mm / 25.4; }
-  function kphToMph(k) { return k * 0.621371; }
-  function cToF(c) { return c * 9/5 + 32; }
+  function mmToIn(mm) {
+    return mm / 25.4;
+  }
+  function kphToMph(k) {
+    return k * 0.621371;
+  }
+  function cToF(c) {
+    return (c * 9) / 5 + 32;
+  }
 
   // ------------------------------ Utility: Forecast windows -------------------
   function sliceHourly(forecast, lookAheadHours, fromTs = now()) {
     if (!forecast?.hourly?.length) return [];
     const until = fromTs + lookAheadHours * 3600000;
-    return forecast.hourly.filter(h => h.ts >= fromTs && h.ts <= until);
+    return forecast.hourly.filter((h) => h.ts >= fromTs && h.ts <= until);
   }
   function sumExpectedRainMm(hours) {
     return (hours || []).reduce((acc, h) => acc + (h.rainMm || 0), 0);
   }
   function maxValue(hours, field) {
-    return (hours || []).reduce((acc, h) => Math.max(acc, +((h[field] ?? 0))), 0);
+    return (hours || []).reduce((acc, h) => Math.max(acc, +(h[field] ?? 0)), 0);
   }
   function anyPopAtLeast(hours, pct) {
-    return (hours || []).some(h => (h.pop || 0) * 100 >= pct);
+    return (hours || []).some((h) => (h.pop || 0) * 100 >= pct);
   }
   function hoursWithRain(hours) {
-    return (hours || []).filter(h => (h.rainMm || 0) > 0);
+    return (hours || []).filter((h) => (h.rainMm || 0) > 0);
   }
   function findNextDryWindow(forecast, startTs, durationHours) {
     // naive: find a contiguous block of 'durationHours' with zero rainMm
     if (!forecast?.hourly?.length) return null;
-    const sorted = forecast.hourly.filter(h => h.ts >= startTs).sort((a,b) => a.ts - b.ts);
+    const sorted = forecast.hourly
+      .filter((h) => h.ts >= startTs)
+      .sort((a, b) => a.ts - b.ts);
     const need = durationHours;
     let run = 0;
     let start = null;
@@ -149,9 +191,11 @@
       if ((sorted[i].rainMm || 0) === 0) {
         run += 1;
         if (start === null) start = sorted[i].ts;
-        if (run >= need) return { startAt: start, endAt: start + durationHours*3600000 };
+        if (run >= need)
+          return { startAt: start, endAt: start + durationHours * 3600000 };
       } else {
-        run = 0; start = null;
+        run = 0;
+        start = null;
       }
     }
     return null;
@@ -164,20 +208,31 @@
     const ts = now();
 
     // Fresh enough cache?
-    if (cache.forecast && (ts - cache.at) < prefs.refreshMs) {
+    if (cache.forecast && ts - cache.at < prefs.refreshMs) {
       return cache.forecast;
     }
 
     // Try preferred client
-    if (prefs.source === "client" && weatherClient && typeof weatherClient.getForecast === "function" && coords) {
+    if (
+      prefs.source === "client" &&
+      weatherClient &&
+      typeof weatherClient.getForecast === "function" &&
+      coords
+    ) {
       try {
-        const fc = await weatherClient.getForecast({ ...coords, units: prefs.units, horizonHours });
+        const fc = await weatherClient.getForecast({
+          ...coords,
+          units: prefs.units,
+          horizonHours,
+        });
         if (fc?.hourly?.length) {
           setCache({ coords, forecast: fc, at: ts });
           eventBus.emit("weather.forecast.updated", { at: ts, coords });
           return fc;
         }
-      } catch (e) { console.warn("[weatherGuard] client.getForecast failed:", e); }
+      } catch (e) {
+        console.warn("[weatherGuard] client.getForecast failed:", e);
+      }
     }
 
     // Fallback to cache if allowed
@@ -209,8 +264,12 @@
     const rainLikely = anyPopAtLeast(hours, th.minPopPct);
     if (rainLikely || expectedMm >= th.minExpectedMm) {
       // propose next dry window AFTER the rain finishes (2h dry window to allow infiltration)
-      const dry = findNextDryWindow(forecast, fromTs + 2*3600000, 2) || null;
-      const until = dry ? dry.startAt : (hours.length ? hours[hours.length - 1].ts + 2*3600000 : fromTs + 6*3600000);
+      const dry = findNextDryWindow(forecast, fromTs + 2 * 3600000, 2) || null;
+      const until = dry
+        ? dry.startAt
+        : hours.length
+        ? hours[hours.length - 1].ts + 2 * 3600000
+        : fromTs + 6 * 3600000;
       return {
         allow: false,
         reason: "rain-likely",
@@ -225,36 +284,64 @@
   function evaluateSpraying(forecast, fromTs = now()) {
     const th = prefs.thresholds.spraying;
     const hours = sliceHourly(forecast, th.lookAheadHours, fromTs);
-    const windy = maxValue(hours, "windKph") > th.maxWindKph || maxValue(hours, "gustKph") > th.maxGustKph;
+    const windy =
+      maxValue(hours, "windKph") > th.maxWindKph ||
+      maxValue(hours, "gustKph") > th.maxGustKph;
     const tooSunny = maxValue(hours, "uv") >= th.maxUvIndex;
-    const beforeWet = hoursWithRain(sliceHourly(forecast, th.minDryHoursBefore, fromTs)).length > 0;
-    const afterWet = hoursWithRain(sliceHourly(forecast, th.minDryHoursAfter, fromTs + 1)).length > 0;
+    const beforeWet =
+      hoursWithRain(sliceHourly(forecast, th.minDryHoursBefore, fromTs))
+        .length > 0;
+    const afterWet =
+      hoursWithRain(sliceHourly(forecast, th.minDryHoursAfter, fromTs + 1))
+        .length > 0;
     if (windy || tooSunny || beforeWet || afterWet) {
       // find earliest 2h calm window (low wind + no rain + UV below threshold)
       const horizon = sliceHourly(forecast, th.lookAheadHours + 12, fromTs);
       let slot = null;
       for (let i = 0; i < horizon.length - 1; i++) {
-        const a = horizon[i], b = horizon[i+1];
-        const calm = (a.windKph < th.maxWindKph && a.gustKph < th.maxGustKph && a.uv < th.maxUvIndex && a.rainMm === 0)
-                  && (b.windKph < th.maxWindKph && b.gustKph < th.maxGustKph && b.uv < th.maxUvIndex && b.rainMm === 0);
-        if (calm) { slot = { startAt: a.ts, endAt: b.ts + 3600000 }; break; }
+        const a = horizon[i],
+          b = horizon[i + 1];
+        const calm =
+          a.windKph < th.maxWindKph &&
+          a.gustKph < th.maxGustKph &&
+          a.uv < th.maxUvIndex &&
+          a.rainMm === 0 &&
+          b.windKph < th.maxWindKph &&
+          b.gustKph < th.maxGustKph &&
+          b.uv < th.maxUvIndex &&
+          b.rainMm === 0;
+        if (calm) {
+          slot = { startAt: a.ts, endAt: b.ts + 3600000 };
+          break;
+        }
       }
-      const until = slot ? slot.startAt : (fromTs + 6*3600000);
-      return { allow: false, reason: "wind/uv/wet", until, message: prefs.messages.sprayingDelay };
+      const until = slot ? slot.startAt : fromTs + 6 * 3600000;
+      return {
+        allow: false,
+        reason: "wind/uv/wet",
+        until,
+        message: prefs.messages.sprayingDelay,
+      };
     }
     return { allow: true };
-   }
+  }
 
   function evaluateTransplanting(forecast, fromTs = now()) {
     const th = prefs.thresholds.transplanting;
     const hours = sliceHourly(forecast, th.lookAheadHours, fromTs);
     const maxHeatC = maxValue(hours, "tempC");
-    const frostRisk = hours.some(h => (h.tempC ?? 5) < 1);
+    const frostRisk = hours.some((h) => (h.tempC ?? 5) < 1);
     if ((th.frostRisk && frostRisk) || maxHeatC >= th.maxHeatIndexC) {
       // choose morning window tomorrow as safer
-      const start = fromTs + 24*3600000; // +1 day
-      const morning = new Date(start); morning.setHours(8,0,0,0);
-      return { allow: false, reason: "frost/heat", until: morning.getTime(), message: prefs.messages.transplantingDelay };
+      const start = fromTs + 24 * 3600000; // +1 day
+      const morning = new Date(start);
+      morning.setHours(8, 0, 0, 0);
+      return {
+        allow: false,
+        reason: "frost/heat",
+        until: morning.getTime(),
+        message: prefs.messages.transplantingDelay,
+      };
     }
     return { allow: true };
   }
@@ -262,13 +349,22 @@
   function evaluateMowing(forecast, fromTs = now()) {
     const th = prefs.thresholds.mowing;
     const hours = sliceHourly(forecast, th.lookAheadHours, fromTs);
-    const recentHours = sliceHourly(forecast, th.recentRainHours, fromTs - th.recentRainHours*3600000);
+    const recentHours = sliceHourly(
+      forecast,
+      th.recentRainHours,
+      fromTs - th.recentRainHours * 3600000
+    );
     const wetRecently = sumExpectedRainMm(recentHours) > 0;
     const windy = maxValue(hours, "windKph") > th.maxWindKph;
     if (wetRecently || windy) {
-      const dry = findNextDryWindow(forecast, fromTs + 1*3600000, 2);
-      const until = dry ? dry.startAt : fromTs + 3*3600000;
-      return { allow: false, reason: wetRecently ? "wet" : "wind", until, message: prefs.messages.mowingDelay };
+      const dry = findNextDryWindow(forecast, fromTs + 1 * 3600000, 2);
+      const until = dry ? dry.startAt : fromTs + 3 * 3600000;
+      return {
+        allow: false,
+        reason: wetRecently ? "wet" : "wind",
+        until,
+        message: prefs.messages.mowingDelay,
+      };
     }
     return { allow: true };
   }
@@ -307,7 +403,14 @@
     // e: { domain, kind, sessionId?, anchorId?, at?, payload?, coords? }
     if (!prefs.enabled) return;
     const verdict = await guardAction(
-      { domain: e.domain, kind: e.kind, at: e.at, anchorId: e.anchorId, sessionId: e.sessionId, payload: e.payload },
+      {
+        domain: e.domain,
+        kind: e.kind,
+        at: e.at,
+        anchorId: e.anchorId,
+        sessionId: e.sessionId,
+        payload: e.payload,
+      },
       null,
       e.coords || cache.coords || null
     );
@@ -324,13 +427,17 @@
           sessionId: e.sessionId || null,
           title: e.kind,
           kind: "guard",
-          payload: Object.assign({}, e.payload || {}, { reason: verdict.reason }),
+          payload: Object.assign({}, e.payload || {}, {
+            reason: verdict.reason,
+          }),
         },
       });
 
       // Pause the related anchor if we have one, so suspendable steps freeze
       if (relativeScheduler && e.anchorId) {
-        try { relativeScheduler.pauseAnchor(e.anchorId); } catch (_e) {}
+        try {
+          relativeScheduler.pauseAnchor(e.anchorId);
+        } catch (_e) {}
       }
 
       // Notify politely + ask NBA for a suggestion (e.g., "shift watering to tomorrow morning")
@@ -355,20 +462,31 @@
   // When a relative schedule is created (e.g., garden session), scan the items and pre-mark withholds
   async function handleScheduleCreated(e = {}) {
     // e: { anchorId, sessionId, domain, items:[{id,title,dueAt, ...}] }
-    if (!prefs.enabled || (e.domain !== "garden")) return;
+    if (!prefs.enabled || e.domain !== "garden") return;
     const coords = cache.coords;
     const fc = await getForecast({ coords, horizonHours: 48 });
     const ts = now();
 
-    for (const item of (e.items || [])) {
+    for (const item of e.items || []) {
       // Try to infer action kind from title/payload (very light heuristic); callers can pass item.payload.kind for precision
-      const kind = (item.kind || item.title || "").toLowerCase().includes("water") ? "watering"
-                : (item.kind || item.title || "").toLowerCase().includes("spray") ? "spraying"
-                : null;
+      const kind = (item.kind || item.title || "")
+        .toLowerCase()
+        .includes("water")
+        ? "watering"
+        : (item.kind || item.title || "").toLowerCase().includes("spray")
+        ? "spraying"
+        : null;
       if (!kind) continue;
 
       const verdict = await guardAction(
-        { domain: e.domain, kind, at: item.dueAt || ts, anchorId: e.anchorId, sessionId: e.sessionId, payload: { itemId: item.id } },
+        {
+          domain: e.domain,
+          kind,
+          at: item.dueAt || ts,
+          anchorId: e.anchorId,
+          sessionId: e.sessionId,
+          payload: { itemId: item.id },
+        },
         fc,
         coords
       );
@@ -379,7 +497,13 @@
           domain: e.domain || "garden",
           until: verdict.until || null,
           source: "weatherGuard",
-          item: { anchorId: e.anchorId, sessionId: e.sessionId, title: item.title, kind: "guard", payload: { itemId: item.id, reason: verdict.reason } },
+          item: {
+            anchorId: e.anchorId,
+            sessionId: e.sessionId,
+            title: item.title,
+            kind: "guard",
+            payload: { itemId: item.id, reason: verdict.reason },
+          },
         });
       }
     }
@@ -402,7 +526,11 @@
       eventBus.on("weather.coords.set", (e = {}) => {
         // e: { lat, lon }
         if (e.lat && e.lon) {
-          setCache({ coords: { lat: e.lat, lon: e.lon }, forecast: cache.forecast, at: cache.at || 0 });
+          setCache({
+            coords: { lat: e.lat, lon: e.lon },
+            forecast: cache.forecast,
+            at: cache.at || 0,
+          });
         }
       });
 
@@ -414,14 +542,22 @@
 
       // HUD ask
       eventBus.on("weather.guard.status.requested", () => {
-        eventBus.emit("weather.guard.status", { enabled: prefs.enabled, coords: cache.coords, cachedAt: cache.at });
+        eventBus.emit("weather.guard.status", {
+          enabled: prefs.enabled,
+          coords: cache.coords,
+          cachedAt: cache.at,
+        });
       });
 
       // Example: simple “skip watering” hook whenever a watering modal tries to open
       eventBus.on("ui.modal.open", async (m = {}) => {
         if (!prefs.enabled) return;
-        if ((m.domain === "garden") && /water/i.test(m.title || m.id || "")) {
-          const verdict = await guardAction({ domain: "garden", kind: "watering", at: now() }, null, cache.coords || null);
+        if (m.domain === "garden" && /water/i.test(m.title || m.id || "")) {
+          const verdict = await guardAction(
+            { domain: "garden", kind: "watering", at: now() },
+            null,
+            cache.coords || null
+          );
           if (!verdict.allow) {
             // Convert modal to notify and queue a suggestion
             eventBus.emit("ui.modal.converted", {
@@ -431,13 +567,19 @@
                 title: "Watering delayed",
                 message: prefs.messages.wateringSkip,
                 runAt: verdict.until || null,
-                actions: [{ id: "viewForecast", label: "View forecast", kind: "view" }],
+                actions: [
+                  { id: "viewForecast", label: "View forecast", kind: "view" },
+                ],
               },
             });
             eventBus.emit("nba.suggestion.requested", {
               context: "weather",
               reasons: [verdict.reason || "rain-likely"],
-              item: { domain: "garden", kind: "watering", until: verdict.until || null },
+              item: {
+                domain: "garden",
+                kind: "watering",
+                until: verdict.until || null,
+              },
             });
           }
         }
@@ -447,26 +589,39 @@
       if (isBrowser && prefs.refreshMs > 0) {
         setInterval(() => {
           if (!prefs.enabled) return;
-          getForecast({ coords: cache.coords || null, horizonHours: 48 }).catch(()=>{});
+          getForecast({ coords: cache.coords || null, horizonHours: 48 }).catch(
+            () => {}
+          );
         }, Math.max(10 * 60 * 1000, prefs.refreshMs)); // not less than 10m
       }
     },
 
     async guard(action = {}, opts = {}) {
       // Imperative API for direct callers
-      const fc = await getForecast({ coords: opts.coords || cache.coords || null, horizonHours: opts.horizonHours || 48 });
+      const fc = await getForecast({
+        coords: opts.coords || cache.coords || null,
+        horizonHours: opts.horizonHours || 48,
+      });
       return guardAction(action, fc, opts.coords || cache.coords || null);
     },
 
-    async getForecast(opts = {}) { return getForecast(opts); },
+    async getForecast(opts = {}) {
+      return getForecast(opts);
+    },
 
     // Preferences
-    getPrefs() { return Object.assign({}, prefs); },
+    getPrefs() {
+      return Object.assign({}, prefs);
+    },
     setPrefs,
 
     // Cache
-    getCache() { return Object.assign({}, cache); },
-    setCoords(coords) { setCache({ coords, forecast: cache.forecast, at: cache.at }); },
+    getCache() {
+      return Object.assign({}, cache);
+    },
+    setCoords(coords) {
+      setCache({ coords, forecast: cache.forecast, at: cache.at });
+    },
   };
 
   // ------------------------------ Export --------------------------------------

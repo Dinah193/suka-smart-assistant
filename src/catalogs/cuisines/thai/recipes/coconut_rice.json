@@ -1,0 +1,327 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai.recipes.coconut_rice",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Thai-Style Coconut Rice",
+    "subtitle": "Fragrant jasmine rice cooked with coconut milk, lightly salted and subtly sweet—perfect with curries, grilled meats, and spicy stir-fries.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Designed as a versatile Thai-side starch for curry and stir-fry meals.",
+        "Balances coconut richness with salt so it pairs well with spicy mains."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "thai",
+    "subprofiles": ["thai.staples", "thai.sides"],
+    "category": "side",
+    "mealArchetypes": ["meal.side", "meal.base"],
+    "servingStyles": [
+      "serving.family_style",
+      "serving.bowls",
+      "serving.plates"
+    ],
+    "plannerTags": [
+      "cuisine.thai",
+      "dish.coconut_rice",
+      "category.side",
+      "starch.rice",
+      "method.steam",
+      "weeknight.easy",
+      "batch.friendly",
+      "pairs_with_curry"
+    ]
+  },
+
+  "summary": "Coconut rice is jasmine rice cooked with coconut milk and water, seasoned lightly with salt (and optionally a touch of sugar). It’s a mellow, fragrant side that complements spicy Thai curries and stir-fries.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Makes about 6 cups cooked rice (varies slightly by rice brand and coconut milk)."
+  },
+
+  "time": {
+    "activeMins": 8,
+    "totalMins": 30,
+    "handsOffMins": 22
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "notes": [
+      "Refrigerates well 3–4 days; best reheated with a splash of water/steam.",
+      "Freezing is acceptable; texture will be slightly softer after thawing."
+    ]
+  },
+
+  "tasteProfile": {
+    "pillars": ["coconut", "fragrant", "mellow", "savory"],
+    "sweetnessTypical": 1,
+    "saltinessTypical": 2,
+    "notes": "Keep sweetness low so it pairs well with savory/spicy dishes."
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.rice_cooker",
+        "label": "Rice cooker (preferred)",
+        "required": false
+      },
+      {
+        "id": "equipment.pot_lidded",
+        "label": "Lidded pot (stovetop method)",
+        "required": false
+      }
+    ],
+    "recommended": [
+      "equipment.fine_mesh_strainer",
+      "equipment.measuring_cups",
+      "equipment.measuring_spoons",
+      "equipment.silicone_spatula"
+    ],
+    "optional": [
+      {
+        "id": "equipment.kitchen_scale",
+        "label": "Kitchen scale",
+        "required": false
+      },
+      {
+        "id": "equipment.steamer_basket",
+        "label": "Steamer basket (for reheating)",
+        "required": false
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian", "diet.gluten_free"],
+
+  "allergens": ["allergen.coconut"],
+
+  "ingredients": [
+    {
+      "id": "ingredient.jasmine_rice",
+      "label": "Jasmine rice (uncooked)",
+      "role": "starch",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "About 2 cups. Rinse until water runs mostly clear for fluffier rice."
+    },
+    {
+      "id": "ingredient.coconut_milk",
+      "label": "Coconut milk (full-fat recommended)",
+      "role": "fat",
+      "amount": { "value": 400, "unit": "ml" },
+      "notes": "1 standard can. Shake well before measuring; avoid overly separated cans if possible."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water",
+      "role": "base",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "Adjust slightly by rice brand; see notes in steps."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp kosher salt (or ~1/2 tsp fine salt)."
+    },
+    {
+      "id": "ingredient.sugar",
+      "label": "Sugar (optional)",
+      "role": "sweetener",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 1/2 tsp. Use only if you want a slightly sweeter coconut profile."
+    },
+    {
+      "id": "ingredient.pandan_leaf",
+      "label": "Pandan leaf (optional, tied in a knot)",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Traditional fragrant add-in if available; remove after cooking."
+    },
+    {
+      "id": "ingredient.lime_zest",
+      "label": "Lime zest (optional)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adds brightness. Use only as a finish right before serving."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.rinse",
+      "title": "Rinse the rice",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Place jasmine rice in a bowl and cover with cool water.",
+        "Swirl with your fingers, drain, and repeat 3–5 times until the water is mostly clear.",
+        "Drain well in a fine-mesh strainer for 1–2 minutes."
+      ],
+      "checks": [
+        "Rice is rinsed to reduce excess surface starch.",
+        "Rice is well drained so liquid ratios stay consistent."
+      ]
+    },
+    {
+      "id": "step.mix_liquid",
+      "title": "Mix coconut cooking liquid",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "In the rice cooker pot (or stovetop pot), combine coconut milk and water.",
+        "Stir in salt and (optional) sugar until dissolved.",
+        "Add pandan leaf if using."
+      ],
+      "checks": [
+        "Salt is dissolved; coconut milk is evenly mixed (no thick clumps)."
+      ]
+    },
+    {
+      "id": "step.cook",
+      "title": "Cook the rice (rice cooker or stovetop)",
+      "activeMins": 1,
+      "handsOffMins": 20,
+      "instructions": [
+        "Add rinsed rice to the coconut liquid and stir once to level.",
+        "Rice cooker method: cook on the standard 'White Rice' setting.",
+        "Stovetop method: bring to a gentle simmer over medium heat, stir once, cover tightly, reduce to low, and cook 15 minutes.",
+        "After cooking, keep covered and rest 10 minutes off heat (both methods)."
+      ],
+      "timers": [
+        { "label": "Stovetop simmer (covered)", "minutes": 15 },
+        { "label": "Rest (covered)", "minutes": 10 }
+      ],
+      "checks": [
+        "Rice grains are tender and liquid absorbed.",
+        "No scorching smell; if stovetop ran too hot, reduce next time."
+      ]
+    },
+    {
+      "id": "step.fluff_finish",
+      "title": "Fluff and finish",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove pandan leaf if used.",
+        "Fluff rice gently with a paddle or fork to release steam.",
+        "Optional: fold in lime zest right before serving for brightness."
+      ],
+      "checks": [
+        "Rice is fluffy, not gummy; coconut aroma is present but balanced."
+      ]
+    }
+  ],
+
+  "methods": ["method.steam", "method.rice_cooker"],
+
+  "pairings": {
+    "bestWith": [
+      { "id": "thai.green_curry", "label": "Green curry" },
+      { "id": "thai.red_curry", "label": "Red curry" },
+      { "id": "thai.pad_krapow", "label": "Pad krapow" },
+      {
+        "id": "thai.grilled_chicken",
+        "label": "Grilled chicken (gai yang-style)"
+      }
+    ],
+    "notes": "Coconut rice is mellow—pair with spicy/sour mains for best contrast."
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Cool quickly, store airtight. Reheat with 1–2 tbsp water per cup and steam/microwave covered."
+    },
+    "freezer": {
+      "recommended": true,
+      "maxMonths": 2,
+      "notes": "Freeze in flat portions. Thaw overnight in fridge; reheat covered with a splash of water."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cool rice quickly to reduce food-safety risk; avoid holding warm rice at room temp.",
+      "Reheat leftovers to steaming hot."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.more_rich",
+      "label": "Extra-rich coconut rice",
+      "when": { "preference": { "richness": "high" } },
+      "adapt": {
+        "notes": "Use 500 ml coconut milk and reduce water to 140 ml (watch for brand differences; may cook softer)."
+      }
+    },
+    {
+      "id": "var_lighter",
+      "label": "Lighter coconut rice",
+      "when": { "preference": { "richness": "low" } },
+      "adapt": {
+        "notes": "Use 250 ml coconut milk and increase water to 390 ml. Coconut flavor is lighter, texture stays fluffy."
+      }
+    }
+  ],
+
+  "notes": [
+    "Liquid ratios: this profile targets fluffy jasmine rice with coconut richness. If your rice brand runs firm, add 15–30 ml more water next time.",
+    "Avoid vigorous stirring after adding rice; it can make rice gummy.",
+    "If coconut milk is very thick/separated, whisk thoroughly before measuring."
+  ],
+
+  "compat": {
+    "catalog": {
+      "cuisinePath": "src/catalogs/cuisines/thai/recipes/coconut_rice.json",
+      "dishId": "thai.coconut_rice"
+    },
+    "search": {
+      "aliases": [
+        "coconut rice",
+        "thai coconut rice",
+        "khao man gati",
+        "ข้าวมันกะทิ"
+      ],
+      "keywords": [
+        "jasmine rice",
+        "coconut milk",
+        "rice cooker",
+        "side dish",
+        "pairs with curry"
+      ]
+    }
+  },
+
+  "audit": {
+    "createdBy": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "reviewed": true,
+    "reviewNotes": [
+      "Schema-required fields present: schemaVersion/meta/ingredients/steps.",
+      "All ingredients include id+label and amount.value/unit (or clearly optional).",
+      "All steps include id+title and instructions[]; timers use minutes."
+    ]
+  }
+}

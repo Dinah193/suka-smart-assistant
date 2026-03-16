@@ -1,0 +1,1158 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T02:10:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "French Country",
+    "name": "French Country",
+    "shortName": "French Country",
+    "description": "Rustic French home cooking built around seasonal produce, long braises, simple pan sauces, herbs, butter, wine, and stock. Comfort-forward, technique-driven, and pantry-smart: roast, braise, sauté, stew, and bake with depth from fond, aromatics, and gentle reduction.",
+    "subtitle": "Rustic French home cooking • braises, roasts, stews, butter, wine, herbs",
+    "originRegions": ["France"],
+    "regions": [
+      "Burgundy",
+      "Provence",
+      "Normandy",
+      "Alsace",
+      "Southwest",
+      "Loire Valley"
+    ],
+    "primaryCountriesAndIslands": ["France"],
+    "tags": [
+      "cuisine.french_country",
+      "cuisine.french",
+      "style.rustic",
+      "style.braised",
+      "style.roasted",
+      "technique.forward",
+      "butter_forward",
+      "wine_forward",
+      "stock_forward",
+      "herb_forward",
+      "weeknight.mixed",
+      "batch.friendly"
+    ],
+    "icon": "cuisine_french_country",
+    "colorHint": "warm_cream",
+    "heritageNotes": [
+      "Focuses on country-style patterns (bistro/home) rather than haute cuisine plating.",
+      "Depth comes from browning, deglazing, reduction, and stock—then finishing with butter/herbs/acid."
+    ],
+    "version": "1.0",
+    "author": "ssa-core",
+    "createdAt": "2026-01-23",
+    "updatedAt": "2026-01-23T02:10:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "canonical",
+      "maintainer": "ssa-core",
+      "license": "internal",
+      "attribution": "SSA canonical cuisine profile",
+      "kind": "catalog",
+      "author": "ssa-core",
+      "origin": "curated",
+      "type": "profile",
+      "notes": "Designed for deterministic planning: pantry tiers + technique emphasis + substitution guidance + archetypes."
+    },
+    "family": {
+      "parent": "cuisines.french",
+      "siblings": [
+        "cuisines.provencal",
+        "cuisines.burgundian",
+        "cuisines.normandy"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.italian",
+          "reason": "Shared use of aromatics, herbs, braises/roasts; differs by fat choices, sauces, and seasoning patterns."
+        },
+        {
+          "id": "cuisines.british",
+          "reason": "Shared comfort staples and roasts; French country leans more on reduction, wine, and butter finishing."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "french_country.provencal",
+        "name": "Provençal Lean",
+        "signatureNotes": "Tomato, olive oil, garlic, herbs, olives; lighter braises and stews; bright finishes.",
+        "commonSauceBases": [
+          "sauce.tomato_light",
+          "sauce.pan_reduction",
+          "sauce.olive_garlic"
+        ]
+      },
+      {
+        "id": "french_country.burgundy",
+        "name": "Burgundy (Braise & Wine)",
+        "signatureNotes": "Red-wine braises, mushrooms, pearl onions, bacon/pancetta analogs; deep reductions.",
+        "commonSauceBases": [
+          "sauce.red_wine_reduction",
+          "sauce.demiglace_style",
+          "sauce.mushroom_pan"
+        ]
+      },
+      {
+        "id": "french_country.normandy",
+        "name": "Normandy (Cream & Apple)",
+        "signatureNotes": "Cream, butter, cider, apples, mustard; poultry/pork; gentle richness.",
+        "commonSauceBases": [
+          "sauce.cream_pan",
+          "sauce.cider_cream",
+          "sauce.mustard_cream"
+        ]
+      },
+      {
+        "id": "french_country.alsace",
+        "name": "Alsace (Cabbage & Smoke)",
+        "signatureNotes": "Cabbage, potatoes, pork/smoke notes; braises and stews; mustard/white wine.",
+        "commonSauceBases": [
+          "sauce.white_wine_pan",
+          "sauce.mustard_pan",
+          "sauce.stock_reduction"
+        ]
+      }
+    ],
+    "regionHints": [
+      "Burgundy-style red wine braises and mushroom-rich sauces",
+      "Provençal herb-forward stews and vegetable dishes",
+      "Normandy cream/cider finishes for poultry and pork"
+    ],
+    "countryHints": ["France"]
+  },
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "family_style",
+      "plates",
+      "one_pot",
+      "stew_and_starch",
+      "plated_meals"
+    ],
+    "weeknightBias": "medium",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "dish.braise_beef_wine",
+        "dish.chicken_stew_herb",
+        "dish.lentil_stew",
+        "dish.roast_chicken_pan_sauce",
+        "dish.vegetable_soup",
+        "dish.potato_gratin"
+      ],
+      "notes": "French country batch cooking leans on braises, stews, soups, and roast proteins that remix into sandwiches, salads, hash, or pasta."
+    },
+    "spiceHeatDefault": "none",
+    "saltinessDefault": 3,
+    "sournessDefault": "low",
+    "sweetnessDefault": "low",
+    "umamiDefault": 3,
+    "oilUseDefault": 3,
+    "preferredCookingFats": ["fat.butter", "fat.olive_oil", "fat.duck_fat"],
+    "primaryStarches": [
+      "starch.potato",
+      "starch.bread_crusty",
+      "starch.rice",
+      "starch.egg_noodles"
+    ],
+    "primaryProteins": [
+      "protein.chicken",
+      "protein.beef",
+      "protein.pork",
+      "protein.fish_white"
+    ],
+    "defaultMealArchetypes": [
+      "plates.protein_pan_sauce_side",
+      "one_pot.stew_with_bread",
+      "roast.protein_roast_veg",
+      "soup_with_bread",
+      "salad_with_warm_protein"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.template.french_country.standard",
+      "plate.template.french_country.braise_night",
+      "plate.template.french_country.roast_night"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Butter + herbs + gentle acid finish",
+      "Fond-driven pan sauces (wine/stock reduction)",
+      "Aromatics (onion/shallot/garlic) + thyme/bay/parsley",
+      "Mushroom depth, mustard accents, and slow-cooked sweetness"
+    ],
+    "aromaticsCore": [
+      "aromatic.onion",
+      "aromatic.shallot",
+      "aromatic.garlic",
+      "aromatic.leek",
+      "aromatic.celery"
+    ],
+    "spiceCore": ["spice.black_pepper", "spice.nutmeg", "spice.paprika_sweet"],
+    "umamiBuilders": [
+      "umami.mushroom",
+      "umami.stock",
+      "umami.tomato_paste",
+      "umami.anchovy_optional",
+      "umami.cheese_hard"
+    ],
+    "acidOptions": [
+      "acid.white_wine",
+      "acid.red_wine",
+      "acid.lemon",
+      "acid.vinegar_wine",
+      "acid.mustard"
+    ],
+    "sweetBalanceOptions": [
+      "sweet.onion_caramel",
+      "sweet.carrot",
+      "sweet.apple",
+      "sweet.tomato"
+    ],
+    "heatOptions": ["heat.none"]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum to cook simple French country weeknights (sauté + pan sauce + roast basics).",
+      "items": [
+        "fat.butter",
+        "fat.olive_oil",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "herb.thyme_dried",
+        "herb.bay_leaf",
+        "herb.parsley_dried",
+        "seasoning.salt",
+        "spice.black_pepper",
+        "acid.vinegar_wine",
+        "umami.stock_cube_or_base",
+        "starch.potato",
+        "starch.bread_crusty",
+        "protein.chicken",
+        "veg.carrot",
+        "veg.celery",
+        "veg.mushroom"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core French pantry for consistent sauces, braises, and soups.",
+      "items": [
+        "acid.white_wine",
+        "acid.red_wine",
+        "umami.stock_chicken",
+        "umami.stock_beef",
+        "umami.tomato_paste",
+        "herb.parsley_fresh",
+        "herb.thyme_fresh",
+        "herb.rosemary",
+        "seasoning.mustard_dijon",
+        "dairy.cream",
+        "dairy.milk",
+        "starch.rice",
+        "starch.egg_noodles",
+        "veg.pearl_onion",
+        "veg.leek",
+        "veg.cabbage",
+        "protein.beef",
+        "protein.pork",
+        "protein.fish_white"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional lifts: deeper sauces, charcuterie notes, and classic enrichments.",
+      "items": [
+        "fat.duck_fat",
+        "umami.bacon",
+        "umami.anchovy_optional",
+        "umami.cheese_hard",
+        "seasoning.herbes_de_provence",
+        "seasoning.nutmeg",
+        "veg.fennel",
+        "veg.turnip",
+        "veg.parsnip",
+        "veg.green_beans",
+        "fruit.apple",
+        "acid.cider"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for classic reproductions and elevated variations.",
+      "items": [
+        "umami.demiglace_base",
+        "seasoning.truffle_oil_optional",
+        "seasoning.saffron_optional",
+        "protein.duck",
+        "protein.lamb",
+        "dairy.creme_fraiche",
+        "baking.flour",
+        "baking.breadcrumbs",
+        "baking.puff_pastry"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "technique.saute",
+      "technique.roast",
+      "technique.braise",
+      "technique.stew",
+      "technique.deglaze",
+      "technique.reduce",
+      "technique.pan_sauce"
+    ],
+    "common": [
+      "technique.simmer",
+      "technique.poach",
+      "technique.sweat",
+      "technique.glaze_veg",
+      "technique.bake",
+      "technique.gratin",
+      "technique.stock_build"
+    ],
+    "notes": [
+      "Build flavor through fond: brown protein/veg, deglaze (wine/stock), reduce, finish with butter/herbs/acid.",
+      "Prefer low and steady heat for braises and soups; reduce gently to avoid bitterness."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.french_country.braise",
+      "label": "Braise + Starch",
+      "description": "Slow-cooked protein in stock/wine with aromatics; served with potatoes, bread, noodles, or rice.",
+      "commonExamples": [
+        "Beef wine braise",
+        "Chicken in herb sauce",
+        "Pork cider braise"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.beef",
+          "protein.chicken",
+          "protein.pork",
+          "protein.lamb"
+        ],
+        "starchOptions": [
+          "starch.potato",
+          "starch.bread_crusty",
+          "starch.egg_noodles",
+          "starch.rice"
+        ],
+        "vegOptions": [
+          "veg.carrot",
+          "veg.mushroom",
+          "veg.pearl_onion",
+          "veg.turnip"
+        ],
+        "garnishOptions": ["garnish.parsley", "garnish.lemon_zest"],
+        "pairings": ["pairing.red_wine", "pairing.green_salad"]
+      }
+    },
+    {
+      "id": "archetype.french_country.roast",
+      "label": "Roast Protein + Pan Sauce + Veg",
+      "description": "Roast chicken/pork/fish; capture drippings; deglaze and reduce into pan sauce; serve with vegetables and bread/potatoes.",
+      "commonExamples": [
+        "Roast chicken with pan sauce",
+        "Pork roast with mustard jus"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.pork",
+          "protein.fish_white"
+        ],
+        "starchOptions": ["starch.potato", "starch.bread_crusty"],
+        "vegOptions": [
+          "veg.green_beans",
+          "veg.carrot",
+          "veg.mushroom",
+          "veg.cabbage"
+        ],
+        "sauceOptions": [
+          "sauce.pan_reduction",
+          "sauce.mustard_pan",
+          "sauce.cream_pan"
+        ],
+        "garnishOptions": ["garnish.parsley", "garnish.chives"]
+      }
+    },
+    {
+      "id": "archetype.french_country.soup",
+      "label": "Soup/Stew + Bread",
+      "description": "Vegetable-forward or meat-forward soups and stews; served with crusty bread and optional cheese.",
+      "commonExamples": ["Vegetable soup", "Lentil stew", "Onion soup"],
+      "defaults": {
+        "stew_baseOptions": [
+          "dish.vegetable_soup",
+          "dish.lentil_stew",
+          "dish.onion_soup"
+        ],
+        "baseOptions": ["base.stock", "base.water_stock_mix"],
+        "vegOptions": [
+          "veg.carrot",
+          "veg.celery",
+          "veg.leek",
+          "veg.cabbage",
+          "veg.potato"
+        ],
+        "sideOptions": ["starch.bread_crusty"],
+        "garnishOptions": ["garnish.parsley", "garnish.cheese_hard"]
+      }
+    },
+    {
+      "id": "archetype.french_country.salad_warm",
+      "label": "Salad + Warm Protein",
+      "description": "Green salad with warm poultry/fish/egg and a sharp vinaigrette; a lighter French country plate.",
+      "commonExamples": ["Warm chicken salad", "Poached egg salad"],
+      "defaults": {
+        "greensOptions": ["greens.mixed", "greens.arugula", "greens.frisee"],
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.fish_white",
+          "protein.eggs"
+        ],
+        "sauceOptions": ["sauce.vinaigrette_mustard", "sauce.vinaigrette_wine"],
+        "garnishOptions": ["garnish.herbs", "garnish.croutons"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "fat.butter",
+      "fat.olive_oil",
+      "fat.duck_fat",
+      "aromatic.shallot",
+      "herb.thyme",
+      "herb.parsley",
+      "herb.bay_leaf",
+      "acid.white_wine",
+      "acid.red_wine",
+      "seasoning.mustard_dijon",
+      "umami.stock",
+      "umami.mushroom",
+      "veg.carrot",
+      "veg.celery",
+      "veg.leek",
+      "veg.mushroom",
+      "starch.potato",
+      "starch.bread_crusty",
+      "protein.chicken",
+      "protein.beef",
+      "protein.pork",
+      "protein.fish_white"
+    ],
+    "optional_traditional": [
+      "dairy.cream",
+      "dairy.creme_fraiche",
+      "umami.bacon",
+      "umami.anchovy_optional",
+      "spice.nutmeg",
+      "fruit.apple",
+      "acid.cider",
+      "veg.turnip",
+      "veg.parsnip"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "seasoning.cumin",
+        "label": "Cumin (limit)",
+        "reason": "Not typical for classic French country profiles; can overpower pan sauces and herb-forward dishes."
+      },
+      {
+        "id": "seasoning.soy_sauce",
+        "label": "Soy sauce (limit)",
+        "reason": "Use only as a last-resort umami builder; prefer stock reduction, mushrooms, tomato paste, or anchovy."
+      },
+      {
+        "id": "heat.hot_chili",
+        "label": "Hot chili heat (limit)",
+        "reason": "French country is generally low-heat; keep heat subtle unless explicitly requested."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.chicken",
+        "options": [
+          "protein.turkey",
+          "protein.rabbit_optional",
+          "protein.pork"
+        ],
+        "notes": "Chicken patterns often translate to turkey or pork tenderloin; adjust cook time for lean cuts."
+      },
+      {
+        "for": "protein.beef",
+        "options": ["protein.lamb", "protein.pork_shoulder"],
+        "notes": "Braise substitutions should match collagen content; choose chuck/shoulder-like cuts."
+      },
+      {
+        "for": "protein.fish_white",
+        "options": ["protein.salmon", "protein.shrimp"],
+        "notes": "Switch to quick methods; shorten cook time; keep sauce lighter (lemon/butter, white wine)."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "starch.potato",
+        "options": ["starch.rice", "starch.egg_noodles", "starch.bread_crusty"],
+        "notes": "Potatoes are classic; rice/noodles work especially with saucy braises."
+      },
+      {
+        "for": "starch.bread_crusty",
+        "options": ["starch.potato", "starch.rice"],
+        "notes": "Use a starch that can catch sauce. If avoiding bread, pick potatoes or rice."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "thickener.flour",
+        "options": ["thickener.cornstarch", "thickener.butter_manie"],
+        "notes": "For pan sauces, butter manié is closest. Cornstarch yields a glossier, less rustic finish."
+      }
+    ],
+    "notes": [
+      "Prefer substitutions that preserve sauce behavior: stock + reduction + butter finish.",
+      "If no wine: use stock + splash of wine vinegar/lemon to mimic acidity; reduce gently."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.french_country.roast_chicken_night",
+      "label": "Roast Chicken Night",
+      "archetypeId": "archetype.french_country.roast",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": ["protein.chicken"],
+          "chooseOne": false,
+          "notes": "Roast whole bird or bone-in pieces; capture drippings for pan sauce."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "veg.carrot",
+            "veg.green_beans",
+            "veg.mushroom",
+            "veg.cabbage"
+          ],
+          "chooseOne": true,
+          "notes": "Pick one main veg; add a second if inventory is abundant."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["starch.potato", "starch.bread_crusty"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.pan_reduction",
+            "sauce.mustard_pan",
+            "sauce.cream_pan"
+          ],
+          "chooseOne": true,
+          "notes": "Deglaze with wine/stock; reduce; finish with butter and herbs."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "garnish.parsley",
+            "garnish.chives",
+            "garnish.lemon_zest"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Salt the chicken ahead if possible (dry brine).",
+        "Make extra pan sauce for leftovers."
+      ]
+    },
+    {
+      "id": "template.french_country.braise_night",
+      "label": "Braise Night",
+      "archetypeId": "archetype.french_country.braise",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.beef",
+            "protein.pork",
+            "protein.chicken",
+            "protein.lamb"
+          ],
+          "chooseOne": true,
+          "notes": "Choose a collagen-rich cut for best texture."
+        },
+        {
+          "role": "stew_base",
+          "ingredientIds": ["base.stock", "acid.red_wine", "acid.white_wine"],
+          "chooseOne": false,
+          "notes": "Stock + wine reduction gives the classic profile."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": ["veg.carrot", "veg.mushroom", "veg.pearl_onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "starch.potato",
+            "starch.egg_noodles",
+            "starch.bread_crusty"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": ["garnish.parsley"],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Brown in batches to avoid steaming.",
+        "Deglaze, scrape fond, reduce slightly, then braise low and slow."
+      ]
+    },
+    {
+      "id": "template.french_country.soup_and_bread",
+      "label": "Soup + Bread",
+      "archetypeId": "archetype.french_country.soup",
+      "components": [
+        {
+          "role": "stew_base",
+          "ingredientIds": ["base.stock", "base.water_stock_mix"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "veg.carrot",
+            "veg.celery",
+            "veg.leek",
+            "veg.cabbage",
+            "veg.potato"
+          ],
+          "chooseOne": false,
+          "notes": "Use what's seasonal or needs to be used up."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.beans",
+            "protein.sausage_optional"
+          ],
+          "chooseOne": true,
+          "notes": "Optional—vegetable soup is canonical too."
+        },
+        {
+          "role": "side",
+          "ingredientIds": ["starch.bread_crusty"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": ["garnish.parsley", "garnish.cheese_hard"],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Sweat aromatics first; simmer gently; finish with herbs and a small acid pop."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.cream_sauces",
+      "label": "Cream sauce handling",
+      "notes": [
+        "Avoid boiling cream-heavy sauces hard; keep at a gentle simmer to prevent splitting.",
+        "Cool quickly and refrigerate within 2 hours; reheat gently with a splash of stock/milk if thickened."
+      ]
+    },
+    {
+      "id": "safety.braises",
+      "label": "Braise cooling and reheating",
+      "notes": [
+        "Braises are ideal make-ahead but must be cooled quickly in shallow containers.",
+        "Reheat to steaming hot; keep above safe temps if holding for service."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "rustic french",
+      "country french",
+      "bistro",
+      "braise",
+      "pan sauce",
+      "wine reduction",
+      "butter finish",
+      "herb sauce",
+      "stew",
+      "roast chicken",
+      "gratin",
+      "cassoulet style",
+      "coq au vin style",
+      "beef bourguignon style"
+    ],
+    "commonAlternateNames": [
+      "Cuisine de campagne",
+      "French farmhouse",
+      "Bistro-style home cooking"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "aromatic.onion",
+      "aromatic.shallot",
+      "aromatic.garlic",
+      "veg.carrot",
+      "veg.celery",
+      "veg.mushroom"
+    ],
+    "proteinsCommon": [
+      "protein.chicken",
+      "protein.beef",
+      "protein.pork",
+      "protein.fish_white",
+      "protein.eggs"
+    ],
+    "produceCommon": [
+      "veg.leek",
+      "veg.cabbage",
+      "veg.green_beans",
+      "veg.potato",
+      "fruit.apple"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "acid.white_wine",
+        "fallbacks": ["umami.stock_chicken", "acid.vinegar_wine", "acid.lemon"],
+        "note": "If no wine, use stock plus a small acid finish; reduce gently for depth."
+      },
+      {
+        "ingredient": "dairy.creme_fraiche",
+        "fallbacks": ["dairy.cream", "dairy.yogurt_plain"],
+        "note": "Use heavy cream for richness; yogurt works for tang but add off-heat to prevent curdling."
+      }
+    ],
+    "coreStaples": {
+      "oils_fats": ["fat.butter", "fat.olive_oil", "fat.duck_fat"],
+      "broths": ["umami.stock_chicken", "umami.stock_beef"],
+      "herbs": ["herb.thyme", "herb.parsley", "herb.bay_leaf"],
+      "seasonings": [
+        "seasoning.salt",
+        "spice.black_pepper",
+        "seasoning.mustard_dijon"
+      ],
+      "acids": [
+        "acid.white_wine",
+        "acid.red_wine",
+        "acid.vinegar_wine",
+        "acid.lemon"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "normandy": ["acid.cider", "dairy.cream", "fruit.apple"],
+      "provencal": [
+        "seasoning.herbes_de_provence",
+        "fat.olive_oil",
+        "veg.tomato"
+      ],
+      "burgundy": ["acid.red_wine", "umami.mushroom", "umami.bacon"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "technique.sweat",
+      "technique.saute",
+      "technique.brown",
+      "technique.deglaze",
+      "technique.reduce",
+      "technique.braise",
+      "technique.roast",
+      "technique.simmer",
+      "technique.pan_sauce"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.fond_pan_sauce",
+        "name": "Fond → Pan Sauce",
+        "steps": [
+          "technique.brown",
+          "technique.deglaze",
+          "technique.reduce",
+          "technique.finish_with_butter"
+        ],
+        "notes": "Brown protein, deglaze with wine/stock, reduce to nappe, finish with cold butter and herbs."
+      },
+      {
+        "id": "process.low_slow_braise",
+        "name": "Low & Slow Braise",
+        "steps": [
+          "technique.brown",
+          "technique.deglaze",
+          "technique.braise",
+          "technique.rest_and_reheat"
+        ],
+        "notes": "Braise gently; rest improves flavor; skim fat if needed; reheat gently."
+      }
+    ],
+    "equipmentAffinity": {
+      "technique.braise": ["tool.dutch_oven"],
+      "technique.roast": ["tool.roasting_pan", "tool.oven"],
+      "technique.pan_sauce": ["tool.skillet"],
+      "technique.stock_build": ["tool.stock_pot"]
+    },
+    "signatureMethods": [
+      "Deglaze and reduce; finish with butter and herbs.",
+      "Sweat aromatics before liquids; avoid harsh boiling for cream sauces."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.dutch_oven",
+      "tool.skillet",
+      "tool.roasting_pan",
+      "tool.oven",
+      "tool.stock_pot",
+      "tool.chef_knife",
+      "tool.cutting_board",
+      "tool.tongs",
+      "tool.whisk",
+      "tool.fine_mesh_strainer",
+      "tool.thermometer"
+    ],
+    "optionalButHelpful": [
+      "tool.immersion_blender",
+      "tool.mandoline",
+      "tool.cast_iron_skillet"
+    ],
+    "notes": [
+      "Dutch oven + skillet covers most French country patterns.",
+      "A fine mesh strainer and whisk help make smooth pan sauces and soups."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": ["allergen.dairy", "allergen.gluten", "allergen.eggs"],
+    "dietCompatibility": {
+      "low_carb": "medium",
+      "gluten_free": "medium",
+      "dairy_free": "low",
+      "vegetarian": "medium",
+      "pescatarian": "medium"
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.roast_chicken_pan_sauce",
+        "name": "Roast Chicken with Pan Sauce",
+        "subprofiles": ["french_country.burgundy", "french_country.normandy"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Baseline pattern for weeknight-friendly French country."
+      },
+      {
+        "id": "dish.braise_beef_wine",
+        "name": "Beef Wine Braise (Bourguignon-style)",
+        "subprofiles": ["french_country.burgundy"],
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Deep red wine braise with mushrooms and onions; best make-ahead."
+      },
+      {
+        "id": "dish.chicken_wine_braise",
+        "name": "Chicken Wine Braise (Coq-au-vin style)",
+        "subprofiles": ["french_country.burgundy"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Braise poultry with wine/stock; finish with herbs."
+      },
+      {
+        "id": "dish.minestrone_like_veg_soup_french",
+        "name": "Rustic Vegetable Soup",
+        "subprofiles": ["french_country.provencal"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Seasonal vegetables simmered in stock; finish with herbs and a small acid pop."
+      },
+      {
+        "id": "dish.potato_gratin",
+        "name": "Potato Gratin (Gratin Dauphinois-style)",
+        "subprofiles": ["french_country.normandy"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Creamy baked potato dish; great with roasts; leftovers reheat well."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.apple_tart_rustic",
+        "name": "Rustic Apple Tart",
+        "subprofiles": ["french_country.normandy"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Apple-forward dessert; pairs well with cream."
+      },
+      {
+        "id": "dish.pear_wine_poach",
+        "name": "Wine-Poached Pears",
+        "subprofiles": ["french_country.burgundy"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Gentle spiced wine poach; simple and elegant."
+      }
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "starch.potato",
+      "starch.bread_crusty",
+      "starch.rice",
+      "starch.egg_noodles"
+    ],
+    "typicalVegSides": [
+      "veg.green_beans",
+      "veg.carrot",
+      "veg.mushroom",
+      "veg.cabbage",
+      "veg.roots_mixed"
+    ],
+    "typicalCondiments": [
+      "condiment.mustard_dijon",
+      "condiment.herb_butter",
+      "condiment.vinaigrette_wine"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "protein.chicken",
+        "pair": [
+          "acid.white_wine",
+          "herb.thyme",
+          "fat.butter",
+          "garnish.parsley"
+        ],
+        "note": "White wine + thyme + butter is a canonical chicken pan sauce lane."
+      },
+      {
+        "with": "protein.beef",
+        "pair": [
+          "acid.red_wine",
+          "umami.mushroom",
+          "aromatic.shallot",
+          "fat.butter"
+        ],
+        "note": "Red wine reduction + mushrooms for deep, rustic sauces."
+      },
+      {
+        "with": "protein.pork",
+        "pair": [
+          "seasoning.mustard_dijon",
+          "acid.cider",
+          "dairy.cream",
+          "herb.thyme"
+        ],
+        "note": "Mustard + cider/cream is a Normandy-friendly pairing."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.high_heat",
+        "avoid": ["heat.hot_chili", "seasoning.extra_hot_sauce"],
+        "note": "High chili heat can dominate butter/wine pan sauces; keep heat minimal unless the user requests otherwise."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.no_wine",
+        "whenMissing": ["acid.white_wine", "acid.red_wine"],
+        "use": [
+          "umami.stock_chicken",
+          "umami.stock_beef",
+          "acid.vinegar_wine",
+          "acid.lemon"
+        ],
+        "notes": "Replace wine with stock; add a small acid finish. Reduce stock gently for body."
+      },
+      {
+        "id": "sub.no_cream",
+        "whenMissing": ["dairy.cream"],
+        "use": ["dairy.milk", "dairy.creme_fraiche", "dairy.yogurt_plain"],
+        "notes": "Milk works for lighter sauces; add yogurt off-heat to avoid curdling."
+      },
+      {
+        "id": "sub.no_mushrooms",
+        "whenMissing": ["umami.mushroom"],
+        "use": ["umami.tomato_paste", "umami.stock", "umami.anchovy_optional"],
+        "notes": "Mushrooms add depth; if missing, lean on tomato paste + stock reduction; anchovy is optional."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.no_dutch_oven",
+        "whenNoEquipment": ["tool.dutch_oven"],
+        "adapt": "technique.braise_oven_safe_pot",
+        "notes": "Use a heavy pot with a tight lid or a deep oven-safe skillet; keep simmer gentle and covered."
+      },
+      {
+        "id": "method.no_roasting_pan",
+        "whenNoEquipment": ["tool.roasting_pan"],
+        "adapt": "technique.roast_sheet_pan",
+        "notes": "Sheet pan roasting works; deglaze pan drippings with stock/wine in a skillet to build sauce."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.braise_base",
+        "name": "Braise Base",
+        "makes": "dish.braise_beef_wine",
+        "freezerFriendly": true,
+        "notes": "Cook once, portion, freeze; remix into pasta, pot pies, rice bowls, or sandwich fillings."
+      },
+      {
+        "id": "batch.stock_day",
+        "name": "Stock Day",
+        "makes": "base.stock",
+        "freezerFriendly": true,
+        "notes": "Stock unlocks quick pan sauces and soups; freeze in 1–2 cup cubes for weeknights."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use storehouse stock + quick pan sauce: brown protein, deglaze, reduce, finish with butter and herbs.",
+      "Roast vegetables on a sheet pan while making a stovetop pan sauce.",
+      "Keep a mustard vinaigrette ready for quick salads with warm protein."
+    ],
+    "seasonality": [
+      {
+        "season": "season.winter",
+        "focus": [
+          "veg.roots_mixed",
+          "veg.cabbage",
+          "dish.braise_beef_wine",
+          "dish.lentil_stew"
+        ]
+      },
+      {
+        "season": "season.spring",
+        "focus": [
+          "veg.green_beans",
+          "veg.leek",
+          "protein.fish_white",
+          "dish.roast_chicken_pan_sauce"
+        ]
+      },
+      {
+        "season": "season.summer",
+        "focus": [
+          "veg.tomato",
+          "veg.zucchini",
+          "dish.ratatouille_style",
+          "archetype.french_country.salad_warm"
+        ]
+      },
+      {
+        "season": "season.fall",
+        "focus": [
+          "fruit.apple",
+          "protein.pork",
+          "dish.potato_gratin",
+          "dish.vegetable_soup"
+        ]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Core Weeknight Wins",
+        "items": [
+          "dish.roast_chicken_pan_sauce",
+          "dish.vegetable_soup",
+          "dish.potato_gratin"
+        ]
+      },
+      {
+        "title": "Make-Ahead Braises",
+        "items": [
+          "dish.braise_beef_wine",
+          "dish.chicken_wine_braise",
+          "dish.lentil_stew"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "pan sauce",
+      "wine reduction",
+      "butter finish",
+      "braise",
+      "stock",
+      "rustic",
+      "gratin",
+      "bistro"
+    ],
+    "colorHints": {
+      "primary": "warm_cream",
+      "accent": "deep_wine",
+      "secondary": "sage_herb"
+    },
+    "iconHints": [
+      "icon.skillet",
+      "icon.dutch_oven",
+      "icon.wine",
+      "icon.herb_bundle"
+    ]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.french_country",
+      "style.rustic",
+      "technique.forward",
+      "butter_forward",
+      "wine_forward"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.template.french_country.standard",
+      "plate.template.french_country.braise_night",
+      "plate.template.french_country.roast_night"
+    ],
+    "notes": [
+      "Tags and ids follow SSA safe id rules (lowercase, dots/underscores/hyphens).",
+      "This profile is planner-first: it intentionally enumerates archetypes, pantry tiers, and technique emphasis."
+    ]
+  }
+}

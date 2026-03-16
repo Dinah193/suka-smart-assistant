@@ -33,15 +33,15 @@
 //
 // This page:
 //    - Loads/saves import settings locally (localStorage for now).
-//    - Emits consistent events via src/services/eventBus.js.
+//    - Emits consistent events via src/services/events/eventBus.js.
 //    - Calls exportToHubIfEnabled() when settings are saved.
 //    - Leaves extension points for new import types and domains.
 
 import React, { useEffect, useMemo, useState } from "react";
 import eventBus from "../../services/events/eventBus";
 import featureFlags from "../../config/featureFlags";
-import HubPacketFormatter from "../../services/hub/HubPacketFormatter";
-import FamilyFundConnector from "../../services/hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * @typedef {"recipe"|"cleaning"|"garden"|"animal"|"storehouse"|"video"} ImportType

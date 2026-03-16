@@ -89,7 +89,7 @@ counter infrastructure.
 SSA is **event-driven**. All agent communication flows through the shared
 event bus:
 
-  src/services/eventBus.js
+  src/services/events/eventBus.js
 
 Agents USE, not own, the bus. They emit:
 
@@ -283,7 +283,7 @@ A shim typically exports:
 Example skeleton:
 
   // src/agents/meals/mealShim.js
-  const { emit } = require("@/services/eventBus");
+  const { emit } = require("@/services/events/eventBus");
 
   async function planForward(input) {
     const ts = new Date().toISOString();
@@ -578,10 +578,10 @@ To author a new agent (for example, a “preservation” agent, or a more detail
   • src/agents/telemetry/counters.js
       - How usage counters are tracked and budgets are enforced.
 
-  • src/services/eventBus.js
+  • src/services/events/eventBus.js
       - Core event bus.
 
-  • src/services/featureFlags.js
+  • src/config/featureFlags.js
       - familyFundMode & other flags that may affect agent behavior.
 
   • SessionRunner implementation

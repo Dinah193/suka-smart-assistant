@@ -1,0 +1,556 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai.recipes.green_curry",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Thai Green Curry (Gaeng Keow Wan)",
+    "subtitle": "Creamy coconut green curry with aromatic herbs, green curry paste, and tender protein + vegetables.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Deterministic canonical green curry recipe for SSA catalogs.",
+        "Designed for store-bought green curry paste with optional fresh boosts.",
+        "Includes chicken default with tofu/seafood/vegetarian adaptations."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "thai",
+    "subprofiles": ["thai.curries", "thai.coconut_based"],
+    "category": "curry",
+    "mealArchetypes": ["meal.lunch", "meal.dinner"],
+    "servingStyles": [
+      "serving.bowls",
+      "serving.family_style",
+      "serving.one_pot"
+    ],
+    "plannerTags": [
+      "cuisine.thai",
+      "dish.green_curry",
+      "category.curry",
+      "method.simmer",
+      "method.saute",
+      "flavor.herbal",
+      "flavor.coconut",
+      "flavor.salty_sweet",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "A fragrant Thai green curry built by frying green curry paste in coconut cream, then simmering with chicken, vegetables, and Thai basil for a bright, creamy, spicy bowl served with jasmine rice.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 with rice; 3 large bowls without sides."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "totalMins": 40,
+    "handsOffMins": 20
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "notes": [
+      "Freezing is acceptable; coconut milk can separate slightly—reheat gently and whisk.",
+      "Flavors deepen overnight."
+    ]
+  },
+
+  "tasteProfile": {
+    "pillars": ["herbal", "spicy", "salty", "sweet", "creamy"],
+    "heatTypical": 3,
+    "sweetnessTypical": 2,
+    "notes": "Green curry is aromatic and can be quite spicy depending on paste. Adjust heat by paste quantity and extra coconut milk."
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.saucepot",
+        "label": "Medium pot or Dutch oven",
+        "required": true,
+        "notes": "A heavy pot helps prevent scorching coconut cream."
+      },
+      {
+        "id": "equipment.knife",
+        "label": "Chef's knife",
+        "required": true
+      },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.wooden_spoon",
+      "equipment.whisk",
+      "equipment.microplane",
+      "equipment.measuring_spoons",
+      "equipment.measuring_cups"
+    ],
+    "optional": [
+      {
+        "id": "equipment.mortar_pestle",
+        "label": "Mortar & pestle",
+        "required": false,
+        "notes": "Helpful for bruising lemongrass/galangal or making a quick herb mash."
+      }
+    ],
+    "minimum": ["equipment.pot", "equipment.knife", "equipment.cutting_board"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": ["allergen.fish", "allergen.shellfish", "allergen.soy"],
+
+  "ingredientGroups": [
+    {
+      "id": "group.curry_base",
+      "label": "Curry base",
+      "items": [
+        "ingredient.coconut_milk",
+        "ingredient.green_curry_paste",
+        "ingredient.fish_sauce",
+        "ingredient.palm_sugar",
+        "ingredient.stock_chicken",
+        "ingredient.kaffir_lime_leaves"
+      ]
+    },
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": [
+        "ingredient.chicken_thigh",
+        "ingredient.tofu_firm",
+        "ingredient.shrimp"
+      ]
+    },
+    {
+      "id": "group.vegetables",
+      "label": "Vegetables",
+      "items": [
+        "ingredient.eggplant_thai",
+        "ingredient.bamboo_shoots",
+        "ingredient.bell_pepper",
+        "ingredient.zucchini",
+        "ingredient.green_beans"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish",
+      "items": [
+        "ingredient.thai_basil",
+        "ingredient.lime_juice",
+        "ingredient.cilantro"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.coconut_milk",
+      "label": "Coconut milk (full-fat), 2 cans",
+      "role": "base",
+      "amount": { "value": 800, "unit": "ml" },
+      "notes": [
+        "If your coconut milk separates, that’s fine—use the thick cream to fry the paste."
+      ]
+    },
+    {
+      "id": "ingredient.green_curry_paste",
+      "label": "Green curry paste",
+      "role": "spice",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": [
+        "Start with ~2–3 Tbsp depending on brand heat. Add more later if desired."
+      ]
+    },
+    {
+      "id": "ingredient.stock_chicken",
+      "label": "Chicken stock (or water)",
+      "role": "base",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "Use water if needed; stock adds depth."
+    },
+    {
+      "id": "ingredient.fish_sauce",
+      "label": "Fish sauce",
+      "role": "umami",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Primary salting agent in Thai curries."
+    },
+    {
+      "id": "ingredient.palm_sugar",
+      "label": "Palm sugar (or light brown sugar)",
+      "role": "sweetener",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "Balance the heat and herbal notes; adjust to taste."
+    },
+    {
+      "id": "ingredient.kaffir_lime_leaves",
+      "label": "Kaffir lime leaves (makrut), torn or bruised",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "each" },
+      "optional": true,
+      "notes": "Optional but highly recommended for authentic aroma."
+    },
+    {
+      "id": "ingredient.thai_basil",
+      "label": "Thai basil leaves",
+      "role": "herb",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": "Add at the end to keep it bright and perfumed."
+    },
+
+    {
+      "id": "ingredient.chicken_thigh",
+      "label": "Boneless skinless chicken thighs, sliced",
+      "role": "protein",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Thighs stay tender in simmered curries."
+    },
+
+    {
+      "id": "ingredient.eggplant_thai",
+      "label": "Eggplant (Thai eggplant preferred), bite-size",
+      "role": "vegetable",
+      "amount": { "value": 250, "unit": "g" },
+      "optional": true,
+      "notes": "If unavailable, use Japanese eggplant or zucchini."
+    },
+    {
+      "id": "ingredient.bamboo_shoots",
+      "label": "Bamboo shoots, drained",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Rinse if very briny."
+    },
+    {
+      "id": "ingredient.bell_pepper",
+      "label": "Bell pepper, sliced",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.green_beans",
+      "label": "Green beans, trimmed",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Keeps a nice crisp bite in curry."
+    },
+    {
+      "id": "ingredient.zucchini",
+      "label": "Zucchini, half-moons (fallback veg)",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Use if Thai eggplant is unavailable."
+    },
+
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Lime juice (to finish)",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true,
+      "notes": "Optional but recommended—brightens at the end."
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep.mise",
+      "title": "Prep protein and vegetables",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Slice chicken thighs into thin bite-size pieces (about 1/2-inch strips).",
+        "Cut vegetables into curry-friendly pieces: eggplant chunks, sliced bell pepper, trimmed green beans.",
+        "Separate Thai basil leaves; keep stems out (optional).",
+        "If using kaffir lime leaves, tear or bruise them to release aroma."
+      ],
+      "checks": [
+        "All ingredients are prepped before heating the pot (coconut can scorch if neglected)."
+      ]
+    },
+    {
+      "id": "step.fry.paste",
+      "title": "Fry green curry paste in coconut cream",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Open coconut milk and spoon the thick cream portion into a pot over medium-high heat.",
+        "Add green curry paste and stir constantly until fragrant and the oil begins to separate slightly (about 2–3 minutes).",
+        "If your coconut milk has little cream, use the whole can and cook a bit longer, stirring to avoid scorching."
+      ],
+      "timers": [{ "label": "Fry curry paste", "minutes": 3 }],
+      "checks": [
+        "Paste smells aromatic (not raw).",
+        "No burnt bits on the bottom of the pot."
+      ]
+    },
+    {
+      "id": "step.build.base",
+      "title": "Build the curry base",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Whisk in the remaining coconut milk and chicken stock (or water).",
+        "Add kaffir lime leaves if using.",
+        "Bring to a gentle simmer (not a hard boil)."
+      ],
+      "checks": ["Curry is simmering gently and evenly."]
+    },
+    {
+      "id": "step.cook.protein",
+      "title": "Simmer chicken until just cooked",
+      "activeMins": 5,
+      "handsOffMins": 8,
+      "instructions": [
+        "Add sliced chicken to the simmering curry.",
+        "Simmer gently, stirring occasionally, until chicken is cooked through and tender."
+      ],
+      "timers": [{ "label": "Simmer chicken", "minutes": 8 }],
+      "checks": ["Chicken pieces are opaque throughout with no raw center."]
+    },
+    {
+      "id": "step.add.veg",
+      "title": "Add vegetables and simmer until tender-crisp",
+      "activeMins": 4,
+      "handsOffMins": 10,
+      "instructions": [
+        "Add eggplant (or zucchini), bamboo shoots, green beans, and bell pepper (if using).",
+        "Simmer gently until eggplant is tender and beans are cooked but still bright."
+      ],
+      "timers": [{ "label": "Simmer vegetables", "minutes": 10 }],
+      "checks": [
+        "Eggplant is tender (not hard).",
+        "Vegetables are not overcooked and mushy."
+      ]
+    },
+    {
+      "id": "step.season.balance",
+      "title": "Season and balance (salty-sweet) then finish with herbs",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Stir in fish sauce and palm sugar. Simmer 1 minute to dissolve.",
+        "Taste and adjust: more fish sauce for salt/umami; more sugar to soften heat; a spoon of coconut milk to mellow spice.",
+        "Turn off heat and fold in Thai basil. Add a squeeze of lime if using."
+      ],
+      "timers": [{ "label": "Dissolve seasoning", "minutes": 1 }],
+      "checks": [
+        "Flavor is balanced: aromatic, slightly sweet, savory, with controllable heat.",
+        "Thai basil is bright and fragrant (not overcooked)."
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Serve hot over jasmine rice.",
+        "Garnish with cilantro if desired.",
+        "Optional: offer extra lime wedges and chili flakes on the side."
+      ],
+      "checks": ["Curry is served hot and aromatic."]
+    }
+  ],
+
+  "methods": ["method.saute", "method.simmer", "method.one_pot"],
+
+  "pairings": {
+    "starches": [
+      { "id": "thai.jasmine_rice", "label": "Jasmine rice" },
+      { "id": "thai.sticky_rice", "label": "Sticky rice (optional)" }
+    ],
+    "sides": [
+      { "id": "thai.cucumber_salad", "label": "Cucumber salad" },
+      { "id": "thai.som_tam", "label": "Som Tam (green papaya salad)" }
+    ],
+    "notes": "Serve with plain rice to let the curry shine; crisp salads help cut richness."
+  },
+
+  "planner": {
+    "dishId": "thai.green_curry",
+    "cuisineId": "cuisines.thai",
+    "defaultMealSlot": "dinner",
+    "leftovers": {
+      "quality": "very_good",
+      "reheat": "gentle_simmer",
+      "notes": "Reheat gently; whisk if coconut separates. Add basil fresh if possible."
+    },
+    "shoppingBoostItems": [
+      "ingredient.coconut_milk",
+      "ingredient.green_curry_paste",
+      "ingredient.thai_basil",
+      "ingredient.kaffir_lime_leaves"
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Cool quickly, store airtight. Reheat gently to avoid breaking coconut."
+    },
+    "freezer": {
+      "recommended": true,
+      "maxMonths": 2,
+      "notes": "Freeze in portions. Thaw overnight; reheat gently and whisk."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Ensure chicken reaches safe doneness; simmer gently until fully cooked."
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.paste_variability",
+      "title": "Adjusting for curry paste brands",
+      "notes": [
+        "Paste heat and salt vary widely. Start smaller, then add more after the first simmer.",
+        "If curry tastes harsh, simmer a few extra minutes and add more coconut milk.",
+        "If curry is flat, add fish sauce (salty/umami) and a touch more sugar (roundness)."
+      ]
+    },
+    {
+      "id": "adapt.no_kaffir",
+      "title": "No kaffir lime leaves",
+      "notes": [
+        "Use lime zest (microplane) added at the end plus extra Thai basil.",
+        "Do not add too much lime juice early; it can dull coconut aroma."
+      ]
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.tofu",
+      "label": "Tofu Green Curry (vegetarian base)",
+      "when": { "dietFlags": ["diet.vegetarian"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.chicken_thigh": {
+            "use": ["ingredient.tofu_firm"],
+            "notes": "Use 400–500g tofu. Pan-sear cubes first for best texture, then add near the end."
+          },
+          "ingredient.fish_sauce": {
+            "use": [
+              "ingredient.soy_sauce_light",
+              "ingredient.mushroom_seasoning"
+            ],
+            "notes": "Season to taste; keep the salty-sweet balance."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.shrimp",
+      "label": "Shrimp Green Curry",
+      "when": { "diet": { "allowShellfish": true } },
+      "adapt": {
+        "add": {
+          "ingredient.shrimp": {
+            "label": "Shrimp, peeled and deveined",
+            "amount": { "value": 400, "unit": "g" },
+            "notes": "Add in the last 3–4 minutes; cook just until opaque."
+          }
+        },
+        "notes": [
+          "Cook shrimp at the end to prevent toughness.",
+          "You can replace chicken entirely or do half chicken/half shrimp."
+        ]
+      }
+    },
+    {
+      "id": "var.low_heat",
+      "label": "Milder Green Curry",
+      "when": { "preference": { "heat": "low" } },
+      "adapt": {
+        "set": {
+          "ingredient.green_curry_paste": {
+            "amount": { "value": 30, "unit": "g" },
+            "notes": "Start with less paste; add more only if desired."
+          }
+        },
+        "notes": [
+          "Add extra coconut milk (up to 1 additional can) for a gentler curry."
+        ]
+      }
+    }
+  ],
+
+  "notes": [
+    "The signature move: fry curry paste in coconut cream before adding liquids.",
+    "Thai basil is best added off-heat to stay aromatic and green.",
+    "Vegetables can vary; keep a mix of tender (eggplant) and crisp (beans/pepper)."
+  ],
+
+  "compat": {
+    "catalog": {
+      "cuisinePath": "src/catalogs/cuisines/thai/recipes/green_curry.json",
+      "dishId": "thai.green_curry"
+    },
+    "search": {
+      "aliases": [
+        "green curry",
+        "gaeng keow wan",
+        "แกงเขียวหวาน",
+        "thai green curry"
+      ],
+      "keywords": [
+        "coconut milk",
+        "green curry paste",
+        "thai basil",
+        "kaffir lime leaves",
+        "eggplant",
+        "one pot",
+        "weeknight"
+      ]
+    }
+  },
+
+  "audit": {
+    "createdBy": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "reviewed": true,
+    "reviewNotes": [
+      "Schema-required fields present: schemaVersion/meta/ingredients/steps.",
+      "All ingredients include id+label and amount value/unit (or optional flagged).",
+      "All steps include id+title and instructions[] with timers where useful."
+    ]
+  }
+}

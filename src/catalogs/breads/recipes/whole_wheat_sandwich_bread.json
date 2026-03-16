@@ -1,0 +1,312 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.whole_wheat_sandwich_bread",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Everyday Whole Wheat Sandwich Bread",
+    "subtitle": "100% whole wheat (or 70/30 option) • soft, dependable loaf • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Canonical baseline for an everyday whole wheat sandwich loaf with optional 70/30 blend for extra softness."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "sandwich bread",
+    "subprofiles": ["whole-wheat", "everyday-loaf"],
+    "mealArchetypes": ["bread", "toast", "sandwich"],
+    "servingStyles": ["sliced loaf"],
+    "plannerTags": [
+      "bread",
+      "loaf",
+      "whole wheat",
+      "sandwich",
+      "toast",
+      "yeast"
+    ]
+  },
+
+  "yield": {
+    "servings": 14,
+    "servingSize": { "value": 1, "unit": "slice" },
+    "notes": "1 loaf (8.5x4.5 in / 9x5 in pan), typically 12–16 slices depending on thickness."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 155,
+    "totalMins": 185
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "loaf pan", "oven", "measuring scale or cups"],
+    "recommended": [
+      "stand mixer (optional)",
+      "instant-read thermometer (optional)",
+      "bench scraper",
+      "spray bottle (optional for keeping dough surface supple)"
+    ],
+    "optional": [
+      "sifter (helpful for fresh-milled flour)",
+      "pastry brush (for oil/butter)"
+    ]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "dairy", "egg"],
+
+  "signals": {
+    "bread": true,
+    "sandwichFriendly": true,
+    "toastFriendly": true,
+    "wholeWheat": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "low",
+    "saltiness": "moderate",
+    "richness": "moderate",
+    "crumb": "soft",
+    "crust": "thin/soft",
+    "notes": "Wheaty, slightly nutty flavor with a tender crumb; designed for everyday sandwiches."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour_whole_wheat",
+      "label": "Whole wheat flour (fresh milled or commercial)",
+      "role": "base",
+      "amount": { "value": 420, "unit": "g" },
+      "notes": "For the 70/30 option, see Variations (replace 30% with bread/AP flour). If using fresh milled, see Fresh-Milled Notes."
+    },
+    {
+      "id": "water",
+      "label": "Warm water (95–105°F / 35–40°C)",
+      "role": "hydration",
+      "amount": { "value": 270, "unit": "g" },
+      "notes": "Whole wheat absorbs more; hold back 20–30g and add as needed during mixing."
+    },
+    {
+      "id": "milk",
+      "label": "Warm milk (95–105°F / 35–40°C)",
+      "role": "tenderizer",
+      "amount": { "value": 60, "unit": "g" }
+    },
+    {
+      "id": "yeast",
+      "label": "Yeast (instant or active dry)",
+      "role": "leavening",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "Instant: mix with flour. Active dry: bloom in warm liquids with a pinch of sweetener 5–10 minutes."
+    },
+    {
+      "id": "sweetener",
+      "label": "Honey or sugar",
+      "role": "sweetener",
+      "amount": { "value": 28, "unit": "g" },
+      "notes": "Honey helps soften whole wheat crumb. If using sugar, use the same weight."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 9, "unit": "g" }
+    },
+    {
+      "id": "fat",
+      "label": "Unsalted butter, softened (or neutral oil)",
+      "role": "tenderizer",
+      "amount": { "value": 40, "unit": "g" },
+      "notes": "Butter gives best flavor; neutral oil keeps loaf very soft."
+    },
+    {
+      "id": "egg",
+      "label": "Large egg",
+      "role": "structure",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "About 1 large egg without shell. Optional but recommended for a softer, sturdier sandwich crumb."
+    },
+    {
+      "id": "pan_grease",
+      "label": "Neutral oil or butter (to grease pan)",
+      "role": "prep",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "crust_finish",
+      "label": "Butter or oil (to brush crust after baking)",
+      "role": "finish",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Prep + yeast choice",
+      "instructions": [
+        "Warm water and milk to 95–105°F (35–40°C).",
+        "If using active dry yeast: stir yeast + a pinch of the honey/sugar into the warm liquids and let stand 5–10 minutes until foamy.",
+        "If using instant yeast: do not bloom; add it with the dry ingredients in the next step."
+      ],
+      "timers": [{ "label": "Optional yeast bloom", "mins": 10 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Mix",
+      "instructions": [
+        "In a bowl (or stand mixer bowl), combine whole wheat flour and salt.",
+        "Add instant yeast now if using instant.",
+        "Add honey/sugar, warm liquids, and egg.",
+        "Mix until a shaggy dough forms, scraping down the bowl as needed.",
+        "If dough feels very stiff/dry, add a little of the held-back water 5–10g at a time."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_03",
+      "title": "Rest (autolyse/hydration rest)",
+      "instructions": [
+        "Cover and let the dough rest 15 minutes. Whole wheat benefits from this rest for softer crumb and easier kneading."
+      ],
+      "handsOffMins": 15,
+      "timers": [{ "label": "Hydration rest", "mins": 15 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Knead + incorporate butter/oil",
+      "instructions": [
+        "Knead until the dough begins to smooth (mixer medium-low 5–7 minutes; by hand 9–12 minutes).",
+        "Add softened butter (or oil) and continue kneading until fully incorporated and the dough is elastic. Whole wheat dough may not windowpane like white dough—aim for smooth, stretchy, and tacky but manageable.",
+        "If the dough is sticky, resist adding lots of flour; oiling your hands or the counter works better."
+      ],
+      "activeMins": 16
+    },
+    {
+      "id": "step_05",
+      "title": "First rise (bulk fermentation)",
+      "instructions": [
+        "Lightly oil a bowl, place dough inside, cover.",
+        "Rise until noticeably puffy and close to doubled (about 60–90 minutes depending on room temperature). Whole wheat sometimes shows less dramatic doubling—use a finger press: a gentle poke should slowly spring back."
+      ],
+      "handsOffMins": 75,
+      "timers": [{ "label": "Bulk rise (check at 60 min)", "mins": 75 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Shape",
+      "instructions": [
+        "Grease a loaf pan.",
+        "Turn dough out and gently press into a rectangle about the width of the pan.",
+        "Roll into a tight log, pinch seam closed, and place seam-side down in the pan.",
+        "For a smooth top, gently tuck ends under and press the loaf evenly into the pan."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_07",
+      "title": "Second rise (proof)",
+      "instructions": [
+        "Cover and proof until the dough crowns about 3/4–1 inch (2–3 cm) above the rim of the pan.",
+        "Typical proof time is 45–75 minutes depending on temperature.",
+        "Avoid over-proofing: if the loaf rises very high and feels fragile, it may collapse in the oven."
+      ],
+      "handsOffMins": 55,
+      "timers": [{ "label": "Proof (check at 45 min)", "mins": 55 }]
+    },
+    {
+      "id": "step_08",
+      "title": "Bake",
+      "instructions": [
+        "Bake at 350°F (175°C) for 32–40 minutes until deep golden brown.",
+        "If browning too fast, tent loosely with foil for the last 10–15 minutes.",
+        "Optional doneness check: internal temperature ~195–205°F (90–96°C)."
+      ],
+      "timers": [{ "label": "Bake (start checking)", "mins": 32 }],
+      "temperature": { "type": "oven", "value": 350, "unit": "F" }
+    },
+    {
+      "id": "step_09",
+      "title": "Cool + slice",
+      "instructions": [
+        "Remove from pan and cool on a rack at least 60 minutes before slicing (90 minutes gives best structure).",
+        "Optional: brush warm crust with butter/oil for a softer top."
+      ],
+      "handsOffMins": 60,
+      "timers": [{ "label": "Cooling", "mins": 60 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled whole wheat is more thirsty and can bake denser unless you manage hydration and gluten development.",
+    "guidelines": [
+      "Hold back 20–30g of the water during mixing; add back only if dough feels stiff/dry.",
+      "A longer rest (15–20 minutes) noticeably improves softness with fresh milled flour.",
+      "For the softest sandwich loaf, sift/bolt out some bran (even a light sift helps) and use the 70/30 variation.",
+      "If your fresh milled flour is very warm from milling, let it cool before mixing so fermentation stays predictable."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 25,
+      "rangeAddBackG": [0, 40]
+    }
+  },
+
+  "storage": {
+    "counter": "Cool completely, then store tightly wrapped at room temperature 2–3 days.",
+    "freezer": "Slice and freeze in a bag up to 2–3 months. Toast slices directly from frozen for best texture.",
+    "notes": "Avoid refrigerating; it stales bread faster. Whole wheat stales a bit quicker—freezing slices is ideal."
+  },
+
+  "variations": [
+    {
+      "name": "70/30 softer everyday loaf",
+      "change": "Use 294g whole wheat flour + 126g bread flour (or all-purpose). Keep other ingredients the same.",
+      "notes": "This blend improves loft and tenderness, especially with fresh milled flour."
+    },
+    {
+      "name": "100% whole wheat, no egg",
+      "change": "Omit egg; add 15g additional milk or water if dough feels stiff.",
+      "notes": "Still good for toast; slightly less tender for sandwiches."
+    },
+    {
+      "name": "Soaker method (extra soft, less gritty)",
+      "change": "Mix flour + water + milk (no yeast/salt/fat/egg) and rest 30–60 minutes before adding remaining ingredients.",
+      "notes": "Improves softness and reduces bran ‘bite’ (great for fresh milled)."
+    },
+    {
+      "name": "Tangzhong option (extra-soft, longer-lasting)",
+      "change": "Cook 25g of the flour + 125g of the water into a paste (about 150°F/65°C), cool, then subtract those amounts from the main flour/water.",
+      "notes": "Produces a pillowy loaf with improved shelf life; works well with whole wheat."
+    }
+  ],
+
+  "notes": [
+    "Whole wheat dough is naturally tackier; oiling your hands is better than adding extra flour.",
+    "If the loaf collapses at the top, it likely over-proofed—reduce proof time next bake.",
+    "If the loaf is dense, use the 70/30 variation and ensure the first rest + full proof to crown above the pan."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/sandwich_bread_white",
+      "breads/recipes/honey_oat_sandwich_bread",
+      "breads/recipes/whole_wheat_dinner_rolls"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Canonical baseline designed for daily sandwiches and toast. Includes 70/30 option for softer crumb and better volume."
+  }
+}

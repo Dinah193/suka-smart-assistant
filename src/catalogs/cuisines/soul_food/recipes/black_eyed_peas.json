@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.black_eyed_peas_okra.v1",
+    "name": "Soul Food Black-Eyed Peas with Okra",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Black-eyed peas simmered with smoky meat and tender okra, finished with vinegar and heat."
+    },
+    "tags": [
+      "soul_food",
+      "black_eyed_peas",
+      "okra",
+      "peas",
+      "legumes",
+      "simmer",
+      "new_years",
+      "comfort_food",
+      "smoky"
+    ],
+    "allergens": [],
+    "dietary": {
+      "halal": false,
+      "kosher_style": false,
+      "gluten_free": true,
+      "dairy_free": true
+    },
+    "summary": "Tender black-eyed peas simmered with smoky meat, onion, garlic, and sliced okra for body and flavor—finished with tangy vinegar and hot sauce.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 8,
+      "unit": "servings"
+    },
+    "yield": "About 8 servings (pot)",
+    "timing": {
+      "prepMinutes": 15,
+      "inactiveMinutes": 0,
+      "cookMinutes": 75,
+      "totalMinutes": 90
+    },
+    "equipment": [
+      {
+        "id": "large_pot_dutch_oven",
+        "label": "Large pot / Dutch oven (5–7 qt)",
+        "required": true
+      },
+      { "id": "cutting_board", "label": "Cutting board", "required": true },
+      { "id": "chef_knife", "label": "Chef's knife", "required": true },
+      { "id": "wooden_spoon", "label": "Wooden spoon", "required": true },
+      {
+        "id": "colander",
+        "label": "Colander (for rinsing peas)",
+        "required": false
+      }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "If using pork or turkey, simmer until fully heated and peas are tender.",
+        "Cool leftovers quickly and refrigerate within 2 hours."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "black_eyed_peas_dried",
+      "label": "Black-eyed peas, dried",
+      "amount": { "value": 1, "unit": "lb" }
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil or bacon fat",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "yellow_onion",
+      "label": "Yellow onion, diced",
+      "amount": { "value": 1, "unit": "medium" }
+    },
+    {
+      "id": "celery",
+      "label": "Celery, diced",
+      "amount": { "value": 2, "unit": "stalk" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic cloves, minced",
+      "amount": { "value": 3, "unit": "clove" }
+    },
+    {
+      "id": "okra",
+      "label": "Fresh okra, sliced into 1/2-inch rounds",
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "smoked_meat",
+      "label": "Smoked meat (ham hock, smoked turkey wing/leg, or neck bones)",
+      "amount": { "value": 1, "unit": "lb" }
+    },
+    {
+      "id": "chicken_broth",
+      "label": "Chicken broth or water",
+      "amount": { "value": 8, "unit": "cup" }
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf",
+      "amount": { "value": 1, "unit": "leaf" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "smoked_paprika",
+      "label": "Smoked paprika (optional)",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "cayenne_pepper",
+      "label": "Cayenne pepper (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt (adjust near end)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "apple_cider_vinegar",
+      "label": "Apple cider vinegar",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "hot_sauce",
+      "label": "Hot sauce (optional)",
+      "amount": { "value": 1, "unit": "tsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_rinse_sort",
+      "title": "Sort and rinse peas",
+      "body": "Pick through dried peas to remove debris. Rinse under cold water until mostly clear. Drain."
+    },
+    {
+      "id": "step_02_saute_aromatics",
+      "title": "Sauté aromatics",
+      "body": "Heat oil or bacon fat in a large pot over medium heat. Add onion and celery and cook 6–8 minutes until softened. Add garlic and cook 30–60 seconds until fragrant."
+    },
+    {
+      "id": "step_03_build_pot",
+      "title": "Add peas, meat, and liquid",
+      "body": "Add rinsed peas, smoked meat, broth, bay leaf, black pepper, and optional smoked paprika or cayenne. Stir and bring to a gentle simmer."
+    },
+    {
+      "id": "step_04_simmer_peas",
+      "title": "Simmer peas until nearly tender",
+      "body": "Reduce heat to low and simmer partially covered for 45–60 minutes, stirring occasionally, until peas are mostly tender."
+    },
+    {
+      "id": "step_05_add_okra",
+      "title": "Add okra",
+      "body": "Stir in sliced okra and continue simmering 15–25 minutes until okra is tender and the broth has slightly thickened."
+    },
+    {
+      "id": "step_06_shred_meat_optional",
+      "title": "Shred meat (optional)",
+      "body": "Remove smoked meat, let cool briefly, pull meat from bones, and return meat to the pot. Discard bones and skin as desired."
+    },
+    {
+      "id": "step_07_season_finish",
+      "title": "Season and finish",
+      "body": "Remove bay leaf. Taste and add salt as needed. Stir in apple cider vinegar and hot sauce if using. Simmer 2–3 minutes, then serve hot."
+    }
+  ]
+}

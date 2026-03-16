@@ -1,0 +1,194 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.marinades.vinegar_shawarma_base",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Vinegar Shawarma Base",
+    "tags": [
+      "marinade",
+      "base",
+      "shawarma",
+      "vinegar_based",
+      "spice_blend",
+      "garlic_forward",
+      "citrus",
+      "make_ahead",
+      "batch_friendly",
+      "multi_use"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Foundational vinegar-based shawarma marinade base (concentrate) to scale and adapt for beef/lamb/chicken/veg."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.vinegar.red_wine",
+      "label": "Red wine vinegar",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": [
+        "Sub: apple cider vinegar for a fruitier tang.",
+        "For a cleaner tang: distilled white vinegar (reduce slightly; it’s sharper)."
+      ]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 90, "unit": "ml" },
+      "notes": [
+        "About 6 tablespoons.",
+        "This is a concentrate; you can add more oil when adapting for specific proteins."
+      ]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 24, "unit": "g" },
+      "notes": ["About 7–8 medium cloves."]
+    },
+    {
+      "id": "ing.onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": [
+        "About 1 tablespoon. Sub: 120 g grated onion (use immediately; shorter storage)."
+      ]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": ["About 1 tablespoon + 1 teaspoon."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": ["About 1 tablespoon."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": ["About 1 tablespoon + 1 teaspoon."]
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": ["About 1 teaspoon."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 1.6, "unit": "g" },
+      "notes": ["About 1/2 teaspoon."]
+    },
+    {
+      "id": "ing.clove_ground",
+      "label": "Ground cloves",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; strong—use lightly."]
+    },
+    {
+      "id": "ing.cardamom_ground",
+      "label": "Ground cardamom",
+      "amount": { "value": 1.2, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; optional but authentic."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": [
+        "About 2 1/2 teaspoons.",
+        "This is a base concentrate; salt can be adjusted per application."
+      ]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Brown sugar (or honey)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": [
+        "Optional: balances acidity and helps browning (about 1 tablespoon).",
+        "Sub: 15 g honey."
+      ]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["Optional for heat (about 1 teaspoon)."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Mix the base concentrate",
+      "instructions": [
+        "In a bowl or jar, combine red wine vinegar, lemon juice, olive oil, garlic, and onion powder. Whisk or shake until emulsified.",
+        "Add all spices, black pepper, salt, optional sugar/honey, and optional chili flakes.",
+        "Whisk until uniform. If storing in a jar, shake vigorously until spices are dispersed."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "How to use (scaling notes)",
+      "instructions": [
+        "This is a concentrate base designed to be adapted per protein/veg and batch size.",
+        "Typical usage: 60–120 ml base per 900 g–1.4 kg (2–3 lb) protein or vegetables.",
+        "For lean meats (chicken breast), consider adding 30–60 ml yogurt or 15–30 ml extra oil to mellow acidity.",
+        "For beef/lamb, you can use the base as-is or add 15–30 ml oil for richer coating."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Marinate time guidance",
+      "instructions": [
+        "Vegetables: 20–30 minutes (quick) up to 2–8 hours (deep).",
+        "Chicken: 2–12 hours (best 6–10). Avoid much beyond 24 hours due to acidity.",
+        "Beef/Lamb: 2–24 hours (best 8–24)."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Storage",
+      "instructions": [
+        "Store base in a sealed jar in the refrigerator.",
+        "For best flavor, use within 7–10 days.",
+        "If you substituted fresh grated onion, use within 2–3 days."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Food safety",
+      "instructions": [
+        "If the base touches raw meat, do not reuse it unless you boil it thoroughly.",
+        "Always marinate proteins in the refrigerator."
+      ]
+    }
+  ]
+}

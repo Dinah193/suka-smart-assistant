@@ -1,0 +1,790 @@
+{
+  "$schema": "../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "kind": "ruleset",
+  "meta": {
+    "id": "homestead.visibility_rules",
+    "type": "ruleset",
+    "label": "Homestead • Visibility Rules",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/homestead/visibility_rules.catalog.json",
+      "notes": [
+        "Deterministic UI gating rules based on homestead level, module/domain tags, and per-level uiFlags.",
+        "These rules are intended for UI visibility/client experience. Enforce authorization separately if needed."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "of",
+        "to",
+        "for",
+        "with",
+        "in",
+        "on"
+      ]
+    }
+  },
+  "globals": {
+    "module": "homestead.visibility",
+    "engineHints": {
+      "contextPaths": {
+        "levelId": "$.homestead.levelId",
+        "levelOrder": "$.homestead.levelOrder",
+        "uiFlags": "$.homestead.uiFlags",
+        "capabilityTags": "$.kitchen.capabilities.tags",
+        "moduleKey": "$.ui.moduleKey",
+        "featureKey": "$.ui.featureKey",
+        "itemTags": "$.ui.item.tags",
+        "route": "$.nav.route"
+      },
+      "conventions": [
+        "UI passes ui.item.tags (string[]) for the nav card/module being evaluated.",
+        "UI passes homestead.levelOrder (0..4).",
+        "UI optionally passes homestead.uiFlags.features (object) for current level.",
+        "Equipment gating expects ui.requiredEquipmentTags (string[]) if needed."
+      ]
+    },
+    "defaults": {
+      "visibility": "visible",
+      "locked": false,
+      "lockReason": null,
+      "lockBadge": null,
+      "score": 0
+    }
+  },
+  "rules": [
+    {
+      "id": "visibility.base_init",
+      "enabled": true,
+      "priority": 0,
+      "title": "Base: initialize visibility fields",
+      "description": "Initialize deterministic UI fields. Downstream rules may lock/hide and attach reasons/badges.",
+      "tags": ["visibility", "baseline"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$.ui" },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.visibility", "value": "visible" },
+          { "type": "set", "path": "$.ui.locked", "value": false },
+          { "type": "set", "path": "$.ui.lockReason", "value": null },
+          { "type": "set", "path": "$.ui.lockBadge", "value": null },
+          { "type": "set", "path": "$.ui.score", "value": 0 }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.level_required_missing",
+      "enabled": true,
+      "priority": 10,
+      "title": "Lock/Hide: level required but missing",
+      "description": "If requireLevelForRoutes is true and homestead.levelId is missing, mark item hidden + locked.",
+      "tags": ["visibility", "level", "lock"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": true,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.homestead.ui.requireLevelForRoutes",
+            "value": true
+          },
+          {
+            "op": "not",
+            "conditions": [{ "type": "exists", "path": "$.homestead.levelId" }]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "hidden" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Homestead level is required to display this module."
+          },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LOCKED" },
+          { "type": "addTag", "value": "visibility.hidden.missing_level" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.feature_flag_gate",
+      "enabled": true,
+      "priority": 40,
+      "title": "Feature flag gating",
+      "description": "If a UI item declares featureKey and current level disables it, lock (and hide if hideLockedModules is true).",
+      "tags": ["visibility", "feature_flags"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.ui.featureKey" },
+          {
+            "type": "eq",
+            "path": "$.homestead.uiFlags.features[$.ui.featureKey]",
+            "value": false
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "This feature is disabled for your current homestead level."
+          },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LOCKED" },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "scoreAdjust", "scoreDelta": -50 },
+          { "type": "addTag", "value": "visibility.locked.feature_flag" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.targets_panel_lock_if_not_allowed",
+      "enabled": true,
+      "priority": 55,
+      "title": "Targets Panel: lock unless (level >= 1 AND inside Homestead Planner)",
+      "description": "Implements: showTargetsPanel only if homesteadLevel >= 1 AND user is in Homestead Planner.",
+      "tags": ["visibility", "targets_panel", "homestead_planner"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.ui.featureKey",
+            "value": "showTargetsPanel"
+          },
+          {
+            "op": "any",
+            "conditions": [
+              { "type": "lt", "path": "$.homestead.levelOrder", "value": 1 },
+              {
+                "op": "not",
+                "conditions": [
+                  {
+                    "type": "matches",
+                    "path": "$.nav.route",
+                    "regex": "^(\\/)?(homestead|homestead_planner)(\\/|$)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 1" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Targets Panel is available in Homestead Planner at Level 1+."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -60 },
+          { "type": "addTag", "value": "visibility.locked.targets_panel" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.targets_panel_allow_when_allowed",
+      "enabled": true,
+      "priority": 56,
+      "title": "Targets Panel: allow when (level >= 1 AND inside Homestead Planner)",
+      "description": "Explicit allow rule (mostly for clarity).",
+      "tags": ["visibility", "targets_panel", "homestead_planner"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.ui.featureKey",
+            "value": "showTargetsPanel"
+          },
+          { "type": "gte", "path": "$.homestead.levelOrder", "value": 1 },
+          {
+            "type": "matches",
+            "path": "$.nav.route",
+            "regex": "^(\\/)?(homestead|homestead_planner)(\\/|$)"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": false },
+          { "type": "set", "path": "$.ui.visibility", "value": "visible" },
+          { "type": "addTag", "value": "visibility.allowed.targets_panel" },
+          { "type": "scoreAdjust", "scoreDelta": 10 }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_preservation_if_level_lt1",
+      "enabled": true,
+      "priority": 60,
+      "title": "Domain gate: preservation (min level 1)",
+      "description": "If item is tagged domain.preservation and levelOrder < 1, lock.",
+      "tags": ["visibility", "domain", "preservation"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.preservation" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 1 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 1" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Preservation unlocks at Homestead Level 1."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -80 },
+          { "type": "addTag", "value": "visibility.locked.domain.preservation" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_toolshed_if_level_lt1",
+      "enabled": true,
+      "priority": 61,
+      "title": "Domain gate: toolshed (min level 1)",
+      "description": "If item is tagged domain.toolshed and levelOrder < 1, lock.",
+      "tags": ["visibility", "domain", "toolshed"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.toolshed" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 1 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 1" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Toolshed unlocks at Homestead Level 1."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -60 },
+          { "type": "addTag", "value": "visibility.locked.domain.toolshed" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_garden_if_level_lt2",
+      "enabled": true,
+      "priority": 70,
+      "title": "Domain gate: garden (min level 2)",
+      "description": "If item is tagged domain.garden and levelOrder < 2, lock.",
+      "tags": ["visibility", "domain", "garden"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.garden" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 2 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 2" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Garden planning unlocks at Homestead Level 2."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -90 },
+          { "type": "addTag", "value": "visibility.locked.domain.garden" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_water_if_level_lt2",
+      "enabled": true,
+      "priority": 71,
+      "title": "Domain gate: water (min level 2)",
+      "description": "If item is tagged domain.water and levelOrder < 2, lock.",
+      "tags": ["visibility", "domain", "water"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.water" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 2 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 2" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Water planning unlocks at Homestead Level 2."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -70 },
+          { "type": "addTag", "value": "visibility.locked.domain.water" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_waste_if_level_lt2",
+      "enabled": true,
+      "priority": 72,
+      "title": "Domain gate: waste (min level 2)",
+      "description": "If item is tagged domain.waste and levelOrder < 2, lock.",
+      "tags": ["visibility", "domain", "waste"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.waste" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 2 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 2" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Waste/compost systems unlock at Homestead Level 2."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -70 },
+          { "type": "addTag", "value": "visibility.locked.domain.waste" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_animals_if_level_lt3",
+      "enabled": true,
+      "priority": 80,
+      "title": "Domain gate: animals (min level 3)",
+      "description": "If item is tagged domain.animals and levelOrder < 3, lock.",
+      "tags": ["visibility", "domain", "animals"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.animals" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 3 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 3" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Animals unlock at Homestead Level 3."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -110 },
+          { "type": "addTag", "value": "visibility.locked.domain.animals" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_butchery_if_level_lt3",
+      "enabled": true,
+      "priority": 81,
+      "title": "Domain gate: butchery (min level 3)",
+      "description": "If item is tagged domain.butchery and levelOrder < 3, lock.",
+      "tags": ["visibility", "domain", "butchery"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.butchery" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 3 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 3" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Butchery unlocks at Homestead Level 3."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -120 },
+          { "type": "addTag", "value": "visibility.locked.domain.butchery" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_energy_if_level_lt4",
+      "enabled": true,
+      "priority": 90,
+      "title": "Domain gate: energy (min level 4)",
+      "description": "If item is tagged domain.energy and levelOrder < 4, lock.",
+      "tags": ["visibility", "domain", "energy"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.energy" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 4 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 4" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Energy/microgrid tools unlock at Homestead Level 4."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -130 },
+          { "type": "addTag", "value": "visibility.locked.domain.energy" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_makerspace_if_level_lt4",
+      "enabled": true,
+      "priority": 91,
+      "title": "Domain gate: makerspace (min level 4)",
+      "description": "If item is tagged domain.makerspace and levelOrder < 4, lock.",
+      "tags": ["visibility", "domain", "makerspace"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.makerspace" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 4 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 4" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Makerspace tools unlock at Homestead Level 4."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -120 },
+          { "type": "addTag", "value": "visibility.locked.domain.makerspace" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_construction_if_level_lt4",
+      "enabled": true,
+      "priority": 92,
+      "title": "Domain gate: construction (min level 4)",
+      "description": "If item is tagged domain.construction and levelOrder < 4, lock.",
+      "tags": ["visibility", "domain", "construction"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.construction" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 4 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 4" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Construction planning unlocks at Homestead Level 4."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -120 },
+          { "type": "addTag", "value": "visibility.locked.domain.construction" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.lock_community_if_level_lt4",
+      "enabled": true,
+      "priority": 93,
+      "title": "Domain gate: community (min level 4)",
+      "description": "If item is tagged domain.community and levelOrder < 4, lock.",
+      "tags": ["visibility", "domain", "community"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "domain.community" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 4 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL 4" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Community/village tools unlock at Homestead Level 4."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -120 },
+          { "type": "addTag", "value": "visibility.locked.domain.community" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.route_gate_by_min_level",
+      "enabled": true,
+      "priority": 120,
+      "title": "Route gating by ui.minLevel",
+      "description": "If a route/menu item declares ui.minLevel and current levelOrder is lower, lock the route entry.",
+      "tags": ["visibility", "routes", "level"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.ui.minLevel" },
+          { "type": "lt", "path": "$.homestead.levelOrder", "value": 0 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "LEVEL UP" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "This route unlocks at a higher homestead level."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -80 },
+          { "type": "addTag", "value": "visibility.locked.route_min_level" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.equipment_gate_required_tags",
+      "enabled": true,
+      "priority": 140,
+      "title": "Equipment gate by ui.requiredEquipmentTags",
+      "description": "If a UI item declares requiredEquipmentTags (string[]) and user capability tags do not intersect, lock the item.",
+      "tags": ["visibility", "equipment", "capabilities"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.ui.requiredEquipmentTags" },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.kitchen.capabilities.tags",
+                "values": ["equipment.placeholder"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.locked", "value": true },
+          { "type": "set", "path": "$.ui.visibility", "value": "locked" },
+          { "type": "set", "path": "$.ui.lockBadge", "value": "EQUIPMENT" },
+          {
+            "type": "set",
+            "path": "$.ui.lockReason",
+            "value": "Missing required equipment to use this feature."
+          },
+          { "type": "scoreAdjust", "scoreDelta": -40 },
+          { "type": "addTag", "value": "visibility.locked.equipment" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.hide_locked_when_preference_enabled",
+      "enabled": true,
+      "priority": 160,
+      "title": "Hide locked modules when preference enabled",
+      "description": "If homestead.ui.hideLockedModules is true and item is locked, set visibility to hidden.",
+      "tags": ["visibility", "lock", "preference"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.homestead.ui.hideLockedModules",
+            "value": true
+          },
+          { "type": "eq", "path": "$.ui.locked", "value": true }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.ui.visibility", "value": "hidden" },
+          { "type": "addTag", "value": "visibility.hidden.locked" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.attach_upgrade_cta",
+      "enabled": true,
+      "priority": 170,
+      "title": "Attach upgrade CTA when locked and preference enabled",
+      "description": "If showUpgradeCTA is true and item is locked, attach ui.cta for the UI to render.",
+      "tags": ["visibility", "cta"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.homestead.ui.showUpgradeCTA",
+            "value": true
+          },
+          { "type": "eq", "path": "$.ui.locked", "value": true }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.ui.cta",
+            "value": {
+              "kind": "upgrade",
+              "label": "Unlock this",
+              "action": "open_homestead_level_modal"
+            }
+          },
+          { "type": "addTag", "value": "visibility.cta.upgrade" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.rank_boost_core_modules",
+      "enabled": true,
+      "priority": 220,
+      "title": "Ranking: boost core modules",
+      "description": "Boost score for core modules so they appear earlier in dashboards/menus.",
+      "tags": ["visibility", "ranking"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.ui.moduleKey", "value": "meals" },
+          { "type": "eq", "path": "$.ui.moduleKey", "value": "inventory" },
+          { "type": "eq", "path": "$.ui.moduleKey", "value": "calendar" },
+          { "type": "eq", "path": "$.ui.moduleKey", "value": "cleaning" }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 20 },
+          { "type": "addTag", "value": "visibility.rank.core" }
+        ]
+      }
+    },
+
+    {
+      "id": "visibility.rank_penalty_locked",
+      "enabled": true,
+      "priority": 230,
+      "title": "Ranking: down-rank locked items",
+      "description": "Down-rank locked items so they appear later in lists when shown.",
+      "tags": ["visibility", "ranking"],
+      "source": "homestead.visibility_rules",
+      "stopOnMatch": false,
+      "when": { "type": "eq", "path": "$.ui.locked", "value": true },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -25 },
+          { "type": "addTag", "value": "visibility.rank.locked" }
+        ]
+      }
+    }
+  ]
+}

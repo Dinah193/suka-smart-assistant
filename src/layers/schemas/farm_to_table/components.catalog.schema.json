@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.suka.local/ssa/catalogs/components.catalog.schema.json",
+  "title": "SSA Farm-to-Table Components Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "catalogId",
+    "version",
+    "generatedAt",
+    "categories",
+    "sources",
+    "items"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "catalogId": {
+      "type": "string",
+      "minLength": 3
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "currency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": "string",
+          "minLength": 2
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mass": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "volume": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "count": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "other": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(\\.[a-z0-9_]+)+$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      }
+    },
+    "allergens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      }
+    },
+    "preservationMethodsIndex": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^preserve\\.[a-z0-9_]+$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      }
+    },
+    "indexes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "byCategory": {
+          "type": "boolean"
+        },
+        "bySource": {
+          "type": "boolean"
+        },
+        "bySubstitutionGroup": {
+          "type": "boolean"
+        },
+        "byNutritionKey": {
+          "type": "boolean"
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/catalogItem"
+      }
+    }
+  },
+  "$defs": {
+    "shelfLifeDays": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pantry": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "fridge": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "freezer": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "seasonal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "startMonth": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 12
+        },
+        "endMonth": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 12
+        }
+      }
+    },
+    "costHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "avgPerUnit": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "preservationLinks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methods",
+        "inputs"
+      ],
+      "properties": {
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^preserve\\.[a-z0-9_]+$"
+          },
+          "default": []
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(preserve_input|spice|pantry|baking|sweetener|fat|grain|legume|protein|veg|fruit|starch)\\.[a-z0-9_]+$"
+          },
+          "default": []
+        }
+      }
+    },
+    "catalogItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "categoryId",
+        "defaultUnit",
+        "edibleYield",
+        "shelfLifeDays",
+        "sources",
+        "tags",
+        "aliases",
+        "allergens",
+        "costHints",
+        "substitutionGroups",
+        "seasonal",
+        "preservationLinks"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "categoryId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9_]+)+$"
+        },
+        "defaultUnit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "density": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "edibleYield": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "shelfLifeDays": {
+          "$ref": "#/$defs/shelfLifeDays"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "minItems": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "nutritionKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "storageNotes": {
+          "type": "string"
+        },
+        "allergens": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "default": []
+        },
+        "costHints": {
+          "$ref": "#/$defs/costHints"
+        },
+        "substitutionGroups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "seasonal": {
+          "$ref": "#/$defs/seasonal"
+        },
+        "preservationLinks": {
+          "$ref": "#/$defs/preservationLinks"
+        }
+      }
+    }
+  }
+}

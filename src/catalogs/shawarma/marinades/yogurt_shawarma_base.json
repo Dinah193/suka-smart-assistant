@@ -1,0 +1,198 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.marinades.yogurt_shawarma_base",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Yogurt Shawarma Base",
+    "tags": [
+      "marinade",
+      "base",
+      "shawarma",
+      "yogurt_based",
+      "spice_blend",
+      "garlic_forward",
+      "citrus",
+      "make_ahead",
+      "batch_friendly",
+      "multi_use"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Foundational yogurt-based shawarma marinade base (concentrate) to adapt for chicken, lamb, beef, and vegetables."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.greek_yogurt.plain",
+      "label": "Plain Greek yogurt",
+      "amount": { "value": 480, "unit": "g" },
+      "notes": [
+        "About 2 cups. Whole-milk preferred.",
+        "Sub: plain yogurt (thinner) or labneh (thicker)."
+      ]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.lemon_zest",
+      "label": "Lemon zest",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 2 tablespoons; optional but brightens flavor."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 24, "unit": "g" },
+      "notes": ["About 7–8 medium cloves."]
+    },
+    {
+      "id": "ing.onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": [
+        "About 1 tablespoon. Sub: 120 g grated onion (shorter storage)."
+      ]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": ["About 1 tablespoon + 1 teaspoon."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": ["About 1 tablespoon."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": ["About 1 tablespoon + 1 teaspoon."]
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": ["About 1 teaspoon; classic shawarma note."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 1.6, "unit": "g" },
+      "notes": ["About 1/2 teaspoon."]
+    },
+    {
+      "id": "ing.clove_ground",
+      "label": "Ground cloves",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; strong—use lightly."]
+    },
+    {
+      "id": "ing.cardamom_ground",
+      "label": "Ground cardamom",
+      "amount": { "value": 1.2, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; optional but authentic."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 16, "unit": "g" },
+      "notes": [
+        "About 1 tablespoon.",
+        "This is a base concentrate; adjust per application if you plan to salt separately."
+      ]
+    },
+    {
+      "id": "ing.chili_powder",
+      "label": "Mild chili powder (or cayenne for heat)",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 2 teaspoons.", "For spicier: use 1–2 g cayenne instead."]
+    },
+    {
+      "id": "ing.honey",
+      "label": "Honey (optional)",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": [
+        "About 2 teaspoons; balances tang and improves browning.",
+        "Sub: 10 g brown sugar."
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Mix the base concentrate",
+      "instructions": [
+        "In a large bowl, whisk yogurt, olive oil, lemon juice, and optional lemon zest until smooth.",
+        "Whisk in garlic and onion powder.",
+        "Add all spices, black pepper, salt, chili powder/cayenne, and optional honey. Whisk until evenly blended."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "How to use (scaling notes)",
+      "instructions": [
+        "This is a base designed to be adapted per protein/veg and batch size.",
+        "Typical usage: 180–300 g base per 900 g–1.4 kg (2–3 lb) protein or vegetables (enough to coat generously).",
+        "For chicken: use as-is. For extra tang, add 5–15 ml more lemon juice.",
+        "For lamb/beef: add 15–30 ml olive oil for a richer coating, or add 10–15 ml vinegar if you want sharper acidity.",
+        "For vegetables: thin with 15–30 ml water or lemon juice so it coats evenly without clumping."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Marinate time guidance",
+      "instructions": [
+        "Vegetables: 20–30 minutes (quick) up to 2–6 hours (deep).",
+        "Chicken: 2–12 hours (best 6–10). Avoid much beyond 24 hours (can soften texture).",
+        "Lamb/Beef: 2–12 hours (best 6–12). If very thin slices, 1–4 hours is enough."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Storage",
+      "instructions": [
+        "Store base in a sealed container in the refrigerator.",
+        "Use within 3–5 days for best freshness (garlic + dairy).",
+        "If you substituted fresh grated onion, use within 2–3 days."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Food safety",
+      "instructions": [
+        "If the base touches raw meat, do not reuse it unless you boil it thoroughly (boiling may split dairy). Safer: discard.",
+        "Always marinate proteins in the refrigerator."
+      ]
+    }
+  ]
+}

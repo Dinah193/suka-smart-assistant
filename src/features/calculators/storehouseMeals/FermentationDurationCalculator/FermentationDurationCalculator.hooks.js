@@ -22,7 +22,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} FeastDay
@@ -72,11 +72,12 @@ export function useFermentationFeastAlignment({
   calculatorResult,
   feastDays,
   toleranceDays = 7,
-  autoEmit = true
+  autoEmit = true,
 }) {
   const [lastEmittedKey, setLastEmittedKey] = useState(null);
 
-  const readyWindow = calculatorResult?.data?.outputs?.targetReadyWindow || null;
+  const readyWindow =
+    calculatorResult?.data?.outputs?.targetReadyWindow || null;
 
   const alignedFeasts = useMemo(() => {
     if (!readyWindow || !feastDays || !feastDays.length) return [];
@@ -93,8 +94,15 @@ export function useFermentationFeastAlignment({
         const windowStart = parseIsoSafe(feast.windowStart) || central;
         const windowEnd = parseIsoSafe(feast.windowEnd) || central;
 
-        const overlap = getDateRangeOverlap(rwStart, rwEnd, windowStart, windowEnd);
-        const overlapDays = overlap ? diffInDays(overlap.start, overlap.end) + 1 : 0;
+        const overlap = getDateRangeOverlap(
+          rwStart,
+          rwEnd,
+          windowStart,
+          windowEnd
+        );
+        const overlapDays = overlap
+          ? diffInDays(overlap.start, overlap.end) + 1
+          : 0;
 
         const offsetToStart = diffInDays(rwStart, windowStart); // + means ready starts after feast window start
         const distanceToFeastCenter = Math.abs(diffInDays(central, rwStart));
@@ -116,7 +124,7 @@ export function useFermentationFeastAlignment({
           distanceToFeastCenter,
           withinTolerance,
           offsetToStart,
-          readyWindow
+          readyWindow,
         };
       })
       .filter(Boolean)
@@ -130,7 +138,8 @@ export function useFermentationFeastAlignment({
         const rb = ranking[b.alignmentType] || 0;
 
         if (ra !== rb) return rb - ra;
-        if (a.overlapDays !== b.overlapDays) return b.overlapDays - a.overlapDays;
+        if (a.overlapDays !== b.overlapDays)
+          return b.overlapDays - a.overlapDays;
         return a.distanceToFeastCenter - b.distanceToFeastCenter;
       });
   }, [readyWindow, feastDays, toleranceDays]);
@@ -144,7 +153,7 @@ export function useFermentationFeastAlignment({
     const key = JSON.stringify({
       rw: readyWindow,
       feastIds: (feastDays || []).map((f) => f.id),
-      bestFeastId: bestMatch?.feast?.id || null
+      bestFeastId: bestMatch?.feast?.id || null,
     });
 
     if (key === lastEmittedKey) return;
@@ -154,14 +163,22 @@ export function useFermentationFeastAlignment({
     emitEvent({
       type: "calendar.ferment.feastAlignment.computed",
       ts: new Date().toISOString(),
-      source: "hooks/FermentationDurationCalculator.useFermentationFeastAlignment",
+      source:
+        "hooks/FermentationDurationCalculator.useFermentationFeastAlignment",
       data: {
         readyWindow,
         alignedFeasts,
-        bestMatch
-      }
+        bestMatch,
+      },
     });
-  }, [autoEmit, readyWindow, alignedFeasts, bestMatch, feastDays, lastEmittedKey]);
+  }, [
+    autoEmit,
+    readyWindow,
+    alignedFeasts,
+    bestMatch,
+    feastDays,
+    lastEmittedKey,
+  ]);
 
   return { alignedFeasts, bestMatch };
 }
@@ -189,13 +206,17 @@ export function useFermentationFeastAlignment({
  * @param {FermentationCalculatorResult|null} params.calculatorResult
  * @param {boolean} [params.autoSync=false]
  */
-export function useFermentationStorehouseSync({ calculatorResult, autoSync = false }) {
+export function useFermentationStorehouseSync({
+  calculatorResult,
+  autoSync = false,
+}) {
   const [syncStatus, setSyncStatus] = useState(
     /** @type {"idle"|"pending"|"synced"|"error"} */ ("idle")
   );
   const [lastError, setLastError] = useState("");
 
-  const readyWindow = calculatorResult?.data?.outputs?.targetReadyWindow || null;
+  const readyWindow =
+    calculatorResult?.data?.outputs?.targetReadyWindow || null;
   const inventoryHints = calculatorResult?.data?.outputs?.inventoryHints || [];
   const product = calculatorResult?.data?.inputs?.product || {};
   const meta = calculatorResult?.data?.meta || {};
@@ -212,13 +233,13 @@ export function useFermentationStorehouseSync({ calculatorResult, autoSync = fal
         unit: product.unit,
         householdId: product.householdId || meta.householdId || null,
         projectId: product.projectId || meta.projectId || null,
-        label: product.label || null
+        label: product.label || null,
       },
       calculator: {
         id: "FermentationDurationCalculator",
         requestedAt: meta.requestedAt || null,
-        sourceNode: meta.sourceNode || null
-      }
+        sourceNode: meta.sourceNode || null,
+      },
     };
   }, [readyWindow, inventoryHints, product, meta]);
 
@@ -241,8 +262,9 @@ export function useFermentationStorehouseSync({ calculatorResult, autoSync = fal
       emitEvent({
         type: "storehouse.inventory.ferment.readyWindow.updated",
         ts: new Date().toISOString(),
-        source: "hooks/FermentationDurationCalculator.useFermentationStorehouseSync",
-        data: normalizedPayload
+        source:
+          "hooks/FermentationDurationCalculator.useFermentationStorehouseSync",
+        data: normalizedPayload,
       });
 
       setSyncStatus("synced");
@@ -297,23 +319,19 @@ export function useFermentationFeastAndStorehouseBridge({
   calculatorResult,
   feastDays,
   autoEmitAlignment = true,
-  autoSyncStorehouse = false
+  autoSyncStorehouse = false,
 }) {
   const { alignedFeasts, bestMatch } = useFermentationFeastAlignment({
     calculatorResult,
     feastDays,
-    autoEmit: autoEmitAlignment
+    autoEmit: autoEmitAlignment,
   });
 
-  const {
-    syncStatus,
-    lastError,
-    syncToStorehouse,
-    normalizedPayload
-  } = useFermentationStorehouseSync({
-    calculatorResult,
-    autoSync: autoSyncStorehouse
-  });
+  const { syncStatus, lastError, syncToStorehouse, normalizedPayload } =
+    useFermentationStorehouseSync({
+      calculatorResult,
+      autoSync: autoSyncStorehouse,
+    });
 
   return {
     alignedFeasts,
@@ -321,7 +339,7 @@ export function useFermentationFeastAndStorehouseBridge({
     syncStatus,
     lastError,
     syncToStorehouse,
-    storehousePayload: normalizedPayload
+    storehousePayload: normalizedPayload,
   };
 }
 

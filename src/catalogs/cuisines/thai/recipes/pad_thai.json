@@ -1,0 +1,636 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai.recipes.pad_thai",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Pad Thai (ผัดไทย)",
+    "subtitle": "Classic street-style rice noodles with tamarind, fish sauce, palm sugar, egg, and crunchy toppings.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Deterministic, canonical Pad Thai recipe for SSA catalogs.",
+        "Designed for home stovetops with wok OR skillet fallback.",
+        "Sauce built on tamarind + fish sauce + palm sugar; lime to finish.",
+        "Optional swaps included for allergy/diet scenarios (see variations/adaptations)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "thai",
+    "subprofiles": ["thai.street_food", "thai.noodles"],
+    "category": "noodles",
+    "mealArchetypes": ["meal.lunch", "meal.dinner"],
+    "servingStyles": ["serving.bowl", "serving.family_style"],
+    "plannerTags": [
+      "cuisine.thai",
+      "dish.pad_thai",
+      "category.noodles",
+      "method.stir_fry",
+      "flavor.sour_sweet_salty",
+      "weeknight.friendly",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "A balanced Thai noodle stir-fry: tangy tamarind, savory fish sauce, sweet palm sugar, egg, and bright lime with crunchy peanuts and bean sprouts.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Makes 4 moderate portions or 3 large portions."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "totalMins": 35,
+    "handsOffMins": 10
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": false,
+    "notes": [
+      "Best eaten fresh; leftovers reheat ok with a splash of water.",
+      "Sauce can be made ahead; noodles are best cooked day-of."
+    ]
+  },
+
+  "tasteProfile": {
+    "pillars": ["salty", "sour", "sweet", "umami"],
+    "heatTypical": 1,
+    "notes": "Heat is optional; classic Pad Thai is not extremely spicy. Serve chili flakes on the side."
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.wok",
+        "label": "Wok (preferred) or wide skillet",
+        "required": true,
+        "notes": "Use a wide skillet if you don’t have a wok; cook in batches to avoid steaming."
+      },
+      {
+        "id": "equipment.colander",
+        "label": "Colander/strainer",
+        "required": true
+      },
+      {
+        "id": "equipment.bowl",
+        "label": "Mixing bowls",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.tongs",
+      "equipment.whisk",
+      "equipment.microplane",
+      "equipment.kettle"
+    ],
+    "optional": [
+      {
+        "id": "equipment.mortar_pestle",
+        "label": "Mortar & pestle",
+        "required": false,
+        "notes": "Nice for lightly crushing peanuts or making a quick chili-lime mix."
+      }
+    ],
+    "minimum": ["equipment.skillet", "equipment.colander", "equipment.bowl"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": [
+    "allergen.fish",
+    "allergen.shellfish",
+    "allergen.peanut",
+    "allergen.egg",
+    "allergen.soy"
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.noodles",
+      "label": "Noodles",
+      "items": ["ingredient.rice_noodles"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Sauce",
+      "items": [
+        "ingredient.tamarind_paste",
+        "ingredient.fish_sauce",
+        "ingredient.palm_sugar",
+        "ingredient.soy_sauce_light",
+        "ingredient.lime_juice"
+      ]
+    },
+    {
+      "id": "group.stir_fry",
+      "label": "Stir-fry",
+      "items": [
+        "ingredient.garlic",
+        "ingredient.shallot",
+        "ingredient.egg",
+        "ingredient.shrimp_dried",
+        "ingredient.tofu_firm",
+        "ingredient.bean_sprouts",
+        "ingredient.chives_garlic",
+        "ingredient.scallions"
+      ]
+    },
+    {
+      "id": "group.toppings",
+      "label": "Finish & toppings",
+      "items": [
+        "ingredient.peanuts",
+        "ingredient.lime",
+        "ingredient.chile_flakes",
+        "ingredient.cilantro"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.rice_noodles",
+      "label": "Flat rice noodles (Pad Thai noodles), dried",
+      "role": "noodles",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": [
+        "Use medium-width rice sticks. Thin works, but is easier to overcook.",
+        "Soak until pliable; finish cooking in the wok with sauce."
+      ]
+    },
+
+    {
+      "id": "ingredient.tamarind_paste",
+      "label": "Tamarind paste/concentrate",
+      "role": "sauce",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "If using very strong concentrate, start with half and adjust to taste."
+    },
+    {
+      "id": "ingredient.fish_sauce",
+      "label": "Fish sauce",
+      "role": "sauce",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Primary salt/umami. If very strong, reduce slightly."
+    },
+    {
+      "id": "ingredient.palm_sugar",
+      "label": "Palm sugar (or light brown sugar)",
+      "role": "sauce",
+      "amount": { "value": 35, "unit": "g" },
+      "notes": "Grate or chop palm sugar so it dissolves quickly."
+    },
+    {
+      "id": "ingredient.soy_sauce_light",
+      "label": "Light soy sauce",
+      "role": "sauce",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "Optional booster for color/umami; reduce if salt-sensitive."
+    },
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Lime juice",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "This is a baseline. Always finish to taste with fresh lime."
+    },
+
+    {
+      "id": "ingredient.water_hot",
+      "label": "Hot water (for loosening sauce/noodles as needed)",
+      "role": "utility",
+      "amount": { "value": 120, "unit": "ml" },
+      "optional": true,
+      "notes": "Keep nearby; add in teaspoons to prevent sticking/drying."
+    },
+
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, finely minced",
+      "role": "aromatics",
+      "amount": { "value": 12, "unit": "g" }
+    },
+    {
+      "id": "ingredient.shallot",
+      "label": "Shallot, thinly sliced",
+      "role": "aromatics",
+      "amount": { "value": 50, "unit": "g" }
+    },
+
+    {
+      "id": "ingredient.shrimp_dried",
+      "label": "Dried shrimp, chopped (optional but classic)",
+      "role": "umami",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Omit for shellfish allergy or vegetarian. Adds classic savory depth."
+    },
+
+    {
+      "id": "ingredient.tofu_firm",
+      "label": "Firm tofu, pressed and diced",
+      "role": "protein",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Classic home version often includes tofu; you can swap chicken/shrimp."
+    },
+
+    {
+      "id": "ingredient.egg",
+      "label": "Eggs",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Creates the silky coating and richness."
+    },
+
+    {
+      "id": "ingredient.vegetable_oil",
+      "label": "Neutral oil (peanut/canola/avocado), divided",
+      "role": "fat",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Use a high-smoke-point oil."
+    },
+
+    {
+      "id": "ingredient.bean_sprouts",
+      "label": "Bean sprouts, divided",
+      "role": "vegetable",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Half cooks in the wok; half stays fresh for crunch."
+    },
+    {
+      "id": "ingredient.chives_garlic",
+      "label": "Garlic chives (or Chinese chives), cut into 2-inch pieces",
+      "role": "herbs",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "If unavailable, use scallions + a little extra garlic."
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions, sliced",
+      "role": "herbs",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.peanuts",
+      "label": "Roasted peanuts, crushed",
+      "role": "topping",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "Serve on the side if allergy risk."
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime wedges",
+      "role": "topping",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Mandatory for proper balance."
+    },
+    {
+      "id": "ingredient.chile_flakes",
+      "label": "Thai chili flakes (to taste, served on the side)",
+      "role": "topping",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro leaves (optional garnish)",
+      "role": "topping",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.sauce.mix",
+      "title": "Mix the Pad Thai sauce",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a bowl, whisk tamarind paste, fish sauce, palm sugar, soy sauce, and lime juice until the sugar is mostly dissolved.",
+        "Taste: it should be bold—salty-sour-sweet. Adjust with a little more sugar (sweet), tamarind (sour), or fish sauce (salty) if needed.",
+        "Keep nearby. Pad Thai moves fast once the pan is hot."
+      ],
+      "checks": [
+        "Sauce tastes slightly too intense on its own (it will mellow on noodles).",
+        "Sugar is at least partially dissolved."
+      ]
+    },
+    {
+      "id": "step.noodles.soak",
+      "title": "Soak noodles until pliable",
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "instructions": [
+        "Place dried rice noodles in a large bowl and cover with warm (not boiling) water.",
+        "Soak until flexible but still slightly firm at the center (they will finish in the wok).",
+        "Drain well and set aside. If they sit, toss with a teaspoon of oil to prevent sticking."
+      ],
+      "timers": [{ "label": "Soak noodles", "minutes": 10 }],
+      "checks": [
+        "Noodles bend without snapping.",
+        "Center still slightly firm (not fully soft)."
+      ]
+    },
+    {
+      "id": "step.prep.mise",
+      "title": "Prep toppings and aromatics (mise en place)",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Minced garlic; slice shallot; chop dried shrimp if using.",
+        "Crush peanuts; slice scallions/garlic chives; portion bean sprouts (half for wok, half for fresh crunch).",
+        "Crack eggs into a small bowl and beat lightly."
+      ],
+      "checks": [
+        "Everything is within arm’s reach (Pad Thai is a fast stir-fry)."
+      ]
+    },
+    {
+      "id": "step.tofu.crisp",
+      "title": "Crisp tofu (and/or protein) in hot oil",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat wok or wide skillet over high heat until very hot.",
+        "Add about 2 tablespoons oil. Add tofu and sear until lightly golden on multiple sides.",
+        "Push tofu to the edge (or remove to a plate if your pan is crowded)."
+      ],
+      "timers": [{ "label": "Sear tofu", "minutes": 5 }],
+      "checks": ["Tofu is lightly browned and not watery in the pan."]
+    },
+    {
+      "id": "step.aromatics",
+      "title": "Bloom aromatics (and dried shrimp if using)",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add a small splash more oil if needed.",
+        "Add shallot and garlic; stir-fry 20–30 seconds until fragrant (do not burn).",
+        "If using dried shrimp, add and stir for 15–20 seconds to toast."
+      ],
+      "timers": [{ "label": "Bloom aromatics", "seconds": 45 }],
+      "checks": ["Garlic is fragrant but not dark brown."]
+    },
+    {
+      "id": "step.egg.scramble",
+      "title": "Scramble egg in the pan",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Push tofu/aromatics to one side; add a touch of oil to the empty spot.",
+        "Pour in beaten eggs and scramble softly.",
+        "When just set, mix into the rest."
+      ],
+      "checks": ["Egg is set but not dry."]
+    },
+    {
+      "id": "step.noodles.sauce",
+      "title": "Add noodles and sauce; toss until glossy",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add drained noodles to the pan and pour in the sauce.",
+        "Toss continuously with tongs/spatula over high heat so noodles absorb sauce and soften evenly.",
+        "If noodles look dry or stiff, add hot water a tablespoon at a time to loosen and help steam-finish them.",
+        "Aim for noodles that are tender but still have a little chew."
+      ],
+      "timers": [{ "label": "Toss noodles with sauce", "minutes": 4 }],
+      "checks": [
+        "Noodles are glossy and evenly colored.",
+        "Sauce is absorbed; no watery puddle at bottom.",
+        "Noodles are tender with slight chew."
+      ]
+    },
+    {
+      "id": "step.finish.veg",
+      "title": "Finish with sprouts and chives; adjust balance",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add half the bean sprouts and the garlic chives/scallions. Toss 30–60 seconds just to wilt slightly.",
+        "Turn off heat. Taste and adjust: add lime for brightness; add a pinch of sugar if too sour; add a splash fish sauce/soy if flat.",
+        "Plate immediately."
+      ],
+      "timers": [{ "label": "Wilt sprouts/chives", "seconds": 60 }],
+      "checks": [
+        "Sprouts still have crunch; greens are bright.",
+        "Flavor is balanced (salty-sour-sweet)."
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve with toppings (custom heat)",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Top each plate with remaining fresh bean sprouts, crushed peanuts, and cilantro if using.",
+        "Serve with lime wedges and chili flakes on the side so everyone controls heat and brightness."
+      ],
+      "checks": ["Lime is served alongside (essential)."]
+    }
+  ],
+
+  "methods": ["method.stir_fry", "method.assemble"],
+
+  "pairings": {
+    "suggestedSides": [
+      { "id": "thai.som_tam", "label": "Som Tam (green papaya salad)" },
+      { "id": "thai.tom_yum_goong", "label": "Tom Yum (hot & sour soup)" }
+    ],
+    "drinks": [
+      { "id": "thai.thai_iced_tea", "label": "Thai iced tea" },
+      {
+        "id": "drink.sparkling_water_lime",
+        "label": "Sparkling water with lime"
+      }
+    ],
+    "notes": "Pad Thai is rich-sweet-sour; pair with crisp salads or light soups."
+  },
+
+  "planner": {
+    "dishId": "thai.pad_thai",
+    "cuisineId": "cuisines.thai",
+    "defaultMealSlot": "dinner",
+    "leftovers": {
+      "quality": "good",
+      "reheat": "skillet",
+      "notes": "Reheat with 1–2 tbsp water; toss quickly to loosen."
+    },
+    "shoppingBoostItems": [
+      "ingredient.tamarind_paste",
+      "ingredient.fish_sauce",
+      "ingredient.rice_noodles"
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 3,
+      "notes": "Store noodles airtight. Add fresh sprouts/peanuts at serving time, not storage time."
+    },
+    "freezer": {
+      "recommended": false,
+      "notes": "Texture suffers after freezing."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cook eggs fully to your safety preference.",
+      "If using shrimp (fresh), cook to opaque and firm; avoid cross-contamination with other foods."
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.no_wok",
+      "title": "No wok available",
+      "notes": [
+        "Use a wide skillet, get it very hot, and cook in batches to avoid steaming.",
+        "If crowded, remove tofu/protein before tossing noodles; add back at the end."
+      ]
+    },
+    {
+      "id": "adapt.low_smoke",
+      "title": "Low-smoke indoor cooking",
+      "notes": [
+        "Preheat pan well but avoid extreme smoking oil; use avocado oil if available.",
+        "Cook protein first, remove, then finish noodles quickly."
+      ]
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.chicken",
+      "label": "Chicken Pad Thai",
+      "when": { "diet": { "allowPoultry": true } },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.tofu_firm": {
+            "use": ["ingredient.chicken_thigh", "ingredient.chicken_breast"],
+            "notes": "Slice thin; sear quickly over high heat."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.shrimp",
+      "label": "Shrimp Pad Thai",
+      "when": { "diet": { "allowShellfish": true } },
+      "adapt": {
+        "add": {
+          "ingredient.shrimp": {
+            "label": "Shrimp, peeled and deveined",
+            "amount": { "value": 300, "unit": "g" },
+            "notes": "Sear 60–90 seconds per side; remove before noodles; add back at end."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.vegetarian",
+      "label": "Vegetarian (no fish sauce / no dried shrimp)",
+      "when": { "dietFlags": ["diet.vegetarian"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.fish_sauce": {
+            "use": [
+              "ingredient.soy_sauce_light",
+              "ingredient.mushroom_seasoning"
+            ],
+            "notes": "Add salt to taste; keep lime/tamarind for brightness."
+          },
+          "ingredient.shrimp_dried": {
+            "use": [],
+            "notes": "Skip. Add extra shallot/garlic and a pinch of mushroom seasoning."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.vegan",
+      "label": "Vegan (no fish sauce / no egg)",
+      "when": { "dietFlags": ["diet.vegan"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.fish_sauce": {
+            "use": ["ingredient.soy_sauce_light", "ingredient.miso_paste"],
+            "notes": "Thin miso with hot water; add late to avoid scorching."
+          },
+          "ingredient.egg": {
+            "use": [],
+            "notes": "Skip egg. Optionally add extra tofu and finish with more lime."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.peanut_free",
+      "label": "Peanut-free",
+      "when": { "allergens": ["allergen.peanut"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.peanuts": {
+            "use": ["ingredient.toasted_sesame", "ingredient.pumpkin_seeds"],
+            "notes": "Use toasted sesame or pumpkin seeds for crunch."
+          }
+        }
+      }
+    }
+  ],
+
+  "notes": [
+    "Key to great Pad Thai at home: soak noodles (don’t boil), very hot pan, and keep things moving.",
+    "If your tamarind is very sour/strong, reduce and balance with sugar and lime.",
+    "Serve chili flakes separately so each person controls heat."
+  ],
+
+  "compat": {
+    "catalog": {
+      "cuisinePath": "src/catalogs/cuisines/thai/recipes/pad_thai.json",
+      "dishId": "thai.pad_thai"
+    },
+    "search": {
+      "aliases": ["pad thai", "phat thai", "thai stir-fried noodles", "ผัดไทย"],
+      "keywords": [
+        "tamarind",
+        "fish sauce",
+        "palm sugar",
+        "rice noodles",
+        "street food",
+        "bean sprouts",
+        "peanuts"
+      ]
+    }
+  },
+
+  "audit": {
+    "createdBy": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "reviewed": true,
+    "reviewNotes": [
+      "Uses schema-required fields: schemaVersion/meta/ingredients/steps.",
+      "All ingredients include id+label and amount with value/unit.",
+      "All steps include id+title and instructions[]."
+    ]
+  }
+}

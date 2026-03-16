@@ -48,9 +48,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  */
 
 // ------------------------ Safe, lazy imports ------------------------
-let eventBus = { emit: (...a) => console.debug("[useRTC:eventBus.emit]", ...a), on: () => () => {} };
+let eventBus = {
+  emit: (...a) => console.debug("[useRTC:eventBus.emit]", ...a),
+  on: () => () => {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -63,15 +66,17 @@ try {
   //   rtc.leave()
   //   rtc.on("message", fn) -> off()
   //   rtc.on("peer.joined", fn(peer)) / rtc.on("peer.left", fn(peerId)) / rtc.on("disconnect", fn(err))
-  rtcClientFactory = require("@/services/realtime/rtcClient.js")?.default
-                  || require("@/services/realtime/rtcClient.js");
+  rtcClientFactory =
+    require("@/services/realtime/rtcClient.js")?.default ||
+    require("@/services/realtime/rtcClient.js");
 } catch {}
 
 let wsFallbackFactory = null;
 try {
   // Same interface as rtcClient above
-  wsFallbackFactory = require("@/services/realtime/wsFallback.js")?.default
-                   || require("@/services/realtime/wsFallback.js");
+  wsFallbackFactory =
+    require("@/services/realtime/wsFallback.js")?.default ||
+    require("@/services/realtime/wsFallback.js");
 } catch {}
 
 let featureFlags = {};
@@ -95,7 +100,9 @@ function envelope(type, data, source = "hooks.useRTC") {
 
 function emitBus(type, data) {
   const env = envelope(type, data);
-  try { eventBus.emit?.(type, env); } catch {}
+  try {
+    eventBus.emit?.(type, env);
+  } catch {}
   return env;
 }
 
@@ -112,8 +119,18 @@ async function exportToHubIfEnabled(payload) {
 
 function createListenerSet() {
   const set = new Set();
-  const add = (fn) => { if (typeof fn === "function") set.add(fn); return () => set.delete(fn); };
-  const emit = (msg) => set.forEach((fn) => { try { fn(msg); } catch (e) { console.warn("[useRTC] listener err", e); } });
+  const add = (fn) => {
+    if (typeof fn === "function") set.add(fn);
+    return () => set.delete(fn);
+  };
+  const emit = (msg) =>
+    set.forEach((fn) => {
+      try {
+        fn(msg);
+      } catch (e) {
+        console.warn("[useRTC] listener err", e);
+      }
+    });
   const clear = () => set.clear();
   return { add, emit, clear, size: () => set.size };
 }
@@ -169,164 +186,255 @@ export default function useRTC({
 
   const peers = useMemo(() => {
     // return a stable array sorted by recent activity
-    const arr = Array.from(peersRef.current.entries()).map(([id, p]) => ({ id, ...p }));
+    const arr = Array.from(peersRef.current.entries()).map(([id, p]) => ({
+      id,
+      ...p,
+    }));
     arr.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
     return arr;
   }, [peersVersion]);
 
   // ---- transport setup & teardown ----
   const detachClient = useCallback(() => {
-    try { clientRef.current?.off?.("*"); } catch {}
-    try { clientRef.current?.leave?.(); } catch {}
+    try {
+      clientRef.current?.off?.("*");
+    } catch {}
+    try {
+      clientRef.current?.leave?.();
+    } catch {}
     clientRef.current = null;
     clientTypeRef.current = null;
   }, []);
 
-  const attachHandlers = useCallback((client) => {
-    // message
-    const offMsg = client.on?.("message", (msg) => {
-      const env = msg?.type ? msg : envelope("rtc.message", msg, source);
-      emitBus("rtc.message.recv", { room, transport: clientTypeRef.current, envelope: env, domain });
-      msgListeners.current.emit(env);
+  const attachHandlers = useCallback(
+    (client) => {
+      // message
+      const offMsg = client.on?.("message", (msg) => {
+        const env = msg?.type ? msg : envelope("rtc.message", msg, source);
+        emitBus("rtc.message.recv", {
+          room,
+          transport: clientTypeRef.current,
+          envelope: env,
+          domain,
+        });
+        msgListeners.current.emit(env);
 
-      // presence updates (convention)
-      // support both explicit type and inline presence on envelope
-      if (env?.type === "presence.state" && env?.data?.peerId) {
-        setPeerPresence(env.data.peerId, env.data.presence || {});
-      }
-      if (env?.type === "presence.ping" && env?.data?.peerId) {
-        setPeerPresence(env.data.peerId, env.data.presence || {});
-      }
-    });
+        // presence updates (convention)
+        // support both explicit type and inline presence on envelope
+        if (env?.type === "presence.state" && env?.data?.peerId) {
+          setPeerPresence(env.data.peerId, env.data.presence || {});
+        }
+        if (env?.type === "presence.ping" && env?.data?.peerId) {
+          setPeerPresence(env.data.peerId, env.data.presence || {});
+        }
+      });
 
-    // peer joined
-    const offJoin = client.on?.("peer.joined", (peer) => {
-      const pid = peer?.id || peer?.peerId || String(Math.random());
-      setPeerPresence(pid, peer?.presence || {});
-      emitBus("rtc.peer.joined", { room, transport: clientTypeRef.current, peerId: pid, domain });
-    });
+      // peer joined
+      const offJoin = client.on?.("peer.joined", (peer) => {
+        const pid = peer?.id || peer?.peerId || String(Math.random());
+        setPeerPresence(pid, peer?.presence || {});
+        emitBus("rtc.peer.joined", {
+          room,
+          transport: clientTypeRef.current,
+          peerId: pid,
+          domain,
+        });
+      });
 
-    // peer left
-    const offLeft = client.on?.("peer.left", (peerId) => {
-      removePeer(peerId);
-      emitBus("rtc.peer.left", { room, transport: clientTypeRef.current, peerId, domain });
-    });
+      // peer left
+      const offLeft = client.on?.("peer.left", (peerId) => {
+        removePeer(peerId);
+        emitBus("rtc.peer.left", {
+          room,
+          transport: clientTypeRef.current,
+          peerId,
+          domain,
+        });
+      });
 
-    // disconnect
-    const offDisc = client.on?.("disconnect", (err) => {
-      setStatus("error");
-      setLastError(err || new Error("disconnected"));
-      emitBus("rtc.room.disconnected", { room, transport: clientTypeRef.current, message: String(err?.message || err), domain });
-      if (reconnect) scheduleReconnect();
-    });
+      // disconnect
+      const offDisc = client.on?.("disconnect", (err) => {
+        setStatus("error");
+        setLastError(err || new Error("disconnected"));
+        emitBus("rtc.room.disconnected", {
+          room,
+          transport: clientTypeRef.current,
+          message: String(err?.message || err),
+          domain,
+        });
+        if (reconnect) scheduleReconnect();
+      });
 
-    // Generic off() aggregator
-    return () => {
-      try { offMsg?.(); } catch {}
-      try { offJoin?.(); } catch {}
-      try { offLeft?.(); } catch {}
-      try { offDisc?.(); } catch {}
-    };
-  }, [domain, removePeer, room, setPeerPresence, reconnect, source]);
+      // Generic off() aggregator
+      return () => {
+        try {
+          offMsg?.();
+        } catch {}
+        try {
+          offJoin?.();
+        } catch {}
+        try {
+          offLeft?.();
+        } catch {}
+        try {
+          offDisc?.();
+        } catch {}
+      };
+    },
+    [domain, removePeer, room, setPeerPresence, reconnect, source]
+  );
 
   // ---- join logic with RTC→WS fallback ----
-  const join = useCallback(async (roomCode) => {
-    if (!roomCode || typeof roomCode !== "string") {
-      const e = new Error("invalid-room");
-      setLastError(e);
-      return;
-    }
-
-    // reset before joining
-    clearHeartbeat();
-    clearRetry();
-    detachClient();
-    setRoom(roomCode);
-    setStatus("joining");
-    emitBus("rtc.room.joining", { room: roomCode, domain });
-
-    // Try RTC first
-    if (rtcClientFactory) {
-      try {
-        const rtc = typeof rtcClientFactory === "function" ? rtcClientFactory() : rtcClientFactory;
-        const joinInfo = await rtc.join(roomCode);
-        clientRef.current = rtc;
-        clientTypeRef.current = "rtc";
-        setTransport("rtc");
-        setStatus("connected");
-        setSelfId(joinInfo?.selfId || null);
-        const off = attachHandlers(rtc);
-        clientRef.current._offAll = off;
-        emitBus("rtc.room.connected", { room: roomCode, transport: "rtc", domain });
-        startHeartbeat();
-        return;
-      } catch (e) {
-        emitBus("rtc.room.error", { room: roomCode, transportTried: "rtc", message: String(e?.message || e), domain });
+  const join = useCallback(
+    async (roomCode) => {
+      if (!roomCode || typeof roomCode !== "string") {
+        const e = new Error("invalid-room");
         setLastError(e);
-      }
-    }
-
-    // Fallback to WS
-    if (wsFallbackFactory) {
-      try {
-        const ws = typeof wsFallbackFactory === "function" ? wsFallbackFactory() : wsFallbackFactory;
-        const joinInfo = await ws.join(roomCode);
-        clientRef.current = ws;
-        clientTypeRef.current = "ws";
-        setTransport("ws");
-        setStatus("connected");
-        setSelfId(joinInfo?.selfId || null);
-        const off = attachHandlers(ws);
-        clientRef.current._offAll = off;
-        emitBus("rtc.room.connected", { room: roomCode, transport: "ws", domain });
-        startHeartbeat();
         return;
-      } catch (e) {
-        emitBus("rtc.room.error", { room: roomCode, transportTried: "ws", message: String(e?.message || e), domain });
+      }
+
+      // reset before joining
+      clearHeartbeat();
+      clearRetry();
+      detachClient();
+      setRoom(roomCode);
+      setStatus("joining");
+      emitBus("rtc.room.joining", { room: roomCode, domain });
+
+      // Try RTC first
+      if (rtcClientFactory) {
+        try {
+          const rtc =
+            typeof rtcClientFactory === "function"
+              ? rtcClientFactory()
+              : rtcClientFactory;
+          const joinInfo = await rtc.join(roomCode);
+          clientRef.current = rtc;
+          clientTypeRef.current = "rtc";
+          setTransport("rtc");
+          setStatus("connected");
+          setSelfId(joinInfo?.selfId || null);
+          const off = attachHandlers(rtc);
+          clientRef.current._offAll = off;
+          emitBus("rtc.room.connected", {
+            room: roomCode,
+            transport: "rtc",
+            domain,
+          });
+          startHeartbeat();
+          return;
+        } catch (e) {
+          emitBus("rtc.room.error", {
+            room: roomCode,
+            transportTried: "rtc",
+            message: String(e?.message || e),
+            domain,
+          });
+          setLastError(e);
+        }
+      }
+
+      // Fallback to WS
+      if (wsFallbackFactory) {
+        try {
+          const ws =
+            typeof wsFallbackFactory === "function"
+              ? wsFallbackFactory()
+              : wsFallbackFactory;
+          const joinInfo = await ws.join(roomCode);
+          clientRef.current = ws;
+          clientTypeRef.current = "ws";
+          setTransport("ws");
+          setStatus("connected");
+          setSelfId(joinInfo?.selfId || null);
+          const off = attachHandlers(ws);
+          clientRef.current._offAll = off;
+          emitBus("rtc.room.connected", {
+            room: roomCode,
+            transport: "ws",
+            domain,
+          });
+          startHeartbeat();
+          return;
+        } catch (e) {
+          emitBus("rtc.room.error", {
+            room: roomCode,
+            transportTried: "ws",
+            message: String(e?.message || e),
+            domain,
+          });
+          setLastError(e);
+          setStatus("error");
+          if (reconnect) scheduleReconnect();
+        }
+      } else {
+        // Nothing available
+        const e = new Error("no-transport");
         setLastError(e);
         setStatus("error");
+        emitBus("rtc.room.error", {
+          room: roomCode,
+          transportTried: "none",
+          message: "No RTC/WS transport available",
+          domain,
+        });
         if (reconnect) scheduleReconnect();
       }
-    } else {
-      // Nothing available
-      const e = new Error("no-transport");
-      setLastError(e);
-      setStatus("error");
-      emitBus("rtc.room.error", { room: roomCode, transportTried: "none", message: "No RTC/WS transport available", domain });
-      if (reconnect) scheduleReconnect();
-    }
-  }, [attachHandlers, detachClient, domain, reconnect]);
+    },
+    [attachHandlers, detachClient, domain, reconnect]
+  );
 
   const leave = useCallback(async () => {
     clearHeartbeat();
     clearRetry();
-    try { clientRef.current?._offAll?.(); } catch {}
-    try { clientRef.current?.leave?.(); } catch {}
+    try {
+      clientRef.current?._offAll?.();
+    } catch {}
+    try {
+      clientRef.current?.leave?.();
+    } catch {}
     detachClient();
     setStatus("closed");
     setTransport(null);
     setSelfId(null);
     peersRef.current.clear();
     setPeersVersion((v) => v + 1);
-    emitBus("rtc.room.disconnected", { room, transport: null, message: "left", domain });
+    emitBus("rtc.room.disconnected", {
+      room,
+      transport: null,
+      message: "left",
+      domain,
+    });
   }, [detachClient, domain, room]);
 
   // ---- heartbeat & presence ----
-  const setPresence = useCallback((partial) => {
-    presenceRef.current = { ...presenceRef.current, ...partial, updatedAt: isoNow() };
-    // push immediately if connected
-    try {
-      if (clientRef.current && status === "connected") {
-        const payload = {
-          peerId: selfId || undefined,
-          presence: presenceRef.current,
-        };
-        const env = envelope("presence.ping", payload, source);
-        clientRef.current.send?.("presence.ping", env);
-        emitBus("rtc.message.sent", { room, transport: clientTypeRef.current, envelope: env, domain });
-      }
-    } catch {}
-  }, [room, source, status, selfId]);
+  const setPresence = useCallback(
+    (partial) => {
+      presenceRef.current = {
+        ...presenceRef.current,
+        ...partial,
+        updatedAt: isoNow(),
+      };
+      // push immediately if connected
+      try {
+        if (clientRef.current && status === "connected") {
+          const payload = {
+            peerId: selfId || undefined,
+            presence: presenceRef.current,
+          };
+          const env = envelope("presence.ping", payload, source);
+          clientRef.current.send?.("presence.ping", env);
+          emitBus("rtc.message.sent", {
+            room,
+            transport: clientTypeRef.current,
+            envelope: env,
+            domain,
+          });
+        }
+      } catch {}
+    },
+    [room, source, status, selfId]
+  );
 
   const startHeartbeat = useCallback(() => {
     clearHeartbeat();
@@ -356,7 +464,10 @@ export default function useRTC({
 
     const tries = (retryRef.current.tries || 0) + 1;
     retryRef.current.tries = tries;
-    const delay = Math.min(1000 * Math.pow(2, Math.floor(tries / 2)), maxBackoffMs); // grow slower
+    const delay = Math.min(
+      1000 * Math.pow(2, Math.floor(tries / 2)),
+      maxBackoffMs
+    ); // grow slower
     retryRef.current.timer = setTimeout(() => {
       if (!room) return;
       join(room);
@@ -371,25 +482,38 @@ export default function useRTC({
   }, []);
 
   // ---- send & onMessage ----
-  const send = useCallback(async (type, data = {}, opts = {}) => {
-    if (status !== "connected" || !clientRef.current) return false;
-    const env = envelope(type, data, source);
-    try {
-      await clientRef.current.send?.(type, env, opts);
-      emitBus("rtc.message.sent", { room, transport: clientTypeRef.current, envelope: env, domain });
+  const send = useCallback(
+    async (type, data = {}, opts = {}) => {
+      if (status !== "connected" || !clientRef.current) return false;
+      const env = envelope(type, data, source);
+      try {
+        await clientRef.current.send?.(type, env, opts);
+        emitBus("rtc.message.sent", {
+          room,
+          transport: clientTypeRef.current,
+          envelope: env,
+          domain,
+        });
 
-      // Example: If certain message types mutate household data, export them:
-      // if (type.startsWith("inventory.") || type.startsWith("storehouse.") || type.startsWith("meal.executed")) {
-      //   exportToHubIfEnabled({ type, ts: env.ts, domain, data });
-      // }
+        // Example: If certain message types mutate household data, export them:
+        // if (type.startsWith("inventory.") || type.startsWith("storehouse.") || type.startsWith("meal.executed")) {
+        //   exportToHubIfEnabled({ type, ts: env.ts, domain, data });
+        // }
 
-      return true;
-    } catch (e) {
-      setLastError(e);
-      emitBus("rtc.room.error", { room, transport: clientTypeRef.current, message: String(e?.message || e), domain });
-      return false;
-    }
-  }, [domain, room, source, status]);
+        return true;
+      } catch (e) {
+        setLastError(e);
+        emitBus("rtc.room.error", {
+          room,
+          transport: clientTypeRef.current,
+          message: String(e?.message || e),
+          domain,
+        });
+        return false;
+      }
+    },
+    [domain, room, source, status]
+  );
 
   const onMessage = useCallback((fn) => msgListeners.current.add(fn), []);
 
@@ -415,26 +539,46 @@ export default function useRTC({
   // ---- cleanup on unmount ----
   useEffect(() => {
     return () => {
-      try { msgListeners.current.clear(); } catch {}
+      try {
+        msgListeners.current.clear();
+      } catch {}
       clearHeartbeat();
       clearRetry();
-      try { clientRef.current?._offAll?.(); } catch {}
-      try { clientRef.current?.leave?.(); } catch {}
+      try {
+        clientRef.current?._offAll?.();
+      } catch {}
+      try {
+        clientRef.current?.leave?.();
+      } catch {}
     };
   }, [clearHeartbeat, clearRetry]);
 
   // ---- public API ----
-  return useMemo(() => ({
-    status,
-    transport,
-    room,
-    selfId,
-    peers,
-    lastError,
-    join,
-    leave,
-    send,
-    onMessage,
-    setPresence,
-  }), [join, lastError, leave, peers, room, selfId, send, setPresence, status, transport]);
+  return useMemo(
+    () => ({
+      status,
+      transport,
+      room,
+      selfId,
+      peers,
+      lastError,
+      join,
+      leave,
+      send,
+      onMessage,
+      setPresence,
+    }),
+    [
+      join,
+      lastError,
+      leave,
+      peers,
+      room,
+      selfId,
+      send,
+      setPresence,
+      status,
+      transport,
+    ]
+  );
 }

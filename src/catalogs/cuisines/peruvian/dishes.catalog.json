@@ -1,0 +1,1219 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Peruvian • Dishes Catalog",
+    "cuisineId": "cuisines.peruvian",
+    "status": "canonical",
+    "notes": [
+      "Dish ids, ingredient ids, technique ids, and equipment ids assume SSA canonical catalogs or alias maps exist.",
+      "Dish entries use DishV2 (strict) for consistent planner behavior."
+    ],
+    "description": "Canonical Peruvian dishes for SSA planners, search, and browse UI. Covers coastal, Andean, chifa, and nikkei-influenced patterns.",
+    "version": "2026.01",
+    "author": "SSA Catalogs",
+    "createdAt": "2026-01-23",
+    "updatedAt": "2026-01-23"
+  },
+
+  "description": "Peruvian dishes emphasize ají-based sauces, bold acids (lime/vinegar), starch-forward plates (potatoes/rice/corn), and global influences (chifa, nikkei).",
+  "tags": [
+    "cuisine.peruvian",
+    "region.south_america",
+    "style.aji_forward",
+    "style.lime_forward",
+    "style.potato_forward",
+    "influence.chifa",
+    "influence.nikkei"
+  ],
+
+  "notes": [
+    "HeatTypical uses a 0–5 scale; Peruvian heat is often fruitier than aggressive.",
+    "Time blocks are estimates for an average home kitchen; planners may adapt based on capability graphs.",
+    "Diet flags are simple ids; richer diet logic can be layered via SSA diet catalogs.",
+    "Compat: `items` is included (required when `tagIndex` exists in this schema)."
+  ],
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "peruvian.ceviche_clasico",
+      "label": "Ceviche (Clásico)",
+      "aka": ["Ceviche Peruano", "Classic Peruvian Ceviche"],
+      "subprofiles": ["peruvian.coastal", "peruvian.nikkei"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.seafood_acid"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.fish_white"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": ["ingredient.aji_amarillo_paste", "ingredient.rocoto_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.red_onion", "ingredient.cilantro"],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": [
+            "ingredient.sweet_potato",
+            "ingredient.corn_kernels",
+            "ingredient.potato"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.ceviche_cure",
+        "technique.slice_onion_thin",
+        "technique.adjust_acid_salt"
+      ],
+      "equipmentRecommended": [
+        "equipment.citrus_juicer_optional",
+        "equipment.chilled_bowl_optional"
+      ],
+      "equipmentMinimum": [
+        "equipment.knife",
+        "equipment.cutting_board",
+        "equipment.mixing_bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.fish_white",
+        "ingredient.lime_juice",
+        "ingredient.red_onion",
+        "ingredient.cilantro",
+        "ingredient.salt",
+        "ingredient.aji_amarillo_paste"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.low_carb"],
+      "plannerTags": [
+        "peruvian",
+        "seafood",
+        "lime_forward",
+        "fresh",
+        "no_cook",
+        "weeknight",
+        "summer"
+      ]
+    },
+
+    {
+      "id": "peruvian.leche_de_tigre",
+      "label": "Leche de Tigre (Ceviche Marinade)",
+      "aka": ["Tiger's Milk"],
+      "subprofiles": ["peruvian.coastal", "peruvian.nikkei"],
+      "category": "sauce",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "bowls", "plates"],
+      "mealArchetypes": ["archetype.seafood_acid"],
+      "signals": {
+        "batchFriendly": "short_hold",
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "acid",
+          "items": ["ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.fish_white", "ingredient.fish_stock_optional"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": ["ingredient.aji_amarillo_paste", "ingredient.rocoto_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.red_onion", "ingredient.garlic"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.blend_sauce", "technique.adjust_acid_salt"],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": ["equipment.mixing_bowl", "equipment.whisk_optional"],
+      "ingredientsCore": [
+        "ingredient.lime_juice",
+        "ingredient.red_onion",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": ["diet.gluten_free", "diet.dairy_free"],
+      "plannerTags": ["peruvian", "sauce", "ceviche", "lime_forward", "fresh"]
+    },
+
+    {
+      "id": "peruvian.aji_verde",
+      "label": "Ají Verde (Green Sauce)",
+      "aka": ["Peruvian Green Sauce"],
+      "subprofiles": ["peruvian.coastal", "peruvian.andean", "peruvian.nikkei"],
+      "category": "sauce",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 10, "totalMins": 10, "handsOffMins": 0 },
+      "servingStyles": ["family_style", "plates", "bowls", "street_food"],
+      "mealArchetypes": ["archetype.starch_plus_sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "not_ideal"
+      },
+      "coreComponents": [
+        {
+          "role": "herbs",
+          "items": ["ingredient.cilantro"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": ["ingredient.aji_amarillo_paste", "ingredient.jalapeno"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.neutral_oil", "ingredient.mayo_optional"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lime_juice", "ingredient.vinegar_white"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.blend_sauce",
+        "technique.emulsify_sauce",
+        "technique.adjust_acid_salt"
+      ],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.blender",
+        "equipment.measuring_spoons_optional"
+      ],
+      "ingredientsCore": [
+        "ingredient.cilantro",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.neutral_oil",
+        "ingredient.lime_juice",
+        "ingredient.salt",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.eggs"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "peruvian",
+        "sauce",
+        "aji_forward",
+        "weeknight",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "peruvian.huancaina_sauce",
+      "label": "Huancaína Sauce",
+      "aka": ["Salsa Huancaína"],
+      "subprofiles": ["peruvian.andean"],
+      "category": "sauce",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.starch_plus_sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "heat",
+          "items": ["ingredient.aji_amarillo_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "dairy",
+          "items": [
+            "ingredient.evaporated_milk",
+            "ingredient.feta_or_queso_fresco"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "thickener",
+          "items": ["ingredient.crackers_or_bread", "ingredient.breadcrumbs"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.neutral_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.blend_sauce",
+        "technique.toast_paste_gently",
+        "technique.adjust_acid_salt"
+      ],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": ["equipment.blender"],
+      "ingredientsCore": [
+        "ingredient.aji_amarillo_paste",
+        "ingredient.evaporated_milk",
+        "ingredient.feta_or_queso_fresco",
+        "ingredient.crackers_or_bread",
+        "ingredient.neutral_oil",
+        "ingredient.salt",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.dairy", "allergen.gluten"],
+      "dietFlags": [],
+      "plannerTags": [
+        "peruvian",
+        "sauce",
+        "creamy",
+        "potato_pairing",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "peruvian.papa_a_la_huancaina",
+      "label": "Papa a la Huancaína",
+      "aka": ["Potatoes with Huancaína Sauce"],
+      "subprofiles": ["peruvian.andean"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 15 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.starch_plus_sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "sauce_no"
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ingredient.potato"], "chooseOne": true },
+        {
+          "role": "sauce",
+          "items": ["peruvian.huancaina_sauce"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.hard_boiled_egg_optional",
+            "ingredient.olives_optional"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.boil_potatoes", "technique.blend_sauce"],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.potato",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.evaporated_milk",
+        "ingredient.feta_or_queso_fresco"
+      ],
+      "allergens": ["allergen.dairy", "allergen.gluten", "allergen.eggs"],
+      "dietFlags": [],
+      "plannerTags": [
+        "peruvian",
+        "side",
+        "potato_forward",
+        "weeknight",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "peruvian.aji_de_gallina",
+      "label": "Ají de Gallina",
+      "aka": ["Creamy Ají Chicken"],
+      "subprofiles": ["peruvian.andean"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 35, "totalMins": 60, "handsOffMins": 25 },
+      "servingStyles": ["plates", "family_style", "bowls"],
+      "mealArchetypes": [
+        "archetype.starch_plus_sauce",
+        "archetype.stew_and_starch"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "ok"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.aji_amarillo_paste",
+            "ingredient.evaporated_milk",
+            "ingredient.crackers_or_bread"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.rice", "ingredient.potato"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.hard_boiled_egg_optional",
+            "ingredient.olives_optional"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.shred_meat",
+        "technique.blend_sauce",
+        "technique.toast_paste_gently"
+      ],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.skilet_or_saucepan",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.evaporated_milk",
+        "ingredient.crackers_or_bread",
+        "ingredient.garlic",
+        "ingredient.onion",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.dairy", "allergen.gluten", "allergen.eggs"],
+      "dietFlags": [],
+      "plannerTags": [
+        "peruvian",
+        "main",
+        "creamy",
+        "aji_forward",
+        "batch_friendly",
+        "comfort_food"
+      ]
+    },
+
+    {
+      "id": "peruvian.lomo_saltado",
+      "label": "Lomo Saltado",
+      "aka": ["Peruvian Beef Stir-Fry", "Lomo Saltado con Papas"],
+      "subprofiles": ["peruvian.chifa"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 40, "handsOffMins": 15 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": [
+        "archetype.stir_fry_and_rice",
+        "archetype.grill_and_sides"
+      ],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ingredient.beef"], "chooseOne": true },
+        {
+          "role": "veg",
+          "items": ["ingredient.red_onion", "ingredient.tomato"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.soy_sauce", "ingredient.vinegar_red_wine"],
+          "chooseOne": false
+        },
+        { "role": "starch", "items": ["ingredient.rice"], "chooseOne": true },
+        {
+          "role": "side",
+          "items": ["ingredient.potato_fries_optional"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.stir_fry_wok",
+        "technique.sear_hot_fast",
+        "technique.deglaze_pan"
+      ],
+      "equipmentRecommended": ["equipment.wok_or_large_skillet"],
+      "equipmentMinimum": [
+        "equipment.wok_or_large_skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef",
+        "ingredient.red_onion",
+        "ingredient.tomato",
+        "ingredient.soy_sauce",
+        "ingredient.garlic",
+        "ingredient.rice",
+        "ingredient.black_pepper"
+      ],
+      "allergens": ["allergen.soy"],
+      "dietFlags": [],
+      "plannerTags": [
+        "peruvian",
+        "chifa",
+        "stir_fry",
+        "weeknight",
+        "rice_and_sides"
+      ]
+    },
+
+    {
+      "id": "peruvian.arroz_chaufa",
+      "label": "Arroz Chaufa (Chifa Fried Rice)",
+      "aka": ["Peruvian Fried Rice", "Chaufa"],
+      "subprofiles": ["peruvian.chifa"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 25, "handsOffMins": 5 },
+      "servingStyles": ["bowls", "family_style"],
+      "mealArchetypes": ["archetype.stir_fry_and_rice"],
+      "signals": {
+        "batchFriendly": "use_leftover_rice",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "ok"
+      },
+      "coreComponents": [
+        { "role": "base", "items": ["ingredient.rice"], "chooseOne": true },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.eggs",
+            "ingredient.chicken",
+            "ingredient.shrimp"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.green_onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.soy_sauce"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.stir_fry_wok",
+        "technique.high_heat_toss",
+        "technique.rice_fry"
+      ],
+      "equipmentRecommended": ["equipment.wok_or_large_skillet"],
+      "equipmentMinimum": [
+        "equipment.wok_or_large_skillet",
+        "equipment.spatula",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.rice",
+        "ingredient.eggs",
+        "ingredient.soy_sauce",
+        "ingredient.green_onion",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.eggs", "allergen.soy"],
+      "dietFlags": ["diet.dairy_free"],
+      "plannerTags": [
+        "peruvian",
+        "chifa",
+        "fried_rice",
+        "weeknight",
+        "leftovers"
+      ]
+    },
+
+    {
+      "id": "peruvian.causa_limena",
+      "label": "Causa Limeña",
+      "aka": ["Causa", "Causa Rellena"],
+      "subprofiles": ["peruvian.coastal", "peruvian.andean", "peruvian.nikkei"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 40, "totalMins": 70, "handsOffMins": 30 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.starch_plus_sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ingredient.potato"], "chooseOne": true },
+        {
+          "role": "acid",
+          "items": ["ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": ["ingredient.aji_amarillo_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "filling",
+          "items": [
+            "ingredient.tuna_optional",
+            "ingredient.chicken_optional",
+            "ingredient.avocado"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.boil_potatoes",
+        "technique.mash",
+        "technique.chill_set"
+      ],
+      "equipmentRecommended": ["equipment.ring_mold_optional"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.mixing_bowl",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.potato",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.lime_juice",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.fish", "allergen.eggs"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": [
+        "peruvian",
+        "potato_forward",
+        "make_ahead",
+        "party_food",
+        "lime_forward"
+      ]
+    },
+
+    {
+      "id": "peruvian.seco_de_pollo",
+      "label": "Seco de Pollo (Cilantro Braise)",
+      "aka": ["Peruvian Cilantro Chicken Stew"],
+      "subprofiles": ["peruvian.andean"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 75, "handsOffMins": 50 },
+      "servingStyles": ["plates", "family_style", "bowls"],
+      "mealArchetypes": ["archetype.stew_and_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken"],
+          "chooseOne": true
+        },
+        {
+          "role": "herbs",
+          "items": ["ingredient.cilantro"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": [
+            "ingredient.onion",
+            "ingredient.garlic",
+            "ingredient.aji_panca_paste"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.rice", "ingredient.potato"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.braise",
+        "technique.simmer",
+        "technique.blend_sauce_optional"
+      ],
+      "equipmentRecommended": ["equipment.dutch_oven_optional"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken",
+        "ingredient.cilantro",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.aji_panca_paste",
+        "ingredient.stock_chicken_optional",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free", "diet.dairy_free"],
+      "plannerTags": [
+        "peruvian",
+        "braise",
+        "stew",
+        "batch_friendly",
+        "freezer_friendly",
+        "comfort_food"
+      ]
+    },
+
+    {
+      "id": "peruvian.anticuchos",
+      "label": "Anticuchos (Grilled Skewers)",
+      "aka": ["Anticuchos de Corazón", "Peruvian Skewers"],
+      "subprofiles": ["peruvian.coastal", "peruvian.andean"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 60, "handsOffMins": 40 },
+      "servingStyles": ["street_food", "grill_and_sides", "family_style"],
+      "mealArchetypes": ["archetype.grill_and_sides"],
+      "signals": {
+        "batchFriendly": "marinade_only",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef", "ingredient.beef_heart_optional"],
+          "chooseOne": true
+        },
+        {
+          "role": "marinade",
+          "items": [
+            "ingredient.aji_panca_paste",
+            "ingredient.garlic",
+            "ingredient.vinegar_red_wine"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": ["ingredient.potato", "ingredient.corn_kernels"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.marinade",
+        "technique.grill",
+        "technique.sear_hot_fast"
+      ],
+      "equipmentRecommended": ["equipment.grill"],
+      "equipmentMinimum": ["equipment.skewers", "equipment.grill_or_broiler"],
+      "ingredientsCore": [
+        "ingredient.aji_panca_paste",
+        "ingredient.garlic",
+        "ingredient.vinegar_red_wine",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.low_carb"],
+      "plannerTags": [
+        "peruvian",
+        "street_food",
+        "grill",
+        "aji_forward",
+        "make_ahead_marinade"
+      ]
+    },
+
+    {
+      "id": "peruvian.tacu_tacu",
+      "label": "Tacu Tacu (Rice & Beans Cake)",
+      "aka": ["Peruvian Rice and Beans Pancake"],
+      "subprofiles": ["peruvian.coastal", "peruvian.andean"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.starch_plus_sauce"],
+      "signals": {
+        "batchFriendly": "uses_leftovers",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.rice", "ingredient.beans_black"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.neutral_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.onion", "ingredient.garlic"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.pan_fry",
+        "technique.crisp_sear",
+        "technique.mash_mix"
+      ],
+      "equipmentRecommended": ["equipment.cast_iron_skillet_optional"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.spatula"],
+      "ingredientsCore": [
+        "ingredient.rice",
+        "ingredient.beans_black",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.vegetarian"],
+      "plannerTags": [
+        "peruvian",
+        "leftovers",
+        "rice_and_beans",
+        "side",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "peruvian.rocoto_relleno",
+      "label": "Rocoto Relleno (Stuffed Pepper)",
+      "aka": ["Arequipa Stuffed Rocoto"],
+      "subprofiles": ["peruvian.andean"],
+      "category": "main",
+      "difficulty": 4,
+      "heatTypical": 4,
+      "time": { "activeMins": 45, "totalMins": 90, "handsOffMins": 45 },
+      "servingStyles": ["plates", "holiday_feasts"],
+      "mealArchetypes": ["archetype.starch_plus_sauce"],
+      "signals": {
+        "batchFriendly": "prep_components",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "ok"
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.rocoto_pepper_optional",
+            "ingredient.bell_pepper"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "filling",
+          "items": [
+            "ingredient.beef",
+            "ingredient.pork",
+            "ingredient.beans_black_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "dairy",
+          "items": ["ingredient.cheese_melty"],
+          "chooseOne": true
+        },
+        { "role": "side", "items": ["ingredient.potato"], "chooseOne": false }
+      ],
+      "techniques": [
+        "technique.parboil_optional",
+        "technique.stuff_and_bake",
+        "technique.simmer_filling"
+      ],
+      "equipmentRecommended": ["equipment.baking_dish"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.baking_dish",
+        "equipment.skillet",
+        "equipment.knife",
+        "equipment.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ingredient.bell_pepper",
+        "ingredient.beef",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.cheese_melty",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "plannerTags": ["peruvian", "spicy", "baked", "holiday", "stuffed"]
+    },
+
+    {
+      "id": "peruvian.chicha_morada",
+      "label": "Chicha Morada",
+      "aka": ["Purple Corn Drink"],
+      "subprofiles": ["peruvian.andean", "peruvian.coastal"],
+      "category": "drink",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 60, "handsOffMins": 50 },
+      "servingStyles": ["family_style", "holiday_feasts"],
+      "mealArchetypes": ["archetype.drink"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "ice_cubes"
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.purple_corn"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar", "ingredient.honey"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lime_juice", "ingredient.lemon_juice"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.simmer", "technique.strain", "technique.chill"],
+      "equipmentRecommended": ["equipment.fine_strainer_optional"],
+      "equipmentMinimum": ["equipment.pot", "equipment.pitcher_optional"],
+      "ingredientsCore": [
+        "ingredient.purple_corn",
+        "ingredient.sugar",
+        "ingredient.lime_juice"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.vegetarian"],
+      "plannerTags": [
+        "peruvian",
+        "drink",
+        "batch_friendly",
+        "make_ahead",
+        "holiday"
+      ]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.peruvian": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.aji_de_gallina",
+        "peruvian.lomo_saltado",
+        "peruvian.arroz_chaufa",
+        "peruvian.causa_limena",
+        "peruvian.seco_de_pollo",
+        "peruvian.anticuchos",
+        "peruvian.tacu_tacu",
+        "peruvian.rocoto_relleno",
+        "peruvian.chicha_morada"
+      ]
+    },
+
+    "byArchetype": {
+      "archetype.seafood_acid": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre"
+      ],
+      "archetype.starch_plus_sauce": [
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.aji_de_gallina",
+        "peruvian.causa_limena",
+        "peruvian.tacu_tacu",
+        "peruvian.rocoto_relleno"
+      ],
+      "archetype.stew_and_starch": [
+        "peruvian.aji_de_gallina",
+        "peruvian.seco_de_pollo"
+      ],
+      "archetype.stir_fry_and_rice": [
+        "peruvian.lomo_saltado",
+        "peruvian.arroz_chaufa"
+      ],
+      "archetype.grill_and_sides": [
+        "peruvian.anticuchos",
+        "peruvian.lomo_saltado"
+      ],
+      "archetype.drink": ["peruvian.chicha_morada"]
+    },
+
+    "aliasIndex": {
+      "ceviche": "peruvian.ceviche_clasico",
+      "ceviche peruano": "peruvian.ceviche_clasico",
+      "leche de tigre": "peruvian.leche_de_tigre",
+      "aji verde": "peruvian.aji_verde",
+      "ají verde": "peruvian.aji_verde",
+      "huancaina": "peruvian.huancaina_sauce",
+      "huancaína": "peruvian.huancaina_sauce",
+      "papa a la huancaina": "peruvian.papa_a_la_huancaina",
+      "ají de gallina": "peruvian.aji_de_gallina",
+      "aji de gallina": "peruvian.aji_de_gallina",
+      "lomo saltado": "peruvian.lomo_saltado",
+      "arroz chaufa": "peruvian.arroz_chaufa",
+      "chaufa": "peruvian.arroz_chaufa",
+      "causa": "peruvian.causa_limena",
+      "causa limena": "peruvian.causa_limena",
+      "seco de pollo": "peruvian.seco_de_pollo",
+      "anticuchos": "peruvian.anticuchos",
+      "tacu tacu": "peruvian.tacu_tacu",
+      "rocoto relleno": "peruvian.rocoto_relleno",
+      "chicha morada": "peruvian.chicha_morada"
+    },
+
+    "keywordIndex": {
+      "aji": [
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.aji_de_gallina",
+        "peruvian.anticuchos"
+      ],
+      "ají": [
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.aji_de_gallina",
+        "peruvian.anticuchos"
+      ],
+      "lime": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.causa_limena"
+      ],
+      "ceviche": ["peruvian.ceviche_clasico", "peruvian.leche_de_tigre"],
+      "chifa": ["peruvian.lomo_saltado", "peruvian.arroz_chaufa"],
+      "fried rice": ["peruvian.arroz_chaufa"],
+      "stir fry": ["peruvian.lomo_saltado"],
+      "potato": [
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.causa_limena",
+        "peruvian.tacu_tacu"
+      ],
+      "beans": ["peruvian.tacu_tacu"],
+      "drink": ["peruvian.chicha_morada"]
+    },
+
+    "tagIndex": {
+      "cuisine.peruvian": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.aji_de_gallina",
+        "peruvian.lomo_saltado",
+        "peruvian.arroz_chaufa",
+        "peruvian.causa_limena",
+        "peruvian.seco_de_pollo",
+        "peruvian.anticuchos",
+        "peruvian.tacu_tacu",
+        "peruvian.rocoto_relleno",
+        "peruvian.chicha_morada"
+      ],
+      "influence.chifa": ["peruvian.lomo_saltado", "peruvian.arroz_chaufa"],
+      "influence.nikkei": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.aji_verde"
+      ],
+      "style.lime_forward": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.causa_limena"
+      ],
+      "style.aji_forward": [
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.aji_de_gallina",
+        "peruvian.anticuchos"
+      ],
+      "style.potato_forward": [
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.causa_limena"
+      ],
+      "weeknight": [
+        "peruvian.ceviche_clasico",
+        "peruvian.aji_verde",
+        "peruvian.lomo_saltado",
+        "peruvian.arroz_chaufa",
+        "peruvian.tacu_tacu"
+      ],
+      "batch_friendly": [
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce",
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.aji_de_gallina",
+        "peruvian.seco_de_pollo",
+        "peruvian.tacu_tacu",
+        "peruvian.chicha_morada"
+      ],
+      "freezer_friendly": ["peruvian.seco_de_pollo", "peruvian.tacu_tacu"]
+    },
+
+    "bySubprofile": {
+      "peruvian.coastal": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.aji_verde",
+        "peruvian.causa_limena",
+        "peruvian.anticuchos",
+        "peruvian.chicha_morada"
+      ],
+      "peruvian.andean": [
+        "peruvian.huancaina_sauce",
+        "peruvian.papa_a_la_huancaina",
+        "peruvian.aji_de_gallina",
+        "peruvian.seco_de_pollo",
+        "peruvian.tacu_tacu",
+        "peruvian.rocoto_relleno",
+        "peruvian.chicha_morada"
+      ],
+      "peruvian.chifa": ["peruvian.lomo_saltado", "peruvian.arroz_chaufa"],
+      "peruvian.nikkei": [
+        "peruvian.ceviche_clasico",
+        "peruvian.leche_de_tigre",
+        "peruvian.aji_verde",
+        "peruvian.causa_limena"
+      ]
+    },
+
+    "byCategory": {
+      "main": [
+        "peruvian.ceviche_clasico",
+        "peruvian.aji_de_gallina",
+        "peruvian.lomo_saltado",
+        "peruvian.arroz_chaufa",
+        "peruvian.causa_limena",
+        "peruvian.seco_de_pollo",
+        "peruvian.anticuchos",
+        "peruvian.rocoto_relleno"
+      ],
+      "side": ["peruvian.papa_a_la_huancaina", "peruvian.tacu_tacu"],
+      "sauce": [
+        "peruvian.leche_de_tigre",
+        "peruvian.aji_verde",
+        "peruvian.huancaina_sauce"
+      ],
+      "drink": ["peruvian.chicha_morada"]
+    }
+  },
+
+  "items": [],
+
+  "tagIndex": {
+    "cuisine.peruvian": [
+      "peruvian.ceviche_clasico",
+      "peruvian.leche_de_tigre",
+      "peruvian.aji_verde",
+      "peruvian.huancaina_sauce",
+      "peruvian.papa_a_la_huancaina",
+      "peruvian.aji_de_gallina",
+      "peruvian.lomo_saltado",
+      "peruvian.arroz_chaufa",
+      "peruvian.causa_limena",
+      "peruvian.seco_de_pollo",
+      "peruvian.anticuchos",
+      "peruvian.tacu_tacu",
+      "peruvian.rocoto_relleno",
+      "peruvian.chicha_morada"
+    ]
+  }
+}

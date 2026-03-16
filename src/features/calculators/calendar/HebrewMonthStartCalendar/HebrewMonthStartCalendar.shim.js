@@ -20,8 +20,8 @@
  * the external contract.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // Optional hub helpers – if your project already wires these differently,
 // you can safely adjust or no-op the export function below.
@@ -98,17 +98,20 @@ export async function runHebrewMonthStartCalendarShim(request) {
     return {
       ok: false,
       calculatorId: "calendar.hebrewMonthStart",
-      nodeKey: request && request.nodeKey ? request.nodeKey : "calendar.hebrewMonthStart",
+      nodeKey:
+        request && request.nodeKey
+          ? request.nodeKey
+          : "calendar.hebrewMonthStart",
       inputs: /** @type {any} */ ({}),
       outputs: null,
       metadata: {
         calculatedAt: ts,
-        warnings: ["Shim invoked with empty or invalid request object."]
+        warnings: ["Shim invoked with empty or invalid request object."],
       },
       error: {
         code: "INVALID_REQUEST",
-        message: "HebrewMonthStartCalendar shim requires a request object."
-      }
+        message: "HebrewMonthStartCalendar shim requires a request object.",
+      },
     };
   }
 
@@ -116,7 +119,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
     calculatorId = "calendar.hebrewMonthStart",
     nodeKey,
     inputs,
-    context = {}
+    context = {},
   } = request;
 
   const safeNodeKey = nodeKey || "calendar.hebrewMonthStart";
@@ -125,7 +128,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
     calculatorId,
     nodeKey: safeNodeKey,
     inputs,
-    context
+    context,
   });
 
   // Validate calculatorId (soft)
@@ -147,12 +150,12 @@ export async function runHebrewMonthStartCalendarShim(request) {
       metadata: {
         calculatedAt: ts,
         source: context.source || "HebrewMonthStartCalendar.shim",
-        warnings: [...warnings, validationError]
+        warnings: [...warnings, validationError],
       },
       error: {
         code: "INVALID_INPUTS",
-        message: validationError
-      }
+        message: validationError,
+      },
     };
 
     emitSafe("planningGraph.calculator.failed", {
@@ -160,7 +163,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
       nodeKey: safeNodeKey,
       inputs,
       error: response.error,
-      metadata: response.metadata
+      metadata: response.metadata,
     });
 
     return response;
@@ -173,7 +176,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
   const metadata = {
     calculatedAt: ts,
     source: context.source || "HebrewMonthStartCalendar.shim",
-    warnings
+    warnings,
   };
 
   const response = {
@@ -183,7 +186,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
     inputs,
     outputs,
     metadata,
-    error: null
+    error: null,
   };
 
   emitSafe("planningGraph.calculator.completed", {
@@ -191,7 +194,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
     nodeKey: safeNodeKey,
     inputs,
     outputs,
-    metadata
+    metadata,
   });
 
   // Optional Hub export when familyFundMode is enabled
@@ -202,7 +205,7 @@ export async function runHebrewMonthStartCalendarShim(request) {
       inputs,
       outputs,
       metadata,
-      context
+      context,
     });
   }
 
@@ -226,7 +229,7 @@ function validateInputs(inputs) {
     "fullMoon",
     "newMoonAstronomical",
     "firstVisibleCrescent",
-    "noMeridianCrossing"
+    "noMeridianCrossing",
   ];
 
   if (!allowedRules.includes(rulePresetId)) {
@@ -322,11 +325,7 @@ function computePlanningWindow(inputs) {
  * @returns {HebrewMonthStartOutputs}
  */
 function generateHebrewMonths(inputs, window, warnings) {
-  const {
-    rulePresetId,
-    location,
-    options = {}
-  } = inputs;
+  const { rulePresetId, location, options = {} } = inputs;
 
   const allowThirteenthMonth =
     typeof options.allowThirteenthMonth === "boolean"
@@ -355,11 +354,11 @@ function generateHebrewMonths(inputs, window, warnings) {
       location: {
         lat: location.lat,
         lon: location.lon,
-        tz: location.tz
+        tz: location.tz,
       },
       flags: ["approximate"],
       notes:
-        "Approximate lunar month start (29/30-day cycle). Replace with precise astronomical calculation when the astro module is available."
+        "Approximate lunar month start (29/30-day cycle). Replace with precise astronomical calculation when the astro module is available.",
     });
 
     // Advance current date by 30 or 29 days alternately
@@ -399,7 +398,7 @@ function buildSummaryFromMonths(months, rulePresetId) {
     lastMonthIndex: last.monthIndex,
     firstGregorianDate: first.gregorianStartDate,
     lastGregorianDate: last.gregorianStartDate,
-    rulePresetId
+    rulePresetId,
   };
 }
 
@@ -415,7 +414,7 @@ function emitSafe(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "calculators/calendar/HebrewMonthStartCalendar",
-      data
+      data,
     });
   } catch {
     // Silent fail – shim should never crash the app due to telemetry
@@ -440,7 +439,7 @@ function exportToHubIfEnabled(payload) {
       inputs: payload.inputs,
       outputs: payload.outputs,
       metadata: payload.metadata,
-      context: payload.context
+      context: payload.context,
     });
 
     FamilyFundConnector.exportCalculatorResult(packet).catch(() => {

@@ -25,7 +25,7 @@
  * - Use the result to block/allow steps that have the `quietHours` blocker.
  */
 
-import { emit } from '../../../services/eventBus';
+import { emit } from "../../../services/events/eventBus";
 
 /**
  * @typedef {'fixedWindows'} QuietHoursMode
@@ -99,50 +99,53 @@ export function evaluateQuietHours(config = {}, now = new Date()) {
     windowStart: null,
     windowEnd: null,
     windowDefinition: null,
-    reasonCode: 'outside',
-    warnings: []
+    reasonCode: "outside",
+    warnings: [],
   };
 
-  if (!config || typeof config !== 'object') {
-    const res = applyDefaultFallbackWindow(baseResult, now, 'Config missing or not an object; using default quiet hours.');
-    safeEmitQuietHoursEvaluated(res);
-    return res;
-  }
-
-  const enabled = typeof config.enabled === 'boolean' ? config.enabled : true;
-  if (!enabled) {
-    const res = {
-      ...baseResult,
-      isQuietHours: false,
-      reasonCode: 'disabled'
-    };
-    safeEmitQuietHoursEvaluated(res);
-    return res;
-  }
-
-  const windows = Array.isArray(config.windows) && config.windows.length
-    ? config.windows
-    : null;
-
-  if (!windows) {
+  if (!config || typeof config !== "object") {
     const res = applyDefaultFallbackWindow(
       baseResult,
       now,
-      'No quiet hours windows defined; using default quiet hours.'
+      "Config missing or not an object; using default quiet hours."
     );
     safeEmitQuietHoursEvaluated(res);
     return res;
   }
 
-  const normalizedWindows = windows
-    .map(normalizeWindow)
-    .filter(Boolean);
+  const enabled = typeof config.enabled === "boolean" ? config.enabled : true;
+  if (!enabled) {
+    const res = {
+      ...baseResult,
+      isQuietHours: false,
+      reasonCode: "disabled",
+    };
+    safeEmitQuietHoursEvaluated(res);
+    return res;
+  }
+
+  const windows =
+    Array.isArray(config.windows) && config.windows.length
+      ? config.windows
+      : null;
+
+  if (!windows) {
+    const res = applyDefaultFallbackWindow(
+      baseResult,
+      now,
+      "No quiet hours windows defined; using default quiet hours."
+    );
+    safeEmitQuietHoursEvaluated(res);
+    return res;
+  }
+
+  const normalizedWindows = windows.map(normalizeWindow).filter(Boolean);
 
   if (!normalizedWindows.length) {
     const res = applyDefaultFallbackWindow(
       baseResult,
       now,
-      'All quiet hours windows invalid; using default quiet hours.'
+      "All quiet hours windows invalid; using default quiet hours."
     );
     safeEmitQuietHoursEvaluated(res);
     return res;
@@ -154,7 +157,7 @@ export function evaluateQuietHours(config = {}, now = new Date()) {
     const res = {
       ...baseResult,
       isQuietHours: false,
-      reasonCode: 'outside'
+      reasonCode: "outside",
     };
     safeEmitQuietHoursEvaluated(res);
     return res;
@@ -167,7 +170,7 @@ export function evaluateQuietHours(config = {}, now = new Date()) {
     windowStart: start.toISOString(),
     windowEnd: end.toISOString(),
     windowDefinition: window,
-    reasonCode: 'inWindow'
+    reasonCode: "inWindow",
   };
 
   safeEmitQuietHoursEvaluated(res);
@@ -196,7 +199,7 @@ export function isQuietHoursNow(config, now) {
  * @returns {QuietHoursWindow|null}
  */
 function normalizeWindow(w) {
-  if (!w || typeof w !== 'object') return null;
+  if (!w || typeof w !== "object") return null;
 
   const days = Array.isArray(w.days) ? w.days.filter(isValidDayIndex) : [];
   if (!days.length) return null;
@@ -212,7 +215,7 @@ function normalizeWindow(w) {
     startMinute,
     endHour,
     endMinute,
-    label: typeof w.label === 'string' ? w.label : undefined
+    label: typeof w.label === "string" ? w.label : undefined,
   };
 }
 
@@ -243,8 +246,16 @@ function findMatchingWindow(now, windows) {
 
     // Case 1: Same-day window that does NOT cross midnight.
     if (!crossesMidnight && window.days.includes(localDay)) {
-      const start = buildLocalDateWithTime(today, window.startHour, window.startMinute);
-      const end = buildLocalDateWithTime(today, window.endHour, window.endMinute);
+      const start = buildLocalDateWithTime(
+        today,
+        window.startHour,
+        window.startMinute
+      );
+      const end = buildLocalDateWithTime(
+        today,
+        window.endHour,
+        window.endMinute
+      );
       if (now >= start && now < end) {
         return { start, end, window };
       }
@@ -253,8 +264,15 @@ function findMatchingWindow(now, windows) {
 
     // Case 2: Cross-midnight window, "evening" side (start day) — e.g., 22:00–24:00.
     if (crossesMidnight && window.days.includes(localDay)) {
-      const start = buildLocalDateWithTime(today, window.startHour, window.startMinute);
-      const end = addDays(buildLocalDateWithTime(today, window.endHour, window.endMinute), 1);
+      const start = buildLocalDateWithTime(
+        today,
+        window.startHour,
+        window.startMinute
+      );
+      const end = addDays(
+        buildLocalDateWithTime(today, window.endHour, window.endMinute),
+        1
+      );
       if (now >= start && now < end) {
         return { start, end, window };
       }
@@ -266,8 +284,16 @@ function findMatchingWindow(now, windows) {
     // If yesterday was a window day and now is before the end time, we're still inside that window.
     const yesterdayDay = yesterday.getDay();
     if (crossesMidnight && window.days.includes(yesterdayDay)) {
-      const start = buildLocalDateWithTime(yesterday, window.startHour, window.startMinute);
-      const end = buildLocalDateWithTime(today, window.endHour, window.endMinute);
+      const start = buildLocalDateWithTime(
+        yesterday,
+        window.startHour,
+        window.startMinute
+      );
+      const end = buildLocalDateWithTime(
+        today,
+        window.endHour,
+        window.endMinute
+      );
       if (now >= start && now < end) {
         return { start, end, window };
       }
@@ -293,7 +319,11 @@ function doesWindowCrossMidnight(w) {
   }
   // If end time is earlier than or equal to start time, we treat it as crossing midnight.
   if (w.endHour < w.startHour) return true;
-  if (w.endHour === w.startHour && isValidMinute(w.endMinute) && isValidMinute(w.startMinute)) {
+  if (
+    w.endHour === w.startHour &&
+    isValidMinute(w.endMinute) &&
+    isValidMinute(w.startMinute)
+  ) {
     return w.endMinute <= w.startMinute;
   }
   return false;
@@ -313,7 +343,7 @@ function doesWindowCrossMidnight(w) {
  * @returns {QuietHoursEvaluationResult}
  */
 function applyDefaultFallbackWindow(baseResult, now, warning) {
-  const res = { ...baseResult, reasonCode: 'fallback.defaultWindow' };
+  const res = { ...baseResult, reasonCode: "fallback.defaultWindow" };
   if (warning) {
     res.warnings = [...(baseResult.warnings || []), warning];
   }
@@ -325,7 +355,7 @@ function applyDefaultFallbackWindow(baseResult, now, warning) {
     startMinute: 0,
     endHour: 7,
     endMinute: 0,
-    label: 'Default quiet hours (22:00–07:00)'
+    label: "Default quiet hours (22:00–07:00)",
   };
 
   const match = findMatchingWindow(now, [defaultWindow]);
@@ -339,14 +369,36 @@ function applyDefaultFallbackWindow(baseResult, now, warning) {
     // But still expose the *next* default window for debugging if desired.
     const today = stripTime(now);
     const localDay = now.getDay();
-    const start = buildLocalDateWithTime(today, defaultWindow.startHour, defaultWindow.startMinute);
-    const end = addDays(buildLocalDateWithTime(today, defaultWindow.endHour, defaultWindow.endMinute), 1);
+    const start = buildLocalDateWithTime(
+      today,
+      defaultWindow.startHour,
+      defaultWindow.startMinute
+    );
+    const end = addDays(
+      buildLocalDateWithTime(
+        today,
+        defaultWindow.endHour,
+        defaultWindow.endMinute
+      ),
+      1
+    );
 
     // If we've already passed today's start time, shift to next day's window for clarity.
     if (now > end) {
       const nextDay = addDays(today, 1);
-      res.windowStart = buildLocalDateWithTime(nextDay, defaultWindow.startHour, defaultWindow.startMinute).toISOString();
-      res.windowEnd = addDays(buildLocalDateWithTime(nextDay, defaultWindow.endHour, defaultWindow.endMinute), 1).toISOString();
+      res.windowStart = buildLocalDateWithTime(
+        nextDay,
+        defaultWindow.startHour,
+        defaultWindow.startMinute
+      ).toISOString();
+      res.windowEnd = addDays(
+        buildLocalDateWithTime(
+          nextDay,
+          defaultWindow.endHour,
+          defaultWindow.endMinute
+        ),
+        1
+      ).toISOString();
     } else {
       res.windowStart = start.toISOString();
       res.windowEnd = end.toISOString();
@@ -377,12 +429,12 @@ function applyDefaultFallbackWindow(baseResult, now, warning) {
  */
 function safeEmitQuietHoursEvaluated(result) {
   try {
-    if (typeof emit !== 'function') return;
+    if (typeof emit !== "function") return;
     emit({
-      type: 'quietHours.evaluated',
+      type: "quietHours.evaluated",
       ts: new Date().toISOString(),
-      source: 'guards.quietHours',
-      data: result
+      source: "guards.quietHours",
+      data: result,
     });
   } catch (_err) {
     // Swallow errors so quiet-hours logic never crashes app due to eventBus issues.

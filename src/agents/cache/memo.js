@@ -361,6 +361,36 @@ export async function setMemo(parts, inputPayload, value, options = {}) {
 }
 
 /**
+ * Back-compat alias expected by some shims.
+ *
+ * preservationShim.js imports:
+ *   import { maybeGetCached, updateCache } from "@/agents/cache/memo";
+ *
+ * Keep canonical implementation as getMemo/setMemo and provide these aliases.
+ *
+ * @param {MemoKeyParts} parts
+ * @param {any} inputPayload
+ * @param {MemoOptions} [options]
+ * @returns {Promise<{ hit: boolean, stale: boolean, entry: MemoEntry|null }>}
+ */
+export async function maybeGetCached(parts, inputPayload, options = {}) {
+  return getMemo(parts, inputPayload, options);
+}
+
+/**
+ * Back-compat alias expected by some shims.
+ *
+ * @param {MemoKeyParts} parts
+ * @param {any} inputPayload
+ * @param {any} value
+ * @param {MemoOptions} [options]
+ * @returns {Promise<MemoEntry>}
+ */
+export async function updateCache(parts, inputPayload, value, options = {}) {
+  return setMemo(parts, inputPayload, value, options);
+}
+
+/**
  * Clear a specific memo entry for a given key+payload.
  *
  * @param {MemoKeyParts} parts
@@ -636,3 +666,15 @@ function safeEmitCacheError(key, parts, code, err) {
     // Swallow telemetry errors.
   }
 }
+
+export default {
+  setMemoStorageAdapter,
+  buildMemoKey,
+  getMemo,
+  setMemo,
+  maybeGetCached,
+  updateCache,
+  clearMemo,
+  clearAllMemo,
+  memoizeAsync,
+};

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "file:///src/schemas/allergens.map.schema.json",
+  "title": "SSA • Allergens Map Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "canonicalAllergens",
+    "termMap",
+    "ingredientTriggers",
+    "confidenceRules"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference used by JSON tooling (may be a relative path in catalogs).",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version of the data contract for this catalog.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "ISO-8601 date or datetime.",
+      "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+    },
+    "notes": {
+      "type": "array",
+      "description": "Human-readable notes for maintainers.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "locale", "normalization"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable catalog ID.",
+          "pattern": "^[a-z0-9_\\.\\-]+$",
+          "minLength": 3
+        },
+        "type": {
+          "type": "string",
+          "const": "allergen_map",
+          "description": "Catalog type discriminator."
+        },
+        "domain": {
+          "type": "string",
+          "const": "safety",
+          "description": "Domain discriminator."
+        },
+        "locale": {
+          "type": "string",
+          "description": "BCP-47-ish locale tag (SSA defaults to en-US).",
+          "minLength": 2
+        },
+        "normalization": {
+          "type": "object",
+          "description": "Normalization rules applied before matching terms/tokens.",
+          "additionalProperties": false,
+          "required": [
+            "case",
+            "trim",
+            "collapseWhitespace",
+            "stripPunctuation"
+          ],
+          "properties": {
+            "case": {
+              "type": "string",
+              "enum": ["lower", "none"],
+              "default": "lower"
+            },
+            "trim": { "type": "boolean", "default": true },
+            "collapseWhitespace": { "type": "boolean", "default": true },
+            "stripPunctuation": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+    "canonicalAllergens": {
+      "type": "object",
+      "description": "Allergen metadata indexed by canonical allergen ID.",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/Id" },
+      "additionalProperties": { "$ref": "#/$defs/CanonicalAllergen" }
+    },
+    "termMap": {
+      "type": "object",
+      "description": "Normalized allergen terms -> array of canonical allergen IDs.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "^[^\\u0000-\\u001F]+$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": { "$ref": "#/$defs/Id" }
+      },
+      "default": {}
+    },
+    "ingredientTriggers": {
+      "type": "array",
+      "description": "Rules to infer allergens from ingredient names.",
+      "items": { "$ref": "#/$defs/IngredientTrigger" },
+      "default": []
+    },
+    "confidenceRules": {
+      "type": "object",
+      "description": "Confidence score guidance for inferred allergens.",
+      "additionalProperties": false,
+      "required": [
+        "explicit_term",
+        "ingredient_trigger",
+        "derived_or_ambiguous"
+      ],
+      "properties": {
+        "explicit_term": { "$ref": "#/$defs/ConfidenceRule" },
+        "ingredient_trigger": { "$ref": "#/$defs/ConfidenceRule" },
+        "derived_or_ambiguous": { "$ref": "#/$defs/ConfidenceRule" }
+      }
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+    "SeverityHint": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "AllergenGroup": {
+      "type": "string",
+      "enum": ["major", "dietary", "regional", "additive", "other"]
+    },
+    "CanonicalAllergen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "group", "severity_hint", "notes"],
+      "properties": {
+        "label": { "$ref": "#/$defs/Text" },
+        "group": { "$ref": "#/$defs/AllergenGroup" },
+        "severity_hint": { "$ref": "#/$defs/SeverityHint" },
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Text" },
+          "default": []
+        }
+      }
+    },
+    "TriggerMatchType": {
+      "type": "string",
+      "enum": ["contains_any", "equals_any", "regex_any"]
+    },
+    "IngredientTrigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allergenId", "match", "tokens"],
+      "properties": {
+        "allergenId": { "$ref": "#/$defs/Id" },
+        "match": { "$ref": "#/$defs/TriggerMatchType" },
+        "tokens": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^\\u0000-\\u001F]+$"
+          }
+        }
+      }
+    },
+    "ConfidenceRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "notes"],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "notes": { "$ref": "#/$defs/Text" }
+      }
+    }
+  }
+}

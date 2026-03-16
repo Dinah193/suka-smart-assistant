@@ -16,6 +16,10 @@ const { Server } = require("socket.io");
 const { EventEmitter } = require("events");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
+const { applySocketCorrelationContext } = require("./middleware/realtime/correlationContext.js");
+const { authorizeSocketScope } = require("./middleware/realtime/authorizeScope.js");
+const { validateSocketRealtimeEnvelope } = require("./middleware/realtime/validateRealtimeEnvelope.js");
+const { withRealtimeSocketGuard } = require("./middleware/realtime/mapRealtimeError.js");
 
 // ---- Hybrid loader (CJS + ESM) ----------------------------------------------
 async function loadAny(modulePath) {
@@ -45,10 +49,11 @@ let preferences = null;
 })();
 
 let io = null;
+let realtimeCoordinator = null;
 
 // ---- Config -----------------------------------------------------------------
 const SOCKET_PATH = process.env.SOCKET_PATH || "/socket.io";
-const SOCKET_CORS = (process.env.SOCKET_CORS || "*")
+const SOCKET_CORS = (process.env.SOCKET_CORS || (process.env.NODE_ENV === "production" ? "" : "*"))
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
@@ -153,6 +158,11 @@ const ALLOW_EVENTS_FROM_CLIENT = new Map([
       "notify",
       "client:ready",
       "presence:hello",
+      "signal:emit",
+      "suggestion:list",
+      "suggestion:consume",
+      "suggestion:assign",
+      "report:request",
     ]),
   ],
   [
@@ -167,6 +177,67 @@ const ALLOW_EVENTS_FROM_CLIENT = new Map([
 
 function buildNamespace(ns) {
   const n = io.of(ns);
+
+  function resolveAuthorizedScopeFromSocket(socket, requestedScope, requestedScopeId = null) {
+    return authorizeSocketScope(socket, {
+      scope: requestedScope,
+      scopeId: requestedScopeId || (requestedScope === "family" ? socket.user?.familyId : socket.user?.homeId),
+    });
+  }
+
+  function resolveRealtimeSocketContext(socket, payload, { eventName, requireEnvelope = false } = {}) {
+    const correlated = applySocketCorrelationContext(socket, payload || {}, { eventName });
+    const scopedPayload = authorizeSocketScope(socket, correlated.payload);
+    const normalizedPayload = requireEnvelope
+      ? validateSocketRealtimeEnvelope(scopedPayload, {
+          actorId: socket?.user?.id || null,
+          sourceModule: ns,
+        })
+      : scopedPayload;
+
+    return {
+      payload: normalizedPayload,
+      context: {
+        ns,
+        user: socket.user,
+        socketId: socket.id,
+        sourceModule: ns,
+        scope: normalizedPayload.scope,
+        scopeId: normalizedPayload.scopeId,
+        correlationId: correlated.context.correlationId,
+        eventId: correlated.context.eventId,
+        idempotencyKey: correlated.context.idempotencyKey,
+      },
+    };
+  }
+
+  function canJoinRoom(socket, room) {
+    const user = socket?.user || {};
+    if (typeof room !== "string" || !room) return false;
+
+    if (room.startsWith("user:")) return room === `user:${user.id}`;
+    if (room.startsWith("home:")) return room === `home:${user.homeId}`;
+    if (room.startsWith("family:")) {
+      return !!user.familyId && room === `family:${user.familyId}`;
+    }
+
+    // Scoped realtime channels (queue + report)
+    if (room.startsWith("suggestions:household:")) {
+      return room === `suggestions:household:${user.homeId}`;
+    }
+    if (room.startsWith("suggestions:family:")) {
+      return !!user.familyId && room === `suggestions:family:${user.familyId}`;
+    }
+    if (room.startsWith("reports:household:")) {
+      return room === `reports:household:${user.homeId}`;
+    }
+    if (room.startsWith("reports:family:")) {
+      return !!user.familyId && room === `reports:family:${user.familyId}`;
+    }
+
+    // Keep backward compatibility for existing ad-hoc rooms.
+    return true;
+  }
 
   // Auth handshake
   n.use(async (socket, next) => {
@@ -243,6 +314,7 @@ function buildNamespace(ns) {
     socket.on("join", (room, cb) => {
       try {
         if (typeof room !== "string" || !room) throw new Error("invalid_room");
+        if (!canJoinRoom(socket, room)) throw new Error("forbidden_room");
         socket.join(room);
         cb && cb({ ok: true, room });
       } catch (e) {
@@ -263,6 +335,9 @@ function buildNamespace(ns) {
     socket.onAny((event, payload) => {
       const allow = ALLOW_EVENTS_FROM_CLIENT.get(ns);
       if (!allow || !allow.has(event)) return;
+      // signal:emit is handled by a dedicated route below to return
+      // validation/idempotency ack contracts; avoid double-ingest via onAny.
+      if (event === "signal:emit") return;
       EventBus.emit("client:event", {
         ns,
         event,
@@ -293,6 +368,127 @@ function buildNamespace(ns) {
         cb && cb({ ok: false, error: String(e.message || e) });
       }
     });
+
+    // Realtime signal aggregator APIs
+    socket.on(
+      "signal:emit",
+      withRealtimeSocketGuard(async (payload, cb) => {
+        if (realtimeCoordinator?.ingest) {
+          const resolved = resolveRealtimeSocketContext(socket, payload, {
+            eventName: "signal:emit",
+            requireEnvelope: true,
+          });
+
+          let alreadyAppended = false;
+          if (realtimeCoordinator?.shouldAppendSignals?.() && realtimeCoordinator?.appendSignal) {
+            const appended = realtimeCoordinator.appendSignal(resolved.payload, resolved.context);
+            if (!appended?.ok) {
+              const err = new Error(appended.error || "event_log_unavailable");
+              err.code = appended.error || "event_log_unavailable";
+              err.status = 503;
+              err.reason = appended.reason || "append_failed";
+              throw err;
+            }
+            alreadyAppended = !appended?.skipped;
+          }
+
+          const out = realtimeCoordinator.ingest(resolved.payload, {
+            ...resolved.context,
+            _alreadyAppended: alreadyAppended,
+          });
+
+          if (out?.ok === false) {
+            const err = new Error(out.error || "invalid_event");
+            err.code = out.error || "invalid_event";
+            err.reason = out.reason || null;
+            err.status = out.error === "duplicate_event" ? 409 : 400;
+            throw err;
+          }
+
+          cb &&
+            cb({
+              ok: true,
+              signal: out.signal,
+              createdSuggestions: out.createdSuggestions,
+              mergedSuggestions: out.mergedSuggestions,
+            });
+          return;
+        }
+
+        EventBus.emit("realtime:signal:ingest", {
+          payload,
+          context: {
+            ns,
+            user: socket.user,
+            socketId: socket.id,
+            sourceModule: ns,
+          },
+        });
+        cb && cb({ ok: true });
+      }),
+    );
+
+    socket.on(
+      "suggestion:list",
+      withRealtimeSocketGuard(async (query = {}, cb) => {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, query?.scope, query?.scopeId);
+        const items = realtimeCoordinator.listSuggestions({
+          scope,
+          scopeId,
+          includeConsumed: !!query?.includeConsumed,
+          target: query?.target,
+          domain: query?.domain,
+          assignedToUserId: query?.assignedToUserId,
+        });
+        cb && cb({ ok: true, scope, scopeId, items, suggestions: items });
+      }),
+    );
+
+    socket.on(
+      "suggestion:consume",
+      withRealtimeSocketGuard(async (payload = {}, cb) => {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope, payload?.scopeId);
+        const item = realtimeCoordinator.consumeSuggestion({
+          scope,
+          scopeId,
+          suggestionId: payload?.suggestionId,
+          userId: socket.user?.id,
+        });
+        cb && cb({ ok: !!item, item, suggestion: item });
+      }),
+    );
+
+    socket.on(
+      "suggestion:assign",
+      withRealtimeSocketGuard(async (payload = {}, cb) => {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope, payload?.scopeId);
+        const item = realtimeCoordinator.assignSuggestion({
+          scope,
+          scopeId,
+          suggestionId: payload?.suggestionId,
+          assignedToUserId: payload?.assignedToUserId,
+          assignedRole: payload?.assignedRole,
+          assignedBy: socket.user?.id,
+        });
+        cb && cb({ ok: !!item, item, suggestion: item });
+      }),
+    );
+
+    socket.on(
+      "report:request",
+      withRealtimeSocketGuard(async (payload = {}, cb) => {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope, payload?.scopeId);
+        if (payload?.forceGenerate) {
+          realtimeCoordinator.generateReports();
+        }
+        const report = realtimeCoordinator.getLatestReport({ scope, scopeId });
+        cb && cb({ ok: true, report, scope, scopeId });
+      }),
+    );
 
     socket.on("disconnect", (reason) => {
       const payload = { ns, user: socket.user, reason, ts: Date.now() };
@@ -372,6 +568,10 @@ function namespaceEmit(ns, event, payload, room = null) {
   pushReplay(ns, event, payload);
 }
 
+function getRealtimeCoordinator() {
+  return realtimeCoordinator;
+}
+
 // ---- Create server -----------------------------------------------------------
 function createSocketServer(httpServer) {
   if (io) return io; // singleton
@@ -406,6 +606,16 @@ function createSocketServer(httpServer) {
   // Bridges
   wirePreferencesBridge();
 
+  try {
+    const { createCoordinator } = require("./services/realtimeCoordinator.js");
+    realtimeCoordinator = createCoordinator({ eventBus: EventBus, namespaceEmit });
+    realtimeCoordinator.start();
+  } catch (e) {
+    // Keep socket server alive even if realtime coordinator fails to boot.
+    // eslint-disable-next-line no-console
+    console.warn("[socket] realtime coordinator skipped:", e?.message || e);
+  }
+
   return io;
 }
 
@@ -418,6 +628,7 @@ module.exports = {
   emitToRoom,
   emitGlobal,
   namespaceEmit,
+  getRealtimeCoordinator,
 
   // optional direct bridges for services
   bridgeInventory,

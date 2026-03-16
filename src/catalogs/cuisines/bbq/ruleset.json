@@ -1,0 +1,622 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.bbq.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "BBQ • Cuisine Ruleset",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Deterministic BBQ ruleset used by planners and recipe adapters.",
+        "Focuses on smoke + rub + sauce patterns, low-and-slow methods, and classic BBQ plate pairings."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.bbq",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "with",
+        "in",
+        "on",
+        "of",
+        "to",
+        "for",
+        "style",
+        "bbq",
+        "barbecue",
+        "barbeque"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredients.kosher_salt": ["kosher salt", "salt"],
+      "ingredients.black_pepper": [
+        "black pepper",
+        "ground black pepper",
+        "pepper"
+      ],
+      "ingredients.brown_sugar": [
+        "brown sugar",
+        "light brown sugar",
+        "dark brown sugar"
+      ],
+      "ingredients.paprika": ["paprika", "sweet paprika"],
+      "ingredients.smoked_paprika": ["smoked paprika"],
+      "ingredients.garlic_powder": ["garlic powder"],
+      "ingredients.onion_powder": ["onion powder"],
+      "ingredients.chili_powder": ["chili powder"],
+      "ingredients.cayenne": ["cayenne", "cayenne pepper"],
+      "ingredients.mustard_powder": ["mustard powder", "dry mustard"],
+      "ingredients.cumin": ["cumin", "ground cumin"],
+      "ingredients.coriander": ["coriander", "ground coriander"],
+      "ingredients.bay_leaf": ["bay leaf", "bay leaves"],
+      "ingredients.oregano": ["oregano", "dried oregano"],
+      "ingredients.thyme": ["thyme", "dried thyme"],
+      "ingredients.worcestershire": ["worcestershire", "worcestershire sauce"],
+      "ingredients.soy_sauce": ["soy sauce"],
+      "ingredients.apple_cider_vinegar": ["apple cider vinegar", "acv"],
+      "ingredients.white_vinegar": ["white vinegar", "distilled vinegar"],
+      "ingredients.red_wine_vinegar": ["red wine vinegar"],
+      "ingredients.ketchup": ["ketchup"],
+      "ingredients.tomato_paste": ["tomato paste"],
+      "ingredients.molasses": ["molasses"],
+      "ingredients.honey": ["honey"],
+      "ingredients.hot_sauce": ["hot sauce"],
+      "ingredients.dijon_mustard": ["dijon mustard", "dijon"],
+      "ingredients.yellow_mustard": ["yellow mustard", "mustard"],
+      "ingredients.mayo": ["mayonnaise", "mayo"],
+      "ingredients.lemon": ["lemon", "lemon juice", "lemon zest"],
+      "ingredients.onion": [
+        "onion",
+        "yellow onion",
+        "white onion",
+        "red onion"
+      ],
+      "ingredients.garlic": ["garlic", "garlic cloves", "minced garlic"],
+      "ingredients.pork_shoulder": [
+        "pork shoulder",
+        "boston butt",
+        "pork butt"
+      ],
+      "ingredients.pork_ribs": [
+        "pork ribs",
+        "spare ribs",
+        "baby back ribs",
+        "st louis ribs"
+      ],
+      "ingredients.beef_brisket": ["beef brisket", "brisket"],
+      "ingredients.chicken": [
+        "chicken",
+        "chicken thighs",
+        "chicken legs",
+        "chicken quarters",
+        "wings"
+      ],
+      "ingredients.turkey": ["turkey", "turkey breast"],
+      "ingredients.sausage": [
+        "sausage",
+        "smoked sausage",
+        "hot links",
+        "andouille"
+      ],
+      "ingredients.wood_smoke": [
+        "smoke",
+        "wood smoke",
+        "hickory",
+        "oak",
+        "pecan",
+        "mesquite",
+        "applewood",
+        "cherrywood"
+      ],
+      "ingredients.butter": ["butter"],
+      "ingredients.neutral_oil": ["neutral oil", "vegetable oil", "canola oil"],
+      "ingredients.bacon": ["bacon"],
+      "ingredients.beans": [
+        "beans",
+        "pinto beans",
+        "navy beans",
+        "kidney beans"
+      ],
+      "ingredients.cabbage": ["cabbage", "green cabbage"],
+      "ingredients.potato": ["potato", "potatoes"],
+      "ingredients.pickles": ["pickles", "dill pickles"],
+      "ingredients.bread_buns": [
+        "buns",
+        "burger buns",
+        "sandwich buns",
+        "rolls"
+      ]
+    },
+    "dishAliases": {
+      "dishes.bbq.pulled_pork_sandwich": [
+        "pulled pork sandwich",
+        "pulled pork"
+      ],
+      "dishes.bbq.sliced_brisket": ["sliced brisket", "brisket"],
+      "dishes.bbq.burnt_ends": ["burnt ends"],
+      "dishes.bbq.spare_ribs": ["spare ribs"],
+      "dishes.bbq.baby_back_ribs": ["baby back ribs"],
+      "dishes.bbq.st_louis_ribs": ["st louis ribs", "st. louis ribs"],
+      "dishes.bbq.smoked_chicken_quarters": [
+        "smoked chicken quarters",
+        "smoked chicken"
+      ],
+      "dishes.bbq.bbq_chicken_wings": ["bbq wings", "chicken wings"],
+      "dishes.bbq.smoked_turkey_breast": [
+        "smoked turkey breast",
+        "smoked turkey"
+      ],
+      "dishes.bbq.smoked_sausage_links": ["smoked sausage", "sausage links"],
+      "dishes.bbq.hot_links": ["hot links"],
+      "dishes.bbq.cole_slaw": ["coleslaw", "cole slaw", "slaw"],
+      "dishes.bbq.potato_salad": ["potato salad"],
+      "dishes.bbq.baked_beans": ["baked beans", "bbq beans"],
+      "dishes.bbq.white_sauce_alabama": ["alabama white sauce", "white sauce"],
+      "dishes.bbq.vinegar_sauce_carolina": [
+        "carolina vinegar sauce",
+        "vinegar sauce"
+      ],
+      "dishes.bbq.tomato_based_bbq_sauce": [
+        "bbq sauce",
+        "barbecue sauce",
+        "barbeque sauce",
+        "tomato bbq sauce"
+      ],
+      "dishes.bbq.dry_rub_classic": ["dry rub", "bbq rub", "barbecue rub"]
+    },
+    "equipmentAliases": {
+      "equipment.smoker": [
+        "smoker",
+        "pellet smoker",
+        "offset smoker",
+        "drum smoker",
+        "kamado"
+      ],
+      "equipment.grill": ["grill", "charcoal grill", "gas grill", "grill pan"],
+      "equipment.oven": ["oven"],
+      "equipment.stovetop": ["stove", "stovetop", "range"],
+      "equipment.instant_read_thermometer": [
+        "instant read thermometer",
+        "thermometer"
+      ],
+      "equipment.probe_thermometer": [
+        "probe thermometer",
+        "leave-in thermometer"
+      ],
+      "equipment.sheet_pan": ["sheet pan", "baking sheet"],
+      "equipment.roasting_pan": ["roasting pan"],
+      "equipment.dutch_oven": ["dutch oven"],
+      "equipment.foil": ["foil", "aluminum foil"],
+      "equipment.spray_bottle": ["spray bottle", "mister"]
+    },
+    "methodAliases": {
+      "methods.smoke": ["smoke", "smoked"],
+      "methods.grill": ["grill", "char", "sear"],
+      "methods.roast": ["roast", "bake"],
+      "methods.braise": ["braise", "stew"],
+      "methods.slow_cook": ["slow cook", "crockpot"],
+      "methods.wrap": ["wrap", "texas crutch"],
+      "methods.rest": ["rest", "hold", "resting"],
+      "methods.deep_fry": ["deep fry", "fry"]
+    }
+  },
+  "globals": {
+    "signals": {
+      "flavorCore": [
+        "smoke",
+        "salt",
+        "pepper",
+        "paprika",
+        "garlic",
+        "onion",
+        "mustard_optional"
+      ],
+      "sweetCore": ["brown_sugar", "molasses_optional", "honey_optional"],
+      "acidCore": ["apple_cider_vinegar", "white_vinegar", "lemon_optional"],
+      "heatCore": [
+        "cayenne_optional",
+        "chili_powder_optional",
+        "hot_sauce_optional"
+      ],
+      "umamiCore": [
+        "worcestershire_optional",
+        "soy_sauce_optional",
+        "tomato_optional"
+      ],
+      "meatCore": [
+        "pork_shoulder",
+        "pork_ribs",
+        "beef_brisket",
+        "chicken",
+        "turkey",
+        "sausage"
+      ],
+      "sideCore": [
+        "cole_slaw",
+        "potato_salad",
+        "baked_beans",
+        "cornbread_optional",
+        "pickles_onions"
+      ]
+    },
+    "plateModel": {
+      "default": {
+        "proteinShareTarget": 0.45,
+        "starchShareTarget": 0.35,
+        "vegShareMin": 0.2,
+        "notes": [
+          "BBQ plates are protein-forward with classic starchy + crunchy/acidic sides.",
+          "Sauce is optional and style-dependent; rub + smoke + bark are the signature."
+        ]
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "bbq.base.tag_cuisine_bbq",
+      "enabled": true,
+      "priority": 900,
+      "title": "Tag cuisine as BBQ",
+      "description": "Adds BBQ cuisine tag for downstream scoring and filtering.",
+      "tags": ["bbq", "cuisine"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.bbq"
+          },
+          { "type": "hasTag", "value": "cuisine.bbq" },
+          {
+            "type": "matches",
+            "path": "$.recipe.title",
+            "regex": "(?i)bbq|barbecue|barbeque|smoked|brisket|pulled pork|ribs"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.bbq" },
+          { "type": "addTag", "value": "flavor.smoke" },
+          { "type": "addTag", "value": "method.low_and_slow" }
+        ]
+      }
+    },
+    {
+      "id": "bbq.search.bias.smoke_rub_sauce_patterns",
+      "enabled": true,
+      "priority": 820,
+      "title": "Prefer smoke/rub/sauce BBQ patterns",
+      "description": "Adjusts scoring toward recipes featuring classic rub ingredients, smoke cues, and BBQ sauce/vinegar sauce patterns.",
+      "tags": ["bbq", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": [
+              "ingredients.smoked_paprika",
+              "ingredients.paprika",
+              "ingredients.brown_sugar",
+              "ingredients.garlic_powder",
+              "ingredients.onion_powder"
+            ]
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": [
+              "ingredients.apple_cider_vinegar",
+              "ingredients.ketchup",
+              "ingredients.molasses",
+              "ingredients.worcestershire",
+              "ingredients.mustard_powder"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.recipe.title",
+            "regex": "(?i)smok|brisket|pulled|rib|burnt end|bbq|barbecue|barbeque|rub|dry rub|sauce"
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.methods",
+            "values": [
+              "methods.smoke",
+              "methods.slow_cook",
+              "methods.wrap",
+              "methods.rest",
+              "methods.grill"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 9 },
+          { "type": "addTag", "value": "bbq.core" }
+        ]
+      }
+    },
+    {
+      "id": "bbq.plan.default_plate_shares",
+      "enabled": true,
+      "priority": 760,
+      "title": "Apply BBQ plate share defaults",
+      "description": "If planner is building a BBQ plate, set default share targets (protein-forward) and typical side balance.",
+      "tags": ["bbq", "planner"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.planner" },
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.bbq"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.plateModel",
+            "value": {
+              "proteinShareTarget": 0.45,
+              "starchShareTarget": 0.35,
+              "vegShareMin": 0.2
+            }
+          },
+          { "type": "addTag", "value": "planner.plate.bbq" }
+        ]
+      }
+    },
+    {
+      "id": "bbq.method.bias.smoke_low_and_slow",
+      "enabled": true,
+      "priority": 730,
+      "title": "Prefer smoke + low-and-slow methods",
+      "description": "BBQ is defined by smoke and controlled heat over time; boost recipes using smoke/grill/slow-cook patterns.",
+      "tags": ["bbq", "technique", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.methods",
+            "values": [
+              "methods.smoke",
+              "methods.slow_cook",
+              "methods.wrap",
+              "methods.rest"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.recipe.title",
+            "regex": "(?i)smok|low\\s*and\\s*slow|brisket|pulled|rib|burnt end"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 5 },
+          { "type": "addTag", "value": "bbq.technique_core" }
+        ]
+      }
+    },
+    {
+      "id": "bbq.adaptation.internal_temp_safety_hint",
+      "enabled": true,
+      "priority": 700,
+      "title": "Internal temperature + safety guidance for BBQ proteins",
+      "description": "Emits a hint to use an instant-read/probe thermometer and follow safe doneness targets for poultry and reheating.",
+      "tags": ["bbq", "adaptation", "safety"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.bbq"
+          },
+          { "type": "exists", "path": "$.recipe" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisineRuleset.hint",
+              "payload": {
+                "kind": "safety",
+                "hint": "Use a thermometer for BBQ proteins. Poultry should reach a safe internal temperature; large cuts benefit from resting/holding for tenderness. Cool leftovers quickly and reheat safely.",
+                "tags": ["thermometer", "doneness", "safety"]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "bbq.substitution.neutral_oil_is_ok",
+      "enabled": true,
+      "priority": 680,
+      "title": "Keep neutral oil/binders as default for BBQ",
+      "description": "BBQ often uses neutral oils, mustard binders, or rendered fats; do not bias toward olive oil by default.",
+      "tags": ["bbq", "substitution"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.bbq"
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.neutral_oil"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisineRuleset.suggestion",
+              "payload": {
+                "kind": "substitution",
+                "from": "ingredients.neutral_oil",
+                "to": "ingredients.neutral_oil",
+                "reason": "Neutral oils (or mustard binders/rendered fats) are common in BBQ rub adhesion and high-heat grilling; keep neutral oil as default unless user preferences override."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "bbq.pairing.default_sides",
+      "enabled": true,
+      "priority": 650,
+      "title": "Suggest common BBQ side pairings",
+      "description": "Provides optional side suggestions (slaw, beans, potato salad, pickles) to build complete BBQ plates.",
+      "tags": ["bbq", "pairing"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.bbq"
+          },
+          { "type": "exists", "path": "$.planner" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.pairingSuggestions",
+            "value": {
+              "sides": [
+                {
+                  "id": "dishes.bbq.cole_slaw",
+                  "tags": ["side", "cooling", "crunchy", "acidic"]
+                },
+                {
+                  "id": "dishes.bbq.baked_beans",
+                  "tags": ["side", "beans", "sweet_savory"]
+                },
+                {
+                  "id": "dishes.bbq.potato_salad",
+                  "tags": ["side", "picnic", "creamy_or_vinegar"]
+                },
+                {
+                  "id": "dishes.bbq.pickles_onions",
+                  "tags": ["side", "condiment", "acidic", "cut_fat"]
+                }
+              ],
+              "sauces": [
+                {
+                  "id": "dishes.bbq.tomato_based_bbq_sauce",
+                  "tags": ["sauce", "classic"]
+                },
+                {
+                  "id": "dishes.bbq.vinegar_sauce_carolina",
+                  "tags": ["sauce", "vinegar", "tangy"]
+                },
+                {
+                  "id": "dishes.bbq.white_sauce_alabama",
+                  "tags": ["sauce", "tangy", "mayo_based"]
+                }
+              ],
+              "breads": [
+                {
+                  "id": "dishes.bbq.bread_buns",
+                  "tags": ["bread", "sandwich"]
+                },
+                { "id": "dishes.bbq.cornbread", "tags": ["bread", "side"] }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "bbq.protein.bias.classic_cuts",
+      "enabled": true,
+      "priority": 620,
+      "title": "Prefer classic BBQ proteins",
+      "description": "Boost brisket, ribs, pulled pork, and smoked chicken/turkey patterns for BBQ cuisine selection.",
+      "tags": ["bbq", "protein", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": [
+              "ingredients.beef_brisket",
+              "ingredients.pork_ribs",
+              "ingredients.pork_shoulder"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.recipe.title",
+            "regex": "(?i)brisket|rib|ribs|pulled\\s+pork|burnt\\s+ends|smoked\\s+chicken|smoked\\s+turkey"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 4 },
+          { "type": "addTag", "value": "bbq.protein_classic" }
+        ]
+      }
+    }
+  ]
+}

@@ -14,13 +14,28 @@
 //
 // Inspirations: Notion (clarity), Linear (speed), FarmOS/FarmWizard (domain cues)
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, addMinutes, differenceInDays, format, isAfter, isPast, isToday, parseISO } from "date-fns";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  addDays,
+  addMinutes,
+  differenceInDays,
+  format,
+  isAfter,
+  isPast,
+  isToday,
+  parseISO,
+} from "date-fns";
 
 // ---------------- Defensive service/context imports ----------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus").default;
+  eventBus = require("../../services/events/eventBus").default;
 } catch {
   eventBus = {
     emit: (...args) => console.debug("[BarnPlanView:eventBus.emit]", ...args),
@@ -30,7 +45,8 @@ try {
 
 let SettingsContext;
 try {
-  SettingsContext = require("../../components/context/SettingsContext").SettingsContext;
+  SettingsContext =
+    require("../../components/context/SettingsContext").SettingsContext;
 } catch {
   SettingsContext = React.createContext({
     sabbathGuard: false,
@@ -43,7 +59,8 @@ try {
 
 let PlanDraftContext;
 try {
-  PlanDraftContext = require("../../components/context/PlanDraftContext").PlanDraftContext;
+  PlanDraftContext =
+    require("../../components/context/PlanDraftContext").PlanDraftContext;
 } catch {
   PlanDraftContext = React.createContext({
     selectedDateISO: new Date().toISOString(),
@@ -54,7 +71,8 @@ try {
 
 let VisionContext;
 try {
-  VisionContext = require("../../components/context/VisionContext").VisionContext;
+  VisionContext =
+    require("../../components/context/VisionContext").VisionContext;
 } catch {
   VisionContext = React.createContext({ getPriorityFor: () => null });
 }
@@ -63,7 +81,9 @@ let estimateEngine;
 try {
   estimateEngine = require("../../engines/estimates/estimateEngine.js");
 } catch {
-  estimateEngine = { estimate: (t) => ({ timeMinutes: t?.estMinutes || 15, cost: null }) };
+  estimateEngine = {
+    estimate: (t) => ({ timeMinutes: t?.estMinutes || 15, cost: null }),
+  };
 }
 
 let scheduleHelpers = {};
@@ -120,7 +140,10 @@ const prettyTime = (iso) => {
   }
 };
 
-const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }) => {
+const withinSabbath = (
+  now = new Date(),
+  window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }
+) => {
   const dow = now.getDay();
   const hr = now.getHours();
   if (dow === window.startDow && hr >= window.startHour) return true;
@@ -154,18 +177,21 @@ const dayHeaderPretty = (iso) => {
 
 // ---------------- Component ----------------
 export default function BarnPlanView({
-  dateISO,              // optional override
-  tasks: tasksProp,     // optional array of animal-related tasks
-  animals = [],         // optional: [{id, name, species, group, pen}]
-  paddocks = [],        // optional: [{id, name, lastGrazedISO, restDaysTarget}]
-  onStartTask,          // optional callback
+  dateISO, // optional override
+  tasks: tasksProp, // optional array of animal-related tasks
+  animals = [], // optional: [{id, name, species, group, pen}]
+  paddocks = [], // optional: [{id, name, lastGrazedISO, restDaysTarget}]
+  onStartTask, // optional callback
   readOnly = false,
 }) {
-  const { sabbathGuard, sabbathWindow, allowWelfareDuringSabbath } = React.useContext(SettingsContext);
-  const { selectedDateISO, tasks: planTasks } = React.useContext(PlanDraftContext);
+  const { sabbathGuard, sabbathWindow, allowWelfareDuringSabbath } =
+    React.useContext(SettingsContext);
+  const { selectedDateISO, tasks: planTasks } =
+    React.useContext(PlanDraftContext);
   const { getPriorityFor } = React.useContext(VisionContext);
 
-  const effectiveDateISO = dateISO || selectedDateISO || new Date().toISOString();
+  const effectiveDateISO =
+    dateISO || selectedDateISO || new Date().toISOString();
   const baseTasks = tasksProp || planTasks || [];
 
   // Filter to the day (or show unscheduled)
@@ -181,12 +207,23 @@ export default function BarnPlanView({
   // UI state
   const [filters, setFilters] = useState({
     showPast: false,
-    subdomains: new Set(["feed", "water", "health", "breeding", "pasture", "cleaning"]),
+    subdomains: new Set([
+      "feed",
+      "water",
+      "health",
+      "breeding",
+      "pasture",
+      "cleaning",
+    ]),
     onlyHighPriority: false,
   });
   const [query, setQuery] = useState("");
   const [activeTaskId, setActiveTaskId] = useState(null);
-  const [timer, setTimer] = useState({ taskId: null, endAt: null, remaining: 0 });
+  const [timer, setTimer] = useState({
+    taskId: null,
+    endAt: null,
+    remaining: 0,
+  });
 
   const [shortageCount, setShortageCount] = useState(0);
   const [feedShortage, setFeedShortage] = useState(0);
@@ -194,8 +231,14 @@ export default function BarnPlanView({
 
   // Pasture & breeding computed helpers
   const rotation = useMemo(() => computeRotation(paddocks), [paddocks]);
-  const vaccinationsDue = useMemo(() => scheduleHelpers.getVaccinationsDue?.(animals, effectiveDateISO) || [], [animals, effectiveDateISO]);
-  const breedingWindows = useMemo(() => scheduleHelpers.getBreedingWindows?.(animals, effectiveDateISO) || [], [animals, effectiveDateISO]);
+  const vaccinationsDue = useMemo(
+    () => scheduleHelpers.getVaccinationsDue?.(animals, effectiveDateISO) || [],
+    [animals, effectiveDateISO]
+  );
+  const breedingWindows = useMemo(
+    () => scheduleHelpers.getBreedingWindows?.(animals, effectiveDateISO) || [],
+    [animals, effectiveDateISO]
+  );
 
   // Subscribe for shortages
   useEffect(() => {
@@ -203,8 +246,15 @@ export default function BarnPlanView({
       const list = Array.isArray(payload?.items) ? payload.items : [];
       const animalNeeds = list.filter((r) => r.domain === "animal");
       setShortageCount(animalNeeds.length);
-      setFeedShortage(animalNeeds.filter((r) => /feed|grain|hay|pellet/i.test(r.name || "")).length);
-      setMedShortage(animalNeeds.filter((r) => /syringe|vaccine|deworm|antibiotic|electrolyte/i.test(r.name || "")).length);
+      setFeedShortage(
+        animalNeeds.filter((r) => /feed|grain|hay|pellet/i.test(r.name || ""))
+          .length
+      );
+      setMedShortage(
+        animalNeeds.filter((r) =>
+          /syringe|vaccine|deworm|antibiotic|electrolyte/i.test(r.name || "")
+        ).length
+      );
     });
     return () => off?.();
   }, []);
@@ -213,7 +263,10 @@ export default function BarnPlanView({
   useEffect(() => {
     if (!timer.endAt) return;
     const id = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((timer.endAt - Date.now()) / 1000));
+      const remaining = Math.max(
+        0,
+        Math.floor((timer.endAt - Date.now()) / 1000)
+      );
       setTimer((prev) => ({ ...prev, remaining }));
       if (remaining <= 0) clearInterval(id);
       eventBus.emit("task.timer.tick", { taskId: timer.taskId, remaining });
@@ -280,13 +333,19 @@ export default function BarnPlanView({
     (task) => {
       const now = new Date();
       const inSabbath = sabbathGuard && withinSabbath(now, sabbathWindow);
-      const welfare = ["feed", "water", "health"].includes(task.subdomain || "");
+      const welfare = ["feed", "water", "health"].includes(
+        task.subdomain || ""
+      );
       if (inSabbath && !(allowWelfareDuringSabbath && welfare)) {
-        eventBus.emit("ui.toast", { variant: "warning", message: "Sabbath guard: action blocked." });
+        eventBus.emit("ui.toast", {
+          variant: "warning",
+          message: "Sabbath guard: action blocked.",
+        });
         return;
       }
 
-      const estMinutes = task.estMinutes || estimateEngine.estimate(task).timeMinutes || 15;
+      const estMinutes =
+        task.estMinutes || estimateEngine.estimate(task).timeMinutes || 15;
       const endAt = Date.now() + estMinutes * 60 * 1000;
       setActiveTaskId(task.id);
       setTimer({ taskId: task.id, endAt, remaining: estMinutes * 60 });
@@ -302,7 +361,11 @@ export default function BarnPlanView({
 
   // ---------- Render helpers ----------
   const Badge = ({ children, className = "" }) => (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${className}`}>{children}</span>
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${className}`}
+    >
+      {children}
+    </span>
   );
 
   const SubdomainBadge = ({ subdomain }) => {
@@ -313,14 +376,22 @@ export default function BarnPlanView({
   const AnimalChip = ({ animal }) => {
     if (!animal) return null;
     const icon = ANIMAL_EMOJI[(animal.species || "").toLowerCase()] || "🐾";
-    return <Badge className="bg-gray-50 text-gray-700 border border-gray-200">{icon} {animal.name || animal.species}</Badge>;
+    return (
+      <Badge className="bg-gray-50 text-gray-700 border border-gray-200">
+        {icon} {animal.name || animal.species}
+      </Badge>
+    );
   };
 
   const TimerChip = ({ task }) => {
     if (timer.taskId !== task.id) return null;
     const mins = Math.floor(timer.remaining / 60);
     const secs = timer.remaining % 60;
-    return <Badge className="bg-black text-white">{mins}:{String(secs).padStart(2, "0")}</Badge>;
+    return (
+      <Badge className="bg-black text-white">
+        {mins}:{String(secs).padStart(2, "0")}
+      </Badge>
+    );
   };
 
   // Quick map for animal lookup
@@ -352,15 +423,32 @@ export default function BarnPlanView({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-gray-900 truncate">{task.title || "Untitled task"}</h3>
+              <h3 className="font-semibold text-gray-900 truncate">
+                {task.title || "Untitled task"}
+              </h3>
               <SubdomainBadge subdomain={task.subdomain} />
-              {task.pen ? <Badge className="bg-gray-100 text-gray-700 border border-gray-200">Pen: {task.pen}</Badge> : null}
-              {task.group ? <Badge className="bg-gray-100 text-gray-700 border border-gray-200">{task.group}</Badge> : null}
+              {task.pen ? (
+                <Badge className="bg-gray-100 text-gray-700 border border-gray-200">
+                  Pen: {task.pen}
+                </Badge>
+              ) : null}
+              {task.group ? (
+                <Badge className="bg-gray-100 text-gray-700 border border-gray-200">
+                  {task.group}
+                </Badge>
+              ) : null}
               <AnimalChip animal={animal} />
               <TimerChip task={task} />
             </div>
             <div className="mt-1 text-sm text-gray-600 flex flex-wrap gap-3">
-              {task.start ? <span title={task.start}>{prettyTime(task.start)}{task.estMinutes ? ` · ${task.estMinutes}m` : ""}</span> : <span className="italic text-gray-400">Unscheduled</span>}
+              {task.start ? (
+                <span title={task.start}>
+                  {prettyTime(task.start)}
+                  {task.estMinutes ? ` · ${task.estMinutes}m` : ""}
+                </span>
+              ) : (
+                <span className="italic text-gray-400">Unscheduled</span>
+              )}
               {task.location ? <span>• {task.location}</span> : null}
               {task.assignee ? <span>• @{task.assignee}</span> : null}
             </div>
@@ -382,16 +470,33 @@ export default function BarnPlanView({
         </div>
 
         {/* Details */}
-        {(task?.tags?.length || task?.ration || task?.dosage || task?.notes) ? (
+        {task?.tags?.length || task?.ration || task?.dosage || task?.notes ? (
           <div className="mt-3 grid gap-2 text-sm">
-            {task.ration ? <div className="text-gray-700"><span className="font-medium">Ration:</span> {task.ration}</div> : null}
-            {task.dosage ? <div className="text-gray-700"><span className="font-medium">Dosage:</span> {task.dosage}</div> : null}
-            {task.tags?.length ? (
-              <div className="flex flex-wrap gap-1">
-                {task.tags.map((tg) => <Badge key={tg} className="bg-gray-50 text-gray-700 border border-gray-200">#{tg}</Badge>)}
+            {task.ration ? (
+              <div className="text-gray-700">
+                <span className="font-medium">Ration:</span> {task.ration}
               </div>
             ) : null}
-            {task.notes ? <p className="text-gray-700 whitespace-pre-wrap">{task.notes}</p> : null}
+            {task.dosage ? (
+              <div className="text-gray-700">
+                <span className="font-medium">Dosage:</span> {task.dosage}
+              </div>
+            ) : null}
+            {task.tags?.length ? (
+              <div className="flex flex-wrap gap-1">
+                {task.tags.map((tg) => (
+                  <Badge
+                    key={tg}
+                    className="bg-gray-50 text-gray-700 border border-gray-200"
+                  >
+                    #{tg}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+            {task.notes ? (
+              <p className="text-gray-700 whitespace-pre-wrap">{task.notes}</p>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -400,7 +505,14 @@ export default function BarnPlanView({
 
   // ---------- Render ----------
   const dayHeader = dayHeaderPretty(effectiveDateISO);
-  const subdomains = ["feed", "water", "health", "breeding", "pasture", "cleaning"];
+  const subdomains = [
+    "feed",
+    "water",
+    "health",
+    "breeding",
+    "pasture",
+    "cleaning",
+  ];
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
@@ -408,7 +520,9 @@ export default function BarnPlanView({
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Barn Plan</h1>
-          <p className="text-gray-600">{dayHeader} • Feed, water, health, breeding, pasture rotation.</p>
+          <p className="text-gray-600">
+            {dayHeader} • Feed, water, health, breeding, pasture rotation.
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -465,7 +579,9 @@ export default function BarnPlanView({
               }
               className={[
                 "rounded-full border px-3 py-1.5 text-sm capitalize",
-                on ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50",
+                on
+                  ? "bg-gray-900 text-white border-black"
+                  : "bg-white hover:bg-gray-50",
               ].join(" ")}
             >
               {d}
@@ -477,7 +593,9 @@ export default function BarnPlanView({
           <input
             type="checkbox"
             checked={filters.showPast}
-            onChange={(e) => setFilters((f) => ({ ...f, showPast: e.target.checked }))}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, showPast: e.target.checked }))
+            }
           />
           Show past
         </label>
@@ -486,7 +604,9 @@ export default function BarnPlanView({
           <input
             type="checkbox"
             checked={filters.onlyHighPriority}
-            onChange={(e) => setFilters((f) => ({ ...f, onlyHighPriority: e.target.checked }))}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, onlyHighPriority: e.target.checked }))
+            }
           />
           High priority
         </label>
@@ -494,10 +614,27 @@ export default function BarnPlanView({
 
       {/* Summary row */}
       <div className="mt-3 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <InfoCard label="Animal shortages" value={shortageCount} hint={`${feedShortage} feed • ${medShortage} meds`} tone={shortageCount ? "amber" : "slate"} />
-        <InfoCard label="Vaccinations due" value={vaccinationsDue.length} onClick={() => scrollToSection("vaccines")} />
-        <InfoCard label="Breeding windows" value={breedingWindows.length} onClick={() => scrollToSection("breeding")} />
-        <InfoCard label="Pasture: ready paddocks" value={rotation.ready.length} onClick={() => scrollToSection("pasture")} />
+        <InfoCard
+          label="Animal shortages"
+          value={shortageCount}
+          hint={`${feedShortage} feed • ${medShortage} meds`}
+          tone={shortageCount ? "amber" : "slate"}
+        />
+        <InfoCard
+          label="Vaccinations due"
+          value={vaccinationsDue.length}
+          onClick={() => scrollToSection("vaccines")}
+        />
+        <InfoCard
+          label="Breeding windows"
+          value={breedingWindows.length}
+          onClick={() => scrollToSection("breeding")}
+        />
+        <InfoCard
+          label="Pasture: ready paddocks"
+          value={rotation.ready.length}
+          onClick={() => scrollToSection("pasture")}
+        />
       </div>
 
       {/* Main grid */}
@@ -506,8 +643,13 @@ export default function BarnPlanView({
         <div className="lg:col-span-2">
           <div className="rounded-2xl border p-4">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Today’s Barn Tasks</h2>
-              <div className="text-xs text-gray-500">{filteredTasks.length} item{filteredTasks.length !== 1 ? "s" : ""}</div>
+              <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                Today’s Barn Tasks
+              </h2>
+              <div className="text-xs text-gray-500">
+                {filteredTasks.length} item
+                {filteredTasks.length !== 1 ? "s" : ""}
+              </div>
             </div>
 
             <div className="mt-3 grid gap-6">
@@ -525,7 +667,15 @@ export default function BarnPlanView({
                       <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                         {slotKey === "unscheduled"
                           ? "Unscheduled"
-                          : format(parseISO(`${format(parseISO(effectiveDateISO), "yyyy-MM-dd")}T${slotKey}:00`), "h:mmaaa")}
+                          : format(
+                              parseISO(
+                                `${format(
+                                  parseISO(effectiveDateISO),
+                                  "yyyy-MM-dd"
+                                )}T${slotKey}:00`
+                              ),
+                              "h:mmaaa"
+                            )}
                       </h3>
                     </div>
                     <div className="grid gap-3">
@@ -546,7 +696,9 @@ export default function BarnPlanView({
           <div id="vaccines" className="rounded-2xl border p-4">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Vaccinations due</h3>
-              <span className="text-xs text-gray-500">{vaccinationsDue.length}</span>
+              <span className="text-xs text-gray-500">
+                {vaccinationsDue.length}
+              </span>
             </div>
             <ul className="mt-2 grid gap-2">
               {vaccinationsDue.slice(0, 6).map((v, i) => (
@@ -554,7 +706,9 @@ export default function BarnPlanView({
                   <div className="text-sm">
                     <span className="font-medium">{v.name}</span> • {v.vaccine}
                   </div>
-                  <div className="text-xs text-gray-600">Due {format(parseISO(v.dueISO), "PP")}</div>
+                  <div className="text-xs text-gray-600">
+                    Due {format(parseISO(v.dueISO), "PP")}
+                  </div>
                   <div className="mt-2">
                     <button
                       type="button"
@@ -566,7 +720,9 @@ export default function BarnPlanView({
                   </div>
                 </li>
               ))}
-              {!vaccinationsDue.length ? <li className="text-sm text-gray-600">None due.</li> : null}
+              {!vaccinationsDue.length ? (
+                <li className="text-sm text-gray-600">None due.</li>
+              ) : null}
             </ul>
           </div>
 
@@ -574,16 +730,20 @@ export default function BarnPlanView({
           <div id="breeding" className="rounded-2xl border p-4">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Breeding</h3>
-              <span className="text-xs text-gray-500">{breedingWindows.length}</span>
+              <span className="text-xs text-gray-500">
+                {breedingWindows.length}
+              </span>
             </div>
             <ul className="mt-2 grid gap-2">
               {breedingWindows.slice(0, 6).map((b, i) => (
                 <li key={`b-${i}`} className="rounded-xl border p-3 bg-white">
                   <div className="text-sm">
-                    <span className="font-medium">{b.name}</span> • {b.type.toUpperCase()}
+                    <span className="font-medium">{b.name}</span> •{" "}
+                    {b.type.toUpperCase()}
                   </div>
                   <div className="text-xs text-gray-600">
-                    {format(parseISO(b.startISO), "PPp")} → {format(parseISO(b.endISO), "PPp")}
+                    {format(parseISO(b.startISO), "PPp")} →{" "}
+                    {format(parseISO(b.endISO), "PPp")}
                   </div>
                   <div className="mt-2 flex gap-2">
                     <button
@@ -603,7 +763,9 @@ export default function BarnPlanView({
                   </div>
                 </li>
               ))}
-              {!breedingWindows.length ? <li className="text-sm text-gray-600">No windows today.</li> : null}
+              {!breedingWindows.length ? (
+                <li className="text-sm text-gray-600">No windows today.</li>
+              ) : null}
             </ul>
           </div>
 
@@ -611,7 +773,9 @@ export default function BarnPlanView({
           <div id="pasture" className="rounded-2xl border p-4">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Pasture rotation</h3>
-              <span className="text-xs text-gray-500">{rotation.all.length} paddocks</span>
+              <span className="text-xs text-gray-500">
+                {rotation.all.length} paddocks
+              </span>
             </div>
             {rotation.ready.length ? (
               <div className="mt-2">
@@ -621,7 +785,9 @@ export default function BarnPlanView({
                     <li key={p.id} className="rounded-xl border p-3 bg-white">
                       <div className="text-sm">
                         <span className="font-medium">{p.name}</span>{" "}
-                        <span className="text-gray-600">• {p.daysRest}d rest / target {p.restDaysTarget}d</span>
+                        <span className="text-gray-600">
+                          • {p.daysRest}d rest / target {p.restDaysTarget}d
+                        </span>
                       </div>
                       <div className="mt-2">
                         <button
@@ -637,7 +803,9 @@ export default function BarnPlanView({
                 </ul>
               </div>
             ) : (
-              <div className="mt-2 text-sm text-gray-600">No paddocks at target rest yet.</div>
+              <div className="mt-2 text-sm text-gray-600">
+                No paddocks at target rest yet.
+              </div>
             )}
 
             {rotation.recovering.length ? (
@@ -648,7 +816,9 @@ export default function BarnPlanView({
                     <li key={p.id} className="rounded-xl border p-3 bg-white">
                       <div className="text-sm">
                         <span className="font-medium">{p.name}</span>{" "}
-                        <span className="text-gray-600">• {p.daysRest}d rest / target {p.restDaysTarget}d</span>
+                        <span className="text-gray-600">
+                          • {p.daysRest}d rest / target {p.restDaysTarget}d
+                        </span>
                       </div>
                     </li>
                   ))}
@@ -676,7 +846,10 @@ export default function BarnPlanView({
       tags: ["vaccination"],
     };
     eventBus.emit("tasks.add", { task });
-    eventBus.emit("ui.toast", { variant: "success", message: "Vaccination task added" });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: "Vaccination task added",
+    });
   }
 
   function createBreedingTask(b) {
@@ -693,12 +866,22 @@ export default function BarnPlanView({
       tags: ["breeding"],
     };
     eventBus.emit("tasks.add", { task });
-    eventBus.emit("ui.toast", { variant: "success", message: "Breeding check scheduled" });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: "Breeding check scheduled",
+    });
   }
 
   function logBreedingEvent(b) {
-    eventBus.emit("animals.breeding.log", { animalId: b.animalId, window: b, at: new Date().toISOString() });
-    eventBus.emit("ui.toast", { variant: "success", message: "Breeding event logged" });
+    eventBus.emit("animals.breeding.log", {
+      animalId: b.animalId,
+      window: b,
+      at: new Date().toISOString(),
+    });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: "Breeding event logged",
+    });
   }
 
   function scheduleMoveToPaddock(p) {
@@ -715,12 +898,16 @@ export default function BarnPlanView({
       pen: p.name,
     };
     eventBus.emit("tasks.add", { task });
-    eventBus.emit("ui.toast", { variant: "success", message: `Scheduled move to ${p.name}` });
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: `Scheduled move to ${p.name}`,
+    });
   }
 
   function scrollToSection(id) {
     const el = document.getElementById(id);
-    if (el?.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el?.scrollIntoView)
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -734,7 +921,13 @@ function InfoCard({ label, value, hint, tone = "slate", onClick }) {
     emerald: "bg-emerald-50 text-emerald-900 border-emerald-200",
   };
   return (
-    <button type="button" onClick={onClick} className={`rounded-2xl border p-4 text-left ${toneMap[tone] || toneMap.slate}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-2xl border p-4 text-left ${
+        toneMap[tone] || toneMap.slate
+      }`}
+    >
       <div className="text-xs text-gray-500">{label}</div>
       <div className="mt-1 text-2xl font-semibold">{value}</div>
       {hint ? <div className="mt-1 text-xs text-gray-600">{hint}</div> : null}
@@ -746,11 +939,15 @@ function InfoCard({ label, value, hint, tone = "slate", onClick }) {
 function computeRotation(paddocks = []) {
   const today = new Date();
   const all = (paddocks || []).map((p) => {
-    const last = p.lastGrazedISO ? parseISO(p.lastGrazedISO) : addDays(today, -999);
+    const last = p.lastGrazedISO
+      ? parseISO(p.lastGrazedISO)
+      : addDays(today, -999);
     const daysRest = Math.max(0, differenceInDays(today, last));
     return { ...p, daysRest };
   });
-  const ready = all.filter((p) => (p.restDaysTarget ? p.daysRest >= p.restDaysTarget : p.daysRest >= 21));
+  const ready = all.filter((p) =>
+    p.restDaysTarget ? p.daysRest >= p.restDaysTarget : p.daysRest >= 21
+  );
   const recovering = all.filter((p) => !ready.find((r) => r.id === p.id));
   ready.sort((a, b) => b.daysRest - a.daysRest);
   recovering.sort((a, b) => a.daysRest - b.daysRest);

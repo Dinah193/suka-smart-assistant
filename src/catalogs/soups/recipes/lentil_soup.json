@@ -1,0 +1,353 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.lentil_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Lentil Soup",
+    "subtitle": "Budget-friendly • high-protein vegetarian baseline • purslane optional",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Designed for SSA meal planning and batch cooking. Flexible veg, pantry-friendly, freezer-stable. Purslane option included for nutrition/texture."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "vegetarian",
+      "budget",
+      "high-protein",
+      "stovetop",
+      "freezer-friendly",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "lentil soup",
+      "vegetarian",
+      "budget",
+      "high protein",
+      "batch cooking",
+      "freezer friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~10–12 cups depending on simmer and thickness."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 45,
+    "totalMins": 60
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon"
+    ],
+    "recommended": ["ladle", "fine mesh strainer (for rinsing lentils)"],
+    "optional": [
+      "immersion blender (optional texture)",
+      "microplane (for lemon zest)"
+    ]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["celery"],
+  "signals": {
+    "budgetFriendly": true,
+    "highProtein": true,
+    "freezerFriendly": true,
+    "useWhatYouHave": true
+  },
+
+  "tasteProfile": {
+    "saltiness": "medium",
+    "richness": "low-to-medium",
+    "aromatics": ["onion", "garlic", "celery", "carrot"],
+    "notes": "Savory lentils with tomato and warm spices; brightened with lemon and herbs."
+  },
+
+  "ingredients": [
+    {
+      "id": "oil",
+      "label": "Olive oil or neutral oil",
+      "role": "cook",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, diced or sliced",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 2–3 medium."
+    },
+    {
+      "id": "celery",
+      "label": "Celery, diced or sliced",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3 stalks."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "tomato_paste_optional",
+      "label": "Tomato paste (optional, deeper flavor)",
+      "role": "base",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "diced_tomatoes",
+      "label": "Diced tomatoes (canned) with juices",
+      "role": "base",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "1 (14–15 oz) can."
+    },
+    {
+      "id": "lentils_brown",
+      "label": "Brown or green lentils, rinsed",
+      "role": "protein",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 1 1/2 cups dry. Holds shape well."
+    },
+    {
+      "id": "broth",
+      "label": "Vegetable broth (or water + bouillon), low-sodium preferred",
+      "role": "liquid",
+      "amount": { "value": 1650, "unit": "g" },
+      "notes": "About 7 cups. Use water if needed; season at the end."
+    },
+    {
+      "id": "water_optional",
+      "label": "Water (optional, adjust thickness)",
+      "role": "liquid",
+      "amount": { "value": 500, "unit": "g" },
+      "optional": true,
+      "notes": "Add during simmer if soup thickens too much."
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "smoked_paprika_optional",
+      "label": "Smoked paprika (optional)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "thyme_optional",
+      "label": "Dried thyme (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon, plus more to taste."
+    },
+    {
+      "id": "salt",
+      "label": "Salt (adjust to broth)",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start with ~1 teaspoon if using low-sodium broth; adjust at end."
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Lemon juice (optional)",
+      "role": "finish",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 tablespoons to taste. Brightens the soup."
+    },
+    {
+      "id": "parsley",
+      "label": "Fresh parsley, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup chopped."
+    },
+    {
+      "id": "purslane_optional",
+      "label": "Purslane, roughly chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 50, "unit": "g" },
+      "optional": true,
+      "notes": "Stir in at the end like greens. Adds a pleasant tang and succulent texture."
+    },
+    {
+      "id": "spinach_optional",
+      "label": "Spinach or other leafy greens, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "Swap for purslane if unavailable."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "Heat oil in a large pot over medium heat.",
+        "Add onion, carrots, and celery. Cook 6–8 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Cook aromatics", "mins": 7 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Bloom spices and build base",
+      "instructions": [
+        "Stir in cumin (and smoked paprika/thyme if using) for 20–30 seconds to bloom.",
+        "Add tomato paste (if using) and cook 1 minute.",
+        "Add diced tomatoes and stir, scraping any fond from the pot."
+      ],
+      "activeMins": 4,
+      "timers": [
+        { "label": "Bloom spices", "seconds": 25 },
+        { "label": "Cook tomato paste", "mins": 1 }
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Add lentils and simmer",
+      "instructions": [
+        "Add rinsed lentils, broth, bay leaf, black pepper, and an initial pinch of salt.",
+        "Bring to a gentle simmer, then reduce heat to maintain a steady simmer.",
+        "Simmer 30–40 minutes until lentils are tender (time depends on lentil age)."
+      ],
+      "handsOffMins": 35,
+      "timers": [{ "label": "Simmer lentils", "mins": 35 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Adjust texture (optional) and season",
+      "instructions": [
+        "Remove bay leaf.",
+        "For a thicker soup, use an immersion blender to blend 1–2 cups of soup in the pot (or mash some lentils with a spoon), then stir.",
+        "Taste and adjust salt and pepper. Add water/broth if too thick."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_05",
+      "title": "Finish with brightness and greens",
+      "instructions": [
+        "Turn off heat. Stir in lemon juice (if using) and parsley (if using).",
+        "If using purslane or spinach, stir in and let wilt 1–2 minutes from residual heat.",
+        "Serve hot."
+      ],
+      "activeMins": 5,
+      "timers": [{ "label": "Wilt greens/purslane", "mins": 2 }]
+    }
+  ],
+
+  "pairings": {
+    "serveWith": ["flatbread", "naan", "sandwich bread", "crackers"],
+    "notes": "If your schema rejects extra pairing fields, keep this object minimal."
+  },
+
+  "planner": {
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "freezerPortionSizeCups": 2,
+      "bestPractices": [
+        "This soup freezes very well. Cool quickly and portion.",
+        "If adding leafy greens, consider adding them fresh when reheating for best texture."
+      ]
+    },
+    "flex": {
+      "vegSwap": [
+        "carrots",
+        "celery",
+        "onion",
+        "potatoes",
+        "sweet potato",
+        "zucchini",
+        "kale",
+        "spinach",
+        "purslane"
+      ],
+      "proteinBoost": [
+        "extra lentils",
+        "white beans (optional add-in)",
+        "chickpeas (optional add-in)"
+      ],
+      "acidFinish": ["lemon juice", "vinegar"]
+    },
+    "useWhatYouHaveLogic": {
+      "notes": "If no tomatoes: omit and add 10g vinegar at end for brightness. If no celery: substitute diced bell pepper or extra carrot/onion."
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 5 days. Thickens as it sits; loosen with water/broth.",
+    "freezer": "Freeze up to 3 months. Thaw overnight and reheat gently; add water/broth if needed.",
+    "reheat": "Reheat to a simmer; adjust salt and add lemon/greens fresh if desired."
+  },
+
+  "notes": [
+    "Salt late if using water-only broth; lentils absorb salt as they cook.",
+    "If lentils are old, they may take longer to soften—extend simmer and add water as needed.",
+    "Purslane adds a unique tang and succulent bite; add at the end to preserve texture."
+  ],
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Fixed JSON syntax and removed disallowed pairings.toppings field. Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions."
+  }
+}

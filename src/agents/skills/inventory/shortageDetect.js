@@ -28,7 +28,7 @@
  *       custom logic for computing recommended restock quantities.
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import InventoryLookup from "@/agents/skills/inventory/lookup";
 
 /* ------------------------- Preservation rule registry ---------------------- */
@@ -218,23 +218,30 @@ export function createRestockSuggestions(shortages = [], context = {}) {
     const effectiveShortage = Math.max(baseShortage + extraUsage, 0);
 
     // Base recommended quantity with a simple safety factor
-    let recommendedQty = effectiveShortage > 0
-      ? effectiveShortage * (1 + Math.max(safetyFactor, 0))
-      : 0;
+    let recommendedQty =
+      effectiveShortage > 0
+        ? effectiveShortage * (1 + Math.max(safetyFactor, 0))
+        : 0;
 
     // Allow custom policy to override
     let policyNotes = null;
     if (customShortagePolicy) {
       try {
         const policyRes = customShortagePolicy(item, s, context) || {};
-        if (typeof policyRes.recommendedQty === "number" && policyRes.recommendedQty > 0) {
+        if (
+          typeof policyRes.recommendedQty === "number" &&
+          policyRes.recommendedQty > 0
+        ) {
           recommendedQty = policyRes.recommendedQty;
         }
         if (policyRes.notes) {
           policyNotes = String(policyRes.notes);
         }
       } catch (err) {
-        console.warn("[inventory.shortageDetect] customShortagePolicy error:", err);
+        console.warn(
+          "[inventory.shortageDetect] customShortagePolicy error:",
+          err
+        );
       }
     }
 
@@ -276,7 +283,10 @@ export function createRestockSuggestions(shortages = [], context = {}) {
  * @param {any} suggestionContext  // passed to createRestockSuggestions
  * @returns {Promise<{ shortages:any[], suggestions:any[] }>}
  */
-export async function detectShortagesWithSuggestions(detectOptions = {}, suggestionContext = {}) {
+export async function detectShortagesWithSuggestions(
+  detectOptions = {},
+  suggestionContext = {}
+) {
   const shortages = await detectShortages(detectOptions);
   const suggestions = createRestockSuggestions(shortages, suggestionContext);
   return { shortages, suggestions };
@@ -334,9 +344,7 @@ function classifyPreservable(item, preservationDomain) {
     return { preservable: false, methods: [], notes: null };
   }
 
-  const pretty = methods
-    .map((m) => toTitle(m))
-    .join(", ");
+  const pretty = methods.map((m) => toTitle(m)).join(", ");
 
   const notes = `You can likely preserve this at home via: ${pretty}. Use the "${preservationDomain}" tools to plan a batch.`;
 
@@ -386,10 +394,14 @@ function emitSafe(type, data) {
 /* --------------------------------- Utils ----------------------------------- */
 
 function norm(s) {
-  return String(s || "").toLowerCase().trim();
+  return String(s || "")
+    .toLowerCase()
+    .trim();
 }
 function cleanSpace(s) {
-  return String(s || "").replace(/\s+/g, " ").trim();
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 function toTitle(s) {
   const str = cleanSpace(s);

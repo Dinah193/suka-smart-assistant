@@ -13,16 +13,30 @@
 //
 // Inspirations: Asana’s “smart suggestions”, Linear’s clean layout, Notion’s simple toggles
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addMinutes, format, isAfter, isBefore, isToday, parseISO } from "date-fns";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  addMinutes,
+  format,
+  isAfter,
+  isBefore,
+  isToday,
+  parseISO,
+} from "date-fns";
 
 // ---------------- Defensive service/context imports ----------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus").default;
+  eventBus = require("../../services/events/eventBus").default;
 } catch {
   eventBus = {
-    emit: (...args) => console.debug("[CleanPlannerShell:eventBus.emit]", ...args),
+    emit: (...args) =>
+      console.debug("[CleanPlannerShell:eventBus.emit]", ...args),
     on: () => () => {},
   };
 }
@@ -36,7 +50,8 @@ try {
 
 let SettingsContext;
 try {
-  SettingsContext = require("../../components/context/SettingsContext").SettingsContext;
+  SettingsContext =
+    require("../../components/context/SettingsContext").SettingsContext;
 } catch {
   SettingsContext = React.createContext({
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -47,7 +62,8 @@ try {
 
 let PlanDraftContext;
 try {
-  PlanDraftContext = require("../../components/context/PlanDraftContext").PlanDraftContext;
+  PlanDraftContext =
+    require("../../components/context/PlanDraftContext").PlanDraftContext;
 } catch {
   PlanDraftContext = React.createContext({
     selectedDateISO: new Date().toISOString(),
@@ -59,13 +75,17 @@ try {
 let scheduleHelpers = {};
 try {
   scheduleHelpers = require("../../engines/scheduling/scheduleHelpers.js");
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let estimateEngine;
 try {
   estimateEngine = require("../../engines/estimates/estimateEngine.js");
 } catch {
-  estimateEngine = { estimate: (t) => ({ timeMinutes: t?.estMinutes || 30, cost: null }) };
+  estimateEngine = {
+    estimate: (t) => ({ timeMinutes: t?.estMinutes || 30, cost: null }),
+  };
 }
 
 let planTemplates;
@@ -74,12 +94,40 @@ try {
 } catch {
   planTemplates = {
     // Minimal fallback cleaning templates
-    getTemplates: () => ([
-      { id: "quick-kitchen", title: "Quick Reset: Kitchen", domain: "cleaning", zone: "kitchen", estMinutes: 20, checklist: ["Dishes", "Wipe counters", "Sweep/Mop spot"] },
-      { id: "bath-boost", title: "Bathroom Boost", domain: "cleaning", zone: "bathroom", estMinutes: 25, checklist: ["Toilet", "Sink", "Mirror", "Tub spot clean"] },
-      { id: "living-tidy", title: "Living Area Tidy", domain: "cleaning", zone: "living", estMinutes: 15, checklist: ["Declutter", "Surfaces", "Vacuum"] },
-      { id: "deep-fridge", title: "Deep Clean: Fridge", domain: "cleaning", zone: "kitchen", estMinutes: 40, checklist: ["Remove items", "Wipe shelves", "Discard old"] },
-    ]),
+    getTemplates: () => [
+      {
+        id: "quick-kitchen",
+        title: "Quick Reset: Kitchen",
+        domain: "cleaning",
+        zone: "kitchen",
+        estMinutes: 20,
+        checklist: ["Dishes", "Wipe counters", "Sweep/Mop spot"],
+      },
+      {
+        id: "bath-boost",
+        title: "Bathroom Boost",
+        domain: "cleaning",
+        zone: "bathroom",
+        estMinutes: 25,
+        checklist: ["Toilet", "Sink", "Mirror", "Tub spot clean"],
+      },
+      {
+        id: "living-tidy",
+        title: "Living Area Tidy",
+        domain: "cleaning",
+        zone: "living",
+        estMinutes: 15,
+        checklist: ["Declutter", "Surfaces", "Vacuum"],
+      },
+      {
+        id: "deep-fridge",
+        title: "Deep Clean: Fridge",
+        domain: "cleaning",
+        zone: "kitchen",
+        estMinutes: 40,
+        checklist: ["Remove items", "Wipe shelves", "Discard old"],
+      },
+    ],
   };
 }
 
@@ -117,7 +165,10 @@ try {
 }
 
 // ---------------- Utility helpers ----------------
-const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }) => {
+const withinSabbath = (
+  now = new Date(),
+  window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }
+) => {
   const dow = now.getDay();
   const hr = now.getHours();
   if (dow === window.startDow && hr >= window.startHour) return true;
@@ -142,12 +193,20 @@ function detectConflicts({ candidates, existing }) {
     const end = addMinutes(start, Number(t.estMinutes || 30));
     return { id: t.id, start, end, title: t.title };
   };
-  const cSpans = candidates.filter((t) => t.start).map(toSpan).sort((a, b) => a.start - b.start);
-  const eSpans = existing.filter((t) => t.start).map(toSpan).sort((a, b) => a.start - b.start);
+  const cSpans = candidates
+    .filter((t) => t.start)
+    .map(toSpan)
+    .sort((a, b) => a.start - b.start);
+  const eSpans = existing
+    .filter((t) => t.start)
+    .map(toSpan)
+    .sort((a, b) => a.start - b.start);
 
-  let i = 0, j = 0;
+  let i = 0,
+    j = 0;
   while (i < cSpans.length && j < eSpans.length) {
-    const c = cSpans[i]; const e = eSpans[j];
+    const c = cSpans[i];
+    const e = eSpans[j];
     const overlap = !(isBefore(c.end, e.start) || isAfter(c.start, e.end));
     if (overlap) conflicts.push({ candidate: c, existing: e });
     if (isBefore(c.end, e.end)) i++;
@@ -163,18 +222,29 @@ function scoreTemplate(t, prefs) {
   if (prefs.energy === "medium" && (t.estMinutes || 30) <= 35) s += 2;
   if (prefs.energy === "high" && (t.estMinutes || 30) > 30) s += 2;
   if (prefs.zones.size === 0 || prefs.zones.has(t.zone)) s += 2;
-  if (prefs.cleaningGoals.includes("sanitation") && /bath|kitchen/.test(t.zone || "")) s += 1;
-  if (prefs.residentsHome === false && /living|bath|kitchen/.test(t.zone || "")) s += 1; // empty rooms bonus
+  if (
+    prefs.cleaningGoals.includes("sanitation") &&
+    /bath|kitchen/.test(t.zone || "")
+  )
+    s += 1;
+  if (prefs.residentsHome === false && /living|bath|kitchen/.test(t.zone || ""))
+    s += 1; // empty rooms bonus
   return s;
 }
 
 function generateDraft({ dateISO, startTime, endTime, prefs }) {
   // Create ISO window
-  const start = parseISO(`${format(parseISO(dateISO), "yyyy-MM-dd")}T${startTime}:00`);
-  const end = parseISO(`${format(parseISO(dateISO), "yyyy-MM-dd")}T${endTime}:00`);
+  const start = parseISO(
+    `${format(parseISO(dateISO), "yyyy-MM-dd")}T${startTime}:00`
+  );
+  const end = parseISO(
+    `${format(parseISO(dateISO), "yyyy-MM-dd")}T${endTime}:00`
+  );
 
   // Candidate templates
-  const templates = (planTemplates.getTemplates?.() || []).filter((t) => t.domain === "cleaning");
+  const templates = (planTemplates.getTemplates?.() || []).filter(
+    (t) => t.domain === "cleaning"
+  );
   const ranked = templates
     .map((t) => ({ ...t, _score: scoreTemplate(t, prefs) }))
     .sort((a, b) => b._score - a._score);
@@ -183,7 +253,8 @@ function generateDraft({ dateISO, startTime, endTime, prefs }) {
   const draft = [];
   let cursor = start;
   for (const tpl of ranked) {
-    const est = tpl.estMinutes || estimateEngine.estimate?.(tpl)?.timeMinutes || 30;
+    const est =
+      tpl.estMinutes || estimateEngine.estimate?.(tpl)?.timeMinutes || 30;
     const nextEnd = addMinutes(cursor, est);
     if (isAfter(nextEnd, end)) continue;
 
@@ -205,22 +276,26 @@ function generateDraft({ dateISO, startTime, endTime, prefs }) {
 }
 
 function cryptoId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && crypto.randomUUID)
+    return crypto.randomUUID();
   return "id-" + Math.random().toString(36).slice(2, 9);
 }
 
 // ---------------- Component ----------------
 export default function CleanPlannerShell() {
   const { sabbathGuard, sabbathWindow } = React.useContext(SettingsContext);
-  const { selectedDateISO, tasks, setTasks } = React.useContext(PlanDraftContext);
+  const { selectedDateISO, tasks, setTasks } =
+    React.useContext(PlanDraftContext);
   const { recordMilestone } = useMilestoneState();
 
   const [windowStart, setWindowStart] = useState("09:00");
   const [windowEnd, setWindowEnd] = useState("12:00");
-  const [energy, setEnergy] = useState("medium");         // low | medium | high
+  const [energy, setEnergy] = useState("medium"); // low | medium | high
   const [residentsHome, setResidentsHome] = useState(true);
-  const [zones, setZones] = useState(new Set(["kitchen", "bathroom", "living"]));
-  const [goals, setGoals] = useState(["sanitation"]);     // sanitation | tidy | deep
+  const [zones, setZones] = useState(
+    new Set(["kitchen", "bathroom", "living"])
+  );
+  const [goals, setGoals] = useState(["sanitation"]); // sanitation | tidy | deep
   const [draft, setDraft] = useState([]);
   const [conflicts, setConflicts] = useState([]);
   const [showConflictModal, setShowConflictModal] = useState(false);
@@ -230,24 +305,34 @@ export default function CleanPlannerShell() {
   // Listen for shortages summary to surface helpful “Supplies” CTA
   useEffect(() => {
     const off = eventBus.on?.("supplies.shortages.update", (payload) => {
-      const n = Array.isArray(payload?.items) ? payload.items.filter((r) => r.domain === "cleaning" || r.domain === "hygiene").length : 0;
+      const n = Array.isArray(payload?.items)
+        ? payload.items.filter(
+            (r) => r.domain === "cleaning" || r.domain === "hygiene"
+          ).length
+        : 0;
       setShortageCount(n);
     });
     return () => off?.();
   }, []);
 
-  const prefs = useMemo(() => ({
-    energy,
-    residentsHome,
-    zones,
-    cleaningGoals: goals,
-  }), [energy, residentsHome, zones, goals]);
+  const prefs = useMemo(
+    () => ({
+      energy,
+      residentsHome,
+      zones,
+      cleaningGoals: goals,
+    }),
+    [energy, residentsHome, zones, goals]
+  );
 
   // Decide for me
   const handleDecide = useCallback(() => {
     const disabled = sabbathGuard && withinSabbath(new Date(), sabbathWindow);
     if (disabled) {
-      eventBus.emit("ui.toast", { variant: "warning", message: "Sabbath guard active: planning blocked." });
+      eventBus.emit("ui.toast", {
+        variant: "warning",
+        message: "Sabbath guard active: planning blocked.",
+      });
       return;
     }
     const draftPlan = generateDraft({
@@ -258,20 +343,44 @@ export default function CleanPlannerShell() {
     });
 
     // Detect conflicts vs. all existing tasks (any domain)
-    const conflictsFound = detectConflicts({ candidates: draftPlan, existing: tasks || [] });
+    const conflictsFound = detectConflicts({
+      candidates: draftPlan,
+      existing: tasks || [],
+    });
     setDraft(draftPlan);
     setConflicts(conflictsFound);
     setShowConflictModal(conflictsFound.length > 0);
 
-    recordMilestone?.({ key: "clean_decide_for_me", meta: { count: draftPlan.length, conflicts: conflictsFound.length } });
-    eventBus.emit("analytics.emit", { type: "decide.clean", payload: { count: draftPlan.length } });
-  }, [selectedDateISO, windowStart, windowEnd, prefs, tasks, sabbathGuard, sabbathWindow, recordMilestone]);
+    recordMilestone?.({
+      key: "clean_decide_for_me",
+      meta: { count: draftPlan.length, conflicts: conflictsFound.length },
+    });
+    eventBus.emit("analytics.emit", {
+      type: "decide.clean",
+      payload: { count: draftPlan.length },
+    });
+  }, [
+    selectedDateISO,
+    windowStart,
+    windowEnd,
+    prefs,
+    tasks,
+    sabbathGuard,
+    sabbathWindow,
+    recordMilestone,
+  ]);
 
   // Apply draft into plan (after conflicts resolved)
   const applyDraft = () => {
-    setTasks?.((prev) => ([...(prev || []), ...draft]));
-    eventBus.emit("ui.toast", { variant: "success", message: `Scheduled ${draft.length} cleaning task(s)` });
-    recordMilestone?.({ key: "clean_plan_applied", meta: { count: draft.length } });
+    setTasks?.((prev) => [...(prev || []), ...draft]);
+    eventBus.emit("ui.toast", {
+      variant: "success",
+      message: `Scheduled ${draft.length} cleaning task(s)`,
+    });
+    recordMilestone?.({
+      key: "clean_plan_applied",
+      meta: { count: draft.length },
+    });
     setDraft([]);
     setConflicts([]);
     setShowConflictModal(false);
@@ -279,16 +388,24 @@ export default function CleanPlannerShell() {
 
   // Quick conflict resolutions
   const shiftCandidate = (id, minutes = 10) => {
-    setDraft((prev) => prev.map((t) => {
-      if (t.id !== id) return t;
-      const iso = parseISO(t.start);
-      const moved = addMinutes(iso, minutes);
-      return { ...t, start: format(moved, "yyyy-MM-dd'T'HH:mm:ss") };
-    }));
+    setDraft((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        const iso = parseISO(t.start);
+        const moved = addMinutes(iso, minutes);
+        return { ...t, start: format(moved, "yyyy-MM-dd'T'HH:mm:ss") };
+      })
+    );
   };
 
   const shortenCandidate = (id, minutes = 5) => {
-    setDraft((prev) => prev.map((t) => (t.id === id ? { ...t, estMinutes: Math.max(10, (t.estMinutes || 30) - minutes) } : t)));
+    setDraft((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, estMinutes: Math.max(10, (t.estMinutes || 30) - minutes) }
+          : t
+      )
+    );
   };
 
   const dropCandidate = (id) => {
@@ -306,23 +423,39 @@ export default function CleanPlannerShell() {
   }, [draft, tasks]);
 
   // Consolidation suggestions (batching)
-  const consolidation = useMemo(() => (showConsolidation && draft.length
-    ? prepConsolidationEngine.consolidate?.(draft) || []
-    : []),
-  [showConsolidation, draft]);
+  const consolidation = useMemo(
+    () =>
+      showConsolidation && draft.length
+        ? prepConsolidationEngine.consolidate?.(draft) || []
+        : [],
+    [showConsolidation, draft]
+  );
 
   // ---------------- Render ----------------
   const dayHeader = pretty(selectedDateISO);
 
-  const zoneList = ["kitchen", "bathroom", "living", "bedrooms", "laundry", "entry", "office"];
+  const zoneList = [
+    "kitchen",
+    "bathroom",
+    "living",
+    "bedrooms",
+    "laundry",
+    "entry",
+    "office",
+  ];
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Cleaning Planner</h1>
-          <p className="text-gray-600">Build a realistic session plan, resolve conflicts, and batch work by zone.</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Cleaning Planner
+          </h1>
+          <p className="text-gray-600">
+            Build a realistic session plan, resolve conflicts, and batch work by
+            zone.
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -336,7 +469,8 @@ export default function CleanPlannerShell() {
               className="rounded-xl border px-3 py-2 text-sm bg-amber-50 border-amber-200 text-amber-900"
               title="We noticed cleaning/hygiene shortages"
             >
-              {shortageCount} supply shortage{shortageCount > 1 ? "s" : ""} → Review
+              {shortageCount} supply shortage{shortageCount > 1 ? "s" : ""} →
+              Review
             </button>
           ) : null}
 
@@ -366,7 +500,9 @@ export default function CleanPlannerShell() {
       <section className="mt-4 rounded-2xl border p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Time window</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Time window
+            </label>
             <div className="mt-1 flex items-center gap-2">
               <input
                 type="time"
@@ -385,7 +521,9 @@ export default function CleanPlannerShell() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Energy level</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Energy level
+            </label>
             <div className="mt-1 flex gap-2">
               {["low", "medium", "high"].map((lvl) => (
                 <button
@@ -394,7 +532,9 @@ export default function CleanPlannerShell() {
                   onClick={() => setEnergy(lvl)}
                   className={[
                     "rounded-full border px-3 py-1.5 text-sm capitalize",
-                    energy === lvl ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50",
+                    energy === lvl
+                      ? "bg-gray-900 text-white border-black"
+                      : "bg-white hover:bg-gray-50",
                   ].join(" ")}
                 >
                   {lvl}
@@ -404,19 +544,31 @@ export default function CleanPlannerShell() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Residents at home</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Residents at home
+            </label>
             <div className="mt-1 flex gap-2">
               <button
                 type="button"
                 onClick={() => setResidentsHome(true)}
-                className={["rounded-full border px-3 py-1.5 text-sm", residentsHome ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50"].join(" ")}
+                className={[
+                  "rounded-full border px-3 py-1.5 text-sm",
+                  residentsHome
+                    ? "bg-gray-900 text-white border-black"
+                    : "bg-white hover:bg-gray-50",
+                ].join(" ")}
               >
                 Yes
               </button>
               <button
                 type="button"
                 onClick={() => setResidentsHome(false)}
-                className={["rounded-full border px-3 py-1.5 text-sm", !residentsHome ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50"].join(" ")}
+                className={[
+                  "rounded-full border px-3 py-1.5 text-sm",
+                  !residentsHome
+                    ? "bg-gray-900 text-white border-black"
+                    : "bg-white hover:bg-gray-50",
+                ].join(" ")}
               >
                 No
               </button>
@@ -426,7 +578,9 @@ export default function CleanPlannerShell() {
 
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700">Target zones</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Target zones
+            </label>
             <div className="mt-1 flex flex-wrap gap-2">
               {zoneList.map((z) => {
                 const on = zones.has(z);
@@ -442,7 +596,12 @@ export default function CleanPlannerShell() {
                         return n;
                       })
                     }
-                    className={["rounded-full border px-3 py-1.5 text-sm capitalize", on ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50"].join(" ")}
+                    className={[
+                      "rounded-full border px-3 py-1.5 text-sm capitalize",
+                      on
+                        ? "bg-gray-900 text-white border-black"
+                        : "bg-white hover:bg-gray-50",
+                    ].join(" ")}
                   >
                     {z}
                   </button>
@@ -451,26 +610,37 @@ export default function CleanPlannerShell() {
             </div>
           </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Goals</label>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {["sanitation", "tidy", "deep"].map((g) => {
-                  const on = goals.includes(g);
-                  return (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() =>
-                        setGoals((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]))
-                      }
-                      className={["rounded-full border px-3 py-1.5 text-sm capitalize", on ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50"].join(" ")}
-                    >
-                      {g}
-                    </button>
-                  );
-                })}
-              </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Goals
+            </label>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {["sanitation", "tidy", "deep"].map((g) => {
+                const on = goals.includes(g);
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() =>
+                      setGoals((prev) =>
+                        prev.includes(g)
+                          ? prev.filter((x) => x !== g)
+                          : [...prev, g]
+                      )
+                    }
+                    className={[
+                      "rounded-full border px-3 py-1.5 text-sm capitalize",
+                      on
+                        ? "bg-gray-900 text-white border-black"
+                        : "bg-white hover:bg-gray-50",
+                    ].join(" ")}
+                  >
+                    {g}
+                  </button>
+                );
+              })}
             </div>
+          </div>
         </div>
       </section>
 
@@ -483,16 +653,23 @@ export default function CleanPlannerShell() {
                 {dayHeader} • Draft Cleaning Plan
               </h2>
               <div className="text-xs text-gray-500">
-                {draft.length ? `${draft.length} task${draft.length > 1 ? "s" : ""}` : "No draft yet"}
+                {draft.length
+                  ? `${draft.length} task${draft.length > 1 ? "s" : ""}`
+                  : "No draft yet"}
               </div>
             </div>
 
             <div className="mt-3">
               {draft.length ? (
-                <TaskPlanView dateISO={selectedDateISO} tasks={draft} readOnly />
+                <TaskPlanView
+                  dateISO={selectedDateISO}
+                  tasks={draft}
+                  readOnly
+                />
               ) : (
                 <div className="rounded-xl border border-dashed p-8 text-center text-gray-600">
-                  Click <strong>Decide for me</strong> to generate a draft plan for this window.
+                  Click <strong>Decide for me</strong> to generate a draft plan
+                  for this window.
                 </div>
               )}
             </div>
@@ -517,7 +694,13 @@ export default function CleanPlannerShell() {
                     ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                     : "bg-gray-900 text-white border-black hover:opacity-90",
                 ].join(" ")}
-                title={!draft.length ? "No draft" : conflicts.length ? "Resolve conflicts first" : "Apply to plan"}
+                title={
+                  !draft.length
+                    ? "No draft"
+                    : conflicts.length
+                    ? "Resolve conflicts first"
+                    : "Apply to plan"
+                }
               >
                 Apply to plan
               </button>
@@ -561,7 +744,8 @@ export default function CleanPlannerShell() {
                 }}
                 className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm text-left"
               >
-                Review cleaning supplies {shortageCount ? `(${shortageCount})` : ""}
+                Review cleaning supplies{" "}
+                {shortageCount ? `(${shortageCount})` : ""}
               </button>
               <button
                 type="button"
@@ -575,7 +759,9 @@ export default function CleanPlannerShell() {
               </button>
               <button
                 type="button"
-                onClick={() => eventBus.emit("ui.navigate", { panel: "TaskPlanView" })}
+                onClick={() =>
+                  eventBus.emit("ui.navigate", { panel: "TaskPlanView" })
+                }
                 className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm text-left"
               >
                 Open full Task Board
@@ -594,10 +780,16 @@ export default function CleanPlannerShell() {
           onShorten={(id, mins) => shortenCandidate(id, mins)}
           onDrop={(id) => dropCandidate(id)}
           onResolved={() => {
-            const still = detectConflicts({ candidates: draft, existing: tasks || [] });
+            const still = detectConflicts({
+              candidates: draft,
+              existing: tasks || [],
+            });
             if (still.length === 0) {
               setShowConflictModal(false);
-              eventBus.emit("ui.toast", { variant: "success", message: "All conflicts resolved" });
+              eventBus.emit("ui.toast", {
+                variant: "success",
+                message: "All conflicts resolved",
+              });
             } else {
               setConflicts(still);
             }
@@ -609,13 +801,32 @@ export default function CleanPlannerShell() {
 }
 
 // ---------------- Subcomponents ----------------
-function ConflictResolverModal({ conflicts, onClose, onShift, onShorten, onDrop, onResolved }) {
+function ConflictResolverModal({
+  conflicts,
+  onClose,
+  onShift,
+  onShorten,
+  onDrop,
+  onResolved,
+}) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center p-4" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl border" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl rounded-2xl bg-white shadow-xl border"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="border-b px-4 py-3 flex items-center justify-between">
           <h3 className="font-semibold">Resolve Conflicts</h3>
-          <button type="button" onClick={onClose} className="text-sm underline decoration-dotted hover:decoration-solid">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm underline decoration-dotted hover:decoration-solid"
+          >
             Close
           </button>
         </div>
@@ -626,14 +837,23 @@ function ConflictResolverModal({ conflicts, onClose, onShift, onShorten, onDrop,
           ) : (
             <ul className="space-y-3">
               {conflicts.map((c, idx) => (
-                <li key={`${c.candidate.id}-${idx}`} className="rounded-xl border p-3">
+                <li
+                  key={`${c.candidate.id}-${idx}`}
+                  className="rounded-xl border p-3"
+                >
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Draft: {c.candidate.title}</div>
+                    <div className="font-medium text-gray-900">
+                      Draft: {c.candidate.title}
+                    </div>
                     <div className="text-gray-600">
-                      {format(c.candidate.start, "h:mmaaa")} – {format(c.candidate.end, "h:mmaaa")}
+                      {format(c.candidate.start, "h:mmaaa")} –{" "}
+                      {format(c.candidate.end, "h:mmaaa")}
                     </div>
                     <div className="mt-1 text-xs text-gray-500">
-                      Conflicts with <span className="font-medium">{c.existing.title}</span> ({format(c.existing.start, "h:mmaaa")}–{format(c.existing.end, "h:mmaaa")})
+                      Conflicts with{" "}
+                      <span className="font-medium">{c.existing.title}</span> (
+                      {format(c.existing.start, "h:mmaaa")}–
+                      {format(c.existing.end, "h:mmaaa")})
                     </div>
                   </div>
 
@@ -686,7 +906,8 @@ function ConflictResolverModal({ conflicts, onClose, onShift, onShorten, onDrop,
         </div>
 
         <div className="border-t px-4 py-3 text-xs text-gray-500">
-          Tip: If many conflicts remain, widen the time window or reduce zones/goals.
+          Tip: If many conflicts remain, widen the time window or reduce
+          zones/goals.
         </div>
       </div>
     </div>

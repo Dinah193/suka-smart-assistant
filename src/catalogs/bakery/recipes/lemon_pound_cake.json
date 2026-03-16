@@ -1,0 +1,226 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.lemon_pound_cake",
+    "slug": "lemon_pound_cake",
+    "name": "Lemon Pound Cake (Dense Loaf Cake, Optional Glaze)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "bakery",
+      "pound-cake",
+      "lemon",
+      "loaf-cake",
+      "dense",
+      "tea-cake",
+      "make-ahead",
+      "freezer-friendly"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A classic lemon pound cake loaf: dense yet tender crumb with bright lemon flavor. Built for clean slicing and make-ahead storage. Includes commercial flour or fine fresh-milled flour guidance (choose one). Optional lemon glaze included."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "loaf_pan_9x5", "label": "9x5-inch loaf pan" },
+    { "id": "parchment_paper", "label": "Parchment paper (recommended)" },
+    { "id": "stand_mixer_or_hand_mixer", "label": "Stand mixer or hand mixer" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "microplane", "label": "Microplane/zester" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    {
+      "id": "thermometer_instant",
+      "label": "Instant-read thermometer (recommended)"
+    },
+    { "id": "cooling_rack", "label": "Cooling rack" }
+  ],
+  "ingredients": [
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter, room temperature",
+      "amount": { "value": 226, "unit": "g" },
+      "notes": "About 1 cup (2 sticks)."
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 1 1/4 cups."
+    },
+    {
+      "id": "lemon_zest",
+      "label": "Lemon zest",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "Zest of ~2 lemons (about 2 tbsp)."
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "vanilla_extract_optional",
+      "label": "Vanilla extract (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 3 tbsp."
+    },
+    {
+      "id": "sour_cream_or_yogurt",
+      "label": "Sour cream or plain Greek yogurt",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 1/2 cup. Adds tenderness and moisture."
+    },
+    {
+      "id": "milk",
+      "label": "Milk",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR the fresh-milled option): all-purpose flour",
+      "amount": { "value": 280, "unit": "g" },
+      "notes": "About 2 1/4 cups. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR the commercial option): fine-milled, sifted",
+      "amount": { "value": 280, "unit": "g" },
+      "notes": "Sift coarse bran for a smoother crumb. Fresh-milled absorbs more; batter may need +15–30 ml extra milk if thick."
+    },
+
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 1/2 tsp."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 3/4 tsp."
+    },
+
+    {
+      "id": "milk_adjustment_optional",
+      "label": "Extra milk (fresh-milled adjustment)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is overly thick; up to ~45 ml total.",
+      "optional": true
+    },
+
+    {
+      "id": "glaze_optional_note",
+      "label": "Optional lemon glaze",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "glaze_powdered_sugar_optional",
+      "label": "Powdered sugar (glaze)",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "About 1 1/2 cups.",
+      "optional": true
+    },
+    {
+      "id": "glaze_lemon_juice_optional",
+      "label": "Lemon juice (glaze)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "2–3 tbsp, to consistency.",
+      "optional": true
+    },
+    {
+      "id": "glaze_lemon_zest_optional",
+      "label": "Lemon zest (glaze, optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_oven_pan",
+      "title": "Prep oven and pan",
+      "body": "Heat oven to 325°F (165°C). Line a 9x5 loaf pan with parchment with overhang and lightly grease. Pound cake benefits from a slightly lower bake temperature for even cooking."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). If using fresh-milled flour, sift out coarse bran for a cleaner crumb."
+    },
+    {
+      "id": "step_03_zest_sugar",
+      "title": "Rub zest into sugar (flavor extraction)",
+      "body": "In the mixer bowl, combine sugar and lemon zest. Rub together with fingertips for 30 seconds until fragrant (this releases lemon oils into the sugar)."
+    },
+    {
+      "id": "step_04_cream_butter_sugar",
+      "title": "Cream butter and sugar",
+      "body": "Add butter to the lemon sugar. Beat 3–5 minutes until very light and fluffy, scraping bowl as needed. Proper creaming supports the dense-yet-tender structure."
+    },
+    {
+      "id": "step_05_add_eggs",
+      "title": "Add eggs gradually",
+      "body": "Add eggs one at a time, beating well after each and scraping bowl. If mixture looks slightly curdled, it will smooth out when flour is added."
+    },
+    {
+      "id": "step_06_add_liquids",
+      "title": "Add liquids",
+      "body": "Beat in lemon juice, sour cream/yogurt, milk, and vanilla (if using) until combined."
+    },
+    {
+      "id": "step_07_add_dry",
+      "title": "Add dry ingredients (minimal mixing)",
+      "body": "Whisk flour, baking powder, and salt together. Add to batter and mix on low just until combined. Do not overmix."
+    },
+    {
+      "id": "step_08_adjust_freshmilled",
+      "title": "Adjust for fresh-milled flour (if needed)",
+      "body": "If using fresh-milled flour and batter is very thick/stiff, add extra milk 15 ml at a time until batter falls from the spatula in thick ribbons. Rest 5 minutes to hydrate, then mix briefly on low."
+    },
+    {
+      "id": "step_09_bake",
+      "title": "Bake",
+      "body": "Scrape batter into pan and smooth top. Bake 60–80 minutes until deeply golden and a tester comes out clean or with a few moist crumbs. For accuracy, internal temp should be ~200–205°F (93–96°C). If top browns too quickly, tent with foil after ~45 minutes."
+    },
+    {
+      "id": "step_10_cool",
+      "title": "Cool",
+      "body": "Cool in pan 15 minutes, then lift out and cool fully on a rack. Pound cake slices best once fully cool."
+    },
+    {
+      "id": "step_11_optional_glaze",
+      "title": "Optional: glaze",
+      "body": "Whisk powdered sugar with lemon juice to a thick but pourable consistency. Stir in optional zest. Drizzle over cooled cake and let set 15–30 minutes before slicing."
+    }
+  ],
+  "notes": [
+    "Dense loaf logic: thorough creaming and gentle final mixing create a tight, tender crumb without toughness.",
+    "Flavor logic: rubbing zest into sugar boosts lemon aroma throughout the loaf.",
+    "Fresh-milled flour: sift coarse bran and expect higher absorption; small milk adjustment and a short rest can improve texture.",
+    "Make-ahead: lemon pound cake improves after resting overnight (flavor blooms)."
+  ],
+  "storage": {
+    "roomTemp": "Wrapped airtight: 3 days.",
+    "refrigerator": "Wrapped airtight: up to 6 days (bring to room temp for best texture).",
+    "freezer": "Freeze whole loaf or slices wrapped airtight up to 2 months."
+  }
+}

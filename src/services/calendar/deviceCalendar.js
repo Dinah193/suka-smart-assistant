@@ -33,18 +33,25 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
-    eventBus = { emit: () => {}, on: () => () => {}, once: () => () => {}, respond: () => () => {} };
+    eventBus = {
+      emit: () => {},
+      on: () => () => {},
+      once: () => () => {},
+      respond: () => () => {},
+    };
     Events = {};
   }
 }
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -96,8 +103,8 @@ try {
  */
 
 /* ------------------------------- In-Memory Cache --------------------------- */
-const _devices = new Map();     // id -> Device
-const _bookings = new Map();    // id -> Booking
+const _devices = new Map(); // id -> Device
+const _bookings = new Map(); // id -> Booking
 const _maintenance = new Map(); // id -> Maintenance
 let _initialized = false;
 
@@ -140,28 +147,45 @@ export async function init() {
   }
 
   // Glue: when a session is approved and declares equipment, attempt auto-book
-  eventBus.on(Events?.SESSION_APPROVED || "session/approved", async ({ data }) => {
-    try {
-      const eq = readEquipmentList(data);
-      if (!eq.length) return;
-      for (const need of eq) {
-        const { deviceId, kind, title, start, end, domain, meta } = need;
-        // If exact device known, try to book it; else find any device by kind
-        if (deviceId && _devices.has(deviceId)) {
-          await safeTry(() =>
-            upsertBooking({ deviceId, title: title || autoTitle(kind), start, end, domain, meta: { ...meta, sessionAuto: true } })
-          );
-        } else if (kind) {
-          const best = findFirstActiveDeviceByKind(kind);
-          if (best) {
+  eventBus.on(
+    Events?.SESSION_APPROVED || "session/approved",
+    async ({ data }) => {
+      try {
+        const eq = readEquipmentList(data);
+        if (!eq.length) return;
+        for (const need of eq) {
+          const { deviceId, kind, title, start, end, domain, meta } = need;
+          // If exact device known, try to book it; else find any device by kind
+          if (deviceId && _devices.has(deviceId)) {
             await safeTry(() =>
-              upsertBooking({ deviceId: best.id, title: title || autoTitle(kind), start, end, domain, meta: { ...meta, sessionAuto: true } })
+              upsertBooking({
+                deviceId,
+                title: title || autoTitle(kind),
+                start,
+                end,
+                domain,
+                meta: { ...meta, sessionAuto: true },
+              })
             );
+          } else if (kind) {
+            const best = findFirstActiveDeviceByKind(kind);
+            if (best) {
+              await safeTry(() =>
+                upsertBooking({
+                  deviceId: best.id,
+                  title: title || autoTitle(kind),
+                  start,
+                  end,
+                  domain,
+                  meta: { ...meta, sessionAuto: true },
+                })
+              );
+            }
           }
         }
-      }
-    } catch {}
-  });
+      } catch {}
+    }
+  );
 }
 
 /** Registry ----------------------------------------------------------------- */
@@ -174,7 +198,12 @@ export async function registerDevice(input) {
   await persistDevice(d);
 
   emit("device/registered", { device: d });
-  await exportToHubIfEnabled({ type: "device/registered", ts: now, source: "deviceCalendar", data: { device: d } });
+  await exportToHubIfEnabled({
+    type: "device/registered",
+    ts: now,
+    source: "deviceCalendar",
+    data: { device: d },
+  });
   return d;
 }
 
@@ -186,14 +215,21 @@ export async function updateDevice(input) {
 
   const now = isoNow();
   const merged = { ...prev, ...input, updatedAt: now };
-  if (typeof merged.quantity !== "number" || merged.quantity < 1) merged.quantity = 1;
-  if (typeof merged.cooldownMs !== "number" || merged.cooldownMs < 0) merged.cooldownMs = prev.cooldownMs || 0;
+  if (typeof merged.quantity !== "number" || merged.quantity < 1)
+    merged.quantity = 1;
+  if (typeof merged.cooldownMs !== "number" || merged.cooldownMs < 0)
+    merged.cooldownMs = prev.cooldownMs || 0;
 
   _devices.set(merged.id, merged);
   await persistDevice(merged);
 
   emit("device/updated", { device: merged, prev });
-  await exportToHubIfEnabled({ type: "device/updated", ts: now, source: "deviceCalendar", data: { device: merged } });
+  await exportToHubIfEnabled({
+    type: "device/updated",
+    ts: now,
+    source: "deviceCalendar",
+    data: { device: merged },
+  });
   return merged;
 }
 
@@ -204,32 +240,44 @@ export async function removeDevice(id) {
 
   // If there are future bookings, reject removal
   const now = Date.now();
-  const hasFuture = Array.from(_bookings.values()).some(b => b.deviceId === dev.id && toMs(b.end) >= now);
+  const hasFuture = Array.from(_bookings.values()).some(
+    (b) => b.deviceId === dev.id && toMs(b.end) >= now
+  );
   if (hasFuture) throw new Error("device: cannot remove with future bookings");
 
   _devices.delete(dev.id);
   await deleteDeviceFromStorage(dev.id);
   emit("device/removed", { id: dev.id, device: dev });
-  await exportToHubIfEnabled({ type: "device/removed", ts: isoNow(), source: "deviceCalendar", data: { id: dev.id } });
+  await exportToHubIfEnabled({
+    type: "device/removed",
+    ts: isoNow(),
+    source: "deviceCalendar",
+    data: { id: dev.id },
+  });
   return true;
 }
 
 export function listDevices({ activeOnly = true, kind, domain } = {}) {
   const arr = Array.from(_devices.values());
-  return arr.filter(d => {
-    if (activeOnly && d.active === false) return false;
-    if (kind && d.kind !== kind) return false;
-    if (domain && d.domain !== domain) return false;
-    return true;
-  }).sort((a,b)=>a.name.localeCompare(b.name));
+  return arr
+    .filter((d) => {
+      if (activeOnly && d.active === false) return false;
+      if (kind && d.kind !== kind) return false;
+      if (domain && d.domain !== domain) return false;
+      return true;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** Maintenance --------------------------------------------------------------- */
 export async function addMaintenance({ deviceId, start, end, reason }) {
   guardInit();
-  if (!deviceId || !_devices.has(String(deviceId))) throw new Error("maintenance: deviceId invalid");
-  if (!isISO(start) || !isISO(end)) throw new Error("maintenance: invalid start/end");
-  if (toMs(end) <= toMs(start)) throw new Error("maintenance: end must be after start");
+  if (!deviceId || !_devices.has(String(deviceId)))
+    throw new Error("maintenance: deviceId invalid");
+  if (!isISO(start) || !isISO(end))
+    throw new Error("maintenance: invalid start/end");
+  if (toMs(end) <= toMs(start))
+    throw new Error("maintenance: end must be after start");
 
   const m = {
     id: genId(),
@@ -242,7 +290,12 @@ export async function addMaintenance({ deviceId, start, end, reason }) {
   await persistMaintenance(m);
 
   emit("device/maintenance.added", { maintenance: m });
-  await exportToHubIfEnabled({ type: "device/maintenance.added", ts: isoNow(), source: "deviceCalendar", data: { maintenance: m } });
+  await exportToHubIfEnabled({
+    type: "device/maintenance.added",
+    ts: isoNow(),
+    source: "deviceCalendar",
+    data: { maintenance: m },
+  });
   return m;
 }
 
@@ -254,7 +307,12 @@ export async function removeMaintenance(id) {
   await deleteMaintenanceFromStorage(m.id);
 
   emit("device/maintenance.removed", { id: m.id, maintenance: m });
-  await exportToHubIfEnabled({ type: "device/maintenance.removed", ts: isoNow(), source: "deviceCalendar", data: { id: m.id } });
+  await exportToHubIfEnabled({
+    type: "device/maintenance.removed",
+    ts: isoNow(),
+    source: "deviceCalendar",
+    data: { id: m.id },
+  });
   return true;
 }
 
@@ -266,9 +324,12 @@ export async function upsertBooking(input) {
   // Normalize & validate
   const b = normalizeBooking(input, now);
   const dev = _devices.get(b.deviceId);
-  if (!dev || dev.active === false) throw new Error("booking: device not active/exists");
-  if (!isISO(b.start) || !isISO(b.end)) throw new Error("booking: invalid start/end");
-  if (toMs(b.end) <= toMs(b.start)) throw new Error("booking: end must be after start");
+  if (!dev || dev.active === false)
+    throw new Error("booking: device not active/exists");
+  if (!isISO(b.start) || !isISO(b.end))
+    throw new Error("booking: invalid start/end");
+  if (toMs(b.end) <= toMs(b.start))
+    throw new Error("booking: end must be after start");
 
   // Guardrails for “noisy” devices if configured
   if (appliesQuietSabbath(dev)) {
@@ -277,17 +338,35 @@ export async function upsertBooking(input) {
   }
 
   // Conflict / capacity check (with cooldowns)
-  const conflict = hasCapacityConflict(dev.id, b, dev.quantity || 1, dev.cooldownMs || 0);
+  const conflict = hasCapacityConflict(
+    dev.id,
+    b,
+    dev.quantity || 1,
+    dev.cooldownMs || 0
+  );
   if (conflict) {
-    emit("device/booking.conflict", { device: dev, booking: b, details: conflict });
+    emit("device/booking.conflict", {
+      device: dev,
+      booking: b,
+      details: conflict,
+    });
     throw new Error("booking: capacity/cooldown conflict");
   }
 
   _bookings.set(b.id, b);
   await persistBooking(b);
 
-  emit("device/booking.saved", { booking: b, device: dev, reason: input?.id ? "updated" : "created" });
-  await exportToHubIfEnabled({ type: "device/booking.saved", ts: now, source: "deviceCalendar", data: { booking: b } });
+  emit("device/booking.saved", {
+    booking: b,
+    device: dev,
+    reason: input?.id ? "updated" : "created",
+  });
+  await exportToHubIfEnabled({
+    type: "device/booking.saved",
+    ts: now,
+    source: "deviceCalendar",
+    data: { booking: b },
+  });
   return b;
 }
 
@@ -299,7 +378,12 @@ export async function releaseBooking(id) {
   await deleteBookingFromStorage(b.id);
 
   emit("device/booking.removed", { id: b.id, booking: b });
-  await exportToHubIfEnabled({ type: "device/booking.removed", ts: isoNow(), source: "deviceCalendar", data: { id: b.id, booking: b } });
+  await exportToHubIfEnabled({
+    type: "device/booking.removed",
+    ts: isoNow(),
+    source: "deviceCalendar",
+    data: { id: b.id, booking: b },
+  });
   return true;
 }
 
@@ -307,7 +391,11 @@ export function getBookingsForDevice(deviceId, { fromISO, toISO } = {}) {
   const s = fromISO ? toMs(fromISO) : -Infinity;
   const e = toISO ? toMs(toISO) : Infinity;
   return Array.from(_bookings.values())
-    .filter(b => b.deviceId === String(deviceId) && rangesOverlap(s, e, toMs(b.start), toMs(b.end)))
+    .filter(
+      (b) =>
+        b.deviceId === String(deviceId) &&
+        rangesOverlap(s, e, toMs(b.start), toMs(b.end))
+    )
     .sort((a, b) => toMs(a.start) - toMs(b.start));
 }
 
@@ -335,8 +423,10 @@ export async function suggestDeviceSlots(params) {
     applyQuiet = true,
   } = params;
 
-  if (!isISO(startISO) || !isISO(endISO)) throw new Error("availability: invalid window");
-  if (!Number.isFinite(durationMin) || durationMin <= 0) throw new Error("availability: durationMin required");
+  if (!isISO(startISO) || !isISO(endISO))
+    throw new Error("availability: invalid window");
+  if (!Number.isFinite(durationMin) || durationMin <= 0)
+    throw new Error("availability: durationMin required");
 
   const s = toMs(startISO);
   const e = toMs(endISO);
@@ -345,9 +435,13 @@ export async function suggestDeviceSlots(params) {
   // Build candidate device list
   let candidates = [];
   if (Array.isArray(deviceIds) && deviceIds.length) {
-    candidates = deviceIds.map(id => _devices.get(String(id))).filter(Boolean);
+    candidates = deviceIds
+      .map((id) => _devices.get(String(id)))
+      .filter(Boolean);
   } else if (Array.isArray(kinds) && kinds.length) {
-    candidates = listDevices({ activeOnly: true }).filter(d => kinds.includes(d.kind));
+    candidates = listDevices({ activeOnly: true }).filter((d) =>
+      kinds.includes(d.kind)
+    );
   } else {
     candidates = listDevices({ activeOnly: true });
   }
@@ -355,9 +449,20 @@ export async function suggestDeviceSlots(params) {
   // For each device, compute free windows honoring capacity/cooldown/maintenance
   const slots = [];
   for (const dev of candidates) {
-    const deviceSlots = computeDeviceSlots(dev, s, e, durMs, granularityMin, applyQuiet);
+    const deviceSlots = computeDeviceSlots(
+      dev,
+      s,
+      e,
+      durMs,
+      granularityMin,
+      applyQuiet
+    );
     for (const win of deviceSlots) {
-      slots.push({ deviceId: dev.id, start: new Date(win[0]).toISOString(), end: new Date(win[1]).toISOString() });
+      slots.push({
+        deviceId: dev.id,
+        start: new Date(win[0]).toISOString(),
+        end: new Date(win[1]).toISOString(),
+      });
     }
   }
 
@@ -378,7 +483,10 @@ export async function suggestDeviceSlots(params) {
 /* ---------------------------- Internal Helpers ----------------------------- */
 function emit(type, data, opts = {}) {
   if (!eventBus?.emit) return;
-  eventBus.emit(type, data, { source: opts.source || "deviceCalendar", sticky: !!opts.sticky });
+  eventBus.emit(type, data, {
+    source: opts.source || "deviceCalendar",
+    sticky: !!opts.sticky,
+  });
 }
 
 async function exportToHubIfEnabled(payload) {
@@ -400,8 +508,14 @@ function normalizeDevice(input, nowIso) {
     name: String(input?.name || "Device"),
     kind: normKind(input?.kind),
     domain: input?.domain || undefined,
-    quantity: Number.isFinite(input?.quantity) && input.quantity > 0 ? Math.floor(input.quantity) : 1,
-    cooldownMs: Number.isFinite(input?.cooldownMs) && input.cooldownMs >= 0 ? Math.floor(input.cooldownMs) : 0,
+    quantity:
+      Number.isFinite(input?.quantity) && input.quantity > 0
+        ? Math.floor(input.quantity)
+        : 1,
+    cooldownMs:
+      Number.isFinite(input?.cooldownMs) && input.cooldownMs >= 0
+        ? Math.floor(input.cooldownMs)
+        : 0,
     active: input?.active !== false,
     tags: Array.isArray(input?.tags) ? dedupStrings(input.tags) : undefined,
     meta: isPojo(input?.meta) ? { ...input.meta } : undefined,
@@ -485,7 +599,7 @@ function hasCapacityConflict(deviceId, newBooking, quantity, cooldownMs) {
   for (const [a, b] of intervals) {
     events.push([a, +1], [b, -1]);
   }
-  events.sort((A, B) => (A[0] - B[0]) || (A[1] - B[1])); // end before start at same ms
+  events.sort((A, B) => A[0] - B[0] || A[1] - B[1]); // end before start at same ms
 
   let active = 0;
   for (const [t, delta] of events) {
@@ -520,7 +634,7 @@ function computeDeviceSlots(dev, s, e, durMs, granMin, applyQuiet) {
   // Turn into a multiset of starts/ends to test capacity at candidate times
   const events = [];
   for (const [a, b] of busy) events.push([a, +1], [b, -1]);
-  events.sort((A, B) => (A[0] - B[0]) || (A[1] - B[1]));
+  events.sort((A, B) => A[0] - B[0] || A[1] - B[1]);
 
   // Helper to test if [x, x+dur] fits within capacity at all instants
   const fits = (x) => {
@@ -538,9 +652,21 @@ function computeDeviceSlots(dev, s, e, durMs, granMin, applyQuiet) {
     let j = i;
     // If applying quiet/sabbath, filter here
     if (applyQuiet && appliesQuietSabbath(dev)) {
-      const tempBooking = { start: new Date(x).toISOString(), end: new Date(y).toISOString(), domain: dev.domain };
-      try { enforceQuietHours(tempBooking); } catch { return false; }
-      try { enforceSabbathGuard(tempBooking); } catch { return false; }
+      const tempBooking = {
+        start: new Date(x).toISOString(),
+        end: new Date(y).toISOString(),
+        domain: dev.domain,
+      };
+      try {
+        enforceQuietHours(tempBooking);
+      } catch {
+        return false;
+      }
+      try {
+        enforceSabbathGuard(tempBooking);
+      } catch {
+        return false;
+      }
     }
     while (j < events.length && events[j][0] <= endCheck) {
       // segment [t, events[j][0]) must respect capacity
@@ -571,20 +697,22 @@ function readEquipmentList(data) {
     [];
   if (!Array.isArray(eq)) return [];
   // Normalize: { deviceId?, kind?, title?, start?, end?, domain?, meta? }
-  return eq.map(x => ({
-    deviceId: x?.deviceId ? String(x.deviceId) : undefined,
-    kind: x?.kind ? String(x.kind) : undefined,
-    title: x?.title,
-    start: isISO(x?.start) ? x.start : undefined,
-    end: isISO(x?.end) ? x.end : undefined,
-    domain: x?.domain,
-    meta: isPojo(x?.meta) ? x.meta : undefined,
-  })).filter(u => (u.deviceId || u.kind) && u.start && u.end);
+  return eq
+    .map((x) => ({
+      deviceId: x?.deviceId ? String(x.deviceId) : undefined,
+      kind: x?.kind ? String(x.kind) : undefined,
+      title: x?.title,
+      start: isISO(x?.start) ? x.start : undefined,
+      end: isISO(x?.end) ? x.end : undefined,
+      domain: x?.domain,
+      meta: isPojo(x?.meta) ? x.meta : undefined,
+    }))
+    .filter((u) => (u.deviceId || u.kind) && u.start && u.end);
 }
 
 function findFirstActiveDeviceByKind(kind) {
   const list = listDevices({ activeOnly: true });
-  return list.find(d => d.kind === normKind(kind));
+  return list.find((d) => d.kind === normKind(kind));
 }
 
 function autoTitle(kind) {
@@ -683,7 +811,8 @@ function dedupStrings(arr) {
   for (const s of arr) {
     const k = String(s).trim();
     if (!k || seen.has(k)) continue;
-    seen.add(k); out.push(k);
+    seen.add(k);
+    out.push(k);
   }
   return out;
 }
@@ -696,19 +825,24 @@ function ceilTo(ms, granMin) {
 }
 function normKind(k) {
   const x = String(k || "other").toLowerCase();
-  if (["appliance","tool","utensil","vehicle"].includes(x)) return x;
+  if (["appliance", "tool", "utensil", "vehicle"].includes(x)) return x;
   return "other";
 }
 function violatesWindow(startMs, endMs, q) {
-  const days = Array.isArray(q.days) && q.days.length ? q.days : [0,1,2,3,4,5,6];
-  for (let d = dayStart(startMs); d <= dayStart(endMs); d += 24*60*60*1000) {
+  const days =
+    Array.isArray(q.days) && q.days.length ? q.days : [0, 1, 2, 3, 4, 5, 6];
+  for (
+    let d = dayStart(startMs);
+    d <= dayStart(endMs);
+    d += 24 * 60 * 60 * 1000
+  ) {
     const dayIdx = new Date(d).getDay();
     if (!days.includes(dayIdx)) continue;
     const [sH, sM] = (q.start || "21:00").split(":").map(Number);
     const [eH, eM] = (q.end || "07:00").split(":").map(Number);
-    const qs = d + (sH*60 + sM) * 60_000;
-    let qe = d + (eH*60 + eM) * 60_000;
-    if (qe <= qs) qe += 24*60*60*1000;
+    const qs = d + (sH * 60 + sM) * 60_000;
+    let qe = d + (eH * 60 + eM) * 60_000;
+    if (qe <= qs) qe += 24 * 60 * 60 * 1000;
     if (rangesOverlap(startMs, endMs, qs, qe)) return true;
   }
   return false;
@@ -752,7 +886,11 @@ function coerceMaintenance(x) {
   };
 }
 async function safeTry(fn) {
-  try { return await fn(); } catch { return null; }
+  try {
+    return await fn();
+  } catch {
+    return null;
+  }
 }
 
 /* --------------------------------- Exports --------------------------------- */

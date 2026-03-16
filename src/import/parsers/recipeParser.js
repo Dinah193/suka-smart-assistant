@@ -42,7 +42,7 @@
 //   Hub export happens later (after normalization / domain engines).
 // -----------------------------------------------------------------------------
 
-import eventBus from "../../services/eventBus";
+import eventBus from "../../services/events/eventBus";
 import scraperService from "../../services/scraperService.js";
 
 // recognized recipe-ish types
@@ -100,7 +100,10 @@ function emitParserEvent(success, detail = {}) {
  */
 async function getHtmlFromRaw(raw) {
   // 1) clearly HTML string
-  if (typeof raw === "string" && /<\/html>|<head>|<body>|<script[\s>]/i.test(raw)) {
+  if (
+    typeof raw === "string" &&
+    /<\/html>|<head>|<body>|<script[\s>]/i.test(raw)
+  ) {
     return raw;
   }
 
@@ -110,7 +113,10 @@ async function getHtmlFromRaw(raw) {
       const html = await scraperService.fetchHtml(raw);
       return html;
     } catch (err) {
-      console.warn("[recipeParser] scraperService.fetchHtml failed:", err?.message || err);
+      console.warn(
+        "[recipeParser] scraperService.fetchHtml failed:",
+        err?.message || err
+      );
       return null;
     }
   }

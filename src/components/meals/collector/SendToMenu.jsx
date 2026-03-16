@@ -3,7 +3,13 @@
 // into Suka modules (Grocery List, Inventory Mapping, Recipe Library, Batch Session,
 // Meal Plan Draft, CSV export, Share, etc.), with alias-safe shims and automation hooks.
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /* ------------------------------ Alias-safe shims ------------------------------ */
 const softRequire = (id) => {
@@ -18,9 +24,14 @@ const alias = (p) => "@" + "/" + p; // avoid static resolution by bundlers
 
 /* ---------------------------------- Icons ----------------------------------- */
 let Icons = softRequire("lucide-react") || {};
-const mkIcon = (name) => (props) => (
-  <span aria-hidden className={props?.className || "inline-block w-4 h-4"} data-icon={name} />
-);
+const mkIcon = (name) => (props) =>
+  (
+    <span
+      aria-hidden
+      className={props?.className || "inline-block w-4 h-4"}
+      data-icon={name}
+    />
+  );
 const {
   Send = mkIcon("Send"),
   Share2 = mkIcon("Share2"),
@@ -40,7 +51,7 @@ const {
 /* ------------------------------- Integrations -------------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const mod = softRequire(alias("services/eventBus"));
+  const mod = softRequire(alias("services/events/eventBus"));
   if (mod?.eventBus) eventBus = mod.eventBus;
 } catch {}
 
@@ -51,10 +62,14 @@ try {
 } catch {}
 
 // Optional stores (graceful shims so preview/sandbox works)
-let useMealPlanningStore = () => ({ addToPlanDraft: () => {}, requestDraft: () => {} });
+let useMealPlanningStore = () => ({
+  addToPlanDraft: () => {},
+  requestDraft: () => {},
+});
 try {
   const mod = softRequire(alias("store/MealPlanningStore"));
-  if (mod?.useMealPlanningStore) useMealPlanningStore = mod.useMealPlanningStore;
+  if (mod?.useMealPlanningStore)
+    useMealPlanningStore = mod.useMealPlanningStore;
 } catch {}
 
 let useBatchQueue = () => ({ addRecipes: () => {}, startSession: () => {} });
@@ -74,7 +89,10 @@ const cap = (s = "") => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 /* ------------------------------ Actions builder ------------------------------ */
 export function useSendToActions({ mode = "ingredients", selected = [] }) {
-  const ids = useMemo(() => selected.map((x) => x.id || x.key || x.raw || x.name), [selected]);
+  const ids = useMemo(
+    () => selected.map((x) => x.id || x.key || x.raw || x.name),
+    [selected]
+  );
   const ingredients = mode === "ingredients" ? selected : [];
   const recipes = mode === "recipes" ? selected : [];
 
@@ -93,7 +111,10 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
           hint: "Normalize → group → add to aisles",
           icon: <Sparkles className="w-4 h-4" />,
           run: async () => {
-            const res = await automation.runTemplate("grocery.smart.normalize", { ingredients });
+            const res = await automation.runTemplate(
+              "grocery.smart.normalize",
+              { ingredients }
+            );
             eventBus.emit("grocery.smart.applied", { res });
             toast.success("Smart grocery updated");
           },
@@ -107,9 +128,13 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
           hint: "Add items to GroceryListPanel",
           icon: <ShoppingCart className="w-4 h-4" />,
           run: async () => {
-            eventBus.emit("grocery.items.add.requested", { items: ingredients });
+            eventBus.emit("grocery.items.add.requested", {
+              items: ingredients,
+            });
             if (automation?.runTemplate) {
-              await automation.runTemplate("grocery.from.ingredients", { ingredients });
+              await automation.runTemplate("grocery.from.ingredients", {
+                ingredients,
+              });
             }
             toast.success(`Added ${ingredients.length} to grocery list`);
           },
@@ -121,7 +146,9 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
           icon: <Boxes className="w-4 h-4" />,
           run: async () => {
             // Your IngredientMappingModal listens for this to open with rows:
-            eventBus.emit("meals.ingredients.mapping.open", { rows: ingredients });
+            eventBus.emit("meals.ingredients.mapping.open", {
+              rows: ingredients,
+            });
             toast.info("Opening Ingredient Mapping…");
           },
         },
@@ -132,9 +159,14 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
           icon: <CalendarDays className="w-4 h-4" />,
           run: async () => {
             addToPlanDraft?.(ingredients);
-            eventBus.emit("mealplan.draft.requested", { from: "collector", count: ingredients.length });
+            eventBus.emit("mealplan.draft.requested", {
+              from: "collector",
+              count: ingredients.length,
+            });
             if (automation?.runTemplate) {
-              await automation.runTemplate("mealplan.draft.generate", { ingredients });
+              await automation.runTemplate("mealplan.draft.generate", {
+                ingredients,
+              });
             }
             toast.success("Draft updated");
           },
@@ -164,7 +196,10 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
           icon: <ChefHat className="w-4 h-4" />,
           run: async () => {
             addRecipes?.(recipes);
-            eventBus.emit("batch.queue.recipes.added", { ids, count: recipes.length });
+            eventBus.emit("batch.queue.recipes.added", {
+              ids,
+              count: recipes.length,
+            });
             toast.success(`Queued ${recipes.length} recipes`);
           },
         },
@@ -175,9 +210,14 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
           icon: <CalendarDays className="w-4 h-4" />,
           run: async () => {
             requestDraft?.({ recipes });
-            eventBus.emit("mealplan.draft.requested", { from: "collector", recipes: ids });
+            eventBus.emit("mealplan.draft.requested", {
+              from: "collector",
+              recipes: ids,
+            });
             if (automation?.runTemplate) {
-              await automation.runTemplate("mealplan.draft.fromRecipes", { recipes });
+              await automation.runTemplate("mealplan.draft.fromRecipes", {
+                recipes,
+              });
             }
             toast.success("Meal plan draft requested");
           },
@@ -192,7 +232,9 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
         label: "Copy to Clipboard",
         icon: <ClipboardList className="w-4 h-4" />,
         run: async () => {
-          const text = selected.map((x) => x.raw || x.title || x.name).join("\n");
+          const text = selected
+            .map((x) => x.raw || x.title || x.name)
+            .join("\n");
           await navigator.clipboard?.writeText(text);
           toast.success("Copied");
         },
@@ -206,7 +248,12 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
             key: x.id || x.key || x.raw,
             name: x.name || x.raw || x.title,
           }));
-          const csv = ["key,name", ...rows.map((r) => `${JSON.stringify(r.key)},${JSON.stringify(r.name)}`)].join("\n");
+          const csv = [
+            "key,name",
+            ...rows.map(
+              (r) => `${JSON.stringify(r.key)},${JSON.stringify(r.name)}`
+            ),
+          ].join("\n");
           const blob = new Blob([csv], { type: "text/csv" });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
@@ -222,7 +269,9 @@ export function useSendToActions({ mode = "ingredients", selected = [] }) {
         label: "Share…",
         icon: <Share2 className="w-4 h-4" />,
         run: async () => {
-          const text = selected.map((x) => x.raw || x.title || x.name).join("\n");
+          const text = selected
+            .map((x) => x.raw || x.title || x.name)
+            .join("\n");
           if (navigator.share) {
             await navigator.share({ text, title: "Suka Collector" });
           } else {
@@ -256,7 +305,11 @@ export default function SendToMenu({
   const { actions } = useSendToActions({ mode, selected });
 
   const width =
-    size === "sm" ? "max-w-[280px]" : size === "lg" ? "max-w-[420px]" : "max-w-[360px]";
+    size === "sm"
+      ? "max-w-[280px]"
+      : size === "lg"
+      ? "max-w-[420px]"
+      : "max-w-[360px]";
 
   const show = () => setOpen(true);
   const hide = useCallback(() => {
@@ -312,11 +365,19 @@ export default function SendToMenu({
       </button>
 
       {open && (
-        <div className={`absolute ${align === "right" ? "right-0" : "left-0"} mt-2 z-[70] w-[92vw] ${width}`}>
+        <div
+          className={`absolute ${
+            align === "right" ? "right-0" : "left-0"
+          } mt-2 z-[70] w-[92vw] ${width}`}
+        >
           <div className="rounded-lg border bg-white shadow-xl overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 border-b bg-gray-50">
               <div className="text-sm font-medium">Choose destination</div>
-              <button className="p-1 rounded hover:bg-gray-100" onClick={hide} aria-label="Close">
+              <button
+                className="p-1 rounded hover:bg-gray-100"
+                onClick={hide}
+                aria-label="Close"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -338,17 +399,26 @@ export default function SendToMenu({
                 </li>
               ))}
               {actions.length === 0 && (
-                <li className="px-3 py-4 text-sm text-gray-500">No actions available for this selection.</li>
+                <li className="px-3 py-4 text-sm text-gray-500">
+                  No actions available for this selection.
+                </li>
               )}
             </ul>
 
             <div className="px-3 py-2 border-t text-[11px] text-gray-500 flex items-center justify-between">
               <span>
-                Tip: <kbd className="px-1.5 py-0.5 border rounded bg-white">Esc</kbd> closes ·{" "}
-                <kbd className="px-1.5 py-0.5 border rounded bg-white">Ctrl/⌘</kbd>{" "}
-                + <kbd className="px-1.5 py-0.5 border rounded bg-white">K</kbd> hides
+                Tip:{" "}
+                <kbd className="px-1.5 py-0.5 border rounded bg-white">Esc</kbd>{" "}
+                closes ·{" "}
+                <kbd className="px-1.5 py-0.5 border rounded bg-white">
+                  Ctrl/⌘
+                </kbd>{" "}
+                + <kbd className="px-1.5 py-0.5 border rounded bg-white">K</kbd>{" "}
+                hides
               </span>
-              <span className="hidden md:inline">Actions adapt to <em>{cap(mode)}</em> selection</span>
+              <span className="hidden md:inline">
+                Actions adapt to <em>{cap(mode)}</em> selection
+              </span>
             </div>
           </div>
         </div>

@@ -1,0 +1,410 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.tamales.rojo_pork",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Pork Tamales (Red Chile)",
+    "subtitle": "Traditional masa tamales with a red chile pork filling, steamed in corn husks",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.tamales",
+      "archetype.steam",
+      "archetype.batch"
+    ],
+    "servingStyles": ["handheld", "family_style"],
+    "plannerTags": [
+      "course.main",
+      "batch.friendly",
+      "freezer.friendly",
+      "event_food"
+    ]
+  },
+  "summary": "Classic pork tamales with a red chile filling and fluffy masa. This SSA baseline is written for deterministic planning: separate components (filling + masa + assembly + steam), batch scaling, and freezer-friendly storage.",
+  "yield": {
+    "servings": 10,
+    "servingSize": { "value": 2, "unit": "tamales" },
+    "notes": "Makes about 18–22 tamales depending on size and how thick you spread masa."
+  },
+  "time": {
+    "activeMins": 75,
+    "handsOffMins": 150,
+    "totalMins": 225
+  },
+  "difficulty": "advanced",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+  "tasteProfile": {
+    "savory": 4,
+    "spicy": 2,
+    "acidic": 1,
+    "rich": 3
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.stock_pot",
+      "equipment.steamer_basket",
+      "equipment.blender"
+    ],
+    "recommended": ["equipment.stand_mixer", "equipment.kitchen_scale"],
+    "optional": [
+      {
+        "id": "equipment.pressure_cooker",
+        "label": "Pressure Cooker / Instant Pot",
+        "notes": "Speeds up pork cooking (see variations)"
+      },
+      {
+        "id": "equipment.fine_strainer",
+        "label": "Fine Strainer",
+        "notes": "Optional for extra-smooth chile sauce"
+      }
+    ]
+  },
+  "dietFlags": ["diet.gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.corn_husks_dried",
+      "label": "Dried corn husks",
+      "role": "wrapper",
+      "amount": { "value": 25, "unit": "each" },
+      "notes": "Soak in hot water until pliable"
+    },
+
+    {
+      "id": "ingredient.pork_shoulder",
+      "label": "Pork shoulder (boneless)",
+      "role": "protein.filling",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "Cut into large chunks"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "large" },
+      "notes": "Half for pork cooking; half for sauce"
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "cloves" },
+      "notes": "Some for pork cooking; some for sauce"
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 3, "unit": "tsp" },
+      "notes": "Divide across filling + masa; adjust to taste"
+    },
+
+    {
+      "id": "ingredient.guajillo_chile",
+      "label": "Dried guajillo chiles",
+      "role": "chile.base",
+      "amount": { "value": 8, "unit": "each" },
+      "notes": "Stemmed and seeded"
+    },
+    {
+      "id": "ingredient.ancho_chile",
+      "label": "Dried ancho chiles",
+      "role": "chile.base",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Stemmed and seeded"
+    },
+    {
+      "id": "ingredient.chipotle_in_adobo",
+      "label": "Chipotle in adobo",
+      "role": "chile.boost",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional smoky heat"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.oregano_mexican",
+      "label": "Mexican oregano",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.vinegar_apple_cider",
+      "label": "Apple cider vinegar (or white vinegar)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true,
+      "notes": "Brightens sauce"
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "For blooming chile sauce"
+    },
+
+    {
+      "id": "ingredient.masa_harina",
+      "label": "Masa harina",
+      "role": "masa.base",
+      "amount": { "value": 4, "unit": "cups" },
+      "notes": "Fresh masa can be used; see variations"
+    },
+    {
+      "id": "ingredient.baking_powder",
+      "label": "Baking powder",
+      "role": "leavening",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Helps make tamales fluffier"
+    },
+    {
+      "id": "ingredient.lard",
+      "label": "Lard (or shortening)",
+      "role": "fat.masa",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "For classic flavor; see dairy/veg substitutions in variations"
+    },
+    {
+      "id": "ingredient.chicken_broth",
+      "label": "Warm broth/stock (chicken or pork)",
+      "role": "liquid.masa",
+      "amount": { "value": 3.5, "unit": "cups" },
+      "notes": "Use reserved pork broth if available"
+    },
+
+    {
+      "id": "ingredient.olives_green",
+      "label": "Green olives (optional, sliced)",
+      "role": "filling.optional",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Wrappers",
+      "items": ["ingredient.corn_husks_dried"]
+    },
+    {
+      "label": "Pork for Filling",
+      "items": [
+        "ingredient.pork_shoulder",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.bay_leaf",
+        "ingredient.salt"
+      ]
+    },
+    {
+      "label": "Red Chile Sauce (for Filling)",
+      "items": [
+        "ingredient.guajillo_chile",
+        "ingredient.ancho_chile",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.cumin_ground",
+        "ingredient.oregano_mexican",
+        "ingredient.vinegar_apple_cider",
+        "ingredient.oil_neutral",
+        "ingredient.chipotle_in_adobo"
+      ]
+    },
+    {
+      "label": "Masa Dough",
+      "items": [
+        "ingredient.masa_harina",
+        "ingredient.baking_powder",
+        "ingredient.lard",
+        "ingredient.chicken_broth",
+        "ingredient.salt"
+      ]
+    },
+    {
+      "label": "Optional Add-ins",
+      "items": ["ingredient.olives_green"]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.soak_husks",
+      "title": "Soak corn husks",
+      "activeMins": 5,
+      "handsOffMins": 30,
+      "body": "Place corn husks in a large bowl or pot and cover with very hot water. Weigh down with a plate so they stay submerged. Soak until pliable, at least 30 minutes.",
+      "timers": [{ "label": "Soak husks", "minutes": 30 }],
+      "checks": ["Husks bend without cracking"]
+    },
+    {
+      "id": "step.cook_pork",
+      "title": "Cook the pork until tender",
+      "activeMins": 10,
+      "handsOffMins": 90,
+      "body": "Add pork to a pot with half the onion (quartered), 3 cloves garlic, bay leaves (optional), and enough water to cover by 2 inches. Add ~1 tsp salt. Bring to a boil, then simmer gently until pork is very tender and shreds easily (75–100 minutes). Reserve broth.",
+      "timers": [{ "label": "Simmer pork", "minutes": 90 }],
+      "checks": ["Pork shreds easily", "Broth tastes pleasantly savory"]
+    },
+    {
+      "id": "step.toast_and_soak_chiles",
+      "title": "Toast and soak dried chiles",
+      "activeMins": 10,
+      "handsOffMins": 15,
+      "body": "Toast guajillo and ancho chiles briefly in a dry skillet until fragrant (10–20 seconds per side). Cover with hot water and soak 15 minutes until pliable.",
+      "timers": [
+        { "label": "Toast chiles", "minutes": 2 },
+        { "label": "Soak chiles", "minutes": 15 }
+      ]
+    },
+    {
+      "id": "step.blend_sauce",
+      "title": "Blend red chile sauce",
+      "activeMins": 10,
+      "body": "Drain chiles (reserve a little soaking liquid). Blend chiles with remaining onion, remaining garlic, cumin/oregano (optional), vinegar (optional), and 1–2 cups reserved pork broth (or soak liquid) until very smooth. Optional: strain for extra-smooth sauce."
+    },
+    {
+      "id": "step.bloom_sauce",
+      "title": "Bloom chile sauce",
+      "activeMins": 8,
+      "body": "Heat oil in a saucepan over medium heat. Carefully add chile sauce and cook 5–7 minutes, stirring, until darker and aromatic. Add chipotle in adobo if using. Season with salt to taste.",
+      "timers": [{ "label": "Bloom sauce", "minutes": 6 }],
+      "checks": ["Sauce tastes rich and not raw"]
+    },
+    {
+      "id": "step.shred_and_sauce_pork",
+      "title": "Shred pork and mix with sauce",
+      "activeMins": 12,
+      "body": "Remove pork from broth and shred. Combine shredded pork with enough red chile sauce to make a moist, spoonable filling. Add olives if using. Taste and adjust salt.",
+      "checks": ["Filling is moist (not dry)", "Flavor is balanced"]
+    },
+    {
+      "id": "step.mix_masa",
+      "title": "Mix masa dough",
+      "activeMins": 15,
+      "body": "In a large bowl, whisk masa harina, baking powder, and 1 tsp salt. In a separate bowl (or stand mixer), beat lard until fluffy. Add dry masa mixture and warm broth gradually, mixing until a soft, spreadable dough forms. It should feel like thick peanut butter—spreadable but not runny.",
+      "checks": [
+        "Masa spreads easily on a husk",
+        "Dough holds shape and doesn't crumble"
+      ]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble tamales",
+      "activeMins": 25,
+      "body": "Drain husks and pat dry. For each husk, spread about 2–3 tbsp masa into a rectangle (leave a border). Add 1–2 tbsp filling down the center. Fold sides in, then fold the bottom up. Tie with a strip of husk if desired. Repeat.",
+      "checks": ["Tamales are sealed enough to hold filling during steaming"]
+    },
+    {
+      "id": "step.steam",
+      "title": "Steam tamales",
+      "activeMins": 10,
+      "handsOffMins": 60,
+      "body": "Stand tamales upright in a steamer basket (open end up). Add water to the pot below the basket (do not submerge tamales). Cover and steam 60–75 minutes, adding water as needed so the pot doesn't dry out. Tamales are done when the husk peels away cleanly from the masa.",
+      "timers": [{ "label": "Steam tamales", "minutes": 65 }],
+      "checks": ["Husk peels cleanly from masa", "Masa is set (not wet/gummy)"]
+    },
+    {
+      "id": "step.rest_serve",
+      "title": "Rest and serve",
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "body": "Let tamales rest 10 minutes before serving for best texture. Serve with salsa roja or salsa verde.",
+      "timers": [{ "label": "Rest", "minutes": 10 }]
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.chicken",
+      "label": "Chicken Tamales",
+      "notes": "Swap pork for cooked shredded chicken thighs. Use chicken broth for the sauce and masa. Total cook time decreases."
+    },
+    {
+      "id": "variation.green_chile",
+      "label": "Tamales Verdes",
+      "notes": "Replace red chile sauce with salsa verde (tomatillo-based). Great with chicken or pork."
+    },
+    {
+      "id": "variation.veg",
+      "label": "Vegetarian Tamales",
+      "notes": "Use vegetable broth and a filling like roasted chile + cheese (or dairy-free cheese), beans, or sautéed mushrooms. Replace lard with vegetable shortening or whipped neutral oil-based fat."
+    },
+    {
+      "id": "variation.pressure_cooker_pork",
+      "label": "Pressure Cooker Pork",
+      "notes": "Cook pork with aromatics and water/broth for ~35 minutes high pressure + natural release. Proceed with shredding and sauce."
+    },
+    {
+      "id": "variation.fresh_masa",
+      "label": "Using Fresh Masa",
+      "notes": "If using fresh masa from a tortilleria, reduce added broth (start with ~1.5 cups) and adjust to spreadable consistency. Still whip fat for fluffiness."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Refrigerate cooked tamales for up to 5 days.",
+    "freezing": "Freeze cooked tamales (wrapped) for up to 3 months. Best practice: freeze on a tray first, then bag.",
+    "reheat": "Steam frozen tamales 15–25 minutes until hot. Microwave works in a pinch: wrap in a damp paper towel and heat in short bursts."
+  },
+  "safety": {
+    "notes": [
+      "Do not let the steamer pot run dry; keep water below basket level.",
+      "Cool cooked tamales within 2 hours before refrigerating or freezing."
+    ]
+  },
+  "pairings": {
+    "salsas": ["mexican.salsa_roja", "mexican.salsa_verde"],
+    "sides": ["mexican.rice_and_beans", "mexican.elote"],
+    "drinks": ["mexican.agua_fresca_jamaica", "mexican.horchata"]
+  },
+  "planner": {
+    "preferredFor": ["holiday", "event_food", "batch_cooking", "freezer_meals"],
+    "scalesWell": true,
+    "prepNotes": [
+      "Make filling and sauce a day ahead for faster assembly day.",
+      "Soak husks first; keep a damp towel over husks while assembling to prevent drying."
+    ],
+    "leftoversPlan": "Freeze in 2–4 tamale packs for grab-and-go meals; include a salsa cup."
+  },
+  "methods": [
+    "technique.simmer",
+    "technique.toast_chiles",
+    "technique.blend",
+    "technique.steam"
+  ],
+  "compat": {
+    "dishId": "mexican.tamales_rojo_pork",
+    "aliases": ["tamales", "pork tamales", "red chile tamales", "tamales rojos"]
+  },
+  "notes": [
+    "Canonical SSA tamales baseline emphasizes component separation (filling/sauce/masa/assembly/steam) for planning and batch workflows.",
+    "Masa consistency is the main success factor: it must spread easily and steam to a set, tender texture.",
+    "For faster assembly, set up an assembly line: husks → spread masa → add filling → fold → stand in steamer."
+  ]
+}

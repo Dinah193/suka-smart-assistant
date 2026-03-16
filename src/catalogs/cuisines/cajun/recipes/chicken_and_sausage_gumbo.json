@@ -1,0 +1,93 @@
+{
+  "id": "cajun_chicken_and_sausage_gumbo",
+  "name": "Chicken and Sausage Gumbo",
+  "servings": 8,
+  "ingredients": [
+    { "item": "neutral oil", "amount": 0.5, "unit": "cup" },
+    { "item": "all-purpose flour", "amount": 0.5, "unit": "cup" },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 4, "unit": "cloves", "prep": "minced" },
+
+    {
+      "item": "andouille sausage",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "sliced into rounds"
+    },
+    {
+      "item": "chicken thighs",
+      "amount": 2,
+      "unit": "lb",
+      "prep": "boneless/skinless, cut into bite-size pieces"
+    },
+
+    { "item": "chicken stock", "amount": 8, "unit": "cups" },
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+
+    { "item": "Cajun seasoning", "amount": 2, "unit": "tbsp" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "black pepper", "amount": 0.5, "unit": "tsp" },
+    { "item": "kosher salt", "amount": 1, "unit": "tsp" },
+
+    {
+      "item": "okra",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "sliced (fresh or frozen)"
+    },
+
+    { "item": "green onions", "amount": 4, "unit": "stalks", "prep": "sliced" },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped"
+    },
+
+    { "item": "cooked white rice", "amount": 8, "unit": "servings" },
+    { "item": "hot sauce", "amount": 1, "unit": "to_taste" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Make the roux: In a heavy pot over medium heat, whisk oil and flour together. Cook, whisking constantly, until the roux turns a deep chocolate-brown (do not walk away). If it smells burnt or shows black specks, start over."
+    },
+    {
+      "order": 2,
+      "text": "Add the holy trinity: Stir in onion, bell pepper, and celery. Cook until softened, then add garlic and cook 30–60 seconds more."
+    },
+    {
+      "order": 3,
+      "text": "Brown the sausage and chicken: Add andouille and cook until lightly browned. Add chicken and stir to coat in the roux mixture; cook until the chicken loses its raw color on the outside."
+    },
+    {
+      "order": 4,
+      "text": "Build the gumbo: Slowly add chicken stock while stirring to prevent lumps. Add bay leaves, Cajun seasoning, thyme, paprika, black pepper, and salt."
+    },
+    {
+      "order": 5,
+      "text": "Simmer: Bring to a gentle simmer. Cook uncovered until the gumbo thickens and the chicken is tender, stirring occasionally to keep the bottom from sticking."
+    },
+    {
+      "order": 6,
+      "text": "Add okra: Stir in okra and simmer until tender and the gumbo is glossy and cohesive."
+    },
+    {
+      "order": 7,
+      "text": "Finish: Remove bay leaves. Stir in green onions and parsley. Taste and adjust seasoning."
+    },
+    {
+      "order": 8,
+      "text": "Serve: Ladle gumbo over rice. Serve hot sauce on the side."
+    }
+  ]
+}

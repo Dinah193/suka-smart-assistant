@@ -1,0 +1,818 @@
+{
+  "$schema": "./raw_inputs.keys.schema.json",
+  "keysetId": "ssa.raw_inputs",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T03:33:33Z",
+  "notes": [
+    "Raw Input Keys define canonical identifiers for inbound data (manual forms, scans, receipts, imports, uploads) before normalization.",
+    "These keys are used to route raw payloads into SSA's ImportRouter/ImportIntelligence pipeline and to store raw snapshots in Dexie tables safely.",
+    "Keys are stable: do not rename ids; deprecate with replacementId when needed."
+  ],
+  "enums": {
+    "domains": [
+      "cooking",
+      "meal_planning",
+      "nutrition",
+      "inventory",
+      "storehouse",
+      "garden_planning",
+      "garden_care",
+      "garden_harvest",
+      "animals_acquisition",
+      "animals_care",
+      "animals_butchery",
+      "preservation",
+      "shopping",
+      "imports",
+      "calendar",
+      "household",
+      "knowledge"
+    ],
+    "sources": [
+      "manual_entry",
+      "form",
+      "scanner",
+      "receipt",
+      "email",
+      "api",
+      "file_upload",
+      "web_clip",
+      "voice",
+      "camera_ocr",
+      "csv_import",
+      "json_import"
+    ],
+    "sensitivity": [
+      "public",
+      "internal",
+      "private",
+      "sensitive"
+    ],
+    "payloadKinds": [
+      "object",
+      "array",
+      "string",
+      "binary",
+      "url",
+      "text"
+    ],
+    "lifecycle": [
+      "active",
+      "deprecated"
+    ]
+  },
+  "keys": [
+    {
+      "id": "raw.import.bundle",
+      "label": "Import Bundle",
+      "domain": "imports",
+      "source": "file_upload",
+      "payloadKind": "object",
+      "description": "A bundle containing one or more raw payloads with metadata (createdAt, source, etc.).",
+      "fields": {
+        "required": [
+          "bundleId",
+          "createdAt",
+          "items"
+        ],
+        "optional": [
+          "householdId",
+          "deviceId",
+          "notes",
+          "schemaVersion"
+        ]
+      },
+      "routing": {
+        "importType": "bundle",
+        "normalizer": "ImportBundleNormalizer",
+        "eventBusTopic": "imports.bundle.received",
+        "tables": [
+          "importBundles",
+          "importItems"
+        ],
+        "tags": [
+          "ingest",
+          "raw"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.import.item",
+      "label": "Import Item",
+      "domain": "imports",
+      "source": "api",
+      "payloadKind": "object",
+      "description": "Single raw import item with type discriminator.",
+      "fields": {
+        "required": [
+          "itemId",
+          "type",
+          "payload",
+          "capturedAt"
+        ],
+        "optional": [
+          "householdId",
+          "sourceMeta",
+          "confidence",
+          "notes"
+        ]
+      },
+      "routing": {
+        "importType": "item",
+        "normalizer": "ImportItemNormalizer",
+        "eventBusTopic": "imports.item.received",
+        "tables": [
+          "importItems"
+        ],
+        "tags": [
+          "ingest",
+          "raw"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.shopping.receipt",
+      "label": "Shopping Receipt",
+      "domain": "shopping",
+      "source": "receipt",
+      "payloadKind": "object",
+      "description": "Receipt data from manual entry, email parse, POS export, or scanner capture.",
+      "fields": {
+        "required": [
+          "merchant",
+          "purchasedAt",
+          "lineItems"
+        ],
+        "optional": [
+          "total",
+          "tax",
+          "tender",
+          "storeAddress",
+          "loyaltyIdMasked",
+          "receiptId",
+          "images"
+        ]
+      },
+      "routing": {
+        "importType": "receipt",
+        "normalizer": "ReceiptNormalizer",
+        "eventBusTopic": "shopping.receipt.ingested",
+        "tables": [
+          "receipts",
+          "priceObservations",
+          "inventoryCandidates"
+        ],
+        "tags": [
+          "shopping",
+          "prices",
+          "raw"
+        ]
+      },
+      "sensitivity": "sensitive",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": [
+        {
+          "merchant": "Store Name",
+          "purchasedAt": "2026-01-09T20:10:00Z",
+          "lineItems": [
+            {
+              "name": "Rice",
+              "qty": 1,
+              "unit": "bag",
+              "price": 6.99
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "raw.shopping.scan_item",
+      "label": "Scan Item",
+      "domain": "shopping",
+      "source": "scanner",
+      "payloadKind": "object",
+      "description": "Single scanned item observation (barcode, photo label, etc.).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "identifiers"
+        ],
+        "optional": [
+          "label",
+          "brand",
+          "size",
+          "unitPrice",
+          "store",
+          "images",
+          "nutritionPanel",
+          "ingredientsText"
+        ]
+      },
+      "routing": {
+        "importType": "scan_item",
+        "normalizer": "ScanItemNormalizer",
+        "eventBusTopic": "shopping.scan.item",
+        "tables": [
+          "scanCandidates",
+          "priceObservations"
+        ],
+        "tags": [
+          "scan",
+          "raw"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.shopping.coupon_clip",
+      "label": "Coupon Clip / Offer",
+      "domain": "shopping",
+      "source": "api",
+      "payloadKind": "object",
+      "description": "Coupon or store offer captured from ads or loyalty APIs.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "offerId",
+          "merchant",
+          "title"
+        ],
+        "optional": [
+          "details",
+          "startAt",
+          "endAt",
+          "requirements",
+          "stackable",
+          "barcode",
+          "promoCode",
+          "url"
+        ]
+      },
+      "routing": {
+        "importType": "coupon",
+        "normalizer": "CouponNormalizer",
+        "eventBusTopic": "shopping.coupon.ingested",
+        "tables": [
+          "coupons"
+        ],
+        "tags": [
+          "coupon",
+          "raw"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.cooking.recipe_text",
+      "label": "Recipe Text",
+      "domain": "cooking",
+      "source": "web_clip",
+      "payloadKind": "text",
+      "description": "Unstructured recipe text from web clip, note, or manual paste.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "text"
+        ],
+        "optional": [
+          "title",
+          "sourceUrl",
+          "author",
+          "images",
+          "servings"
+        ]
+      },
+      "routing": {
+        "importType": "recipe_text",
+        "normalizer": "RecipeTextParser",
+        "eventBusTopic": "cooking.recipe.raw_text",
+        "tables": [
+          "rawRecipes",
+          "recipeDrafts"
+        ],
+        "tags": [
+          "recipe",
+          "raw"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.cooking.recipe_structured",
+      "label": "Structured Recipe",
+      "domain": "cooking",
+      "source": "api",
+      "payloadKind": "object",
+      "description": "Structured recipe payload (ingredients, steps, yields).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "title",
+          "ingredients",
+          "steps"
+        ],
+        "optional": [
+          "servings",
+          "cuisineId",
+          "tags",
+          "nutrition",
+          "sourceUrl",
+          "notes"
+        ]
+      },
+      "routing": {
+        "importType": "recipe_structured",
+        "normalizer": "RecipeStructuredNormalizer",
+        "eventBusTopic": "cooking.recipe.ingested",
+        "tables": [
+          "recipes",
+          "recipeIngredients",
+          "recipeSteps"
+        ],
+        "tags": [
+          "recipe"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.cooking.session_log",
+      "label": "Cooking Session Log",
+      "domain": "cooking",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Raw log of a cooking session (steps, timers, outcomes).",
+      "fields": {
+        "required": [
+          "sessionId",
+          "startedAt",
+          "steps"
+        ],
+        "optional": [
+          "endedAt",
+          "notes",
+          "issues",
+          "rating",
+          "linkedPlanId"
+        ]
+      },
+      "routing": {
+        "importType": "session_log",
+        "normalizer": "SessionLogNormalizer",
+        "eventBusTopic": "session.completed",
+        "tables": [
+          "sessions",
+          "sessionSteps",
+          "taskLogs"
+        ],
+        "tags": [
+          "session",
+          "cooking"
+        ]
+      },
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.meal_plan.draft",
+      "label": "Meal Plan Draft",
+      "domain": "meal_planning",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Draft meal plan selection before normalization (templates, cuisines, constraints).",
+      "fields": {
+        "required": [
+          "createdAt",
+          "horizonDays",
+          "selections"
+        ],
+        "optional": [
+          "householdId",
+          "startDate",
+          "notes",
+          "constraints",
+          "targets"
+        ]
+      },
+      "routing": {
+        "importType": "meal_plan_draft",
+        "normalizer": "MealPlanDraftNormalizer",
+        "eventBusTopic": "mealplan.draft.created",
+        "tables": [
+          "mealPlanDrafts"
+        ],
+        "tags": [
+          "planner",
+          "draft"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.inventory.count",
+      "label": "Inventory Count Snapshot",
+      "domain": "inventory",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Raw inventory counts from manual entry, scan, or audit.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "items"
+        ],
+        "optional": [
+          "location",
+          "householdId",
+          "notes",
+          "confidence"
+        ]
+      },
+      "routing": {
+        "importType": "inventory_count",
+        "normalizer": "InventoryCountNormalizer",
+        "eventBusTopic": "inventory.count.ingested",
+        "tables": [
+          "inventorySnapshots",
+          "inventoryItems"
+        ],
+        "tags": [
+          "inventory",
+          "audit"
+        ]
+      },
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.storehouse.target_adjustment",
+      "label": "Storehouse Target Adjustment",
+      "domain": "storehouse",
+      "source": "manual_entry",
+      "payloadKind": "object",
+      "description": "Manual edits to provisioning targets (days, quantities) before recalculation.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "targets"
+        ],
+        "optional": [
+          "reason",
+          "householdId",
+          "notes"
+        ]
+      },
+      "routing": {
+        "importType": "storehouse_target_adjustment",
+        "normalizer": "StorehouseTargetAdjustmentNormalizer",
+        "eventBusTopic": "storehouse.targets.updated",
+        "tables": [
+          "storehouseTargets"
+        ],
+        "tags": [
+          "storehouse",
+          "targets"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.garden.plan",
+      "label": "Garden Plan",
+      "domain": "garden_planning",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Garden planning inputs: beds, crop selections, dates, constraints.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "beds",
+          "crops"
+        ],
+        "optional": [
+          "householdId",
+          "season",
+          "notes",
+          "location",
+          "soilProfile"
+        ]
+      },
+      "routing": {
+        "importType": "garden_plan",
+        "normalizer": "GardenPlanNormalizer",
+        "eventBusTopic": "garden.plan.ingested",
+        "tables": [
+          "gardenPlans",
+          "gardenBeds",
+          "gardenCrops"
+        ],
+        "tags": [
+          "garden",
+          "plan"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.garden.harvest_log",
+      "label": "Harvest Log",
+      "domain": "garden_harvest",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Harvest log entry (crop, quantity, preservation intent).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "harvests"
+        ],
+        "optional": [
+          "householdId",
+          "notes",
+          "images",
+          "movedToStorehouse"
+        ]
+      },
+      "routing": {
+        "importType": "harvest_log",
+        "normalizer": "HarvestLogNormalizer",
+        "eventBusTopic": "garden.harvest.logged",
+        "tables": [
+          "harvestLogs",
+          "inventoryCandidates"
+        ],
+        "tags": [
+          "garden",
+          "harvest"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.animals.profile",
+      "label": "Animal Profile",
+      "domain": "animals_care",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Animal profile entry (species, age, health notes).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "animalId",
+          "species"
+        ],
+        "optional": [
+          "breed",
+          "sex",
+          "birthDate",
+          "acquiredAt",
+          "notes",
+          "tags"
+        ]
+      },
+      "routing": {
+        "importType": "animal_profile",
+        "normalizer": "AnimalProfileNormalizer",
+        "eventBusTopic": "animals.profile.saved",
+        "tables": [
+          "animals",
+          "animalNotes"
+        ],
+        "tags": [
+          "animals"
+        ]
+      },
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.animals.butchery_log",
+      "label": "Butchery Log",
+      "domain": "animals_butchery",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Butchery log entry including yields and preservation decisions.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "animalId",
+          "yields"
+        ],
+        "optional": [
+          "cutSheet",
+          "weights",
+          "notes",
+          "photos",
+          "linkedInventoryCommitId"
+        ]
+      },
+      "routing": {
+        "importType": "butchery_log",
+        "normalizer": "ButcheryLogNormalizer",
+        "eventBusTopic": "animals.butchery.logged",
+        "tables": [
+          "butcheryLogs",
+          "inventoryCandidates",
+          "preservationBatches"
+        ],
+        "tags": [
+          "animals",
+          "butchery"
+        ]
+      },
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.preservation.batch",
+      "label": "Preservation Batch",
+      "domain": "preservation",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Preservation batch entry (method, inputs, outputs, safety notes).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "methodId",
+          "inputs",
+          "outputs"
+        ],
+        "optional": [
+          "equipmentUsed",
+          "processNotes",
+          "safetyNotes",
+          "labels",
+          "linkedSessionId"
+        ]
+      },
+      "routing": {
+        "importType": "preservation_batch",
+        "normalizer": "PreservationBatchNormalizer",
+        "eventBusTopic": "preservation.batch.logged",
+        "tables": [
+          "preservationBatches",
+          "inventoryItems"
+        ],
+        "tags": [
+          "preservation"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.nutrition.label",
+      "label": "Nutrition Facts Label",
+      "domain": "nutrition",
+      "source": "camera_ocr",
+      "payloadKind": "object",
+      "description": "Nutrition label capture from photo/scan, prior to normalization and mapping to food database.",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "textOrFields"
+        ],
+        "optional": [
+          "servingSize",
+          "servingsPerContainer",
+          "calories",
+          "macros",
+          "micros",
+          "ingredientsText",
+          "brand",
+          "productName"
+        ]
+      },
+      "routing": {
+        "importType": "nutrition_label",
+        "normalizer": "NutritionLabelNormalizer",
+        "eventBusTopic": "nutrition.label.ingested",
+        "tables": [
+          "nutritionLabels",
+          "foodCandidates"
+        ],
+        "tags": [
+          "nutrition",
+          "raw"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.calendar.hebrew_month_start",
+      "label": "Hebrew Month Start Computation Input",
+      "domain": "calendar",
+      "source": "form",
+      "payloadKind": "object",
+      "description": "Inputs used for Hebrew Month Start calculator (location, rule selection, astro sources).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "location",
+          "ruleId"
+        ],
+        "optional": [
+          "source",
+          "astroDataRef",
+          "notes"
+        ]
+      },
+      "routing": {
+        "importType": "hebrew_month_start",
+        "normalizer": "HebrewMonthStartInputNormalizer",
+        "eventBusTopic": "calendar.hebrew.month_start.inputs",
+        "tables": [
+          "calendarInputs"
+        ],
+        "tags": [
+          "calendar",
+          "astro"
+        ]
+      },
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    },
+    {
+      "id": "raw.knowledge.note",
+      "label": "Knowledge Note",
+      "domain": "knowledge",
+      "source": "manual_entry",
+      "payloadKind": "object",
+      "description": "Freeform note captured in SSA knowledge area (may later be tagged and linked).",
+      "fields": {
+        "required": [
+          "capturedAt",
+          "text"
+        ],
+        "optional": [
+          "title",
+          "tags",
+          "links",
+          "attachments",
+          "domainRefs"
+        ]
+      },
+      "routing": {
+        "importType": "knowledge_note",
+        "normalizer": "KnowledgeNoteNormalizer",
+        "eventBusTopic": "knowledge.note.saved",
+        "tables": [
+          "knowledgeNotes"
+        ],
+        "tags": [
+          "knowledge"
+        ]
+      },
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null,
+      "examples": []
+    }
+  ]
+}

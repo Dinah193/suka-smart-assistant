@@ -39,7 +39,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -65,7 +65,12 @@ const MEM_RESOURCES = new Map(); // resourceId -> Resource (last seen snapshot)
 const nowISO = () => new Date().toISOString();
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 const isStr = (v) => typeof v === "string";
-const asISO = (v) => (v instanceof Date ? v.toISOString() : (isStr(v) ? new Date(v).toISOString() : null));
+const asISO = (v) =>
+  v instanceof Date
+    ? v.toISOString()
+    : isStr(v)
+    ? new Date(v).toISOString()
+    : null;
 const toMs = (isoOrDate) => {
   if (isoOrDate instanceof Date) return isoOrDate.getTime();
   if (isStr(isoOrDate)) {
@@ -184,12 +189,19 @@ function defaultMatcher(requirement, resource) {
   }
 
   if (Array.isArray(requirement.skills) && requirement.skills.length) {
-    const skills = new Set(Array.isArray(resource.skills) ? resource.skills : []);
+    const skills = new Set(
+      Array.isArray(resource.skills) ? resource.skills : []
+    );
     for (const s of requirement.skills) if (!skills.has(s)) return false;
   }
 
-  if (Array.isArray(requirement.capabilities) && requirement.capabilities.length) {
-    const caps = new Set(Array.isArray(resource.capabilities) ? resource.capabilities : []);
+  if (
+    Array.isArray(requirement.capabilities) &&
+    requirement.capabilities.length
+  ) {
+    const caps = new Set(
+      Array.isArray(resource.capabilities) ? resource.capabilities : []
+    );
     for (const c of requirement.capabilities) if (!caps.has(c)) return false;
   }
 
@@ -201,7 +213,12 @@ function* requirementVariants(req) {
   yield req;
   const alts = Array.isArray(req?.alternatives) ? req.alternatives : [];
   for (const a of alts) {
-    yield { ...req, role: a.role ?? req.role, skills: a.skills ?? req.skills, capabilities: a.capabilities ?? req.capabilities };
+    yield {
+      ...req,
+      role: a.role ?? req.role,
+      skills: a.skills ?? req.skills,
+      capabilities: a.capabilities ?? req.capabilities,
+    };
   }
 }
 
@@ -229,7 +246,14 @@ function canReserve(resource, startMs, endMs, quantity, existingCalendar) {
   return load + quantity <= cap;
 }
 
-function applyReservation(resource, startISO, endISO, taskId, planId, quantity) {
+function applyReservation(
+  resource,
+  startISO,
+  endISO,
+  taskId,
+  planId,
+  quantity
+) {
   const entries = [];
   const cal = resource.calendar || (resource.calendar = []);
   for (let i = 0; i < quantity; i++) {
@@ -272,7 +296,11 @@ function allocateGreedy(tasks, resources, options = {}) {
     const tStartMs = toMs(task.startISO);
     const tEndMs = toMs(task.endISO);
     if (tStartMs == null || tEndMs == null || tEndMs <= tStartMs) {
-      conflicts.push({ type: "invalidWindow", taskId: task.id, detail: { start: task.startISO, end: task.endISO } });
+      conflicts.push({
+        type: "invalidWindow",
+        taskId: task.id,
+        detail: { start: task.startISO, end: task.endISO },
+      });
       continue;
     }
 
@@ -288,7 +316,9 @@ function allocateGreedy(tasks, resources, options = {}) {
       for (const variant of requirementVariants(req)) {
         if (remaining <= 0) break;
         // Candidate resources matching variant
-        const candidates = (resources || []).filter((r) => defaultMatcher(variant, r));
+        const candidates = (resources || []).filter((r) =>
+          defaultMatcher(variant, r)
+        );
         // Sort candidates: least-loaded first on the window, then higher capacity
         candidates.sort((r1, r2) => {
           const load1 = getConcurrentLoad(r1, tStartMs, tEndMs, r1.calendar);
@@ -305,7 +335,14 @@ function allocateGreedy(tasks, resources, options = {}) {
           if (!can) continue;
           const sISO = asISO(task.startISO);
           const eISO = asISO(task.endISO);
-          const ents = applyReservation(res, sISO, eISO, task.id, options.planId || "ad-hoc", 1);
+          const ents = applyReservation(
+            res,
+            sISO,
+            eISO,
+            task.id,
+            options.planId || "ad-hoc",
+            1
+          );
           matched = matched.concat(ents);
           remaining -= 1;
         }
@@ -326,7 +363,13 @@ function allocateGreedy(tasks, resources, options = {}) {
             const res = byId.get(m.resourceId);
             if (!res) continue;
             res.calendar = (res.calendar || []).filter(
-              (slot) => !(slot.planId === m.planId && slot.taskId === m.taskId && slot.startISO === m.startISO && slot.endISO === m.endISO)
+              (slot) =>
+                !(
+                  slot.planId === m.planId &&
+                  slot.taskId === m.taskId &&
+                  slot.startISO === m.startISO &&
+                  slot.endISO === m.endISO
+                )
             );
           }
           conflicts.push({
@@ -365,18 +408,28 @@ function allocateGreedy(tasks, resources, options = {}) {
  * @returns {Promise<{ reservations: Array, conflicts: Array }>}
  */
 async function reserveResources(tasks = [], resources = [], options = {}) {
-  const source = "engines/scheduling/planner/resourceAllocator.reserveResources";
+  const source =
+    "engines/scheduling/planner/resourceAllocator.reserveResources";
 
   // Defensive copies to avoid mutating caller arrays
-  const resCopy = Array.isArray(resources) ? resources.map((r) => ({ ...r, calendar: (r.calendar || []).slice() })) : [];
+  const resCopy = Array.isArray(resources)
+    ? resources.map((r) => ({ ...r, calendar: (r.calendar || []).slice() }))
+    : [];
   const tasksCopy = Array.isArray(tasks) ? tasks.map((t) => ({ ...t })) : [];
 
   // Validate inputs quickly
-  const badTasks = tasksCopy.filter((t) => !t || !t.id || !t.startISO || !t.endISO);
+  const badTasks = tasksCopy.filter(
+    (t) => !t || !t.id || !t.startISO || !t.endISO
+  );
   if (badTasks.length) {
-    const msg = `Invalid tasks: ${badTasks.map((t) => t?.id || "?").join(", ")}`;
+    const msg = `Invalid tasks: ${badTasks
+      .map((t) => t?.id || "?")
+      .join(", ")}`;
     emit("scheduling.resources.error", source, { message: msg });
-    return { reservations: [], conflicts: [{ type: "invalidTask", tasks: badTasks.map((t) => t?.id) }] };
+    return {
+      reservations: [],
+      conflicts: [{ type: "invalidTask", tasks: badTasks.map((t) => t?.id) }],
+    };
   }
 
   const strategy = (options.strategy || "greedy").toLowerCase();
@@ -390,8 +443,15 @@ async function reserveResources(tasks = [], resources = [], options = {}) {
         break;
     }
   } catch (err) {
-    emit("scheduling.resources.error", source, { message: String(err?.message || err) });
-    return { reservations: [], conflicts: [{ type: "internalError", message: String(err?.message || err) }] };
+    emit("scheduling.resources.error", source, {
+      message: String(err?.message || err),
+    });
+    return {
+      reservations: [],
+      conflicts: [
+        { type: "internalError", message: String(err?.message || err) },
+      ],
+    };
   }
 
   // Persist reservations set for this planId
@@ -428,8 +488,13 @@ async function reserveResources(tasks = [], resources = [], options = {}) {
  * Release reservations by planId, or by taskId subset within a plan.
  * This changes household data → emits & (optionally) exports.
  */
-async function releaseReservations({ planId, taskIds = null, export: doExport = false } = {}) {
-  const source = "engines/scheduling/planner/resourceAllocator.releaseReservations";
+async function releaseReservations({
+  planId,
+  taskIds = null,
+  export: doExport = false,
+} = {}) {
+  const source =
+    "engines/scheduling/planner/resourceAllocator.releaseReservations";
   if (!planId) {
     emit("scheduling.resources.error", source, { message: "Missing planId" });
     return { released: [], remaining: [] };
@@ -440,7 +505,11 @@ async function releaseReservations({ planId, taskIds = null, export: doExport = 
     return { released: [], remaining: [] };
   }
 
-  const { keep, drop } = partition(current, (r) => (Array.isArray(taskIds) && taskIds.length ? !taskIds.includes(r.taskId) : false));
+  const { keep, drop } = partition(current, (r) =>
+    Array.isArray(taskIds) && taskIds.length
+      ? !taskIds.includes(r.taskId)
+      : false
+  );
 
   await store.putReservations(planId, keep);
 

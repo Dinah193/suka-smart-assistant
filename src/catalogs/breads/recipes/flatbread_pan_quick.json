@@ -1,0 +1,308 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.flatbread_pan_quick",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Quick Stovetop Flatbread (Pan)",
+    "subtitle": "Fast • flexible • works across many cuisines • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "A fast, skillet-cooked flatbread with a simple dough. Includes yeast-free and yeast options, plus fresh-milled guidance and multi-cuisine seasoning paths."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "flatbread",
+    "subprofiles": [
+      "stovetop",
+      "pan",
+      "quick",
+      "yeast-optional",
+      "multi-cuisine"
+    ],
+    "mealArchetypes": [
+      "side bread",
+      "wrap",
+      "dipper",
+      "street food",
+      "meal component"
+    ],
+    "servingStyles": ["rounds", "triangles", "wrap"],
+    "plannerTags": [
+      "flatbread",
+      "stovetop",
+      "quick",
+      "wrap",
+      "dipper",
+      "versatile",
+      "freezer-friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "flatbread" },
+    "notes": "Makes 6 medium flatbreads (~7–8 inches). Scale up easily."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 15,
+    "totalMins": 40
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "skillet or griddle", "stove"],
+    "recommended": ["scale", "rolling pin", "bench scraper", "lid for skillet"],
+    "optional": [
+      "cast iron skillet",
+      "instant-read thermometer",
+      "brush for oil/butter"
+    ]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "milk"],
+
+  "signals": {
+    "quickBread": true,
+    "stovetop": true,
+    "wrapCapable": true,
+    "multiCuisine": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "none",
+    "saltiness": "moderate",
+    "richness": "low-to-medium",
+    "chew": "soft-chewy",
+    "notes": "Neutral base flatbread; can go buttery, garlicky, herbed, or spiced depending on cuisine."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "Flour (all-purpose / bread flour / fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "All-purpose is most flexible. Bread flour yields slightly chewier flatbreads."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 1 1/4 teaspoons."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder (for quick lift)",
+      "role": "leavening",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 2 teaspoons."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar (optional, helps browning)",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 1/2 teaspoons. Omit for very savory flatbreads."
+    },
+    {
+      "id": "oil_in_dough",
+      "label": "Neutral oil or olive oil (in dough)",
+      "role": "fat",
+      "amount": { "value": 24, "unit": "g" },
+      "notes": "About 2 tablespoons. Adds softness."
+    },
+    {
+      "id": "yogurt",
+      "label": "Plain yogurt (or sour cream) (optional, softens crumb)",
+      "role": "tenderizer",
+      "amount": { "value": 90, "unit": "g" },
+      "optional": true,
+      "notes": "If omitted, replace with equal weight of water."
+    },
+    {
+      "id": "water",
+      "label": "Warm water (or room temp if using yogurt)",
+      "role": "hydration",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Hold back 20–30g and add as needed. If omitting yogurt, total water becomes 270g."
+    },
+    {
+      "id": "yeast_optional",
+      "label": "Instant yeast (optional for extra puff + flavor)",
+      "role": "leavening",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 teaspoon. If used, allow a longer rest (30–60 minutes) for best flavor."
+    },
+    {
+      "id": "pan_oil",
+      "label": "Oil or butter for cooking (as needed)",
+      "role": "cook",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "Use a thin film; add more between breads if pan dries."
+    },
+    {
+      "id": "finish_butter",
+      "label": "Butter or garlic butter to brush (optional)",
+      "role": "finish",
+      "amount": { "value": 14, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Mix dry ingredients",
+      "instructions": [
+        "In a bowl, whisk flour, salt, baking powder, and sugar (if using).",
+        "If using optional yeast, whisk it in now."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_02",
+      "title": "Add wet ingredients and form dough",
+      "instructions": [
+        "Add oil, yogurt (if using), and most of the water (hold back ~20–30g).",
+        "Stir until shaggy, then knead briefly (1–2 minutes) in the bowl or on the counter just until smooth.",
+        "Add remaining water only if dough is dry and cracking. Dough should be soft and slightly tacky, not sticky."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_03",
+      "title": "Rest dough",
+      "instructions": [
+        "Cover dough and rest 10–15 minutes (quick version) to relax gluten for easier rolling.",
+        "If you used yeast, rest 30–60 minutes for better puff and flavor (still works at 15 minutes in a pinch)."
+      ],
+      "handsOffMins": 15,
+      "timers": [
+        { "label": "Quick rest", "mins": 15 },
+        { "label": "Yeast rest (optional)", "mins": 45 }
+      ]
+    },
+    {
+      "id": "step_04",
+      "title": "Divide and shape",
+      "instructions": [
+        "Divide dough into 6 equal pieces (~110g each).",
+        "Round into balls; cover pieces not being rolled.",
+        "On a lightly floured surface, roll each ball into a thin round (about 1/8 inch / 3 mm).",
+        "For softer, thicker flatbreads, roll slightly thicker (3/16 inch / 4–5 mm)."
+      ],
+      "activeMins": 10
+    },
+    {
+      "id": "step_05",
+      "title": "Cook in a hot skillet",
+      "instructions": [
+        "Heat a skillet/griddle over medium-high until hot. Lightly oil the surface.",
+        "Cook one flatbread 60–90 seconds until bubbles form and underside has brown spots.",
+        "Flip and cook 45–75 seconds more. Adjust heat so it browns without burning.",
+        "Optional: cover the skillet briefly after flipping to trap steam and encourage puffing."
+      ],
+      "handsOffMins": 10,
+      "timers": [
+        { "label": "Side 1", "seconds": 75 },
+        { "label": "Side 2", "seconds": 60 }
+      ]
+    },
+    {
+      "id": "step_06",
+      "title": "Keep warm + finish",
+      "instructions": [
+        "Stack cooked flatbreads in a towel to keep soft and warm.",
+        "Optional: brush with butter or garlic butter while hot.",
+        "Serve as wraps, dippers, or alongside stews, curries, kebabs, or hummus."
+      ],
+      "activeMins": 2
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour absorbs more water and can be less extensible. A short rest (or blend) improves roll-out and tenderness.",
+    "guidelines": [
+      "Best everyday texture: use 70% fresh milled flour + 30% all-purpose flour for softness and easy rolling.",
+      "If using 100% fresh milled (unsifted), expect a slightly denser bread; increase rest time to 20–30 minutes and add water as needed.",
+      "Fresh milled flour often needs +10–30g extra water depending on grind and age.",
+      "If dough keeps shrinking when rolling, rest another 10 minutes and roll again."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 30,
+      "rangeAddBackG": [0, 30]
+    }
+  },
+
+  "variations": [
+    {
+      "name": "Simple water-only flatbread (no yogurt)",
+      "change": "Omit yogurt and increase water to 270g total.",
+      "notes": "Still soft; yogurt version is slightly more tender."
+    },
+    {
+      "name": "Naan-style (softer, slightly thicker)",
+      "change": "Roll slightly thicker (4–5 mm). Cook on medium heat a bit longer; brush with butter after cooking.",
+      "notes": "Great with curries and stews."
+    },
+    {
+      "name": "Tortilla-style (more pliable, less puffy)",
+      "change": "Omit baking powder; increase oil to 36g; roll thinner. Cook over medium heat for even browning.",
+      "notes": "For wraps and tacos."
+    },
+    {
+      "name": "Middle Eastern za’atar flatbread",
+      "change": "After rolling, brush lightly with oil and sprinkle za’atar + sesame; cook as directed.",
+      "notes": "Excellent with hummus or labneh."
+    },
+    {
+      "name": "Garlic herb flatbread",
+      "change": "Add 2–3g garlic powder + 2g dried oregano (or mixed herbs) to dry ingredients; brush with garlic butter after cooking.",
+      "notes": "Pairs with Italian and Mediterranean meals."
+    },
+    {
+      "name": "Spiced flatbread (West African / Caribbean vibe)",
+      "change": "Add 2g ground ginger + 1g allspice or grains of paradise (if available) + 1–2g chili powder; finish with a little butter and salt.",
+      "notes": "Great alongside stews and grilled meats."
+    }
+  ],
+
+  "storage": {
+    "counter": "Best same day. Keep wrapped to prevent drying. Up to 1 day airtight at room temp.",
+    "fridge": "Up to 4 days airtight. Rewarm briefly in a dry skillet to restore softness.",
+    "freezer": "Freeze stacked with parchment between pieces up to 2 months. Rewarm from frozen in a skillet or microwave briefly."
+  },
+
+  "notes": [
+    "Hot pan + quick cook = best texture. If cooking too slowly, breads dry out; if too hot, they burn before cooking through.",
+    "Keep dough covered between rolls to prevent skinning and cracking.",
+    "For puffier breads: roll slightly thicker and cover the skillet briefly after flipping."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/cornbread_skillet",
+      "breads/recipes/buttermilk_biscuits"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Quick stovetop flatbread designed to be cuisine-agnostic and adaptable. Supports yogurt/no-yogurt and yeast/no-yeast paths."
+  }
+}

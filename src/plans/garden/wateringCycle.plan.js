@@ -27,29 +27,60 @@
 
 (function () {
   /* ------------------------------ Safe Imports ------------------------------ */
-  var eventBus = { on: function(){}, off: function(){}, emit: function(){} };
+  var eventBus = {
+    on: function () {},
+    off: function () {},
+    emit: function () {},
+  };
   try {
-    var eb = require("@/services/eventBus");
+    var eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
-  var inventoryGuard = { ensureOnHand: function(){ return { ok:true, missing:[] }; } };
-  try { inventoryGuard = require("@/services/session/guards/inventoryGuard"); } catch (_e) {}
+  var inventoryGuard = {
+    ensureOnHand: function () {
+      return { ok: true, missing: [] };
+    },
+  };
+  try {
+    inventoryGuard = require("@/services/session/guards/inventoryGuard");
+  } catch (_e) {}
 
-  var offsetParser = { parse: function (s){ return { ms:0 }; } };
-  try { offsetParser = require("@/services/session/utils/offsetParser"); } catch (_e) {}
+  var offsetParser = {
+    parse: function (s) {
+      return { ms: 0 };
+    },
+  };
+  try {
+    offsetParser = require("@/services/session/utils/offsetParser");
+  } catch (_e) {}
 
-  var pausePolicies = { SAFETY_WINDOW_MINUTES: 30, canRunNow: function(){ return true; } };
-  try { pausePolicies = require("@/services/session/policies/pausePolicies"); } catch (_e) {}
+  var pausePolicies = {
+    SAFETY_WINDOW_MINUTES: 30,
+    canRunNow: function () {
+      return true;
+    },
+  };
+  try {
+    pausePolicies = require("@/services/session/policies/pausePolicies");
+  } catch (_e) {}
 
   // Optional central templates library — if present, we’ll defer to it.
   var GardenPlanTemplates = null;
-  try { GardenPlanTemplates = require("@/libraries/GardenPlanTemplates"); } catch (_e) {}
+  try {
+    GardenPlanTemplates = require("@/libraries/GardenPlanTemplates");
+  } catch (_e) {}
 
   /* ------------------------------ ID Helpers -------------------------------- */
-  var rnd = function () { return Math.random().toString(36).slice(2, 8); };
+  var rnd = function () {
+    return Math.random().toString(36).slice(2, 8);
+  };
   var stableId = function (base, householdId) {
-    return ("gardenplan:" + base + (householdId ? (":" + householdId) : "")).toLowerCase();
+    return (
+      "gardenplan:" +
+      base +
+      (householdId ? ":" + householdId : "")
+    ).toLowerCase();
   };
 
   /* ------------------------ Favorite/Save Integration ------------------------ */
@@ -62,8 +93,8 @@
       domain: "garden",
       plan,
       options: options || {},
-      favoriteKey: plan.meta.defaultFavoriteKey || ("garden:" + plan.slug),
-      timestamp: Date.now()
+      favoriteKey: plan.meta.defaultFavoriteKey || "garden:" + plan.slug,
+      timestamp: Date.now(),
     };
     eventBus.emit("garden.plan.favorite.requested", payload);
     return payload;
@@ -72,12 +103,20 @@
   /* ------------------------------ Supplies/SKUs ------------------------------ */
   // Domain-aware consumables & spares to pre-check via inventoryGuard.
   var SUPPLIES = {
-    "irrigation.filter.inline.3/4in": { label: "Inline Filter 3/4\"", unit: "ea", min: 1 },
-    "irrigation.emitter.2gph":        { label: "Drip Emitters 2 GPH",  unit: "ea", min: 12 },
-    "hose.gasket.standard":           { label: "Hose Gaskets",         unit: "ea", min: 6 },
-    "battery.aa":                     { label: "AA Batteries (Timer)", unit: "ea", min: 2 },
-    "teflon.tape":                    { label: "PTFE Thread Seal Tape",unit: "roll", min: 1 },
-    "mulch.chips.cuft":               { label: "Mulch (cubic ft)",     unit: "cuft", min: 2 }
+    "irrigation.filter.inline.3/4in": {
+      label: 'Inline Filter 3/4"',
+      unit: "ea",
+      min: 1,
+    },
+    "irrigation.emitter.2gph": {
+      label: "Drip Emitters 2 GPH",
+      unit: "ea",
+      min: 12,
+    },
+    "hose.gasket.standard": { label: "Hose Gaskets", unit: "ea", min: 6 },
+    "battery.aa": { label: "AA Batteries (Timer)", unit: "ea", min: 2 },
+    "teflon.tape": { label: "PTFE Thread Seal Tape", unit: "roll", min: 1 },
+    "mulch.chips.cuft": { label: "Mulch (cubic ft)", unit: "cuft", min: 2 },
   };
 
   /* ------------------------------ Templates --------------------------------- */
@@ -88,13 +127,32 @@
   var INFILE_TEMPLATES = {
     "timed-drip": function timedDripTemplate(opts) {
       var householdId = opts.householdId || "household";
-      var zones = (opts.zones && opts.zones.length ? opts.zones : [
-        { id: "front-beds",  label: "Front Beds",  minutes: 20, start: "06:00" },
-        { id: "kitchen-herb",label: "Kitchen Herb",minutes: 12, start: "06:25" },
-        { id: "rear-rows",   label: "Rear Vegetable Rows", minutes: 25, start: "06:40" }
-      ]);
+      var zones =
+        opts.zones && opts.zones.length
+          ? opts.zones
+          : [
+              {
+                id: "front-beds",
+                label: "Front Beds",
+                minutes: 20,
+                start: "06:00",
+              },
+              {
+                id: "kitchen-herb",
+                label: "Kitchen Herb",
+                minutes: 12,
+                start: "06:25",
+              },
+              {
+                id: "rear-rows",
+                label: "Rear Vegetable Rows",
+                minutes: 25,
+                start: "06:40",
+              },
+            ];
 
-      var recurrence = opts.recurrence || "RRULE:FREQ=DAILY;BYHOUR=6;BYMINUTE=0;BYSECOND=0";
+      var recurrence =
+        opts.recurrence || "RRULE:FREQ=DAILY;BYHOUR=6;BYMINUTE=0;BYSECOND=0";
       var slug = "wateringCycle:timed-drip";
       var planId = stableId(slug, householdId);
 
@@ -103,27 +161,32 @@
         return {
           id: "zone-" + z.id,
           title: "Water " + z.label,
-          description: "Run drip for " + z.minutes + " min. Ensure emitters are not clogged.",
+          description:
+            "Run drip for " +
+            z.minutes +
+            " min. Ensure emitters are not clogged.",
           kind: "water",
           appliance: "irrigation",
           zone: z.id,
-          startOffset: offsetParser.parse("+" + (i === 0 ? "0m" : (zones[i-1].minutes + 5) + "m")).ms, // 5m buffer
-          durationMs: (z.minutes * 60 * 1000),
+          startOffset: offsetParser.parse(
+            "+" + (i === 0 ? "0m" : zones[i - 1].minutes + 5 + "m")
+          ).ms, // 5m buffer
+          durationMs: z.minutes * 60 * 1000,
           parallelGroup: null,
           guards: {
             withhold: {
               // Weather-aware withhold (handled by pausePolicies/scheduleHelpers)
               // Examples: freeze, heavy rain forecast, drought restrictions windows.
               reason: "weather|withhold",
-              policy: "auto" // let pausePolicies decide
-            }
-          }
+              policy: "auto", // let pausePolicies decide
+            },
+          },
         };
       });
 
       return {
-        "$id": planId,
-        "$schema": "urn:suka:contracts:gardenplan",
+        $id: planId,
+        $schema: "urn:suka:contracts:gardenplan",
         type: "wateringCycle",
         slug: slug,
         meta: {
@@ -136,18 +199,18 @@
           exportable: true, // enables Save to Device / Cloud in the SavePlan modal
           icon: "sprout",
           tags: ["watering", "drip", "zones", "morning", "automation-ready"],
-          createdAt: Date.now()
+          createdAt: Date.now(),
         },
         params: {
           droughtMode: !!opts.droughtMode,
           weatherStationId: opts.weatherStationId || null,
           soilMoistureSensorIds: opts.soilMoistureSensorIds || [],
-          zones: zones
+          zones: zones,
         },
         inventory: {
           required: Object.keys(SUPPLIES).map(function (sku) {
             return { sku: sku, ...SUPPLIES[sku] };
-          })
+          }),
         },
         schedule: {
           recurrence: recurrence,
@@ -155,28 +218,52 @@
           calendar: {
             write: true,
             title: "Garden — Watering (Timed Drip)",
-            reminders: [{ minutesBefore: 5, method: "popup" }]
-          }
+            reminders: [{ minutesBefore: 5, method: "popup" }],
+          },
         },
         steps: steps,
         nudgeRules: [
-          { kind: "precheck", message: "Quick emitter check: look for geysers or clogs." },
-          { kind: "post", message: "Mulch exposed soil to reduce evaporation." }
+          {
+            kind: "precheck",
+            message: "Quick emitter check: look for geysers or clogs.",
+          },
+          {
+            kind: "post",
+            message: "Mulch exposed soil to reduce evaporation.",
+          },
         ],
         emitOnLoad: [
-          { event: "prep.tasks.requested", payload: { domain: "garden", planId: planId } }
-        ]
+          {
+            event: "prep.tasks.requested",
+            payload: { domain: "garden", planId: planId },
+          },
+        ],
       };
     },
 
     "deep-soak": function deepSoakTemplate(opts) {
       var householdId = opts.householdId || "household";
-      var zones = (opts.zones && opts.zones.length ? opts.zones : [
-        { id: "perennial-beds", label: "Perennial Beds", minutes: 45, start: "19:00" },
-        { id: "raised-beds",    label: "Raised Beds",    minutes: 35, start: "19:50" }
-      ]);
+      var zones =
+        opts.zones && opts.zones.length
+          ? opts.zones
+          : [
+              {
+                id: "perennial-beds",
+                label: "Perennial Beds",
+                minutes: 45,
+                start: "19:00",
+              },
+              {
+                id: "raised-beds",
+                label: "Raised Beds",
+                minutes: 35,
+                start: "19:50",
+              },
+            ];
 
-      var recurrence = opts.recurrence || "RRULE:FREQ=WEEKLY;BYDAY=MO,TH;BYHOUR=19;BYMINUTE=0;BYSECOND=0";
+      var recurrence =
+        opts.recurrence ||
+        "RRULE:FREQ=WEEKLY;BYDAY=MO,TH;BYHOUR=19;BYMINUTE=0;BYSECOND=0";
       var slug = "wateringCycle:deep-soak";
       var planId = stableId(slug, householdId);
 
@@ -188,17 +275,19 @@
           kind: "water",
           appliance: "irrigation",
           zone: z.id,
-          startOffset: offsetParser.parse("+" + (i === 0 ? "0m" : (zones[i-1].minutes + 10) + "m")).ms, // 10m buffer
-          durationMs: (z.minutes * 60 * 1000),
+          startOffset: offsetParser.parse(
+            "+" + (i === 0 ? "0m" : zones[i - 1].minutes + 10 + "m")
+          ).ms, // 10m buffer
+          durationMs: z.minutes * 60 * 1000,
           guards: {
-            withhold: { reason: "weather|withhold", policy: "auto" }
-          }
+            withhold: { reason: "weather|withhold", policy: "auto" },
+          },
         };
       });
 
       return {
-        "$id": planId,
-        "$schema": "urn:suka:contracts:gardenplan",
+        $id: planId,
+        $schema: "urn:suka:contracts:gardenplan",
         type: "wateringCycle",
         slug: slug,
         meta: {
@@ -210,19 +299,25 @@
           defaultFavoriteKey: "garden:wateringCycle:deep-soak",
           exportable: true,
           icon: "droplets",
-          tags: ["watering", "deep-soak", "perennial", "raised-beds", "evening"],
-          createdAt: Date.now()
+          tags: [
+            "watering",
+            "deep-soak",
+            "perennial",
+            "raised-beds",
+            "evening",
+          ],
+          createdAt: Date.now(),
         },
         params: {
           droughtMode: !!opts.droughtMode,
           weatherStationId: opts.weatherStationId || null,
           soilMoistureSensorIds: opts.soilMoistureSensorIds || [],
-          zones: zones
+          zones: zones,
         },
         inventory: {
           required: Object.keys(SUPPLIES).map(function (sku) {
             return { sku: sku, ...SUPPLIES[sku] };
-          })
+          }),
         },
         schedule: {
           recurrence: recurrence,
@@ -230,19 +325,28 @@
           calendar: {
             write: true,
             title: "Garden — Watering (Deep Soak)",
-            reminders: [{ minutesBefore: 10, method: "popup" }]
-          }
+            reminders: [{ minutesBefore: 10, method: "popup" }],
+          },
         },
         steps: steps,
         nudgeRules: [
-          { kind: "precheck", message: "Check mulch coverage; add if soil is exposed." },
-          { kind: "post", message: "Spot-check 2–3 soil areas to confirm soak depth." }
+          {
+            kind: "precheck",
+            message: "Check mulch coverage; add if soil is exposed.",
+          },
+          {
+            kind: "post",
+            message: "Spot-check 2–3 soil areas to confirm soak depth.",
+          },
         ],
         emitOnLoad: [
-          { event: "prep.tasks.requested", payload: { domain: "garden", planId: planId } }
-        ]
+          {
+            event: "prep.tasks.requested",
+            payload: { domain: "garden", planId: planId },
+          },
+        ],
       };
-    }
+    },
   };
 
   /* -------------------------- Shortage Check Helper -------------------------- */
@@ -252,13 +356,13 @@
         domain: "garden",
         items: (plan.inventory?.required || []).map(function (r) {
           return { sku: r.sku, min: r.min, label: r.label };
-        })
+        }),
       });
       if (!result.ok && result.missing && result.missing.length) {
         eventBus.emit("inventory.shortage.detected", {
           domain: "garden",
           planId: plan.$id,
-          missing: result.missing
+          missing: result.missing,
         });
       }
       return result;
@@ -271,7 +375,10 @@
   /* --------------------------- Weather/Pause Helper -------------------------- */
   function canRunNowContextual() {
     try {
-      return !!pausePolicies.canRunNow({ domain: "garden", kind: "weather|withhold" });
+      return !!pausePolicies.canRunNow({
+        domain: "garden",
+        kind: "weather|withhold",
+      });
     } catch (_e) {
       return true;
     }
@@ -293,17 +400,21 @@
 
     // If the central library exists and has this template, use it.
     if (GardenPlanTemplates && GardenPlanTemplates.get) {
-      var libTpl = GardenPlanTemplates.get("wateringCycle:" + templateId, options);
+      var libTpl = GardenPlanTemplates.get(
+        "wateringCycle:" + templateId,
+        options
+      );
       if (libTpl) {
         // ensure fields we rely on exist
         libTpl.meta = libTpl.meta || {};
         libTpl.meta.domain = "garden";
         libTpl.meta.favoriteable = true;
         libTpl.meta.exportable = true;
-        libTpl.slug = libTpl.slug || ("wateringCycle:" + templateId);
+        libTpl.slug = libTpl.slug || "wateringCycle:" + templateId;
         // run inventory precheck
         checkInventory(libTpl);
-        if (options.autoFavorite) requestFavoriteAdoption(libTpl, { reason: "autoFavorite" });
+        if (options.autoFavorite)
+          requestFavoriteAdoption(libTpl, { reason: "autoFavorite" });
         // Calendar write request hint
         if (libTpl?.schedule?.calendar?.write) {
           eventBus.emit("schedule.event.write.requested", {
@@ -311,7 +422,7 @@
             planId: libTpl.$id,
             title: libTpl.schedule.calendar.title || libTpl.meta.title,
             recurrence: libTpl.schedule.recurrence,
-            startTimeLocal: libTpl.schedule.startTimeLocal
+            startTimeLocal: libTpl.schedule.startTimeLocal,
           });
         }
         return libTpl;
@@ -321,7 +432,11 @@
     // Fallback to in-file templates
     var builder = INFILE_TEMPLATES[templateId];
     if (!builder) {
-      console.warn("[wateringCycle] Unknown templateId:", templateId, "— defaulting to timed-drip.");
+      console.warn(
+        "[wateringCycle] Unknown templateId:",
+        templateId,
+        "— defaulting to timed-drip."
+      );
       builder = INFILE_TEMPLATES["timed-drip"];
     }
 
@@ -336,12 +451,13 @@
         planId: plan.$id,
         title: plan.schedule.calendar.title || plan.meta.title,
         recurrence: plan.schedule.recurrence,
-        startTimeLocal: plan.schedule.startTimeLocal
+        startTimeLocal: plan.schedule.startTimeLocal,
       });
     }
 
     // Optionally mark as favorite immediately
-    if (options.autoFavorite) requestFavoriteAdoption(plan, { reason: "autoFavorite" });
+    if (options.autoFavorite)
+      requestFavoriteAdoption(plan, { reason: "autoFavorite" });
 
     return plan;
   }
@@ -354,8 +470,12 @@
    */
   function attachRuntimeHooks(plan) {
     plan.runtime = plan.runtime || {};
-    plan.runtime.requestFavorite = function (opt) { return requestFavoriteAdoption(plan, opt); };
-    plan.runtime.canRunNow = function () { return canRunNowContextual(); };
+    plan.runtime.requestFavorite = function (opt) {
+      return requestFavoriteAdoption(plan, opt);
+    };
+    plan.runtime.canRunNow = function () {
+      return canRunNowContextual();
+    };
     return plan;
   }
 
@@ -366,7 +486,7 @@
       return attachRuntimeHooks(plan);
     },
     templates: Object.keys(INFILE_TEMPLATES),
-    supplies: SUPPLIES
+    supplies: SUPPLIES,
   };
 
   if (typeof module !== "undefined" && module.exports) module.exports = api;

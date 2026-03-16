@@ -31,7 +31,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb;
     Events = eb.Events || {};
   } catch {
@@ -49,21 +49,25 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
 try {
   HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
   FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 /* --------------------------------- State ----------------------------------- */
 const SOURCE = "telemetry.session";
 
-const RING_MAX = 400;            // recent events for timeline
-const _timeline = [];            // [{t, type, sessionId, domain, ...}]
-const _bySession = new Map();    // sessionId -> SessionMetric (see typedef)
+const RING_MAX = 400; // recent events for timeline
+const _timeline = []; // [{t, type, sessionId, domain, ...}]
+const _bySession = new Map(); // sessionId -> SessionMetric (see typedef)
 const _counters = {
   drafts: 0,
   approvals: 0,
@@ -91,18 +95,54 @@ export function initSessionTelemetry() {
   const unsubs = [];
 
   // Core session pipeline events (from eventBus.Events registry)
-  unsubs.push(eventBus.on(Events.SESSION_DRAFT_READY || "session/draftReady", onDraft, { priority: -1 }));
-  unsubs.push(eventBus.on(Events.SESSION_APPROVED || "session/approved", onApproved, { priority: -1 }));
-  unsubs.push(eventBus.on(Events.SESSION_DISCARDED || "session/discarded", onDiscarded, { priority: -1 }));
-  unsubs.push(eventBus.on(Events.SESSION_ERROR || "session/error", onError, { priority: -1 }));
+  unsubs.push(
+    eventBus.on(Events.SESSION_DRAFT_READY || "session/draftReady", onDraft, {
+      priority: -1,
+    })
+  );
+  unsubs.push(
+    eventBus.on(Events.SESSION_APPROVED || "session/approved", onApproved, {
+      priority: -1,
+    })
+  );
+  unsubs.push(
+    eventBus.on(Events.SESSION_DISCARDED || "session/discarded", onDiscarded, {
+      priority: -1,
+    })
+  );
+  unsubs.push(
+    eventBus.on(Events.SESSION_ERROR || "session/error", onError, {
+      priority: -1,
+    })
+  );
 
   // Household-calendar glue (writer emits schedule/saved & schedule/deleted)
-  unsubs.push(eventBus.on(Events.SCHEDULE_SAVED || "schedule/saved", onScheduled, { priority: -1 }));
-  unsubs.push(eventBus.on(Events.SCHEDULE_DELETED || "schedule/deleted", onUnschedule, { priority: -1 }));
+  unsubs.push(
+    eventBus.on(Events.SCHEDULE_SAVED || "schedule/saved", onScheduled, {
+      priority: -1,
+    })
+  );
+  unsubs.push(
+    eventBus.on(Events.SCHEDULE_DELETED || "schedule/deleted", onUnschedule, {
+      priority: -1,
+    })
+  );
 
   // Domain completions (used to mark "executed/completed")
-  unsubs.push(eventBus.on(Events.PRESERVATION_COMPLETED || "preservation/completed", onDomainCompleted, { priority: -1 }));
-  unsubs.push(eventBus.on(Events.GARDEN_HARVEST_LOGGED || "garden/harvestLogged", onGardenLogged, { priority: -1 }));
+  unsubs.push(
+    eventBus.on(
+      Events.PRESERVATION_COMPLETED || "preservation/completed",
+      onDomainCompleted,
+      { priority: -1 }
+    )
+  );
+  unsubs.push(
+    eventBus.on(
+      Events.GARDEN_HARVEST_LOGGED || "garden/harvestLogged",
+      onGardenLogged,
+      { priority: -1 }
+    )
+  );
   // Cooking "executed" signal is not standardized; accept meal.executed (from prompt)
   unsubs.push(eventBus.on("meal/executed", onMealExecuted, { priority: -1 }));
 
@@ -110,7 +150,12 @@ export function initSessionTelemetry() {
   emitAnalyticsSnapshot("init");
 
   // Return unsubscribe for tests/env reset
-  return () => unsubs.forEach((u) => { try { u(); } catch {} });
+  return () =>
+    unsubs.forEach((u) => {
+      try {
+        u();
+      } catch {}
+    });
 }
 
 /**
@@ -142,8 +187,15 @@ export function getSummary() {
   const byDomain = {};
   for (const sm of _bySession.values()) {
     const d = sm.domain || "general";
-    byDomain[d] = byDomain[d] || { drafts: 0, approvals: 0, scheduled: 0, executed: 0, completed: 0, errors: 0 };
-    for (const k of Object.keys(byDomain[d])) byDomain[d][k] += (sm[k] ? 1 : 0);
+    byDomain[d] = byDomain[d] || {
+      drafts: 0,
+      approvals: 0,
+      scheduled: 0,
+      executed: 0,
+      completed: 0,
+      errors: 0,
+    };
+    for (const k of Object.keys(byDomain[d])) byDomain[d][k] += sm[k] ? 1 : 0;
   }
   return {
     ts: new Date().toISOString(),
@@ -195,7 +247,9 @@ function onScheduled({ data }) {
   const sm = ensureSessionMetric(sessionId);
   sm.scheduledAt = now();
   sm.scheduled = true;
-  sm.holdsCount = Array.isArray(data?.holds) ? data.holds.length : (sm.holdsCount || 0);
+  sm.holdsCount = Array.isArray(data?.holds)
+    ? data.holds.length
+    : sm.holdsCount || 0;
   addTimeline("scheduled", { sessionId, holds: sm.holdsCount });
   emitAnalyticsPulse("scheduled", sessionId, sm.domain);
   scheduleFlush();
@@ -230,7 +284,11 @@ function onError({ data }) {
   sm.errors = (sm.errors || 0) + 1;
   inc("errors");
   sm.lastErrorAt = now();
-  addTimeline("error", { sessionId: sm.id, domain: sm.domain, error: String(data?.error || "unknown") });
+  addTimeline("error", {
+    sessionId: sm.id,
+    domain: sm.domain,
+    error: String(data?.error || "unknown"),
+  });
   emitAnalyticsPulse("error", sm.id, sm.domain);
   scheduleFlush();
 }
@@ -290,33 +348,57 @@ async function flushSnapshot() {
     } else if (dataGateway?.put) {
       await dataGateway.put(SNAPSHOT_KEY, snapshot);
     }
-  } catch { /* storage is optional */ }
+  } catch {
+    /* storage is optional */
+  }
 
   // Emit an analytics snapshot event for UI subscribers
   emitAnalyticsSnapshot("flush", snapshot);
 
   // Optional Hub mirror (NOT household data, but allowed in familyFundMode)
   try {
-    if (featureFlags?.familyFundMode && HubPacketFormatter && FamilyFundConnector) {
-      const payload = { type: "analytics/sessionSnapshot", ts: snapshot.ts, source: SOURCE, data: snapshot };
+    if (
+      featureFlags?.familyFundMode &&
+      HubPacketFormatter &&
+      FamilyFundConnector
+    ) {
+      const payload = {
+        type: "analytics/sessionSnapshot",
+        ts: snapshot.ts,
+        source: SOURCE,
+        data: snapshot,
+      };
       const pkt = HubPacketFormatter.format(payload);
       await FamilyFundConnector.send(pkt);
     }
-  } catch { /* fail-silent */ }
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* ------------------------------ Emit helpers ------------------------------- */
 function emitAnalyticsPulse(kind, sessionId, domain) {
-  eventBus.emit("analytics/sessionTelemetry.pulse", {
-    kind, sessionId, domain,
-  }, { source: SOURCE });
+  eventBus.emit(
+    "analytics/sessionTelemetry.pulse",
+    {
+      kind,
+      sessionId,
+      domain,
+    },
+    { source: SOURCE }
+  );
 }
 
 function emitAnalyticsSnapshot(reason, provided) {
   const snap = provided || getSummary();
-  eventBus.emit("analytics/sessionTelemetry.snapshot", {
-    reason, summary: snap,
-  }, { source: SOURCE, sticky: true });
+  eventBus.emit(
+    "analytics/sessionTelemetry.snapshot",
+    {
+      reason,
+      summary: snap,
+    },
+    { source: SOURCE, sticky: true }
+  );
 }
 
 /* -------------------------------- Utilities -------------------------------- */
@@ -371,7 +453,8 @@ function addTimeline(type, extra = {}) {
     type,
     ...extra,
   });
-  if (_timeline.length > RING_MAX) _timeline.splice(0, _timeline.length - RING_MAX);
+  if (_timeline.length > RING_MAX)
+    _timeline.splice(0, _timeline.length - RING_MAX);
 }
 
 function inc(name) {
@@ -394,9 +477,15 @@ function shallowCloneForPersist(sm) {
 // but snapshots may be mirrored if familyFundMode=true via flushSnapshot().
 
 /* --------------------------------- Small utils ----------------------------- */
-function now() { return new Date().toISOString(); }
-function clone(v) { return JSON.parse(JSON.stringify(v)); }
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function now() {
+  return new Date().toISOString();
+}
+function clone(v) {
+  return JSON.parse(JSON.stringify(v));
+}
+function genId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function noopUnsub() {}
 
 /* --------------------------------- Exports --------------------------------- */

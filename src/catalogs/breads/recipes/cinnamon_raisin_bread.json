@@ -1,0 +1,381 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.cinnamon_raisin_bread",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Cinnamon Raisin Bread",
+    "subtitle": "Soft, lightly sweet loaf • swirled cinnamon sugar • breakfast/toast baseline • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Enriched sandwich-style loaf with cinnamon swirl and raisins. Optimized for toast and French toast. Includes fresh-milled guidance and 70/30 blend option."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "sweet loaf",
+    "subprofiles": ["enriched", "cinnamon", "raisin", "swirl", "sandwich loaf"],
+    "mealArchetypes": ["breakfast", "toast", "snack bread"],
+    "servingStyles": ["sliced loaf"],
+    "plannerTags": [
+      "cinnamon raisin",
+      "breakfast",
+      "toast",
+      "sweet loaf",
+      "swirl",
+      "kid-friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 12,
+    "servingSize": { "value": 1, "unit": "slice" },
+    "notes": "One standard 9x5-inch loaf; yields ~12–14 slices depending on thickness."
+  },
+
+  "time": {
+    "activeMins": 40,
+    "handsOffMins": 155,
+    "totalMins": 195
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "loaf pan (9x5-inch)", "oven"],
+    "recommended": [
+      "scale",
+      "stand mixer (dough hook)",
+      "rolling pin",
+      "bench scraper",
+      "instant-read thermometer"
+    ],
+    "optional": ["parchment sling", "pastry brush"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "milk", "egg"],
+
+  "signals": {
+    "sweetBread": true,
+    "toastFriendly": true,
+    "swirlLoaf": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "moderate",
+    "saltiness": "low-to-moderate",
+    "richness": "medium",
+    "texture": "soft-tender-sandwich-crumb",
+    "notes": "Warm cinnamon aroma, sweet raisins, and a defined swirl—excellent toasted with butter."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "Flour (bread flour preferred; or all-purpose; or fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 420, "unit": "g" },
+      "notes": "Bread flour gives better rise and slice structure; AP is softer and still works."
+    },
+    {
+      "id": "milk",
+      "label": "Milk, warm (95–105°F / 35–40°C)",
+      "role": "hydration",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup."
+    },
+    {
+      "id": "yeast",
+      "label": "Instant yeast (or active dry yeast)",
+      "role": "leavening",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 2 1/4 teaspoons. If using active dry, bloom in warm milk (see steps)."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar (for dough)",
+      "role": "sweetener",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "About 1/4 cup. Keeps crumb soft and lightly sweet."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 1/4 teaspoons."
+    },
+    {
+      "id": "egg",
+      "label": "Large egg",
+      "role": "enrichment",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Adds tenderness and structure."
+    },
+    {
+      "id": "butter",
+      "label": "Unsalted butter, softened (for dough)",
+      "role": "enrichment",
+      "amount": { "value": 56, "unit": "g" },
+      "notes": "About 4 tablespoons."
+    },
+    {
+      "id": "vanilla_optional",
+      "label": "Vanilla extract (optional)",
+      "role": "flavor",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "raisins",
+      "label": "Raisins",
+      "role": "mix-in",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 3/4 cup. Dark or golden raisins both work."
+    },
+    {
+      "id": "water_soak",
+      "label": "Warm water (for soaking raisins, optional but recommended)",
+      "role": "prep",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Helps raisins stay plump and prevents them from stealing moisture from the crumb."
+    },
+    {
+      "id": "cinnamon_sugar",
+      "label": "Cinnamon-sugar filling (mix before use)",
+      "role": "filling",
+      "amount": { "value": 1, "unit": "batch" },
+      "notes": "See next ingredients for exact weights."
+    },
+    {
+      "id": "sugar_filling",
+      "label": "Brown sugar (for cinnamon-sugar filling)",
+      "role": "filling",
+      "amount": { "value": 70, "unit": "g" },
+      "notes": "About 1/3 cup packed."
+    },
+    {
+      "id": "cinnamon_filling",
+      "label": "Ground cinnamon (for filling)",
+      "role": "filling",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "flour_filling",
+      "label": "Flour (for filling; helps reduce swirl separation)",
+      "role": "filling",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "butter_filling_optional",
+      "label": "Unsalted butter, melted (optional, for swirl adhesion)",
+      "role": "filling",
+      "amount": { "value": 14, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tablespoon. Brush onto dough before adding filling."
+    },
+    {
+      "id": "egg_wash_optional",
+      "label": "Egg wash (optional: egg + splash of milk)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "batch" },
+      "optional": true,
+      "notes": "For shinier, more even browning."
+    },
+    {
+      "id": "butter_finish_optional",
+      "label": "Butter, melted (optional, brush after baking)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Optional: soak raisins (recommended)",
+      "instructions": [
+        "Cover raisins with warm water for 10 minutes to plump.",
+        "Drain well and pat dry with a towel so they don’t add extra water to the dough."
+      ],
+      "handsOffMins": 10,
+      "timers": [{ "label": "Soak raisins (optional)", "mins": 10 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Optional: bloom active dry yeast (if using)",
+      "instructions": [
+        "If using active dry yeast, stir yeast and a pinch of sugar into the warm milk (use from recipe milk).",
+        "Rest 5–10 minutes until foamy. If using instant yeast, skip blooming."
+      ],
+      "handsOffMins": 8,
+      "timers": [{ "label": "Bloom yeast (optional)", "mins": 8 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Mix dough",
+      "instructions": [
+        "In a large bowl (or mixer bowl), combine flour, sugar, salt, and (if using instant) yeast.",
+        "Add warm milk, egg, softened butter, and vanilla (if using).",
+        "Mix until a shaggy dough forms and no dry flour remains."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step_04",
+      "title": "Knead until smooth; then add raisins",
+      "instructions": [
+        "Knead until dough is smooth and elastic: stand mixer 6–8 minutes; by hand 10–12 minutes.",
+        "Add raisins and knead briefly just until evenly distributed (1–2 minutes).",
+        "Dough should be soft and slightly tacky; avoid over-flouring."
+      ],
+      "activeMins": 12
+    },
+    {
+      "id": "step_05",
+      "title": "First rise (bulk)",
+      "instructions": [
+        "Place dough in a lightly oiled bowl, cover, and rise until doubled, 60–90 minutes."
+      ],
+      "handsOffMins": 75,
+      "timers": [{ "label": "Bulk rise", "mins": 75 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Prepare pan and filling",
+      "instructions": [
+        "Grease a 9x5 loaf pan (or line with parchment sling).",
+        "Mix brown sugar, cinnamon, and 10g flour for the filling.",
+        "Optional: melt 14g butter for brushing onto the dough before filling (helps swirl stick)."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_07",
+      "title": "Shape loaf with cinnamon swirl",
+      "instructions": [
+        "Turn dough onto a lightly floured surface and gently press into a rectangle.",
+        "Roll out to about 8x16 inches (20x40 cm), with the short side roughly matching the pan width.",
+        "Optional: brush the rectangle lightly with melted butter for adhesion.",
+        "Sprinkle cinnamon-sugar evenly, leaving a 1-inch border on one long edge (so the seam can seal).",
+        "Starting from the long edge opposite the clean border, roll up tightly into a log.",
+        "Pinch seam closed; pinch ends and tuck under. Place seam-side down in the pan."
+      ],
+      "activeMins": 12
+    },
+    {
+      "id": "step_08",
+      "title": "Final proof",
+      "instructions": [
+        "Cover and proof until the loaf crowns 1–1.5 inches above the rim, about 45–75 minutes.",
+        "Loaf should spring back slowly when gently pressed."
+      ],
+      "handsOffMins": 60,
+      "timers": [{ "label": "Final proof", "mins": 60 }]
+    },
+    {
+      "id": "step_09",
+      "title": "Bake",
+      "instructions": [
+        "Heat oven to 350°F (175°C).",
+        "Optional: brush top with egg wash for shinier browning.",
+        "Bake 35–45 minutes until deep golden and internal temp is 190–200°F (88–93°C).",
+        "If top browns too fast, tent loosely with foil for the last 10–15 minutes."
+      ],
+      "handsOffMins": 40,
+      "timers": [{ "label": "Bake", "mins": 40 }]
+    },
+    {
+      "id": "step_10",
+      "title": "Cool and slice",
+      "instructions": [
+        "Cool in pan 10 minutes, then remove and cool on a rack at least 45 minutes before slicing (swirl sets as it cools).",
+        "Optional: brush with melted butter after baking for a soft, glossy crust."
+      ],
+      "handsOffMins": 55,
+      "timers": [
+        { "label": "Cool in pan", "mins": 10 },
+        { "label": "Cool before slicing", "mins": 45 }
+      ]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour brings great flavor but can reduce loft. Blend or adjust hydration for a softer sandwich-style crumb.",
+    "guidelines": [
+      "Best soft-loaf option: 70% fresh milled flour + 30% bread flour (same total flour weight).",
+      "If using 100% fresh milled (unsifted), consider sifting out some bran for better rise and swirl integrity.",
+      "Fresh milled may need +10–25g milk depending on wheat and fineness; dough should be soft and tacky.",
+      "Add a 10-minute rest after initial mixing (before kneading) to hydrate bran for smoother dough."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 0,
+      "rangeAddBackG": [0, 25]
+    }
+  },
+
+  "variations": [
+    {
+      "name": "70/30 whole wheat option (heartier but still soft)",
+      "change": "Use 70% whole wheat (or fresh milled) and 30% bread flour within the 420g flour total. Add +10–20g milk if needed.",
+      "notes": "More wheat flavor and nutrition; still sliceable."
+    },
+    {
+      "name": "Cinnamon swirl without raisins",
+      "change": "Omit raisins. Keep filling the same.",
+      "notes": "Great for kids who don’t like raisins."
+    },
+    {
+      "name": "Cranberry-orange loaf",
+      "change": "Replace raisins with dried cranberries; add 4g orange zest to dough; optional 10g orange juice in place of milk (reduce milk slightly).",
+      "notes": "Holiday-style flavor."
+    },
+    {
+      "name": "Extra-defined swirl (reduced separation)",
+      "change": "Use the 10g flour in filling (already included) and brush dough lightly with melted butter before filling; roll tightly and seal seam well.",
+      "notes": "Helps swirl adhere and reduces big gaps."
+    }
+  ],
+
+  "storage": {
+    "counter": "Store airtight up to 3 days.",
+    "freezer": "Slice and freeze up to 2 months; toast from frozen.",
+    "reheat": "Best toasted. For whole loaf warming: wrap in foil and warm at 300°F (150°C) for 10–15 minutes."
+  },
+
+  "notes": [
+    "For the best toast: slice once fully cooled; toast until edges crisp and cinnamon is fragrant.",
+    "If your swirl separates (big tunnels): roll tighter, seal seam firmly, and include flour in the filling (already specified).",
+    "Raisins can burn on the surface—keep them mostly inside the dough when shaping."
+  ],
+
+  "pairings": {
+    "serveWith": ["butter", "cream cheese", "honey", "apple butter"],
+    "useFor": ["toast", "french toast", "bread pudding"]
+  },
+
+  "links": {
+    "related": [
+      "breads/recipes/sandwich_bread_white",
+      "breads/recipes/whole_wheat_sandwich_bread",
+      "breads/recipes/french_toast"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions."
+  }
+}

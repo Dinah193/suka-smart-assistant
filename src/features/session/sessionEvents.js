@@ -1,6 +1,6 @@
 // C:\Users\larho\suka-smart-assistant\src\features\session\sessionEvents.js
 
-import { emit } from "../../services/eventBus";
+import { emit } from "../../services/events/eventBus";
 
 /**
  * Default source label for session-related events.
@@ -208,7 +208,11 @@ export function emitSessionStepCompleted(session, step, index, opts = {}) {
  * These are key for your reverse-planned sessions and shims/orchestrator flows.
  */
 
-export function emitSessionReverseGenerated(session, targetCompletion, opts = {}) {
+export function emitSessionReverseGenerated(
+  session,
+  targetCompletion,
+  opts = {}
+) {
   emitSessionEvent(SessionEventTypes.SESSION_REVERSE_GENERATED, {
     source: opts.source,
     data: {
@@ -355,7 +359,12 @@ export function emitDomainSessionRequested(domainKey, context = {}, opts = {}) {
   });
 }
 
-export function emitReversePlanRequested(domainKey, targetCompletion, context = {}, opts = {}) {
+export function emitReversePlanRequested(
+  domainKey,
+  targetCompletion,
+  context = {},
+  opts = {}
+) {
   // Example: "Finish butchery by 5pm" → orchestrator listens for this
   emitSessionEvent("session.reverse.requested", {
     source: opts.source,

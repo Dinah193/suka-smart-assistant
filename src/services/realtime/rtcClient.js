@@ -17,7 +17,7 @@
 // • A signaling service is reachable via WebSocket (URL passed in options or env).
 // • Signaling protocol is JSON messages with shape: { op, roomId, payload }.
 //   ops: "host", "join", "offer", "answer", "ice", "close".
-// • eventBus is available at "@/services/eventBus" (graceful fallback included).
+// • eventBus is available at "@/services/events/eventBus" (graceful fallback included).
 //
 // Extension points:
 // • Custom ICE servers via options. • Pluggable QR generation (see buildPairingQRCode()).
@@ -28,15 +28,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 // Feature flags (familyFundMode, etc.)
 let featureFlags = { familyFundMode: false };
 try {
   featureFlags = require("@/config/featureFlags.json");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 // Optional Hub exports
 let HubPacketFormatter = null;
@@ -44,7 +48,9 @@ let FamilyFundConnector = null;
 try {
   HubPacketFormatter = require("@/integrations/HubPacketFormatter");
   FamilyFundConnector = require("@/integrations/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 const SRC = "services.realtime.rtcClient";
 
@@ -69,7 +75,10 @@ async function exportToHubIfEnabled(payload) {
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // Fail silently by design; Hub is auxiliary.
-    console.warn("[rtcClient] Hub export failed silently:", err?.message || err);
+    console.warn(
+      "[rtcClient] Hub export failed silently:",
+      err?.message || err
+    );
   }
 }
 
@@ -77,7 +86,8 @@ async function exportToHubIfEnabled(payload) {
 function makeId(prefix = "room", len = 8) {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
-  for (let i = 0; i < len; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < len; i++)
+    s += alphabet[Math.floor(Math.random() * alphabet.length)];
   return `${prefix}_${s}`;
 }
 
@@ -134,14 +144,23 @@ class RTCClient {
     }
   }
 
-  get roomId() { return this._roomId; }
-  get role() { return this._role; }
-  get pairingUrl() { return this._pairingUrl; }
-  get connected() { return this._dc && this._dc.readyState === "open"; }
+  get roomId() {
+    return this._roomId;
+  }
+  get role() {
+    return this._role;
+  }
+  get pairingUrl() {
+    return this._pairingUrl;
+  }
+  get connected() {
+    return this._dc && this._dc.readyState === "open";
+  }
 
   // Host flow: create room, open signaling, create offer, present pairing URL/QR.
   async createRoom(customRoomId) {
-    if (!this._ensureWsUrl()) throw new Error("Missing signalingUrl in rtcClient.configure()");
+    if (!this._ensureWsUrl())
+      throw new Error("Missing signalingUrl in rtcClient.configure()");
     if (this._pc) this.close("recreate-room");
 
     this._role = "host";
@@ -158,15 +177,24 @@ class RTCClient {
     const offer = await this._pc.createOffer();
     await this._pc.setLocalDescription(offer);
 
-    this._sendSignal(SIG.OFFER, { roomId: this._roomId, sdp: offer.sdp, type: offer.type });
+    this._sendSignal(SIG.OFFER, {
+      roomId: this._roomId,
+      sdp: offer.sdp,
+      type: offer.type,
+    });
 
-    emit("rtc.room.created", { roomId: this._roomId, pairingUrl: this._pairingUrl, role: this._role });
+    emit("rtc.room.created", {
+      roomId: this._roomId,
+      pairingUrl: this._pairingUrl,
+      role: this._role,
+    });
     return { roomId: this._roomId, pairingUrl: this._pairingUrl };
   }
 
   // Joiner flow: connect signaling, announce join, wait for offer (or accept direct offer), answer.
   async joinRoom(roomId) {
-    if (!this._ensureWsUrl()) throw new Error("Missing signalingUrl in rtcClient.configure()");
+    if (!this._ensureWsUrl())
+      throw new Error("Missing signalingUrl in rtcClient.configure()");
     if (!roomId) throw new Error("joinRoom requires roomId");
     if (this._pc) this.close("rejoin-room");
 
@@ -196,19 +224,43 @@ class RTCClient {
     }
   }
 
-  onMessage(fn) { this._onMessage = typeof fn === "function" ? fn : null; }
-  onStatus(fn)  { this._onStatus  = typeof fn === "function" ? fn : null; }
+  onMessage(fn) {
+    this._onMessage = typeof fn === "function" ? fn : null;
+  }
+  onStatus(fn) {
+    this._onStatus = typeof fn === "function" ? fn : null;
+  }
 
   // Close gracefully
   close(reason = "client-close") {
-    try { this._sendSignal(SIG.CLOSE, { roomId: this._roomId, reason }); } catch {}
-    if (this._dc) { try { this._dc.close(); } catch {} }
-    if (this._pc) { try { this._pc.close(); } catch {} }
-    if (this._ws) { try { this._ws.close(); } catch {} }
+    try {
+      this._sendSignal(SIG.CLOSE, { roomId: this._roomId, reason });
+    } catch {}
+    if (this._dc) {
+      try {
+        this._dc.close();
+      } catch {}
+    }
+    if (this._pc) {
+      try {
+        this._pc.close();
+      } catch {}
+    }
+    if (this._ws) {
+      try {
+        this._ws.close();
+      } catch {}
+    }
 
     clearInterval(this._wsHeartbeat);
-    this._ws = null; this._wsAlive = false; this._wsHeartbeat = null;
-    this._pc = null; this._dc = null; this._role = null; this._roomId = null; this._pairingUrl = null;
+    this._ws = null;
+    this._wsAlive = false;
+    this._wsHeartbeat = null;
+    this._pc = null;
+    this._dc = null;
+    this._role = null;
+    this._roomId = null;
+    this._pairingUrl = null;
 
     emit("rtc.connection.closed", { reason });
     this._notifyStatus("closed", { reason });
@@ -222,7 +274,9 @@ class RTCClient {
   }
 
   _notifyStatus(status, data = {}) {
-    try { this._onStatus && this._onStatus({ status, ...data }); } catch {}
+    try {
+      this._onStatus && this._onStatus({ status, ...data });
+    } catch {}
     emit("rtc.connection.status", { status, ...data });
   }
 
@@ -244,7 +298,9 @@ class RTCClient {
           this._notifyStatus("signaling.closed");
         };
         this._ws.onerror = (err) => {
-          this._notifyStatus("signaling.error", { error: err?.message || String(err) });
+          this._notifyStatus("signaling.error", {
+            error: err?.message || String(err),
+          });
         };
         this._notifyStatus("signaling.open");
         resolve();
@@ -275,7 +331,9 @@ class RTCClient {
   }
 
   async _setupPeerConnection() {
-    const iceServers = Array.isArray(this._options.iceServers) ? this._options.iceServers : DEFAULT_ICE;
+    const iceServers = Array.isArray(this._options.iceServers)
+      ? this._options.iceServers
+      : DEFAULT_ICE;
     this._pc = new RTCPeerConnection({ iceServers });
 
     this._pc.onicecandidate = (e) => {
@@ -287,11 +345,20 @@ class RTCClient {
     this._pc.onconnectionstatechange = () => {
       const s = this._pc.connectionState;
       this._notifyStatus("pc.state", { state: s });
-      if (s === "connected") emit("rtc.connection.ready", { roomId: this._roomId, role: this._role });
+      if (s === "connected")
+        emit("rtc.connection.ready", {
+          roomId: this._roomId,
+          role: this._role,
+        });
       if (s === "failed") {
         // Try ICE restart once
-        try { this._pc.restartIce?.(); } catch {}
-        emit("rtc.connection.failed", { roomId: this._roomId, role: this._role });
+        try {
+          this._pc.restartIce?.();
+        } catch {}
+        emit("rtc.connection.failed", {
+          roomId: this._roomId,
+          role: this._role,
+        });
       }
     };
 
@@ -329,10 +396,20 @@ class RTCClient {
     };
     dc.onmessage = (e) => {
       let msg = null;
-      try { msg = JSON.parse(e.data); } catch { msg = { type: "rtc.raw", ts: nowIso(), payload: e.data }; }
+      try {
+        msg = JSON.parse(e.data);
+      } catch {
+        msg = { type: "rtc.raw", ts: nowIso(), payload: e.data };
+      }
       // Fan out to consumer
-      try { this._onMessage && this._onMessage(msg); } catch {}
-      emit("rtc.message", { roomId: this._roomId, role: this._role, message: msg });
+      try {
+        this._onMessage && this._onMessage(msg);
+      } catch {}
+      emit("rtc.message", {
+        roomId: this._roomId,
+        role: this._role,
+        message: msg,
+      });
 
       // Hub export only for mutating domain types (session.*, inventory.*, garden.*, preservation.*)
       if (this._isHouseholdMutation(msg)) {
@@ -356,7 +433,11 @@ class RTCClient {
 
   async _handleSignal(raw) {
     let m = null;
-    try { m = JSON.parse(raw); } catch { return; }
+    try {
+      m = JSON.parse(raw);
+    } catch {
+      return;
+    }
     const { op, roomId, payload } = m || {};
     if (roomId && this._roomId && roomId !== this._roomId) return;
 
@@ -365,7 +446,11 @@ class RTCClient {
       await this._pc.setRemoteDescription(desc);
       const answer = await this._pc.createAnswer();
       await this._pc.setLocalDescription(answer);
-      this._sendSignal(SIG.ANSWER, { roomId: this._roomId, sdp: answer.sdp, type: answer.type });
+      this._sendSignal(SIG.ANSWER, {
+        roomId: this._roomId,
+        sdp: answer.sdp,
+        type: answer.type,
+      });
       return;
     }
 
@@ -376,8 +461,13 @@ class RTCClient {
     }
 
     if (op === SIG.ICE && payload?.candidate) {
-      try { await this._pc.addIceCandidate(payload.candidate); } catch (err) {
-        console.warn("[rtcClient] addIceCandidate failed:", err?.message || err);
+      try {
+        await this._pc.addIceCandidate(payload.candidate);
+      } catch (err) {
+        console.warn(
+          "[rtcClient] addIceCandidate failed:",
+          err?.message || err
+        );
       }
       return;
     }
@@ -391,13 +481,15 @@ class RTCClient {
   // ------------------- QR pairing helpers (pluggable) -------------------
   _buildPairingUrl(roomId) {
     // Prefer explicit pairingUrlBase (e.g., your /cooking/remote route)
-    if (this._options.pairingUrlBase) return `${this._options.pairingUrlBase}${encodeURIComponent(roomId)}`;
+    if (this._options.pairingUrlBase)
+      return `${this._options.pairingUrlBase}${encodeURIComponent(roomId)}`;
 
     // Fallback to a custom scheme the mobile app/shortcut can intercept.
     // You can also map this to /import/share-capture if desired.
-    const base = (typeof window !== "undefined" && window.location)
-      ? `${window.location.origin}/remote?room=`
-      : "ssa://remote?room=";
+    const base =
+      typeof window !== "undefined" && window.location
+        ? `${window.location.origin}/remote?room=`
+        : "ssa://remote?room=";
     return `${base}${encodeURIComponent(roomId)}`;
   }
 
@@ -412,7 +504,10 @@ class RTCClient {
     if (!text) return { text, svg: null };
     let svg = null;
     try {
-      if (typeof window !== "undefined" && typeof window.__SSA_QR__ === "function") {
+      if (
+        typeof window !== "undefined" &&
+        typeof window.__SSA_QR__ === "function"
+      ) {
         svg = window.__SSA_QR__(text, size);
       }
     } catch {}

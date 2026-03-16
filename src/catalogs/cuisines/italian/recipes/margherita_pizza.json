@@ -1,0 +1,517 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:36:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.margherita_pizza",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Margherita Pizza",
+    "subtitle": "Neapolitan-inspired: tomato, fresh mozzarella, basil, olive oil",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical margherita structure with SSA-friendly roles and timing.",
+        "Oven-first with optional pizza stone/steel and optional outdoor/high-heat variants.",
+        "Dough is same-day or cold-ferment; recipe includes both paths."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "category": "pizza",
+    "mealArchetypes": ["plates", "street_food", "snacks", "plated_meals"],
+    "servingStyles": ["plated_meals", "street_food", "family_style"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.pizza",
+      "bake.oven",
+      "weekend.project",
+      "crowd_pleaser",
+      "vegetarian",
+      "dairy",
+      "contains_gluten",
+      "make_ahead.option"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 2, "unit": "slices" },
+    "notes": "Makes 2 x ~12-inch pizzas (8 slices each). Serves 3–4 depending on sides/appetite."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 210,
+    "totalMins": 255
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": "medium",
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": "partial",
+    "notes": [
+      "Dough benefits from fermentation time; best planned ahead.",
+      "Leftover slices reheat well in skillet or hot oven.",
+      "You can par-bake crusts for freezer-friendly make-ahead pizzas."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "umami": 4,
+    "sweetness": 1,
+    "sourness": 0,
+    "heat": 0,
+    "oilUse": 2,
+    "notes": [
+      "Balance comes from good tomatoes, proper salt level, and fresh basil at the end."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "tool.oven",
+      "tool.baking_sheet",
+      "tool.mixing_bowl",
+      "tool.scale_optional",
+      "tool.measuring_cups",
+      "tool.measuring_spoons",
+      "tool.spoon",
+      "tool.knife",
+      "tool.cutting_board"
+    ],
+    "recommended": [
+      "tool.pizza_stone_or_steel",
+      "tool.pizza_peel",
+      "tool.instant_read_thermometer",
+      "tool.dough_scraper"
+    ],
+    "optional": [
+      {
+        "id": "tool.stand_mixer",
+        "label": "Stand mixer (dough hook)",
+        "required": false,
+        "notes": "Speeds kneading; not required."
+      },
+      {
+        "id": "tool.cast_iron_skillet",
+        "label": "Cast iron skillet",
+        "required": false,
+        "notes": "Useful for reheating slices or making pan-style variant."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian"],
+  "allergens": ["allergen.dairy", "allergen.gluten"],
+
+  "ingredientGroups": [
+    {
+      "id": "group_dough",
+      "label": "Dough",
+      "items": [
+        "flour.bread_or_00",
+        "water",
+        "salt.kosher",
+        "yeast.instant",
+        "fat.olive_oil"
+      ],
+      "notes": "00 flour gives a tender crust; bread flour gives chew; AP works too."
+    },
+    {
+      "id": "group_sauce_toppings",
+      "label": "Sauce + Toppings",
+      "items": [
+        "tomato.san_marzano_crushed",
+        "salt.kosher",
+        "fat.olive_oil",
+        "cheese.mozzarella_fresh",
+        "herb.basil_fresh"
+      ],
+      "notes": "Keep toppings minimal for margherita: light sauce, fresh mozzarella, basil, olive oil."
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "flour.bread_or_00",
+      "label": "Flour (00, bread, or all-purpose)",
+      "role": "starch",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": [
+        "00 flour is classic for Neapolitan-style; bread flour adds chew; AP is fine."
+      ]
+    },
+    {
+      "id": "water",
+      "label": "Warm water",
+      "role": "liquid",
+      "amount": { "value": 325, "unit": "g" },
+      "notes": [
+        "About 65% hydration.",
+        "Target ~95–105°F (35–40°C) if using instant yeast for faster rise."
+      ]
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 2 tsp Diamond Crystal or ~1 1/2 tsp Morton (by volume varies)."
+    },
+    {
+      "id": "yeast.instant",
+      "label": "Instant yeast",
+      "role": "leavening",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": ["About 1 tsp. For cold ferment, you can reduce to ~1–2 g."]
+    },
+    {
+      "id": "fat.olive_oil",
+      "label": "Olive oil (in dough + finishing drizzle)",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 tbsp total; you may not use all on top."
+    },
+
+    {
+      "id": "tomato.san_marzano_crushed",
+      "label": "Crushed tomatoes (San Marzano-style if possible)",
+      "role": "sauce",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": [
+        "Use crushed or whole peeled tomatoes you crush by hand.",
+        "Keep sauce simple—no cooking needed for classic style."
+      ]
+    },
+    {
+      "id": "salt.sauce",
+      "label": "Salt for sauce",
+      "role": "seasoning",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "Start light; tomatoes vary."
+    },
+    {
+      "id": "cheese.mozzarella_fresh",
+      "label": "Fresh mozzarella, sliced and patted dry",
+      "role": "cheese",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": [
+        "Drain and blot well to avoid soggy pizza.",
+        "If using low-moisture mozzarella, use ~200 g shredded."
+      ]
+    },
+    {
+      "id": "herb.basil_fresh",
+      "label": "Fresh basil leaves",
+      "role": "garnish",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "Add after baking (or last 1 minute) to preserve aroma."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper (optional)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_mix_dough",
+      "title": "Mix dough",
+      "instructions": [
+        "In a mixing bowl, combine warm water and yeast; stir briefly.",
+        "Add flour and salt. Mix until shaggy.",
+        "Add 1 tbsp olive oil and continue mixing until a cohesive dough forms."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": ["No dry flour pockets remain.", "Dough is tacky but cohesive."]
+    },
+    {
+      "id": "step_02_knead",
+      "title": "Knead until smooth and elastic",
+      "instructions": [
+        "Knead by hand 8–10 minutes (or stand mixer 6–8 minutes) until smoother and elastic.",
+        "If very sticky, dust with a small amount of flour (avoid adding too much)."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": [
+        "Dough stretches without tearing too quickly (windowpane-ish)."
+      ]
+    },
+    {
+      "id": "step_03_first_rise",
+      "title": "First rise (choose same-day or cold ferment)",
+      "instructions": [
+        "Lightly oil the bowl, place dough inside, and cover.",
+        "Same-day: let rise at room temperature until doubled, about 1.5–2 hours.",
+        "Cold ferment (recommended flavor): refrigerate 12–48 hours; bring to room temp 60–90 minutes before shaping."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 120,
+      "timers": [{ "label": "Same-day rise (until doubled)", "minutes": 120 }],
+      "checks": ["Dough roughly doubled and shows bubbles on the surface."]
+    },
+    {
+      "id": "step_04_preheat_oven",
+      "title": "Preheat oven (stone/steel if using)",
+      "instructions": [
+        "Place pizza stone/steel on the middle or upper-middle rack (if using).",
+        "Preheat oven to its hottest setting (500–550°F / 260–288°C).",
+        "Let it heat at least 30 minutes after reaching temp for best results."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 30,
+      "temperature": {
+        "type": "oven",
+        "value": 550,
+        "unit": "F",
+        "notes": "Use max oven temp available; longer preheat improves spring."
+      },
+      "timers": [{ "label": "Stone/steel heat soak", "minutes": 30 }],
+      "checks": ["Stone/steel is fully preheated for crisp bottom."]
+    },
+    {
+      "id": "step_05_make_sauce",
+      "title": "Make simple tomato sauce",
+      "instructions": [
+        "In a bowl, combine crushed tomatoes with salt.",
+        "Optionally add a small drizzle of olive oil.",
+        "Taste and adjust: it should be bright and lightly salted."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0
+    },
+    {
+      "id": "step_06_portion_dough",
+      "title": "Divide and rest dough balls",
+      "instructions": [
+        "Turn dough onto a lightly floured surface.",
+        "Divide into 2 equal pieces (~415 g each).",
+        "Shape each into a tight ball and let rest covered 15–20 minutes."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 20,
+      "timers": [{ "label": "Bench rest", "minutes": 20 }],
+      "checks": ["Dough relaxes and is easier to stretch after resting."]
+    },
+    {
+      "id": "step_07_shape_pizzas",
+      "title": "Shape pizza rounds",
+      "instructions": [
+        "On a lightly floured surface, press dough from the center outward, leaving a thicker rim.",
+        "Stretch into a ~12-inch round (avoid tearing).",
+        "Transfer to a floured peel or parchment (if baking on a sheet)."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": [
+        "Center is thin enough to cook through; rim remains thicker for airy crust."
+      ]
+    },
+    {
+      "id": "step_08_top_pizza",
+      "title": "Top lightly (margherita style)",
+      "instructions": [
+        "Spread a thin layer of tomato sauce (about 1/3–1/2 cup) leaving the rim uncovered.",
+        "Add mozzarella pieces evenly (don’t overload).",
+        "Drizzle a little olive oil over the top.",
+        "Hold basil for after baking (or add during last minute)."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": ["Toppings are sparse enough to avoid sogginess."]
+    },
+    {
+      "id": "step_09_bake",
+      "title": "Bake until blistered and melted",
+      "instructions": [
+        "Slide pizza onto hot stone/steel (or bake on a preheated sheet).",
+        "Bake 7–12 minutes depending on oven heat until crust is browned and cheese is melted with some spots.",
+        "If needed, rotate halfway for even browning."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Bake pizza", "minutes": 9 }],
+      "checks": [
+        "Bottom is crisp and browned.",
+        "Cheese melted; sauce bubbling lightly."
+      ]
+    },
+    {
+      "id": "step_10_finish_and_serve",
+      "title": "Finish with basil and serve",
+      "instructions": [
+        "Remove pizza and immediately top with fresh basil leaves.",
+        "Optional: drizzle a touch more olive oil and a pinch of salt.",
+        "Rest 1–2 minutes, slice, and serve."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0
+    },
+    {
+      "id": "step_11_repeat_second_pizza",
+      "title": "Repeat with second dough ball",
+      "instructions": [
+        "Shape, top, and bake the second pizza the same way.",
+        "If using stone/steel, allow 3–5 minutes between pizzas for surface temp to recover."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 5,
+      "timers": [{ "label": "Stone recovery (optional)", "minutes": 4 }]
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Use caution when handling hot stone/steel and when sliding pizza into the oven.",
+      "If using fresh mozzarella, keep refrigerated until ready and don’t leave out longer than needed."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": [
+        "Store leftover slices in an airtight container up to 3 days.",
+        "Reheat best in a skillet: medium heat 3–5 minutes, cover briefly to melt cheese."
+      ]
+    },
+    "freeze": {
+      "notes": [
+        "Freeze baked slices up to 2 months; reheat from frozen in a hot oven.",
+        "For make-ahead: par-bake crusts 4–5 minutes, cool, wrap, freeze; top and finish-bake later."
+      ]
+    }
+  },
+
+  "notes": [
+    "Fresh mozzarella releases water—pat dry and don’t overload.",
+    "For a hotter top, finish 30–60 seconds under broiler (watch closely).",
+    "If you only have a baking sheet, preheat it in the oven to improve bottom browning."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_neapolitan_simpler",
+      "label": "Ultra-simple Neapolitan-style topping",
+      "when": { "style": "neapolitan_minimal" },
+      "adapt": {
+        "notes": [
+          "Use only tomatoes + salt (no oil in sauce).",
+          "Add basil after bake; use a very light drizzle of oil."
+        ]
+      }
+    },
+    {
+      "id": "variation_low_moisture_mozz",
+      "label": "Low-moisture mozzarella swap",
+      "when": { "ingredientSwap": "low_moisture_mozzarella" },
+      "adapt": {
+        "notes": [
+          "Use 200 g shredded low-moisture mozzarella.",
+          "Bake time may be slightly longer; watch browning."
+        ],
+        "removeIngredients": ["cheese.mozzarella_fresh"],
+        "addIngredients": [
+          {
+            "id": "cheese.mozzarella_low_moisture",
+            "label": "Low-moisture mozzarella, shredded",
+            "amount": { "value": 200, "unit": "g" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation_pan_pizza",
+      "label": "Pan margherita (home-oven friendly)",
+      "when": { "equipment": "tool.cast_iron_skillet" },
+      "adapt": {
+        "notes": [
+          "Oil skillet well, press dough in, rest 10 minutes, top and bake.",
+          "Bake 12–16 minutes at 500°F; bottom gets crisp."
+        ]
+      }
+    },
+    {
+      "id": "variation_garlic_oil_finish",
+      "label": "Garlic oil finish (optional)",
+      "when": { "finish": "garlic_oil" },
+      "adapt": {
+        "notes": [
+          "Warm olive oil with smashed garlic 2–3 minutes; cool slightly; drizzle after baking."
+        ],
+        "addIngredients": [
+          {
+            "id": "aromatic.garlic",
+            "label": "Garlic, smashed",
+            "amount": { "value": 2, "unit": "cloves" }
+          }
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "starch", "ids": ["flour.bread_or_00"] },
+      { "role": "sauce", "ids": ["tomato.san_marzano_crushed"] },
+      { "role": "cheese", "ids": ["cheese.mozzarella_fresh"] },
+      { "role": "garnish", "ids": ["herb.basil_fresh"] }
+    ],
+    "pairWith": {
+      "sides": [
+        "side.simple_salad",
+        "side.roasted_vegetables",
+        "side_veg.sauteed_greens"
+      ],
+      "drinks": ["drink.sparkling_water", "drink.italian_soda_optional"]
+    },
+    "makeAhead": {
+      "notes": [
+        "Cold-ferment dough 24–48 hours for best flavor.",
+        "Par-bake crusts for freezer-friendly pizza kits."
+      ]
+    }
+  },
+
+  "methods": [
+    "technique.knead",
+    "technique.ferment",
+    "technique.bake",
+    "technique.stretch"
+  ],
+
+  "compat": {
+    "aliases": [
+      "pizza margherita",
+      "margherita",
+      "neapolitan margherita",
+      "tomato basil mozzarella pizza"
+    ],
+    "keywordBoost": [
+      "00 flour",
+      "cavolo",
+      "stone",
+      "steel",
+      "high heat",
+      "cold ferment"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

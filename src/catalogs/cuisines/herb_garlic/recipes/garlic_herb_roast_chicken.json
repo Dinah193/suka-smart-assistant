@@ -1,0 +1,511 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic.recipes.garlic_herb_roast_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Garlic & Herb Roast Chicken",
+    "subtitle": "Lemon-garlic butter under the skin, herb perfume, crisp skin, juicy meat",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Canonical SSA Herb & Garlic baseline roast chicken.",
+        "Designed for deterministic planning + adaptation (oven roast, lemon/garlic/herbs, olive oil option)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Herb & Garlic",
+    "subprofiles": ["cuisines.herb_garlic"],
+    "category": "main",
+    "mealArchetypes": ["archetype.roast_chicken", "archetype.family_dinner"],
+    "servingStyles": ["family_style", "plated"],
+    "plannerTags": [
+      "herb_garlic",
+      "garlic_forward",
+      "herb_forward",
+      "lemony",
+      "roast",
+      "sunday_dinner",
+      "leftovers_good",
+      "batch_friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "notes": "1 whole chicken (3.5–4.5 lb) yields ~4 hearty portions (plus bones for broth)."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 65,
+    "totalMins": 90
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": "meat_only",
+    "equipmentSensitive": false,
+    "makeAhead": {
+      "canDryBrineOvernight": true,
+      "compoundButterKeepsDays": 5
+    }
+  },
+
+  "tasteProfile": {
+    "dominant": ["garlic", "fresh_herbs", "lemon", "savory"],
+    "supporting": ["black_pepper", "butter", "olive_oil_optional"],
+    "heat": 0,
+    "acid": "medium",
+    "salt": "medium"
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equip.oven",
+        "label": "Oven",
+        "required": true
+      },
+      {
+        "id": "equip.roasting_pan_or_skillet",
+        "label": "Roasting pan or large oven-safe skillet",
+        "required": true
+      },
+      {
+        "id": "equip.thermometer",
+        "label": "Instant-read thermometer",
+        "required": true,
+        "notes": "Strongly recommended for safe doneness and juiciness."
+      },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      },
+      {
+        "id": "equip.knife",
+        "label": "Chef’s knife",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.kitchen_twine",
+        "label": "Kitchen twine",
+        "required": false,
+        "notes": "Optional for trussing (more even roasting)."
+      },
+      {
+        "id": "equip.rack",
+        "label": "Roasting rack",
+        "required": false,
+        "notes": "Optional; improves airflow and crispness."
+      }
+    ],
+    "minimum": [
+      "equip.oven",
+      "equip.roasting_pan_or_skillet",
+      "equip.knife",
+      "equip.cutting_board"
+    ],
+    "recommended": ["equip.thermometer", "equip.kitchen_twine", "equip.rack"]
+  },
+
+  "dietFlags": ["diet.gluten_free", "diet.keto_friendly", "diet.low_carb"],
+  "allergens": ["allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "ing.chicken_whole",
+      "label": "Whole chicken",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": [
+        "3.5–4.5 lb preferred. Remove giblets if included.",
+        "Pat very dry for best browning."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": [
+        "Add more if using Diamond Crystal vs Morton's (brand saltiness varies).",
+        "Optional: dry brine up to 24 hours for deeper seasoning."
+      ]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ing.butter_unsalted",
+      "label": "Unsalted butter, softened",
+      "role": "fat",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": [
+        "Softened, not melted. Helps bind garlic/herbs and bastes under the skin."
+      ]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "Optional: brush over skin to encourage browning if butter is mostly under-skin."
+      ]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, finely grated or minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": [
+        "Use zest + juice in the butter; optional halves inside cavity for perfume."
+      ]
+    },
+    {
+      "id": "ing.parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.thyme",
+      "label": "Fresh thyme leaves",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": ["Or 1 tsp dried thyme."]
+    },
+    {
+      "id": "ing.rosemary",
+      "label": "Fresh rosemary, very finely chopped",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["Rosemary is potent—keep it fine and measured."]
+    },
+    {
+      "id": "ing.onion",
+      "label": "Onion, quartered",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": [
+        "Optional: place under chicken (or in pan) to flavor drippings for gravy/sauce."
+      ]
+    },
+    {
+      "id": "ing.chicken_stock_or_water",
+      "label": "Chicken stock or water",
+      "role": "pan_liquid",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": [
+        "Optional: add to pan to prevent scorching and create quick pan sauce."
+      ]
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "grp.chicken",
+      "label": "Chicken",
+      "items": ["ing.chicken_whole"]
+    },
+    {
+      "id": "grp.garlic_herb_lemon_butter",
+      "label": "Garlic-Herb Lemon Butter",
+      "items": [
+        "ing.butter_unsalted",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.parsley",
+        "ing.thyme",
+        "ing.rosemary",
+        "ing.salt_kosher",
+        "ing.black_pepper"
+      ]
+    },
+    {
+      "id": "grp.optional_pan_items",
+      "label": "Optional Pan Items",
+      "items": ["ing.onion", "ing.chicken_stock_or_water", "ing.olive_oil"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep_oven_pan",
+      "title": "Preheat oven and prep pan",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat oven to 425°F.",
+        "Place a roasting pan or large oven-safe skillet on the counter. If using onion, scatter it in the pan as a bed.",
+        "Optional: add 1/2 cup stock or water to the pan to reduce drippings scorching."
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 425,
+        "unit": "F",
+        "notes": "High heat starts crisp skin."
+      }
+    },
+    {
+      "id": "step.mix_butter",
+      "title": "Make garlic-herb lemon butter",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a small bowl, combine softened butter with grated garlic, lemon zest, 1–2 tsp lemon juice, parsley, thyme, rosemary, salt, and black pepper.",
+        "Mix until evenly blended and spreadable."
+      ]
+    },
+    {
+      "id": "step.dry_and_season",
+      "title": "Dry the chicken and season under the skin",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove giblets (if present) and pat chicken very dry with paper towels (including the cavity).",
+        "Gently loosen the skin over the breast and thighs with your fingers (avoid tearing).",
+        "Spread most of the garlic-herb butter under the skin over the breasts and thighs. Use the remainder over the outside of the skin."
+      ],
+      "checks": [
+        "Skin loosened without tearing",
+        "Butter distributed under breast skin"
+      ]
+    },
+    {
+      "id": "step.truss_optional",
+      "title": "Truss (optional) and place in pan",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Optional: truss the legs with kitchen twine for more even roasting.",
+        "Place chicken breast-side up in the pan (on top of onions if using).",
+        "Optional: brush a thin film of olive oil over skin for extra browning."
+      ]
+    },
+    {
+      "id": "step.roast_high_then_reduce",
+      "title": "Roast until golden, then finish to safe doneness",
+      "activeMins": 2,
+      "handsOffMins": 60,
+      "instructions": [
+        "Roast at 425°F for 20 minutes to start browning.",
+        "Reduce heat to 375°F and continue roasting until the thickest part of the breast reaches 160–165°F and the thigh reaches 175–185°F.",
+        "If the skin is browning too fast, tent loosely with foil for the remainder."
+      ],
+      "timers": [
+        { "label": "Initial high-heat roast", "minutes": 20 },
+        { "label": "Roast to doneness (estimate)", "minutes": 45 }
+      ],
+      "temperature": {
+        "type": "internal",
+        "value": 165,
+        "unit": "F",
+        "notes": "Target 160–165°F breast (carryover), 175–185°F thighs for tenderness."
+      },
+      "checks": [
+        "Skin golden-brown",
+        "Thermometer confirms breast 160–165°F",
+        "Thermometer confirms thigh 175–185°F"
+      ]
+    },
+    {
+      "id": "step.rest",
+      "title": "Rest, carve, and finish with lemon/herbs",
+      "activeMins": 8,
+      "handsOffMins": 10,
+      "instructions": [
+        "Transfer chicken to a board and rest 10 minutes (carryover cooking + juicier slices).",
+        "Carve: remove legs/thighs, separate drumsticks, slice breasts against the grain.",
+        "Optional: squeeze a little fresh lemon juice over carved meat and sprinkle extra chopped parsley."
+      ],
+      "timers": [{ "label": "Rest chicken", "minutes": 10 }]
+    },
+    {
+      "id": "step.quick_pan_sauce_optional",
+      "title": "Optional quick pan sauce (2 minutes)",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "If desired, place the pan on the stovetop over medium heat (careful: hot handle).",
+        "Skim excess fat, then simmer drippings (and any added stock) 1–2 minutes.",
+        "Add a squeeze of lemon and scrape browned bits; spoon over chicken."
+      ],
+      "optional": true,
+      "timers": [{ "label": "Pan sauce simmer", "minutes": 2 }]
+    }
+  ],
+
+  "methods": ["technique.roast", "technique.marinade"],
+
+  "pairings": {
+    "sides": [
+      "herb_garlic.garlic_herb_roasted_potatoes",
+      "herb_garlic.lemon_garlic_green_beans",
+      "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+      "salad.simple_green_salad"
+    ],
+    "sauces": [
+      "herb_garlic.garlic_herb_yogurt_sauce",
+      "herb_garlic.lemon_herb_vinaigrette"
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Cool within 2 hours. Store carved meat in an airtight container.",
+      "maxDays": 4
+    },
+    "freezer": {
+      "guidance": "Freeze carved meat (best) in portions with a little drippings; thaw overnight in fridge.",
+      "maxMonths": 3
+    },
+    "reheat": {
+      "best": [
+        "Oven 325°F covered with a splash of broth/drippings until warmed",
+        "Skillet with lid and a spoon of water/broth"
+      ],
+      "avoid": ["Over-microwaving breast meat (dries quickly)"]
+    }
+  },
+
+  "planner": {
+    "dishId": "herb_garlic.lemon_garlic_roast_chicken",
+    "course": "main",
+    "batchNotes": [
+      "Roast 2 chickens if oven space allows: use extra for wraps/salads/broth.",
+      "Save carcass for stock (storehouse-friendly)."
+    ],
+    "leftovers": [
+      "Shred for garlic-herb chicken salad",
+      "Use for lemony chicken orzo soup",
+      "Make broth from bones"
+    ]
+  },
+
+  "summary": "A canonical Herb & Garlic roast chicken: garlic-herb lemon butter seasons under the skin for juicy meat and crisp, fragrant skin.",
+
+  "keywords": [
+    "garlic",
+    "herb",
+    "lemon",
+    "roast chicken",
+    "oven roast",
+    "family dinner",
+    "crisp skin",
+    "juicy",
+    "pan sauce"
+  ],
+
+  "tags": [
+    "cuisine.herb_garlic",
+    "herb_garlic",
+    "garlic_forward",
+    "herb_forward",
+    "lemony",
+    "roast",
+    "main",
+    "family_style",
+    "leftovers_good",
+    "batch_friendly",
+    "gluten_free",
+    "keto_friendly",
+    "low_carb"
+  ],
+
+  "safety": {
+    "doneness": {
+      "guidance": "Cook to safe internal temperature. Breast 160–165°F, thigh 175–185°F for tenderness.",
+      "tool": "equip.thermometer"
+    },
+    "handling": [
+      "Avoid cross-contamination: wash hands, sanitize board/knife after raw chicken.",
+      "Cool leftovers quickly; refrigerate within 2 hours."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.dry_brine_overnight",
+      "label": "Dry-brine overnight for deeper seasoning",
+      "when": { "timeAvailableHoursGte": 8 },
+      "adapt": {
+        "notes": [
+          "Salt chicken (and optionally pepper) and refrigerate uncovered 8–24 hours for crisper skin.",
+          "Apply garlic-herb butter just before roasting."
+        ]
+      }
+    },
+    {
+      "id": "var.spatchcock",
+      "label": "Spatchcock for faster, more even roasting",
+      "when": { "wantsFaster": true },
+      "adapt": {
+        "notes": [
+          "Remove backbone and flatten chicken; roast at 425°F until breast 160–165°F (often ~40–50 minutes).",
+          "Butter can still go under skin."
+        ]
+      }
+    },
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free (olive oil herb paste)",
+      "when": { "avoidAllergen": "allergen.dairy" },
+      "adapt": {
+        "notes": [
+          "Replace butter with 3 tbsp olive oil + 1 tbsp additional oil for brushing skin.",
+          "Add 1 tsp Dijon mustard (optional) to help emulsify and adhere."
+        ],
+        "allergens": ["allergen.none"]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.herb_garlic.recipes.garlic_herb_roast_chicken",
+    "aliases": [
+      "garlic herb roast chicken",
+      "lemon garlic roast chicken",
+      "herb garlic roast chicken"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.roast"],
+      "coreIngredients": [
+        "ing.chicken_whole",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.parsley",
+        "ing.thyme",
+        "ing.rosemary"
+      ]
+    }
+  }
+}

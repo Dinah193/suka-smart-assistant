@@ -1,0 +1,504 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:58:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.bolognese",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Ragù alla Bolognese (Classic Meat Ragù)",
+    "subtitle": "Slow-simmered meat sauce for tagliatelle or lasagna (not a quick tomato sauce)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical-style ragù: soffritto + meat + small tomato + dairy/wine, gently simmered until rich.",
+        "Best with tagliatelle, pappardelle, or layered into lasagna."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "subprofiles": [
+      "italian.emilian",
+      "italian.bologna",
+      "italian.slow_cooked"
+    ],
+    "category": "sauce",
+    "mealArchetypes": ["plates", "bowls", "one_pot"],
+    "servingStyles": ["family_style", "one_pot", "plated_meals", "bowls"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.sauce",
+      "ragu",
+      "slow_cooked",
+      "batch.friendly",
+      "freezer_friendly",
+      "contains_dairy",
+      "contains_gluten_if_served_with_pasta",
+      "beef",
+      "pork_optional"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "Makes ~8 cups sauce (enough for 2 lb pasta or a large lasagna)."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 150,
+    "totalMins": 185
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": "high",
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": "high",
+    "notes": [
+      "Flavor improves after a rest overnight.",
+      "Ideal for make-ahead meal prep and freezing in portions."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "umami": 5,
+    "sweetness": 1,
+    "sourness": 1,
+    "heat": 0,
+    "oilUse": 2,
+    "notes": [
+      "This is meat-forward; tomato is supporting, not dominant.",
+      "Milk smooths acidity and rounds the sauce."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.dutch_oven",
+      "tool.wooden_spoon",
+      "tool.chef_knife",
+      "tool.cutting_board",
+      "tool.measuring_cups",
+      "tool.measuring_spoons",
+      "tool.ladle"
+    ],
+    "minimum": ["tool.heavy_pot", "tool.spoon", "tool.knife", "tool.board"],
+    "optional": [
+      {
+        "id": "tool.food_processor",
+        "label": "Food processor",
+        "required": false,
+        "notes": "Speeds up soffritto prep; avoid pureeing too fine."
+      }
+    ]
+  },
+
+  "dietFlags": [],
+  "allergens": ["allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "fat.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "fat.butter",
+      "label": "Unsalted butter",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Traditional richness; olive oil + butter is classic."
+    },
+
+    {
+      "id": "veg.onion_yellow",
+      "label": "Yellow onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "About 1 cup diced."
+    },
+    {
+      "id": "veg.carrot",
+      "label": "Carrot, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "About 3/4 cup diced."
+    },
+    {
+      "id": "veg.celery",
+      "label": "Celery stalks, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "About 3/4 cup diced."
+    },
+
+    {
+      "id": "meat.ground_beef",
+      "label": "Ground beef (80–85% lean)",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": "About 1.5 lb."
+    },
+    {
+      "id": "meat.ground_pork",
+      "label": "Ground pork",
+      "role": "protein",
+      "amount": { "value": 340, "unit": "g" },
+      "optional": true,
+      "notes": "About 3/4 lb. If skipping, increase beef to 2.25 lb total."
+    },
+
+    {
+      "id": "meat.pancetta",
+      "label": "Pancetta, finely chopped (optional)",
+      "role": "umami",
+      "amount": { "value": 85, "unit": "g" },
+      "optional": true,
+      "notes": "Adds depth; can omit for a simpler sauce."
+    },
+
+    {
+      "id": "wine.white_dry",
+      "label": "Dry white wine",
+      "role": "deglaze",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Dry red also works."
+    },
+
+    {
+      "id": "tomato.paste",
+      "label": "Tomato paste",
+      "role": "tomato",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "tomato.crushed",
+      "label": "Crushed tomatoes (or passata)",
+      "role": "tomato",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "About 14 oz. Keep tomato restrained."
+    },
+
+    {
+      "id": "dairy.milk_whole",
+      "label": "Whole milk",
+      "role": "dairy",
+      "amount": { "value": 360, "unit": "ml" },
+      "notes": "About 1 1/2 cups, added in stages."
+    },
+    {
+      "id": "stock.beef_or_chicken",
+      "label": "Beef or chicken stock (as needed)",
+      "role": "liquid",
+      "amount": { "value": 480, "unit": "ml" },
+      "optional": true,
+      "notes": "Used to loosen during simmer if it tightens too much."
+    },
+
+    {
+      "id": "seasoning.salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Start light; finish to taste."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "spice.nutmeg",
+      "label": "Fresh nutmeg (optional)",
+      "role": "spice",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": "A traditional whisper—don’t overdo it."
+    },
+    {
+      "id": "herb.bay_leaf",
+      "label": "Bay leaf",
+      "role": "aroma",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+
+    {
+      "id": "cheese.parmigiano_reggiano",
+      "label": "Parmigiano-Reggiano, grated (for serving)",
+      "role": "garnish",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_soffritto",
+      "title": "Build the soffritto (gentle, sweet, not browned)",
+      "instructions": [
+        "Heat olive oil and butter in a Dutch oven over medium-low.",
+        "Add onion, carrot, and celery with a pinch of salt.",
+        "Cook 10–15 minutes, stirring often, until soft and sweet (no strong browning)."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 7,
+      "timers": [{ "label": "Soffritto", "minutes": 12 }],
+      "checks": [
+        "Vegetables are very soft and aromatic.",
+        "No burnt bits; color should be pale-golden at most."
+      ]
+    },
+    {
+      "id": "step_02_pancetta_optional",
+      "title": "Render pancetta (optional)",
+      "instructions": [
+        "If using pancetta, add it to the pot and cook 3–5 minutes until it releases fat and turns lightly golden."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 2,
+      "checks": ["Pancetta is lightly golden; fat is rendered."]
+    },
+    {
+      "id": "step_03_brown_meat",
+      "title": "Brown the meat properly",
+      "instructions": [
+        "Increase heat to medium.",
+        "Add ground beef (and pork if using). Break it up and spread it out.",
+        "Cook until most moisture evaporates and the meat browns (10–15 minutes).",
+        "Season with black pepper and a bit more salt."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 3,
+      "timers": [{ "label": "Brown meat", "minutes": 12 }],
+      "checks": [
+        "Meat is browned in spots (not gray/steamed).",
+        "Fond is forming lightly on the bottom."
+      ]
+    },
+    {
+      "id": "step_04_deglaze_wine",
+      "title": "Deglaze with wine",
+      "instructions": [
+        "Pour in the wine and scrape up any browned bits.",
+        "Simmer until the wine is almost fully evaporated and the smell of alcohol is gone (3–6 minutes)."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 3,
+      "timers": [{ "label": "Reduce wine", "minutes": 5 }],
+      "checks": ["Liquid is reduced; aroma is mellow (not sharp/alcoholic)."]
+    },
+    {
+      "id": "step_05_milk_stage_1",
+      "title": "Add milk (stage 1) to soften and enrich",
+      "instructions": [
+        "Stir in about half the milk (3/4 cup).",
+        "Simmer gently, stirring occasionally, until mostly absorbed/evaporated (8–12 minutes).",
+        "Add nutmeg (optional) and bay leaf (optional)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 7,
+      "timers": [{ "label": "Reduce milk (stage 1)", "minutes": 10 }],
+      "checks": [
+        "Milk is mostly absorbed; sauce looks creamy, not watery.",
+        "No scorching on the bottom."
+      ]
+    },
+    {
+      "id": "step_06_tomato_and_simmer",
+      "title": "Add tomato and begin the long simmer",
+      "instructions": [
+        "Stir in tomato paste and cook 1 minute to bloom.",
+        "Add crushed tomatoes/passata and 1/2 cup water or stock (as needed) to keep it gently simmering.",
+        "Bring to a very low simmer (bare bubbles)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "Sauce is loose enough to simmer gently, not thick like paste.",
+        "Heat is low—no rapid boiling."
+      ]
+    },
+    {
+      "id": "step_07_low_simmer_finish",
+      "title": "Simmer low and slow (the flavor-making phase)",
+      "instructions": [
+        "Simmer partially covered for 2–3 hours, stirring every 15–20 minutes.",
+        "If it tightens too much, add splashes of stock/water to maintain a gentle simmer.",
+        "In the last 30 minutes, stir in the remaining milk (3/4 cup) in 2 additions, letting it absorb between additions."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 150,
+      "timers": [
+        { "label": "Low simmer", "minutes": 150 },
+        { "label": "Stir/check interval", "minutes": 20 }
+      ],
+      "checks": [
+        "Sauce is deeply flavored and cohesive; fat is integrated, not greasy.",
+        "Texture is thick, spoon-coating, and meat is tender."
+      ]
+    },
+    {
+      "id": "step_08_final_seasoning",
+      "title": "Final seasoning and serving",
+      "instructions": [
+        "Remove bay leaf (if used).",
+        "Taste and adjust salt and pepper.",
+        "Serve with tagliatelle/pappardelle or use as lasagna ragù; finish with Parmigiano."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": [
+        "Balance is savory and rich; tomato is present but not dominant."
+      ]
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Cool sauce quickly before refrigerating: portion into shallow containers, refrigerate within 2 hours.",
+      "Reheat to steaming hot (74°C / 165°F) before serving."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": ["Refrigerate up to 4 days. Flavor improves overnight."]
+    },
+    "freeze": {
+      "notes": [
+        "Freeze up to 3 months in 1–2 cup portions.",
+        "Thaw overnight in fridge for best texture."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat gently on stovetop; add a splash of water/stock if needed.",
+        "If serving with pasta, loosen with a bit of pasta water for a glossy finish."
+      ]
+    }
+  },
+
+  "pairings": {
+    "bestWith": {
+      "pasta": ["pasta.tagliatelle", "pasta.pappardelle", "pasta.rigatoni"],
+      "notes": [
+        "Tagliatelle is classic for Bologna-style ragù.",
+        "Use as the meat layer sauce for lasagna."
+      ]
+    },
+    "sides": {
+      "notes": [
+        "Simple green salad with lemon/olive oil.",
+        "Roasted vegetables (broccoli, zucchini, Brussels)."
+      ]
+    }
+  },
+
+  "notes": [
+    "Key success: low simmer + time. Don’t rush it.",
+    "Meat must brown (evaporate moisture first) to avoid a flat sauce.",
+    "Milk stages make it silky and round; it’s not optional for the classic profile (but can be adapted)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_all_beef",
+      "label": "All-beef ragù",
+      "when": { "preference": "no_pork" },
+      "adapt": {
+        "notes": [
+          "Use 2.25 lb (1020 g) ground beef total and add 1 tbsp olive oil if the pot seems dry during browning."
+        ],
+        "swapIngredients": [
+          { "from": "meat.ground_pork", "to": "meat.ground_beef" }
+        ]
+      }
+    },
+    {
+      "id": "variation_red_wine",
+      "label": "Use dry red wine",
+      "when": { "availability": "no_white_wine" },
+      "adapt": {
+        "notes": [
+          "Dry red adds deeper tannic notes; simmer off alcohol fully before proceeding."
+        ]
+      }
+    },
+    {
+      "id": "variation_quicker_ragu",
+      "label": "Shorter simmer (still good)",
+      "when": { "timeConstraint": "moderate" },
+      "adapt": {
+        "notes": [
+          "Simmer 75–90 minutes instead of 2–3 hours. Flavor will be lighter but still rich.",
+          "Keep the heat very low; prioritize browning and reduction steps."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      {
+        "role": "aromatic",
+        "ids": ["veg.onion_yellow", "veg.carrot", "veg.celery"]
+      },
+      { "role": "protein", "ids": ["meat.ground_beef", "meat.ground_pork"] },
+      { "role": "tomato", "ids": ["tomato.paste", "tomato.crushed"] },
+      { "role": "dairy", "ids": ["dairy.milk_whole"] }
+    ],
+    "makeAhead": {
+      "notes": [
+        "Best made 1 day ahead; chill overnight to deepen flavor.",
+        "Freeze in portions for quick weeknight pasta."
+      ]
+    },
+    "batch": {
+      "goodFor": ["mealprep.freezer_portions", "lasagna_build", "pasta_nights"],
+      "notes": [
+        "Portion and label with date; keep 1–2 cup increments for flexibility."
+      ]
+    }
+  },
+
+  "methods": [
+    "technique.saute",
+    "technique.brown",
+    "technique.deglaze",
+    "technique.simmer_low"
+  ],
+
+  "compat": {
+    "aliases": [
+      "bolognese",
+      "ragù alla bolognese",
+      "ragu alla bolognese",
+      "meat ragu",
+      "bologna sauce"
+    ],
+    "keywordBoost": [
+      "soffritto",
+      "slow simmer",
+      "milk in ragu",
+      "tagliatelle",
+      "lasagna ragu"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

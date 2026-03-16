@@ -19,7 +19,7 @@ try {
 } catch {
   try {
     // eslint-disable-next-line global-require, import/no-unresolved
-    const eb2 = require("@/services/eventBus");
+    const eb2 = require("@/services/events/eventBus");
     eventBus = eb2?.default || eb2?.eventBus || eb2 || eventBus;
   } catch {
     try {

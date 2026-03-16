@@ -6,7 +6,7 @@
 // This file is the **persistence spine** for SSA.
 //
 // Pipeline role:
-//   imports → intelligence → automation → (optional) Hub export
+// imports → intelligence → automation → (optional) Hub export
 //
 // - All normalized data (imports, inventory, sessions, logs, etc.) land here.
 // - Domain engines (meals, cleaning, garden, animals, preservation, storehouse)
@@ -24,7 +24,7 @@
 import Dexie from "dexie";
 
 // NOTE: In your project this lives at src/services/events/eventBus.js
-// and should provide an `.emit(payload)` API.
+// and should provide an .emit(payload) API.
 import eventBus from "./events/eventBus";
 
 // Hub helpers live under src/services/hub/
@@ -32,10 +32,10 @@ import HubPacketFormatter from "./hub/HubPacketFormatter";
 import FamilyFundConnector from "./hub/FamilyFundConnector";
 
 // Feature flags JSON (assumed at src/config/featureFlags.json)
-import featureFlags from "../config/featureFlags.json";
+import featureFlags from "@/config/featureFlags.json";
 
 /* -------------------------------------------------------------------------- */
-/* Utility helpers                                                            */
+/* Utility helpers */
 /* -------------------------------------------------------------------------- */
 
 function nowIso() {
@@ -50,9 +50,9 @@ function makeId(prefix = "sess") {
 /**
  * Emit a strongly-shaped SSA event.
  *
- * @param {string} type   Semantic event type (e.g. "inventory.updated").
+ * @param {string} type Semantic event type (e.g. "inventory.updated").
  * @param {string} source Short identifier of the emitter (e.g. "db.hook").
- * @param {object} data   Arbitrary structured payload.
+ * @param {object} data Arbitrary structured payload.
  */
 function emitEvent(type, source, data) {
   if (!eventBus || typeof eventBus.emit !== "function") {
@@ -85,7 +85,7 @@ function emitEvent(type, source, data) {
  *
  * This **must not** throw; Hub connectivity is best-effort only.
  *
- * @param {string} domain  Logical domain ("inventory" | "storehouse" | "sessions" | etc.)
+ * @param {string} domain Logical domain ("inventory" | "storehouse" | "sessions" | etc.)
  * @param {object} payload Structured data describing the change.
  */
 async function exportToHubIfEnabled(domain, payload) {
@@ -102,7 +102,7 @@ async function exportToHubIfEnabled(domain, payload) {
       if (import.meta?.env?.DEV) {
         console.warn(
           "[db] Hub helpers not available; skipping Hub export for domain:",
-          domain
+          domain,
         );
       }
       return;
@@ -125,25 +125,27 @@ async function exportToHubIfEnabled(domain, payload) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Dexie database definition                                                  */
+/* Dexie database definition */
 /* -------------------------------------------------------------------------- */
 
 /**
  * Single, shared Dexie instance for the entire SSA runtime.
  *
  * Version 1 schema:
- * - imports:    normalized imported artifacts, regardless of domain.
- * - sessions:   runnable sessions (cooking, cleaning, garden, animal, preservation).
- * - inventory:  line items in the household inventory.
+ * - imports: normalized imported artifacts, regardless of domain.
+ * - sessions: runnable sessions (cooking, cleaning, garden, animal, preservation).
+ * - inventory: line items in the household inventory.
  * - storehouse: higher-level “storehouse” view (by category/season/cycle).
- * - logs:       generic diagnostic / analytics events.
+ * - logs: generic diagnostic / analytics events.
  *
  * Sessions table is domain-agnostic:
- *   - domain = "cooking" | "cleaning" | "garden" | "animals" | "preservation" | ...
- *   - status = "draft" | "scheduled" | "running" | "completed" | "aborted"
+ * - domain = "cooking" | "cleaning" | "garden" | "animals" | "preservation" | ...
+ * - status = "draft" | "scheduled" | "running" | "completed" | "aborted"
  */
-
 export const db = new Dexie("sukaSmartAssistant");
+
+// ✅ Back-compat named export for code that imports { ssaDB } from "@/services/db"
+export const ssaDB = db;
 
 /**
  * v1 (legacy) used auto-increment numeric ids for sessions.
@@ -152,47 +154,39 @@ export const db = new Dexie("sukaSmartAssistant");
 db.version(1).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   // LEGACY: numeric autoincrement id
   sessions:
     "++id, domain, status, startedAt, updatedAt, plannedFor, originImportId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
 });
 
 /**
  * ✅ Option A (safe): Keep numeric primary key (so we DO NOT change primary key),
- * but introduce a canonical, stable string identifier: `sessionId`.
+ * but introduce a canonical, stable string identifier: sessionId.
  *
  * This avoids Dexie "changing primary key" UpgradeError, while still allowing
  * routes to use the stable string id.
  *
  * Important:
- * - Primary key remains `++id` (unchanged).
- * - We add `sessionId` as an indexed field for fast lookup.
- * - All code should treat `sessionId` as the canonical identifier for play/resume.
+ * - Primary key remains ++id (unchanged).
+ * - We add sessionId as an indexed field for fast lookup.
+ * - All code should treat sessionId as the canonical identifier for play/resume.
  */
 db.version(2)
   .stores({
     imports:
       "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
     // ✅ SAME PRIMARY KEY as v1 (++) — only adds indexes.
     sessions:
       "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
     inventory:
       "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
     storehouse:
       "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
     logs: "++id, domain, level, ts, tag",
   })
   .upgrade(async (tx) => {
@@ -206,11 +200,12 @@ db.version(2)
         // If already has a sessionId, leave it.
         if (typeof s?.sessionId === "string" && s.sessionId.length) continue;
 
-        const legacyId = s?.legacyId ?? s?.id; // v1 numeric PK lives in `id`
+        const legacyId = s?.legacyId ?? s?.id; // v1 numeric PK lives in id
         const sessionId = makeId(String(s?.domain || "sess"));
 
         // Use table.update(key, mods) so we don't rewrite PK.
-        // NOTE: In Dexie upgrade tx, records from toArray() include the numeric PK at `id`.
+        // NOTE: In Dexie upgrade tx, records from toArray() include the numeric PK at id.
+        // eslint-disable-next-line no-await-in-loop
         await table.update(s.id, {
           sessionId,
           legacyId: legacyId ?? s.id,
@@ -225,7 +220,7 @@ db.version(2)
       if (import.meta?.env?.DEV) {
         console.warn(
           "[db] sessions migration v1->v2 encountered an issue:",
-          err
+          err,
         );
       }
     }
@@ -233,31 +228,17 @@ db.version(2)
 
 /**
  * ✅ v3: Add cleaningPlans (NEW TABLE) without changing existing PKs.
- *
- * - We keep all existing primary keys exactly the same.
- * - sessions keeps `++id` as PK (unchanged).
- * - cleaningPlans uses a string primary key: `id`
- *   (this is safe because it's a brand-new table introduced in v3).
- *
- * Index notes:
- * - `*zones` is a multiEntry index so you can filter by zone quickly.
- * - Keep the index string stable; changing it later requires another schema version.
  */
 db.version(3).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   // NEW: reusable cleaning plans library (brand-new table; safe to introduce)
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
@@ -265,50 +246,19 @@ db.version(3).stores({
 
 /**
  * ✅ v4: Add planningDrafts (NEW TABLE) for cross-domain planner artifacts.
- *
- * Purpose:
- * - Draft artifacts generated by "Estimate" / "Plan" buttons (ex: Animals Stocking Estimate)
- * - Must show immediately on the originating domain page AND surface in Homestead Planner.
- * - This table is intentionally NOT tied to runnable Play sessions.
- *
- * Draft Contract (recommended):
- * {
- *   id: string,
- *   kind: "animal.stocking.draft" | ...,
- *   domain: "animals" | "garden" | "storehouse" | ...,
- *   title: string,
- *   status: "draft"|"saved"|"archived",
- *   createdAt: ISO,
- *   updatedAt: ISO,
- *   homesteadPlanId: string|null,
- *   inputs: object,
- *   outputs: object,
- *   links: { homesteadPlanId?: string|null, relatedIds?: string[] },
- *   metadata: { source?: string, version?: number }
- * }
- *
- * Index notes:
- * - `id` is the primary key (string). This is safe because it's a brand-new table.
- * - We index by kind/domain/status for fast "latest animals stocking draft" queries.
  */
 db.version(4).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   // NEW: planning drafts (cross-domain artifacts)
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
@@ -316,40 +266,21 @@ db.version(4).stores({
 
 /**
  * ✅ v5: Add Import Pipeline tables (NEW TABLES)
- *
- * Tables added:
- * - importRaw
- * - importNormalized
- * - importLinkMaps
- * - importLogs
- *
- * These are required by the new multi-step Import wizard pages.
- *
- * IMPORTANT:
- * - We do NOT change primary keys of existing tables.
- * - All 4 tables are brand-new, so we can safely add them in a new version.
  */
 db.version(5).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
   // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   importRaw: "id, domain, createdAtISO, updatedAtISO, source.kind, source.url",
   importNormalized:
@@ -359,38 +290,22 @@ db.version(5).stores({
 });
 
 /**
- * ✅ v6: Add helpful compound indexes for per-domain import browsing (Cooking + Garden + others)
- *
- * Why:
- * - Import UIs often need "latest imports for this domain".
- * - Compound indexes make per-domain sorting/filtering cheaper and more consistent.
- *
- * IMPORTANT:
- * - No primary key changes.
- * - Only adds indexes to the 4 import pipeline tables.
+ * ✅ v6: Add helpful compound indexes for per-domain import browsing
  */
 db.version(6).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-  // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   // Added compound indexes: [domain+createdAtISO] and [domain+ts]
   importRaw:
     "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], source.kind, source.url",
@@ -402,41 +317,22 @@ db.version(6).stores({
 });
 
 /**
- * ✅ v7: Import Pipeline conveniences for Homestead Planner + Meal Planner + Storehouse
- *
- * What changed:
- * - No new tables required (we already have importRaw/importNormalized/importLinkMaps/importLogs).
- * - We add additional secondary indexes that make the new domain Import pages faster:
- *   - importNormalized: [domain+rawId] for quick joins
- *   - importLinkMaps:  [domain+normId] and [domain+rawId] for quick retrieval
- *   - importRaw:       [domain+fingerprint] to reduce duplicates (best-effort)
- *
- * IMPORTANT:
- * - No primary key changes.
- * - This is safe additive indexing only.
+ * ✅ v7: Import Pipeline conveniences (extra secondary indexes)
  */
 db.version(7).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-  // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   importRaw:
     "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
   importNormalized:
@@ -447,42 +343,22 @@ db.version(7).stores({
 });
 
 /**
- * ✅ v8: Cooking Import Library tables (recipes + tools + utensils + equipment)
- *
- * Purpose:
- * - Persist cooking imports into SSA-owned libraries:
- *   • recipes (structured recipe objects)
- *   • kitchenTools (tools used for cooking)
- *   • kitchenUtensils (hand utensils, smallwares)
- *   • kitchenEquipment (appliances, larger equipment)
- *
- * Notes:
- * - These tables are local-first; they are NOT exported to Hub automatically.
- * - They are designed to be populated by the Cooking Import pipeline (and later edited by UI).
- * - Primary keys are string `id` (safe: brand-new tables introduced in v8).
+ * ✅ v8: Cooking Import Library tables
  */
 db.version(8).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-  // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   importRaw:
     "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
   importNormalized:
@@ -490,7 +366,6 @@ db.version(8).stores({
   importLinkMaps:
     "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
   importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
-
   // --- Cooking libraries (NEW in v8) ---
   recipeLibrary:
     "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
@@ -504,39 +379,21 @@ db.version(8).stores({
 
 /**
  * ✅ v9: Session persistence support (checkpoints + kv)
- *
- * Add/confirm these stores in your Dexie schema:
- * - sessionCheckpoints: stores checkpoint snapshots so sessions survive reload/navigation
- * - kv: optional key-value store for lastActiveSessionId per domain (fallback is localStorage)
- *
- * IMPORTANT:
- * - We DO NOT change the existing sessions primary key (still ++id).
- * - This matches the interactive Play pages that soft-import db and expect:
- *     db.sessionCheckpoints
- *     db.kv
  */
 db.version(9).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-  // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   importRaw:
     "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
   importNormalized:
@@ -544,8 +401,6 @@ db.version(9).stores({
   importLinkMaps:
     "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
   importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
-
-  // --- Cooking libraries ---
   recipeLibrary:
     "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
   kitchenTools:
@@ -554,7 +409,6 @@ db.version(9).stores({
     "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
   kitchenEquipment:
     "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
-
   // ✅ NEW: Session checkpoints + key-value store
   sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
   kv: "key",
@@ -562,38 +416,21 @@ db.version(9).stores({
 
 /**
  * ✅ v10: Nutrition tools support (ToolsHub.jsx)
- *
- * Adds:
- * - personProfiles: household members and baseline anthropometrics
- * - nutritionPreferences: per-person goal/preferences used by BMI/Macros/Micros
- * - toolRunLogs: auditable runs of nutrition tools (local-first)
- *
- * IMPORTANT:
- * - No primary key changes to existing tables.
- * - This is additive and safe.
  */
 db.version(10).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-  // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   importRaw:
     "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
   importNormalized:
@@ -601,8 +438,6 @@ db.version(10).stores({
   importLinkMaps:
     "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
   importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
-
-  // --- Cooking libraries ---
   recipeLibrary:
     "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
   kitchenTools:
@@ -611,11 +446,8 @@ db.version(10).stores({
     "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
   kitchenEquipment:
     "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
-
-  // --- Session persistence ---
   sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
   kv: "key",
-
   // ✅ NEW: Nutrition tools tables
   personProfiles:
     "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
@@ -625,39 +457,21 @@ db.version(10).stores({
 
 /**
  * ✅ v11: Nutrition → MealPlan → Grocery → Session Drafts
- *
- * Adds:
- * - nutritionTargetsHistory
- * - mealPlanDrafts
- * - groceryDrafts
- * - sessionDrafts
- *
- * IMPORTANT:
- * - No primary key changes to existing tables.
- * - These are additive and safe.
  */
 db.version(11).stores({
   imports:
     "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
   sessions:
     "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
   inventory:
     "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
   storehouse:
     "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
   logs: "++id, domain, level, ts, tag",
-
   cleaningPlans:
     "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
   planningDrafts:
     "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-  // --- Import pipeline tables (raw + normalized + link maps + logs) ---
   importRaw:
     "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
   importNormalized:
@@ -665,8 +479,6 @@ db.version(11).stores({
   importLinkMaps:
     "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
   importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
-
-  // --- Cooking libraries ---
   recipeLibrary:
     "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
   kitchenTools:
@@ -675,17 +487,12 @@ db.version(11).stores({
     "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
   kitchenEquipment:
     "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
-
-  // --- Session persistence ---
   sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
   kv: "key",
-
-  // --- Nutrition tools tables ---
   personProfiles:
     "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
   nutritionPreferences: "id, personId, goal, createdAt, updatedAt",
   toolRunLogs: "id, personId, tool, createdAt",
-
   // ✅ NEW: Nutrition→MealPlan→Grocery→Session draft chain tables
   nutritionTargetsHistory: "id, householdId, personId, appliedAt, createdAt",
   mealPlanDrafts: "id, householdId, personId, targetsId, updatedAt, createdAt",
@@ -693,7 +500,6 @@ db.version(11).stores({
     "id, householdId, personId, targetsId, mealPlanId, updatedAt, createdAt",
   sessionDrafts:
     "id, householdId, personId, targetsId, mealPlanId, groceryId, updatedAt, createdAt",
-
   // ✅ NEW (patch): quick add drafts + audit trail (offline-first)
   quickAddDrafts:
     "id, createdAt, updatedAt, householdId, personId, detectedDomain, status",
@@ -703,38 +509,22 @@ db.version(11).stores({
 
 /**
  * ✅ v12: Layer Spine tables (artifacts → parsed → method map → blueprint → overrides)
- *
- * IMPORTANT:
- * - Dexie requires each version().stores({...}) to include ALL tables for that version.
- * - We DO NOT rely on db._dbSchema here (avoids any internal/private behavior).
- * - We simply extend the v11 schema explicitly and safely.
- *
- * Migration:
- * - New tables only; no destructive changes; upgrade hook is no-op for now.
  */
 db.version(12)
   .stores({
     imports:
       "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
     sessions:
       "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
     inventory:
       "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
     storehouse:
       "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
     logs: "++id, domain, level, ts, tag",
-
     cleaningPlans:
       "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
     planningDrafts:
       "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
-    // --- Import pipeline tables (raw + normalized + link maps + logs) ---
     importRaw:
       "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
     importNormalized:
@@ -742,8 +532,6 @@ db.version(12)
     importLinkMaps:
       "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
     importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
-
-    // --- Cooking libraries ---
     recipeLibrary:
       "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
     kitchenTools:
@@ -752,18 +540,12 @@ db.version(12)
       "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
     kitchenEquipment:
       "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
-
-    // --- Session persistence ---
     sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
     kv: "key",
-
-    // --- Nutrition tools tables ---
     personProfiles:
       "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
     nutritionPreferences: "id, personId, goal, createdAt, updatedAt",
     toolRunLogs: "id, personId, tool, createdAt",
-
-    // --- Draft chain tables (Nutrition → MealPlan → Grocery → Session) ---
     nutritionTargetsHistory: "id, householdId, personId, appliedAt, createdAt",
     mealPlanDrafts:
       "id, householdId, personId, targetsId, updatedAt, createdAt",
@@ -771,32 +553,23 @@ db.version(12)
       "id, householdId, personId, targetsId, mealPlanId, updatedAt, createdAt",
     sessionDrafts:
       "id, householdId, personId, targetsId, mealPlanId, groceryId, updatedAt, createdAt",
-
-    // --- Quick Add tables ---
     quickAddDrafts:
       "id, createdAt, updatedAt, householdId, personId, detectedDomain, status",
     quickAddHistory:
       "id, createdAt, updatedAt, householdId, personId, domain, source",
-
     // ============================================================
     // NEW: Layer Spine tables (L0 → L3 + overrides + cache)
     // ============================================================
-
     artifacts:
       "++id, kind, domain, source, fingerprint, createdAt, updatedAt, status, sessionId, [kind+fingerprint], [domain+createdAt], [domain+status]",
-
     parsed_candidates:
       "++id, artifactId, domain, parser, fingerprint, createdAt, updatedAt, status, [artifactId+parser], [domain+createdAt], [domain+status]",
-
     method_maps:
       "++id, artifactId, candidateId, domain, methodKey, confidence, createdAt, updatedAt, status, [domain+methodKey], [candidateId+methodKey], [domain+status]",
-
     blueprints:
       "++id, domain, blueprintKey, createdAt, updatedAt, artifactId, candidateId, methodMapId, sessionId, status, [domain+createdAt], [domain+status], [domain+blueprintKey]",
-
     layer_overrides:
       "++id, scope, scopeId, domain, methodKey, createdAt, updatedAt, isActive, [scope+scopeId], [domain+methodKey], [scope+scopeId+domain], [scope+scopeId+domain+methodKey]",
-
     parse_cache: "fingerprint, createdAt, updatedAt, domain",
   })
   .upgrade(async () => {
@@ -806,46 +579,23 @@ db.version(12)
 
 /**
  * ✅ v13: Shopping Mode (staging + price observations + ad impressions + receipts)
- *
- * Adds tables (minimum requested):
- * - shoppingSessions: shopping session lifecycle (in-store trip)
- * - shoppingCandidates: provisional scanned items (NOT committed)
- * - priceObservations: price snapshots by UPC/store/time
- * - adImpressions: ad/sponsored impressions + transparency + caps
- *
- * Also adds optional-but-expected support tables for the services you listed:
- * - couponMatches
- * - recallAlerts
- * - sponsoredPlacements (what showed, why, caps)
- * - receiptReconciliations (receipt → candidate reconciliation and commit state)
- *
- * IMPORTANT:
- * - All are NEW tables (safe additive change).
- * - No primary key changes to existing tables.
  */
 db.version(13)
   .stores({
     // ---------- carry forward v12 schema (must include ALL tables) ----------
     imports:
       "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
-
     sessions:
       "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
-
     inventory:
       "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
-
     storehouse:
       "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
-
     logs: "++id, domain, level, ts, tag",
-
     cleaningPlans:
       "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
-
     planningDrafts:
       "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
-
     importRaw:
       "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
     importNormalized:
@@ -853,7 +603,6 @@ db.version(13)
     importLinkMaps:
       "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
     importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
-
     recipeLibrary:
       "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
     kitchenTools:
@@ -862,15 +611,12 @@ db.version(13)
       "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
     kitchenEquipment:
       "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
-
     sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
     kv: "key",
-
     personProfiles:
       "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
     nutritionPreferences: "id, personId, goal, createdAt, updatedAt",
     toolRunLogs: "id, personId, tool, createdAt",
-
     nutritionTargetsHistory: "id, householdId, personId, appliedAt, createdAt",
     mealPlanDrafts:
       "id, householdId, personId, targetsId, updatedAt, createdAt",
@@ -878,12 +624,10 @@ db.version(13)
       "id, householdId, personId, targetsId, mealPlanId, updatedAt, createdAt",
     sessionDrafts:
       "id, householdId, personId, targetsId, mealPlanId, groceryId, updatedAt, createdAt",
-
     quickAddDrafts:
       "id, createdAt, updatedAt, householdId, personId, detectedDomain, status",
     quickAddHistory:
       "id, createdAt, updatedAt, householdId, personId, domain, source",
-
     artifacts:
       "++id, kind, domain, source, fingerprint, createdAt, updatedAt, status, sessionId, [kind+fingerprint], [domain+createdAt], [domain+status]",
     parsed_candidates:
@@ -895,49 +639,21 @@ db.version(13)
     layer_overrides:
       "++id, scope, scopeId, domain, methodKey, createdAt, updatedAt, isActive, [scope+scopeId], [domain+methodKey], [scope+scopeId+domain], [scope+scopeId+domain+methodKey]",
     parse_cache: "fingerprint, createdAt, updatedAt, domain",
-
     // -------------------- NEW: Shopping Mode tables --------------------
-
-    // Shopping session lifecycle
-    // id: string PK (safe: new table)
-    // sessionId: optional linkage to runnable SSA sessions if you later build a ShoppingSessionEngine
-    // storeIds: multiEntry for querying "which sessions involved store X"
-    // [householdId+startedAt] for "recent trips"
     shoppingSessions:
       "id, householdId, userId, status, startedAt, endedAt, updatedAt, createdAt, sessionId, *storeIds, primaryStoreId, [householdId+startedAt], [householdId+status], [userId+startedAt]",
-
-    // Provisional scanned items (NOT committed)
-    // candidateId is string PK; also index by upc + store + session
-    // status: staged|matched|reconciled|committed|discarded
     shoppingCandidates:
       "candidateId, shoppingSessionId, householdId, userId, upc, sku, createdAt, updatedAt, status, storeId, [shoppingSessionId+createdAt], [shoppingSessionId+status], [storeId+upc], [householdId+createdAt], [upc+createdAt], fingerprint",
-
-    // Price snapshots by UPC/location/time
-    // observationId string PK for dedupe; also supports querying latest price per store/upc
     priceObservations:
       "observationId, upc, storeId, storeChainId, observedAt, createdAt, [storeId+upc], [storeId+observedAt], [upc+observedAt], [storeChainId+upc], source, currency",
-
-    // Ad impressions (for sponsored placement + transparency controls)
-    // impressionId string PK; indexes for caps and audit
     adImpressions:
       "impressionId, householdId, userId, shoppingSessionId, storeId, upc, placementId, shownAt, createdAt, [shoppingSessionId+shownAt], [storeId+shownAt], [userId+shownAt], [placementId+shownAt], [upc+shownAt]",
-
-    // Optional support tables aligned to your planned services:
-
-    // Coupons: matches tied to UPC/store/eligibility
     couponMatches:
       "matchId, upc, storeId, storeChainId, eligibleAt, expiresAt, createdAt, [storeId+upc], [upc+expiresAt], [storeChainId+upc], source, status",
-
-    // Recalls: matches tied to UPC/brand/lot info (when available)
     recallAlerts:
       "alertId, upc, brand, issuedAt, updatedAt, createdAt, status, severity, [upc+issuedAt], [brand+issuedAt], source",
-
-    // Sponsored listing metadata (what showed, why, caps)
     sponsoredPlacements:
       "placementId, provider, campaignId, storeId, storeChainId, upc, createdAt, updatedAt, status, [storeId+upc], [campaignId+createdAt], [provider+campaignId], caps.daily, caps.weekly",
-
-    // Receipt reconciliation: receipt → candidates → commit gating
-    // Lets you keep shopping scans staged until receipt arrives.
     receiptReconciliations:
       "reconId, householdId, userId, shoppingSessionId, storeId, receiptFingerprint, receivedAt, status, createdAt, updatedAt, [shoppingSessionId+receivedAt], [receiptFingerprint+receivedAt], [householdId+receivedAt]",
   })
@@ -946,7 +662,6 @@ db.version(13)
     // - No required backfill for new tables.
     // Keep hook for future schema hardening.
     try {
-      // Example: noop placeholder to keep Dexie happy in some environments
       void tx;
     } catch {
       // ignore
@@ -954,7 +669,388 @@ db.version(13)
   });
 
 /* -------------------------------------------------------------------------- */
-/* Dexie hooks → SSA events (+ optional Hub export)                           */
+/* Cuisine Profiles (AAI Cuisine) tables — version 14 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * ✅ v14: Cuisine Profiles tables
+ */
+db.version(14)
+  .stores({
+    // ---------- carry forward v13 schema ----------
+    imports:
+      "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
+    sessions:
+      "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
+    inventory:
+      "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
+    storehouse:
+      "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
+    logs: "++id, domain, level, ts, tag",
+    cleaningPlans:
+      "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
+    planningDrafts:
+      "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
+    importRaw:
+      "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
+    importNormalized:
+      "id, rawId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], confidence.overall",
+    importLinkMaps:
+      "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
+    importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
+    recipeLibrary:
+      "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
+    kitchenTools:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    kitchenUtensils:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    kitchenEquipment:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
+    kv: "key",
+    personProfiles:
+      "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
+    nutritionPreferences: "id, personId, goal, createdAt, updatedAt",
+    toolRunLogs: "id, personId, tool, createdAt",
+    nutritionTargetsHistory: "id, householdId, personId, appliedAt, createdAt",
+    mealPlanDrafts:
+      "id, householdId, personId, targetsId, updatedAt, createdAt",
+    groceryDrafts:
+      "id, householdId, personId, targetsId, mealPlanId, updatedAt, createdAt",
+    sessionDrafts:
+      "id, householdId, personId, targetsId, mealPlanId, groceryId, updatedAt, createdAt",
+    quickAddDrafts:
+      "id, createdAt, updatedAt, householdId, personId, detectedDomain, status",
+    quickAddHistory:
+      "id, createdAt, updatedAt, householdId, personId, domain, source",
+    artifacts:
+      "++id, kind, domain, source, fingerprint, createdAt, updatedAt, status, sessionId, [kind+fingerprint], [domain+createdAt], [domain+status]",
+    parsed_candidates:
+      "++id, artifactId, domain, parser, fingerprint, createdAt, updatedAt, status, [artifactId+parser], [domain+createdAt], [domain+status]",
+    method_maps:
+      "++id, artifactId, candidateId, domain, methodKey, confidence, createdAt, updatedAt, status, [domain+methodKey], [candidateId+methodKey], [domain+status]",
+    blueprints:
+      "++id, domain, blueprintKey, createdAt, updatedAt, artifactId, candidateId, methodMapId, sessionId, status, [domain+createdAt], [domain+status], [domain+blueprintKey]",
+    layer_overrides:
+      "++id, scope, scopeId, domain, methodKey, createdAt, updatedAt, isActive, [scope+scopeId], [domain+methodKey], [scope+scopeId+domain], [scope+scopeId+domain+methodKey]",
+    parse_cache: "fingerprint, createdAt, updatedAt, domain",
+    shoppingSessions:
+      "id, householdId, userId, status, startedAt, endedAt, updatedAt, createdAt, sessionId, *storeIds, primaryStoreId, [householdId+startedAt], [householdId+status], [userId+startedAt]",
+    shoppingCandidates:
+      "candidateId, shoppingSessionId, householdId, userId, upc, sku, createdAt, updatedAt, status, storeId, [shoppingSessionId+createdAt], [shoppingSessionId+status], [storeId+upc], [householdId+createdAt], [upc+createdAt], fingerprint",
+    priceObservations:
+      "observationId, upc, storeId, storeChainId, observedAt, createdAt, [storeId+upc], [storeId+observedAt], [upc+observedAt], [storeChainId+upc], source, currency",
+    adImpressions:
+      "impressionId, householdId, userId, shoppingSessionId, storeId, upc, placementId, shownAt, createdAt, [shoppingSessionId+shownAt], [storeId+shownAt], [userId+shownAt], [placementId+shownAt], [upc+shownAt]",
+    couponMatches:
+      "matchId, upc, storeId, storeChainId, eligibleAt, expiresAt, createdAt, [storeId+upc], [upc+expiresAt], [storeChainId+upc], source, status",
+    recallAlerts:
+      "alertId, upc, brand, issuedAt, updatedAt, createdAt, status, severity, [upc+issuedAt], [brand+issuedAt], source",
+    sponsoredPlacements:
+      "placementId, provider, campaignId, storeId, storeChainId, upc, createdAt, updatedAt, status, [storeId+upc], [campaignId+createdAt], [provider+campaignId], caps.daily, caps.weekly",
+    receiptReconciliations:
+      "reconId, householdId, userId, shoppingSessionId, storeId, receiptFingerprint, receivedAt, status, createdAt, updatedAt, [shoppingSessionId+receivedAt], [receiptFingerprint+receivedAt], [householdId+receivedAt]",
+    // ---------- NEW cuisine tables ----------
+    cuisine_profiles: "++id,&key,name,enabledByDefault,createdAt,updatedAt",
+    cuisine_rulesets:
+      "++id,cuisineKey,versionTag,updatedAt,[cuisineKey+versionTag]",
+    cuisine_user_prefs: "++id,householdId,updatedAt",
+    cuisine_rotation_state:
+      "++id,householdId,cuisineKey,weekIndex,updatedAt,[householdId+cuisineKey],[householdId+updatedAt]",
+    // Optional indexes (safe to add now; can be used later for recipe linking)
+    cuisine_recipe_index:
+      "++id,recipeId,cuisineKey,updatedAt,[recipeId+cuisineKey],[cuisineKey+updatedAt]",
+    preservation_outputs_index:
+      "++id,householdId,itemKey,updatedAt,[householdId+itemKey],[itemKey+updatedAt]",
+  })
+  .upgrade(async (tx) => {
+    // Non-destructive, best-effort backfill: nothing required.
+    try {
+      void tx;
+    } catch {
+      /* ignore */
+    }
+  });
+
+/* -------------------------------------------------------------------------- */
+/* Homestead Planner (Farm-to-Table / FTT) tables — version 15 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * ✅ v15: Add/confirm tables used by Homestead Planner (FTT)
+ */
+db.version(15)
+  .stores({
+    // ---------- carry forward v14 schema ----------
+    imports:
+      "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
+    sessions:
+      "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
+    inventory:
+      "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
+    storehouse:
+      "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
+    logs: "++id, domain, level, ts, tag",
+    cleaningPlans:
+      "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
+    planningDrafts:
+      "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
+    importRaw:
+      "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
+    importNormalized:
+      "id, rawId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], confidence.overall",
+    importLinkMaps:
+      "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
+    importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
+    recipeLibrary:
+      "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
+    kitchenTools:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    kitchenUtensils:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    kitchenEquipment:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
+    kv: "key",
+    personProfiles:
+      "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
+    nutritionPreferences: "id, personId, goal, createdAt, updatedAt",
+    toolRunLogs: "id, personId, tool, createdAt",
+    nutritionTargetsHistory: "id, householdId, personId, appliedAt, createdAt",
+    mealPlanDrafts:
+      "id, householdId, personId, targetsId, updatedAt, createdAt",
+    groceryDrafts:
+      "id, householdId, personId, targetsId, mealPlanId, updatedAt, createdAt",
+    sessionDrafts:
+      "id, householdId, personId, targetsId, mealPlanId, groceryId, updatedAt, createdAt",
+    quickAddDrafts:
+      "id, createdAt, updatedAt, householdId, personId, detectedDomain, status",
+    quickAddHistory:
+      "id, createdAt, updatedAt, householdId, personId, domain, source",
+    artifacts:
+      "++id, kind, domain, source, fingerprint, createdAt, updatedAt, status, sessionId, [kind+fingerprint], [domain+createdAt], [domain+status]",
+    parsed_candidates:
+      "++id, artifactId, domain, parser, fingerprint, createdAt, updatedAt, status, [artifactId+parser], [domain+createdAt], [domain+status]",
+    method_maps:
+      "++id, artifactId, candidateId, domain, methodKey, confidence, createdAt, updatedAt, status, [domain+methodKey], [candidateId+methodKey], [domain+status]",
+    blueprints:
+      "++id, domain, blueprintKey, createdAt, updatedAt, artifactId, candidateId, methodMapId, sessionId, status, [domain+createdAt], [domain+status], [domain+blueprintKey]",
+    layer_overrides:
+      "++id, scope, scopeId, domain, methodKey, createdAt, updatedAt, isActive, [scope+scopeId], [domain+methodKey], [scope+scopeId+domain], [scope+scopeId+domain+methodKey]",
+    parse_cache: "fingerprint, createdAt, updatedAt, domain",
+    shoppingSessions:
+      "id, householdId, userId, status, startedAt, endedAt, updatedAt, createdAt, sessionId, *storeIds, primaryStoreId, [householdId+startedAt], [householdId+status], [userId+startedAt]",
+    shoppingCandidates:
+      "candidateId, shoppingSessionId, householdId, userId, upc, sku, createdAt, updatedAt, status, storeId, [shoppingSessionId+createdAt], [shoppingSessionId+status], [storeId+upc], [householdId+createdAt], [upc+createdAt], fingerprint",
+    priceObservations:
+      "observationId, upc, storeId, storeChainId, observedAt, createdAt, [storeId+upc], [storeId+observedAt], [upc+observedAt], [storeChainId+upc], source, currency",
+    adImpressions:
+      "impressionId, householdId, userId, shoppingSessionId, storeId, upc, placementId, shownAt, createdAt, [shoppingSessionId+shownAt], [storeId+shownAt], [userId+shownAt], [placementId+shownAt], [upc+shownAt]",
+    couponMatches:
+      "matchId, upc, storeId, storeChainId, eligibleAt, expiresAt, createdAt, [storeId+upc], [upc+expiresAt], [storeChainId+upc], source, status",
+    recallAlerts:
+      "alertId, upc, brand, issuedAt, updatedAt, createdAt, status, severity, [upc+issuedAt], [brand+issuedAt], source",
+    sponsoredPlacements:
+      "placementId, provider, campaignId, storeId, storeChainId, upc, createdAt, updatedAt, status, [storeId+upc], [campaignId+createdAt], [provider+campaignId], caps.daily, caps.weekly",
+    receiptReconciliations:
+      "reconId, householdId, userId, shoppingSessionId, storeId, receiptFingerprint, receivedAt, status, createdAt, updatedAt, [shoppingSessionId+receivedAt], [receiptFingerprint+receivedAt], [householdId+receivedAt]",
+    cuisine_profiles: "++id,&key,name,enabledByDefault,createdAt,updatedAt",
+    cuisine_rulesets:
+      "++id,cuisineKey,versionTag,updatedAt,[cuisineKey+versionTag]",
+    cuisine_user_prefs: "++id,householdId,updatedAt",
+    cuisine_rotation_state:
+      "++id,householdId,cuisineKey,weekIndex,updatedAt,[householdId+cuisineKey],[householdId+updatedAt]",
+    cuisine_recipe_index:
+      "++id,recipeId,cuisineKey,updatedAt,[recipeId+cuisineKey],[cuisineKey+updatedAt]",
+    preservation_outputs_index:
+      "++id,householdId,itemKey,updatedAt,[householdId+itemKey],[itemKey+updatedAt]",
+
+    // =========================
+    // NEW: Homestead Planner FTT
+    // =========================
+    // Household-level preferences: pantry goals, scratch-cooking %, cadence, cuisine rotation, etc.
+    ftt_preferences_household:
+      "id, householdId, updatedAt, createdAt, status, [householdId+updatedAt], [householdId+status]",
+    // Person-level preferences: allergens, macros targets, dislikes, activity, roles, etc.
+    ftt_preferences_people:
+      "id, householdId, personId, updatedAt, createdAt, status, [householdId+personId], [personId+updatedAt], [householdId+updatedAt], [householdId+status]",
+    // Session overrides: temporary adjustments that affect provisioning + planning (feasts, travel, sick days)
+    ftt_preferences_session_overrides:
+      "id, householdId, appliesToISO, updatedAt, createdAt, status, [householdId+appliesToISO], [householdId+updatedAt], [householdId+status]",
+    // Provisioning targets: computed outputs (what to stock / produce / purchase) for a horizon window
+    ftt_provisioning_targets:
+      "id, householdId, horizonStartISO, horizonDays, updatedAt, createdAt, status, [householdId+horizonStartISO], [householdId+updatedAt], [householdId+status]",
+    // Component inventory: normalized components used by FTT planning (SSA-local view; can map to inventory/storehouse)
+    ftt_component_inventory:
+      "id, householdId, componentKey, itemKey, updatedAt, createdAt, [householdId+componentKey], [householdId+itemKey], [componentKey+updatedAt], [itemKey+updatedAt]",
+    // Component batches: batch-prep outputs (cooked beans, broth, chopped veg) and preservation runs tied to components
+    ftt_component_batches:
+      "id, householdId, componentKey, batchDateISO, updatedAt, createdAt, status, [householdId+componentKey], [householdId+batchDateISO], [componentKey+batchDateISO], [status+batchDateISO]",
+    // FTT Plans: a saved homestead plan run (inputs + outputs + reasoning summary + snapshots)
+    ftt_plans:
+      "id, householdId, startISO, horizonDays, updatedAt, createdAt, status, title, [householdId+updatedAt], [householdId+status], [householdId+startISO]",
+    // Plan items: normalized line-items inside a plan (targets, gaps, actions, garden/animal suggestions, tasks)
+    ftt_plan_items:
+      "id, planId, householdId, kind, itemKey, componentKey, updatedAt, createdAt, status, [planId+kind], [planId+status], [householdId+updatedAt], [itemKey+updatedAt], [componentKey+updatedAt]",
+  })
+  .upgrade(async (tx) => {
+    // New tables only — no backfill required.
+    try {
+      void tx;
+    } catch {
+      /* ignore */
+    }
+  });
+
+/* -------------------------------------------------------------------------- */
+/* Homestead Profile + Visibility + Estimators — version 16 */
+/* -------------------------------------------------------------------------- */
+/**
+ * ✅ v16: Add/confirm tables:
+ * - homestead_profile
+ *   • selected level, enabled domains, goals
+ * - homestead_visibility_state (optional)
+ *   • dismissed helper panels, collapsed sections, “don’t show again”
+ * - estimator_baselines
+ *   • grocery spend, eating-out frequency, household size, meals/week
+ * - estimator_snapshots
+ *   • computed outputs (food security %, days covered, monthly savings) over time
+ *
+ * IMPORTANT:
+ * - Carry forward ALL v15 tables unchanged.
+ * - Add new tables only (safe additive change).
+ */
+db.version(16)
+  .stores({
+    // ---------- carry forward v15 schema ----------
+    imports:
+      "++id, type, subType, source, sourceUrl, importedAt, domain, fingerprint",
+    sessions:
+      "++id, sessionId, domain, status, startedAt, updatedAt, plannedFor, originImportId, legacyId",
+    inventory:
+      "++id, sku, name, location, category, quantity, unit, updatedAt, lowStockFlag",
+    storehouse:
+      "++id, bucket, season, cycle, itemKey, plannedQuantity, actualQuantity, updatedAt",
+    logs: "++id, domain, level, ts, tag",
+    cleaningPlans:
+      "id, householdId, status, intensity, *zones, createdAt, updatedAt, lastCompletedAt",
+    planningDrafts:
+      "id, kind, domain, status, createdAt, updatedAt, homesteadPlanId, title",
+    importRaw:
+      "id, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+fingerprint], fingerprint, source.kind, source.url",
+    importNormalized:
+      "id, rawId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], confidence.overall",
+    importLinkMaps:
+      "id, rawId, normId, domain, createdAtISO, updatedAtISO, [domain+createdAtISO], [domain+rawId], [domain+normId]",
+    importLogs: "id, domain, rawId, normId, linkMapId, ts, [domain+ts], level",
+    recipeLibrary:
+      "id, sourceImportId, domain, createdAt, updatedAt, title, [domain+updatedAt]",
+    kitchenTools:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    kitchenUtensils:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    kitchenEquipment:
+      "id, name, category, createdAt, updatedAt, sourceImportId, [category+name]",
+    sessionCheckpoints: "id, sessionId, domain, updatedAt, createdAt",
+    kv: "key",
+    personProfiles:
+      "id, householdId, name, sex, age, heightCm, weightKg, activityLevel, updatedAt",
+    nutritionPreferences: "id, personId, goal, createdAt, updatedAt",
+    toolRunLogs: "id, personId, tool, createdAt",
+    nutritionTargetsHistory: "id, householdId, personId, appliedAt, createdAt",
+    mealPlanDrafts:
+      "id, householdId, personId, targetsId, updatedAt, createdAt",
+    groceryDrafts:
+      "id, householdId, personId, targetsId, mealPlanId, updatedAt, createdAt",
+    sessionDrafts:
+      "id, householdId, personId, targetsId, mealPlanId, groceryId, updatedAt, createdAt",
+    quickAddDrafts:
+      "id, createdAt, updatedAt, householdId, personId, detectedDomain, status",
+    quickAddHistory:
+      "id, createdAt, updatedAt, householdId, personId, domain, source",
+    artifacts:
+      "++id, kind, domain, source, fingerprint, createdAt, updatedAt, status, sessionId, [kind+fingerprint], [domain+createdAt], [domain+status]",
+    parsed_candidates:
+      "++id, artifactId, domain, parser, fingerprint, createdAt, updatedAt, status, [artifactId+parser], [domain+createdAt], [domain+status]",
+    method_maps:
+      "++id, artifactId, candidateId, domain, methodKey, confidence, createdAt, updatedAt, status, [domain+methodKey], [candidateId+methodKey], [domain+status]",
+    blueprints:
+      "++id, domain, blueprintKey, createdAt, updatedAt, artifactId, candidateId, methodMapId, sessionId, status, [domain+createdAt], [domain+status], [domain+blueprintKey]",
+    layer_overrides:
+      "++id, scope, scopeId, domain, methodKey, createdAt, updatedAt, isActive, [scope+scopeId], [domain+methodKey], [scope+scopeId+domain], [scope+scopeId+domain+methodKey]",
+    parse_cache: "fingerprint, createdAt, updatedAt, domain",
+    shoppingSessions:
+      "id, householdId, userId, status, startedAt, endedAt, updatedAt, createdAt, sessionId, *storeIds, primaryStoreId, [householdId+startedAt], [householdId+status], [userId+startedAt]",
+    shoppingCandidates:
+      "candidateId, shoppingSessionId, householdId, userId, upc, sku, createdAt, updatedAt, status, storeId, [shoppingSessionId+createdAt], [shoppingSessionId+status], [storeId+upc], [householdId+createdAt], [upc+createdAt], fingerprint",
+    priceObservations:
+      "observationId, upc, storeId, storeChainId, observedAt, createdAt, [storeId+upc], [storeId+observedAt], [upc+observedAt], [storeChainId+upc], source, currency",
+    adImpressions:
+      "impressionId, householdId, userId, shoppingSessionId, storeId, upc, placementId, shownAt, createdAt, [shoppingSessionId+shownAt], [storeId+shownAt], [userId+shownAt], [placementId+shownAt], [upc+shownAt]",
+    couponMatches:
+      "matchId, upc, storeId, storeChainId, eligibleAt, expiresAt, createdAt, [storeId+upc], [upc+expiresAt], [storeChainId+upc], source, status",
+    recallAlerts:
+      "alertId, upc, brand, issuedAt, updatedAt, createdAt, status, severity, [upc+issuedAt], [brand+issuedAt], source",
+    sponsoredPlacements:
+      "placementId, provider, campaignId, storeId, storeChainId, upc, createdAt, updatedAt, status, [storeId+upc], [campaignId+createdAt], [provider+campaignId], caps.daily, caps.weekly",
+    receiptReconciliations:
+      "reconId, householdId, userId, shoppingSessionId, storeId, receiptFingerprint, receivedAt, status, createdAt, updatedAt, [shoppingSessionId+receivedAt], [receiptFingerprint+receivedAt], [householdId+receivedAt]",
+    cuisine_profiles: "++id,&key,name,enabledByDefault,createdAt,updatedAt",
+    cuisine_rulesets:
+      "++id,cuisineKey,versionTag,updatedAt,[cuisineKey+versionTag]",
+    cuisine_user_prefs: "++id,householdId,updatedAt",
+    cuisine_rotation_state:
+      "++id,householdId,cuisineKey,weekIndex,updatedAt,[householdId+cuisineKey],[householdId+updatedAt]",
+    cuisine_recipe_index:
+      "++id,recipeId,cuisineKey,updatedAt,[recipeId+cuisineKey],[cuisineKey+updatedAt]",
+    preservation_outputs_index:
+      "++id,householdId,itemKey,updatedAt,[householdId+itemKey],[itemKey+updatedAt]",
+
+    // ---------- FTT tables (confirmed) ----------
+    ftt_preferences_household:
+      "id, householdId, updatedAt, createdAt, status, [householdId+updatedAt], [householdId+status]",
+    ftt_preferences_people:
+      "id, householdId, personId, updatedAt, createdAt, status, [householdId+personId], [personId+updatedAt], [householdId+updatedAt], [householdId+status]",
+    ftt_preferences_session_overrides:
+      "id, householdId, appliesToISO, updatedAt, createdAt, status, [householdId+appliesToISO], [householdId+updatedAt], [householdId+status]",
+    ftt_provisioning_targets:
+      "id, householdId, horizonStartISO, horizonDays, updatedAt, createdAt, status, [householdId+horizonStartISO], [householdId+updatedAt], [householdId+status]",
+    ftt_component_inventory:
+      "id, householdId, componentKey, itemKey, updatedAt, createdAt, [householdId+componentKey], [householdId+itemKey], [componentKey+updatedAt], [itemKey+updatedAt]",
+    ftt_component_batches:
+      "id, householdId, componentKey, batchDateISO, updatedAt, createdAt, status, [householdId+componentKey], [householdId+batchDateISO], [componentKey+batchDateISO], [status+batchDateISO]",
+    ftt_plans:
+      "id, householdId, startISO, horizonDays, updatedAt, createdAt, status, title, [householdId+updatedAt], [householdId+status], [householdId+startISO]",
+    ftt_plan_items:
+      "id, planId, householdId, kind, itemKey, componentKey, updatedAt, createdAt, status, [planId+kind], [planId+status], [householdId+updatedAt], [itemKey+updatedAt], [componentKey+updatedAt]",
+
+    // ================================
+    // NEW: Homestead profile + visibility
+    // ================================
+    homestead_profile:
+      "id, householdId, selectedLevel, status, updatedAt, createdAt, [householdId+updatedAt], [householdId+status], [householdId+selectedLevel]",
+    homestead_visibility_state:
+      "id, householdId, viewKey, updatedAt, createdAt, [householdId+viewKey], [householdId+updatedAt]",
+
+    // ================================
+    // NEW: Estimators (baselines + snapshots)
+    // ================================
+    estimator_baselines:
+      "id, householdId, status, updatedAt, createdAt, [householdId+updatedAt], [householdId+status]",
+    estimator_snapshots:
+      "id, householdId, kind, computedAt, updatedAt, createdAt, [householdId+computedAt], [householdId+kind], [kind+computedAt]",
+  })
+  .upgrade(async (tx) => {
+    // New tables only — no backfill required.
+    try {
+      void tx;
+    } catch {
+      /* ignore */
+    }
+  });
+
+/* -------------------------------------------------------------------------- */
+/* Dexie hooks → SSA events (+ optional Hub export) */
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -963,7 +1059,7 @@ db.version(13)
  * - eventType: high-level event name used by automation / UI.
  * - hubDomain: which domain label to send to the Hub when exporting.
  * - exportToHub: whether this table change is considered “household data”
- *                and should be mirrored to the Hub when familyFundMode=true.
+ *   and should be mirrored to the Hub when familyFundMode=true.
  */
 const HOOK_CONFIG = {
   inventory: {
@@ -1045,11 +1141,7 @@ const HOOK_CONFIG = {
     hubDomain: "sessionCheckpoints",
     exportToHub: false,
   },
-  kv: {
-    eventType: "kv.changed",
-    hubDomain: "kv",
-    exportToHub: false,
-  },
+  kv: { eventType: "kv.changed", hubDomain: "kv", exportToHub: false },
 
   // ✅ NEW: Nutrition tools tables (ToolsHub.jsx)
   personProfiles: {
@@ -1176,6 +1268,48 @@ const HOOK_CONFIG = {
     exportToHub: false,
   },
 
+  // ✅ NEW: Homestead Planner (FTT) events (local-first)
+  ftt_preferences_household: {
+    eventType: "ftt.preferences.household.changed",
+    hubDomain: "ftt_preferences_household",
+    exportToHub: false,
+  },
+  ftt_preferences_people: {
+    eventType: "ftt.preferences.people.changed",
+    hubDomain: "ftt_preferences_people",
+    exportToHub: false,
+  },
+  ftt_preferences_session_overrides: {
+    eventType: "ftt.preferences.sessionOverrides.changed",
+    hubDomain: "ftt_preferences_session_overrides",
+    exportToHub: false,
+  },
+  ftt_provisioning_targets: {
+    eventType: "ftt.provisioning.targets.changed",
+    hubDomain: "ftt_provisioning_targets",
+    exportToHub: false,
+  },
+  ftt_component_inventory: {
+    eventType: "ftt.component.inventory.changed",
+    hubDomain: "ftt_component_inventory",
+    exportToHub: false,
+  },
+  ftt_component_batches: {
+    eventType: "ftt.component.batches.changed",
+    hubDomain: "ftt_component_batches",
+    exportToHub: false,
+  },
+  ftt_plans: {
+    eventType: "ftt.plan.changed",
+    hubDomain: "ftt_plans",
+    exportToHub: false,
+  },
+  ftt_plan_items: {
+    eventType: "ftt.plan.items.changed",
+    hubDomain: "ftt_plan_items",
+    exportToHub: false,
+  },
+
   // logs table intentionally does not emit events to avoid infinite loops.
 };
 
@@ -1192,7 +1326,7 @@ function attachTableHooks() {
     if (!table) {
       if (import.meta?.env?.DEV) {
         console.warn(
-          `[db] Table "${tableName}" not found when attaching hooks.`
+          `[db] Table "${tableName}" not found when attaching hooks.`,
         );
       }
       return;
@@ -1257,23 +1391,23 @@ function attachTableHooks() {
 attachTableHooks();
 
 /* -------------------------------------------------------------------------- */
-/* Public API                                                                 */
+/* Public API */
 /* -------------------------------------------------------------------------- */
 
 /**
  * Convenience helper for transactional work.
  *
  * Example usage in a repo:
- *   import db, { runInTransaction } from "../services/db";
+ * import db, { runInTransaction } from "../services/db";
  *
- *   await runInTransaction("rw", ["inventory", "storehouse"], async (txDb) => {
- *     await txDb.inventory.put({...});
- *     await txDb.storehouse.put({...});
- *   });
+ * await runInTransaction("rw", ["inventory", "storehouse"], async (txDb) => {
+ *   await txDb.inventory.put({...});
+ *   await txDb.storehouse.put({...});
+ * });
  *
- * @param {"r"|"rw"} mode     Transaction mode.
- * @param {string[]} tables   Table names participating in the transaction.
- * @param {Function} worker   Async function that receives a transactional db.
+ * @param {"r"|"rw"} mode Transaction mode.
+ * @param {string[]} tables Table names participating in the transaction.
+ * @param {Function} worker Async function that receives a transactional db.
  */
 export async function runInTransaction(mode, tables, worker) {
   if (!Array.isArray(tables) || tables.length === 0) {
@@ -1289,13 +1423,15 @@ export async function runInTransaction(mode, tables, worker) {
  * ✅ Canonical session persistence helper
  *
  * Option A: sessionId is the canonical stable identifier for routing/resume.
- * - Primary key remains numeric (`id`) to avoid Dexie PK change errors.
+ * - Primary key remains numeric (id) to avoid Dexie PK change errors.
  * - We UPSERT by sessionId (find existing row → update by numeric id).
- * - We also mirror `id` (string) field for back-compat with callers that expect `session.id`
- *   to be routable. In this implementation:
- *     - `session.sessionId` is canonical
- *     - `session.id` (string alias) === session.sessionId
- *     - `session.dbId` is the numeric primary key (if present)
+ * - We also mirror id (string) field for back-compat with callers that expect session.id
+ *   to be routable.
+ *
+ * In this implementation:
+ * - session.sessionId is canonical
+ * - session.id (string alias) === session.sessionId
+ * - session.dbId is the numeric primary key (if present)
  *
  * @param {object} session
  * @returns {Promise<object>} saved session (with sessionId + dbId + id alias)
@@ -1319,14 +1455,11 @@ export async function saveSession(session) {
 
   const normalized = {
     ...session,
-
     // Canonical
     sessionId,
-
-    // Back-compat alias: many pages currently navigate using `session.id`
+    // Back-compat alias: many pages currently navigate using session.id
     // We want that to be the stable string id (NOT the numeric db PK).
     id: sessionId,
-
     domain,
     status: session.status || "draft",
     createdAt: session.createdAt || now,
@@ -1359,11 +1492,11 @@ export async function saveSession(session) {
     if (import.meta?.env?.DEV) {
       console.warn(
         "[db.saveSession] upsert by sessionId failed; falling back to put:",
-        err
+        err,
       );
     }
-    // Fallback: put may insert/update depending on `id` numeric PK presence in object.
-    // Ensure we never pass the string alias `id` as a numeric PK by deleting it temporarily.
+    // Fallback: put may insert/update depending on id numeric PK presence in object.
+    // Ensure we never pass the string alias id as a numeric PK by deleting it temporarily.
     const { id: _stringId, ...withoutStringId } = normalized;
     dbId = await db.sessions.put(withoutStringId);
   }
@@ -1376,8 +1509,8 @@ export async function saveSession(session) {
 
 /**
  * ✅ Convenience loader used by Play routes
- * - First: treat `id` as sessionId (canonical)
- * - Fallback: if `id` looks numeric, try numeric PK lookup
+ * - First: treat id as sessionId (canonical)
+ * - Fallback: if id looks numeric, try numeric PK lookup
  *
  * @param {string|number} id
  */
@@ -1393,6 +1526,7 @@ export async function getSessionById(id) {
       .where("sessionId")
       .equals(asString)
       .first();
+
     if (bySessionId) {
       return {
         ...bySessionId,
@@ -1424,8 +1558,9 @@ export async function getSessionById(id) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Planning Drafts helpers (optional convenience API)                          */
+/* Planning Drafts helpers (optional convenience API) */
 /* -------------------------------------------------------------------------- */
+
 /**
  * Optional helpers to keep planning drafts consistent across pages.
  * These are NOT required if you use a dedicated repo file, but are convenient.
@@ -1450,12 +1585,10 @@ export async function savePlanningDraft(draft) {
     updatedAt: now,
     homesteadPlanId:
       draft.homesteadPlanId == null ? null : String(draft.homesteadPlanId),
-
     inputs:
       draft.inputs && typeof draft.inputs === "object" ? draft.inputs : {},
     outputs:
       draft.outputs && typeof draft.outputs === "object" ? draft.outputs : {},
-
     links: draft.links && typeof draft.links === "object" ? draft.links : {},
     metadata:
       draft.metadata && typeof draft.metadata === "object"
@@ -1484,6 +1617,7 @@ export async function listPlanningDrafts({
   limit = 25,
 } = {}) {
   if (!db.planningDrafts) return [];
+
   let rows = [];
 
   // Dexie doesn't support multi-where on separate indexes without compound indexes.

@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // src/pages/animals/BarnPlannerShell.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * BarnPlannerShell — plan barn layout, assignments, and sessions
@@ -23,7 +29,9 @@ const useSafeEventBus = () => {
     let on = true;
     (async () => {
       try {
-        const mod = await import(/* webpackIgnore: true */ "../../services/eventBus.js").catch(() => null);
+        const mod = await import(
+          /* webpackIgnore: true */ "../../services/events/eventBus.js"
+        ).catch(() => null);
         if (on && mod?.eventBus) setBus(mod.eventBus);
       } catch (e) {}
       if (on && !bus) setBus(createLocalBus());
@@ -38,7 +46,8 @@ function createLocalBus() {
     on(evt, cb) {
       listeners[evt] = listeners[evt] || [];
       listeners[evt].push(cb);
-      return () => (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
+      return () =>
+        (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
     },
     emit(evt, payload) {
       (listeners[evt] || []).forEach((cb) => {
@@ -58,7 +67,9 @@ const useSafeNBA = () => {
     let on = true;
     (async () => {
       try {
-        const mod = await import(/* webpackIgnore: true */ "../../services/nbaOrchestrator.js").catch(() => null);
+        const mod = await import(
+          /* webpackIgnore: true */ "../../services/nbaOrchestrator.js"
+        ).catch(() => null);
         if (on && mod?.invokeNBA) setInvoke(() => mod.invokeNBA);
       } catch (e) {}
     })();
@@ -69,7 +80,9 @@ const useSafeNBA = () => {
 
 async function safeScheduleHelpers() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../engines/scheduling/scheduleHelpers.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../engines/calendar/scheduleHelpers.js"
+    ).catch(() => null);
     return mod || {};
   } catch (e) {
     return {};
@@ -77,7 +90,9 @@ async function safeScheduleHelpers() {
 }
 async function safeEstimateEngine() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../engines/estimates/estimateEngine.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../engines/cost/estimateEngine.js"
+    ).catch(() => null);
     return mod || {};
   } catch (e) {
     return {};
@@ -85,7 +100,9 @@ async function safeEstimateEngine() {
 }
 async function safePlanTemplates() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../engines/planning/planTemplates.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../engines/planning/planTemplates.js"
+    ).catch(() => null);
     return mod || {};
   } catch (e) {
     return {};
@@ -93,7 +110,9 @@ async function safePlanTemplates() {
 }
 async function safePrepConsolidation() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../engines/planning/prepConsolidationEngine.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../engines/planning/prepConsolidationEngine.js"
+    ).catch(() => null);
     return mod || {};
   } catch (e) {
     return {};
@@ -101,7 +120,9 @@ async function safePrepConsolidation() {
 }
 async function safeAnimalExecutor() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../adapters/execution/animalExecutor.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../adapters/execution/animalExecutor.js"
+    ).catch(() => null);
     return mod || {};
   } catch (e) {
     return {};
@@ -148,7 +169,9 @@ function Field({ label, hint, children }) {
     <label className="block mb-3">
       <div className="text-xs uppercase tracking-wide mb-1 flex items-center gap-2">
         <span>{label}</span>
-        {hint ? <span className="text-[10px] text-gray-500">• {hint}</span> : null}
+        {hint ? (
+          <span className="text-[10px] text-gray-500">• {hint}</span>
+        ) : null}
       </div>
       {children}
     </label>
@@ -159,7 +182,11 @@ function Chip({ children, onRemove }) {
     <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
       {children}
       {onRemove ? (
-        <button type="button" onClick={onRemove} className="opacity-70 hover:opacity-100">
+        <button
+          type="button"
+          onClick={onRemove}
+          className="opacity-70 hover:opacity-100"
+        >
           ×
         </button>
       ) : null}
@@ -175,11 +202,18 @@ function Toast({ toast, onUndo, onClose }) {
         <span className="opacity-90">{toast.message}</span>
       </div>
       {toast.canUndo ? (
-        <button className="underline text-sm mr-2" onClick={() => onUndo?.(toast)}>
+        <button
+          className="underline text-sm mr-2"
+          onClick={() => onUndo?.(toast)}
+        >
           Undo
         </button>
       ) : null}
-      <button className="opacity-80 hover:opacity-100" aria-label="close" onClick={onClose}>
+      <button
+        className="opacity-80 hover:opacity-100"
+        aria-label="close"
+        onClick={onClose}
+      >
         ×
       </button>
     </div>
@@ -200,7 +234,9 @@ export default function BarnPlannerShell() {
   const [sabbathGuard, setSabbathGuard] = useState(draft?.sabbathGuard ?? true);
 
   // NEW: Global loss settings (defaults can be tuned)
-  const [loss, setLoss] = useState(draft?.loss || { feedPct: 7, beddingPct: 10 });
+  const [loss, setLoss] = useState(
+    draft?.loss || { feedPct: 7, beddingPct: 10 }
+  );
 
   // quick search / filters
   const [q, setQ] = useState("");
@@ -213,7 +249,9 @@ export default function BarnPlannerShell() {
     const f = q.toLowerCase();
     return cells.map((c) =>
       c.name?.toLowerCase().includes(f) ||
-      (c.assigned || []).some((a) => (a.name || a.id || "").toLowerCase().includes(f)) ||
+      (c.assigned || []).some((a) =>
+        (a.name || a.id || "").toLowerCase().includes(f)
+      ) ||
       c.zone?.toLowerCase().includes(f)
         ? c
         : { ...c, hidden: true }
@@ -244,9 +282,20 @@ export default function BarnPlannerShell() {
     setCells((prev) =>
       prev.map((c) => {
         if (c.id !== cellId) return c;
-        const next = new Set([...(c.assigned || []).map((a) => a.id), animal.id]);
-        const list = (c.assigned || []).filter((a) => a.id !== animal.id).concat([animal]);
-        return { ...c, assigned: list.filter((a, i) => next.has(a.id) && i === list.findIndex((x) => x.id === a.id)) };
+        const next = new Set([
+          ...(c.assigned || []).map((a) => a.id),
+          animal.id,
+        ]);
+        const list = (c.assigned || [])
+          .filter((a) => a.id !== animal.id)
+          .concat([animal]);
+        return {
+          ...c,
+          assigned: list.filter(
+            (a, i) =>
+              next.has(a.id) && i === list.findIndex((x) => x.id === a.id)
+          ),
+        };
       })
     );
   }, []);
@@ -255,7 +304,10 @@ export default function BarnPlannerShell() {
     setCells((prev) =>
       prev.map((c) => {
         if (c.id !== cellId) return c;
-        return { ...c, assigned: (c.assigned || []).filter((a) => a.id !== animalId) };
+        return {
+          ...c,
+          assigned: (c.assigned || []).filter((a) => a.id !== animalId),
+        };
       })
     );
   }, []);
@@ -266,21 +318,25 @@ export default function BarnPlannerShell() {
     raiseToast("Cleared", "All stall assignments removed.", false);
   }, []);
 
-  const addZone = useCallback(() => setZones((z) => [...z, `Zone ${z.length + 1}`]), []);
-  const removeZone = useCallback(
-    (name) => {
-      setZones((z) => z.filter((x) => x !== name));
-      setCells((prev) => prev.map((c) => (c.zone === name ? { ...c, zone: "" } : c)));
-    },
+  const addZone = useCallback(
+    () => setZones((z) => [...z, `Zone ${z.length + 1}`]),
     []
   );
+  const removeZone = useCallback((name) => {
+    setZones((z) => z.filter((x) => x !== name));
+    setCells((prev) =>
+      prev.map((c) => (c.zone === name ? { ...c, zone: "" } : c))
+    );
+  }, []);
 
   const sendTo = useCallback(
     async (target) => {
       const sched = await safeScheduleHelpers();
       const prep = await safePrepConsolidation();
       const allSessions = buildSessions(cells, sabbathGuard, sched);
-      const consolidated = prep?.consolidate ? prep.consolidate(allSessions, { domain: "animals" }) : allSessions;
+      const consolidated = prep?.consolidate
+        ? prep.consolidate(allSessions, { domain: "animals" })
+        : allSessions;
 
       eventBus.emit("export.requested", {
         kind: "barn-plan",
@@ -299,7 +355,11 @@ export default function BarnPlannerShell() {
       try {
         invokeNBA?.({
           reason: "barn_plan_export",
-          context: { target, stalls: cells.length, sessions: consolidated.length },
+          context: {
+            target,
+            stalls: cells.length,
+            sessions: consolidated.length,
+          },
         });
       } catch (e) {}
     },
@@ -322,8 +382,12 @@ export default function BarnPlannerShell() {
         assigned.forEach((a) => {
           const key = (a.species || "").toLowerCase();
           const baseLine = FEED_BASELINES[key] || FEED_BASELINES.sheep;
-          const feedKg = est?.estimateAnimalFeedKgPerDay ? est.estimateAnimalFeedKgPerDay(a) : baseLine.feedKgPerDay;
-          const beddingLb = est?.estimateBeddingLbPerWeek ? est.estimateBeddingLbPerWeek(a) : baseLine.beddingLbPerWeek;
+          const feedKg = est?.estimateAnimalFeedKgPerDay
+            ? est.estimateAnimalFeedKgPerDay(a)
+            : baseLine.feedKgPerDay;
+          const beddingLb = est?.estimateBeddingLbPerWeek
+            ? est.estimateBeddingLbPerWeek(a)
+            : baseLine.beddingLbPerWeek;
           acc.feedKgPerDay += feedKg || 0;
           acc.beddingLbPerWeek += beddingLb || 0;
         });
@@ -345,8 +409,12 @@ export default function BarnPlannerShell() {
         assigned.forEach((a) => {
           const key = (a.species || "").toLowerCase();
           const baseLine = FEED_BASELINES[key] || FEED_BASELINES.sheep;
-          const feedKg = est?.estimateAnimalFeedKgPerDay ? est.estimateAnimalFeedKgPerDay(a) : baseLine.feedKgPerDay;
-          const beddingLb = est?.estimateBeddingLbPerWeek ? est.estimateBeddingLbPerWeek(a) : baseLine.beddingLbPerWeek;
+          const feedKg = est?.estimateAnimalFeedKgPerDay
+            ? est.estimateAnimalFeedKgPerDay(a)
+            : baseLine.feedKgPerDay;
+          const beddingLb = est?.estimateBeddingLbPerWeek
+            ? est.estimateBeddingLbPerWeek(a)
+            : baseLine.beddingLbPerWeek;
           stallFeed += feedKg || 0;
           stallBedding += beddingLb || 0;
         });
@@ -389,9 +457,19 @@ export default function BarnPlannerShell() {
           kind: a.status === "butcher-queued" ? "butchery" : "care",
           estMinutes: a.status === "butcher-queued" ? 120 : 10,
           flags: a.status === "butcher-queued" ? ["raw-meat", "biohazard"] : [],
-          ppe: a.status === "butcher-queued" ? ["gloves", "apron", "face shield"] : ["gloves"],
-          chillChain: a.status === "butcher-queued" ? { maxMinutesOut: 20 } : undefined,
-          feed: a.status !== "butcher-queued" ? { items: [{ name: "ration", amount: "per plan" }], waterCheck: true } : undefined,
+          ppe:
+            a.status === "butcher-queued"
+              ? ["gloves", "apron", "face shield"]
+              : ["gloves"],
+          chillChain:
+            a.status === "butcher-queued" ? { maxMinutesOut: 20 } : undefined,
+          feed:
+            a.status !== "butcher-queued"
+              ? {
+                  items: [{ name: "ration", amount: "per plan" }],
+                  waterCheck: true,
+                }
+              : undefined,
         };
         all.push(toRunbook ? toRunbook(task) : basic(task));
       });
@@ -401,7 +479,8 @@ export default function BarnPlannerShell() {
   }, [cells]);
 
   // undo toast
-  const raiseToast = (title, message, canUndo) => setToast({ id: uid("t"), title, message, canUndo });
+  const raiseToast = (title, message, canUndo) =>
+    setToast({ id: uid("t"), title, message, canUndo });
   const dismissToast = () => setToast(null);
   const undoLast = () => {
     const last = lastChangeRef.current;
@@ -425,7 +504,9 @@ export default function BarnPlannerShell() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <header className="mb-4 md:mb-6">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-xl md:text-2xl font-semibold">Barn Planner — Layout • Assign • Chores</h1>
+          <h1 className="text-xl md:text-2xl font-semibold">
+            Barn Planner — Layout • Assign • Chores
+          </h1>
           <div className="flex items-center gap-2">
             <label className="inline-flex items-center gap-2 text-sm border rounded-lg px-3 py-1.5">
               <input
@@ -435,16 +516,28 @@ export default function BarnPlannerShell() {
               />
               Sabbath Guard
             </label>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Task Board")}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Task Board")}
+            >
               Send → Task Board
             </button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Calendar")}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Calendar")}
+            >
               Send → Calendar
             </button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Inventory")}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Inventory")}
+            >
               Send → Inventory
             </button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => window.print()}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => window.print()}
+            >
               Print Stall Cards
             </button>
           </div>
@@ -461,7 +554,11 @@ export default function BarnPlannerShell() {
             <button
               key={x.k}
               onClick={() => setTab(x.k)}
-              className={`px-3 py-1.5 rounded-lg text-sm border ${tab === x.k ? "bg-black text-white border-black" : "hover:bg-gray-50"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm border ${
+                tab === x.k
+                  ? "bg-black text-white border-black"
+                  : "hover:bg-gray-50"
+              }`}
             >
               {x.t}
             </button>
@@ -484,30 +581,59 @@ export default function BarnPlannerShell() {
             title="Grid & Zones"
             actions={
               <>
-                <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => setGridSize(grid.rows + 1, grid.cols)}>
+                <button
+                  className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                  onClick={() => setGridSize(grid.rows + 1, grid.cols)}
+                >
                   + Row
                 </button>
-                <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => setGridSize(Math.max(1, grid.rows - 1), grid.cols)}>
+                <button
+                  className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                  onClick={() =>
+                    setGridSize(Math.max(1, grid.rows - 1), grid.cols)
+                  }
+                >
                   − Row
                 </button>
-                <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => setGridSize(grid.rows, grid.cols + 1)}>
+                <button
+                  className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                  onClick={() => setGridSize(grid.rows, grid.cols + 1)}
+                >
                   + Col
                 </button>
-                <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => setGridSize(grid.rows, Math.max(1, grid.cols - 1))}>
+                <button
+                  className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                  onClick={() =>
+                    setGridSize(grid.rows, Math.max(1, grid.cols - 1))
+                  }
+                >
                   − Col
                 </button>
               </>
             }
           >
             <div className="mb-4 text-sm text-gray-600">
-              Click a cell to rename, set zone/aisle, mark status, or edit loss overrides in Chores.
+              Click a cell to rename, set zone/aisle, mark status, or edit loss
+              overrides in Chores.
             </div>
-            <BarnGrid grid={grid} cells={filteredCells} onUpdate={updateCell} zones={zones} />
+            <BarnGrid
+              grid={grid}
+              cells={filteredCells}
+              onUpdate={updateCell}
+              zones={zones}
+            />
           </SectionCard>
 
           <SectionCard
             title="Zones / Aisles"
-            actions={<button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={addZone}>+ Zone</button>}
+            actions={
+              <button
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                onClick={addZone}
+              >
+                + Zone
+              </button>
+            }
           >
             <div className="flex flex-wrap gap-2">
               {zones.map((z) => (
@@ -516,7 +642,9 @@ export default function BarnPlannerShell() {
                 </Chip>
               ))}
             </div>
-            <div className="mt-3 text-xs text-gray-600">Assign zones on cells to group chores and feed runs.</div>
+            <div className="mt-3 text-xs text-gray-600">
+              Assign zones on cells to group chores and feed runs.
+            </div>
           </SectionCard>
 
           <SectionCard title="Daily Needs (Estimates with Loss)">
@@ -535,16 +663,27 @@ export default function BarnPlannerShell() {
           title="Assign Animals to Stalls"
           actions={
             <>
-              <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => setTab("chores")}>
+              <button
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                onClick={() => setTab("chores")}
+              >
                 Next → Chores
               </button>
-              <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={clearAssignments}>
+              <button
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                onClick={clearAssignments}
+              >
                 Clear Assignments
               </button>
             </>
           }
         >
-          <AssignPanel cells={filteredCells} onAssign={assignAnimal} onUnassign={unassignAnimal} onUpdate={updateCell} />
+          <AssignPanel
+            cells={filteredCells}
+            onAssign={assignAnimal}
+            onUnassign={unassignAnimal}
+            onUpdate={updateCell}
+          />
         </SectionCard>
       )}
 
@@ -553,12 +692,20 @@ export default function BarnPlannerShell() {
         <SectionCard
           title="Chore Rotations & Tasks (with Loss Overrides)"
           actions={
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => setTab("simulate")}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => setTab("simulate")}
+            >
               Next → Simulate
             </button>
           }
         >
-          <ChoresPanel cells={filteredCells} onUpdate={updateCell} sabbathGuard={sabbathGuard} loss={loss} />
+          <ChoresPanel
+            cells={filteredCells}
+            onUpdate={updateCell}
+            sabbathGuard={sabbathGuard}
+            loss={loss}
+          />
         </SectionCard>
       )}
 
@@ -567,7 +714,10 @@ export default function BarnPlannerShell() {
         <SectionCard
           title="Simulate Sessions"
           actions={
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={buildRunbooks}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={buildRunbooks}
+            >
               Build Runbooks
             </button>
           }
@@ -581,7 +731,10 @@ export default function BarnPlannerShell() {
         <SectionCard
           title="Runbook Preview"
           actions={
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Task Board")}>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Task Board")}
+            >
               Send Runbooks → Task Board
             </button>
           }
@@ -597,9 +750,20 @@ export default function BarnPlannerShell() {
 
 // ---------- Subcomponents ----------
 function BarnGrid({ grid, cells, zones, onUpdate }) {
-  const getCell = (r, c) => cells.find((x) => x.r === r && x.c === c) || { id: "", name: "", status: "empty", r, c, zone: "" };
+  const getCell = (r, c) =>
+    cells.find((x) => x.r === r && x.c === c) || {
+      id: "",
+      name: "",
+      status: "empty",
+      r,
+      c,
+      zone: "",
+    };
   return (
-    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))` }}>
+    <div
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))` }}
+    >
       {Array.from({ length: grid.rows }).map((_, r) =>
         Array.from({ length: grid.cols }).map((__, c) => {
           const cell = getCell(r, c);
@@ -610,19 +774,37 @@ function BarnGrid({ grid, cells, zones, onUpdate }) {
               key={cell.id || `${r}-${c}`}
               className={`rounded-xl border p-3 text-left ${statusClass} hover:ring-2 hover:ring-black/10`}
               onClick={() => {
-                const name = prompt("Stall name/label", cell.name || `Stall ${r + 1}-${c + 1}`) ?? cell.name;
-                const zone = prompt("Zone/Aisle (or blank)", cell.zone || "") ?? cell.zone;
-                const status = prompt("Status: empty | occupied | quarantine | cleaning", cell.status || "empty") ?? cell.status;
+                const name =
+                  prompt(
+                    "Stall name/label",
+                    cell.name || `Stall ${r + 1}-${c + 1}`
+                  ) ?? cell.name;
+                const zone =
+                  prompt("Zone/Aisle (or blank)", cell.zone || "") ?? cell.zone;
+                const status =
+                  prompt(
+                    "Status: empty | occupied | quarantine | cleaning",
+                    cell.status || "empty"
+                  ) ?? cell.status;
                 onUpdate(cell.id, { name, zone, status });
               }}
             >
-              <div className="font-medium">{cell.name || `Stall ${r + 1}-${c + 1}`}</div>
+              <div className="font-medium">
+                {cell.name || `Stall ${r + 1}-${c + 1}`}
+              </div>
               <div className="text-xs text-gray-600">{cell.zone || "—"}</div>
               <div className="mt-1 text-[11px]">
                 {(cell.assigned || []).slice(0, 3).map((a) => (
-                  <div key={a.id} className="truncate">• {(a.name || a.id)}{a.species ? ` (${a.species})` : ""}</div>
+                  <div key={a.id} className="truncate">
+                    • {a.name || a.id}
+                    {a.species ? ` (${a.species})` : ""}
+                  </div>
                 ))}
-                {(cell.assigned || []).length > 3 ? <div className="opacity-70">+{(cell.assigned || []).length - 3} more</div> : null}
+                {(cell.assigned || []).length > 3 ? (
+                  <div className="opacity-70">
+                    +{(cell.assigned || []).length - 3} more
+                  </div>
+                ) : null}
               </div>
             </button>
           );
@@ -639,20 +821,35 @@ function AssignPanel({ cells, onAssign, onUnassign, onUpdate }) {
         c.hidden ? null : (
           <div key={c.id} className="rounded-xl border p-4">
             <div className="flex items-center justify-between mb-2">
-              <div className="font-semibold">{c.name || `Stall ${c.r + 1}-${c.c + 1}`}</div>
-              <button className="text-xs rounded-lg border px-2 py-1 hover:bg-gray-50" onClick={() => onUpdate(c.id, { assigned: [] })}>
+              <div className="font-semibold">
+                {c.name || `Stall ${c.r + 1}-${c.c + 1}`}
+              </div>
+              <button
+                className="text-xs rounded-lg border px-2 py-1 hover:bg-gray-50"
+                onClick={() => onUpdate(c.id, { assigned: [] })}
+              >
                 Clear
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Add animal by CSV" hint='id,name,species,status (ex: "a1,Daisy,sheep,active")'>
+              <Field
+                label="Add animal by CSV"
+                hint='id,name,species,status (ex: "a1,Daisy,sheep,active")'
+              >
                 <input
                   className="w-full border rounded-md px-2 py-1"
                   placeholder="a1,Daisy,sheep,active"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                      const [id, name, species, status] = e.currentTarget.value.split(",").map((s) => s?.trim());
-                      onAssign(c.id, { id: id || uid("animal"), name, species, status: status || "active" });
+                      const [id, name, species, status] = e.currentTarget.value
+                        .split(",")
+                        .map((s) => s?.trim());
+                      onAssign(c.id, {
+                        id: id || uid("animal"),
+                        name,
+                        species,
+                        status: status || "active",
+                      });
                       e.currentTarget.value = "";
                     }
                   }}
@@ -665,7 +862,9 @@ function AssignPanel({ cells, onAssign, onUnassign, onUpdate }) {
                   onChange={(e) => onUpdate(c.id, { status: e.target.value })}
                 >
                   {["empty", "occupied", "quarantine", "cleaning"].map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
                 </select>
               </Field>
@@ -674,7 +873,9 @@ function AssignPanel({ cells, onAssign, onUnassign, onUpdate }) {
             <div className="mt-2 flex flex-wrap gap-2">
               {(c.assigned || []).map((a) => (
                 <Chip key={a.id} onRemove={() => onUnassign(c.id, a.id)}>
-                  {(a.name || a.id)}{a.species ? ` • ${a.species}` : ""}{a.status ? ` • ${a.status}` : ""}
+                  {a.name || a.id}
+                  {a.species ? ` • ${a.species}` : ""}
+                  {a.status ? ` • ${a.status}` : ""}
                 </Chip>
               ))}
             </div>
@@ -691,7 +892,9 @@ function ChoresPanel({ cells, onUpdate, sabbathGuard, loss }) {
       {cells.map((c) =>
         c.hidden ? null : (
           <div key={c.id} className="rounded-xl border p-4">
-            <div className="font-semibold mb-2">{c.name || `Stall ${c.r + 1}-${c.c + 1}`}</div>
+            <div className="font-semibold mb-2">
+              {c.name || `Stall ${c.r + 1}-${c.c + 1}`}
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Feed (times/day)">
@@ -700,7 +903,11 @@ function ChoresPanel({ cells, onUpdate, sabbathGuard, loss }) {
                   min="0"
                   className="w-full border rounded-md px-2 py-1"
                   value={numOr(c.feedPerDay, 1)}
-                  onChange={(e) => onUpdate(c.id, { feedPerDay: clampNum(e.target.value, 0, 6) })}
+                  onChange={(e) =>
+                    onUpdate(c.id, {
+                      feedPerDay: clampNum(e.target.value, 0, 6),
+                    })
+                  }
                 />
               </Field>
               <Field label="Water check (times/day)">
@@ -709,7 +916,11 @@ function ChoresPanel({ cells, onUpdate, sabbathGuard, loss }) {
                   min="0"
                   className="w-full border rounded-md px-2 py-1"
                   value={numOr(c.waterChecks, 2)}
-                  onChange={(e) => onUpdate(c.id, { waterChecks: clampNum(e.target.value, 0, 12) })}
+                  onChange={(e) =>
+                    onUpdate(c.id, {
+                      waterChecks: clampNum(e.target.value, 0, 12),
+                    })
+                  }
                 />
               </Field>
               <Field label="Bedding (lb/week)">
@@ -718,7 +929,11 @@ function ChoresPanel({ cells, onUpdate, sabbathGuard, loss }) {
                   min="0"
                   className="w-full border rounded-md px-2 py-1"
                   value={numOr(c.beddingLbPerWeek, 0)}
-                  onChange={(e) => onUpdate(c.id, { beddingLbPerWeek: clampNum(e.target.value, 0, 500) })}
+                  onChange={(e) =>
+                    onUpdate(c.id, {
+                      beddingLbPerWeek: clampNum(e.target.value, 0, 500),
+                    })
+                  }
                 />
               </Field>
               <Field label="Muck-out day">
@@ -736,23 +951,33 @@ function ChoresPanel({ cells, onUpdate, sabbathGuard, loss }) {
               </Field>
 
               {/* NEW: per-stall loss overrides */}
-              <Field label="Feed loss %" hint={`Global default ${loss.feedPct}%`}>
+              <Field
+                label="Feed loss %"
+                hint={`Global default ${loss.feedPct}%`}
+              >
                 <input
                   type="number"
                   min="0"
                   className="w-full border rounded-md px-2 py-1"
                   value={numOr(c.feedLossPct, "")}
-                  onChange={(e) => onUpdate(c.id, { feedLossPct: cleanPct(e.target.value) })}
+                  onChange={(e) =>
+                    onUpdate(c.id, { feedLossPct: cleanPct(e.target.value) })
+                  }
                   placeholder={`${loss.feedPct}`}
                 />
               </Field>
-              <Field label="Bedding loss %" hint={`Global default ${loss.beddingPct}%`}>
+              <Field
+                label="Bedding loss %"
+                hint={`Global default ${loss.beddingPct}%`}
+              >
                 <input
                   type="number"
                   min="0"
                   className="w-full border rounded-md px-2 py-1"
                   value={numOr(c.beddingLossPct, "")}
-                  onChange={(e) => onUpdate(c.id, { beddingLossPct: cleanPct(e.target.value) })}
+                  onChange={(e) =>
+                    onUpdate(c.id, { beddingLossPct: cleanPct(e.target.value) })
+                  }
                   placeholder={`${loss.beddingPct}`}
                 />
               </Field>
@@ -760,7 +985,9 @@ function ChoresPanel({ cells, onUpdate, sabbathGuard, loss }) {
 
             <div className="mt-2 text-xs text-gray-700">
               Rotation hint: {nextRotation(new Date().getDay())}
-              {sabbathGuard ? " • Sabbath Guard active (no new sessions Fri eve–Sat eve)" : ""}
+              {sabbathGuard
+                ? " • Sabbath Guard active (no new sessions Fri eve–Sat eve)"
+                : ""}
             </div>
           </div>
         )
@@ -776,9 +1003,28 @@ function SimulatePanel({ cells }) {
       if (c.hidden) return;
       const feed = Math.max(0, Number(c.feedPerDay ?? 1));
       const water = Math.max(0, Number(c.waterChecks ?? 2));
-      for (let i = 0; i < feed; i++) out.push({ id: uid("sess"), kind: "feed", stall: c.name, zone: c.zone });
-      for (let i = 0; i < water; i++) out.push({ id: uid("sess"), kind: "water", stall: c.name, zone: c.zone });
-      if (c.muckDay) out.push({ id: uid("sess"), kind: "muck", stall: c.name, zone: c.zone, day: c.muckDay });
+      for (let i = 0; i < feed; i++)
+        out.push({
+          id: uid("sess"),
+          kind: "feed",
+          stall: c.name,
+          zone: c.zone,
+        });
+      for (let i = 0; i < water; i++)
+        out.push({
+          id: uid("sess"),
+          kind: "water",
+          stall: c.name,
+          zone: c.zone,
+        });
+      if (c.muckDay)
+        out.push({
+          id: uid("sess"),
+          kind: "muck",
+          stall: c.name,
+          zone: c.zone,
+          day: c.muckDay,
+        });
     });
     return out;
   }, [cells]);
@@ -796,20 +1042,25 @@ function SimulatePanel({ cells }) {
   return (
     <div>
       <div className="text-sm text-gray-600 mb-2">
-        Auto-grouped sessions (for consolidation): feed/water per zone, and weekly muck-outs.
+        Auto-grouped sessions (for consolidation): feed/water per zone, and
+        weekly muck-outs.
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         {Object.keys(grouped).map((k) => (
           <div key={k} className="rounded-xl border p-4">
             <div className="font-semibold mb-1">{k}</div>
-            <div className="text-xs text-gray-700">{grouped[k].length} tasks</div>
+            <div className="text-xs text-gray-700">
+              {grouped[k].length} tasks
+            </div>
             <ul className="mt-2 text-sm list-disc ml-5">
               {grouped[k].slice(0, 8).map((s) => (
                 <li key={s.id}>
                   {s.kind} @ {s.stall} {s.day ? `• ${s.day}` : ""}
                 </li>
               ))}
-              {grouped[k].length > 8 ? <li className="opacity-70">…and more</li> : null}
+              {grouped[k].length > 8 ? (
+                <li className="opacity-70">…and more</li>
+              ) : null}
             </ul>
           </div>
         ))}
@@ -823,7 +1074,9 @@ function RunbooksList({ runbooks }) {
     return (
       <div className="border-2 border-dashed rounded-2xl p-8 text-center">
         <h4 className="font-semibold mb-1">No runbooks yet</h4>
-        <p className="text-sm text-gray-600">Use “Build Runbooks” in Simulate to generate care/butchery steps.</p>
+        <p className="text-sm text-gray-600">
+          Use “Build Runbooks” in Simulate to generate care/butchery steps.
+        </p>
       </div>
     );
   }
@@ -831,15 +1084,33 @@ function RunbooksList({ runbooks }) {
     <div className="grid md:grid-cols-2 gap-4">
       {runbooks.map((rb) => (
         <div key={rb.id} className="rounded-xl border p-4">
-          <div className="text-sm uppercase tracking-wide text-gray-600 mb-1">{rb.kind}</div>
+          <div className="text-sm uppercase tracking-wide text-gray-600 mb-1">
+            {rb.kind}
+          </div>
           <div className="font-semibold mb-2">{rb.title}</div>
           <div className="text-sm mb-2">Est. {rb.estMinutes} min</div>
           {rb.flags?.length ? (
-            <div className="mb-2 flex flex-wrap gap-1">{rb.flags.map((f) => <Chip key={f}>{f}</Chip>)}</div>
+            <div className="mb-2 flex flex-wrap gap-1">
+              {rb.flags.map((f) => (
+                <Chip key={f}>{f}</Chip>
+              ))}
+            </div>
           ) : null}
-          {rb.ppe?.length ? <div className="text-xs text-gray-700 mb-2">PPE: {rb.ppe.join(", ")}</div> : null}
-          {rb.feed ? <div className="text-xs text-gray-700">Feed: water check {rb.feed.waterCheck ? "✓" : "—"}</div> : null}
-          {rb.chillChain ? <div className="text-xs text-gray-700">Chill-chain: max {rb.chillChain.maxMinutesOut} min out</div> : null}
+          {rb.ppe?.length ? (
+            <div className="text-xs text-gray-700 mb-2">
+              PPE: {rb.ppe.join(", ")}
+            </div>
+          ) : null}
+          {rb.feed ? (
+            <div className="text-xs text-gray-700">
+              Feed: water check {rb.feed.waterCheck ? "✓" : "—"}
+            </div>
+          ) : null}
+          {rb.chillChain ? (
+            <div className="text-xs text-gray-700">
+              Chill-chain: max {rb.chillChain.maxMinutesOut} min out
+            </div>
+          ) : null}
         </div>
       ))}
     </div>
@@ -876,8 +1147,14 @@ function EstimateBlock({ estimates }) {
   const lb = (n) => Number(n || 0).toFixed(1);
   const base = estimates.base || { feedKgPerDay: 0, beddingLbPerWeek: 0 };
   const final = estimates.final || { feedKgPerDay: 0, beddingLbPerWeek: 0 };
-  const addFeed = Math.max(0, (final.feedKgPerDay || 0) - (base.feedKgPerDay || 0));
-  const addBed = Math.max(0, (final.beddingLbPerWeek || 0) - (base.beddingLbPerWeek || 0));
+  const addFeed = Math.max(
+    0,
+    (final.feedKgPerDay || 0) - (base.feedKgPerDay || 0)
+  );
+  const addBed = Math.max(
+    0,
+    (final.beddingLbPerWeek || 0) - (base.beddingLbPerWeek || 0)
+  );
 
   return (
     <div className="text-sm">
@@ -908,7 +1185,8 @@ function EstimateBlock({ estimates }) {
       </div>
 
       <div className="text-xs text-gray-600 mt-3">
-        Estimates use your engine if available; otherwise fallback species baselines. Final totals include loss.
+        Estimates use your engine if available; otherwise fallback species
+        baselines. Final totals include loss.
       </div>
     </div>
   );
@@ -1020,7 +1298,13 @@ function buildSessions(cells, sabbathGuard, schedHelpers) {
     }
     const helper = schedHelpers?.mkDateForWeekday;
     const nextMuckDate = helper ? helper(c.muckDay || "Wed") : null;
-    sessions.push({ id: uid("sess"), kind: "muck", stall: c.name, zone: c.zone, when: nextMuckDate || c.muckDay || "Wed" });
+    sessions.push({
+      id: uid("sess"),
+      kind: "muck",
+      stall: c.name,
+      zone: c.zone,
+      when: nextMuckDate || c.muckDay || "Wed",
+    });
   });
   return sessions;
 }

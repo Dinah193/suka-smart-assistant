@@ -29,8 +29,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // Defensive optional chaining helpers in case imports change shape later
 const safeEventBus = {
@@ -304,7 +304,10 @@ function StabilityDashboardView() {
       }));
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.warn("[StabilityDashboard] Notification.requestPermission error", err);
+      console.warn(
+        "[StabilityDashboard] Notification.requestPermission error",
+        err
+      );
     }
   };
 
@@ -327,7 +330,8 @@ function StabilityDashboardView() {
           metadata: {
             tempTargetF: 0,
             donenessCue: "timer",
-            cueNotes: "You should see/read/hear step-change cues from SessionRunner.",
+            cueNotes:
+              "You should see/read/hear step-change cues from SessionRunner.",
           },
         },
         {
@@ -339,7 +343,8 @@ function StabilityDashboardView() {
           metadata: {
             tempTargetF: 0,
             donenessCue: "timer",
-            cueNotes: "Navigate around the app and confirm the runner persists.",
+            cueNotes:
+              "Navigate around the app and confirm the runner persists.",
           },
         },
       ],
@@ -443,8 +448,7 @@ function StabilityDashboardView() {
       ? runningSession.steps.length
       : 0;
     const currentStep =
-      Array.isArray(runningSession.steps) &&
-      runningSession.steps[stepIndex]
+      Array.isArray(runningSession.steps) && runningSession.steps[stepIndex]
         ? runningSession.steps[stepIndex]
         : null;
 
@@ -483,8 +487,8 @@ function StabilityDashboardView() {
     if (!lastSessionEvent) {
       return (
         <p className="text-sm text-slate-500">
-          No recent session events. Start a session to see live event
-          telemetry here.
+          No recent session events. Start a session to see live event telemetry
+          here.
         </p>
       );
     }
@@ -519,9 +523,9 @@ function StabilityDashboardView() {
               Stability &amp; Resilience
             </h1>
             <p className="mt-1 text-sm text-slate-600 max-w-xl">
-              See how well Suka Smart Assistant can keep sessions running in
-              the background, stay in sync across pages, and keep your
-              household flows stable.
+              See how well Suka Smart Assistant can keep sessions running in the
+              background, stay in sync across pages, and keep your household
+              flows stable.
             </p>
           </div>
           <div className="flex flex-col items-end gap-3">
@@ -729,7 +733,8 @@ function StabilityDashboardView() {
             <p className="mt-3 text-xs text-slate-500">
               These values will improve once dedicated guard services emit{" "}
               <span className="font-mono text-[11px]">guard.*</span> events
-              (e.g. <span className="font-mono text-[11px]">guard.sabbath</span>).
+              (e.g. <span className="font-mono text-[11px]">guard.sabbath</span>
+              ).
             </p>
           </section>
 
@@ -751,8 +756,8 @@ function StabilityDashboardView() {
               <li className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 <span>
-                  Session timers should continue even if this page is closed,
-                  as long as the browser tab is still open.
+                  Session timers should continue even if this page is closed, as
+                  long as the browser tab is still open.
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -766,8 +771,8 @@ function StabilityDashboardView() {
                 <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 <span>
                   On supported devices, a mini control HUD can appear via
-                  Document Picture-in-Picture so sessions stay visible while
-                  you multitask.
+                  Document Picture-in-Picture so sessions stay visible while you
+                  multitask.
                 </span>
               </li>
             </ul>
@@ -903,12 +908,8 @@ function StabilityDetailModal({
 
         {/* Content */}
         <div className="px-4 py-4 max-h-[70vh] overflow-y-auto text-sm">
-          {tab === "device" && (
-            <DeviceDetailView deviceCaps={deviceCaps} />
-          )}
-          {tab === "guards" && (
-            <GuardsDetailView guardStatus={guardStatus} />
-          )}
+          {tab === "device" && <DeviceDetailView deviceCaps={deviceCaps} />}
+          {tab === "guards" && <GuardsDetailView guardStatus={guardStatus} />}
           {tab === "session" && (
             <SessionDetailView runningSession={runningSession} />
           )}
@@ -956,9 +957,9 @@ function DeviceDetailView({ deviceCaps }) {
           changes, “time to stir,” and other nudges even if you switch tabs.
         </li>
         <li>
-          <span className="font-medium">Voice (TTS):</span> Reads steps out
-          loud so you can keep your hands free, especially for messy kitchen or
-          barn tasks.
+          <span className="font-medium">Voice (TTS):</span> Reads steps out loud
+          so you can keep your hands free, especially for messy kitchen or barn
+          tasks.
         </li>
         <li>
           <span className="font-medium">Media Session:</span> Lets hardware
@@ -988,9 +989,9 @@ function GuardsDetailView({ guardStatus }) {
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-slate-900">Guard checks</h3>
       <p className="text-sm text-slate-600">
-        Guards are safety and sanity checks that decide whether a session
-        should run right now: Sabbath boundaries, quiet hours, weather
-        constraints, inventory readiness, and more.
+        Guards are safety and sanity checks that decide whether a session should
+        run right now: Sabbath boundaries, quiet hours, weather constraints,
+        inventory readiness, and more.
       </p>
       <ul className="space-y-3 text-sm text-slate-700">
         <li>
@@ -999,8 +1000,8 @@ function GuardsDetailView({ guardStatus }) {
           configuration.
         </li>
         <li>
-          <span className="font-medium">Quiet hours:</span> Reduces noisy
-          alerts and defers loud tasks when your household should be resting.
+          <span className="font-medium">Quiet hours:</span> Reduces noisy alerts
+          and defers loud tasks when your household should be resting.
         </li>
         <li>
           <span className="font-medium">Weather:</span> Checks conditions for
@@ -1040,9 +1041,9 @@ function SessionDetailView({ runningSession }) {
           pause/resume, N for next step, P for previous step.
         </li>
         <li>
-          <span className="font-medium">Checkpoints:</span> The runner writes
-          to Dexie after every step change and every 10 seconds while running,
-          so it can recover from reloads.
+          <span className="font-medium">Checkpoints:</span> The runner writes to
+          Dexie after every step change and every 10 seconds while running, so
+          it can recover from reloads.
         </li>
         <li>
           <span className="font-medium">Events:</span> It emits{" "}
@@ -1088,9 +1089,9 @@ function BackgroundDetailView() {
         Background behavior
       </h3>
       <p className="text-sm text-slate-600">
-        Once the SessionRunner starts, its job is to stay alive and helpful
-        even if you click around different tools in SSA. This is where the
-        stability features all come together.
+        Once the SessionRunner starts, its job is to stay alive and helpful even
+        if you click around different tools in SSA. This is where the stability
+        features all come together.
       </p>
       <ul className="space-y-3 text-sm text-slate-700">
         <li>
@@ -1105,8 +1106,8 @@ function BackgroundDetailView() {
           different page or another app.
         </li>
         <li>
-          <span className="font-medium">Mini HUD (PiP):</span> When supported,
-          a tiny floating control panel can show the current step and controls
+          <span className="font-medium">Mini HUD (PiP):</span> When supported, a
+          tiny floating control panel can show the current step and controls
           above other windows, especially helpful on desktop while browsing
           recipes or watching videos.
         </li>

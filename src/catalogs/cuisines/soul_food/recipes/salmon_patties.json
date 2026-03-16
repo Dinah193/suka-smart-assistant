@@ -1,0 +1,209 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.salmon_croquettes.v1",
+    "name": "Soul Food Salmon Croquettes",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Classic salmon croquettes/patties made with canned salmon, aromatics, and a crisp pan-fry. Includes optional cracker crumbs and hot sauce."
+    },
+    "tags": [
+      "soul_food",
+      "salmon_croquettes",
+      "salmon_patties",
+      "fish",
+      "pan_fry",
+      "comfort_food",
+      "budget_meal"
+    ],
+    "allergens": ["fish", "egg", "wheat"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": true
+    },
+    "summary": "Crispy-edged salmon croquettes with onion, celery, herbs, and seasoning—quick soul food favorites for breakfast or dinner.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 6,
+      "unit": "servings"
+    },
+    "yield": "8–10 croquettes (depending on size)",
+    "timing": {
+      "prepMinutes": 15,
+      "inactiveMinutes": 10,
+      "cookMinutes": 12,
+      "totalMinutes": 37
+    },
+    "equipment": [
+      {
+        "id": "skillet",
+        "label": "Skillet (cast iron preferred)",
+        "required": true
+      },
+      { "id": "mixing_bowl", "label": "Mixing bowl", "required": true },
+      { "id": "fork", "label": "Fork (for flaking salmon)", "required": true },
+      { "id": "spatula", "label": "Spatula", "required": true },
+      { "id": "sheet_pan", "label": "Sheet pan", "required": false },
+      { "id": "wire_rack", "label": "Wire rack (optional)", "required": false }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Croquettes are fully cooked when hot throughout and browned on both sides.",
+        "If using fresh cooked salmon, ensure it was cooked safely before mixing."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "canned_salmon",
+      "label": "Canned salmon, drained (bones/skin removed if desired)",
+      "amount": { "value": 2, "unit": "can_14_75oz" }
+    },
+    {
+      "id": "yellow_onion",
+      "label": "Yellow onion, finely diced",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "celery",
+      "label": "Celery, finely diced",
+      "amount": { "value": 0.33, "unit": "cup" }
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Green bell pepper, finely diced (optional)",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "parsley",
+      "label": "Parsley, chopped (optional)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "eggs",
+      "label": "Eggs",
+      "amount": { "value": 2, "unit": "large" }
+    },
+    {
+      "id": "mayonnaise",
+      "label": "Mayonnaise (or mustard; helps moisture)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "dijon_mustard",
+      "label": "Mustard (optional, flavor)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "hot_sauce",
+      "label": "Hot sauce (optional)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+
+    {
+      "id": "breadcrumbs",
+      "label": "Breadcrumbs (or crushed saltine crackers)",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour (optional, if mixture is too wet)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "cayenne_pepper",
+      "label": "Cayenne pepper (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil (for frying)",
+      "amount": { "value": 4, "unit": "tbsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_salmon",
+      "title": "Prep salmon",
+      "body": "Drain canned salmon. Flake into a mixing bowl with a fork. Remove large bones/skin if you prefer (small bones are edible and mash easily)."
+    },
+    {
+      "id": "step_02_mix_base",
+      "title": "Mix aromatics and binders",
+      "body": "Add onion, celery, bell pepper (optional), parsley (optional), eggs, mayonnaise, mustard (optional), and hot sauce (optional). Mix until combined."
+    },
+    {
+      "id": "step_03_season_thicken",
+      "title": "Season and set texture",
+      "body": "Add breadcrumbs (or crushed crackers), salt, pepper, paprika, garlic powder, onion powder, and cayenne (optional). Mix. If mixture seems too wet to shape, add 1–2 tbsp flour until it holds together."
+    },
+    {
+      "id": "step_04_rest",
+      "title": "Rest mixture",
+      "body": "Let mixture rest 10 minutes so crumbs hydrate and the mix firms up for shaping."
+    },
+    {
+      "id": "step_05_shape",
+      "title": "Shape croquettes",
+      "body": "Form into 8–10 patties (about 1/2-inch thick). Press edges so they don’t crack."
+    },
+    {
+      "id": "step_06_pan_fry",
+      "title": "Pan-fry until crisp",
+      "body": "Heat oil in a skillet over medium to medium-high. Fry croquettes 3–4 minutes per side until deep golden and crisp. Work in batches; don’t overcrowd."
+    },
+    {
+      "id": "step_07_drain",
+      "title": "Drain and hold",
+      "body": "Transfer to a rack (preferred) or paper towels. Keep warm while frying remaining batches."
+    },
+    {
+      "id": "step_08_serve",
+      "title": "Serve",
+      "body": "Serve hot with grits, eggs, rice, or a side salad. Optional: add hot sauce or a squeeze of lemon."
+    }
+  ]
+}

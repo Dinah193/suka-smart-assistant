@@ -49,17 +49,17 @@
 // (Adjust paths to match your project aliases as needed.)
 // -----------------------------------------------------------------------------
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import { HubPacketFormatter } from "@/services/HubPacketFormatter";
-import { FamilyFundConnector } from "@/services/FamilyFundConnector";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 // Runtime enforcement & helpers
-import { checkBudget } from "@/agents/runtime/budget";
-import { isReasonerAllowed } from "@/agents/runtime/gating";
-import { applyConfidenceRules } from "@/agents/runtime/confidence";
-import { applyFreshnessRules } from "@/agents/runtime/freshness";
+import { checkBudget } from "@/agents/runtime/reasoner/budget";
+import { isReasonerAllowed } from "@/reasoner/gating";
+import { applyConfidenceRules } from "@/agents/runtime/reasoner/confidence";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness";
 
 // Context selectors (Dexie-backed)
 import {
@@ -70,33 +70,24 @@ import {
 } from "@/agents/runtime/selectors";
 
 // Cache layer
-import {
-  getMemoized,
-  setMemoized,
-} from "@/agents/runtime/cache/memo";
-import {
-  makeSababCacheKey,
-} from "@/agents/runtime/cache/keys";
+import { getMemoized, setMemoized } from "@/agents/runtime/reasoner/cache/memo";
+import { makeSababCacheKey } from "@/agents/runtime/reasoner/cache/keys";
 
 // Mode mapping + Reasoner + schema validator
 import {
   resolveSababMode, // (req: ShimRequest) => { mode: string, schemaId: string }
-} from "@/agents/shims/sabab/modes/map";
+} from "@/agents/modes/map";
 
-import {
-  callReasoner,
-} from "@/agents/runtime/reasonerDriver";
+import { callReasoner } from "@/agents/runtime/reasonerDriver";
 
-import {
-  validateModeOutput,
-} from "@/agents/runtime/schemaValidator";
+import { validateModeOutput } from "@/agents/runtime/schemaValidator";
 
 // (Optional) session composition & guards if you later wire Sabab → sessions.
 // Keeping imports commented so you can enable when ready.
 /*
 import {
   composeSessionFromSababFeast,
-} from "@/skills/sessions/compose";
+} from "@agents/skills/sessions/compose";
 
 import {
   evaluateGuardsForSession,
@@ -172,23 +163,19 @@ function buildPromptForMode(req, mode, context) {
 
   const torahProfile = context?.torahProfile || {};
   const cuisinePreferences =
-    context?.cuisinePreferences ||
-    input?.cuisinePreferences ||
-    {};
+    context?.cuisinePreferences || input?.cuisinePreferences || {};
   const nutritionProfile =
-    context?.nutritionProfile ||
-    input?.nutritionProfile ||
-    {};
+    context?.nutritionProfile || input?.nutritionProfile || {};
   const diasporaPreferences =
-    context?.diasporaPreferences ||
-    input?.diasporaPreferences ||
-    {};
+    context?.diasporaPreferences || input?.diasporaPreferences || {};
   const coalition = input?.coalition || null;
 
   // Rotisserie-first system prompt
   const systemPrompt =
     // Allow modes map to override, but default to rotisserie architect
-    (context?.modeConfig && context.modeConfig.prompts && context.modeConfig.prompts.system) ||
+    (context?.modeConfig &&
+      context.modeConfig.prompts &&
+      context.modeConfig.prompts.system) ||
     "You are the Sabab Rotisserie Architect for African American Israelites. " +
       "Sababs are meat cooked on a rotisserie (vertical or horizontal spit) " +
       "with layered spices and herbs applied to the meat as it turns. Your " +
@@ -263,8 +250,7 @@ function buildPromptForMode(req, mode, context) {
           "rotation_schedule",
           "internal_temp_and_texture_cues",
         ],
-        presentationStyle:
-          "sliced_rotisserie_meat_layered_with_veg_and_sauces",
+        presentationStyle: "sliced_rotisserie_meat_layered_with_veg_and_sauces",
       },
     },
     task: "sabab-rotisserie-feast-planning",
@@ -289,9 +275,7 @@ function normalizeResult(intent, raw, context) {
   const normalized = raw || {};
 
   const cuisinePreferences =
-    normalized.cuisinePreferences ||
-    context?.cuisinePreferences ||
-    {};
+    normalized.cuisinePreferences || context?.cuisinePreferences || {};
   const nutritionSummary =
     normalized.nutritionSummary ||
     normalized.nutrition ||
@@ -324,49 +308,45 @@ function normalizeResult(intent, raw, context) {
         normalized.rotisserie?.orientation || "vertical_or_horizontal_spit",
       burnerLayout:
         normalized.rotisserie?.burnerLayout || "indirect_heat_around_spit",
-      rotationSpeedRpm:
-        normalized.rotisserie?.rotationSpeedRpm || 3, // reasonable default
+      rotationSpeedRpm: normalized.rotisserie?.rotationSpeedRpm || 3, // reasonable default
       preheatMinutes: normalized.rotisserie?.preheatMinutes || 15,
-      targetInternalTempF:
-        normalized.rotisserie?.targetInternalTempF || [150, 165],
-      bastingIntervalMin:
-        normalized.rotisserie?.bastingIntervalMin || 15,
-      spiceHerbLayers:
-        normalized.rotisserie?.spiceHerbLayers || [
-          {
-            layer: 1,
-            type: "base_rub",
-            description:
-              "Salt + base spices rubbed directly on meat before mounting.",
-          },
-          {
-            layer: 2,
-            type: "herb_coating",
-            description:
-              "Herb mix pressed onto exterior after first 15–20 minutes of rotation.",
-          },
-          {
-            layer: 3,
-            type: "finishing_oil_or_glaze",
-            description:
-              "Light oil or glaze brushed on in last 10–15 minutes for shine and aroma.",
-          },
-        ],
-      donenessCues:
-        normalized.rotisserie?.donenessCues || [
-          "deeply browned edges",
-          "rendered fat dripping but not burning",
-          "juices run clear when sliced",
-        ],
-    },
-    altMethods:
-      normalized.altMethods || [
+      targetInternalTempF: normalized.rotisserie?.targetInternalTempF || [
+        150, 165,
+      ],
+      bastingIntervalMin: normalized.rotisserie?.bastingIntervalMin || 15,
+      spiceHerbLayers: normalized.rotisserie?.spiceHerbLayers || [
         {
-          method: "oven_roasting",
-          notes:
-            "Use a wire rack over a tray, flip once, and baste frequently to mimic rotisserie.",
+          layer: 1,
+          type: "base_rub",
+          description:
+            "Salt + base spices rubbed directly on meat before mounting.",
+        },
+        {
+          layer: 2,
+          type: "herb_coating",
+          description:
+            "Herb mix pressed onto exterior after first 15–20 minutes of rotation.",
+        },
+        {
+          layer: 3,
+          type: "finishing_oil_or_glaze",
+          description:
+            "Light oil or glaze brushed on in last 10–15 minutes for shine and aroma.",
         },
       ],
+      donenessCues: normalized.rotisserie?.donenessCues || [
+        "deeply browned edges",
+        "rendered fat dripping but not burning",
+        "juices run clear when sliced",
+      ],
+    },
+    altMethods: normalized.altMethods || [
+      {
+        method: "oven_roasting",
+        notes:
+          "Use a wire rack over a tray, flip once, and baste frequently to mimic rotisserie.",
+      },
+    ],
   };
 
   // Plate/platter presentation
@@ -374,20 +354,18 @@ function normalizeResult(intent, raw, context) {
     style:
       normalized.presentationStyle ||
       "sliced_rotisserie_meat_layered_with_veg_and_sauces",
-    layeringOrder:
-      normalized.layeringOrder || [
-        "base_bread_or_grains",
-        "sauced_veg",
-        "sliced_rotisserie_meat",
-        "fresh_herbs_and_crunch",
-        "finishing_sauce_or_oil",
-      ],
-    notes:
-      normalized.presentationNotes || [
-        "Slice meat thinly off the spit, catching outer crisp edges.",
-        "Alternate layers of meat and fresh veg for temperature and texture contrast.",
-        "Add fresh herbs and finishing sauce right before serving.",
-      ],
+    layeringOrder: normalized.layeringOrder || [
+      "base_bread_or_grains",
+      "sauced_veg",
+      "sliced_rotisserie_meat",
+      "fresh_herbs_and_crunch",
+      "finishing_sauce_or_oil",
+    ],
+    notes: normalized.presentationNotes || [
+      "Slice meat thinly off the spit, catching outer crisp edges.",
+      "Alternate layers of meat and fresh veg for temperature and texture contrast.",
+      "Add fresh herbs and finishing sauce right before serving.",
+    ],
   };
 
   if (intent === "sabab.buildKebab") {
@@ -419,8 +397,7 @@ function normalizeResult(intent, raw, context) {
   }
 
   if (intent === "sabab.planFeast") {
-    const schedule =
-      feast.schedule || normalized.schedule || [];
+    const schedule = feast.schedule || normalized.schedule || [];
 
     return {
       type: "sabab.planFeast",
@@ -489,7 +466,9 @@ export async function invokeShim(req) {
       ok: false,
       mode: "sabab.none",
       data: { error: "Missing ShimRequest" },
-      warnings: [{ code: "bad_request", message: "Request object is required." }],
+      warnings: [
+        { code: "bad_request", message: "Request object is required." },
+      ],
       debug,
     });
   }
@@ -501,7 +480,9 @@ export async function invokeShim(req) {
       ok: false,
       mode: "sabab.none",
       data: { error: "Missing domain or intent" },
-      warnings: [{ code: "bad_request", message: "domain and intent are required." }],
+      warnings: [
+        { code: "bad_request", message: "domain and intent are required." },
+      ],
       debug,
     });
   }
@@ -509,9 +490,7 @@ export async function invokeShim(req) {
   // Resolve mode via modes/map.js (with defensive fallback)
   let modeInfo = null;
   try {
-    modeInfo = resolveSababMode
-      ? resolveSababMode(req)
-      : null;
+    modeInfo = resolveSababMode ? resolveSababMode(req) : null;
   } catch (err) {
     debug.push({
       stage: "resolveMode",
@@ -526,14 +505,9 @@ export async function invokeShim(req) {
     "sabab.shareBundle": "sabab.shareBundle.v1",
   };
 
-  const mode =
-    modeInfo?.mode ||
-    fallbackModeMap[intent] ||
-    "sabab.generic.v1";
+  const mode = modeInfo?.mode || fallbackModeMap[intent] || "sabab.generic.v1";
 
-  const schemaId =
-    modeInfo?.schemaId ||
-    `sabab.${mode}.delta.schema.json`;
+  const schemaId = modeInfo?.schemaId || `sabab.${mode}.delta.schema.json`;
 
   debug.push({ stage: "modeSelected", mode, schemaId, intent, domain });
 
@@ -604,7 +578,8 @@ export async function invokeShim(req) {
   } catch (err) {
     warnings.push({
       code: "context_error",
-      message: "Failed to load full Sabab context; proceeding with partial context.",
+      message:
+        "Failed to load full Sabab context; proceeding with partial context.",
     });
     debug.push({
       stage: "contextError",
@@ -714,7 +689,10 @@ export async function invokeShim(req) {
     return buildShimResponse({
       ok: false,
       mode,
-      data: { error: "Reasoner call failed", detail: err?.message || String(err) },
+      data: {
+        error: "Reasoner call failed",
+        detail: err?.message || String(err),
+      },
       warnings,
       debug,
     });
@@ -870,7 +848,9 @@ export async function invokeShim(req) {
  * @returns {Promise<ShimResponse>}
  */
 export async function invokeSababCommand(command, payload = {}) {
-  const cmd = String(command || "").toLowerCase().trim();
+  const cmd = String(command || "")
+    .toLowerCase()
+    .trim();
   const map = {
     buildkebab: "sabab.buildKebab",
     kebab: "sabab.buildKebab",

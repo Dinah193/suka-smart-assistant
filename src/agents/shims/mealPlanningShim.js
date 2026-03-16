@@ -19,11 +19,12 @@
  *  - Normalize the result into a stable Meal Planning payload.
  *  - Emit SSA Reasoner + domain events.
  *  - Optionally export to Hub when familyFundMode is enabled.
+ *  - ✅ OPTIONAL: persist the current plan to MealPlanStore when requested.
  *
  * This shim does NOT:
  *  - Own any UI logic, DOM access, Jobs engine, or Toast/NBA glue.
  *  - Directly call LLMs (uses Reasoner core instead).
- *  - Persist plans or inventory itself (that’s handled by other modules).
+ *  - Persist plans or inventory itself by default (only when explicitly requested).
  */
 
 /**
@@ -41,36 +42,40 @@
  * @property {Object} data
  * @property {Array<Object>} [warnings]
  * @property {Array<Object>} [debug]
+ *
+ * Compatibility additions (non-breaking):
+ * @property {Object|null} [mealPlan]   // top-level convenience mirror of data.mealPlan
+ * @property {Object|null} [plan]       // alias of mealPlan (some callers use "plan")
  */
 
-import { emit } from '@/services/eventBus';
-import { familyFundMode } from '@/services/featureFlags';
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // Reasoner runtime support
-import { enforceBudget } from '@/services/reasoner/budget';
-import { isGated } from '@/services/reasoner/gating';
-import { checkConfidence } from '@/services/reasoner/confidence';
-import { applyFreshnessRules } from '@/services/reasoner/freshness';
-import { getCachedResponse, setCachedResponse } from '@/services/reasoner/cache/memo';
-import { mealPlanningShimKey } from '@/services/reasoner/cache/keys';
-import { selectModeForIntent } from '@/services/reasoner/modes/map';
-import { validateResponse } from '@/services/reasoner/validate';
-import { buildSystemPrompt } from '@/services/reasoner/prompts/system';
-import { buildTemplatePrompt } from '@/services/reasoner/prompts/templates';
-import { callReasoner } from '@/services/reasoner/core';
+import { enforceBudget } from "@/reasoner/budget";
+import { isGated } from "@/reasoner/gating";
+import { checkConfidence } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
+import { getCachedResponse, setCachedResponse } from "@/reasoner/cache/memo";
+import { mealPlanningShimKey } from "@/reasoner/cache/keys";
+import { selectModeForIntent } from "@/reasoner/modes/map";
+import { validateResponse } from "@/reasoner/modes/validate";
+import { buildSystemPrompt } from "@/reasoner/prompts/system";
+import { buildTemplatePrompt } from "@/reasoner/prompts/templates";
+import { callReasoner } from "@/reasoner/core";
 
 // Context selectors
-import { selectMealPlanningContext } from '@/services/selectors/mealPlanningSelectors';
+import { selectMealPlanningContext } from "@/services/selectors/mealPlanningSelectors";
 
 // Guards – use wrappers, no inline guard logic here
-import { evaluateGuards } from '@/services/guards/guardsEvaluate';
+import { evaluateGuards } from "@/services/guards/guardsEvaluate";
 
 // Hub export (optional)
-import { HubPacketFormatter } from '@/services/hub/HubPacketFormatter';
-import { FamilyFundConnector } from '@/services/hub/FamilyFundConnector';
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 const isoNow = () => new Date().toISOString();
-const lower = (s) => (s == null ? '' : String(s).toLowerCase().trim());
+const lower = (s) => (s == null ? "" : String(s).toLowerCase().trim());
 
 /* ---------------------------------------------------------------------------
  * Intent normalization
@@ -103,42 +108,42 @@ const lower = (s) => (s == null ? '' : String(s).toLowerCase().trim());
  * @returns {string}
  */
 function normalizeIntent(raw) {
-  const s = lower(raw || '');
+  const s = lower(raw || "");
 
   const map = {
-    listbundles: 'mealPlanning.listBundles',
-    bundles: 'mealPlanning.listBundles',
+    listbundles: "mealPlanning.listBundles",
+    bundles: "mealPlanning.listBundles",
 
-    createplanfrombundle: 'mealPlanning.createFromBundle',
-    create_plan_from_bundle: 'mealPlanning.createFromBundle',
-    create: 'mealPlanning.createFromBundle',
+    createplanfrombundle: "mealPlanning.createFromBundle",
+    create_plan_from_bundle: "mealPlanning.createFromBundle",
+    create: "mealPlanning.createFromBundle",
 
-    getcropdemandweights: 'mealPlanning.cropDemandWeights',
-    get_crop_demand_weights: 'mealPlanning.cropDemandWeights',
-    weights: 'mealPlanning.cropDemandWeights',
+    getcropdemandweights: "mealPlanning.cropDemandWeights",
+    get_crop_demand_weights: "mealPlanning.cropDemandWeights",
+    weights: "mealPlanning.cropDemandWeights",
 
-    generateplan: 'mealPlanning.generatePlan',
-    generate: 'mealPlanning.generatePlan',
-    plan: 'mealPlanning.generatePlan',
+    generateplan: "mealPlanning.generatePlan",
+    generate: "mealPlanning.generatePlan",
+    plan: "mealPlanning.generatePlan",
 
-    shareplan_to_coalition: 'mealPlanning.shareToCoalition',
-    sharecoalition: 'mealPlanning.shareToCoalition',
-    coalitionshare: 'mealPlanning.shareToCoalition',
+    shareplan_to_coalition: "mealPlanning.shareToCoalition",
+    sharecoalition: "mealPlanning.shareToCoalition",
+    coalitionshare: "mealPlanning.shareToCoalition",
 
-    mealtrain: 'mealPlanning.createMealTrain',
-    createmealtrain: 'mealPlanning.createMealTrain',
+    mealtrain: "mealPlanning.createMealTrain",
+    createmealtrain: "mealPlanning.createMealTrain",
 
-    publishplanpreset: 'mealPlanning.publishPreset',
-    publishplan: 'mealPlanning.publishPreset',
-    publish: 'mealPlanning.publishPreset',
+    publishplanpreset: "mealPlanning.publishPreset",
+    publishplan: "mealPlanning.publishPreset",
+    publish: "mealPlanning.publishPreset",
 
-    getcurrentplan: 'mealPlanning.getCurrentPlan',
-    current: 'mealPlanning.getCurrentPlan',
-    get: 'mealPlanning.getCurrentPlan',
+    getcurrentplan: "mealPlanning.getCurrentPlan",
+    current: "mealPlanning.getCurrentPlan",
+    get: "mealPlanning.getCurrentPlan",
   };
 
   if (map[s]) return map[s];
-  if (s.startsWith('mealplanning.')) return s;
+  if (s.startsWith("mealplanning.")) return s;
   return `mealPlanning.${s}`;
 }
 
@@ -154,9 +159,9 @@ function normalizeIntent(raw) {
  * @returns {any}
  */
 function pick(raw, key) {
-  if (!raw || typeof raw !== 'object') return undefined;
+  if (!raw || typeof raw !== "object") return undefined;
   if (raw[key] !== undefined) return raw[key];
-  if (raw.data && typeof raw.data === 'object' && raw.data[key] !== undefined) {
+  if (raw.data && typeof raw.data === "object" && raw.data[key] !== undefined) {
     return raw.data[key];
   }
   return undefined;
@@ -170,10 +175,15 @@ function pick(raw, key) {
  * @returns {string}
  */
 function buildSummary(raw, defaultSummary) {
-  if (raw && typeof raw.summary === 'string' && raw.summary.trim().length) {
+  if (raw && typeof raw.summary === "string" && raw.summary.trim().length) {
     return raw.summary.trim();
   }
-  if (raw && raw.data && typeof raw.data.summary === 'string' && raw.data.summary.trim().length) {
+  if (
+    raw &&
+    raw.data &&
+    typeof raw.data.summary === "string" &&
+    raw.data.summary.trim().length
+  ) {
     return raw.data.summary.trim();
   }
   return defaultSummary;
@@ -202,17 +212,18 @@ function normalizeMealPlanningOutput(intent, raw) {
   const warnings = [];
   const debug = [];
 
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return {
       data: {
-        summary: 'Reasoner returned empty result for meal planning intent.',
+        summary: "Reasoner returned empty result for meal planning intent.",
         mealPlan: null,
         calendarEvents: [],
       },
       warnings: [
         {
-          type: 'emptyResult',
-          message: 'Reasoner returned no structured payload for meal planning intent.',
+          type: "emptyResult",
+          message:
+            "Reasoner returned no structured payload for meal planning intent.",
         },
       ],
       debug,
@@ -221,25 +232,24 @@ function normalizeMealPlanningOutput(intent, raw) {
 
   const summary = buildSummary(
     raw,
-    intent.startsWith('mealPlanning.')
+    intent.startsWith("mealPlanning.")
       ? `Meal planning result for "${intent}".`
-      : 'Meal planning result.',
+      : "Meal planning result."
   );
 
   /* ------------------------ listBundles ------------------------ */
-  if (intent === 'mealPlanning.listBundles') {
-    const bundles = Array.isArray(pick(raw, 'bundles')) ? pick(raw, 'bundles') : [];
-    const mealPlanningUpdates =
-      Array.isArray(pick(raw, 'mealPlanningUpdates')) ? pick(raw, 'mealPlanningUpdates') : [];
+  if (intent === "mealPlanning.listBundles") {
+    const bundles = Array.isArray(pick(raw, "bundles"))
+      ? pick(raw, "bundles")
+      : [];
+    const mealPlanningUpdates = Array.isArray(pick(raw, "mealPlanningUpdates"))
+      ? pick(raw, "mealPlanningUpdates")
+      : [];
 
-    const data = {
-      summary,
-      bundles,
-      mealPlanningUpdates,
-    };
+    const data = { summary, bundles, mealPlanningUpdates };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.listBundles',
+      type: "mealPlanningShim.normalize.listBundles",
       ts: isoNow(),
       bundleCount: bundles.length,
       hasUpdates: mealPlanningUpdates.length > 0,
@@ -250,16 +260,23 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* --------------------- createFromBundle ---------------------- */
-  if (intent === 'mealPlanning.createFromBundle') {
-    const mealPlan = pick(raw, 'mealPlan') || null;
-    const calendarEvents = Array.isArray(pick(raw, 'calendarEvents')) ? pick(raw, 'calendarEvents') : [];
-    const shoppingList = Array.isArray(pick(raw, 'shoppingList')) ? pick(raw, 'shoppingList') : [];
-    const inventoryUpdates =
-      Array.isArray(pick(raw, 'inventoryUpdates')) ? pick(raw, 'inventoryUpdates') : [];
-    const mealPlanningUpdates =
-      Array.isArray(pick(raw, 'mealPlanningUpdates')) ? pick(raw, 'mealPlanningUpdates') : [];
-    const gardenUpdates =
-      Array.isArray(pick(raw, 'gardenUpdates')) ? pick(raw, 'gardenUpdates') : [];
+  if (intent === "mealPlanning.createFromBundle") {
+    const mealPlan = pick(raw, "mealPlan") || null;
+    const calendarEvents = Array.isArray(pick(raw, "calendarEvents"))
+      ? pick(raw, "calendarEvents")
+      : [];
+    const shoppingList = Array.isArray(pick(raw, "shoppingList"))
+      ? pick(raw, "shoppingList")
+      : [];
+    const inventoryUpdates = Array.isArray(pick(raw, "inventoryUpdates"))
+      ? pick(raw, "inventoryUpdates")
+      : [];
+    const mealPlanningUpdates = Array.isArray(pick(raw, "mealPlanningUpdates"))
+      ? pick(raw, "mealPlanningUpdates")
+      : [];
+    const gardenUpdates = Array.isArray(pick(raw, "gardenUpdates"))
+      ? pick(raw, "gardenUpdates")
+      : [];
 
     const data = {
       summary,
@@ -272,7 +289,7 @@ function normalizeMealPlanningOutput(intent, raw) {
     };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.createFromBundle',
+      type: "mealPlanningShim.normalize.createFromBundle",
       ts: isoNow(),
       hasPlan: !!mealPlan,
       eventCount: calendarEvents.length,
@@ -285,22 +302,26 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* ----------------------- generatePlan ------------------------ */
-  if (intent === 'mealPlanning.generatePlan') {
-    const mealPlan = pick(raw, 'mealPlan') || pick(raw, 'plan') || null;
-    const calendarEvents =
-      Array.isArray(pick(raw, 'calendarEvents')) ? pick(raw, 'calendarEvents') : [];
-    const inventoryUpdates =
-      Array.isArray(pick(raw, 'inventoryUpdates')) ? pick(raw, 'inventoryUpdates') : [];
-    const mealPlanningUpdates =
-      Array.isArray(pick(raw, 'mealPlanningUpdates')) ? pick(raw, 'mealPlanningUpdates') : [];
-    const nutritionFlags = Array.isArray(pick(raw, 'nutritionFlags'))
-      ? pick(raw, 'nutritionFlags')
-      : Array.isArray(pick(raw, '_nutritionFlags'))
-      ? pick(raw, '_nutritionFlags')
+  if (intent === "mealPlanning.generatePlan") {
+    const mealPlan = pick(raw, "mealPlan") || pick(raw, "plan") || null;
+    const calendarEvents = Array.isArray(pick(raw, "calendarEvents"))
+      ? pick(raw, "calendarEvents")
       : [];
-    const macroSummary = pick(raw, 'macroSummary') || pick(raw, '_macroSummary') || null;
-    const draftId = pick(raw, 'draftId') || null;
-    const persisted = !!pick(raw, 'persisted');
+    const inventoryUpdates = Array.isArray(pick(raw, "inventoryUpdates"))
+      ? pick(raw, "inventoryUpdates")
+      : [];
+    const mealPlanningUpdates = Array.isArray(pick(raw, "mealPlanningUpdates"))
+      ? pick(raw, "mealPlanningUpdates")
+      : [];
+    const nutritionFlags = Array.isArray(pick(raw, "nutritionFlags"))
+      ? pick(raw, "nutritionFlags")
+      : Array.isArray(pick(raw, "_nutritionFlags"))
+      ? pick(raw, "_nutritionFlags")
+      : [];
+    const macroSummary =
+      pick(raw, "macroSummary") || pick(raw, "_macroSummary") || null;
+    const draftId = pick(raw, "draftId") || null;
+    const persisted = !!pick(raw, "persisted");
 
     const data = {
       summary,
@@ -315,7 +336,7 @@ function normalizeMealPlanningOutput(intent, raw) {
     };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.generatePlan',
+      type: "mealPlanningShim.normalize.generatePlan",
       ts: isoNow(),
       hasPlan: !!mealPlan,
       eventCount: calendarEvents.length,
@@ -331,19 +352,16 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* ------------------- cropDemandWeights ----------------------- */
-  if (intent === 'mealPlanning.cropDemandWeights') {
-    const weights = pick(raw, 'weights') || {};
-    const gardenUpdates =
-      Array.isArray(pick(raw, 'gardenUpdates')) ? pick(raw, 'gardenUpdates') : [];
+  if (intent === "mealPlanning.cropDemandWeights") {
+    const weights = pick(raw, "weights") || {};
+    const gardenUpdates = Array.isArray(pick(raw, "gardenUpdates"))
+      ? pick(raw, "gardenUpdates")
+      : [];
 
-    const data = {
-      summary,
-      weights,
-      gardenUpdates,
-    };
+    const data = { summary, weights, gardenUpdates };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.cropDemandWeights',
+      type: "mealPlanningShim.normalize.cropDemandWeights",
       ts: isoNow(),
       cropCount: Object.keys(weights || {}).length,
       hasUpdates: gardenUpdates.length > 0,
@@ -354,18 +372,14 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* --------------------- shareToCoalition ----------------------- */
-  if (intent === 'mealPlanning.shareToCoalition') {
-    const mealPlan = pick(raw, 'mealPlan') || null;
-    const coalition = pick(raw, 'coalition') || null;
+  if (intent === "mealPlanning.shareToCoalition") {
+    const mealPlan = pick(raw, "mealPlan") || null;
+    const coalition = pick(raw, "coalition") || null;
 
-    const data = {
-      summary,
-      mealPlan,
-      coalition,
-    };
+    const data = { summary, mealPlan, coalition };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.shareToCoalition',
+      type: "mealPlanningShim.normalize.shareToCoalition",
       ts: isoNow(),
       hasPlan: !!mealPlan,
       hasCoalition: !!coalition,
@@ -376,19 +390,16 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* ---------------------- createMealTrain ----------------------- */
-  if (intent === 'mealPlanning.createMealTrain') {
-    const calendarEvents =
-      Array.isArray(pick(raw, 'calendarEvents')) ? pick(raw, 'calendarEvents') : [];
-    const coalition = pick(raw, 'coalition') || null;
+  if (intent === "mealPlanning.createMealTrain") {
+    const calendarEvents = Array.isArray(pick(raw, "calendarEvents"))
+      ? pick(raw, "calendarEvents")
+      : [];
+    const coalition = pick(raw, "coalition") || null;
 
-    const data = {
-      summary,
-      calendarEvents,
-      coalition,
-    };
+    const data = { summary, calendarEvents, coalition };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.createMealTrain',
+      type: "mealPlanningShim.normalize.createMealTrain",
       ts: isoNow(),
       eventCount: calendarEvents.length,
       hasCoalition: !!coalition,
@@ -399,18 +410,14 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* ------------------------ publishPreset ------------------------ */
-  if (intent === 'mealPlanning.publishPreset') {
-    const mealPlan = pick(raw, 'mealPlan') || null;
-    const marketplace = pick(raw, 'marketplace') || null;
+  if (intent === "mealPlanning.publishPreset") {
+    const mealPlan = pick(raw, "mealPlan") || null;
+    const marketplace = pick(raw, "marketplace") || null;
 
-    const data = {
-      summary,
-      mealPlan,
-      marketplace,
-    };
+    const data = { summary, mealPlan, marketplace };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.publishPreset',
+      type: "mealPlanningShim.normalize.publishPreset",
       ts: isoNow(),
       hasPlan: !!mealPlan,
       hasMarketplaceMeta: !!marketplace,
@@ -421,16 +428,13 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* ------------------------ getCurrentPlan ----------------------- */
-  if (intent === 'mealPlanning.getCurrentPlan') {
-    const mealPlan = pick(raw, 'mealPlan') || pick(raw, 'plan') || null;
+  if (intent === "mealPlanning.getCurrentPlan") {
+    const mealPlan = pick(raw, "mealPlan") || pick(raw, "plan") || null;
 
-    const data = {
-      summary,
-      mealPlan,
-    };
+    const data = { summary, mealPlan };
 
     debug.push({
-      type: 'mealPlanningShim.normalize.getCurrentPlan',
+      type: "mealPlanningShim.normalize.getCurrentPlan",
       ts: isoNow(),
       hasPlan: !!mealPlan,
       rawKeys: Object.keys(raw || {}),
@@ -440,19 +444,77 @@ function normalizeMealPlanningOutput(intent, raw) {
   }
 
   /* -------------------------- fallback --------------------------- */
-  const data = {
-    summary,
-    raw,
-  };
+  const data = { summary, raw };
 
   debug.push({
-    type: 'mealPlanningShim.normalize.fallback',
+    type: "mealPlanningShim.normalize.fallback",
     ts: isoNow(),
     intent,
     rawKeys: Object.keys(raw || {}),
   });
 
   return { data, warnings, debug };
+}
+
+/* ---------------------------------------------------------------------------
+ * Store persistence (optional / safe)
+ * ------------------------------------------------------------------------ */
+
+function shouldSaveToStore(input) {
+  const i = input && typeof input === "object" ? input : {};
+  const opt = i.options && typeof i.options === "object" ? i.options : {};
+  return !!(i.saveToStore || opt.saveToStore);
+}
+
+function getStoreMeta(input, intent, mode) {
+  const i = input && typeof input === "object" ? input : {};
+  const opt = i.options && typeof i.options === "object" ? i.options : {};
+  return {
+    intent,
+    mode,
+    source: "agents/shims/mealPlanningShim",
+    householdId: i.householdId || opt.householdId || null,
+    startISO: i.startISO || i.startIso || opt.startISO || opt.startIso || null,
+    endISO: i.endISO || i.endIso || opt.endISO || opt.endIso || null,
+    note: opt.note || i.note || null,
+  };
+}
+
+async function persistPlanToMealPlanStore(planEnvelope, meta) {
+  if (!planEnvelope) return false;
+  try {
+    const mod = await import("@/store/MealPlanStore");
+    const storeObj = mod?.MealPlanStore || mod?.default || null;
+
+    // Preferred: module facade with actions.setPlan
+    if (storeObj?.actions?.setPlan) {
+      storeObj.actions.setPlan(planEnvelope, meta);
+      return true;
+    }
+
+    // Fallback: zustand hook getState().setPlan
+    if (mod?.useMealPlanStore?.getState) {
+      const st = mod.useMealPlanStore.getState();
+      if (st?.setPlan) {
+        st.setPlan(planEnvelope, meta);
+        return true;
+      }
+      if (st?.setMealPlan) {
+        st.setMealPlan(planEnvelope);
+        return true;
+      }
+    }
+  } catch (_) {}
+  return false;
+}
+
+function withTopLevelPlan(response) {
+  const mp = response?.data?.mealPlan ?? response?.data?.plan ?? null;
+  return {
+    ...response,
+    mealPlan: mp,
+    plan: mp,
+  };
 }
 
 /* ---------------------------------------------------------------------------
@@ -471,70 +533,70 @@ export async function invokeShim(req) {
   const debug = [];
 
   try {
-    if (!req || typeof req !== 'object') {
-      return {
+    if (!req || typeof req !== "object") {
+      return withTopLevelPlan({
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
           {
-            type: 'badRequest',
-            message: 'ShimRequest is required and must be an object.',
+            type: "badRequest",
+            message: "ShimRequest is required and must be an object.",
           },
         ],
         debug,
-      };
+      });
     }
 
-    const domain = req.domain || 'cooking';
-    const intent = normalizeIntent(req.intent || '');
+    const domain = req.domain || "cooking";
+    const intent = normalizeIntent(req.intent || "");
     const input = req.input || {};
     const runtime = req.runtime || {};
 
-    if (domain !== 'cooking') {
-      return {
+    if (domain !== "cooking") {
+      return withTopLevelPlan({
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
           {
-            type: 'badDomain',
+            type: "badDomain",
             message: `Meal Planning Shim only supports domain="cooking", received "${domain}".`,
           },
         ],
         debug,
-      };
+      });
     }
 
     // Initial invocation event
     emit({
-      type: 'reasoner.invoked',
+      type: "reasoner.invoked",
       ts: startedAt,
-      source: 'agents/shims/mealPlanning',
+      source: "agents/shims/mealPlanning",
       data: { intent, domain, runtime },
     });
 
     // Gating
     if (isGated({ domain, intent, runtime })) {
       warnings.push({
-        type: 'gated',
+        type: "gated",
         message: `Reasoner calls gated for intent "${intent}".`,
       });
 
       emit({
-        type: 'reasoner.gated',
+        type: "reasoner.gated",
         ts: isoNow(),
-        source: 'agents/shims/mealPlanning',
+        source: "agents/shims/mealPlanning",
         data: { intent, domain },
       });
 
-      return {
+      return withTopLevelPlan({
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings,
         debug,
-      };
+      });
     }
 
     // Mode selection
@@ -543,37 +605,38 @@ export async function invokeShim(req) {
         domain,
         intent,
         input,
-      }) || 'mealPlanning.generatePlan.v1';
+      }) || "mealPlanning.generatePlan.v1";
 
     // Budget enforcement
     const budgetInfo = enforceBudget({ domain, intent, mode, runtime });
     if (!budgetInfo.ok) {
       warnings.push({
-        type: 'budgetExceeded',
-        message: budgetInfo.message || 'Budget exceeded for Meal Planning Shim.',
+        type: "budgetExceeded",
+        message:
+          budgetInfo.message || "Budget exceeded for Meal Planning Shim.",
       });
 
       emit({
-        type: 'reasoner.budgetExceeded',
+        type: "reasoner.budgetExceeded",
         ts: isoNow(),
-        source: 'agents/shims/mealPlanning',
+        source: "agents/shims/mealPlanning",
         data: { intent, domain, mode, budgetInfo },
       });
 
-      return {
+      return withTopLevelPlan({
         ok: false,
         mode,
         data: {},
         warnings,
         debug,
-      };
+      });
     }
 
     // Load context (recipes, inventory, bundles, user prefs, coalitions, etc.)
     const context = await selectMealPlanningContext({ intent, input, runtime });
 
     debug.push({
-      type: 'context.loaded',
+      type: "context.loaded",
       ts: isoNow(),
       keys: Object.keys(context || {}),
     });
@@ -601,52 +664,73 @@ export async function invokeShim(req) {
     };
 
     // Cache lookup
-    const cacheKey = mealPlanningShimKey({ intent, mode, payload: reasonerPayload });
+    const cacheKey = mealPlanningShimKey({
+      intent,
+      mode,
+      payload: reasonerPayload,
+    });
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
       emit({
-        type: 'reasoner.cachedHit',
+        type: "reasoner.cachedHit",
         ts: isoNow(),
-        source: 'agents/shims/mealPlanning',
+        source: "agents/shims/mealPlanning",
         data: { intent, mode, cacheKey },
       });
 
-      const { data, warnings: w2, debug: d2 } = normalizeMealPlanningOutput(intent, cached);
+      const {
+        data,
+        warnings: w2,
+        debug: d2,
+      } = normalizeMealPlanningOutput(intent, cached);
       if (w2?.length) warnings.push(...w2);
       if (d2?.length) debug.push(...d2);
 
-      return {
+      // ✅ optionally persist to store if caller asked
+      if (shouldSaveToStore(input) && (data?.mealPlan || null)) {
+        const meta = getStoreMeta(input, intent, mode);
+        const saved = await persistPlanToMealPlanStore(data.mealPlan, meta);
+        debug.push({
+          type: "mealPlanningShim.storePersist",
+          ts: isoNow(),
+          requested: true,
+          saved,
+          via: saved ? "MealPlanStore.setPlan" : "none",
+        });
+      }
+
+      return withTopLevelPlan({
         ok: true,
         mode,
         data,
         warnings,
         debug,
-      };
+      });
     }
 
     emit({
-      type: 'reasoner.cachedMiss',
+      type: "reasoner.cachedMiss",
       ts: isoNow(),
-      source: 'agents/shims/mealPlanning',
+      source: "agents/shims/mealPlanning",
       data: { intent, mode, cacheKey },
     });
 
     // Build prompts
     const systemPrompt = buildSystemPrompt({
-      domain: 'cooking',
+      domain: "cooking",
       mode,
       extra: {
         mealPlanningInstruction:
-          'You are the Suka Smart Assistant Meal Planning engine. ' +
-          'Use recipes, inventory, user preferences, bundles, coalition data, and past plans ' +
-          'to build structured meal plans and related analytics. ' +
-          'Respect dietary restrictions, budget hints, and family size. ' +
-          'Return STRICT JSON matching the schema for the selected mode (see modes/schemas).',
+          "You are the Suka Smart Assistant Meal Planning engine. " +
+          "Use recipes, inventory, user preferences, bundles, coalition data, and past plans " +
+          "to build structured meal plans and related analytics. " +
+          "Respect dietary restrictions, budget hints, and family size. " +
+          "Return STRICT JSON matching the schema for the selected mode (see modes/schemas).",
       },
     });
 
     const userPrompt = buildTemplatePrompt({
-      domain: 'cooking',
+      domain: "cooking",
       mode,
       intent,
       payload: reasonerPayload,
@@ -671,49 +755,55 @@ export async function invokeShim(req) {
 
     if (!confidence.ok) {
       warnings.push({
-        type: 'lowConfidence',
+        type: "lowConfidence",
         message:
           confidence.message ||
-          'Reasoner confidence below threshold for meal planning intent.',
+          "Reasoner confidence below threshold for meal planning intent.",
       });
 
       emit({
-        type: 'reasoner.lowConfidence',
+        type: "reasoner.lowConfidence",
         ts: isoNow(),
-        source: 'agents/shims/mealPlanning',
+        source: "agents/shims/mealPlanning",
         data: { intent, mode, confidence },
       });
     }
 
     // Schema validation
-    const validation = validateResponse({ domain, intent, mode, raw: rawResult });
+    const validation = validateResponse({
+      domain,
+      intent,
+      mode,
+      raw: rawResult,
+    });
     if (!validation.ok) {
       warnings.push({
-        type: 'invalidSchema',
-        message: validation.message || 'Reasoner output failed schema validation.',
+        type: "invalidSchema",
+        message:
+          validation.message || "Reasoner output failed schema validation.",
         details: validation.errors || [],
       });
 
       emit({
-        type: 'reasoner.invalidSchema',
+        type: "reasoner.invalidSchema",
         ts: isoNow(),
-        source: 'agents/shims/mealPlanning',
+        source: "agents/shims/mealPlanning",
         data: { intent, mode, errors: validation.errors || [] },
       });
 
-      return {
+      return withTopLevelPlan({
         ok: false,
         mode,
         data: {},
         warnings,
         debug,
-      };
+      });
     }
 
     emit({
-      type: 'reasoner.validated',
+      type: "reasoner.validated",
       ts: isoNow(),
-      source: 'agents/shims/mealPlanning',
+      source: "agents/shims/mealPlanning",
       data: { intent, mode },
     });
 
@@ -727,28 +817,40 @@ export async function invokeShim(req) {
     });
 
     // Normalize into SSA Meal Planning payload
-    const { data, warnings: w3, debug: d3 } = normalizeMealPlanningOutput(intent, guarded);
+    const {
+      data,
+      warnings: w3,
+      debug: d3,
+    } = normalizeMealPlanningOutput(intent, guarded);
     if (w3?.length) warnings.push(...w3);
     if (d3?.length) debug.push(...d3);
 
-    // Cache raw result (pre-normalization or post-guards – here we cache pre-normalized guarded)
+    // Cache guarded result
     await setCachedResponse(cacheKey, guarded);
 
     // Domain-level event
-    let domainEventType = 'mealPlanning.output.ready';
-    if (intent === 'mealPlanning.listBundles') domainEventType = 'mealPlanning.bundles.listed';
-    if (intent === 'mealPlanning.createFromBundle') domainEventType = 'mealPlanning.plan.createdFromBundle';
-    if (intent === 'mealPlanning.generatePlan') domainEventType = 'mealPlanning.plan.generated';
-    if (intent === 'mealPlanning.cropDemandWeights') domainEventType = 'mealPlanning.cropDemandWeights.computed';
-    if (intent === 'mealPlanning.shareToCoalition') domainEventType = 'mealPlanning.coalition.shared';
-    if (intent === 'mealPlanning.createMealTrain') domainEventType = 'mealPlanning.mealTrain.created';
-    if (intent === 'mealPlanning.publishPreset') domainEventType = 'mealPlanning.plan.published';
-    if (intent === 'mealPlanning.getCurrentPlan') domainEventType = 'mealPlanning.currentPlan.loaded';
+    let domainEventType = "mealPlanning.output.ready";
+    if (intent === "mealPlanning.listBundles")
+      domainEventType = "mealPlanning.bundles.listed";
+    if (intent === "mealPlanning.createFromBundle")
+      domainEventType = "mealPlanning.plan.createdFromBundle";
+    if (intent === "mealPlanning.generatePlan")
+      domainEventType = "mealPlanning.plan.generated";
+    if (intent === "mealPlanning.cropDemandWeights")
+      domainEventType = "mealPlanning.cropDemandWeights.computed";
+    if (intent === "mealPlanning.shareToCoalition")
+      domainEventType = "mealPlanning.coalition.shared";
+    if (intent === "mealPlanning.createMealTrain")
+      domainEventType = "mealPlanning.mealTrain.created";
+    if (intent === "mealPlanning.publishPreset")
+      domainEventType = "mealPlanning.plan.published";
+    if (intent === "mealPlanning.getCurrentPlan")
+      domainEventType = "mealPlanning.currentPlan.loaded";
 
     emit({
       type: domainEventType,
       ts: isoNow(),
-      source: 'agents/shims/mealPlanning',
+      source: "agents/shims/mealPlanning",
       data: {
         intent,
         mode,
@@ -756,10 +858,30 @@ export async function invokeShim(req) {
       },
     });
 
+    // ✅ persist to store if requested
+    if (shouldSaveToStore(input) && (data?.mealPlan || null)) {
+      const meta = getStoreMeta(input, intent, mode);
+      const saved = await persistPlanToMealPlanStore(data.mealPlan, meta);
+      debug.push({
+        type: "mealPlanningShim.storePersist",
+        ts: isoNow(),
+        requested: true,
+        saved,
+        via: saved ? "MealPlanStore.setPlan" : "none",
+      });
+
+      emit({
+        type: "mealPlanning.plan.savedToStore",
+        ts: isoNow(),
+        source: "agents/shims/mealPlanning",
+        data: { intent, mode, saved },
+      });
+    }
+
     // Optional Hub export for generated plans & bundle plans
     const isExportableIntent =
-      intent === 'mealPlanning.generatePlan' ||
-      intent === 'mealPlanning.createFromBundle';
+      intent === "mealPlanning.generatePlan" ||
+      intent === "mealPlanning.createFromBundle";
 
     if (familyFundMode && runtime?.exportToHub && isExportableIntent) {
       try {
@@ -773,57 +895,60 @@ export async function invokeShim(req) {
         await FamilyFundConnector.export(packet);
 
         emit({
-          type: 'session.exported',
+          type: "session.exported",
           ts: isoNow(),
-          source: 'agents/shims/mealPlanning',
-          data: { intent, mode, packetType: 'mealPlanning' },
+          source: "agents/shims/mealPlanning",
+          data: { intent, mode, packetType: "mealPlanning" },
         });
       } catch (e) {
         warnings.push({
-          type: 'hubExportFailed',
-          message: e?.message || 'Failed to export meal planning data to Family Fund Hub.',
+          type: "hubExportFailed",
+          message:
+            e?.message ||
+            "Failed to export meal planning data to Family Fund Hub.",
         });
       }
     }
 
-    return {
+    // ✅ return consistent shape: { ok, mode, data, ... , mealPlan, plan }
+    return withTopLevelPlan({
       ok: true,
       mode,
       data,
       warnings,
       debug,
-    };
+    });
   } catch (err) {
     const message = err?.message || String(err);
     const stack = err?.stack || null;
 
     emit({
-      type: 'reasoner.error',
+      type: "reasoner.error",
       ts: isoNow(),
-      source: 'agents/shims/mealPlanning',
+      source: "agents/shims/mealPlanning",
       data: { message, stack },
     });
 
-    return {
+    return withTopLevelPlan({
       ok: false,
-      mode: 'none',
+      mode: "none",
       data: {},
       warnings: [
         {
-          type: 'shimError',
+          type: "shimError",
           message,
         },
       ],
       debug: [
         ...debug,
         {
-          type: 'exception',
+          type: "exception",
           ts: isoNow(),
           message,
           stack,
         },
       ],
-    };
+    });
   }
 }
 
@@ -839,7 +964,7 @@ export async function invokeShim(req) {
  *   handleCommand("generatePlan", payload)
  *   handleCommand({ command: "createPlanFromBundle", payload })
  *
- * Always returns a ShimResponse.
+ * Always returns a ShimResponse (now includes top-level mealPlan/plan when present).
  *
  * @param {string|Object} command
  * @param {Object} [payload]
@@ -848,18 +973,18 @@ export async function invokeShim(req) {
 export async function handleCommand(command, payload = {}) {
   let cmdStr = command;
 
-  if (typeof command === 'object' && command) {
+  if (typeof command === "object" && command) {
     if (command.payload && !Object.keys(payload || {}).length) {
       // eslint-disable-next-line no-param-reassign
       payload = command.payload;
     }
-    cmdStr = command.command || command.type || 'generatePlan';
+    cmdStr = command.command || command.type || "generatePlan";
   }
 
-  const normalizedIntent = normalizeIntent(cmdStr || '');
+  const normalizedIntent = normalizeIntent(cmdStr || "");
 
   return invokeShim({
-    domain: 'cooking',
+    domain: "cooking",
     intent: normalizedIntent,
     input: payload,
     runtime: payload.runtime || {},
@@ -874,8 +999,8 @@ export async function handleCommand(command, payload = {}) {
 
 export async function listBundles(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.listBundles',
+    domain: "cooking",
+    intent: "mealPlanning.listBundles",
     input,
     runtime: input.runtime || {},
   });
@@ -883,8 +1008,8 @@ export async function listBundles(input = {}) {
 
 export async function createPlanFromBundle(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.createFromBundle',
+    domain: "cooking",
+    intent: "mealPlanning.createFromBundle",
     input,
     runtime: input.runtime || {},
   });
@@ -892,8 +1017,8 @@ export async function createPlanFromBundle(input = {}) {
 
 export async function getCropDemandWeights(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.cropDemandWeights',
+    domain: "cooking",
+    intent: "mealPlanning.cropDemandWeights",
     input,
     runtime: input.runtime || {},
   });
@@ -901,8 +1026,8 @@ export async function getCropDemandWeights(input = {}) {
 
 export async function generateMealPlan(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.generatePlan',
+    domain: "cooking",
+    intent: "mealPlanning.generatePlan",
     input,
     runtime: input.runtime || {},
   });
@@ -910,8 +1035,8 @@ export async function generateMealPlan(input = {}) {
 
 export async function sharePlanToCoalition(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.shareToCoalition',
+    domain: "cooking",
+    intent: "mealPlanning.shareToCoalition",
     input,
     runtime: input.runtime || {},
   });
@@ -919,8 +1044,8 @@ export async function sharePlanToCoalition(input = {}) {
 
 export async function createMealTrain(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.createMealTrain',
+    domain: "cooking",
+    intent: "mealPlanning.createMealTrain",
     input,
     runtime: input.runtime || {},
   });
@@ -928,8 +1053,8 @@ export async function createMealTrain(input = {}) {
 
 export async function publishPlanPreset(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.publishPreset',
+    domain: "cooking",
+    intent: "mealPlanning.publishPreset",
     input,
     runtime: input.runtime || {},
   });
@@ -937,8 +1062,8 @@ export async function publishPlanPreset(input = {}) {
 
 export async function getCurrentPlan(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealPlanning.getCurrentPlan',
+    domain: "cooking",
+    intent: "mealPlanning.getCurrentPlan",
     input,
     runtime: input.runtime || {},
   });

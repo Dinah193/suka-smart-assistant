@@ -14,15 +14,22 @@
 //
 // Inspiration: Notion Web Clipper, Raindrop.io, Readwise, Linear’s crisp batch UI
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 // -------------------- Defensive imports (contexts/services) --------------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus").default;
+  eventBus = require("../../services/events/eventBus").default;
 } catch {
   eventBus = {
-    emit: (...args) => console.debug("[CollectOrganize:eventBus.emit]", ...args),
+    emit: (...args) =>
+      console.debug("[CollectOrganize:eventBus.emit]", ...args),
     on: () => () => {},
   };
 }
@@ -48,8 +55,11 @@ try {
 // Optional helpers if you created these elsewhere in the project:
 let TaggingAutoClassifier = { inferTags: (obj) => [] };
 try {
-  TaggingAutoClassifier = require("../../engines/metadata/taggingAutoClassifier").default;
-} catch { /* noop */ }
+  TaggingAutoClassifier =
+    require("../../engines/metadata/taggingAutoClassifier").default;
+} catch {
+  /* noop */
+}
 
 let CollectionsPicker; // optional nice picker
 try {
@@ -106,9 +116,13 @@ const normalizeUrl = (u) => {
     url.hash = "";
     if (url.searchParams && url.searchParams.toString().includes("utm_")) {
       // strip common trackers
-      ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach((k) =>
-        url.searchParams.delete(k)
-      );
+      [
+        "utm_source",
+        "utm_medium",
+        "utm_campaign",
+        "utm_term",
+        "utm_content",
+      ].forEach((k) => url.searchParams.delete(k));
     }
     return url.toString();
   } catch {
@@ -128,13 +142,17 @@ const guessTypeFromUrl = (u) => {
 const guessTypeFromFile = (name = "", type = "") => {
   const s = name.toLowerCase();
   if (type.includes("pdf") || s.endsWith(".pdf")) return "pdf";
-  if (type.includes("image") || /\.(png|jpe?g|gif|webp|svg)$/.test(s)) return "image";
+  if (type.includes("image") || /\.(png|jpe?g|gif|webp|svg)$/.test(s))
+    return "image";
   if (type.includes("video") || /\.(mp4|mov|mkv|webm)$/.test(s)) return "video";
   if (/\.(docx?|pptx?|xlsx?)$/.test(s)) return "doc";
   return "doc";
 };
 
-const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }) => {
+const withinSabbath = (
+  now = new Date(),
+  window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }
+) => {
   const dow = now.getDay();
   const hr = now.getHours();
   if (dow === window.startDow && hr >= window.startHour) return true;
@@ -145,7 +163,9 @@ const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, 
 const dedupeMerge = (arr) => {
   const map = new Map();
   for (const it of arr) {
-    const key = it.url ? `u:${normalizeUrl(it.url)}` : `f:${(it.filename || it.title || "").toLowerCase()}`;
+    const key = it.url
+      ? `u:${normalizeUrl(it.url)}`
+      : `f:${(it.filename || it.title || "").toLowerCase()}`;
     if (!map.has(key)) {
       map.set(key, { ...it, tags: [...new Set(it.tags || [])] });
       continue;
@@ -193,7 +213,9 @@ export default function CollectOrganize({
   const [query, setQuery] = useState("");
   const [collection, setCollection] = useState(defaultCollection);
   const [selected, setSelected] = useState(() => new Set());
-  const [filters, setFilters] = useState(() => new Set(["article", "video", "pdf", "image", "doc", "checklist"]));
+  const [filters, setFilters] = useState(
+    () => new Set(["article", "video", "pdf", "image", "doc", "checklist"])
+  );
   const [bulkTags, setBulkTags] = useState("");
   const [newChecklist, setNewChecklist] = useState({ title: "", lines: "" });
 
@@ -201,15 +223,23 @@ export default function CollectOrganize({
   useEffect(() => {
     const off = eventBus.on?.("collect.capture", (payload) => {
       if (!payload) return;
-      const captured = (Array.isArray(payload) ? payload : [payload]).map(normalizeIncoming);
+      const captured = (Array.isArray(payload) ? payload : [payload]).map(
+        normalizeIncoming
+      );
       addItems(captured);
-      recordMilestone?.({ key: "collect_capture", meta: { count: captured.length } });
+      recordMilestone?.({
+        key: "collect_capture",
+        meta: { count: captured.length },
+      });
     });
     return () => off?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const disabledBySabbath = sabbathGuard && withinSabbath(new Date(), sabbathWindow) && !allowSabbathCapture;
+  const disabledBySabbath =
+    sabbathGuard &&
+    withinSabbath(new Date(), sabbathWindow) &&
+    !allowSabbathCapture;
 
   function normalizeIncoming(x) {
     // Shape target:
@@ -242,7 +272,11 @@ export default function CollectOrganize({
       };
     }
     if (x.type === "checklist") {
-      return { ...base, type: "checklist", items: Array.isArray(x.items) ? x.items : [] };
+      return {
+        ...base,
+        type: "checklist",
+        items: Array.isArray(x.items) ? x.items : [],
+      };
     }
     return { ...base, type: "unknown" };
   }
@@ -268,7 +302,10 @@ export default function CollectOrganize({
     );
     addItems(normalized);
     setUrlsText("");
-    recordMilestone?.({ key: "collect_add_urls", meta: { count: normalized.length } });
+    recordMilestone?.({
+      key: "collect_add_urls",
+      meta: { count: normalized.length },
+    });
   }, [urlsText]);
 
   // -------- Drag & Drop Files --------
@@ -290,7 +327,10 @@ export default function CollectOrganize({
         })
       );
       addItems(mapped);
-      recordMilestone?.({ key: "collect_drop_files", meta: { count: mapped.length } });
+      recordMilestone?.({
+        key: "collect_drop_files",
+        meta: { count: mapped.length },
+      });
     },
     [setDragActive]
   );
@@ -320,7 +360,10 @@ export default function CollectOrganize({
     });
     addItems([item]);
     setNewChecklist({ title: "", lines: "" });
-    recordMilestone?.({ key: "collect_new_checklist", meta: { count: lines.length } });
+    recordMilestone?.({
+      key: "collect_new_checklist",
+      meta: { count: lines.length },
+    });
   }, [newChecklist]);
 
   // -------- Selection & bulk ops --------
@@ -342,14 +385,20 @@ export default function CollectOrganize({
       .filter(Boolean);
     if (!tags.length || selected.size === 0) return;
     setItems((prev) =>
-      prev.map((i) => (selected.has(i.id) ? { ...i, tags: [...new Set([...(i.tags || []), ...tags])] } : i))
+      prev.map((i) =>
+        selected.has(i.id)
+          ? { ...i, tags: [...new Set([...(i.tags || []), ...tags])] }
+          : i
+      )
     );
     setBulkTags("");
   };
 
   const applyBulkCollection = (val) => {
     if (!val || selected.size === 0) return;
-    setItems((prev) => prev.map((i) => (selected.has(i.id) ? { ...i, collection: val } : i)));
+    setItems((prev) =>
+      prev.map((i) => (selected.has(i.id) ? { ...i, collection: val } : i))
+    );
     setCollection(val);
   };
 
@@ -400,25 +449,41 @@ export default function CollectOrganize({
       eventBus.emit("ui.navigate", { panel: "LibraryPanel", destination });
       eventBus.emit("ui.toast", {
         variant: "success",
-        message: `Sent ${chosen.length} item(s) to ${prettyDestination(destination)}`,
+        message: `Sent ${chosen.length} item(s) to ${prettyDestination(
+          destination
+        )}`,
       });
     }
 
-    recordMilestone?.({ key: "collect_send_to", meta: { count: chosen.length, destination } });
+    recordMilestone?.({
+      key: "collect_send_to",
+      meta: { count: chosen.length, destination },
+    });
     clearSelection();
   };
 
   // -------------------- Render --------------------
-  const TYPE_ORDER = ["article", "video", "pdf", "image", "doc", "checklist", "unknown"];
+  const TYPE_ORDER = [
+    "article",
+    "video",
+    "pdf",
+    "image",
+    "doc",
+    "checklist",
+    "unknown",
+  ];
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Collect & Organize</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Collect & Organize
+          </h1>
           <p className="text-gray-600">
-            Paste links, drop files, or make checklists. Tag, organize, and send to your vaults and planners.
+            Paste links, drop files, or make checklists. Tag, organize, and send
+            to your vaults and planners.
           </p>
         </div>
 
@@ -430,7 +495,9 @@ export default function CollectOrganize({
               placeholder="Search title, tags, site, file, notes…"
               className="w-72 rounded-xl border px-3 py-2 text-sm"
             />
-            <span className="absolute right-2 top-2 text-xs text-gray-400">/</span>
+            <span className="absolute right-2 top-2 text-xs text-gray-400">
+              /
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -450,7 +517,9 @@ export default function CollectOrganize({
                   }
                   className={[
                     "rounded-full border px-3 py-1.5 text-sm capitalize",
-                    on ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50",
+                    on
+                      ? "bg-gray-900 text-white border-black"
+                      : "bg-white hover:bg-gray-50",
                   ].join(" ")}
                   title={`Toggle ${t}`}
                 >
@@ -467,7 +536,9 @@ export default function CollectOrganize({
         {/* Paste URLs */}
         <div className="rounded-2xl border p-4">
           <h3 className="font-semibold">Paste links</h3>
-          <p className="text-sm text-gray-600">One per line. We detect type (YouTube, PDFs, articles, images).</p>
+          <p className="text-sm text-gray-600">
+            One per line. We detect type (YouTube, PDFs, articles, images).
+          </p>
           <textarea
             value={urlsText}
             onChange={(e) => setUrlsText(e.target.value)}
@@ -498,7 +569,9 @@ export default function CollectOrganize({
           onDragLeave={onDragLeave}
         >
           <h3 className="font-semibold">Drop files</h3>
-          <p className="text-sm text-gray-600">PDFs, images, videos, docs. We’ll infer a type.</p>
+          <p className="text-sm text-gray-600">
+            PDFs, images, videos, docs. We’ll infer a type.
+          </p>
           <div className="mt-3 flex items-center justify-center rounded-xl border border-dashed p-8 text-sm text-gray-600">
             Drag files here…
           </div>
@@ -512,13 +585,17 @@ export default function CollectOrganize({
           <h3 className="font-semibold">Make a checklist</h3>
           <input
             value={newChecklist.title}
-            onChange={(e) => setNewChecklist((v) => ({ ...v, title: e.target.value }))}
+            onChange={(e) =>
+              setNewChecklist((v) => ({ ...v, title: e.target.value }))
+            }
             placeholder="Checklist title (e.g., 'Deep clean: kitchen')"
             className="mt-2 w-full rounded-xl border px-3 py-2 text-sm"
           />
           <textarea
             value={newChecklist.lines}
-            onChange={(e) => setNewChecklist((v) => ({ ...v, lines: e.target.value }))}
+            onChange={(e) =>
+              setNewChecklist((v) => ({ ...v, lines: e.target.value }))
+            }
             placeholder="- Clear counters&#10;- Degrease stove&#10;- Mop floor"
             className="mt-2 w-full h-24 rounded-xl border px-3 py-2 text-sm"
           />
@@ -539,10 +616,18 @@ export default function CollectOrganize({
       {/* Bulk tools */}
       <section className="mt-6 rounded-2xl border p-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <button type="button" onClick={selectAll} className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm">
+          <button
+            type="button"
+            onClick={selectAll}
+            className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm"
+          >
             Select all
           </button>
-          <button type="button" onClick={clearSelection} className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm">
+          <button
+            type="button"
+            onClick={clearSelection}
+            className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-2 text-sm"
+          >
             Clear
           </button>
 
@@ -563,7 +648,10 @@ export default function CollectOrganize({
             </button>
 
             <div className="w-56">
-              <CollectionsPicker value={collection} onChange={applyBulkCollection} />
+              <CollectionsPicker
+                value={collection}
+                onChange={applyBulkCollection}
+              />
             </div>
 
             <SendToMenu
@@ -571,7 +659,8 @@ export default function CollectOrganize({
                 if (disabledBySabbath) {
                   eventBus.emit("ui.toast", {
                     variant: "warning",
-                    message: "Sabbath guard active: sending disabled until it ends.",
+                    message:
+                      "Sabbath guard active: sending disabled until it ends.",
                   });
                   return;
                 }
@@ -596,7 +685,9 @@ export default function CollectOrganize({
         {!filtered.length ? (
           <div className="rounded-2xl border border-dashed p-10 text-center text-gray-600">
             <div className="text-lg font-semibold">Nothing here yet.</div>
-            <div className="mt-1">Paste a few links or drop files to get started.</div>
+            <div className="mt-1">
+              Paste a few links or drop files to get started.
+            </div>
           </div>
         ) : (
           <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -604,7 +695,10 @@ export default function CollectOrganize({
               const isSelected = selected.has(it.id);
               const type = it.type || "unknown";
               return (
-                <li key={it.id} className="rounded-2xl border bg-white shadow-sm p-4">
+                <li
+                  key={it.id}
+                  className="rounded-2xl border bg-white shadow-sm p-4"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -630,8 +724,12 @@ export default function CollectOrganize({
                           </span>
                         ) : null}
                         {it.author ? <span>• {it.author}</span> : null}
-                        {it.channel && !it.author ? <span>• {it.channel}</span> : null}
-                        {it.collection ? <span>• 📁 {it.collection}</span> : null}
+                        {it.channel && !it.author ? (
+                          <span>• {it.channel}</span>
+                        ) : null}
+                        {it.collection ? (
+                          <span>• 📁 {it.collection}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -662,7 +760,12 @@ export default function CollectOrganize({
                       onAdd={(tag) =>
                         setItems((prev) =>
                           prev.map((x) =>
-                            x.id === it.id ? { ...x, tags: [...new Set([...(x.tags || []), tag])] } : x
+                            x.id === it.id
+                              ? {
+                                  ...x,
+                                  tags: [...new Set([...(x.tags || []), tag])],
+                                }
+                              : x
                           )
                         )
                       }
@@ -674,7 +777,9 @@ export default function CollectOrganize({
                     value={it.notes || ""}
                     onChange={(e) =>
                       setItems((prev) =>
-                        prev.map((x) => (x.id === it.id ? { ...x, notes: e.target.value } : x))
+                        prev.map((x) =>
+                          x.id === it.id ? { ...x, notes: e.target.value } : x
+                        )
                       )
                     }
                     placeholder="Notes…"
@@ -684,7 +789,9 @@ export default function CollectOrganize({
                   {/* Inline actions */}
                   <div className="mt-3 flex items-center justify-between">
                     <div className="text-xs text-gray-500">
-                      {it.createdAt ? new Date(it.createdAt).toLocaleString() : ""}
+                      {it.createdAt
+                        ? new Date(it.createdAt).toLocaleString()
+                        : ""}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -694,7 +801,8 @@ export default function CollectOrganize({
                           if (disabledBySabbath) {
                             eventBus.emit("ui.toast", {
                               variant: "warning",
-                              message: "Sabbath guard active: sending disabled until it ends.",
+                              message:
+                                "Sabbath guard active: sending disabled until it ends.",
                             });
                             return;
                           }
@@ -707,7 +815,9 @@ export default function CollectOrganize({
                       </button>
                       <button
                         type="button"
-                        onClick={() => setSelected((s) => new Set([...s, it.id]))}
+                        onClick={() =>
+                          setSelected((s) => new Set([...s, it.id]))
+                        }
                         className="rounded-xl border bg-white hover:bg-gray-50 px-3 py-1.5 text-sm"
                       >
                         Add to selection
@@ -750,7 +860,8 @@ function TagAdder({ onAdd }) {
 
 // -------------------- Utils --------------------
 function cryptoSafeId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && crypto.randomUUID)
+    return crypto.randomUUID();
   return "id-" + Math.random().toString(36).slice(2, 10);
 }
 
@@ -772,7 +883,8 @@ function prettyDestination(dest) {
 }
 
 function defaultDestinationForType(type) {
-  if (type === "article" || type === "pdf" || type === "doc") return "docsVault";
+  if (type === "article" || type === "pdf" || type === "doc")
+    return "docsVault";
   if (type === "video") return "docsVault";
   if (type === "image") return "docsVault";
   if (type === "checklist") return "taskPlan";

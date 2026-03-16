@@ -127,7 +127,7 @@ let EVT = {
 /**
  * SSA repo has had both:
  *  - "@/services/events/eventBus"
- *  - "@/services/eventBus"
+ *  - "@/services/events/eventBus"
  * We soft-import and provide a tiny wrapper.
  */
 let SSA_EVENTBUS = { emit: () => {}, on: () => () => {} };
@@ -138,8 +138,8 @@ function getEventBus() {
   const candidates = [
     "@/services/events/eventBus",
     "@/services/events/eventBus.js",
-    "@/services/eventBus",
-    "@/services/eventBus.js",
+    "@/services/events/eventBus",
+    "@/services/events/eventBus.js",
     "../../services/events/eventBus",
     "../../services/events/eventBus.js",
     "../../../services/events/eventBus",

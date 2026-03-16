@@ -1,0 +1,143 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-17",
+
+  "domain": "cuisine",
+  "locale": "en-US",
+
+  "id": "cajun",
+  "title": "Cajun",
+  "tags": [
+    "cajun",
+    "louisiana",
+    "gulf_coast",
+    "one_pot",
+    "trinity",
+    "roux",
+    "gumbo",
+    "jambalaya",
+    "etouffee",
+    "red_beans_and_rice"
+  ],
+
+  "plannerDefaults": {
+    "mealRoles": ["dinner", "batch_cook", "event_feast_main"],
+    "batchFriendly": true,
+    "freezerFriendly": true,
+    "defaultHeatLevel": "medium",
+    "defaultServingStyle": ["over_rice", "one_pot"],
+    "defaultStaples": [
+      "long_grain_rice",
+      "onion",
+      "celery",
+      "green_bell_pepper",
+      "garlic",
+      "all_purpose_flour",
+      "neutral_oil",
+      "paprika",
+      "black_pepper",
+      "cayenne",
+      "thyme",
+      "bay_leaf",
+      "hot_sauce"
+    ],
+    "inventorySignals": [
+      "keep_trinity_on_hand",
+      "keep_roux_inputs_on_hand",
+      "keep_one_smoked_protein_on_hand"
+    ],
+    "makeAheadNotes": [
+      "Gumbo, beans, and stews improve after resting; flavors deepen overnight.",
+      "Store rice separately; reheat stews gently and cook rice fresh when possible.",
+      "Dark roux brings depth but thickens less; plan simmer time accordingly."
+    ]
+  },
+
+  "flavorSystem": {
+    "identity": {
+      "summary": "Louisiana Cajun home cooking built on the Trinity (onion-celery-bell pepper), roux, smoked meats, seafood, and layered spice—often in one-pot dishes.",
+      "pillars": [
+        "Trinity aromatics as the base",
+        "Roux for body and deep flavor",
+        "Smoked depth (andouille/tasso/smoked turkey/pork)",
+        "Layered spice + herbs, adjusted late",
+        "One-pot workflows and simmering reduction"
+      ]
+    },
+
+    "bases": [
+      {
+        "id": "trinity",
+        "label": "The Trinity",
+        "components": ["onion", "celery", "green_bell_pepper"],
+        "defaultRatio": "2:1:1 (onion:celery:bell pepper)",
+        "notes": "Sweat until soft; add garlic near the end to avoid burning."
+      },
+      {
+        "id": "roux",
+        "label": "Roux",
+        "components": ["all_purpose_flour", "neutral_oil"],
+        "notes": "Blonde → peanut butter → dark chocolate. Darker roux = more flavor, less thickening."
+      }
+    ],
+
+    "aromatics": [
+      "onion",
+      "celery",
+      "green_bell_pepper",
+      "garlic",
+      "green_onion"
+    ],
+    "spices": [
+      "black_pepper",
+      "cayenne",
+      "paprika",
+      "garlic_powder",
+      "onion_powder"
+    ],
+    "herbs": ["thyme", "oregano", "bay_leaf", "parsley"],
+    "finishes": ["hot_sauce", "file_powder", "green_onion", "parsley"],
+    "thickeners": ["roux", "okra", "file_powder"],
+    "fats": ["neutral_oil", "lard", "butter"],
+    "acids": ["lemon", "vinegar_hot_sauce"],
+
+    "heat": {
+      "defaultLevel": "medium",
+      "levels": {
+        "mild": { "cayenneFactor": 0.25, "hotSauceFactor": 0.5 },
+        "medium": { "cayenneFactor": 1.0, "hotSauceFactor": 1.0 },
+        "hot": { "cayenneFactor": 1.75, "hotSauceFactor": 1.5 }
+      },
+      "notes": "Increase heat gradually; taste late in cooking after reduction."
+    },
+
+    "proteinPatterns": [
+      {
+        "id": "smoked_backbone",
+        "label": "Smoked backbone protein",
+        "examples": ["andouille", "tasso", "smoked_turkey", "smoked_pork"],
+        "notes": "Provides depth for gumbo, beans, and many one-pot dishes."
+      },
+      {
+        "id": "seafood_finish",
+        "label": "Seafood added late",
+        "examples": ["shrimp", "crawfish", "crab"],
+        "notes": "Add near end to prevent overcooking; finish with herbs/hot sauce."
+      }
+    ],
+
+    "styleNotes": [
+      {
+        "id": "tomato_in_gumbo",
+        "label": "Tomatoes in gumbo",
+        "notes": "Often excluded in Cajun gumbo (more common in Creole-leaning versions)."
+      },
+      {
+        "id": "cream",
+        "label": "Cream-heavy sauces",
+        "notes": "Not typical; richness comes from roux/butter and reduction."
+      }
+    ]
+  }
+}

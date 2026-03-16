@@ -6,7 +6,7 @@
 // – Batch Session Drafts + Multi-timer scaffolding
 // – Next Best Action (NBA) suggestions
 // – Undo patches and diff hooks
-// – Agents-friendly (agentsClient) and Automation runtime emit
+// – Agents-friendly (shimsClient) and Automation runtime emit
 
 /* ----------------------------------------------------------------------------
    Imports (kept defensive – gracefully degrade if optional deps missing)
@@ -15,13 +15,13 @@ import { eventBus } from "@/services/events/eventBus";
 import { automation, emitProgress } from "@/services/automation/runtime";
 import { sabbathGuard } from "@/services/guardrails/sabbathGuard";
 
-import { usePreferencesStore } from "@/store/PreferencesStore";     // contains flavor rhythms, diet prefs
-import { useFoodStore } from "@/store/FoodStore";                   // nutrition refs (USDA/custom)
-import { MealPlans } from "@/store/MealPlanStore";                  // persist/fetch meal plans
-import { Inventory } from "@/store/InventoryStore";                 // inventory & locations (root cellar, freezer)
-import { CalendarSync } from "@/services/calendar/CalendarSync";    // sync plan to calendar
-import { Recipes } from "@/store/RecipeStore";                      // Recipe Library + Recipe Vault
-import { BatchDrafts } from "@/store/BatchDraftStore";              // batch cooking session drafts
+import { usePreferencesStore } from "@/store/PreferencesStore"; // contains flavor rhythms, diet prefs
+import { useFoodStore } from "@/store/FoodStore"; // nutrition refs (USDA/custom)
+import { MealPlans } from "@/store/MealPlanStore"; // persist/fetch meal plans
+import { Inventory } from "@/store/InventoryStore"; // inventory & locations (root cellar, freezer)
+import { CalendarSync } from "@/services/calendar/CalendarSync"; // sync plan to calendar
+import { Recipes } from "@/store/RecipeStore"; // Recipe Library + Recipe Vault
+import { BatchDrafts } from "@/store/BatchDraftStore"; // batch cooking session drafts
 import { logger } from "@/utils/logger";
 import { uid, deepClone } from "@/utils/obj";
 import { startOfWeek, addDays, formatISO, isSameDay } from "@/utils/dates";
@@ -31,7 +31,7 @@ import { calcMacrosForRecipe, sumMacros } from "@/utils/nutrition";
 import { cuisineWeights } from "@/services/mealplanning/recommenders/cuisineWeights";
 import { seasonality } from "@/services/mealplanning/recommenders/seasonality";
 import { recipeRanker } from "@/services/mealplanning/recommenders/recipeRanker";
-import { agentsClient } from "@/agents/agentsClient";
+import { shimsClient } from "@/agents/shimsClient";
 // Optional: local diff util (your errors were in mealPlanDiff.js – this file just calls it)
 import { diffPlans } from "@/services/mealplanning/mealPlanDiff"; // keep this import stable
 
@@ -44,9 +44,9 @@ const DEFAULT_SERVINGS = 1; // per person scaling will adjust
 // Cuisine emphasis: West African primary, but adaptive to household favorites & street/food-truck mode
 const DEFAULT_CUISINE_PRIORITY = [
   { tag: "west-african", weight: 2.0 },
-  { tag: "street-food", weight: 1.3 },         // kebabs, wraps, bowls, fritters
-  { tag: "food-truck", weight: 1.2 },          // menu-scale, handheld, fast-serve
-  { tag: "fusion", weight: 1.1 },              // e.g., Indian curry × German döner lamb fusion
+  { tag: "street-food", weight: 1.3 }, // kebabs, wraps, bowls, fritters
+  { tag: "food-truck", weight: 1.2 }, // menu-scale, handheld, fast-serve
+  { tag: "fusion", weight: 1.1 }, // e.g., Indian curry × German döner lamb fusion
 ];
 
 /* ----------------------------------------------------------------------------
@@ -139,7 +139,13 @@ export const mealPlanEngine = {
     }
 
     // 7) Actions (NBA)
-    const actions = buildNextBestActions(context, draft, shopping, batchDraft, options);
+    const actions = buildNextBestActions(
+      context,
+      draft,
+      shopping,
+      batchDraft,
+      options
+    );
 
     // 8) Persist
     const plan = await persistPlan(context, { ...draft, shopping, actions });
@@ -150,7 +156,10 @@ export const mealPlanEngine = {
     }
 
     // 10) Diff from previous (for Undo Toast & Confirm Bar)
-    const prev = await MealPlans.getPrevious(context.householdId, plan.weekStartISO);
+    const prev = await MealPlans.getPrevious(
+      context.householdId,
+      plan.weekStartISO
+    );
     const diff = diffPlans(prev, plan);
 
     // 11) Undo patch (simple inverse ops placeholder)
@@ -167,10 +176,13 @@ export const mealPlanEngine = {
   async regenerateDay({ planId, dateISO, keepLocked = true }) {
     const plan = await MealPlans.getById(planId);
     if (!plan) throw new Error("Plan not found");
-    const options = { householdId: plan.householdId, weekStartISO: plan.weekStartISO };
+    const options = {
+      householdId: plan.householdId,
+      weekStartISO: plan.weekStartISO,
+    };
     const context = await buildContext(options);
 
-    const day = plan.days.find(d => d.dateISO === dateISO);
+    const day = plan.days.find((d) => d.dateISO === dateISO);
     if (!day) throw new Error("Day not found in plan");
 
     const refilled = await refillDay(context, day, { keepLocked });
@@ -189,14 +201,19 @@ export const mealPlanEngine = {
   async suggestSubstitutions({ planId, dateISO, mealKey, constraints = {} }) {
     const plan = await MealPlans.getById(planId);
     if (!plan) throw new Error("Plan not found");
-    const options = { householdId: plan.householdId, weekStartISO: plan.weekStartISO };
+    const options = {
+      householdId: plan.householdId,
+      weekStartISO: plan.weekStartISO,
+    };
     const context = await buildContext(options);
 
-    const day = plan.days.find(d => d.dateISO === dateISO);
+    const day = plan.days.find((d) => d.dateISO === dateISO);
     const slot = day?.meals?.[mealKey];
     if (!slot?.recipeId) return [];
 
-    const avoid = new Set(constraints.avoidIngredients || context.prefs.avoidIngredients || []);
+    const avoid = new Set(
+      constraints.avoidIngredients || context.prefs.avoidIngredients || []
+    );
     const picks = await findSubstituteRecipes(context, slot, { avoid });
 
     return picks.slice(0, 12); // small curated list
@@ -206,19 +223,27 @@ export const mealPlanEngine = {
   async recomputeActions(planId) {
     const plan = await MealPlans.getById(planId);
     if (!plan) throw new Error("Plan not found");
-    const context = await buildContext({ householdId: plan.householdId, weekStartISO: plan.weekStartISO });
-    const actions = buildNextBestActions(context, plan, plan.shopping, null, { calendarSync: false, createBatchDrafts: false });
+    const context = await buildContext({
+      householdId: plan.householdId,
+      weekStartISO: plan.weekStartISO,
+    });
+    const actions = buildNextBestActions(context, plan, plan.shopping, null, {
+      calendarSync: false,
+      createBatchDrafts: false,
+    });
     await MealPlans.update({ ...plan, actions });
     eventBus.emit("mealplan:actions", { planId, actions });
     return actions;
-  }
+  },
 };
 
 /* ----------------------------------------------------------------------------
    Normalize & Context
 ---------------------------------------------------------------------------- */
 function normalizeOptions(opts) {
-  const weekStart = opts.weekStartISO || formatISO(startOfWeek(new Date(), { weekStartsOn: 1 })); // Monday
+  const weekStart =
+    opts.weekStartISO ||
+    formatISO(startOfWeek(new Date(), { weekStartsOn: 1 })); // Monday
   return {
     strategy: "auto",
     numDays: 7,
@@ -231,7 +256,7 @@ function normalizeOptions(opts) {
     avoidIngredients: [],
     targets: null,
     ...opts,
-    weekStartISO: weekStart
+    weekStartISO: weekStart,
   };
 }
 
@@ -242,11 +267,18 @@ async function buildContext(options) {
 
   const recipes = await Recipes.all(); // expect tags, nutrition, prep steps
   const inventory = await Inventory.snapshot(options.householdId);
-  const prevPlan = await MealPlans.getPrevious(options.householdId, options.weekStartISO);
+  const prevPlan = await MealPlans.getPrevious(
+    options.householdId,
+    options.weekStartISO
+  );
 
-  const cuisineBias = cuisineWeights.merge(DEFAULT_CUISINE_PRIORITY, household?.cuisineBias);
+  const cuisineBias = cuisineWeights.merge(
+    DEFAULT_CUISINE_PRIORITY,
+    household?.cuisineBias
+  );
   const rhythm = household?.mealRhythm || defaultRhythm();
-  const targets = options.targets || household?.nutritionTargets || food?.defaultTargets;
+  const targets =
+    options.targets || household?.nutritionTargets || food?.defaultTargets;
 
   const season = seasonality.current(new Date());
   const sabbath = sabbathGuard?.window?.() || null;
@@ -263,7 +295,7 @@ async function buildContext(options) {
     rhythm,
     targets,
     season,
-    sabbath
+    sabbath,
   };
 }
 
@@ -278,8 +310,8 @@ function defaultRhythm() {
       3: { dinner: ["braise|smoke", "beef|lamb", "roots|tubers"] },
       4: { dinner: ["curry|sauce", "goat|fish", "fusion"] },
       5: { dinner: ["batch|bulk", "lamb|goat", "party|feast"] },
-      6: { dinner: ["leftovers|simple", "fish|eggs", "salad|grains"] }
-    }
+      6: { dinner: ["leftovers|simple", "fish|eggs", "salad|grains"] },
+    },
   };
 }
 
@@ -288,16 +320,18 @@ function defaultRhythm() {
 ---------------------------------------------------------------------------- */
 function emptyPlan(ctx) {
   const days = Array.from({ length: ctx.numDays }).map((_, i) => {
-    const dateISO = formatISO(addDays(new Date(ctx.weekStartISO), i), { representation: "date" });
+    const dateISO = formatISO(addDays(new Date(ctx.weekStartISO), i), {
+      representation: "date",
+    });
     return {
       dateISO,
       meals: {
         breakfast: newEmptySlot(),
         lunch: newEmptySlot(),
         dinner: newEmptySlot(),
-        snack: newEmptySlot()
+        snack: newEmptySlot(),
       },
-      nutrition: { Calories: 0, Protein: 0, Carbs: 0, Fat: 0, Fiber: 0 }
+      nutrition: { Calories: 0, Protein: 0, Carbs: 0, Fat: 0, Fiber: 0 },
     };
   });
 
@@ -314,7 +348,7 @@ function emptyPlan(ctx) {
       strategy: ctx.strategy,
     },
     actions: [],
-    undoPatch: []
+    undoPatch: [],
   };
 }
 
@@ -325,7 +359,7 @@ function newEmptySlot() {
     servings: DEFAULT_SERVINGS,
     timers: {},
     macros: {},
-    locked: false
+    locked: false,
   };
 }
 
@@ -347,7 +381,11 @@ async function fillPlan(ctx, draft) {
       const chosen = picks[0] || null;
 
       if (chosen) {
-        day.meals[mealKey] = attachRecipeToSlot(ctx, chosen, day.meals[mealKey]);
+        day.meals[mealKey] = attachRecipeToSlot(
+          ctx,
+          chosen,
+          day.meals[mealKey]
+        );
       }
     }
 
@@ -389,7 +427,11 @@ function seedForDay(ctx, day) {
 
 function attachRecipeToSlot(ctx, recipe, slot) {
   const timers = parseTimers(recipe);
-  const macros = calcMacrosForRecipe(recipe, slot.servings, ctx.food?.macroRefs);
+  const macros = calcMacrosForRecipe(
+    recipe,
+    slot.servings,
+    ctx.food?.macroRefs
+  );
   const tags = [...new Set([...(slot.tags || []), ...(recipe.tags || [])])];
   return { ...slot, recipeId: recipe.id, timers, macros, tags };
 }
@@ -409,14 +451,21 @@ async function optimizeNutrition(ctx, draft) {
       const mealKey = dev > 0 ? "snack" : "lunch"; // trim or boost
       const picks = await rankRecipesForSlot(ctx, day, mealKey);
 
-      const better = picks.find(r => {
-        const m = calcMacrosForRecipe(r, day.meals[mealKey].servings, ctx.food?.macroRefs);
+      const better = picks.find((r) => {
+        const m = calcMacrosForRecipe(
+          r,
+          day.meals[mealKey].servings,
+          ctx.food?.macroRefs
+        );
         if (dev > 0) return m.Calories < day.meals[mealKey].macros?.Calories; // lower cal
         return m.Calories > day.meals[mealKey].macros?.Calories; // higher cal
       });
 
       if (better) {
-        day.meals[mealKey] = attachRecipeToSlot(ctx, better, { ...day.meals[mealKey], locked: false });
+        day.meals[mealKey] = attachRecipeToSlot(ctx, better, {
+          ...day.meals[mealKey],
+          locked: false,
+        });
         day.nutrition = computeDayNutrition(ctx, day);
       }
     }
@@ -444,7 +493,10 @@ function ensureSabbathSafety(ctx, draft) {
   if (!ctx.sabbath) return draft;
   const out = deepClone(draft);
   for (const day of out.days) {
-    if (!isSameDay(new Date(day.dateISO), ctx.sabbath.from) && !isSameDay(new Date(day.dateISO), ctx.sabbath.to)) {
+    if (
+      !isSameDay(new Date(day.dateISO), ctx.sabbath.from) &&
+      !isSameDay(new Date(day.dateISO), ctx.sabbath.to)
+    ) {
       continue;
     }
     // Replace long-cook dinner with ready/leftovers if timers exceed threshold
@@ -453,7 +505,10 @@ function ensureSabbathSafety(ctx, draft) {
     if (longCook && !dinner.locked) {
       const quick = quickSwapCandidate(ctx, day, "dinner");
       if (quick) {
-        day.meals.dinner = attachRecipeToSlot(ctx, quick, { ...dinner, locked: false });
+        day.meals.dinner = attachRecipeToSlot(ctx, quick, {
+          ...dinner,
+          locked: false,
+        });
         day.nutrition = computeDayNutrition(ctx, day);
       }
     }
@@ -475,9 +530,9 @@ function quickSwapCandidate(ctx, day, mealKey) {
     favorites: ctx.household?.favorites || {},
     avoidIngredients: new Set(ctx.avoidIngredients || []),
     respectInventory: ctx.respectInventory,
-    preferQuick: true
+    preferQuick: true,
   });
-  return ranked.find(r => (parseTimers(r)?.totalMinutes || 0) <= 30) || null;
+  return ranked.find((r) => (parseTimers(r)?.totalMinutes || 0) <= 30) || null;
 }
 
 /* ----------------------------------------------------------------------------
@@ -485,7 +540,7 @@ function quickSwapCandidate(ctx, day, mealKey) {
 ---------------------------------------------------------------------------- */
 function buildInventoryMap(inventory) {
   const map = new Map();
-  (inventory?.items || []).forEach(item => {
+  (inventory?.items || []).forEach((item) => {
     map.set(item.slug || item.name?.toLowerCase(), item.qty || 0);
   });
   return map;
@@ -500,20 +555,33 @@ function computeShoppingList(ctx, draft) {
     for (const key of MEALS) {
       const slot = day.meals[key];
       if (!slot.recipeId) continue;
-      const recipe = ctx.recipes.find(r => r.id === slot.recipeId);
+      const recipe = ctx.recipes.find((r) => r.id === slot.recipeId);
       if (!recipe?.ingredients) continue;
 
       for (const ing of recipe.ingredients) {
         const slug = (ing.slug || ing.name || "").toLowerCase();
-        const invItem = ctx.inventory?.items?.find(i => (i.slug || i.name?.toLowerCase()) === slug);
+        const invItem = ctx.inventory?.items?.find(
+          (i) => (i.slug || i.name?.toLowerCase()) === slug
+        );
         const have = invItem?.qty || 0;
         const needQty = (ing.qty || 0) * slot.servings;
 
         if (have >= needQty) {
-          deltas.push({ type: "reserve", slug, qty: needQty, day: day.dateISO });
-          byLocation[invItem?.location || "pantry"] = (byLocation[invItem?.location || "pantry"] || 0) + 1;
+          deltas.push({
+            type: "reserve",
+            slug,
+            qty: needQty,
+            day: day.dateISO,
+          });
+          byLocation[invItem?.location || "pantry"] =
+            (byLocation[invItem?.location || "pantry"] || 0) + 1;
         } else {
-          need.push({ slug, qty: needQty - have, day: day.dateISO, aisle: ing.aisle || null });
+          need.push({
+            slug,
+            qty: needQty - have,
+            day: day.dateISO,
+            aisle: ing.aisle || null,
+          });
         }
       }
     }
@@ -526,7 +594,7 @@ function computeShoppingList(ctx, draft) {
 ---------------------------------------------------------------------------- */
 async function createBatchSessionDraft(ctx, draft) {
   // Heuristic: aggregate Sat/Sun dinners + a few lunches with overlapping ingredients
-  const weekend = draft.days.filter(d => {
+  const weekend = draft.days.filter((d) => {
     const dow = new Date(d.dateISO).getDay();
     return dow === 6 || dow === 0; // Saturday (6) & Sunday (0) depending locale
   });
@@ -543,7 +611,7 @@ async function createBatchSessionDraft(ctx, draft) {
   if (!unique.length) return null;
 
   const recipes = unique
-    .map(id => ctx.recipes.find(r => r.id === id))
+    .map((id) => ctx.recipes.find((r) => r.id === id))
     .filter(Boolean);
 
   const multiTimers = buildMultiTimerPayload(recipes);
@@ -556,7 +624,7 @@ async function createBatchSessionDraft(ctx, draft) {
     recipes: unique,
     timers: multiTimers,
     labels: ["batch", "weekend", "auto"],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
   await BatchDrafts.save(draftObj);
@@ -566,15 +634,15 @@ async function createBatchSessionDraft(ctx, draft) {
 
 function buildMultiTimerPayload(recipes) {
   // Flatten each recipe timers into a multi-timer plan the UI can parse
-  return recipes.map(r => ({
+  return recipes.map((r) => ({
     recipeId: r.id,
     steps: (r.steps || []).map((s, i) => ({
       id: `${r.id}_s${i}`,
       label: s.label || `Step ${i + 1}`,
       minutes: s.minutes || 0,
       // Voice step support: BatchCookingAssistant will TTS & start timers
-      voice: s.voice || s.label || null
-    }))
+      voice: s.voice || s.label || null,
+    })),
   }));
 }
 
@@ -590,7 +658,7 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
       label: "Generate Grocery List",
       icon: "shopping-bag",
       intent: "generate-shopping",
-      payload: { planId: plan.id }
+      payload: { planId: plan.id },
     });
   }
   if (batchDraft) {
@@ -599,7 +667,7 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
       label: "Review Weekend Batch Draft",
       icon: "timer",
       intent: "open-batch-draft",
-      payload: { draftId: batchDraft.id }
+      payload: { draftId: batchDraft.id },
     });
   }
   if (!options.calendarSync) {
@@ -608,7 +676,7 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
       label: "Preview Calendar Sync",
       icon: "calendar",
       intent: "calendar-sync",
-      payload: { planId: plan.id }
+      payload: { planId: plan.id },
     });
   }
   // Health scan (ingredient risk → safer substitutes)
@@ -617,7 +685,7 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
     label: "Scan for Non-Earth Ingredients",
     icon: "stethoscope",
     intent: "health-scan",
-    payload: { planId: plan.id }
+    payload: { planId: plan.id },
   });
 
   // Preservation queue (if plan includes bulk meats/produce)
@@ -626,7 +694,7 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
     label: "Queue Preservation Tasks",
     icon: "jar",
     intent: "preservation-queue",
-    payload: { planId: plan.id }
+    payload: { planId: plan.id },
   });
 
   // Cooking session generator
@@ -635,7 +703,7 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
     label: "Start Cooking Session",
     icon: "chef-hat",
     intent: "start-cooking",
-    payload: { planId: plan.id }
+    payload: { planId: plan.id },
   });
 
   return actions;
@@ -647,7 +715,10 @@ function buildNextBestActions(ctx, plan, shopping, batchDraft, options) {
 async function persistPlan(ctx, plan) {
   const saved = await MealPlans.save(plan);
   // Fire automation hooks (non-blocking)
-  automation.queue?.("onMealPlanCreated", { planId: saved.id, householdId: saved.householdId });
+  automation.queue?.("onMealPlanCreated", {
+    planId: saved.id,
+    householdId: saved.householdId,
+  });
   return saved;
 }
 
@@ -667,7 +738,9 @@ async function refillDay(ctx, day, { keepLocked }) {
     if (keepLocked && slot.locked) continue;
     const picks = await rankRecipesForSlot(ctx, out, key);
     const chosen = picks[0] || null;
-    out.meals[key] = chosen ? attachRecipeToSlot(ctx, chosen, { ...slot, locked: false }) : { ...slot, recipeId: null };
+    out.meals[key] = chosen
+      ? attachRecipeToSlot(ctx, chosen, { ...slot, locked: false })
+      : { ...slot, recipeId: null };
   }
   out.nutrition = computeDayNutrition(ctx, out);
   return out;
@@ -675,7 +748,7 @@ async function refillDay(ctx, day, { keepLocked }) {
 
 function replaceDay(plan, newDay) {
   const out = deepClone(plan);
-  out.days = out.days.map(d => (d.dateISO === newDay.dateISO ? newDay : d));
+  out.days = out.days.map((d) => (d.dateISO === newDay.dateISO ? newDay : d));
   return out;
 }
 
@@ -683,7 +756,7 @@ function replaceDay(plan, newDay) {
    Substitutions
 ---------------------------------------------------------------------------- */
 async function findSubstituteRecipes(ctx, slot, { avoid }) {
-  const base = ctx.recipes.filter(r => r.id !== slot.recipeId);
+  const base = ctx.recipes.filter((r) => r.id !== slot.recipeId);
   const ranked = recipeRanker.rank(base, {
     mealKey: inferMealKeyFromSlot(slot),
     cuisineBias: ctx.cuisineBias,
@@ -691,7 +764,7 @@ async function findSubstituteRecipes(ctx, slot, { avoid }) {
     favorites: ctx.household?.favorites || {},
     avoidIngredients: avoid,
     respectInventory: ctx.respectInventory,
-    preferQuick: true
+    preferQuick: true,
   });
   return ranked;
 }
@@ -713,7 +786,7 @@ function parseTimers(recipe) {
     id: `${recipe.id}_t${i}`,
     label: s.label || `Step ${i + 1}`,
     minutes: s.minutes || 0,
-    active: s.active ?? true
+    active: s.active ?? true,
   }));
   const totalMinutes = steps.reduce((a, b) => a + (b.minutes || 0), 0);
   return { totalMinutes, steps };
@@ -725,17 +798,19 @@ function parseTimers(recipe) {
 // Example: ask AI to propose a “fusion” variant if rankings tie
 async function maybeAskAgentForFusion(ctx, candidates, day, mealKey) {
   try {
-    if (!agentsClient?.generateFusionVariant) return null;
+    if (!shimsClient?.generateFusionVariant) return null;
     if (!candidates?.length) return null;
-    const top = candidates.slice(0, 3).map(r => ({ id: r.id, tags: r.tags || [] }));
-    const fusion = await agentsClient.generateFusionVariant({
+    const top = candidates
+      .slice(0, 3)
+      .map((r) => ({ id: r.id, tags: r.tags || [] }));
+    const fusion = await shimsClient.generateFusionVariant({
       cuisineBias: ctx.cuisineBias,
       day: day.dateISO,
       mealKey,
-      candidates: top
+      candidates: top,
     });
     if (!fusion?.id) return null;
-    const recipe = ctx.recipes.find(r => r.id === fusion.id);
+    const recipe = ctx.recipes.find((r) => r.id === fusion.id);
     return recipe || null;
   } catch (e) {
     logger.warn("[mealPlanEngine] fusion agent failed – continue locally", e);
@@ -756,5 +831,5 @@ export {
   ensureSabbathSafety,
   computeShoppingList,
   createBatchSessionDraft,
-  buildNextBestActions
+  buildNextBestActions,
 };

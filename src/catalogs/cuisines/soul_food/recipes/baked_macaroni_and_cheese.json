@@ -1,0 +1,241 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.baked_macaroni_and_cheese.v1",
+    "name": "Soul Food Baked Macaroni and Cheese",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Custardy baked mac with a creamy cheese sauce and golden top."
+    },
+    "tags": [
+      "soul_food",
+      "macaroni_and_cheese",
+      "mac_and_cheese",
+      "baked",
+      "comfort_food",
+      "holiday",
+      "casserole",
+      "cheesy"
+    ],
+    "allergens": ["milk", "wheat", "egg"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": false
+    },
+    "summary": "Creamy, custardy baked macaroni and cheese with sharp cheddar, creamy cheeses, and a browned top.",
+    "difficulty": "medium",
+    "servings": {
+      "count": 10,
+      "unit": "servings"
+    },
+    "yield": "1 (9x13-inch) pan",
+    "timing": {
+      "prepMinutes": 25,
+      "inactiveMinutes": 10,
+      "cookMinutes": 45,
+      "totalMinutes": 80
+    },
+    "equipment": [
+      { "id": "large_pot", "label": "Large pot (for pasta)", "required": true },
+      { "id": "colander", "label": "Colander", "required": true },
+      { "id": "saucepan", "label": "Saucepan", "required": true },
+      { "id": "whisk", "label": "Whisk", "required": true },
+      {
+        "id": "wooden_spoon",
+        "label": "Wooden spoon / spatula",
+        "required": true
+      },
+      {
+        "id": "measuring_cups",
+        "label": "Measuring cups/spoons",
+        "required": false
+      },
+      {
+        "id": "baking_dish_9x13",
+        "label": "9x13-inch baking dish",
+        "required": true
+      },
+      { "id": "foil", "label": "Aluminum foil", "required": false }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Baked dishes with eggs should reach at least 165°F internal temperature.",
+        "Cool leftovers quickly and refrigerate within 2 hours."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "elbow_macaroni",
+      "label": "Elbow macaroni (or cavatappi)",
+      "amount": { "value": 1, "unit": "lb" }
+    },
+    {
+      "id": "kosher_salt_pasta_water",
+      "label": "Kosher salt (for pasta water)",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+
+    {
+      "id": "unsalted_butter",
+      "label": "Unsalted butter",
+      "amount": { "value": 6, "unit": "tbsp" }
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "whole_milk",
+      "label": "Whole milk",
+      "amount": { "value": 3.5, "unit": "cup" }
+    },
+    {
+      "id": "evaporated_milk",
+      "label": "Evaporated milk",
+      "amount": { "value": 1, "unit": "can_12oz" }
+    },
+    {
+      "id": "heavy_cream",
+      "label": "Heavy cream (or more whole milk)",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+
+    {
+      "id": "sharp_cheddar",
+      "label": "Sharp cheddar, shredded",
+      "amount": { "value": 3, "unit": "cup" }
+    },
+    {
+      "id": "colby_jack",
+      "label": "Colby Jack (or Monterey Jack), shredded",
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "mozzarella",
+      "label": "Mozzarella, shredded (for stretch, optional but common)",
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "cream_cheese",
+      "label": "Cream cheese, softened",
+      "amount": { "value": 4, "unit": "oz" }
+    },
+
+    {
+      "id": "eggs",
+      "label": "Eggs, beaten",
+      "amount": { "value": 2, "unit": "large" }
+    },
+
+    {
+      "id": "ground_mustard",
+      "label": "Dry mustard (or Dijon mustard)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt (adjust to taste; cheeses vary)",
+      "amount": { "value": 1.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "butter_for_dish",
+      "label": "Butter (for greasing baking dish)",
+      "amount": { "value": 1, "unit": "tbsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat_prep",
+      "title": "Preheat and prep pan",
+      "body": "Preheat oven to 350°F. Grease a 9x13-inch baking dish with butter."
+    },
+    {
+      "id": "step_02_cook_pasta",
+      "title": "Cook pasta (slightly under)",
+      "body": "Bring a large pot of water to a boil. Salt the water. Add macaroni and cook 1–2 minutes less than package directions (al dente). Drain well."
+    },
+    {
+      "id": "step_03_make_roux",
+      "title": "Make roux",
+      "body": "In a saucepan over medium heat, melt butter. Whisk in flour and cook 1–2 minutes, whisking constantly, until the raw flour smell is gone (do not brown heavily)."
+    },
+    {
+      "id": "step_04_add_dairy",
+      "title": "Whisk in milk and thicken",
+      "body": "Slowly whisk in whole milk, then evaporated milk and cream. Continue whisking until smooth. Simmer gently 3–6 minutes until slightly thickened (it should coat a spoon)."
+    },
+    {
+      "id": "step_05_melt_cheese",
+      "title": "Melt cheeses into sauce",
+      "body": "Reduce heat to low. Add cream cheese and whisk until smooth. Add about 2 cups cheddar + 1.5 cups Colby Jack + 1/2 cup mozzarella (reserve the rest for layering/topping). Stir until melted and silky."
+    },
+    {
+      "id": "step_06_season",
+      "title": "Season the sauce",
+      "body": "Stir in dry mustard, garlic powder, onion powder, paprika, black pepper, and salt. Taste and adjust salt/pepper carefully (cheeses can be salty)."
+    },
+    {
+      "id": "step_07_temper_eggs",
+      "title": "Temper eggs (prevents scrambling)",
+      "body": "In a bowl, beat eggs. Slowly whisk 1/2 cup of hot cheese sauce into the eggs to temper, then whisk the egg mixture back into the saucepan off heat."
+    },
+    {
+      "id": "step_08_combine",
+      "title": "Combine pasta and sauce",
+      "body": "Add drained macaroni to the baking dish (or a large mixing bowl). Pour cheese sauce over pasta and stir until evenly coated."
+    },
+    {
+      "id": "step_09_layer_top",
+      "title": "Layer and top with cheese",
+      "body": "Sprinkle remaining shredded cheeses over the top (remaining cheddar/Colby Jack/mozzarella). For a more “soul food” layered style, add half the pasta mixture, sprinkle some cheese, then add the rest and top again."
+    },
+    {
+      "id": "step_10_bake",
+      "title": "Bake until set and golden",
+      "body": "Bake uncovered 30–40 minutes, until bubbling around edges and the center is set. If browning too fast, tent loosely with foil."
+    },
+    {
+      "id": "step_11_rest",
+      "title": "Rest before slicing",
+      "body": "Let stand 10–15 minutes before serving so it sets and slices cleanly."
+    }
+  ]
+}

@@ -32,7 +32,7 @@
  */
 
 // Imports are defensive and alias-friendly; adjust paths if your alias differs.
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import domainWeightsConfig from "@/features/planning/configs/domainWeights.config.json";
 
 /**
@@ -269,18 +269,28 @@ class StabilityEngine {
       if (info.index <= this.severityThresholds.critical) {
         hints.push("Consider a dedicated stabilization flow for this domain.");
       } else {
-        hints.push("Scheduling one or two focused sessions may relieve pressure.");
+        hints.push(
+          "Scheduling one or two focused sessions may relieve pressure."
+        );
       }
 
       // Domain-specific hint seasoning (lightweight, easily extendable)
       if (domain === "cooking") {
-        hints.push("A batch-cooking or meal-planning session can quickly improve stability.");
+        hints.push(
+          "A batch-cooking or meal-planning session can quickly improve stability."
+        );
       } else if (domain === "cleaning") {
-        hints.push("A timed cleaning sprint or zone reset session is often enough to stabilize.");
+        hints.push(
+          "A timed cleaning sprint or zone reset session is often enough to stabilize."
+        );
       } else if (domain === "garden") {
-        hints.push("Try a short garden maintenance or harvest logging session.");
+        hints.push(
+          "Try a short garden maintenance or harvest logging session."
+        );
       } else if (domain === "storehouse") {
-        hints.push("Run a storehouse inventory alignment or shopping-list planning session.");
+        hints.push(
+          "Run a storehouse inventory alignment or shopping-list planning session."
+        );
       }
 
       hotspots.push({
@@ -306,12 +316,18 @@ class StabilityEngine {
   _computeRecommendations(domainStability, hotspots, flows) {
     if (!Array.isArray(flows) || flows.length === 0) {
       // Even without flows, we can still suggest domains for the "Now" CTA.
-      const suggestedNowDomains = this._suggestNowDomains(domainStability, hotspots);
+      const suggestedNowDomains = this._suggestNowDomains(
+        domainStability,
+        hotspots
+      );
       return { flows: [], suggestedNowDomains };
     }
 
     const hotspotDomains = new Set(hotspots.map((h) => h.domain));
-    const suggestedNowDomains = this._suggestNowDomains(domainStability, hotspots);
+    const suggestedNowDomains = this._suggestNowDomains(
+      domainStability,
+      hotspots
+    );
 
     /** @type {FlowRecommendation[]} */
     const flowRecs = [];

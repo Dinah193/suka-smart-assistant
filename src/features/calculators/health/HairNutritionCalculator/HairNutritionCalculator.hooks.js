@@ -22,7 +22,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import HairNutritionCalculatorShim, {
   runHairNutritionCalculatorShim,
 } from "./HairNutritionCalculator.shim";
@@ -211,8 +211,8 @@ export function useHairNutritionCalculatorRunner(options = {}) {
     emitPlanningGraphEvent = true,
   } = options;
 
-  const [status, setStatus] = useState/** @type {"idle"|"running"|"success"|"error"} */(
-    "idle"
+  const [status, setStatus] = useState(
+    /** @type {"idle"|"running"|"success"|"error"} */ "idle"
   );
   const [error, setError] = useState(null);
   const [lastPayload, setLastPayload] = useState(null);
@@ -234,39 +234,42 @@ export function useHairNutritionCalculatorRunner(options = {}) {
    *
    * @param {object} payload
    */
-  const emitPlanningGraphBridgeEvent = useCallback((payload) => {
-    if (!emitPlanningGraphEvent) return;
+  const emitPlanningGraphBridgeEvent = useCallback(
+    (payload) => {
+      if (!emitPlanningGraphEvent) return;
 
-    try {
-      emit({
-        type: "planningGraph.node.hairNutrition.updated",
-        ts: new Date().toISOString(),
-        source:
-          "features/calculators/health/HairNutritionCalculator.hooks/useHairNutritionCalculatorRunner",
-        data: {
-          nodeId: HairNutritionCalculatorShim.NODE_ID,
-          meta: payload.meta,
-          input: payload.input,
-          output: payload.output,
-          provides: {
-            // Match config.graph.provides keys
-            dailyHairProteinTarget: payload.output.dailyHairProteinTarget,
-            hairAminoProfile: payload.output.hairAminoProfile,
-            hairSupportFlags: payload.output.hairSupportFlags,
-            hairMicronutrientTargets: payload.output.hairMicronutrientTargets,
-            hairHealthyFatTargets: payload.output.hairHealthyFatTargets,
-            blackHairRiskFlags: payload.output.blackHairRiskFlags,
+      try {
+        emit({
+          type: "planningGraph.node.hairNutrition.updated",
+          ts: new Date().toISOString(),
+          source:
+            "features/calculators/health/HairNutritionCalculator.hooks/useHairNutritionCalculatorRunner",
+          data: {
+            nodeId: HairNutritionCalculatorShim.NODE_ID,
+            meta: payload.meta,
+            input: payload.input,
+            output: payload.output,
+            provides: {
+              // Match config.graph.provides keys
+              dailyHairProteinTarget: payload.output.dailyHairProteinTarget,
+              hairAminoProfile: payload.output.hairAminoProfile,
+              hairSupportFlags: payload.output.hairSupportFlags,
+              hairMicronutrientTargets: payload.output.hairMicronutrientTargets,
+              hairHealthyFatTargets: payload.output.hairHealthyFatTargets,
+              blackHairRiskFlags: payload.output.blackHairRiskFlags,
+            },
           },
-        },
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "[useHairNutritionCalculatorRunner] Failed to emit planningGraph bridge event:",
-        err
-      );
-    }
-  }, [emitPlanningGraphEvent]);
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[useHairNutritionCalculatorRunner] Failed to emit planningGraph bridge event:",
+          err
+        );
+      }
+    },
+    [emitPlanningGraphEvent]
+  );
 
   /**
    * Run the calculator with a given input object.
@@ -281,7 +284,9 @@ export function useHairNutritionCalculatorRunner(options = {}) {
   const run = useCallback(
     async (input) => {
       if (!input || typeof input !== "object") {
-        setError("HairNutritionCalculator.run requires a non-null input object.");
+        setError(
+          "HairNutritionCalculator.run requires a non-null input object."
+        );
         setStatus("error");
         return null;
       }

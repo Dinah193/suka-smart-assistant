@@ -59,8 +59,8 @@
 
 import eventBus from "../services/events/eventBus";
 import featureFlags from "../config/featureFlags";
-import HubPacketFormatter from "../services/hub/HubPacketFormatter";
-import FamilyFundConnector from "../services/hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /** @type {number} */
 const VERSION = 99; // <-- Replace with your next Dexie version.

@@ -1,0 +1,409 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country.recipes.braised_carrots",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "French Country Braised Carrots",
+    "subtitle": "Tender carrots glazed with butter, a touch of honey, and fresh herbs.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Canonical SSA side dish: French-style braised/glazed carrots (carottes glacées).",
+        "Designed for deterministic timing, easy scaling, and batch/holiday service holding."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.french_country",
+    "category": "side",
+    "mealArchetypes": ["archetype.side", "archetype.veg_side"],
+    "servingStyles": [
+      "family_style",
+      "plates",
+      "plated_meals",
+      "holiday_feasts"
+    ],
+    "plannerTags": [
+      "cuisine.french_country",
+      "side",
+      "vegetable",
+      "dish.braised_carrots",
+      "method.braise",
+      "method.glaze",
+      "weeknight.friendly",
+      "batch.friendly",
+      "holiday.friendly"
+    ]
+  },
+
+  "summary": "French country braised carrots: carrots gently simmered with butter and a splash of stock, then reduced into a glossy glaze with herbs. Sweetness is optional and kept subtle.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a side. Double recipe using a wider pan for even glazing."
+  },
+
+  "time": {
+    "activeMins": 12,
+    "handsOffMins": 18,
+    "totalMins": 30
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": false,
+    "weeknightPossible": true,
+    "notes": [
+      "Best served fresh; holds warm well for 20–30 minutes.",
+      "Reheats nicely with a splash of water/stock."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 1,
+    "sourness": 0,
+    "sweetness": 2,
+    "umami": 1,
+    "heat": 0,
+    "richness": 2,
+    "notes": [
+      "Butter-glazed, herb-fresh, lightly sweet (optional).",
+      "Classic French finish: glossy glaze, not saucy."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.wide_skillet_lid",
+      "equipment.chef_knife",
+      "equipment.cutting_board",
+      "equipment.silicone_spatula",
+      "equipment.microplane",
+      "equipment.tongs"
+    ],
+    "minimum": [
+      "equipment.skillet",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.stove"
+    ],
+    "optional": [
+      {
+        "id": "equipment.cast_iron_skillet",
+        "label": "Cast iron skillet",
+        "required": false,
+        "notes": "Great heat retention; watch reduction to prevent scorching."
+      },
+      {
+        "id": "equipment.saucepan_small",
+        "label": "Small saucepan",
+        "required": false,
+        "notes": "Useful if you prefer to warm stock or melt butter separately."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian", "diet.gluten_free"],
+  "allergens": {
+    "common": ["allergen.dairy"],
+    "notes": ["Contains butter. Use olive oil or plant butter for dairy-free."]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.carrots",
+      "label": "Carrots, peeled (or scrubbed) and cut into batons or thick coins",
+      "role": "veg",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": [
+        "Cut evenly for consistent braise time.",
+        "Batons glaze beautifully; coins are quicker."
+      ]
+    },
+    {
+      "id": "ingredient.butter_unsalted",
+      "label": "Unsalted butter",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.chicken_stock",
+      "label": "Chicken stock (or vegetable stock)",
+      "role": "braising_liquid",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": ["Water works, but stock adds depth."]
+    },
+    {
+      "id": "ingredient.kosher_salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["Start lighter; reduce glaze concentrates salt."]
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.honey",
+      "label": "Honey (optional, for a gentle glaze)",
+      "role": "sweetener",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Traditional glazed carrots often use a small pinch of sugar; honey is SSA-friendly."
+      ]
+    },
+    {
+      "id": "ingredient.thyme_fresh",
+      "label": "Fresh thyme (or dried thyme)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["If using fresh, 3–4 sprigs is typical. If dried, use 1/2 tsp."]
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaf (optional)",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Parsley, finely chopped (finish)",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lemon_zest",
+      "label": "Lemon zest (tiny pinch, optional brighten)",
+      "role": "finish",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Add at the end; a little goes a long way."]
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Lemon juice (optional, 1–2 tsp to balance sweetness)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep carrots for even cooking",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Peel or scrub carrots. Trim ends.",
+        "Cut into even batons (about finger-thick) or thick coins (~1/2-inch).",
+        "Keep pieces similar size so they finish together."
+      ],
+      "checks": [
+        "Carrot pieces are uniform.",
+        "No very thin pieces that will overcook during braise."
+      ]
+    },
+    {
+      "id": "step_02_start_braise",
+      "title": "Start the braise with butter and stock",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add carrots to a wide skillet.",
+        "Add butter, stock, salt, thyme, and optional bay leaf.",
+        "Bring to a simmer over medium heat."
+      ],
+      "checks": ["Liquid is simmering gently (not vigorously boiling)."]
+    },
+    {
+      "id": "step_03_cover_and_braise",
+      "title": "Cover and braise until just tender",
+      "activeMins": 1,
+      "handsOffMins": 12,
+      "instructions": [
+        "Cover with a lid (or foil) and simmer gently 10–14 minutes.",
+        "Stir once or twice for even cooking.",
+        "Carrots should be tender but still hold their shape."
+      ],
+      "timers": [
+        { "label": "Braise carrots (check at 10 min)", "minutes": 10 },
+        { "label": "Optional extra braise", "minutes": 4 }
+      ],
+      "checks": [
+        "Knife slides in with light resistance; carrots are not mushy."
+      ]
+    },
+    {
+      "id": "step_04_uncover_reduce_glaze",
+      "title": "Uncover and reduce into a glossy glaze",
+      "activeMins": 2,
+      "handsOffMins": 6,
+      "instructions": [
+        "Remove lid. Increase heat to medium-high to reduce the liquid.",
+        "If using honey, add now and toss to coat.",
+        "Cook, tossing occasionally, until the liquid thickens and coats carrots in a shiny glaze."
+      ],
+      "timers": [{ "label": "Reduce to glaze", "minutes": 6 }],
+      "checks": [
+        "Pan liquid is syrupy and coats a spoon lightly.",
+        "Carrots look glossy, not swimming in liquid."
+      ]
+    },
+    {
+      "id": "step_05_finish_and_season",
+      "title": "Finish with herbs and balance",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove bay leaf and thyme sprigs if used whole.",
+        "Taste and adjust salt and pepper.",
+        "Optional: add a pinch of lemon zest and/or 1–2 tsp lemon juice to brighten.",
+        "Finish with chopped parsley if desired. Serve warm."
+      ],
+      "checks": [
+        "Flavor is balanced: buttery, lightly sweet (if used), and fresh.",
+        "Glaze remains glossy (not broken or greasy)."
+      ]
+    }
+  ],
+
+  "methods": ["method.braise", "method.reduce", "method.glaze"],
+
+  "pairings": {
+    "with": [
+      "dishes.french_country.roast_chicken",
+      "dishes.french_country.beef_stew",
+      "dishes.french_country.mashed_potatoes_butter"
+    ],
+    "notes": [
+      "A classic side for roast chicken or beef stew.",
+      "Also pairs well with simple lentils and a green salad."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "notes": [
+        "Cool quickly; store airtight.",
+        "Glaze will set slightly when cold—normal."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Skillet: reheat over medium-low with 1–2 tbsp water/stock; toss until glossy again.",
+        "Microwave: cover and heat in short bursts; finish with a small pat of butter if needed."
+      ]
+    },
+    "hold": {
+      "notes": [
+        "Hold warm (covered) up to 30 minutes; re-gloss with a splash of stock and quick toss if needed."
+      ]
+    }
+  },
+
+  "safety": {
+    "core": [
+      "Refrigerate within 2 hours.",
+      "Reheat leftovers until steaming hot."
+    ]
+  },
+
+  "notes": [
+    "A wide pan helps reduction glaze evenly—avoid crowded carrots.",
+    "If glaze looks greasy, add 1–2 tsp water and toss over heat to re-emulsify.",
+    "For deeper flavor, swap half the stock for a dry white wine (if your household uses it)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.orange_glazed",
+      "label": "Orange-glazed carrots",
+      "when": { "preferences": ["citrus"] },
+      "adapt": {
+        "notes": [
+          "Replace 2 tbsp stock with orange juice; finish with orange zest.",
+          "Keep sweetness subtle; reduce carefully to avoid burning sugars."
+        ]
+      }
+    },
+    {
+      "id": "variation.dairy_free",
+      "label": "Dairy-free braised carrots",
+      "when": { "dietFlags": ["diet.dairy_free"] },
+      "adapt": {
+        "notes": [
+          "Use olive oil or plant butter in place of butter.",
+          "Finish with a drizzle of good olive oil and extra herbs."
+        ]
+      }
+    },
+    {
+      "id": "variation.honey_free",
+      "label": "Savory braised carrots (no added sweetener)",
+      "when": { "preferences": ["no_sweetener"] },
+      "adapt": {
+        "notes": [
+          "Skip honey; rely on carrot natural sweetness.",
+          "Add a tiny splash of lemon juice at the end for balance."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "shopping": {
+      "pantryFirst": ["ingredient.kosher_salt", "ingredient.black_pepper"],
+      "niceToHave": [
+        "ingredient.thyme_fresh",
+        "ingredient.parsley",
+        "ingredient.lemon_zest",
+        "ingredient.honey"
+      ]
+    },
+    "leftovers": {
+      "remixIdeas": [
+        "Chop and fold into rice or couscous-style bowls",
+        "Add to beef stew near the end for a sweet veg accent",
+        "Serve cold as a salad with vinaigrette and herbs"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.french_country",
+    "dishId": "dishes.french_country.braised_carrots",
+    "search": {
+      "aliases": [
+        "carottes glacees",
+        "glazed carrots",
+        "butter braised carrots"
+      ],
+      "keywords": ["butter", "thyme", "parsley", "stock", "glaze", "reduce"]
+    },
+    "normalization": {
+      "recommendedIdCase": "lower",
+      "ingredientIdStyle": "ingredient.*",
+      "methodIdStyle": "method.*",
+      "equipmentIdStyle": "equipment.*"
+    }
+  }
+}

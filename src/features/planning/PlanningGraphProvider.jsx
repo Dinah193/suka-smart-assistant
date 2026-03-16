@@ -37,7 +37,7 @@ let featureFlags = {};
 
 try {
   // eslint-disable-next-line global-require
-  eventBus = require("@/services/eventBus");
+  eventBus = require("@/services/events/eventBus");
 } catch (err) {
   // eslint-disable-next-line no-console
   console.warn("[PlanningGraphProvider] eventBus not available yet.", err);
@@ -45,7 +45,7 @@ try {
 
 try {
   // eslint-disable-next-line global-require
-  featureFlags = require("@/services/featureFlags");
+  featureFlags = require("@/config/featureFlags");
 } catch (err) {
   // eslint-disable-next-line no-console
   console.warn("[PlanningGraphProvider] featureFlags not available yet.", err);
@@ -236,7 +236,11 @@ export function PlanningGraphProvider({ children, loadGraph, onGraphLoaded }) {
     try {
       const loaded = await loader();
 
-      if (!loaded || !Array.isArray(loaded.nodes) || !Array.isArray(loaded.edges)) {
+      if (
+        !loaded ||
+        !Array.isArray(loaded.nodes) ||
+        !Array.isArray(loaded.edges)
+      ) {
         throw new Error(
           "[PlanningGraphProvider] Loaded graph is missing required properties `nodes` and/or `edges`."
         );
@@ -244,11 +248,15 @@ export function PlanningGraphProvider({ children, loadGraph, onGraphLoaded }) {
 
       setGraph(loaded);
 
-      emitSafe("planning.graph.loaded", "features/planning/PlanningGraphProvider", {
-        version: loaded.version || "unknown",
-        nodeCount: loaded.nodes.length,
-        edgeCount: loaded.edges.length,
-      });
+      emitSafe(
+        "planning.graph.loaded",
+        "features/planning/PlanningGraphProvider",
+        {
+          version: loaded.version || "unknown",
+          nodeCount: loaded.nodes.length,
+          edgeCount: loaded.edges.length,
+        }
+      );
 
       if (typeof onGraphLoaded === "function") {
         onGraphLoaded(loaded);
@@ -259,9 +267,13 @@ export function PlanningGraphProvider({ children, loadGraph, onGraphLoaded }) {
       // eslint-disable-next-line no-console
       console.error("[PlanningGraphProvider] Failed to load graph:", castErr);
 
-      emitSafe("planning.graph.load.failed", "features/planning/PlanningGraphProvider", {
-        message: castErr.message,
-      });
+      emitSafe(
+        "planning.graph.load.failed",
+        "features/planning/PlanningGraphProvider",
+        {
+          message: castErr.message,
+        }
+      );
     } finally {
       setIsLoading(false);
     }
@@ -329,9 +341,7 @@ export function PlanningGraphProvider({ children, loadGraph, onGraphLoaded }) {
         .map((edge) => edge.to || edge.target)
         .filter(Boolean);
 
-      return downstreamKeys
-        .map((k) => nodesByKey[String(k)])
-        .filter(Boolean);
+      return downstreamKeys.map((k) => nodesByKey[String(k)]).filter(Boolean);
     },
     [getOutgoingEdges, nodesByKey]
   );

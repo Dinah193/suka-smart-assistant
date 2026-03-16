@@ -1,621 +1,565 @@
-// C:\Users\larho\suka-smart-assistant\src\services\scraper\ScraperEngine.js
 /**
- * ScraperEngine — Universal scraper for SSA
- * ------------------------------------------------------------
- * ROLE IN PIPELINE
- * imports (fetch/scrape) → intelligence (normalize/enrich) → automation (emit events) → (optional) hub export
+ * @file C:\Users\larho\suka-smart-assistant\src\services\scraper\ScraperEngine.js
  *
- * WHAT THIS FILE DOES
- * - Fetches a remote URL (optionally via proxy) and extracts:
- *   * HTML + plaintext (readable main content)
- *   * Tables (HTML <table> → arrays of rows with header mapping)
- *   * Links, images, OpenGraph/Twitter cards
- *   * schema.org JSON-LD (Recipe, HowTo, Product, VideoObject, etc.)
- * - Guesses importType (recipe/cleaning/garden/animal/storehouse/video) from metadata
- * - Emits eventBus notifications with a consistent payload shape: { type, ts, source, data }
- * - Provides a lightweight plugin system to register per-domain/per-type extractors
- * - Soft-integrates with an import cache if available (does not hard-require it)
- * - Provides a silent Hub export helper for future data-changing flows
+ * ScraperEngine (Browser-Safe)
+ * -----------------------------------------------------------------------------
+ * Purpose:
+ *  - Parse HTML and extract structured content using CSS selectors.
+ *  - Browser-first implementation (Vite client build compatible).
  *
- * WHAT THIS FILE DOES *NOT* DO
- * - It does not mutate household state (inventory/storehouse/sessions). Downstream parsers will.
- *   Therefore, we DO NOT call exportToHubIfEnabled() here by default.
+ * Why this exists:
+ *  - Your build failed because jsdom was imported in a client bundle.
+ *  - jsdom is Node-only; Vite/Rollup will not resolve it for browser builds.
  *
- * EXTENSION POINTS
- * - registerExtractor({ id, test(url, doc, meta), extract({ url, html, doc, meta }) })
- *   to add domain-specific scraping logic (e.g., Allrecipes, YouTube, Pinterest, seed vendors)
+ * Design:
+ *  - Uses DOMParser when available.
+ *  - If DOMParser is unavailable (rare in client builds), returns a safe failure.
+ *  - Emits telemetry events if SSA eventBus is present, but never throws.
  *
- * EVENTS EMITTED
- * - scrape.started
- * - scrape.completed  (success or failure)
- * - import.cached     (only if a cache service is available and persist=true)
- *
- * ERROR HANDLING
- * - Defensive guards; early returns for invalid input
- * - Timeouts and retry logic for fetch
- * - CORS-safe options (proxy usage)
+ * Notes:
+ *  - If you truly need Node-side scraping with jsdom, create a separate file:
+ *      ScraperEngine.node.js
+ *    and ONLY import it from Node contexts (scripts, server, CLI), not from UI.
  */
 
-import eventBus from '../eventBus.js';
+const SOURCE = "ScraperEngine";
 
-// Soft imports (optional). If missing, features degrade gracefully.
-let featureFlags = { familyFundMode: false };
-let HubPacketFormatter = null;
-let FamilyFundConnector = null;
-let ImportCacheService = null;
-let siteAllowList = null;
-
-(async () => {
-  try {
-    const mod = await import('../../config/featureFlags.js');
-    featureFlags = mod.default || mod || featureFlags;
-  } catch {}
-  try {
-    const mod = await import('../../hub/HubPacketFormatter.js');
-    HubPacketFormatter = mod.default || mod;
-  } catch {}
-  try {
-    const mod = await import('../../hub/FamilyFundConnector.js');
-    FamilyFundConnector = mod.default || mod;
-  } catch {}
-  try {
-    const mod = await import('../../services/imports/ImportCacheService.js');
-    ImportCacheService = mod.default || mod;
-  } catch {}
-  try {
-    const mod = await import('../../config/siteAllowList.json', { assert: { type: 'json' } });
-    siteAllowList = mod.default || mod;
-  } catch {}
-})();
-
-// Runtime utilities ----------------------------------------------------------
-
-const SOURCE = 'ScraperEngine';
-
-const nowISO = () => new Date().toISOString();
-
-const emit = (type, data) => {
-  eventBus.emit({
-    type,
-    ts: nowISO(),
-    source: SOURCE,
-    data,
-  });
-};
-
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-
-/**
- * Fetch with timeout + retry. Uses browser fetch; if running under Node,
- * callers should ensure a fetch polyfill is available.
+/* ──────────────────────────────────────────────────────────────────────────────
+ * Telemetry (safe)
  */
-async function fetchWithRetry(url, { timeoutMs = 15000, retries = 1, retryDelayMs = 600, headers = {}, proxy } = {}) {
-  const controller = new AbortController();
-  const tid = setTimeout(() => controller.abort(), timeoutMs);
 
-  const targetUrl = proxy ? `${proxy}${encodeURIComponent(url)}` : url;
-
+async function emit(type, data) {
   try {
-    const res = await fetch(targetUrl, {
-      method: 'GET',
-      headers,
-      signal: controller.signal,
-      credentials: 'omit',
-      cache: 'no-store',
-      redirect: 'follow',
-    });
-    clearTimeout(tid);
-    if (!res.ok) {
-      const err = new Error(`HTTP ${res.status} for ${url}`);
-      err.status = res.status;
-      throw err;
-    }
-    const contentType = res.headers.get('content-type') || '';
-    const text = await res.text();
-    return { text, contentType, status: res.status };
-  } catch (err) {
-    clearTimeout(tid);
-    if (retries > 0) {
-      await sleep(retryDelayMs);
-      return fetchWithRetry(url, { timeoutMs, retries: retries - 1, retryDelayMs: retryDelayMs * 2, headers, proxy });
-    }
-    throw err;
-  }
-}
+    const mod = await import("@/services/events/eventBus");
+    const bus = mod?.default || mod?.eventBus || mod;
+    if (!bus || typeof bus.emit !== "function") return;
 
-/**
- * Safely build a DOM in browser or in Node (if jsdom is available).
- */
-async function toDOM(html) {
-  // Browser path
-  if (typeof window !== 'undefined' && typeof window.DOMParser !== 'undefined') {
-    const parser = new window.DOMParser();
-    return parser.parseFromString(html, 'text/html');
-  }
-  // Node path (optional)
-  try {
-    const { JSDOM } = await import('jsdom');
-    return new JSDOM(html).window.document;
-  } catch {
-    return null; // No DOM available in this environment
-  }
-}
+    const payload = {
+      type,
+      ts: new Date().toISOString(),
+      source: SOURCE,
+      data: safeSerializable(data),
+    };
 
-/**
- * Basic readability heuristic that:
- * - removes script/noscript/style
- * - picks the largest <article|main|section|div> by text length as main
- * - returns textContent and innerHTML for that node
- */
-function extractReadable(doc) {
-  if (!doc) return { text: '', html: '' };
-
-  // Remove noise
-  ['script', 'noscript', 'style', 'iframe', 'svg'].forEach((sel) =>
-    doc.querySelectorAll(sel).forEach((n) => n.remove())
-  );
-
-  const candidates = [...doc.querySelectorAll('article, main, section, div')];
-
-  let best = null;
-  let bestScore = 0;
-
-  for (const node of candidates) {
-    const text = node.textContent || '';
-    const len = text.trim().length;
-    // Penalize if it looks like nav/footer/aside
-    const role = node.getAttribute('role') || '';
-    const id = node.id || '';
-    const cls = node.className || '';
-    const penalized =
-      /nav|footer|header|aside|menu|promo|breadcrumb|subscribe|newsletter/i.test(role + ' ' + id + ' ' + cls);
-
-    const score = penalized ? Math.floor(len * 0.25) : len;
-    if (score > bestScore) {
-      bestScore = score;
-      best = node;
-    }
-  }
-
-  if (!best) {
-    const body = doc.body || doc.documentElement;
-    return { text: (body && body.textContent) || '', html: (body && body.innerHTML) || '' };
-  }
-
-  return {
-    text: (best.textContent || '').replace(/\s+\n/g, '\n').trim(),
-    html: best.innerHTML || '',
-  };
-}
-
-/**
- * Extract JSON-LD blobs and parse the ones with @type we care about.
- */
-function extractJSONLD(doc) {
-  if (!doc) return [];
-  const scripts = [...doc.querySelectorAll('script[type="application/ld+json"]')];
-  const out = [];
-  for (const s of scripts) {
-    const raw = s.textContent || '';
-    if (!raw.trim()) continue;
+    // Try emitting on the named type; fallback to a shared channel if used
     try {
-      const json = JSON.parse(raw);
-      // Compact arrays/graphs
-      if (Array.isArray(json)) {
-        out.push(...json);
-      } else if (json['@graph']) {
-        out.push(...json['@graph']);
-      } else {
-        out.push(json);
-      }
+      bus.emit(type, payload);
     } catch {
-      // ignore bad JSON-LD
+      try {
+        bus.emit("automation.event", payload);
+      } catch {
+        // ignore
+      }
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+ * Public API
+ */
+
+/**
+ * Parse an HTML string into a Document (browser-safe).
+ * Adds/updates a <base> tag to make relative URL resolution consistent.
+ *
+ * @param {string} html
+ * @param {object} [options]
+ * @param {string} [options.baseUrl] - used for <base href="...">
+ * @returns {{ ok:boolean, doc: Document|null, error?:string }}
+ */
+export function parseHTML(html, options = {}) {
+  try {
+    if (typeof html !== "string") {
+      return {
+        ok: false,
+        doc: null,
+        error: "parseHTML: html must be a string.",
+      };
+    }
+
+    // DOMParser is available in browsers
+    if (typeof DOMParser === "undefined") {
+      return {
+        ok: false,
+        doc: null,
+        error: "parseHTML: DOMParser not available in this runtime.",
+      };
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    // Optional base URL support for resolving links
+    const baseUrl = typeof options.baseUrl === "string" ? options.baseUrl : "";
+    if (baseUrl) ensureBaseHref(doc, baseUrl);
+
+    return { ok: true, doc };
+  } catch (e) {
+    return { ok: false, doc: null, error: e?.message || String(e) };
+  }
+}
+
+/**
+ * Extract structured data from HTML using a "recipe" object.
+ *
+ * Example recipe:
+ * {
+ *   baseUrl: "https://example.com/page",
+ *   fields: {
+ *     title: { selector: "h1", attr: "text" },
+ *     price: { selector: ".price", attr: "text", transform: "number" },
+ *     image: { selector: "img.hero", attr: "src", resolveUrl: true },
+ *   },
+ *   lists: {
+ *     bullets: { selector: "ul li", attr: "text" }
+ *   },
+ *   tables: {
+ *     nutrition: { selector: "table.nutrition" }
+ *   }
+ * }
+ *
+ * @param {object} args
+ * @param {string} args.html
+ * @param {string} [args.url] - base URL fallback
+ * @param {object} args.recipe
+ * @returns {Promise<{ ok:boolean, output:any, meta:any, error?:string }>}
+ */
+export async function scrape({ html, url, recipe } = {}) {
+  const tsStart = new Date().toISOString();
+  await emit("scraper.started", {
+    hasHtml: typeof html === "string" && html.length > 0,
+    url: url || recipe?.baseUrl || null,
+  });
+
+  try {
+    const baseUrl = (recipe && recipe.baseUrl) || url || "";
+    const parsed = parseHTML(html, { baseUrl });
+
+    if (!parsed.ok || !parsed.doc) {
+      const err = parsed.error || "Failed to parse HTML.";
+      await emit("scraper.error", {
+        stage: "parse",
+        url: baseUrl || null,
+        message: err,
+      });
+      return {
+        ok: false,
+        output: null,
+        meta: { tsStart, tsEnd: new Date().toISOString() },
+        error: err,
+      };
+    }
+
+    const doc = parsed.doc;
+
+    const output = {
+      fields: {},
+      lists: {},
+      tables: {},
+      links: [],
+      meta: {},
+    };
+
+    // Fields (single values)
+    const fields =
+      recipe?.fields && typeof recipe.fields === "object" ? recipe.fields : {};
+    for (const [key, spec] of Object.entries(fields)) {
+      output.fields[key] = extractField(doc, spec, baseUrl);
+    }
+
+    // Lists (arrays)
+    const lists =
+      recipe?.lists && typeof recipe.lists === "object" ? recipe.lists : {};
+    for (const [key, spec] of Object.entries(lists)) {
+      output.lists[key] = extractList(doc, spec, baseUrl);
+    }
+
+    // Tables
+    const tables =
+      recipe?.tables && typeof recipe.tables === "object" ? recipe.tables : {};
+    for (const [key, spec] of Object.entries(tables)) {
+      output.tables[key] = extractTable(doc, spec, baseUrl);
+    }
+
+    // Optional: collect links
+    if (recipe?.collectLinks) {
+      output.links = collectLinks(doc, {
+        baseUrl,
+        filter: recipe.collectLinks,
+      });
+    }
+
+    // Page meta (title, description, canonical, etc.)
+    output.meta = extractPageMeta(doc, baseUrl);
+
+    const tsEnd = new Date().toISOString();
+    await emit("scraper.completed", {
+      url: baseUrl || null,
+      fieldCount: Object.keys(output.fields || {}).length,
+      listCount: Object.keys(output.lists || {}).length,
+      tableCount: Object.keys(output.tables || {}).length,
+      tsStart,
+      tsEnd,
+    });
+
+    return {
+      ok: true,
+      output,
+      meta: {
+        source: SOURCE,
+        url: baseUrl || null,
+        tsStart,
+        tsEnd,
+      },
+    };
+  } catch (e) {
+    const msg = e?.message || String(e);
+    await emit("scraper.error", {
+      stage: "scrape",
+      url: url || recipe?.baseUrl || null,
+      message: msg,
+    });
+    return {
+      ok: false,
+      output: null,
+      meta: { tsStart, tsEnd: new Date().toISOString() },
+      error: msg,
+    };
+  }
+}
+
+/**
+ * Convenience: extract by selectors without full recipe object.
+ * @param {object} args
+ * @param {string} args.html
+ * @param {string} [args.baseUrl]
+ * @param {object} args.selectors - { key: "css", ... }
+ * @returns {{ ok:boolean, fields:any, error?:string }}
+ */
+export function extractBySelectors({
+  html,
+  baseUrl = "",
+  selectors = {},
+} = {}) {
+  const parsed = parseHTML(html, { baseUrl });
+  if (!parsed.ok || !parsed.doc)
+    return { ok: false, fields: null, error: parsed.error || "parse failed" };
+
+  const out = {};
+  for (const [k, sel] of Object.entries(selectors || {})) {
+    out[k] = textOf(parsed.doc.querySelector(sel));
+  }
+  return { ok: true, fields: out };
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+ * Extraction helpers
+ */
+
+function extractField(doc, spec, baseUrl) {
+  const s = spec && typeof spec === "object" ? spec : {};
+  const selector = String(s.selector || "").trim();
+  if (!selector) return null;
+
+  const el = doc.querySelector(selector);
+  if (!el) return null;
+
+  const attr = String(s.attr || "text").toLowerCase();
+  let val;
+
+  if (attr === "text") val = textOf(el);
+  else if (attr === "html") val = (el && el.innerHTML) || "";
+  else if (attr === "value") val = el.value != null ? String(el.value) : null;
+  else val = el.getAttribute(attr);
+
+  if (val == null) return null;
+
+  // Optional URL resolution
+  if (s.resolveUrl) {
+    val = resolveUrl(val, baseUrl);
+  }
+
+  // Optional transforms
+  val = applyTransform(val, s.transform);
+
+  // Optional post-processing
+  if (typeof s.post === "function") {
+    try {
+      val = s.post(val);
+    } catch {
+      // ignore
     }
   }
+
+  return val;
+}
+
+function extractList(doc, spec, baseUrl) {
+  const s = spec && typeof spec === "object" ? spec : {};
+  const selector = String(s.selector || "").trim();
+  if (!selector) return [];
+
+  const nodes = Array.from(doc.querySelectorAll(selector));
+  if (!nodes.length) return [];
+
+  const attr = String(s.attr || "text").toLowerCase();
+
+  const out = [];
+  for (const el of nodes) {
+    let val;
+    if (attr === "text") val = textOf(el);
+    else if (attr === "html") val = (el && el.innerHTML) || "";
+    else if (attr === "value") val = el.value != null ? String(el.value) : null;
+    else val = el.getAttribute(attr);
+
+    if (val == null) continue;
+
+    if (s.resolveUrl) val = resolveUrl(val, baseUrl);
+    val = applyTransform(val, s.transform);
+
+    if (val == null) continue;
+    if (typeof val === "string" && !val.trim() && !s.keepEmpty) continue;
+
+    out.push(val);
+  }
+
   return out;
 }
 
-/**
- * Extract OpenGraph and Twitter Card metadata.
- */
-function extractCards(doc) {
-  if (!doc) return { og: {}, twitter: {} };
-  const byProp = (prop) =>
-    [...doc.querySelectorAll(`meta[property="${prop}"],meta[name="${prop}"]`)]
-      .map((m) => m.getAttribute('content'))
-      .filter(Boolean)[0];
+function extractTable(doc, spec, baseUrl) {
+  const s = spec && typeof spec === "object" ? spec : {};
+  const selector = String(s.selector || "").trim();
+  if (!selector) return null;
 
-  return {
-    og: {
-      title: byProp('og:title'),
-      description: byProp('og:description'),
-      image: byProp('og:image'),
-      type: byProp('og:type'),
-      url: byProp('og:url'),
-      site_name: byProp('og:site_name'),
-    },
-    twitter: {
-      card: byProp('twitter:card'),
-      title: byProp('twitter:title'),
-      description: byProp('twitter:description'),
-      image: byProp('twitter:image'),
-      site: byProp('twitter:site'),
-      creator: byProp('twitter:creator'),
-    },
-  };
-}
+  const table = doc.querySelector(selector);
+  if (!table) return null;
 
-/**
- * Extract all <table> elements into structured arrays with headers.
- */
-function extractTables(doc) {
-  if (!doc) return [];
-  const results = [];
+  const rows = Array.from(table.querySelectorAll("tr"));
 
-  const tables = [...doc.querySelectorAll('table')];
-  for (const table of tables) {
-    const headers = [];
-    const headerRow =
-      table.querySelector('thead tr') || table.querySelector('tr'); // try thead first, fallback to first row
-    if (headerRow) {
-      [...headerRow.querySelectorAll('th,td')].forEach((cell, idx) => {
-        const txt = (cell.textContent || '').trim();
-        headers[idx] = txt || `col_${idx + 1}`;
-      });
-    }
+  const matrix = rows.map((tr) =>
+    Array.from(tr.querySelectorAll("th,td")).map((cell) =>
+      normalizeSpace(textOf(cell))
+    )
+  );
 
-    const bodyRows =
-      table.querySelectorAll('tbody tr').length > 0 ? [...table.querySelectorAll('tbody tr')] : [...table.querySelectorAll('tr')].slice(1);
+  // Optional: interpret first row as header
+  const hasHeader =
+    s.hasHeader !== false &&
+    matrix.length > 0 &&
+    rows[0].querySelectorAll("th").length > 0;
 
-    const rows = bodyRows.map((tr) => {
+  if (hasHeader) {
+    const header = matrix[0].map((h) => slugify(h) || h);
+    const body = matrix.slice(1);
+    const objects = body.map((r) => {
       const obj = {};
-      const cells = [...tr.querySelectorAll('td,th')];
-      cells.forEach((cell, idx) => {
-        const key = headers[idx] || `col_${idx + 1}`;
-        obj[key] = (cell.textContent || '').trim();
-      });
+      for (let i = 0; i < header.length; i++) {
+        const key = header[i] || `col_${i + 1}`;
+        obj[key] = r[i] != null ? r[i] : "";
+      }
       return obj;
     });
-
-    // Skip empty tables
-    const nonEmpty = rows.some((r) => Object.values(r).some((v) => v));
-    if (!nonEmpty) continue;
-
-    results.push({
-      header: headers,
-      rows,
-      approxSize: rows.length,
-    });
+    return { header, rows: objects, matrix };
   }
 
-  return results;
+  return { matrix };
 }
 
-/**
- * Extract basic document meta (title, description).
- */
-function extractBasicMeta(doc) {
-  if (!doc) return { title: '', description: '' };
-  const title = (doc.querySelector('title') && doc.querySelector('title').textContent) || '';
-  const desc =
-    (doc.querySelector('meta[name="description"]') &&
-      doc.querySelector('meta[name="description"]').getAttribute('content')) ||
-    '';
-  return { title: title.trim(), description: (desc || '').trim() };
-}
+function extractPageMeta(doc, baseUrl) {
+  const title = textOf(doc.querySelector("title")) || null;
 
-/**
- * Extract links, images (basic), for heuristic type detection or downstream uses.
- */
-function extractLinksAndImages(doc) {
-  if (!doc) return { links: [], images: [] };
-  const links = [...doc.querySelectorAll('a[href]')]
-    .map((a) => ({ href: a.getAttribute('href'), text: (a.textContent || '').trim() }))
-    .filter((l) => l.href && !l.href.startsWith('javascript:'));
+  const description =
+    doc.querySelector('meta[name="description"]')?.getAttribute("content") ||
+    doc
+      .querySelector('meta[property="og:description"]')
+      ?.getAttribute("content") ||
+    null;
 
-  const images = [...doc.querySelectorAll('img[src]')].map((img) => ({
-    src: img.getAttribute('src'),
-    alt: img.getAttribute('alt') || '',
-  }));
+  const canonical =
+    doc.querySelector('link[rel="canonical"]')?.getAttribute("href") || null;
 
-  return { links, images };
-}
+  const ogImage =
+    doc.querySelector('meta[property="og:image"]')?.getAttribute("content") ||
+    null;
 
-/**
- * Guess an importType from JSON-LD and content signals.
- */
-function guessImportType({ jsonld, og, twitter, text }) {
-  const str = `${JSON.stringify(jsonld)} ${og?.type || ''} ${twitter?.card || ''} ${text || ''}`.toLowerCase();
-
-  if (/\brecipe\b/.test(str)) return 'recipe';
-  if (/\bhowto\b/.test(str)) return 'cleaning'; // treat HowTo as a procedure; downstream may refine
-  if (/\bproduct\b/.test(str) || /\baggregateoffer\b/.test(str)) return 'storehouse';
-  if (/\bvideoobject\b/.test(str)) return 'video';
-  if (/\banimal\b|\bbutchery|\bslaughter\b|\bgoat\b|\blamb\b|\bcow\b|\bduck\b/.test(str)) return 'animal';
-  if (/\bseed\b|\bgermination\b|\bplanting\b|\bzone\b|\bharvest\b|\bsoil\b/.test(str)) return 'garden';
-
-  // Heuristic fallback using keywords
-  if (/\bclean|sanitize|disinfect|deodorize|aromatic|essential oil\b/.test(str)) return 'cleaning';
-  if (/\bcan(ning)?\b|\bdehydration\b|\bferment(ation)?\b|\bbrine\b|\bpickle\b/.test(str)) return 'preservation';
-
-  return 'unknown';
-}
-
-/**
- * Optional hub export helper (not used here by default).
- */
-async function exportToHubIfEnabled(payload) {
-  try {
-    if (!featureFlags?.familyFundMode) return;
-    if (!HubPacketFormatter || !FamilyFundConnector) return;
-    const packet = HubPacketFormatter.format(payload);
-    await FamilyFundConnector.send(packet);
-  } catch {
-    // fail silently by design
-  }
-}
-
-/**
- * Optional allow-list enforcement.
- */
-function isAllowedByList(urlStr) {
-  if (!siteAllowList || !Array.isArray(siteAllowList?.domains) || siteAllowList.domains.length === 0) return true;
-  try {
-    const u = new URL(urlStr);
-    const host = u.hostname.toLowerCase();
-    return siteAllowList.domains.some((d) => host === d || host.endsWith(`.${d}`));
-  } catch {
-    return false;
-  }
-}
-
-// Extractor plugin system ----------------------------------------------------
-
-const _extractors = new Map();
-/**
- * Register a custom extractor plugin:
- * {
- *   id: 'allrecipes',
- *   test: (url, doc, meta) => boolean,
- *   extract: async ({ url, html, doc, meta }) => ({ enriched fields })
- * }
- */
-export function registerExtractor(plugin) {
-  if (!plugin || !plugin.id || typeof plugin.test !== 'function' || typeof plugin.extract !== 'function') {
-    throw new Error('Invalid extractor plugin shape.');
-  }
-  _extractors.set(plugin.id, plugin);
-}
-
-export function unregisterExtractor(id) {
-  _extractors.delete(id);
-}
-
-export function listExtractors() {
-  return [..._extractors.keys()];
-}
-
-// Main Scrape API ------------------------------------------------------------
-
-/**
- * scrape(url, options)
- * - Fetches and extracts content
- * - Returns a normalized payload
- * - Emits scrape.started and scrape.completed
- *
- * options:
- * {
- *   proxy?: string,                // e.g., '/api/proxy?url=' to bypass CORS
- *   timeoutMs?: number,            // default 15000
- *   retries?: number,              // default 1
- *   headers?: object,              // custom request headers
- *   persist?: boolean,             // if true and ImportCacheService exists, cache result
- *   allowListEnforced?: boolean,   // default false; enforce siteAllowList.json
- * }
- */
-export async function scrape(url, options = {}) {
-  const startedAt = nowISO();
-
-  // Basic input validation
-  if (typeof url !== 'string' || url.length < 8) {
-    const err = new Error('scrape() requires a valid URL string.');
-    emit('scrape.completed', { url, ok: false, startedAt, finishedAt: nowISO(), error: err.message });
-    throw err;
-  }
-
-  if (options.allowListEnforced && !isAllowedByList(url)) {
-    const err = new Error('URL is not in the allowed domains list.');
-    emit('scrape.completed', { url, ok: false, startedAt, finishedAt: nowISO(), error: err.message });
-    throw err;
-  }
-
-  emit('scrape.started', { url, startedAt });
-
-  // Fetch
-  let html, contentType, status;
-  try {
-    const result = await fetchWithRetry(url, {
-      timeoutMs: options.timeoutMs ?? 15000,
-      retries: options.retries ?? 1,
-      headers: options.headers || {},
-      proxy: options.proxy,
-    });
-    html = result.text;
-    contentType = result.contentType || '';
-    status = result.status;
-  } catch (error) {
-    emit('scrape.completed', { url, ok: false, startedAt, finishedAt: nowISO(), error: error.message });
-    throw error;
-  }
-
-  // Only HTML is supported here; non-HTML could be handled by future plugins
-  if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
-    const payload = {
-      url,
-      fetchedAt: nowISO(),
-      status,
-      contentType,
-      html: '',
-      text: '',
-      tables: [],
-      meta: {},
-      og: {},
-      twitter: {},
-      jsonld: [],
-      links: [],
-      images: [],
-      type: 'unknown',
-      extractor: null,
-    };
-    emit('scrape.completed', { url, ok: true, startedAt, finishedAt: nowISO(), data: summarizePayload(payload) });
-    if (options.persist && ImportCacheService && typeof ImportCacheService.save === 'function') {
-      await persistImportCacheSafe(payload);
-    }
-    return payload;
-  }
-
-  // Build DOM
-  const doc = await toDOM(html);
-
-  // Core extraction
-  const basic = extractBasicMeta(doc);
-  const cards = extractCards(doc);
-  const jsonld = extractJSONLD(doc);
-  const { text, html: mainHTML } = extractReadable(doc);
-  const tables = extractTables(doc);
-  const { links, images } = extractLinksAndImages(doc);
-
-  const meta = {
-    ...basic,
-    fetchedAt: nowISO(),
-    sourceUrl: url,
-  };
-
-  // Try registered extractors
-  let extractorId = null;
-  let extractedEnrichment = {};
-  for (const plugin of _extractors.values()) {
-    let match = false;
-    try {
-      match = !!plugin.test(url, doc, { basic, cards, jsonld });
-    } catch {
-      match = false;
-    }
-    if (match) {
-      extractorId = plugin.id;
-      try {
-        extractedEnrichment = (await plugin.extract({ url, html, doc, meta: { basic, cards, jsonld } })) || {};
-      } catch {
-        extractedEnrichment = {};
-      }
-      break;
-    }
-  }
-
-  const type = guessImportType({
-    jsonld,
-    og: cards.og,
-    twitter: cards.twitter,
-    text,
-  });
-
-  const payload = {
-    url,
-    fetchedAt: meta.fetchedAt,
-    status,
-    contentType,
-    html, // full HTML (consider trimming or omitting in production if size is a concern)
-    main: {
-      html: mainHTML,
-      text,
-    },
-    tables,
-    meta: basic,
-    og: cards.og,
-    twitter: cards.twitter,
-    jsonld,
-    links,
-    images,
-    type, // best-effort guess for downstream ImportRouter/Normalizers
-    extractor: extractorId, // which plugin enriched this content, if any
-    enrichment: extractedEnrichment, // domain-specific extras (e.g., canonical ingredients table)
-  };
-
-  // Emit completion
-  emit('scrape.completed', { url, ok: true, startedAt, finishedAt: nowISO(), data: summarizePayload(payload) });
-
-  // Optional cache
-  if (options.persist && ImportCacheService && typeof ImportCacheService.save === 'function') {
-    await persistImportCacheSafe(payload);
-  }
-
-  return payload;
-}
-
-// Helpers --------------------------------------------------------------------
-
-function summarizePayload(payload) {
-  // Keep event payload lean to avoid large bus traffic
   return {
-    url: payload.url,
-    fetchedAt: payload.fetchedAt,
-    status: payload.status,
-    contentType: payload.contentType,
-    type: payload.type,
-    extractor: payload.extractor,
-    mainTextPreview: (payload.main?.text || '').slice(0, 180),
-    tablesCount: payload.tables?.length || 0,
-    imagesCount: payload.images?.length || 0,
-    jsonldCount: payload.jsonld?.length || 0,
+    title: title ? normalizeSpace(title) : null,
+    description: description ? normalizeSpace(description) : null,
+    canonical: canonical ? resolveUrl(canonical, baseUrl) : null,
+    ogImage: ogImage ? resolveUrl(ogImage, baseUrl) : null,
   };
 }
 
-async function persistImportCacheSafe(payload) {
-  try {
-    const key = `${payload.url}::${payload.fetchedAt}`;
-    await ImportCacheService.save(key, {
-      url: payload.url,
-      fetchedAt: payload.fetchedAt,
-      status: payload.status,
-      contentType: payload.contentType,
-      type: payload.type,
-      meta: payload.meta,
-      og: payload.og,
-      twitter: payload.twitter,
-      jsonld: payload.jsonld,
-      main: payload.main,
-      tables: payload.tables,
-      links: payload.links,
-      images: payload.images,
-      extractor: payload.extractor,
-      enrichment: payload.enrichment,
-      // NOTE: We deliberately do NOT store full HTML by default to keep cache smaller.
-      // If you need it, toggle below:
-      // html: payload.html,
+function collectLinks(doc, { baseUrl = "", filter } = {}) {
+  const links = Array.from(doc.querySelectorAll("a[href]"))
+    .map((a) => a.getAttribute("href"))
+    .filter(Boolean)
+    .map((href) => resolveUrl(href, baseUrl))
+    .filter(Boolean);
+
+  if (typeof filter === "function") {
+    try {
+      return links.filter((x) => filter(x));
+    } catch {
+      return links;
+    }
+  }
+
+  if (filter && typeof filter === "object") {
+    const { include, exclude } = filter;
+    return links.filter((x) => {
+      if (Array.isArray(exclude) && exclude.some((re) => safeTest(re, x)))
+        return false;
+      if (Array.isArray(include)) return include.some((re) => safeTest(re, x));
+      return true;
     });
-    emit('import.cached', { url: payload.url, key, type: payload.type, ts: nowISO() });
+  }
+
+  return links;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+ * DOM + string utilities
+ */
+
+function ensureBaseHref(doc, baseUrl) {
+  try {
+    const head = doc.head || doc.querySelector("head");
+    if (!head) return;
+
+    let base = head.querySelector("base");
+    if (!base) {
+      base = doc.createElement("base");
+      head.prepend(base);
+    }
+    base.setAttribute("href", baseUrl);
   } catch {
-    // ignore cache errors
+    // ignore
   }
 }
 
-// Default export -------------------------------------------------------------
+function resolveUrl(href, baseUrl) {
+  const h = String(href || "").trim();
+  if (!h) return null;
+  if (/^(data:|mailto:|tel:|javascript:)/i.test(h)) return h;
 
-const ScraperEngine = {
+  try {
+    // If already absolute, URL() will keep it
+    const u = baseUrl ? new URL(h, baseUrl) : new URL(h);
+    return u.toString();
+  } catch {
+    // If URL constructor fails, return original
+    return h;
+  }
+}
+
+function textOf(el) {
+  if (!el) return "";
+  // Prefer textContent
+  const t = el.textContent != null ? String(el.textContent) : "";
+  return normalizeSpace(t);
+}
+
+function normalizeSpace(s) {
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function slugify(s) {
+  const t = normalizeSpace(s).toLowerCase();
+  if (!t) return "";
+  return t
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function applyTransform(val, transform) {
+  if (!transform) return val;
+
+  const t = typeof transform === "string" ? transform : null;
+
+  if (t === "number") {
+    const n = Number(String(val).replace(/[^0-9.\-]/g, ""));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  if (t === "int") {
+    const n = Number.parseInt(String(val).replace(/[^0-9\-]/g, ""), 10);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  if (t === "lower") return String(val).toLowerCase();
+  if (t === "upper") return String(val).toUpperCase();
+  if (t === "trim") return String(val).trim();
+
+  if (typeof transform === "function") {
+    try {
+      return transform(val);
+    } catch {
+      return val;
+    }
+  }
+
+  return val;
+}
+
+function safeTest(reLike, text) {
+  try {
+    if (reLike instanceof RegExp) return reLike.test(text);
+    if (typeof reLike === "string") return new RegExp(reLike).test(text);
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
+function safeSerializable(x) {
+  try {
+    return JSON.parse(JSON.stringify(x));
+  } catch {
+    if (x == null) return null;
+    if (
+      typeof x === "string" ||
+      typeof x === "number" ||
+      typeof x === "boolean"
+    )
+      return x;
+    if (Array.isArray(x)) return x.map((v) => safeSerializable(v));
+    if (typeof x === "object") {
+      const out = {};
+      for (const k of Object.keys(x)) {
+        const v = x[k];
+        if (typeof v === "function") continue;
+        out[k] = safeSerializable(v);
+      }
+      return out;
+    }
+    return String(x);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+ * Default export
+ */
+
+export default {
+  parseHTML,
   scrape,
-  registerExtractor,
-  unregisterExtractor,
-  listExtractors,
+  extractBySelectors,
 };
 
-export default ScraperEngine;
-
 /**
- * DEV NOTES / FUTURE:
- * - Consider adding a workerized path for large pages to avoid main-thread blocking.
- * - Add binary handling (PDF/image OCR) via specialized plugins and screenshot tool.
- * - Add source-specific anti-bot handling (headers, randomized UA) behind feature flags.
- * - Add per-domain rate limiting via a small token bucket to avoid hammering.
- * - Integrate a “content hash” to dedupe cache entries.
- * - When a downstream normalizer mutates household data, it should invoke exportToHubIfEnabled().
+ * Named export expected by:
+ *   import { ScraperEngine } from "@/services/scraper/ScraperEngine";
+ *
+ * Keep it as a simple object wrapper over the same functions.
  */
+export const ScraperEngine = {
+  parseHTML,
+  scrape,
+  extractBySelectors,
+};

@@ -1,0 +1,361 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.sauces.garlic_toum",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Garlic Toum (Lebanese Garlic Sauce)",
+    "subtitle": "Fluffy, intense garlic emulsion for shawarma, grilled meats, and roasted vegetables",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Classic toum is an emulsified garlic + oil sauce (no eggs, no dairy).",
+        "This version includes SSA-friendly checkpoints for emulsion success.",
+        "Use a food processor for reliability; mortar-and-pestle is optional but slower."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "sauce", "garlic", "emulsion"],
+    "category": "sauce",
+    "mealArchetypes": [
+      "meal_archetype.sauce",
+      "meal_archetype.wrap_components",
+      "meal_archetype.grill_sides"
+    ],
+    "servingStyles": ["street_food", "family_style", "plates"],
+    "plannerTags": [
+      "shawarma",
+      "toum",
+      "garlic_sauce",
+      "emulsion",
+      "no_egg",
+      "dairy_free",
+      "vegan",
+      "make_ahead"
+    ]
+  },
+
+  "summary": "Traditional toum: a powerful, fluffy garlic sauce made by emulsifying garlic with neutral oil and lemon juice. No eggs, no dairy—just technique.",
+
+  "yield": {
+    "servings": 16,
+    "servingSize": { "value": 1, "unit": "tbsp" },
+    "notes": "Makes about 1.5–2 cups (varies with oil absorption and garlic size)."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 10,
+    "totalMins": 25
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": false
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.food_processor",
+      "equipment.measuring_cups",
+      "equipment.measuring_spoons",
+      "equipment.spatula",
+      "equipment.citrus_juicer",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "recommended": [
+      "equipment.kitchen_scale",
+      "equipment.microplane",
+      "equipment.insta_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "equipment.immersion_blender",
+        "label": "Immersion blender + tall cup",
+        "notes": "Works but is less forgiving than a processor for classic toum. Add oil extra slowly."
+      },
+      {
+        "id": "equipment.mortar_and_pestle",
+        "label": "Mortar and pestle",
+        "notes": "Traditional method; more time and arm work. Emulsion is possible with patience."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.vegan",
+    "diet.vegetarian",
+    "diet.dairy_free",
+    "diet.no_egg"
+  ],
+  "allergens": {
+    "notes": [
+      "Contains garlic (allium).",
+      "If using mustard variation, check mustard sensitivity."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves, peeled",
+      "role": "aromatic_base",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "About 18–24 cloves, depending on size. Fresh, firm garlic emulsifies best."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Salt helps break down garlic into a paste and supports emulsion."
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Fresh lemon juice",
+      "role": "acid",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": "About 2–3 lemons. Add gradually; too much at once can break the emulsion."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (grapeseed, sunflower, avocado, or canola)",
+      "role": "fat_emulsifier",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "notes": "Avoid strongly flavored olive oil for classic toum; use neutral for clean garlic punch."
+    },
+    {
+      "id": "ingredient.ice_water",
+      "label": "Ice water",
+      "role": "stabilizer_optional",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Helps keep the emulsion cool and stable if the processor warms up."
+    },
+    {
+      "id": "ingredient.mustard_dijon",
+      "label": "Dijon mustard (optional stabilizer)",
+      "role": "stabilizer_optional",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Not traditional but can help beginners stabilize the emulsion."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_prep",
+      "title": "Prep for a stable emulsion",
+      "instructions": [
+        "Make sure your food processor bowl and blade are completely clean and dry.",
+        "Use peeled garlic cloves with any green sprouts removed (sprouts can taste bitter).",
+        "Have oil and lemon juice measured and ready—toum moves quickly once emulsifying starts."
+      ],
+      "checks": ["Processor bowl is dry and oil/lemon are measured."]
+    },
+    {
+      "id": "step.002_garlic_paste",
+      "title": "Make a smooth garlic paste",
+      "instructions": [
+        "Add garlic and salt to the food processor.",
+        "Process 60–90 seconds, stopping to scrape down the sides 2–3 times.",
+        "Goal: a very smooth paste (like wet sand to creamy paste). The smoother the paste, the fluffier the toum."
+      ],
+      "timers": [{ "label": "Process garlic", "seconds": 90 }],
+      "checks": ["Garlic is finely processed with no large chunks."]
+    },
+    {
+      "id": "step.003_start_emulsion",
+      "title": "Begin emulsifying (oil in a very thin stream)",
+      "instructions": [
+        "With the processor running, start adding oil in a *very thin* steady stream (almost drops at first).",
+        "After about 1/4 cup oil, the mixture should start turning pale and thick.",
+        "If it looks glossy and loose, slow down the oil stream and keep processing."
+      ],
+      "timers": [{ "label": "Initial emulsion", "minutes": 3 }],
+      "checks": [
+        "Mixture becomes pale and begins to thicken after initial oil."
+      ]
+    },
+    {
+      "id": "step.004_balance_with_lemon",
+      "title": "Alternate oil and lemon juice",
+      "instructions": [
+        "Continue adding oil slowly, then drizzle in a small splash of lemon juice.",
+        "Keep alternating: oil (thin stream) → small lemon splash → oil → lemon.",
+        "If the processor bowl warms up, add 1 tbsp ice water to cool and stabilize (optional)."
+      ],
+      "timers": [{ "label": "Build toum", "minutes": 8 }],
+      "checks": ["Sauce is thick, fluffy, and holds soft peaks."]
+    },
+    {
+      "id": "step.005_finish_adjust",
+      "title": "Finish and adjust thickness",
+      "instructions": [
+        "Once all oil is incorporated, add remaining lemon juice gradually to taste and brighten the sauce.",
+        "If too thick: add 1 tsp ice water at a time and pulse until smooth.",
+        "If too sharp: add a little more oil to mellow (slow drizzle).",
+        "Taste and adjust salt if needed."
+      ],
+      "timers": [{ "label": "Final adjust", "minutes": 2 }],
+      "checks": ["Toum is white, fluffy, and spreadable (not runny)."]
+    },
+    {
+      "id": "step.006_recover_if_breaks",
+      "title": "If the emulsion breaks (rescue method)",
+      "instructions": [
+        "If the mixture turns runny or looks separated: stop adding oil immediately.",
+        "In a clean bowl, whisk 1 tbsp lemon juice (or 1 tbsp water) with 1–2 tsp of the broken mixture until it thickens slightly.",
+        "With the processor running, slowly stream the broken mixture into the new base to re-emulsify.",
+        "Then resume adding oil *very slowly* if needed."
+      ],
+      "checks": ["Separated mixture becomes thick again as it re-emulsifies."]
+    },
+    {
+      "id": "step.007_chill",
+      "title": "Chill to set flavor",
+      "instructions": [
+        "Transfer toum to a clean jar/container and refrigerate at least 30 minutes.",
+        "Flavor mellows and texture sets as it chills."
+      ],
+      "timers": [{ "label": "Chill", "minutes": 30 }]
+    }
+  ],
+
+  "tasteProfile": {
+    "garlicIntensity": 5,
+    "acidBrightness": 3,
+    "saltLevel": 2,
+    "notes": ["sharp", "pungent", "creamy", "bright", "clean"]
+  },
+
+  "pairings": {
+    "bestWith": [
+      "shawarma.recipes.chicken_shawarma",
+      "shawarma.recipes.beef_shawarma",
+      "shawarma.recipes.lamb_shawarma",
+      "shawarma.recipes.shawarma_roasted_vegetables",
+      "shawarma.recipes.shawarma_flatbread_wrap"
+    ],
+    "alsoGreatWith": [
+      "grilled_chicken",
+      "roasted_potatoes",
+      "fried_plantains",
+      "steamed_rice"
+    ],
+    "notes": [
+      "Use sparingly in wraps—toum is potent.",
+      "Thin with a splash of water + lemon for a drizzle sauce."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "7 days",
+      "notes": "Store cold in a sealed container. Use clean utensils to avoid contamination."
+    },
+    "freezer": {
+      "duration": "not_recommended",
+      "notes": "Freezing can cause separation and graininess."
+    },
+    "foodSafety": {
+      "notes": [
+        "Because this is a raw-garlic sauce, keep refrigerated and do not leave at room temperature for extended periods.",
+        "Discard if it smells off, develops mold, or becomes unusually watery."
+      ]
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Peel garlic", "mins": 5 },
+      { "task": "Process + emulsify", "mins": 15 },
+      { "task": "Chill to set", "mins": 30 }
+    ],
+    "batchNotes": [
+      "Double batch is efficient—toum keeps about a week and supports multiple shawarma meals.",
+      "For milder toum: reduce garlic to 3/4 cup and keep oil/lemon similar, adjusting to taste."
+    ]
+  },
+
+  "methods": [
+    "technique.emulsify",
+    "technique.food_processor",
+    "technique.sauce"
+  ],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "toum",
+        "lebanese garlic sauce",
+        "garlic spread",
+        "shawarma garlic sauce"
+      ],
+      "keywords": [
+        "garlic",
+        "emulsion",
+        "oil",
+        "lemon",
+        "shawarma",
+        "sauce",
+        "vegan"
+      ]
+    }
+  },
+
+  "notes": [
+    "Key success factor: oil must be added slowly at the beginning.",
+    "If it breaks, the rescue method works—don’t throw it out.",
+    "Neutral oil produces classic flavor; olive oil makes it heavier and more bitter."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.mustard_stabilized",
+      "label": "Beginner-stabilized toum (with Dijon)",
+      "when": { "preferences": ["more_foolproof"] },
+      "adapt": {
+        "notes": [
+          "Add 1 tsp Dijon mustard after processing the garlic paste.",
+          "Proceed with emulsion as written; mustard can help stability and reduce break risk."
+        ]
+      }
+    },
+    {
+      "id": "variation.extra_lemony",
+      "label": "Extra lemony toum",
+      "when": { "preferences": ["brighter"] },
+      "adapt": {
+        "notes": [
+          "Increase lemon juice to 1/3 cup, adding gradually at the end.",
+          "Balance by adding 1–2 tbsp additional oil if needed."
+        ]
+      }
+    },
+    {
+      "id": "variation_roasted_garlic_blend",
+      "label": "Half roasted-garlic toum (milder)",
+      "when": { "preferences": ["milder_garlic"] },
+      "adapt": {
+        "notes": [
+          "Replace half the raw garlic with roasted garlic cloves.",
+          "Start with slightly less oil; roasted garlic can thicken faster. Adjust oil/lemon to taste."
+        ]
+      }
+    }
+  ]
+}

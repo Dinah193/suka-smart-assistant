@@ -37,16 +37,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let featureFlags = {
   familyFundMode: false,
   bufferPolicy: {
-    defaultMin: 5,          // base fallback minutes
-    capMin: 60,             // absolute cap
-    perDomainCaps: {        // optional domain caps
+    defaultMin: 5, // base fallback minutes
+    capMin: 60, // absolute cap
+    perDomainCaps: {
+      // optional domain caps
       preservation: 90,
     },
     // Optional hard minimums by domain/task
@@ -58,16 +61,22 @@ let featureFlags = {
 try {
   const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff || featureFlags;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let dataGateway;
-try { dataGateway = require("@/services/dataGateway"); } catch {}
+try {
+  dataGateway = require("@/services/dataGateway");
+} catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
 try {
   HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
   FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 /* ------------------------------ Public API --------------------------------- */
 module.exports = {
@@ -87,12 +96,25 @@ module.exports = {
     try {
       const res = await _resolveBufferInternal(key);
       if (opts.emitEvent !== false) {
-        eventBus.emit({ type: "scheduling.buffer.resolved", ts, source, data: { key: normKey(key), ...res } });
+        eventBus.emit({
+          type: "scheduling.buffer.resolved",
+          ts,
+          source,
+          data: { key: normKey(key), ...res },
+        });
       }
       return res;
     } catch (err) {
-      eventBus.emit({ type: "scheduling.buffer.policy.error", ts, source, data: { op: "resolve", reason: err?.message || "unknown" } });
-      return { minutes: clamp(featureFlags?.bufferPolicy?.defaultMin ?? 5, 0, 1440), source: "error:fallback" };
+      eventBus.emit({
+        type: "scheduling.buffer.policy.error",
+        ts,
+        source,
+        data: { op: "resolve", reason: err?.message || "unknown" },
+      });
+      return {
+        minutes: clamp(featureFlags?.bufferPolicy?.defaultMin ?? 5, 0, 1440),
+        source: "error:fallback",
+      };
     }
   },
 
@@ -104,12 +126,20 @@ module.exports = {
    */
   async applyBufferToEstimate(estimate, key) {
     const safe = sanitizeEstimate(estimate);
-    const { minutes, source } = await this.resolveBuffer(key, { emitEvent: false });
+    const { minutes, source } = await this.resolveBuffer(key, {
+      emitEvent: false,
+    });
     const buffer = minutes;
     const total = safe.prep + safe.setup + safe.task + safe.cleanup + buffer;
     return {
       totalMinutes: total,
-      parts: { prep: safe.prep, setup: safe.setup, task: safe.task, cleanup: safe.cleanup, buffer },
+      parts: {
+        prep: safe.prep,
+        setup: safe.setup,
+        task: safe.task,
+        cleanup: safe.cleanup,
+        buffer,
+      },
       bufferSource: source,
     };
   },
@@ -136,19 +166,38 @@ module.exports = {
         type: "scheduling.buffer.policy.updated",
         ts,
         source,
-        data: { id, minutes: toSave.minutes, scope: pick(toSave, ["domain", "taskType", "equipmentSig"]), reason: toSave.reason || null },
+        data: {
+          id,
+          minutes: toSave.minutes,
+          scope: pick(toSave, ["domain", "taskType", "equipmentSig"]),
+          reason: toSave.reason || null,
+        },
       });
 
       await exportToHubIfEnabled({
         type: "policy.buffer.updated",
         ts,
         source,
-        data: { id, minutes: toSave.minutes, scope: pick(toSave, ["domain", "taskType", "equipmentSig"]), enabled: toSave.enabled !== false },
+        data: {
+          id,
+          minutes: toSave.minutes,
+          scope: pick(toSave, ["domain", "taskType", "equipmentSig"]),
+          enabled: toSave.enabled !== false,
+        },
       });
 
-      return { id, minutes: toSave.minutes, scope: pick(toSave, ["domain", "taskType", "equipmentSig"]) };
+      return {
+        id,
+        minutes: toSave.minutes,
+        scope: pick(toSave, ["domain", "taskType", "equipmentSig"]),
+      };
     } catch (err) {
-      eventBus.emit({ type: "scheduling.buffer.policy.error", ts: new Date().toISOString(), source, data: { op: "set", reason: err?.message || "unknown" } });
+      eventBus.emit({
+        type: "scheduling.buffer.policy.error",
+        ts: new Date().toISOString(),
+        source,
+        data: { op: "set", reason: err?.message || "unknown" },
+      });
       throw err;
     }
   },
@@ -165,12 +214,27 @@ module.exports = {
       guardDataGateway();
       const ok = await delById("policies.buffers", id);
       if (ok) {
-        eventBus.emit({ type: "scheduling.buffer.policy.removed", ts, source, data: { id } });
-        await exportToHubIfEnabled({ type: "policy.buffer.removed", ts, source, data: { id } });
+        eventBus.emit({
+          type: "scheduling.buffer.policy.removed",
+          ts,
+          source,
+          data: { id },
+        });
+        await exportToHubIfEnabled({
+          type: "policy.buffer.removed",
+          ts,
+          source,
+          data: { id },
+        });
       }
       return !!ok;
     } catch (err) {
-      eventBus.emit({ type: "scheduling.buffer.policy.error", ts, source, data: { op: "remove", reason: err?.message || "unknown" } });
+      eventBus.emit({
+        type: "scheduling.buffer.policy.error",
+        ts,
+        source,
+        data: { op: "remove", reason: err?.message || "unknown" },
+      });
       return false;
     }
   },
@@ -182,7 +246,9 @@ module.exports = {
   async listBufferOverrides() {
     guardDataGateway();
     const rows = await readAll("policies.buffers");
-    return (rows || []).sort((a, b) => Number(b.enabled !== false) - Number(a.enabled !== false));
+    return (rows || []).sort(
+      (a, b) => Number(b.enabled !== false) - Number(a.enabled !== false)
+    );
   },
 
   /**
@@ -234,7 +300,9 @@ async function _resolveBufferInternal(key) {
 function finalize(rawMinutes, source, key) {
   const caps = featureFlags?.bufferPolicy?.perDomainCaps || {};
   const floors = featureFlags?.bufferPolicy?.floors || {};
-  const cap = toPosInt(caps[key.domain] ?? featureFlags?.bufferPolicy?.capMin ?? 60);
+  const cap = toPosInt(
+    caps[key.domain] ?? featureFlags?.bufferPolicy?.capMin ?? 60
+  );
   const floor = toPosInt(floors[key.domain] ?? 0);
 
   const bounded = clamp(toPosInt(rawMinutes), floor, cap);
@@ -267,11 +335,15 @@ async function matchFromPersistent(key) {
   if (!dataGateway) return null;
   // attempt to fetch once and index
   const rows = await readAll("policies.buffers");
-  const list = (rows || []).filter(r => r && (r.enabled !== false));
+  const list = (rows || []).filter((r) => r && r.enabled !== false);
 
   const tryMatch = (scope) => {
-    return list.find(r =>
-      isScopeMatch(scope, { domain: r.domain, taskType: r.taskType, equipmentSig: r.equipmentSig })
+    return list.find((r) =>
+      isScopeMatch(scope, {
+        domain: r.domain,
+        taskType: r.taskType,
+        equipmentSig: r.equipmentSig,
+      })
     );
   };
 
@@ -297,8 +369,10 @@ async function matchFromModels(key) {
   if (!dataGateway) return null;
   const read = async (scope) => {
     const row =
-      (typeof dataGateway.getOne === "function" && await dataGateway.getOne("planning.models", scope)) ||
-      (typeof dataGateway.findOne === "function" && await dataGateway.findOne("planning.models", scope)) ||
+      (typeof dataGateway.getOne === "function" &&
+        (await dataGateway.getOne("planning.models", scope))) ||
+      (typeof dataGateway.findOne === "function" &&
+        (await dataGateway.findOne("planning.models", scope))) ||
       null;
     return row?.bufferMin != null ? toPosInt(row.bufferMin) : null;
   };
@@ -322,7 +396,11 @@ async function matchFromModels(key) {
   }
 
   // domain-only fallback
-  const v2 = await read({ domain: key.domain, taskType: "general", equipmentSig: "none" });
+  const v2 = await read({
+    domain: key.domain,
+    taskType: "general",
+    equipmentSig: "none",
+  });
   return isPosInt(v2) ? v2 : null;
 }
 
@@ -338,7 +416,12 @@ async function upsertMany(table, rows, keyFields) {
     return await dataGateway.upsertMany(table, rows, keyFields);
   }
   if (typeof dataGateway.writeMany === "function") {
-    return await dataGateway.writeMany({ table, rows, keyFields, mode: "upsert" });
+    return await dataGateway.writeMany({
+      table,
+      rows,
+      keyFields,
+      mode: "upsert",
+    });
   }
   if (typeof dataGateway.putMany === "function") {
     await dataGateway.putMany(table, rows);
@@ -352,8 +435,10 @@ async function upsertMany(table, rows, keyFields) {
 }
 
 async function delById(table, id) {
-  if (typeof dataGateway.delete === "function") return await dataGateway.delete(table, id);
-  if (typeof dataGateway.remove === "function") return await dataGateway.remove(table, { id });
+  if (typeof dataGateway.delete === "function")
+    return await dataGateway.delete(table, id);
+  if (typeof dataGateway.remove === "function")
+    return await dataGateway.remove(table, { id });
   if (typeof dataGateway.writeMany === "function") {
     await dataGateway.writeMany({ table, rows: [{ id }], mode: "delete" });
     return true;
@@ -362,8 +447,10 @@ async function delById(table, id) {
 }
 
 async function readAll(table) {
-  if (typeof dataGateway.all === "function") return await dataGateway.all(table);
-  if (typeof dataGateway.scan === "function") return await dataGateway.scan(table, {});
+  if (typeof dataGateway.all === "function")
+    return await dataGateway.all(table);
+  if (typeof dataGateway.scan === "function")
+    return await dataGateway.scan(table, {});
   return [];
 }
 
@@ -388,7 +475,8 @@ function keyToString({ domain, taskType, equipmentSig }) {
 function isScopeMatch(scope, row) {
   const domOk = row.domain === "*" || row.domain === scope.domain;
   const taskOk = row.taskType === "*" || row.taskType === scope.taskType;
-  const eqOk = row.equipmentSig === "*" || row.equipmentSig === scope.equipmentSig;
+  const eqOk =
+    row.equipmentSig === "*" || row.equipmentSig === scope.equipmentSig;
   return domOk && taskOk && eqOk;
 }
 
@@ -421,11 +509,26 @@ function makeId(row) {
   // Stable ID per scope when not provided
   return `buf::${row.domain}::${row.taskType}::${row.equipmentSig}`;
 }
-function isPosInt(n) { return Number.isInteger(n) && n > 0; }
-function toPosInt(n) { const v = Math.floor(Number(n) || 0); return v > 0 ? v : 0; }
-function toNonNegInt(n) { const v = Math.floor(Number(n) || 0); return v < 0 ? 0 : v; }
-function clamp(n, lo, hi) { const x = Number(n); return Math.max(lo, Math.min(hi, Number.isFinite(x) ? x : lo)); }
-function pick(obj, keys) { const o = {}; for (const k of keys) if (k in obj) o[k] = obj[k]; return o; }
+function isPosInt(n) {
+  return Number.isInteger(n) && n > 0;
+}
+function toPosInt(n) {
+  const v = Math.floor(Number(n) || 0);
+  return v > 0 ? v : 0;
+}
+function toNonNegInt(n) {
+  const v = Math.floor(Number(n) || 0);
+  return v < 0 ? 0 : v;
+}
+function clamp(n, lo, hi) {
+  const x = Number(n);
+  return Math.max(lo, Math.min(hi, Number.isFinite(x) ? x : lo));
+}
+function pick(obj, keys) {
+  const o = {};
+  for (const k of keys) if (k in obj) o[k] = obj[k];
+  return o;
+}
 
 /* --------------------------- Optional Hub Export --------------------------- */
 /**
@@ -439,5 +542,7 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }

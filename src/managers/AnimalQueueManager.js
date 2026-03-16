@@ -32,7 +32,8 @@ import DexieDB from "../db";
 
 const DOMAIN = "animals";
 const NOW = () => new Date();
-const iso = (d) => (d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString());
+const iso = (d) =>
+  d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString();
 const addMinutes = (d, m) => new Date(d.getTime() + m * 60000);
 const addHours = (d, h) => addMinutes(d, h * 60);
 const addDays = (d, n) => addHours(d, n * 24);
@@ -41,7 +42,7 @@ const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 /* ------------------------------- Optional deps ------------------------------ */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
@@ -106,28 +107,46 @@ async function getSetting(key, fallback) {
 }
 
 async function loadAnimalSettings() {
-  const [milkCadenceHours, eggCollectionPerDay, breedHeatCycleDays, processingWindowDays, fastingHours] =
-    await Promise.all([
-      getSetting("milkCadenceHours", DEFAULTS.milkCadenceHours),
-      getSetting("eggCollectionPerDay", DEFAULTS.eggCollectionPerDay),
-      getSetting("breedHeatCycleDays", DEFAULTS.breedHeatCycleDays),
-      getSetting("processingWindowDays", DEFAULTS.processingWindowDays),
-      getSetting("fastingHours", DEFAULTS.fastingHours),
-    ]);
-  return { milkCadenceHours, eggCollectionPerDay, breedHeatCycleDays, processingWindowDays, fastingHours };
+  const [
+    milkCadenceHours,
+    eggCollectionPerDay,
+    breedHeatCycleDays,
+    processingWindowDays,
+    fastingHours,
+  ] = await Promise.all([
+    getSetting("milkCadenceHours", DEFAULTS.milkCadenceHours),
+    getSetting("eggCollectionPerDay", DEFAULTS.eggCollectionPerDay),
+    getSetting("breedHeatCycleDays", DEFAULTS.breedHeatCycleDays),
+    getSetting("processingWindowDays", DEFAULTS.processingWindowDays),
+    getSetting("fastingHours", DEFAULTS.fastingHours),
+  ]);
+  return {
+    milkCadenceHours,
+    eggCollectionPerDay,
+    breedHeatCycleDays,
+    processingWindowDays,
+    fastingHours,
+  };
 }
 
 /* ------------------------------ Favorites hints ---------------------------- */
 async function loadFavoriteHints() {
   try {
-    const all = await (DexieDB.favoritePlans?.where?.("domain")?.equals?.(DOMAIN)?.toArray?.() ??
-      DexieDB.favoritePlans?.toArray?.() ?? []);
+    const all = await (DexieDB.favoritePlans
+      ?.where?.("domain")
+      ?.equals?.(DOMAIN)
+      ?.toArray?.() ??
+      DexieDB.favoritePlans?.toArray?.() ??
+      []);
     const hints = {};
     for (const fav of all || []) {
       if (fav?.domain !== DOMAIN) continue;
       const map = fav?.meta?.hints || {};
       for (const k of Object.keys(map)) {
-        hints[k.toLowerCase()] = { ...(hints[k.toLowerCase()] || {}), ...map[k] };
+        hints[k.toLowerCase()] = {
+          ...(hints[k.toLowerCase()] || {}),
+          ...map[k],
+        };
       }
     }
     return hints; // keys by animal name OR species (lowercased)
@@ -175,12 +194,22 @@ function iconForTask(task) {
 
 /* ----------------------------- Narration helpers --------------------------- */
 function narrationFor(entry) {
-  const dueTxt = entry.dueISO ? ` by ${new Date(entry.dueISO).toLocaleString()}` : "";
-  const extra = entry.details?.hint || entry.details?.reason || entry.details?.suggestion || "";
-  return `Animal task: ${entry.task} — ${entry.name}${entry.species ? ` (${entry.species})` : ""}${dueTxt}${extra ? ". " + extra : ""}`;
+  const dueTxt = entry.dueISO
+    ? ` by ${new Date(entry.dueISO).toLocaleString()}`
+    : "";
+  const extra =
+    entry.details?.hint ||
+    entry.details?.reason ||
+    entry.details?.suggestion ||
+    "";
+  return `Animal task: ${entry.task} — ${entry.name}${
+    entry.species ? ` (${entry.species})` : ""
+  }${dueTxt}${extra ? ". " + extra : ""}`;
 }
 function toastMsg(entry) {
-  const when = entry.dueISO ? "due " + new Date(entry.dueISO).toLocaleTimeString() : "queued";
+  const when = entry.dueISO
+    ? "due " + new Date(entry.dueISO).toLocaleTimeString()
+    : "queued";
   return `${entry.task} — ${entry.name} (${entry.priority}) • ${when}`;
 }
 
@@ -197,7 +226,8 @@ function ruleFeedRestock(item, defaults) {
   const urgent = pct <= (item.meta?.feedLowPct ?? defaults.feedLowPct);
   const { score, label } = priorityScore({ base: urgent ? 95 : 55 });
 
-  const suggestedDays = item.meta?.restockDaysCover ?? defaults.restockDaysCover;
+  const suggestedDays =
+    item.meta?.restockDaysCover ?? defaults.restockDaysCover;
   const dailyUse = Number(item.meta?.dailyUse ?? 0);
   const suggestedQty = dailyUse > 0 ? dailyUse * suggestedDays : threshold * 2;
 
@@ -217,7 +247,10 @@ function ruleFeedRestock(item, defaults) {
       suggestedQty,
       unit: item.unit || "",
     },
-    ui: { intent: "restock", deepLink: { panel: "Inventory", tab: "Feed", id: item.id } },
+    ui: {
+      intent: "restock",
+      deepLink: { panel: "Inventory", tab: "Feed", id: item.id },
+    },
   };
 }
 
@@ -229,7 +262,11 @@ function ruleMilkCollection(animal, cadenceHours, fav = {}, defaults) {
   const last = lastISO ? new Date(lastISO) : addHours(NOW(), -cadence - 1);
   const nextDue = addHours(last, cadence);
 
-  if (NOW() < nextDue && !hasAnyTag(animal, ["goat-milk", "cow-milk", "sheep-milk"])) return null;
+  if (
+    NOW() < nextDue &&
+    !hasAnyTag(animal, ["goat-milk", "cow-milk", "sheep-milk"])
+  )
+    return null;
 
   const over = NOW() - nextDue > 0 ? 20 : 0;
   const { score, label } = priorityScore({ base: 70, bump: over });
@@ -243,7 +280,10 @@ function ruleMilkCollection(animal, cadenceHours, fav = {}, defaults) {
   }
 
   // Pause policies (if any)
-  if (pausePolicies?.shouldPause && pausePolicies.shouldPause({ domain: DOMAIN, when: due })) {
+  if (
+    pausePolicies?.shouldPause &&
+    pausePolicies.shouldPause({ domain: DOMAIN, when: due })
+  ) {
     due = addMinutes(due, 30);
   }
 
@@ -266,7 +306,10 @@ function ruleMilkCollection(animal, cadenceHours, fav = {}, defaults) {
     ui: {
       intent: "milk",
       deepLink: { panel: "Animals", tab: "Dairy", id: animal.id },
-      followups: [{ action: "openForm", target: "MilkLog" }, { action: "openPlanner", target: "DairyBatch" }],
+      followups: [
+        { action: "openForm", target: "MilkLog" },
+        { action: "openPlanner", target: "DairyBatch" },
+      ],
     },
   };
 }
@@ -278,7 +321,14 @@ function ruleEggCollection(animal, eggCollectionsPerDay, fav = {}, defaults) {
     /chicken|duck|turkey|quail/i.test(animal.species || "");
   if (!isLayer) return null;
 
-  const timesPerDay = Math.max(1, Number(fav.eggCollectionsPerDay ?? eggCollectionsPerDay ?? defaults.eggCollectionPerDay));
+  const timesPerDay = Math.max(
+    1,
+    Number(
+      fav.eggCollectionsPerDay ??
+        eggCollectionsPerDay ??
+        defaults.eggCollectionPerDay
+    )
+  );
   const gapHours = Math.floor(24 / timesPerDay);
   const lastISO = animal.lastEggISO || animal.meta?.lastEggISO || null;
   const last = lastISO ? new Date(lastISO) : addHours(NOW(), -gapHours - 1);
@@ -319,7 +369,9 @@ function ruleBreedingCheck(animal, heatCycleDays, defaults) {
   if (!hasAnyTag(animal, ["breeding", "doe", "ewe", "cow"])) return null;
 
   const lastHeatISO = animal.lastHeatISO || animal.meta?.lastHeatISO || null;
-  const lastHeat = lastHeatISO ? new Date(lastHeatISO) : addDays(NOW(), -cycleDays - 1);
+  const lastHeat = lastHeatISO
+    ? new Date(lastHeatISO)
+    : addDays(NOW(), -cycleDays - 1);
   const start = addDays(lastHeat, cycleDays - 2);
   const end = addDays(lastHeat, cycleDays + 2);
 
@@ -339,13 +391,24 @@ function ruleBreedingCheck(animal, heatCycleDays, defaults) {
     priorityScore: score,
     dueISO: iso(start),
     estMinutes: DEFAULTS.estDurationsMin.breedingCheck,
-    details: { reason: `Heat cycle ~${cycleDays}d; window ${start.toDateString()}–${end.toDateString()}.` },
-    ui: { intent: "breeding-check", deepLink: { panel: "Animals", tab: "Breeding", id: animal.id } },
+    details: {
+      reason: `Heat cycle ~${cycleDays}d; window ${start.toDateString()}–${end.toDateString()}.`,
+    },
+    ui: {
+      intent: "breeding-check",
+      deepLink: { panel: "Animals", tab: "Breeding", id: animal.id },
+    },
   };
 }
 
 /** Processing (on-farm & red-meat processor drop-off) */
-function ruleProcessing(animal, processingWindowDays, fastingHoursDefault, fav = {}, defaults) {
+function ruleProcessing(
+  animal,
+  processingWindowDays,
+  fastingHoursDefault,
+  fav = {},
+  defaults
+) {
   const ready =
     hasAnyTag(animal, ["butcher-ready", "slaughter"]) ||
     /butcher-ready|slaughter/i.test(animal.stage || "") ||
@@ -353,18 +416,34 @@ function ruleProcessing(animal, processingWindowDays, fastingHoursDefault, fav =
 
   if (!ready) return null;
 
-  const startISO = animal.meta?.butcherReadyISO || animal.readyISO || animal.meta?.markISO || iso(NOW());
-  const baseDue = addDays(new Date(startISO), processingWindowDays || DEFAULTS.processingWindowDays);
+  const startISO =
+    animal.meta?.butcherReadyISO ||
+    animal.readyISO ||
+    animal.meta?.markISO ||
+    iso(NOW());
+  const baseDue = addDays(
+    new Date(startISO),
+    processingWindowDays || DEFAULTS.processingWindowDays
+  );
 
   // Processor preference (favorite can override)
-  const processorPref = fav.processorPref || animal.meta?.processorPref || "on-farm"; // "on-farm" | "state" | "USDA"
-  const processorDropoffISO = fav.processorDropoffISO || animal.meta?.processorDropoffISO || null;
-  const fastingHours = fav.fastingHours ?? animal.meta?.fastingHours ?? fastingHoursDefault ?? DEFAULTS.fastingHours;
+  const processorPref =
+    fav.processorPref || animal.meta?.processorPref || "on-farm"; // "on-farm" | "state" | "USDA"
+  const processorDropoffISO =
+    fav.processorDropoffISO || animal.meta?.processorDropoffISO || null;
+  const fastingHours =
+    fav.fastingHours ??
+    animal.meta?.fastingHours ??
+    fastingHoursDefault ??
+    DEFAULTS.fastingHours;
 
   const tasks = [];
 
   // 1) Fasting (feed withdraw) & water
-  const fastingStart = addHours(new Date(processorDropoffISO || baseDue), -fastingHours);
+  const fastingStart = addHours(
+    new Date(processorDropoffISO || baseDue),
+    -fastingHours
+  );
   tasks.push({
     id: `fast-${animal.id}`,
     sourceId: animal.id,
@@ -376,13 +455,20 @@ function ruleProcessing(animal, processingWindowDays, fastingHoursDefault, fav =
     priorityScore: 70,
     dueISO: iso(fastingStart),
     estMinutes: 10,
-    details: { hint: `Withdraw feed ~${fastingHours}h before processing; provide water as policy allows.` },
-    ui: { intent: "processing-fast", deepLink: { panel: "Animals", tab: "Processing", id: animal.id } },
+    details: {
+      hint: `Withdraw feed ~${fastingHours}h before processing; provide water as policy allows.`,
+    },
+    ui: {
+      intent: "processing-fast",
+      deepLink: { panel: "Animals", tab: "Processing", id: animal.id },
+    },
   });
 
   // 2) Transport or On-farm Setup
   if (processorPref === "on-farm") {
-    const setupDue = processorDropoffISO ? new Date(processorDropoffISO) : baseDue;
+    const setupDue = processorDropoffISO
+      ? new Date(processorDropoffISO)
+      : baseDue;
     tasks.push({
       id: `setup-${animal.id}`,
       sourceId: animal.id,
@@ -401,7 +487,10 @@ function ruleProcessing(animal, processingWindowDays, fastingHoursDefault, fav =
       ui: {
         intent: "processing-setup",
         deepLink: { panel: "Animals", tab: "Processing", id: animal.id },
-        followups: [{ action: "openForm", target: "ButcheryCutSheet" }, { action: "openPlanner", target: "PreservationSuite" }],
+        followups: [
+          { action: "openForm", target: "ButcheryCutSheet" },
+          { action: "openPlanner", target: "PreservationSuite" },
+        ],
       },
     });
   } else {
@@ -431,7 +520,10 @@ function ruleProcessing(animal, processingWindowDays, fastingHoursDefault, fav =
   }
 
   // 3) Processing prep (generic)
-  const { score, label } = priorityScore({ base: 85, bump: NOW() > baseDue ? 15 : 0 });
+  const { score, label } = priorityScore({
+    base: 85,
+    bump: NOW() > baseDue ? 15 : 0,
+  });
   tasks.push({
     id: `process-${animal.id}`,
     sourceId: animal.id,
@@ -446,7 +538,8 @@ function ruleProcessing(animal, processingWindowDays, fastingHoursDefault, fav =
     details: {
       hint: "Confirm chilling, knives, packaging, sanitation plan.",
       suggestion: "Queue curing/canning tasks after butchering.",
-      cutSheetDefaults: fav.cutSheetDefaults || animal.meta?.cutSheetDefaults || null,
+      cutSheetDefaults:
+        fav.cutSheetDefaults || animal.meta?.cutSheetDefaults || null,
     },
     ui: {
       intent: "processing",
@@ -467,7 +560,9 @@ function ruleGeneralCare(item, defaults) {
   return {
     id: `care-${item.id}`,
     sourceId: item.id,
-    source: hasAnyTag(item, ["animal-feed", "goat-milk"]) ? "supplies" : "animals",
+    source: hasAnyTag(item, ["animal-feed", "goat-milk"])
+      ? "supplies"
+      : "animals",
     task: "General care",
     name: item.name,
     species: item.species || item.meta?.species || null,
@@ -476,7 +571,10 @@ function ruleGeneralCare(item, defaults) {
     dueISO: iso(addDays(NOW(), 1)),
     estMinutes: defaults.estDurationsMin.general,
     details: {},
-    ui: { intent: "care", deepLink: { panel: "Animals", tab: "Tasks", id: item.id } },
+    ui: {
+      intent: "care",
+      deepLink: { panel: "Animals", tab: "Tasks", id: item.id },
+    },
   };
 }
 
@@ -490,7 +588,11 @@ const AnimalQueueManager = {
    *  - includeGeneralCare?: boolean (default true)
    */
   async generateQueue(opts = {}) {
-    const { emitEvents = true, useFavorites = true, includeGeneralCare = true } = opts;
+    const {
+      emitEvents = true,
+      useFavorites = true,
+      includeGeneralCare = true,
+    } = opts;
 
     const settings = await loadAnimalSettings();
     const favorites = useFavorites ? await loadFavoriteHints() : {};
@@ -536,29 +638,51 @@ const AnimalQueueManager = {
     // Animal tasks
     for (const a of animals) {
       const fav = pickFav(favorites, a);
-      const milk = ruleMilkCollection(a, settings.milkCadenceHours, fav, { ...DEFAULTS, ...settings });
-      if (milk) queue.push(milk);
-
-      const eggs = ruleEggCollection(a, settings.eggCollectionPerDay, fav, { ...DEFAULTS, ...settings });
-      if (eggs) queue.push(eggs);
-
-      const breed = ruleBreedingCheck(a, settings.breedHeatCycleDays, { ...DEFAULTS, ...settings });
-      if (breed) queue.push(breed);
-
-      const processing = ruleProcessing(a, settings.processingWindowDays, settings.fastingHours, fav, {
+      const milk = ruleMilkCollection(a, settings.milkCadenceHours, fav, {
         ...DEFAULTS,
         ...settings,
       });
+      if (milk) queue.push(milk);
+
+      const eggs = ruleEggCollection(a, settings.eggCollectionPerDay, fav, {
+        ...DEFAULTS,
+        ...settings,
+      });
+      if (eggs) queue.push(eggs);
+
+      const breed = ruleBreedingCheck(a, settings.breedHeatCycleDays, {
+        ...DEFAULTS,
+        ...settings,
+      });
+      if (breed) queue.push(breed);
+
+      const processing = ruleProcessing(
+        a,
+        settings.processingWindowDays,
+        settings.fastingHours,
+        fav,
+        {
+          ...DEFAULTS,
+          ...settings,
+        }
+      );
       if (Array.isArray(processing)) queue.push(...processing);
 
-      if (includeGeneralCare && !milk && !eggs && !breed && !processing?.length) {
+      if (
+        includeGeneralCare &&
+        !milk &&
+        !eggs &&
+        !breed &&
+        !processing?.length
+      ) {
         queue.push(ruleGeneralCare(a, { ...DEFAULTS, ...settings }));
       }
     }
 
     // Sort by priority desc, due asc
     queue.sort((a, b) => {
-      if ((b.priorityScore || 0) !== (a.priorityScore || 0)) return (b.priorityScore || 0) - (a.priorityScore || 0);
+      if ((b.priorityScore || 0) !== (a.priorityScore || 0))
+        return (b.priorityScore || 0) - (a.priorityScore || 0);
       return new Date(a.dueISO || 0) - new Date(b.dueISO || 0);
     });
 
@@ -631,14 +755,26 @@ const AnimalQueueManager = {
       id: `${e.id}:${e.dueISO || "soon"}`,
       title: `${e.icon} ${e.task}: ${e.name}`,
       start: e.dueISO || iso(NOW()),
-      end: iso(addMinutes(new Date(e.dueISO || Date.now()), e.estMinutes || 15)),
-      metadata: { source: "animal-queue", priority: e.priority, priorityScore: e.priorityScore, domain: DOMAIN },
+      end: iso(
+        addMinutes(new Date(e.dueISO || Date.now()), e.estMinutes || 15)
+      ),
+      metadata: {
+        source: "animal-queue",
+        priority: e.priority,
+        priorityScore: e.priorityScore,
+        domain: DOMAIN,
+      },
     }));
   },
 
   async writeCalendar(opts = {}) {
     const events = await this.getCalendarEvents(opts);
-    if (!calendarSync?.writeEvents) return { ok: false, reason: "calendarSync not present", eventsCount: events.length };
+    if (!calendarSync?.writeEvents)
+      return {
+        ok: false,
+        reason: "calendarSync not present",
+        eventsCount: events.length,
+      };
     try {
       await calendarSync.writeEvents(events, { domain: DOMAIN });
       return { ok: true, eventsCount: events.length };
@@ -717,7 +853,10 @@ const AnimalQueueManager = {
         await PlanStorageRouter.save(plan, { favorite, ...exportOpts });
         return true;
       } catch (err) {
-        console.warn("[AnimalQueueManager] PlanStorageRouter.save failed:", err);
+        console.warn(
+          "[AnimalQueueManager] PlanStorageRouter.save failed:",
+          err
+        );
         return false;
       }
     };
@@ -730,13 +869,27 @@ const AnimalQueueManager = {
             const key = (it.name || it.species || "").toLowerCase();
             if (!key) return acc;
             acc[key] = acc[key] || {};
-            if (/Collect milk/i.test(it.task)) acc[key].milkingWindow = acc[key].milkingWindow || { start: "06:00", end: "08:00" };
-            if (/Transport & drop-off/i.test(it.task)) acc[key].processorPref = acc[key].processorPref || "state";
-            if (/On-farm butchery setup/i.test(it.task)) acc[key].processorPref = acc[key].processorPref || "on-farm";
-            if (it.meta?.cutSheetDefaults) acc[key].cutSheetDefaults = it.meta.cutSheetDefaults;
+            if (/Collect milk/i.test(it.task))
+              acc[key].milkingWindow = acc[key].milkingWindow || {
+                start: "06:00",
+                end: "08:00",
+              };
+            if (/Transport & drop-off/i.test(it.task))
+              acc[key].processorPref = acc[key].processorPref || "state";
+            if (/On-farm butchery setup/i.test(it.task))
+              acc[key].processorPref = acc[key].processorPref || "on-farm";
+            if (it.meta?.cutSheetDefaults)
+              acc[key].cutSheetDefaults = it.meta.cutSheetDefaults;
             return acc;
           }, {});
-          const favRow = { id: plan.id, domain: DOMAIN, title: plan.title, createdAt: plan.createdAt, meta: { hints }, items };
+          const favRow = {
+            id: plan.id,
+            domain: DOMAIN,
+            title: plan.title,
+            createdAt: plan.createdAt,
+            meta: { hints },
+            items,
+          };
           await DexieDB.favoritePlans?.put?.(favRow);
         } else {
           await DexieDB.userPlans?.put?.(plan);
@@ -758,14 +911,32 @@ const AnimalQueueManager = {
       eventBus.emit("prep.tasks.requested", {
         domain: DOMAIN,
         tasks: plan.items.map((it) => ({
-          id: it.id, name: it.name, task: it.task, dueISO: it.dueISO, estMinutes: it.estMinutes, priority: it.priority
+          id: it.id,
+          name: it.name,
+          task: it.task,
+          dueISO: it.dueISO,
+          estMinutes: it.estMinutes,
+          priority: it.priority,
         })),
-        meta: { planId: plan.id, title: plan.title, source: "AnimalQueueManager.saveQueueAsPlan" },
+        meta: {
+          planId: plan.id,
+          title: plan.title,
+          source: "AnimalQueueManager.saveQueueAsPlan",
+        },
       });
     } catch (_) {}
 
     try {
-      automation?.nudge?.({ scope: DOMAIN, kind: "plan_saved", payload: { planId: plan.id, favorite, items: plan.items.length, title: plan.title } });
+      automation?.nudge?.({
+        scope: DOMAIN,
+        kind: "plan_saved",
+        payload: {
+          planId: plan.id,
+          favorite,
+          items: plan.items.length,
+          title: plan.title,
+        },
+      });
     } catch (_) {}
 
     return { ok: saved, plan };
@@ -788,10 +959,20 @@ const AnimalQueueManager = {
           [key]: {
             // derive simple reusable hints
             milkingWindow: /Collect milk/i.test(e.task)
-              ? { start: `${String(when.getHours()).padStart(2,"0")}:${String(when.getMinutes()).padStart(2,"0")}`, end: `${String(clamp(when.getHours()+2,0,23)).padStart(2,"0")}:${String(when.getMinutes()).padStart(2,"0")}` }
+              ? {
+                  start: `${String(when.getHours()).padStart(2, "0")}:${String(
+                    when.getMinutes()
+                  ).padStart(2, "0")}`,
+                  end: `${String(clamp(when.getHours() + 2, 0, 23)).padStart(
+                    2,
+                    "0"
+                  )}:${String(when.getMinutes()).padStart(2, "0")}`,
+                }
               : undefined,
-            processorPref: /on-farm butchery setup/i.test(e.task) ? "on-farm"
-              : /drop-off|transport/i.test(e.task) ? "state"
+            processorPref: /on-farm butchery setup/i.test(e.task)
+              ? "on-farm"
+              : /drop-off|transport/i.test(e.task)
+              ? "state"
               : undefined,
             estMinutesOverride: e.estMinutes,
           },

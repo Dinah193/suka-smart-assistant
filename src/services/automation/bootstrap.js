@@ -19,26 +19,29 @@ import { registerAgent } from "@/services/automation/agentRegistry";
  * We keep your explicit imports (fast path), but the resolver below
  * tolerates default/named/factory/class and promise-returning modules.
  */
-import * as animalAgentMod from "@/agents/animalAgent";
-import * as gardenAgentMod from "@/agents/gardeningAgent";
-import * as gardenHealthAgentMod from "@/agents/gardenHealthAgent";
-import * as gardenHarvestAgentMod from "@/agents/gardenHarvestAgent";
-import * as soilAndWaterAgentMod from "@/agents/soilAndWaterAgent";
-import * as breedingAndButcheringAgentMod from "@/agents/breedingAndButcheringAgent";
-import * as mealPlanningAgentMod from "@/agents/mealPlanningAgent";
-import * as cookingAgentMod from "@/agents/cookingAgent";
-import * as recipeConsolidatorAgentMod from "@/agents/recipeConsolidatorAgent";
-import * as inventoryAgentMod from "@/agents/inventoryAgent";
-import * as batchCookingAgentMod from "@/agents/batchCookingAgent";
-import * as cleaningAgentMod from "@/agents/cleaningAgent";
-import * as feedOptimizerAgentMod from "@/agents/feedOptimizerAgent";
-import * as companionPlantingAgentMod from "@/agents/companionPlantingAgent";
-import * as wasteToCompostAgentMod from "@/agents/wasteToCompostAgent";
-import * as storehouseAgentMod from "@/agents/storehouseAgent";
+import * as animalAgentMod from "@/agents/shims/animalShim";
+import * as gardenAgentMod from "@/agents/shims/gardeningShim";
+import * as gardenHealthAgentMod from "@/agents/shims/gardenHealthShim";
+import * as gardenHarvestAgentMod from "@/agents/shims/gardenHarvestShim";
+import * as soilAndWaterAgentMod from "@/agents/shims/soilAndWaterShim";
+import * as breedingAndButcheringAgentMod from "@/agents/shims/breedingAndButcheringShim";
+import * as mealPlanningAgentMod from "@/agents/shims/mealPlanningShim";
+import * as cookingAgentMod from "@/agents/shims/cookingShim";
+import * as recipeConsolidatorAgentMod from "@/agents/shims/recipeConsolidatorShim";
+import * as inventoryAgentMod from "@/agents/shims/inventoryShim";
+import * as batchCookingAgentMod from "@/agents/shims/batchCookingShim";
+import * as cleaningAgentMod from "@/agents/shims/cleaningShim";
+import * as feedOptimizerAgentMod from "@/agents/shims/feedOptimizerShim";
+import * as companionPlantingAgentMod from "@/agents/shims/companionPlantingShim";
+import * as wasteToCompostAgentMod from "@/agents/shims/wasteToCompostShim";
+import * as storehouseAgentMod from "@/agents/shims/storehouseShim";
 
 /* ----------------------------- Triggers -------------------------------- */
 import * as loadCalendarContextMod from "@/services/triggers/loadCalendarContext";
 import * as detectCleaningTriggersMod from "@/services/triggers/detectCleaningTriggers";
+import * as detectCookingTriggersMod from "@/services/triggers/detectCookingTriggers";
+import * as detectAnimalsTriggersMod from "@/services/triggers/detectAnimalsTriggers";
+import * as detectGardenTriggersMod from "@/services/triggers/detectGardenTriggers";
 import * as householdOrchestratorMod from "@/services/triggers/householdOrchestrator";
 
 /* ----------------------------- Safe resolvers --------------------------- */
@@ -49,19 +52,27 @@ function pickFirstExport(mod, preferred = []) {
   if (mod.template) return mod.template;
   if (typeof mod.getTemplate === "function") return mod.getTemplate();
   if (mod.agent) return mod.agent;
-  const val = Object.values(mod).find((v) => typeof v === "object" || typeof v === "function");
+  const val = Object.values(mod).find(
+    (v) => typeof v === "object" || typeof v === "function"
+  );
   return val;
 }
 
 async function resolveMaybeAsync(entity) {
   // If it's a promise (dynamic import/factory), await once
   if (entity && typeof entity.then === "function") {
-    try { return await entity; } catch { return undefined; }
+    try {
+      return await entity;
+    } catch {
+      return undefined;
+    }
   }
   // If it's a factory (function without prototype methods), try invoking with no args
   if (typeof entity === "function") {
     const proto = entity.prototype || {};
-    const looksClass = typeof proto === "object" && (proto.start || proto.teardown || proto.handleEvent);
+    const looksClass =
+      typeof proto === "object" &&
+      (proto.start || proto.teardown || proto.handleEvent);
     if (!looksClass) {
       try {
         const out = entity();
@@ -78,21 +89,59 @@ async function resolveMaybeAsync(entity) {
 async function registerAllAgents() {
   const defs = [
     ["animalAgent", pickFirstExport(animalAgentMod, ["animalAgent"])],
-    ["gardenAgent", pickFirstExport(gardenAgentMod, ["gardenAgent", "gardeningAgent"])],
-    ["gardenHealthAgent", pickFirstExport(gardenHealthAgentMod, ["gardenHealthAgent"])],
-    ["gardenHarvestAgent", pickFirstExport(gardenHarvestAgentMod, ["gardenHarvestAgent"])],
-    ["soilAndWaterAgent", pickFirstExport(soilAndWaterAgentMod, ["soilAndWaterAgent"])],
-    ["breedingAndButcheringAgent", pickFirstExport(breedingAndButcheringAgentMod, ["breedingAndButcheringAgent"])],
-    ["mealPlanningAgent", pickFirstExport(mealPlanningAgentMod, ["mealPlanningAgent"])],
+    [
+      "gardenAgent",
+      pickFirstExport(gardenAgentMod, ["gardenAgent", "gardeningAgent"]),
+    ],
+    [
+      "gardenHealthAgent",
+      pickFirstExport(gardenHealthAgentMod, ["gardenHealthAgent"]),
+    ],
+    [
+      "gardenHarvestAgent",
+      pickFirstExport(gardenHarvestAgentMod, ["gardenHarvestAgent"]),
+    ],
+    [
+      "soilAndWaterAgent",
+      pickFirstExport(soilAndWaterAgentMod, ["soilAndWaterAgent"]),
+    ],
+    [
+      "breedingAndButcheringAgent",
+      pickFirstExport(breedingAndButcheringAgentMod, [
+        "breedingAndButcheringAgent",
+      ]),
+    ],
+    [
+      "mealPlanningAgent",
+      pickFirstExport(mealPlanningAgentMod, ["mealPlanningAgent"]),
+    ],
     ["cookingAgent", pickFirstExport(cookingAgentMod, ["cookingAgent"])],
-    ["recipeConsolidatorAgent", pickFirstExport(recipeConsolidatorAgentMod, ["recipeConsolidatorAgent"])],
+    [
+      "recipeConsolidatorAgent",
+      pickFirstExport(recipeConsolidatorAgentMod, ["recipeConsolidatorAgent"]),
+    ],
     ["inventoryAgent", pickFirstExport(inventoryAgentMod, ["inventoryAgent"])],
-    ["batchCookingAgent", pickFirstExport(batchCookingAgentMod, ["batchCookingAgent"])],
+    [
+      "batchCookingAgent",
+      pickFirstExport(batchCookingAgentMod, ["batchCookingAgent"]),
+    ],
     ["cleaningAgent", pickFirstExport(cleaningAgentMod, ["cleaningAgent"])],
-    ["feedOptimizerAgent", pickFirstExport(feedOptimizerAgentMod, ["feedOptimizerAgent"])],
-    ["companionPlantingAgent", pickFirstExport(companionPlantingAgentMod, ["companionPlantingAgent"])],
-    ["wasteToCompostAgent", pickFirstExport(wasteToCompostAgentMod, ["wasteToCompostAgent"])],
-    ["storehouseAgent", pickFirstExport(storehouseAgentMod, ["storehouseAgent"])],
+    [
+      "feedOptimizerAgent",
+      pickFirstExport(feedOptimizerAgentMod, ["feedOptimizerAgent"]),
+    ],
+    [
+      "companionPlantingAgent",
+      pickFirstExport(companionPlantingAgentMod, ["companionPlantingAgent"]),
+    ],
+    [
+      "wasteToCompostAgent",
+      pickFirstExport(wasteToCompostAgentMod, ["wasteToCompostAgent"]),
+    ],
+    [
+      "storehouseAgent",
+      pickFirstExport(storehouseAgentMod, ["storehouseAgent"]),
+    ],
   ];
 
   // Resolve async/factories and register with the upgraded agentRegistry
@@ -100,12 +149,17 @@ async function registerAllAgents() {
     try {
       const inst = await resolveMaybeAsync(raw);
       if (!inst) {
-        console.warn(`[automation] Agent "${name}" not found or not exported. Skipping.`);
+        console.warn(
+          `[automation] Agent "${name}" not found or not exported. Skipping.`
+        );
         continue;
       }
       await registerAgent(name, inst);
     } catch (e) {
-      console.warn(`[automation] Failed to register agent "${name}":`, e?.message || e);
+      console.warn(
+        `[automation] Failed to register agent "${name}":`,
+        e?.message || e
+      );
     }
   }
 }
@@ -121,30 +175,61 @@ function wireHouseholdIntuition() {
 
   const emit = (topic, payload = {}) => {
     try {
-      automation.emit?.("event", { topic, payload, ts: Date.now(), source: "intuition" });
+      automation.emit?.("event", {
+        topic,
+        payload,
+        ts: Date.now(),
+        source: "intuition",
+      });
     } catch (e) {
-      console.warn("[automation/bootstrap] emit failed:", topic, e?.message || e);
+      console.warn(
+        "[automation/bootstrap] emit failed:",
+        topic,
+        e?.message || e
+      );
     }
   };
 
   // Cooking lifecycle
-  window.addEventListener("session:cooking:planned", () => emit("SESSION.COOKING.PLANNED"));
-  window.addEventListener("session:cooking:started", () => emit("SESSION.COOKING.STARTED"));
-  window.addEventListener("session:cooking:finished", () => emit("SESSION.COOKING.FINISHED"));
+  window.addEventListener("session:cooking:planned", () =>
+    emit("SESSION.COOKING.PLANNED")
+  );
+  window.addEventListener("session:cooking:started", () =>
+    emit("SESSION.COOKING.STARTED")
+  );
+  window.addEventListener("session:cooking:finished", () =>
+    emit("SESSION.COOKING.FINISHED")
+  );
 
   // Cleaning lifecycle
-  window.addEventListener("session:cleaning:planned", () => emit("SESSION.CLEANING.PLANNED"));
-  window.addEventListener("session:cleaning:started", () => emit("SESSION.CLEANING.STARTED"));
-  window.addEventListener("session:cleaning:finished", () => emit("SESSION.CLEANING.FINISHED"));
+  window.addEventListener("session:cleaning:planned", () =>
+    emit("SESSION.CLEANING.PLANNED")
+  );
+  window.addEventListener("session:cleaning:started", () =>
+    emit("SESSION.CLEANING.STARTED")
+  );
+  window.addEventListener("session:cleaning:finished", () =>
+    emit("SESSION.CLEANING.FINISHED")
+  );
 
   // Gardening / season windows
-  window.addEventListener("garden:harvest:window", () => emit("GARDEN.HARVEST.WINDOW"));
-  window.addEventListener("garden:planting:window", () => emit("GARDEN.PLANTING.WINDOW"));
+  window.addEventListener("garden:harvest:window", () =>
+    emit("GARDEN.HARVEST.WINDOW")
+  );
+  window.addEventListener("garden:planting:window", () =>
+    emit("GARDEN.PLANTING.WINDOW")
+  );
 
   // Weather signals
-  window.addEventListener("weather:frostAlert", () => emit("WEATHER.FROST.ALERT"));
-  window.addEventListener("weather:heatAlert", () => emit("WEATHER.HEAT.ALERT"));
-  window.addEventListener("weather:rainWindow", () => emit("WEATHER.RAIN.WINDOW"));
+  window.addEventListener("weather:frostAlert", () =>
+    emit("WEATHER.FROST.ALERT")
+  );
+  window.addEventListener("weather:heatAlert", () =>
+    emit("WEATHER.HEAT.ALERT")
+  );
+  window.addEventListener("weather:rainWindow", () =>
+    emit("WEATHER.RAIN.WINDOW")
+  );
 
   // Sabbath rhythm
   window.addEventListener("sabbath:prep", () => emit("SABBATH.PREP.WINDOW"));
@@ -187,9 +272,9 @@ function registerTriggers() {
 export async function bootstrapAutomation(options = {}) {
   const { wireIntuition = true } = options;
   try {
-    await registerAllAgents();                 // 1
-    await autoRegisterTemplates();             // 2
-    registerTriggers();                        // 3
+    await registerAllAgents(); // 1
+    await autoRegisterTemplates(); // 2
+    registerTriggers(); // 3
     automation.start?.({ source: "bootstrap" }); // 4 (idempotent)
 
     if (wireIntuition) wireHouseholdIntuition(); // 5

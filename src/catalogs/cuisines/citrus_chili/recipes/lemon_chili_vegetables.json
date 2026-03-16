@@ -1,0 +1,435 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.citrus_chili.recipes.lemon_chili_vegetables",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Lemon-Chili Roasted Vegetables",
+    "subtitle": "Bright citrus, warm chili, and garlic—easy sheet-pan side"
+  },
+  "classification": {
+    "cuisine": "citrus_chili",
+    "category": "side",
+    "mealArchetypes": [
+      "veg_side",
+      "roasted_veg",
+      "weeknight_side",
+      "plates",
+      "bowls"
+    ],
+    "servingStyles": ["family_style", "plates", "bowls"],
+    "plannerTags": [
+      "cuisine.citrus_chili",
+      "side.vegetables",
+      "sheet_pan",
+      "weeknight.friendly",
+      "batch.friendly",
+      "make_ahead",
+      "bright",
+      "spice_adjustable"
+    ]
+  },
+  "summary": "A flexible sheet-pan vegetable roast finished with lemon zest and a lemon-chili-garlic drizzle. Works with almost any protein and is great for meal prep bowls.",
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a side or 3–4 as a bowl base."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": "high",
+    "leftoversGood": true,
+    "freezerFriendly": "low",
+    "spiceAdjustable": true,
+    "mealPrepFriendly": true
+  },
+  "tasteProfile": {
+    "heatLevel": 2,
+    "acidity": "lemon-forward",
+    "salt": "medium",
+    "sweetness": "low",
+    "notes": ["roasty edges", "bright lemon finish", "garlic + chili warmth"]
+  },
+  "equipment": {
+    "minimum": [
+      "cutting_board",
+      "knife",
+      "mixing_bowl",
+      "sheet_pan",
+      "parchment_or_foil_optional",
+      "measuring_spoons"
+    ],
+    "recommended": [
+      "microplane_or_grater",
+      "citrus_juicer",
+      "tongs_or_spatula"
+    ],
+    "optional": [
+      {
+        "id": "wire_rack",
+        "label": "Wire rack",
+        "notes": "Can help airflow for crispier vegetables."
+      }
+    ]
+  },
+  "allergens": ["citrus"],
+  "dietFlags": ["vegetarian", "vegan_optional", "gluten_free"],
+  "keywords": [
+    "lemon chili vegetables",
+    "lemon chili roasted vegetables",
+    "sheet pan vegetables",
+    "roasted veg with lemon",
+    "meal prep vegetables"
+  ],
+  "tags": [
+    "cuisine.citrus_chili",
+    "side.vegetables",
+    "sheet_pan",
+    "meal_prep",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+  "methods": ["roast", "citrus_finish", "optional_pan_roast"],
+  "ingredientGroups": [
+    {
+      "id": "veg",
+      "label": "Vegetables (flexible mix)",
+      "items": [
+        "broccoli_florets",
+        "cauliflower_florets",
+        "bell_peppers",
+        "red_onion",
+        "zucchini",
+        "cherry_tomatoes_optional"
+      ]
+    },
+    {
+      "id": "seasoning",
+      "label": "Lemon-Chili Seasoning",
+      "items": [
+        "olive_oil",
+        "salt",
+        "black_pepper",
+        "garlic",
+        "lemon_zest",
+        "lemon_juice",
+        "red_pepper_flakes_or_chili_powder",
+        "smoked_paprika_optional",
+        "honey_optional",
+        "fresh_herbs_optional"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "broccoli_florets",
+      "label": "Broccoli florets",
+      "role": "veg",
+      "amount": { "value": 300, "unit": "g" }
+    },
+    {
+      "id": "cauliflower_florets",
+      "label": "Cauliflower florets",
+      "role": "veg",
+      "amount": { "value": 300, "unit": "g" }
+    },
+    {
+      "id": "bell_peppers",
+      "label": "Bell peppers, sliced",
+      "role": "veg",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Any color; use 1 if very large."
+    },
+    {
+      "id": "red_onion",
+      "label": "Red onion, cut into wedges",
+      "role": "veg",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "zucchini",
+      "label": "Zucchini, thick half-moons",
+      "role": "veg",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "cherry_tomatoes_optional",
+      "label": "Cherry tomatoes (optional)",
+      "role": "veg",
+      "optional": true,
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Add near the end so they don’t collapse too much."
+    },
+
+    {
+      "id": "olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, finely minced (or grated)",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "red_pepper_flakes_or_chili_powder",
+      "label": "Red pepper flakes (or chili powder)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Use 1/2 tsp for mild; up to 2 tsp for hotter."
+    },
+    {
+      "id": "smoked_paprika_optional",
+      "label": "Smoked paprika (optional)",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": "Adds warm depth and color."
+    },
+    {
+      "id": "lemon_zest",
+      "label": "Lemon zest",
+      "role": "citrus",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Fresh lemon juice",
+      "role": "citrus",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 1 large lemon."
+    },
+    {
+      "id": "honey_optional",
+      "label": "Honey (optional)",
+      "role": "sweetener",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Balances acidity; omit for vegan."
+    },
+    {
+      "id": "fresh_herbs_optional",
+      "label": "Fresh herbs (optional): parsley or cilantro, chopped",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Preheat and prep the pan",
+      "instructions": [
+        "Heat oven to 425°F / 218°C.",
+        "Line a sheet pan with parchment (optional) for easier cleanup.",
+        "For best browning: preheat the empty sheet pan for 5 minutes while you finish chopping."
+      ],
+      "activeMins": 4,
+      "timers": [{ "label": "Preheat empty pan (optional)", "minutes": 5 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Cut vegetables for even roasting",
+      "instructions": [
+        "Cut broccoli and cauliflower into medium florets (avoid tiny pieces that burn).",
+        "Slice peppers, wedge onion, and cut zucchini into thick half-moons.",
+        "If using cherry tomatoes, keep them whole and set aside for later."
+      ],
+      "activeMins": 12,
+      "checks": [
+        "Vegetables are similar in thickness so they finish together",
+        "Zucchini pieces are thick enough to resist getting mushy"
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Season vegetables",
+      "instructions": [
+        "In a large bowl, toss broccoli, cauliflower, peppers, onion, and zucchini with olive oil, salt, black pepper, garlic, chili flakes (or chili powder), and smoked paprika (optional).",
+        "Spread evenly on the hot sheet pan in a single layer—avoid crowding."
+      ],
+      "activeMins": 4,
+      "checks": [
+        "Vegetables are evenly coated with oil and seasoning",
+        "Pan is not overcrowded (use a second pan if needed)"
+      ]
+    },
+    {
+      "id": "step_04",
+      "title": "Roast until browned and tender-crisp",
+      "instructions": [
+        "Roast 18–22 minutes, stirring once halfway, until broccoli/cauliflower have browned edges and peppers are softened.",
+        "If using cherry tomatoes: add them for the final 8–10 minutes so they blister without collapsing."
+      ],
+      "handsOffMins": 22,
+      "timers": [
+        { "label": "Roast (first phase)", "minutes": 12 },
+        { "label": "Roast (second phase)", "minutes": 10 }
+      ],
+      "checks": [
+        "Edges are browned (not burned)",
+        "Vegetables are tender but still have some bite"
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Finish with lemon-chili brightness",
+      "instructions": [
+        "While vegetables roast (or right after), whisk lemon juice with lemon zest. Add honey (optional) if you want a slightly rounder flavor.",
+        "When vegetables come out, drizzle the lemon mixture over the hot pan and toss to coat.",
+        "Taste and adjust: add a pinch of salt, extra chili flakes, or extra lemon juice as needed.",
+        "Finish with fresh herbs (optional)."
+      ],
+      "activeMins": 6,
+      "checks": [
+        "Lemon flavor is bright but not harsh (use honey if needed)",
+        "Heat level matches your household (add or reduce chili)"
+      ]
+    }
+  ],
+  "pairings": {
+    "proteins": [
+      "chili_lime_chicken",
+      "orange_chili_pork",
+      "garlic_shrimp",
+      "citrus_marinated_fish"
+    ],
+    "starches": ["steamed_rice", "quinoa", "roasted_potatoes", "flatbread"],
+    "sauces": [
+      "yogurt_sauce_optional",
+      "tahini_lemon_optional",
+      "simple_vinaigrette_optional"
+    ]
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 4,
+      "notes": "Store airtight; reheat on a sheet pan or skillet for best texture."
+    },
+    "freezer": {
+      "ok": false,
+      "notes": "Roasted zucchini/peppers soften after freezing."
+    },
+    "reheat": {
+      "methods": ["oven_or_air_fryer", "skillet"],
+      "notes": "Reheat at high heat to re-crisp edges; add a small squeeze of lemon after reheating."
+    }
+  },
+  "safety": {
+    "handling": [
+      "Wash produce well.",
+      "Use clean board/knife when switching between raw proteins and vegetables."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation_garlic_lemon_broccoli_only",
+      "label": "Garlic-lemon broccoli (single-veg version)",
+      "notes": [
+        "Use 900g broccoli florets instead of mixed veg.",
+        "Roast 14–18 minutes depending on floret size."
+      ]
+    },
+    {
+      "id": "variation_spicy_citrus_chili",
+      "label": "Spicier finish",
+      "notes": [
+        "Add 1 tsp chili paste to the lemon juice before drizzling.",
+        "Or toss with thin-sliced jalapeño after roasting."
+      ]
+    },
+    {
+      "id": "variation_pan_roast",
+      "label": "Stovetop pan-roasted version",
+      "notes": [
+        "Use a large skillet over medium-high with 2 tbsp oil.",
+        "Cook denser veg first (broccoli/cauliflower) covered 4–6 min with a splash of water, then uncover and brown.",
+        "Add peppers/onion/zucchini and cook until tender; finish with lemon + zest."
+      ]
+    }
+  ],
+  "planner": {
+    "cuisineId": "cuisines.citrus_chili",
+    "defaultCourse": "side",
+    "weeknightNotes": [
+      "Use pre-cut florets and a bag of frozen peppers/onions in a pinch (increase roast time slightly).",
+      "Roast on a second rack while your main cooks."
+    ],
+    "shopping": {
+      "corePantry": [
+        "olive_oil",
+        "salt",
+        "black_pepper",
+        "red_pepper_flakes_or_chili_powder",
+        "smoked_paprika_optional",
+        "honey_optional"
+      ],
+      "fresh": [
+        "lemon",
+        "garlic",
+        "broccoli_florets",
+        "cauliflower_florets",
+        "bell_peppers",
+        "red_onion",
+        "zucchini"
+      ]
+    }
+  },
+  "compat": {
+    "cuisine": "citrus_chili",
+    "dishId": "lemon_chili_vegetables",
+    "ingredientIds": [
+      "broccoli_florets",
+      "cauliflower_florets",
+      "bell_peppers",
+      "red_onion",
+      "zucchini",
+      "cherry_tomatoes_optional",
+      "olive_oil",
+      "salt",
+      "black_pepper",
+      "garlic",
+      "red_pepper_flakes_or_chili_powder",
+      "smoked_paprika_optional",
+      "lemon_zest",
+      "lemon_juice",
+      "honey_optional",
+      "fresh_herbs_optional"
+    ],
+    "equipmentIds": [
+      "cutting_board",
+      "knife",
+      "mixing_bowl",
+      "sheet_pan",
+      "parchment_or_foil_optional",
+      "measuring_spoons",
+      "microplane_or_grater",
+      "citrus_juicer",
+      "tongs_or_spatula",
+      "wire_rack"
+    ],
+    "methodIds": ["roast", "citrus_finish", "optional_pan_roast"]
+  }
+}

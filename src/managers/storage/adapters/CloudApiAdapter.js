@@ -6,9 +6,13 @@
   var logger = console;
 
   // ----------------------------- Safe imports ------------------------------
-  var eventBus = { emit: function(){}, on: function(){}, off: function(){} };
+  var eventBus = {
+    emit: function () {},
+    on: function () {},
+    off: function () {},
+  };
   try {
-    var eb = require("@/services/eventBus");
+    var eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
@@ -19,34 +23,65 @@
   } catch (_e) {}
 
   // Use global fetch if present; node fallback if available
-  var _fetch = (typeof fetch !== "undefined") ? fetch : null;
+  var _fetch = typeof fetch !== "undefined" ? fetch : null;
   if (!_fetch) {
-    try { _fetch = require("node-fetch"); } catch (_e) {}
+    try {
+      _fetch = require("node-fetch");
+    } catch (_e) {}
   }
 
   var isBrowser = typeof window !== "undefined";
 
   // ------------------------------ Small utils ------------------------------
-  var assign = function (t, s) { for (var k in s) { if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k]; } return t; };
-  var clamp = function(n,a,b){ return Math.max(a, Math.min(b, n)); };
-  var now = function(){ return Date.now(); };
+  var assign = function (t, s) {
+    for (var k in s) {
+      if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k];
+    }
+    return t;
+  };
+  var clamp = function (n, a, b) {
+    return Math.max(a, Math.min(b, n));
+  };
+  var now = function () {
+    return Date.now();
+  };
 
-  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  function sleep(ms) {
+    return new Promise(function (r) {
+      setTimeout(r, ms);
+    });
+  }
 
   function toJSON(x) {
-    try { return JSON.stringify(x); } catch (_e) { return null; }
+    try {
+      return JSON.stringify(x);
+    } catch (_e) {
+      return null;
+    }
   }
   function fromJSON(s) {
-    try { return JSON.parse(s); } catch (_e) { return null; }
+    try {
+      return JSON.parse(s);
+    } catch (_e) {
+      return null;
+    }
   }
 
-  function u8(str){ try { return encodeURIComponent(str); } catch (_e){ return str; } }
+  function u8(str) {
+    try {
+      return encodeURIComponent(str);
+    } catch (_e) {
+      return str;
+    }
+  }
 
   // ------------------------------ Outbox (LS) ------------------------------
   // Minimal durable queue for offline operations.
   function createOutbox(key) {
     var storageOK = false;
-    try { storageOK = isBrowser && !!window.localStorage; } catch(_e){}
+    try {
+      storageOK = isBrowser && !!window.localStorage;
+    } catch (_e) {}
     var _key = key || "suka:cloud:outbox";
 
     function read() {
@@ -58,23 +93,31 @@
     }
     function write(arr) {
       if (!storageOK) return;
-      try { window.localStorage.setItem(_key, toJSON(arr || [])); } catch (_e) {}
+      try {
+        window.localStorage.setItem(_key, toJSON(arr || []));
+      } catch (_e) {}
     }
 
     return {
-      push: function(job) {
+      push: function (job) {
         var list = read();
         list.push(assign({ ts: now() }, job));
         write(list);
       },
-      drain: function() {
+      drain: function () {
         var list = read();
         write([]);
         return list;
       },
-      peekAll: function() { return read(); },
-      size: function(){ return read().length; },
-      clear: function(){ write([]); }
+      peekAll: function () {
+        return read();
+      },
+      size: function () {
+        return read().length;
+      },
+      clear: function () {
+        write([]);
+      },
     };
   }
 
@@ -85,12 +128,16 @@
 
     async function http(method, path, body, headers, attempt) {
       if (!_fetch) throw new Error("fetch unavailable");
-      var url = base.replace(/\/+$/,"") + "/" + path.replace(/^\/+/,"");
-      var h = assign({
-        "Content-Type": "application/json"
-      }, headers || {});
+      var url = base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+      var h = assign(
+        {
+          "Content-Type": "application/json",
+        },
+        headers || {}
+      );
       try {
-        var token = (typeof getAuthToken === "function") ? await getAuthToken() : null;
+        var token =
+          typeof getAuthToken === "function" ? await getAuthToken() : null;
         if (token) h.Authorization = "Bearer " + token;
       } catch (_e) {}
 
@@ -99,26 +146,33 @@
       if (typeof AbortController !== "undefined") {
         controller = new AbortController();
         signal = controller.signal;
-        setTimeout(function(){ try { controller.abort(); } catch(_e){} }, _timeout);
+        setTimeout(function () {
+          try {
+            controller.abort();
+          } catch (_e) {}
+        }, _timeout);
       }
 
       var opts = { method: method, headers: h, signal: signal };
-      if (body != null) opts.body = (typeof body === "string" ? body : toJSON(body));
+      if (body != null)
+        opts.body = typeof body === "string" ? body : toJSON(body);
 
       try {
         var res = await _fetch(url, opts);
-        var etag = res.headers && res.headers.get ? res.headers.get("ETag") : null;
+        var etag =
+          res.headers && res.headers.get ? res.headers.get("ETag") : null;
         if (res.status === 401 || res.status === 403) {
           onAuthError && onAuthError(res);
           var e = new Error("Unauthorized");
           e.status = res.status;
           throw e;
         }
-        if (res.status === 204) return { status: res.status, ok: true, data: null, etag: etag };
+        if (res.status === 204)
+          return { status: res.status, ok: true, data: null, etag: etag };
         var text = await res.text();
         var data = text ? fromJSON(text) : null;
         if (!res.ok) {
-          var err = new Error((data && data.message) || ("HTTP " + res.status));
+          var err = new Error((data && data.message) || "HTTP " + res.status);
           err.status = res.status;
           err.data = data;
           throw err;
@@ -137,11 +191,19 @@
     }
 
     return {
-      get: function(path, headers){ return http("GET", path, null, headers); },
-      del: function(path, headers){ return http("DELETE", path, null, headers); },
-      put: function(path, body, headers){ return http("PUT", path, body, headers); },
-      post: function(path, body, headers){ return http("POST", path, body, headers); },
-      baseUrl: base
+      get: function (path, headers) {
+        return http("GET", path, null, headers);
+      },
+      del: function (path, headers) {
+        return http("DELETE", path, null, headers);
+      },
+      put: function (path, body, headers) {
+        return http("PUT", path, body, headers);
+      },
+      post: function (path, body, headers) {
+        return http("POST", path, body, headers);
+      },
+      baseUrl: base,
     };
   }
 
@@ -157,28 +219,45 @@
     this._timeout = options.timeoutMs || 10000;
 
     this._kvPrefix = options.kvPrefix || "storage/kv"; // endpoints: /kv, /kv/bulk, etc.
-    this._healthPath = options.healthPath || "health";  // GET /health -> 200
+    this._healthPath = options.healthPath || "health"; // GET /health -> 200
 
-    this._http = makeHttp(this._baseUrl, this._getAuthToken, this._onAuthError, this._timeout);
+    this._http = makeHttp(
+      this._baseUrl,
+      this._getAuthToken,
+      this._onAuthError,
+      this._timeout
+    );
 
     this._etagCache = {}; // key -> etag
     this._outbox = createOutbox(options.outboxKey || "suka:cloud:outbox");
     this._online = true;
   }
 
-  CloudApiAdapter.prototype.setAuth = function(getAuthTokenFn) {
+  CloudApiAdapter.prototype.setAuth = function (getAuthTokenFn) {
     this._getAuthToken = getAuthTokenFn;
-    this._http = makeHttp(this._baseUrl, this._getAuthToken, this._onAuthError, this._timeout);
+    this._http = makeHttp(
+      this._baseUrl,
+      this._getAuthToken,
+      this._onAuthError,
+      this._timeout
+    );
   };
 
-  CloudApiAdapter.prototype.setBaseUrl = function(baseUrl) {
+  CloudApiAdapter.prototype.setBaseUrl = function (baseUrl) {
     this._baseUrl = baseUrl;
-    this._http = makeHttp(this._baseUrl, this._getAuthToken, this._onAuthError, this._timeout);
+    this._http = makeHttp(
+      this._baseUrl,
+      this._getAuthToken,
+      this._onAuthError,
+      this._timeout
+    );
   };
 
-  CloudApiAdapter.prototype.isOnline = function(){ return !!this._online; };
+  CloudApiAdapter.prototype.isOnline = function () {
+    return !!this._online;
+  };
 
-  CloudApiAdapter.prototype.init = async function(){
+  CloudApiAdapter.prototype.init = async function () {
     // health check (non-fatal)
     try {
       var res = await this._http.get(this._healthPath);
@@ -189,13 +268,15 @@
     this.ready = true;
 
     // Try flushing any pending outbox
-    try { await this.flushOutbox(); } catch (_e) {}
+    try {
+      await this.flushOutbox();
+    } catch (_e) {}
     return;
   };
 
   // ----------------------------- KV primitives ------------------------------
   // GET /storage/kv/:key
-  CloudApiAdapter.prototype.get = async function(key) {
+  CloudApiAdapter.prototype.get = async function (key) {
     if (!this.ready) return undefined;
     try {
       var res = await this._http.get(this._kvPrefix + "/" + u8(key));
@@ -212,7 +293,7 @@
   };
 
   // PUT /storage/kv  { key, value }  supports If-Match with known ETag
-  CloudApiAdapter.prototype.set = async function(key, value) {
+  CloudApiAdapter.prototype.set = async function (key, value) {
     if (!this.ready) return;
     var body = { key: key, value: value };
     var hdrs = {};
@@ -233,15 +314,17 @@
             scope: value.scope,
             userId: (value.meta && value.meta.createdBy) || undefined,
             version: value.meta && value.meta.version,
-            at: now()
+            at: now(),
           });
-          automation && automation.emit && automation.emit("nba.signal", {
-            kind: "plan.saved",
-            domain: value.domain,
-            planId: value.id,
-            userId: (value.meta && value.meta.createdBy) || undefined,
-            ts: now()
-          });
+          automation &&
+            automation.emit &&
+            automation.emit("nba.signal", {
+              kind: "plan.saved",
+              domain: value.domain,
+              planId: value.id,
+              userId: (value.meta && value.meta.createdBy) || undefined,
+              ts: now(),
+            });
         } catch (_e) {}
       }
 
@@ -266,7 +349,7 @@
   };
 
   // DELETE /storage/kv/:key
-  CloudApiAdapter.prototype.del = async function(key) {
+  CloudApiAdapter.prototype.del = async function (key) {
     if (!this.ready) return;
     var hdrs = {};
     var et = this._etagCache[key];
@@ -286,10 +369,12 @@
   };
 
   // GET /storage/kv?prefix=<prefix>  -> { keys: [...] }
-  CloudApiAdapter.prototype.keys = async function(prefix) {
+  CloudApiAdapter.prototype.keys = async function (prefix) {
     if (!this.ready) return [];
     try {
-      var res = await this._http.get(this._kvPrefix + "?prefix=" + u8(prefix || ""));
+      var res = await this._http.get(
+        this._kvPrefix + "?prefix=" + u8(prefix || "")
+      );
       var ks = (res && res.data && res.data.keys) || [];
       return ks;
     } catch (_e) {
@@ -299,35 +384,46 @@
   };
 
   // POST /storage/kv/bulk/get { keys } -> { items: [{ key, value, etag? }, ...] }
-  CloudApiAdapter.prototype.bulkGet = async function(keys) {
-    if (!this.ready) return keys.map(function(){ return undefined; });
+  CloudApiAdapter.prototype.bulkGet = async function (keys) {
+    if (!this.ready)
+      return keys.map(function () {
+        return undefined;
+      });
     try {
-      var res = await this._http.post(this._kvPrefix + "/bulk/get", { keys: keys || [] });
+      var res = await this._http.post(this._kvPrefix + "/bulk/get", {
+        keys: keys || [],
+      });
       var items = (res && res.data && res.data.items) || [];
       var byKey = {};
-      for (var i=0;i<items.length;i++){
+      for (var i = 0; i < items.length; i++) {
         var it = items[i];
         if (it && it.key) {
           byKey[it.key] = it.value;
           if (it.etag) this._etagCache[it.key] = it.etag;
         }
       }
-      return (keys || []).map(function(k){ return byKey[k]; });
+      return (keys || []).map(function (k) {
+        return byKey[k];
+      });
     } catch (_e) {
       this._online = false;
-      return keys.map(function(){ return undefined; });
+      return keys.map(function () {
+        return undefined;
+      });
     }
   };
 
   // POST /storage/kv/bulk/set { entries: [{ key, value }...] }
-  CloudApiAdapter.prototype.bulkSet = async function(entries) {
+  CloudApiAdapter.prototype.bulkSet = async function (entries) {
     if (!this.ready) return;
     try {
-      var res = await this._http.post(this._kvPrefix + "/bulk/set", { entries: entries || [] });
+      var res = await this._http.post(this._kvPrefix + "/bulk/set", {
+        entries: entries || [],
+      });
       // Optional: server returns etags { items: [{ key, etag }] }
       var items = res && res.data && res.data.items;
       if (items && items.length) {
-        for (var i=0;i<items.length;i++){
+        for (var i = 0; i < items.length; i++) {
           var it = items[i];
           if (it && it.key && it.etag) this._etagCache[it.key] = it.etag;
         }
@@ -336,17 +432,21 @@
     } catch (e) {
       // Enqueue all entries on failure
       this._online = false;
-      for (var j=0;j<(entries||[]).length;j++){
+      for (var j = 0; j < (entries || []).length; j++) {
         var ent = entries[j];
         this._outbox.push({ op: "set", key: ent.key, value: ent.value });
       }
-      eventBus.emit("sync.outbox.enqueued", { op: "bulkSet", count: (entries||[]).length, at: now() });
+      eventBus.emit("sync.outbox.enqueued", {
+        op: "bulkSet",
+        count: (entries || []).length,
+        at: now(),
+      });
       return;
     }
   };
 
   // ------------------------------ Outbox flush ------------------------------
-  CloudApiAdapter.prototype.flushOutbox = async function() {
+  CloudApiAdapter.prototype.flushOutbox = async function () {
     if (!this.ready) return { flushed: 0 };
     var jobs = this._outbox.peekAll();
     if (!jobs.length) return { flushed: 0 };
@@ -356,7 +456,7 @@
 
     // Drain & replay
     jobs = this._outbox.drain();
-    for (var i=0;i<jobs.length;i++){
+    for (var i = 0; i < jobs.length; i++) {
       var j = jobs[i];
       try {
         if (j.op === "set") {
@@ -375,7 +475,13 @@
     if (flushed > 0) {
       try {
         eventBus.emit("sync.flush.finished", { flushed: flushed, at: now() });
-        automation && automation.emit && automation.emit("nba.signal", { kind: "sync.flushed", flushed: flushed, ts: now() });
+        automation &&
+          automation.emit &&
+          automation.emit("nba.signal", {
+            kind: "sync.flushed",
+            flushed: flushed,
+            ts: now(),
+          });
       } catch (_e) {}
     }
     return { flushed: flushed };
@@ -389,7 +495,7 @@
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       CloudApiAdapter: CloudApiAdapter,
-      createCloudApiAdapter: createCloudApiAdapter
+      createCloudApiAdapter: createCloudApiAdapter,
     };
   } else {
     // @ts-ignore

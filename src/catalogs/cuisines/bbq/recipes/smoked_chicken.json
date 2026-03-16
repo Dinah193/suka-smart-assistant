@@ -1,0 +1,325 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.smoked_chicken",
+    "type": "recipe",
+    "name": "Smoked Chicken (Juicy, Crispy-Skinned BBQ Style)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Whole smoked chicken with a light brine option and skin-crisping technique.",
+        "Written for SSA planners/adapters with clear doneness targets and timing cues."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "main",
+    "mealArchetypes": ["dinner", "meal_prep"],
+    "servingStyles": ["family_style", "bbq_plate"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "method.smoke",
+      "protein.chicken",
+      "weekend_cook",
+      "crowd_friendly",
+      "meal_prep"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "notes": "One 4.5–5.5 lb chicken serves ~4–6 depending on sides. For bigger crowds, plan 1 chicken per 4 people."
+  },
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 150,
+    "totalMins": 185
+  },
+  "difficulty": "beginner",
+  "equipment": {
+    "minimum": [
+      "equipment.smoker",
+      "equipment.knife",
+      "equipment.tongs",
+      "equipment.sheet_pan"
+    ],
+    "recommended": [
+      "equipment.probe_thermometer",
+      "equipment.instant_read_thermometer",
+      "equipment.kitchen_shears",
+      "equipment.wire_rack",
+      "equipment.spray_bottle"
+    ],
+    "optional": [
+      "equipment.small_saucepan",
+      "equipment.cooling_rack",
+      "equipment.cast_iron_skillet"
+    ]
+  },
+  "dietFlags": ["gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredients.whole_chicken",
+      "label": "Whole chicken",
+      "qty": 1,
+      "unit": "each",
+      "notes": "4.5–5.5 lb ideal. Remove giblets if included.",
+      "optional": false
+    },
+
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt",
+      "qty": 1.5,
+      "unit": "tbsp",
+      "notes": "Main seasoning. If using table salt, reduce.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "qty": 1.5,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Paprika (sweet)",
+      "qty": 2,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.garlic_powder",
+      "label": "Garlic powder",
+      "qty": 1.5,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.onion_powder",
+      "label": "Onion powder",
+      "qty": 1.5,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.brown_sugar",
+      "label": "Brown sugar (optional)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Optional touch of sweetness for BBQ profile; omit if you prefer savory or cook hotter.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.cayenne",
+      "label": "Cayenne (optional)",
+      "qty": 0.25,
+      "unit": "tsp",
+      "notes": "Optional heat. Increase gradually.",
+      "optional": true
+    },
+
+    {
+      "id": "ingredients.baking_powder",
+      "label": "Baking powder (for crispier skin, optional but recommended)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Alkaline lift helps crisp skin; use baking powder (NOT baking soda).",
+      "optional": true
+    },
+
+    {
+      "id": "ingredients.neutral_oil",
+      "label": "Neutral oil (binder)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Helps rub adhere and improves browning; can substitute melted butter.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.butter",
+      "label": "Butter (optional alternative to oil)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Melted; adds richness.",
+      "optional": true
+    },
+
+    {
+      "id": "ingredients.wood_smoke",
+      "label": "Smoking wood (hickory/pecan/apple/cherry)",
+      "qty": 2,
+      "unit": "cups",
+      "notes": "Amount depends on smoker type. Fruit woods are great for poultry.",
+      "optional": false
+    },
+
+    {
+      "id": "ingredients.apple_juice",
+      "label": "Apple juice (spritz, optional)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "Optional spritz for color and moisture. Can use water.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.water",
+      "label": "Water (spritz, optional)",
+      "qty": 0.5,
+      "unit": "cup",
+      "optional": true
+    },
+
+    {
+      "id": "ingredients.bbq_sauce",
+      "label": "BBQ sauce (optional glaze)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "Use in last 10–15 minutes if glazing; avoid early to prevent burning.",
+      "optional": true
+    },
+
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon wedges (optional, serving)",
+      "qty": 1,
+      "unit": "each",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_dry",
+      "title": "Prep and dry the chicken",
+      "body": "Remove giblets. Pat chicken very dry (inside and out). For best skin, air-dry uncovered on a rack in the fridge 2–12 hours. If short on time, dry thoroughly with paper towels and proceed.",
+      "timers": [
+        { "label": "Quick prep (minimum)", "mins": 10 },
+        { "label": "Optional air-dry (recommended)", "mins": 240 }
+      ]
+    },
+    {
+      "id": "step.spatchcock_optional",
+      "title": "Optional: spatchcock for faster, more even cooking",
+      "body": "For best results, spatchcock: use kitchen shears to remove backbone, flip, and press breastbone flat. This increases surface area, speeds cooking, and improves skin crispness. If leaving whole, tuck wing tips under and tie legs loosely.",
+      "timers": [{ "label": "Spatchcock (optional)", "mins": 8 }]
+    },
+    {
+      "id": "step.mix_rub",
+      "title": "Mix BBQ poultry rub",
+      "body": "Combine kosher salt, black pepper, paprika, garlic powder, onion powder, optional brown sugar/cayenne, and optional baking powder (for crisp skin). Mix well.",
+      "timers": [{ "label": "Rub mix", "mins": 3 }]
+    },
+    {
+      "id": "step.season",
+      "title": "Season the chicken",
+      "body": "Lightly coat chicken with neutral oil (or melted butter). Apply rub evenly over all surfaces; for extra flavor, season under the skin over the breast/thighs if you can separate it without tearing. Let rest 15–20 minutes while smoker preheats.",
+      "timers": [{ "label": "Season + short rest", "mins": 20 }]
+    },
+    {
+      "id": "step.preheat_smoker",
+      "title": "Preheat smoker for poultry",
+      "body": "Preheat smoker to 275–325°F (135–163°C). Poultry benefits from higher heat to render fat and crisp skin. Add wood and aim for clean smoke (thin blue).",
+      "timers": [{ "label": "Preheat smoker", "mins": 15 }]
+    },
+    {
+      "id": "step.smoke_cook",
+      "title": "Smoke until safely cooked and juicy",
+      "body": "Place chicken on smoker. Cook at 275–325°F until breast reaches 160–165°F and thighs reach 175–185°F. Typical total time: 1.5–2.5 hours depending on size and whether spatchcocked. Optional: spritz lightly once or twice after 45 minutes if surface looks dry.",
+      "timers": [
+        { "label": "Smoke cook (typical)", "mins": 120 },
+        { "label": "Optional spritz check", "mins": 45 }
+      ]
+    },
+    {
+      "id": "step.glaze_optional",
+      "title": "Optional: BBQ sauce glaze",
+      "body": "If glazing, brush a thin layer of BBQ sauce during the last 10–15 minutes of cooking. Keep heat at least 300°F to set the glaze without making skin rubbery.",
+      "timers": [{ "label": "Glaze set", "mins": 12 }]
+    },
+    {
+      "id": "step.rest_carve",
+      "title": "Rest, then carve",
+      "body": "Rest chicken 10–15 minutes to redistribute juices. Carve into quarters or slices. Serve as a BBQ plate or pull meat for sandwiches/tacos/salads.",
+      "timers": [{ "label": "Rest", "mins": 12 }]
+    },
+    {
+      "id": "step.storage_reheat",
+      "title": "Storage and reheating",
+      "body": "Cool within 2 hours. Refrigerate up to 4 days or freeze up to 3 months. Reheat gently covered in a 300°F oven with a splash of broth/water; for crisp skin, uncover at the end or finish under broiler briefly.",
+      "timers": []
+    }
+  ],
+  "pairings": {
+    "sides": [
+      { "id": "dishes.bbq.cole_slaw", "label": "Cole Slaw" },
+      { "id": "dishes.bbq.mac_and_cheese", "label": "Mac and Cheese" },
+      { "id": "dishes.bbq.baked_beans", "label": "Baked Beans" },
+      { "id": "dishes.bbq.potato_salad", "label": "Potato Salad" },
+      { "id": "dishes.bbq.cornbread", "label": "Cornbread" }
+    ],
+    "sauces": [
+      {
+        "id": "dishes.bbq.tomato_based_bbq_sauce",
+        "label": "Tomato-Based BBQ Sauce"
+      },
+      {
+        "id": "dishes.bbq.white_sauce_alabama",
+        "label": "Alabama White Sauce (optional)"
+      }
+    ]
+  },
+  "planner": {
+    "batchable": true,
+    "leftovers": {
+      "goodFor": [
+        "bbq_chicken_sandwiches",
+        "chicken_tacos",
+        "chicken_salad",
+        "bbq_loaded_potatoes",
+        "bbq_pizza"
+      ],
+      "notes": "Cook 2 chickens for meal prep. Freeze pulled meat in 1–2 cup portions."
+    },
+    "serveModes": [
+      {
+        "id": "serveMode.bbq_plate",
+        "label": "BBQ Plate",
+        "notes": "Serve with beans + starch + veg."
+      },
+      {
+        "id": "serveMode.pulled",
+        "label": "Pulled/Chopped Chicken",
+        "notes": "Mix with a little sauce and serve on buns; great for batch meals."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "equipment",
+      "notes": [
+        "No smoker: roast at 425°F until breast 160–165°F and thighs 175–185°F; optionally add smoked paprika for smoke-like note.",
+        "Pellet grills run clean: use a stronger wood (hickory) if you want deeper smoke flavor."
+      ]
+    },
+    {
+      "kind": "doneness",
+      "notes": [
+        "Target breast 160–165°F and thigh 175–185°F for best texture. Let carryover finish during rest.",
+        "If skin is not crisp, raise cooker temp to 325°F for the last 15 minutes or finish briefly under broiler."
+      ]
+    },
+    {
+      "kind": "flavor",
+      "notes": [
+        "Brine option: 2 quarts water + 1/4 cup kosher salt + 2 tbsp sugar for 2–6 hours, then dry well before seasoning.",
+        "For spicier BBQ, increase cayenne and add chipotle powder (optional)."
+      ]
+    }
+  ]
+}

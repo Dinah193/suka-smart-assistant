@@ -13,7 +13,8 @@ let eventBus = null;
 try {
   // eslint-disable-next-line global-require
   eventBus =
-    require("@/services/eventBus").default ?? require("@/services/eventBus");
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch {}
 
 let Config = { get: (_k, fb) => fb };

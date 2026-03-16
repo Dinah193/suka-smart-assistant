@@ -51,22 +51,27 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 
 const SOURCE = "hooks.useNowSession";
 const isoNow = () => new Date().toISOString();
 const emit = (type, data = {}) => {
   const payload = { type, ts: isoNow(), source: SOURCE, data };
-  try { eventBus?.emit?.(payload); } catch {}
+  try {
+    eventBus?.emit?.(payload);
+  } catch {}
   return payload;
 };
 
 // --------------------------- Soft Imports / Stubs ---------------------------
 
 function softRequire(path) {
-  try { return require(/* @vite-ignore */ path); }
-  catch { return null; }
+  try {
+    return require(/* @vite-ignore */ path);
+  } catch {
+    return null;
+  }
 }
 
 // Sessions access
@@ -86,7 +91,7 @@ const guardPaths = {
 const guards = {};
 for (const [k, p] of Object.entries(guardPaths)) {
   const m = softRequire(p);
-  guards[k] = (m?.default || m?.check || (() => Promise.resolve({ pass: true })));
+  guards[k] = m?.default || m?.check || (() => Promise.resolve({ pass: true }));
 }
 
 // Fallback Dexie table GET if SessionsRepo is missing
@@ -96,12 +101,18 @@ async function fallbackFetchSessions(domain, includePaused) {
     if (!db?.sessions) return [];
     // naive fetch: newest first
     const rows = await db.sessions
-      .where("domain").equals(domain)
+      .where("domain")
+      .equals(domain)
       .reverse()
       .sortBy("updatedAt");
-    return (rows || []).filter(s => {
-      if (!includePaused) return (s.status === "pending" || s.status === "running");
-      return (s.status === "pending" || s.status === "running" || s.status === "paused");
+    return (rows || []).filter((s) => {
+      if (!includePaused)
+        return s.status === "pending" || s.status === "running";
+      return (
+        s.status === "pending" ||
+        s.status === "running" ||
+        s.status === "paused"
+      );
     });
   } catch {
     return [];
@@ -111,7 +122,11 @@ async function fallbackFetchSessions(domain, includePaused) {
 async function fetchCandidates(domain, includePaused) {
   if (SessionsRepo?.findByDomain) {
     // Repo contract we assume in SSA: returns newest-first
-    const all = await SessionsRepo.findByDomain(domain, { statuses: includePaused ? ["pending","running","paused"] : ["pending","running"] });
+    const all = await SessionsRepo.findByDomain(domain, {
+      statuses: includePaused
+        ? ["pending", "running", "paused"]
+        : ["pending", "running"],
+    });
     return Array.isArray(all) ? all : [];
   }
   // Fallback
@@ -130,26 +145,35 @@ async function evaluateGuards(session) {
   }
 
   // Respect explicit blockers on the step if present, else evaluate all
-  const requested = Array.isArray(step.blockers) && step.blockers.length
-    ? step.blockers
-    : ["sabbath","quietHours","weather","inventory","equipment"];
+  const requested =
+    Array.isArray(step.blockers) && step.blockers.length
+      ? step.blockers
+      : ["sabbath", "quietHours", "weather", "inventory", "equipment"];
 
   // Battery is optional global guard that we tack on (won't block unless threshold logic says so)
   if (!requested.includes("battery")) requested.push("battery");
 
-  const checks = await Promise.all(requested.map(async (name) => {
-    const fn = guards[name] || (() => Promise.resolve({ pass: true }));
-    try {
-      const res = await fn({ session, step });
-      return { name, pass: !!res?.pass, reason: res?.reason || (res?.pass ? undefined : "blocked") };
-    } catch (e) {
-      // Guard failed → do not block by crash; report reason for visibility
-      return { name, pass: true, reason: `guard-error:${name}` };
-    }
-  }));
+  const checks = await Promise.all(
+    requested.map(async (name) => {
+      const fn = guards[name] || (() => Promise.resolve({ pass: true }));
+      try {
+        const res = await fn({ session, step });
+        return {
+          name,
+          pass: !!res?.pass,
+          reason: res?.reason || (res?.pass ? undefined : "blocked"),
+        };
+      } catch (e) {
+        // Guard failed → do not block by crash; report reason for visibility
+        return { name, pass: true, reason: `guard-error:${name}` };
+      }
+    })
+  );
 
-  const blocked = checks.filter(c => !c.pass);
-  const reasons = checks.map(c => (c.reason ? `${c.name}:${c.reason}` : null)).filter(Boolean);
+  const blocked = checks.filter((c) => !c.pass);
+  const reasons = checks
+    .map((c) => (c.reason ? `${c.name}:${c.reason}` : null))
+    .filter(Boolean);
   return { ok: blocked.length === 0, reasons };
 }
 
@@ -185,7 +209,7 @@ export default function useNowSession(options = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [candidates, setCandidates] = useState([]);
-  const [runnable, setRunnable] = useState([]);  // subset after guards
+  const [runnable, setRunnable] = useState([]); // subset after guards
   const abortRef = useRef({ aborted: false });
 
   const refresh = useCallback(async () => {
@@ -200,15 +224,17 @@ export default function useNowSession(options = {}) {
       if (abortRef.current.aborted) return;
 
       // Evaluate guards concurrently
-      const guardResults = await Promise.all(raw.map(async (s) => {
-        const { ok, reasons } = await evaluateGuards(s);
-        return { session: s, ok, reasons };
-      }));
+      const guardResults = await Promise.all(
+        raw.map(async (s) => {
+          const { ok, reasons } = await evaluateGuards(s);
+          return { session: s, ok, reasons };
+        })
+      );
       if (abortRef.current.aborted) return;
 
       const runnables = guardResults
-        .filter(r => r.ok)
-        .map(r => r.session)
+        .filter((r) => r.ok)
+        .map((r) => r.session)
         .sort((a, b) => scoreSession(b) - scoreSession(a));
 
       setCandidates(raw);
@@ -241,7 +267,9 @@ export default function useNowSession(options = {}) {
   useEffect(() => {
     if (!domain) return;
     refresh();
-    return () => { abortRef.current.aborted = true; };
+    return () => {
+      abortRef.current.aborted = true;
+    };
   }, [domain, refresh]);
 
   // Public checker for a specific session object
@@ -260,45 +288,53 @@ export default function useNowSession(options = {}) {
   }, []);
 
   // Run the best candidate, or emit selector request if many.
-  const run = useCallback(async (session) => {
-    // If explicit session passed, prefer it (after checking).
-    if (session) {
-      const { ok, reasons } = await check(session);
-      if (!ok) {
-        emit("domain.now.blocked", { domain, reasonsBySession: { [session.id]: reasons || [] } });
-        return false;
+  const run = useCallback(
+    async (session) => {
+      // If explicit session passed, prefer it (after checking).
+      if (session) {
+        const { ok, reasons } = await check(session);
+        if (!ok) {
+          emit("domain.now.blocked", {
+            domain,
+            reasonsBySession: { [session.id]: reasons || [] },
+          });
+          return false;
+        }
+        openRunner(session.id);
+        return true;
       }
-      openRunner(session.id);
-      return true;
-    }
 
-    // No explicit session → pick from runnable subset
-    if (!runnable.length) {
-      // Attempt to refresh once if we had nothing
-      await refresh();
-      if (!runnable.length) return false;
-    }
+      // No explicit session → pick from runnable subset
+      if (!runnable.length) {
+        // Attempt to refresh once if we had nothing
+        await refresh();
+        if (!runnable.length) return false;
+      }
 
-    if (runnable.length === 1) {
-      openRunner(runnable[0].id);
-      return true;
-    }
+      if (runnable.length === 1) {
+        openRunner(runnable[0].id);
+        return true;
+      }
 
-    // Multiple: emit selector request for caller/global UI
-    const items = runnable.slice(0, 10).map(s => ({
-      id: s.id,
-      title: s.title || "(untitled session)",
-      subtitle: `${s.domain} • step ${Number(s?.progress?.currentStepIndex || 0) + 1}/${Array.isArray(s?.steps) ? s.steps.length : 0}`,
-    }));
+      // Multiple: emit selector request for caller/global UI
+      const items = runnable.slice(0, 10).map((s) => ({
+        id: s.id,
+        title: s.title || "(untitled session)",
+        subtitle: `${s.domain} • step ${
+          Number(s?.progress?.currentStepIndex || 0) + 1
+        }/${Array.isArray(s?.steps) ? s.steps.length : 0}`,
+      }));
 
-    emit("ui.selector.request", {
-      title: selectorTitle || "Choose a session to run now",
-      items,
-      meta: { domain, purpose: "run-now" },
-    });
+      emit("ui.selector.request", {
+        title: selectorTitle || "Choose a session to run now",
+        items,
+        meta: { domain, purpose: "run-now" },
+      });
 
-    return false;
-  }, [domain, runnable, openRunner, refresh, check]);
+      return false;
+    },
+    [domain, runnable, openRunner, refresh, check]
+  );
 
   const firstRunnable = useMemo(() => runnable[0] || null, [runnable]);
 

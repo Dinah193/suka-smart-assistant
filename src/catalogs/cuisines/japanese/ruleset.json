@@ -1,0 +1,185 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-22T23:30:00Z",
+  "kind": "cuisine_ruleset",
+
+  "meta": {
+    "id": "cuisines.japanese.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Japanese Cuisine Ruleset",
+    "cuisineId": "cuisines.japanese",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Deterministic cuisine rules for Japanese dishes",
+        "Used by planners, recipe adapters, and scoring engines"
+      ]
+    }
+  },
+
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.japanese",
+    "locales": ["en-US", "ja-JP"]
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+
+    "ingredientAliases": {
+      "soy_sauce": ["shoyu", "soya sauce"],
+      "mirin": ["sweet rice wine"],
+      "miso": ["fermented soybean paste"],
+      "dashi": ["fish stock", "kombu dashi", "katsuobushi stock"],
+      "rice": ["steamed rice", "japanese rice"],
+      "panko": ["japanese breadcrumbs"]
+    },
+
+    "dishAliases": {
+      "ramen": ["chuka soba"],
+      "tempura": ["tenpura"],
+      "okonomiyaki": ["savory pancake"],
+      "onigiri": ["rice ball"],
+      "yakisoba": ["fried noodles"]
+    },
+
+    "equipmentAliases": {
+      "wok": ["chuka pan"],
+      "rice_cooker": ["electric rice cooker"],
+      "bamboo_steamer": ["steamer basket"]
+    },
+
+    "methodAliases": {
+      "simmer": ["nimono"],
+      "grill": ["yakimono"],
+      "deep_fry": ["agemono"]
+    }
+  },
+
+  "globals": {
+    "flavorProfile": "umami_forward",
+    "fatBias": "low_to_moderate",
+    "typicalStaple": "rice",
+    "defaultHeatLevel": 1
+  },
+
+  "rules": [
+    {
+      "id": "japanese.umami.tagging",
+      "enabled": true,
+      "priority": 10,
+      "title": "Tag umami-forward dishes",
+      "description": "Adds umami-forward tag when dashi, miso, or soy sauce are present.",
+      "tags": ["flavor", "umami"],
+      "source": "ssa.catalog.japanese",
+      "stopOnMatch": false,
+
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredientsCore",
+        "values": ["dashi", "miso", "soy_sauce"]
+      },
+
+      "then": {
+        "actions": [
+          {
+            "type": "addTag",
+            "value": "flavor.umami_forward"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "japanese.weeknight.scoring",
+      "enabled": true,
+      "priority": 20,
+      "title": "Boost weeknight score for quick Japanese dishes",
+      "description": "Increases planner score for dishes under 30 minutes.",
+      "tags": ["planner", "weeknight"],
+      "source": "ssa.catalog.japanese",
+      "stopOnMatch": false,
+
+      "when": {
+        "type": "lte",
+        "path": "$.time.totalMins",
+        "value": 30
+      },
+
+      "then": {
+        "actions": [
+          {
+            "type": "scoreAdjust",
+            "scoreDelta": 1.5
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "japanese.deep_fry.signal",
+      "enabled": true,
+      "priority": 30,
+      "title": "Flag deep-fried techniques",
+      "description": "Marks dishes using deep frying as less freezer-friendly.",
+      "tags": ["technique", "frying"],
+      "source": "ssa.catalog.japanese",
+      "stopOnMatch": false,
+
+      "when": {
+        "type": "hasTag",
+        "value": "technique.deep_fry"
+      },
+
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.signals.freezerFriendly",
+            "value": false
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "japanese.rice.staple.emit",
+      "enabled": true,
+      "priority": 40,
+      "title": "Emit rice staple usage event",
+      "description": "Emits an SSA event when rice is a core component.",
+      "tags": ["event", "staple"],
+      "source": "ssa.catalog.japanese",
+      "stopOnMatch": false,
+
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredientsCore",
+        "values": ["rice"]
+      },
+
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisine.staple.used",
+              "payload": {
+                "cuisine": "japanese",
+                "staple": "rice"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

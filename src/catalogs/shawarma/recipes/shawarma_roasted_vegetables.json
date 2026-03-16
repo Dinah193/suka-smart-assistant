@@ -1,0 +1,430 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.recipes.shawarma_roasted_vegetables",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Shawarma Roasted Vegetables",
+    "subtitle": "Sheet-pan roasted veg with shawarma spice, lemon, and garlic for bowls & platters",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Designed as a shawarma platter/bowl side: caramelized edges, warm spice, bright finish.",
+        "Works year-round; swap vegetables by season without breaking the flavor profile."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "vegetables", "side", "sheet_pan"],
+    "category": "side",
+    "mealArchetypes": [
+      "meal_archetype.roasted_veg_side",
+      "meal_archetype.platter_sides",
+      "meal_archetype.bowl_components"
+    ],
+    "servingStyles": ["family_style", "plates", "bowls", "street_food"],
+    "plannerTags": [
+      "shawarma",
+      "roasted_vegetables",
+      "sheet_pan",
+      "weeknight_friendly",
+      "batch_friendly",
+      "leftovers_friendly",
+      "meal_prep"
+    ]
+  },
+
+  "summary": "A colorful, caramelized sheet-pan mix of vegetables tossed in shawarma spice, garlic, and olive oil, finished with lemon and herbs. Built for shawarma bowls and platters alongside rice, sauces, and pickles.",
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "Makes about 6–7 cups roasted vegetables."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 25,
+    "totalMins": 40
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": "conditional"
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.sheet_pan",
+      "equipment.mixing_bowl",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "recommended": [
+      "equipment.parchment_paper",
+      "equipment.microplane",
+      "equipment.tongs"
+    ],
+    "optional": [
+      {
+        "id": "equipment.wire_rack",
+        "label": "Wire rack (on sheet pan)",
+        "notes": "Optional; promotes airflow for extra browning, especially if vegetables are wet."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.vegan",
+    "diet.vegetarian",
+    "diet.dairy_free",
+    "diet.gluten_free"
+  ],
+  "allergens": {
+    "notes": [
+      "Nut-free unless you add tahini/seed toppings at serving.",
+      "If serving with sauces, allergen profile depends on sauce (e.g., sesame in tahini)."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.cauliflower",
+      "label": "Cauliflower florets",
+      "role": "veg",
+      "amount": { "value": 4, "unit": "cup" },
+      "notes": "About 1 medium head, cut into bite-size florets."
+    },
+    {
+      "id": "ingredient.zucchini",
+      "label": "Zucchini, thick half-moons",
+      "role": "veg",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Cut thicker than usual so it doesn’t get mushy."
+    },
+    {
+      "id": "ingredient.bell_pepper",
+      "label": "Bell peppers, sliced",
+      "role": "veg",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Any color; red/yellow adds sweetness."
+    },
+    {
+      "id": "ingredient.red_onion",
+      "label": "Red onion, wedges",
+      "role": "aromatic",
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.carrot",
+      "label": "Carrots, diagonal slices",
+      "role": "veg",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "notes": "Cut similar thickness to ensure even roasting."
+    },
+    {
+      "id": "ingredient.chickpeas_cooked",
+      "label": "Chickpeas, cooked (drained and dried)",
+      "role": "legume_optional",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Adds protein and crunch; pat dry for best browning."
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.shawarma_spice_blend",
+      "label": "Shawarma spice blend",
+      "role": "spice",
+      "amount": { "value": 2.5, "unit": "tsp" },
+      "notes": "Use your SSA catalog blend (preferably salt-free)."
+    },
+    {
+      "id": "ingredient.turmeric_ground",
+      "label": "Ground turmeric",
+      "role": "color_optional",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Boosts golden color and warmth."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" },
+      "notes": "Adjust based on whether shawarma spice blend contains salt."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.lemon",
+      "label": "Lemon juice",
+      "role": "acid_finish",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.lemon_zest",
+      "label": "Lemon zest",
+      "role": "aroma_finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Parsley, chopped",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": "Use parsley, cilantro, or a mix."
+    },
+    {
+      "id": "ingredient.sumac",
+      "label": "Sumac (optional finishing sprinkle)",
+      "role": "finish_optional",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.red_pepper_flakes",
+      "label": "Red pepper flakes (optional)",
+      "role": "heat_optional",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_preheat",
+      "title": "Preheat oven and prep pan",
+      "instructions": [
+        "Heat oven to 450°F (232°C).",
+        "Line a sheet pan with parchment (optional) for easier cleanup.",
+        "If your oven runs hot, use 425°F (218°C) and roast a few minutes longer."
+      ],
+      "timers": [{ "label": "Preheat oven", "minutes": 8 }],
+      "temperature": { "type": "oven", "value": 450, "unit": "F" }
+    },
+    {
+      "id": "step.002_cut_veg",
+      "title": "Cut vegetables for even roasting",
+      "instructions": [
+        "Cut cauliflower into bite-size florets.",
+        "Slice zucchini into thick half-moons.",
+        "Slice peppers into strips; cut red onion into wedges.",
+        "Slice carrots on a diagonal (similar thickness to cauliflower stems).",
+        "Optional: drain chickpeas and pat dry very well."
+      ],
+      "timers": [{ "label": "Prep vegetables", "minutes": 10 }],
+      "checks": ["Vegetables cut to similar thickness for even roasting"]
+    },
+    {
+      "id": "step.003_season",
+      "title": "Toss with shawarma seasoning",
+      "instructions": [
+        "In a large bowl, combine vegetables (and chickpeas if using).",
+        "Add olive oil, garlic, shawarma spice blend, optional turmeric, salt, pepper, and optional red pepper flakes.",
+        "Toss until everything is evenly coated."
+      ],
+      "timers": [{ "label": "Toss + season", "minutes": 3 }],
+      "checks": ["Even coating; no dry spice pockets"]
+    },
+    {
+      "id": "step.004_roast",
+      "title": "Roast until browned and tender-crisp",
+      "instructions": [
+        "Spread vegetables in a single layer on the sheet pan.",
+        "Roast 18–22 minutes, stirring/flipping once halfway through.",
+        "For extra char, broil 1–2 minutes at the end (watch closely)."
+      ],
+      "timers": [
+        { "label": "Roast (first side)", "minutes": 10 },
+        { "label": "Roast (finish)", "minutes": 10 }
+      ],
+      "checks": ["Caramelized edges; fork-tender cauliflower stems"]
+    },
+    {
+      "id": "step.005_finish",
+      "title": "Finish with lemon and herbs",
+      "instructions": [
+        "Remove pan from oven.",
+        "Immediately squeeze lemon juice over the hot vegetables.",
+        "Add lemon zest (optional) and toss gently.",
+        "Top with parsley/cilantro and a sprinkle of sumac (optional)."
+      ],
+      "checks": [
+        "Bright finish; seasoning balanced—add a pinch of salt if needed"
+      ]
+    },
+    {
+      "id": "step.006_serve",
+      "title": "Serve as a platter or bowl component",
+      "instructions": [
+        "Serve with shawarma meats, shawarma rice, pickles, and sauces like toum or tahini.",
+        "Great in bowls with cucumbers, tomatoes, chopped lettuce, and a drizzle of sauce."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "bestWith": [
+      "shawarma.recipes.shawarma_rice",
+      "shawarma.recipes.chicken_shawarma",
+      "shawarma.recipes.beef_shawarma",
+      "shawarma.recipes.lamb_shawarma",
+      "shawarma.recipes.mixed_shawarma_platter"
+    ],
+    "sauces": [
+      "component.toum",
+      "component.tahini_sauce",
+      "component.amba_optional"
+    ],
+    "sides": [
+      "side.pickled_turnips",
+      "side.pickled_cucumbers",
+      "side.cucumber_tomato_salad"
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "4 days",
+      "notes": "Cool fully and store airtight. Reheat on a hot sheet pan or skillet to re-crisp edges."
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": "Freeze flat for quick reheats. Texture softens slightly—best for bowls, wraps, or mixing into rice."
+    },
+    "reheat": {
+      "oven": "425°F (218°C) for 8–12 minutes on a sheet pan",
+      "skillet": "Medium-high with a little oil, 5–7 minutes",
+      "microwave": "Fast but softer; finish in a hot pan if you want crisp edges"
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Wash + chop vegetables", "mins": 10 },
+      { "task": "Toss with oil + spices", "mins": 3 },
+      { "task": "Roast", "mins": 22 }
+    ],
+    "batchNotes": [
+      "Double batch on two sheet pans (rotate halfway).",
+      "Keep lemon/herbs separate for meal-prep; add after reheating for brighter flavor.",
+      "If serving with salty meats/sauces, start with 1 tsp salt and adjust after roasting."
+    ],
+    "makeAhead": {
+      "best": "Roast up to 3 days ahead; re-crisp in oven before serving.",
+      "dayOf": "Add lemon + herbs right before serving."
+    }
+  },
+
+  "methods": [
+    "technique.roast",
+    "technique.sheet_pan",
+    "technique.toss_seasoning",
+    "technique.finish_with_acid"
+  ],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "shawarma veggies",
+        "middle eastern roasted vegetables",
+        "sheet pan shawarma vegetables",
+        "shawarma bowl vegetables"
+      ],
+      "keywords": [
+        "shawarma",
+        "roasted",
+        "sheet pan",
+        "cauliflower",
+        "zucchini",
+        "bell pepper",
+        "red onion",
+        "lemon",
+        "sumac"
+      ]
+    },
+    "normalization": {
+      "notes": [
+        "Vegetable swaps: eggplant, mushrooms, sweet potato, broccoli, green beans.",
+        "If using watery vegetables (mushrooms, zucchini), roast at 450°F and avoid crowding to prevent steaming."
+      ]
+    }
+  },
+
+  "notes": [
+    "Key to browning: hot oven + single layer + dry vegetables (especially chickpeas).",
+    "If your sheet pan is crowded, use two pans—crowding steams the vegetables.",
+    "Finish is everything: lemon + herbs make the shawarma spice pop."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.winter_root_veg",
+      "label": "Winter root vegetable version",
+      "when": { "season": ["winter"] },
+      "adapt": {
+        "notes": [
+          "Use carrots + sweet potato + red onion + cauliflower.",
+          "Roast 25–35 minutes, stirring once, until sweet potato is tender and browned."
+        ]
+      }
+    },
+    {
+      "id": "variation.extra_crispy_chickpeas",
+      "label": "Extra crispy chickpeas",
+      "when": { "ingredients": ["ingredient.chickpeas_cooked"] },
+      "adapt": {
+        "notes": [
+          "Pat chickpeas very dry; add 1 additional tbsp olive oil and 1 tsp cornstarch (optional).",
+          "Roast chickpeas on a separate pan if you want maximum crisp."
+        ]
+      }
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicy harissa finish",
+      "when": { "preferences": ["more_heat"] },
+      "adapt": {
+        "notes": [
+          "Toss roasted vegetables with 1–2 tsp harissa paste thinned with a little lemon juice and olive oil.",
+          "Or drizzle with chili oil before serving."
+        ]
+      }
+    }
+  ]
+}

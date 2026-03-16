@@ -1,0 +1,198 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.smothered_turkey_wings.v1",
+    "name": "Soul Food Smothered Turkey Wings",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Oven-braised turkey wings smothered in onion gravy. Includes optional sear for deeper flavor."
+    },
+    "tags": [
+      "soul_food",
+      "smothered",
+      "turkey_wings",
+      "gravy",
+      "braise",
+      "oven_braised",
+      "comfort_food"
+    ],
+    "allergens": ["wheat"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": true
+    },
+    "summary": "Tender oven-braised turkey wings smothered in a rich onion gravy—classic soul food comfort for Sunday dinner.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 6,
+      "unit": "servings"
+    },
+    "yield": "About 6 servings (4–5 wings)",
+    "timing": {
+      "prepMinutes": 20,
+      "inactiveMinutes": 0,
+      "cookMinutes": 120,
+      "totalMinutes": 140
+    },
+    "equipment": [
+      {
+        "id": "roasting_pan",
+        "label": "Roasting pan or deep baking dish with lid/foil",
+        "required": true
+      },
+      {
+        "id": "skillet",
+        "label": "Skillet (optional for searing/gravy start)",
+        "required": false
+      },
+      { "id": "cutting_board", "label": "Cutting board", "required": true },
+      { "id": "chef_knife", "label": "Chef's knife", "required": true },
+      { "id": "tongs", "label": "Tongs", "required": false },
+      { "id": "whisk", "label": "Whisk", "required": false }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Turkey is safe at 165°F internal; for wings, braise until very tender (often 190°F+).",
+        "Keep covered while braising to prevent drying."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "turkey_wings",
+      "label": "Turkey wings (whole or split at joints)",
+      "amount": { "value": 4.5, "unit": "lb" }
+    },
+
+    {
+      "id": "yellow_onion",
+      "label": "Yellow onions, sliced",
+      "amount": { "value": 2, "unit": "large" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic cloves, minced",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour (for gravy thickening)",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+
+    {
+      "id": "chicken_broth",
+      "label": "Chicken broth (or turkey broth)",
+      "amount": { "value": 3.5, "unit": "cup" }
+    },
+
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "dried_thyme",
+      "label": "Dried thyme (or poultry seasoning)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "cayenne_pepper",
+      "label": "Cayenne pepper (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "worces_tershire",
+      "label": "Worcestershire sauce (optional)",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf (optional)",
+      "amount": { "value": 1, "unit": "leaf" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven",
+      "body": "Preheat oven to 350°F. Lightly oil a roasting pan or deep baking dish."
+    },
+    {
+      "id": "step_02_season_wings",
+      "title": "Season turkey wings",
+      "body": "Pat wings dry. Season all over with salt, black pepper, paprika, garlic powder, onion powder, thyme (or poultry seasoning), and cayenne (optional)."
+    },
+    {
+      "id": "step_03_optional_sear",
+      "title": "Optional: sear for deeper flavor",
+      "body": "Heat 1 tbsp oil in a skillet over medium-high. Sear wings 2–3 minutes per side until browned (work in batches). Transfer wings to the roasting pan. This step is optional but adds flavor."
+    },
+    {
+      "id": "step_04_build_onion_bed",
+      "title": "Add onions and garlic",
+      "body": "Scatter sliced onions and minced garlic in the roasting pan. Nestle wings on top (or mix onions around wings)."
+    },
+    {
+      "id": "step_05_make_gravy_base",
+      "title": "Make quick gravy base",
+      "body": "In the same skillet (or a saucepan), heat remaining oil over medium. Whisk in flour and cook 1–2 minutes to remove raw flour taste. Slowly whisk in broth until smooth. Stir in Worcestershire (optional) and add bay leaf (optional). Bring to a simmer until slightly thickened."
+    },
+    {
+      "id": "step_06_pour_cover",
+      "title": "Pour, cover, and braise",
+      "body": "Pour the gravy over wings and onions. Cover tightly with a lid or foil. Bake 1 hour 30 minutes to 2 hours, until wings are very tender."
+    },
+    {
+      "id": "step_07_uncover_reduce",
+      "title": "Uncover to brown (optional)",
+      "body": "Remove foil and bake 10–20 minutes uncovered to lightly brown the top and reduce gravy slightly, if desired."
+    },
+    {
+      "id": "step_08_finish_serve",
+      "title": "Finish and serve",
+      "body": "Taste gravy and adjust seasoning if needed. Serve wings smothered with onion gravy over rice, mashed potatoes, or alongside collard greens and cornbread."
+    }
+  ]
+}

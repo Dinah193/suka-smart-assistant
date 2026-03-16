@@ -1,0 +1,618 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.levantine.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Levantine • Cuisine Ruleset",
+    "cuisineId": "cuisines.levantine",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs",
+      "notes": [
+        "Deterministic cuisine rules for tagging, scoring, and adapter signals.",
+        "Designed for SSA planners + RecipeAdapter pipeline (non-AI).",
+        "IDs/tokens comply with ^[a-z0-9_\\.\\-]+$."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.levantine",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "and",
+        "or",
+        "with",
+        "style",
+        "fresh",
+        "homemade",
+        "traditional",
+        "authentic",
+        "best",
+        "easy",
+        "quick"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.olive_oil": ["olive oil", "extra virgin olive oil", "evoo"],
+      "ingredient.lemon_juice": ["lemon juice", "fresh lemon juice", "lemon"],
+      "ingredient.garlic": ["garlic", "garlic cloves", "minced garlic"],
+      "ingredient.tahini": ["tahini", "sesame paste"],
+      "ingredient.sumac": ["sumac"],
+      "ingredient.zaatar": ["zaatar", "za'atar", "zaatar spice"],
+      "ingredient.bulgur": ["bulgur", "bulgur wheat", "cracked wheat"],
+      "ingredient.chickpeas": ["chickpeas", "garbanzo beans", "chana"],
+      "ingredient.lentils_red": ["red lentils", "masoor dal"],
+      "ingredient.lentils_brown": ["brown lentils", "green lentils"],
+      "ingredient.yogurt_plain": ["plain yogurt", "greek yogurt", "yoghurt"],
+      "ingredient.phyllo_dough": [
+        "phyllo",
+        "filo",
+        "phyllo dough",
+        "filo pastry"
+      ],
+      "ingredient.pita": ["pita", "pita bread", "arabic bread", "pocket bread"],
+      "ingredient.pomegranate_molasses": [
+        "pomegranate molasses",
+        "dibs rمان",
+        "dibs al rumman",
+        "pomegranate syrup"
+      ],
+      "ingredient.cucumber": ["cucumber", "cucumbers"],
+      "ingredient.tomato": ["tomato", "tomatoes"],
+      "ingredient.parsley": ["parsley", "flat-leaf parsley"],
+      "ingredient.mint": ["mint", "fresh mint"],
+      "ingredient.onion": ["onion", "onions", "yellow onion", "white onion"],
+      "ingredient.cumin_ground": ["cumin", "ground cumin"],
+      "ingredient.coriander_ground": ["coriander", "ground coriander"],
+      "ingredient.allspice_ground": ["allspice", "ground allspice"],
+      "ingredient.cardamom_ground": ["cardamom", "ground cardamom"]
+    },
+    "dishAliases": {
+      "dish.levantine.hummus": [
+        "hummus",
+        "hummus bi tahini",
+        "chickpea tahini dip"
+      ],
+      "dish.levantine.baba_ganoush": [
+        "baba ganoush",
+        "baba ghanouj",
+        "roasted eggplant dip",
+        "eggplant tahini dip"
+      ],
+      "dish.levantine.tabouleh": ["tabouleh", "tabbouleh", "parsley salad"],
+      "dish.levantine.fattoush": ["fattoush", "pita salad"],
+      "dish.levantine.lentil_soup": [
+        "lentil soup",
+        "shorbet adas",
+        "adas soup"
+      ],
+      "dish.levantine.mujaddara": [
+        "mujaddara",
+        "mujadara",
+        "lentils and rice",
+        "lentil rice"
+      ],
+      "dish.levantine.falafel": ["falafel", "chickpea fritters"],
+      "dish.levantine.toum": ["toum", "garlic sauce", "lebanese garlic sauce"],
+      "dish.levantine.labneh": ["labneh", "strained yogurt", "yogurt cheese"],
+      "dish.levantine.kofte": [
+        "kofta",
+        "kefta",
+        "koftas",
+        "ground meat kebabs"
+      ],
+      "dish.levantine.shawarma_chicken": [
+        "chicken shawarma",
+        "shawarma djaj",
+        "shawarma"
+      ],
+      "dish.levantine.shish_tawook": ["shish tawook", "shish taouk"],
+      "dish.levantine.baklava": ["baklava", "baklawa"],
+      "dish.levantine.mint_tea": ["mint tea", "nana tea"]
+    },
+    "equipmentAliases": {
+      "equipment.food_processor": ["food processor", "processor"],
+      "equipment.blender": ["blender"],
+      "equipment.immersion_blender": ["immersion blender", "stick blender"],
+      "equipment.grill": ["grill", "bbq"],
+      "equipment.skilet": ["skillet", "pan", "frying pan"],
+      "equipment.dutch_oven": ["dutch oven", "heavy pot"],
+      "equipment.oven": ["oven"],
+      "equipment.baking_sheet": ["baking sheet", "sheet pan"],
+      "equipment.baking_dish": ["baking dish", "casserole dish"],
+      "equipment.cheesecloth": ["cheesecloth", "muslin"]
+    },
+    "methodAliases": {
+      "technique.emulsify": ["emulsify", "emulsion", "whisk in"],
+      "technique.blend": ["blend", "puree", "process"],
+      "technique.roast": ["roast", "oven roast", "bake"],
+      "technique.char": ["char", "flame roast", "open flame", "grill char"],
+      "technique.grill": ["grill", "bbq", "chargrill"],
+      "technique.simmer": ["simmer", "gentle boil"],
+      "technique.caramelize": ["caramelize", "brown slowly"],
+      "technique.marinate": ["marinate"],
+      "technique.knead": ["knead"],
+      "technique.proof": ["proof", "rise", "ferment"]
+    }
+  },
+  "globals": {
+    "cuisineId": "cuisines.levantine",
+    "profileTags": ["cuisine.levantine"],
+    "defaultHeatLevel": 1,
+    "signatureNotes": [
+      "garlic_forward",
+      "lemon_bright",
+      "olive_oil_rich",
+      "herb_fresh",
+      "sesame_tahini"
+    ],
+    "commonCondiments": ["dish.levantine.toum", "dish.levantine.tahini_sauce"],
+    "plannerBias": {
+      "prefer": ["mezze", "salad", "grill", "one_pot"],
+      "avoid": ["overly_sweet", "heavy_cream"],
+      "weeknightFocus": true
+    }
+  },
+  "rules": [
+    {
+      "id": "lv.base.tag.cuisine",
+      "enabled": true,
+      "priority": 0,
+      "title": "Always tag Levantine cuisine context",
+      "description": "Adds canonical cuisine tags when scope cuisineId matches.",
+      "tags": ["cuisine", "baseline"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.cuisineId",
+            "value": "cuisines.levantine"
+          },
+          {
+            "type": "intersects",
+            "path": "$.tags",
+            "values": ["cuisine.levantine"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.levantine" },
+          { "type": "addTag", "value": "profile.levantine" }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.signature.ingredients.score",
+      "enabled": true,
+      "priority": 10,
+      "title": "Boost items matching Levantine signature ingredients",
+      "description": "Score lift when key Levantine ingredients appear.",
+      "tags": ["scoring", "signature"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients",
+            "values": [
+              "ingredient.olive_oil",
+              "ingredient.lemon_juice",
+              "ingredient.garlic",
+              "ingredient.tahini",
+              "ingredient.sumac",
+              "ingredient.zaatar",
+              "ingredient.pomegranate_molasses",
+              "ingredient.parsley",
+              "ingredient.mint"
+            ]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": [
+              "ingredient.olive_oil",
+              "ingredient.lemon_juice",
+              "ingredient.garlic",
+              "ingredient.tahini",
+              "ingredient.sumac",
+              "ingredient.zaatar",
+              "ingredient.parsley",
+              "ingredient.mint"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 2.0 },
+          { "type": "addTag", "value": "profile.signature_ingredients" }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.signature.dishes.tag",
+      "enabled": true,
+      "priority": 20,
+      "title": "Tag known Levantine signature dishes",
+      "description": "Adds dish tags when the dishId or dishName maps to signature items like hummus, tabouleh, etc.",
+      "tags": ["dish", "signature"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dishId",
+            "values": [
+              "dish.levantine.hummus",
+              "dish.levantine.baba_ganoush",
+              "dish.levantine.tabouleh",
+              "dish.levantine.fattoush",
+              "dish.levantine.falafel",
+              "dish.levantine.lentil_soup",
+              "dish.levantine.mujaddara",
+              "dish.levantine.toum",
+              "dish.levantine.labneh",
+              "dish.levantine.kofte",
+              "dish.levantine.shawarma_chicken",
+              "dish.levantine.shish_tawook",
+              "dish.levantine.baklava"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(hummus|baba\\s+ganoush|tabbouleh|tabouleh|fattoush|falafel|toum|labneh|kofta|kefta|shawarma|shish\\s+taouk|baklava)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.name",
+            "regex": "(?i)\\b(hummus|baba\\s+ganoush|tabbouleh|tabouleh|fattoush|falafel|toum|labneh|kofta|kefta|shawarma|shish\\s+taouk|baklava)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "profile.signature_dish" },
+          { "type": "scoreAdjust", "scoreDelta": 2.5 }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.category.mezze.tag",
+      "enabled": true,
+      "priority": 30,
+      "title": "Classify mezze / dips / spreads",
+      "description": "If it looks like mezze, tag it and bias planners toward snack/side contexts.",
+      "tags": ["classification", "mezze"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.tags",
+            "values": ["mezze", "dip", "spread"]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(hummus|baba\\s+ganoush|labneh|toum|mutabbal|muhammara)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.name",
+            "regex": "(?i)\\b(hummus|baba\\s+ganoush|labneh|toum|mutabbal|muhammara)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "category.mezze" },
+          { "type": "addTag", "value": "serving.family_style" },
+          { "type": "addTag", "value": "serving.snacks" },
+          { "type": "set", "path": "$.planner.hints.course", "value": "side" }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.category.salad.tag",
+      "enabled": true,
+      "priority": 35,
+      "title": "Classify fresh salads",
+      "description": "Fattoush/tabouleh and chopped salads get fresh + side tags.",
+      "tags": ["classification", "salad"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "intersects", "path": "$.tags", "values": ["salad"] },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(tabouleh|tabbouleh|fattoush|israeli\\s+salad|tomato\\s+cucumber)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.name",
+            "regex": "(?i)\\b(tabouleh|tabbouleh|fattoush|israeli\\s+salad|tomato\\s+cucumber)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "category.salad" },
+          { "type": "addTag", "value": "profile.fresh" },
+          { "type": "set", "path": "$.planner.hints.course", "value": "side" },
+          { "type": "scoreAdjust", "scoreDelta": 0.8 }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.category.grill.tag",
+      "enabled": true,
+      "priority": 40,
+      "title": "Classify grills/kebabs/shawarma style mains",
+      "description": "Adds grill + protein-main tags; signals for equipment and meal archetypes.",
+      "tags": ["classification", "grill"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.tags",
+            "values": ["kebab", "grill", "shawarma"]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(kebab|kebabs|kofta|kefta|shawarma|shish\\s+tawook|shish\\s+taouk|shish)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.name",
+            "regex": "(?i)\\b(kebab|kebabs|kofta|kefta|shawarma|shish\\s+tawook|shish\\s+taouk|shish)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "category.protein_main" },
+          { "type": "addTag", "value": "profile.grill" },
+          { "type": "addTag", "value": "serving.plates" },
+          { "type": "set", "path": "$.planner.hints.course", "value": "main" },
+          {
+            "type": "set",
+            "path": "$.adapter.equipment.prefer",
+            "value": ["equipment.grill", "equipment.skilet", "equipment.oven"]
+          },
+          { "type": "scoreAdjust", "scoreDelta": 1.2 }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.method.emulsify.tag",
+      "enabled": true,
+      "priority": 50,
+      "title": "Detect emulsified sauces (toum/tahini-based)",
+      "description": "If emulsify/blend is present with garlic + oil/lemon, tag as sauce and suggest blender/processor.",
+      "tags": ["method", "sauce"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.methods",
+                "values": ["technique.emulsify", "technique.blend"]
+              },
+              {
+                "type": "matches",
+                "path": "$.instructions",
+                "regex": "(?i)\\b(emulsif|whisk\\s+in\\s+slowly|drizzle\\s+in\\s+oil|process\\s+until\\s+fluffy)\\b"
+              }
+            ]
+          },
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients",
+                "values": ["ingredient.garlic"]
+              },
+              {
+                "type": "intersects",
+                "path": "$.ingredientsCore",
+                "values": ["ingredient.garlic"]
+              }
+            ]
+          },
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients",
+                "values": ["ingredient.neutral_oil", "ingredient.olive_oil"]
+              },
+              {
+                "type": "intersects",
+                "path": "$.ingredientsCore",
+                "values": ["ingredient.neutral_oil", "ingredient.olive_oil"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "category.condiment" },
+          { "type": "addTag", "value": "profile.emulsified" },
+          {
+            "type": "set",
+            "path": "$.adapter.equipment.recommend",
+            "value": ["equipment.food_processor", "equipment.blender"]
+          },
+          { "type": "scoreAdjust", "scoreDelta": 0.9 }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.allergen.sesame.tag",
+      "enabled": true,
+      "priority": 60,
+      "title": "Sesame / tahini allergen tagging",
+      "description": "When tahini or sesame appears, ensure allergen tag is present.",
+      "tags": ["allergen", "safety"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients",
+            "values": ["ingredient.tahini"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ingredient.tahini"]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(tahini|sesame)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.name",
+            "regex": "(?i)\\b(tahini|sesame)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.sesame" },
+          { "type": "set", "path": "$.allergens.sesame", "value": true }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.weeknight.quick.score",
+      "enabled": true,
+      "priority": 70,
+      "title": "Weeknight bias for quick Levantine staples",
+      "description": "Boost quick staples like tomato-cucumber salad, hummus, toum, mint tea.",
+      "tags": ["planner", "weeknight"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dishId",
+            "values": [
+              "dish.levantine.hummus",
+              "dish.levantine.toum",
+              "dish.levantine.tomato_cucumber_salad",
+              "dish.levantine.mint_tea"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(hummus|toum|tomato\\s+cucumber|mint\\s+tea)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.name",
+            "regex": "(?i)\\b(hummus|toum|tomato\\s+cucumber|mint\\s+tea)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "planner.weeknight" },
+          { "type": "scoreAdjust", "scoreDelta": 1.1 }
+        ]
+      }
+    },
+
+    {
+      "id": "lv.emit.discovery.event",
+      "enabled": true,
+      "priority": 90,
+      "title": "Emit event when Levantine signature match occurs",
+      "description": "Optional: used by SSA event bus to surface UI badges or explainers. Safe even if ignored by runtime.",
+      "tags": ["event", "ui"],
+      "source": "ssa.catalogs",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.cuisineId",
+            "value": "cuisines.levantine"
+          },
+          { "type": "hasTag", "value": "profile.signature_ingredients" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisine.ruleset.match",
+              "payload": {
+                "cuisineId": "cuisines.levantine",
+                "rulesetId": "cuisines.levantine.ruleset",
+                "signal": "signature_ingredients"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

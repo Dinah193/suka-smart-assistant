@@ -21,11 +21,27 @@ const isVitest = !!globalThis.vi;
 
 const { describe, it, expect, beforeEach, afterEach } = (function () {
   const v = {
-    describe: globalThis.describe || (isVitest ? require("vitest").describe : require("@jest/globals").describe),
-    it: globalThis.it || (isVitest ? require("vitest").it : require("@jest/globals").it),
-    expect: globalThis.expect || (isVitest ? require("vitest").expect : require("@jest/globals").expect),
-    beforeEach: globalThis.beforeEach || (isVitest ? require("vitest").beforeEach : require("@jest/globals").beforeEach),
-    afterEach: globalThis.afterEach || (isVitest ? require("vitest").afterEach : require("@jest/globals").afterEach),
+    describe:
+      globalThis.describe ||
+      (isVitest
+        ? require("vitest").describe
+        : require("@jest/globals").describe),
+    it:
+      globalThis.it ||
+      (isVitest ? require("vitest").it : require("@jest/globals").it),
+    expect:
+      globalThis.expect ||
+      (isVitest ? require("vitest").expect : require("@jest/globals").expect),
+    beforeEach:
+      globalThis.beforeEach ||
+      (isVitest
+        ? require("vitest").beforeEach
+        : require("@jest/globals").beforeEach),
+    afterEach:
+      globalThis.afterEach ||
+      (isVitest
+        ? require("vitest").afterEach
+        : require("@jest/globals").afterEach),
   };
   return v;
 })();
@@ -44,7 +60,7 @@ const BASE = Date.UTC(2025, 9, 27, 14, 0, 0); // store as UTC; prefs tz is Ameri
 
 // ------------------------------ Mocks ---------------------------------------
 
-T?.mock?.("@/services/eventBus", () => {
+T?.mock?.("@/services/events/eventBus", () => {
   const handlers = new Map();
   return {
     __esModule: true,
@@ -65,12 +81,24 @@ T?.mock?.("@/stores/scheduler/prefs", () => {
     __esModule: true,
     getSchedulerPrefs: () => ({
       ...PREFS,
-      safety: { softLeadMs: 120000, hardGraceMs: 60000, cooldownMs: 1, minTickMs: 5000 },
+      safety: {
+        softLeadMs: 120000,
+        hardGraceMs: 60000,
+        cooldownMs: 1,
+        minTickMs: 5000,
+      },
     }),
-    default: { getSchedulerPrefs: () => ({
-      ...PREFS,
-      safety: { softLeadMs: 120000, hardGraceMs: 60000, cooldownMs: 1, minTickMs: 5000 },
-    })},
+    default: {
+      getSchedulerPrefs: () => ({
+        ...PREFS,
+        safety: {
+          softLeadMs: 120000,
+          hardGraceMs: 60000,
+          cooldownMs: 1,
+          minTickMs: 5000,
+        },
+      }),
+    },
   };
 });
 
@@ -84,13 +112,18 @@ T?.mock?.("@/services/session/utils/offsetParser", () => {
     if (sh) {
       const n = parseInt(sh[1], 10);
       const u = sh[2].toLowerCase();
-      return u === "s" ? n * 1000
-        : u === "m" ? n * 60000
-        : u === "h" ? n * 3600000
+      return u === "s"
+        ? n * 1000
+        : u === "m"
+        ? n * 60000
+        : u === "h"
+        ? n * 3600000
         : n * 86400000;
     }
     // ISO durations: PT15M, PT1H, P1D
-    const iso = /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/i.exec(s);
+    const iso = /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/i.exec(
+      s
+    );
     if (iso) {
       const d = parseInt(iso[1] || "0", 10);
       const h = parseInt(iso[2] || "0", 10);
@@ -146,11 +179,14 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
     // Given
     const startAt = BASE; // 09:00 local CT
     const { generateRepeats } = RelativeScheduler;
-    const res = generateRepeats({
-      startAt,
-      repeatEvery: "PT15M",
-      count: 4,
-    }, BASE);
+    const res = generateRepeats(
+      {
+        startAt,
+        repeatEvery: "PT15M",
+        count: 4,
+      },
+      BASE
+    );
 
     expect(Array.isArray(res.occurrences)).toBe(true);
     expect(res.occurrences.length).toBe(4);
@@ -164,14 +200,21 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
     const { generateRepeats } = RelativeScheduler;
     const startAt = BASE;
     const untilTs = BASE + 45 * 60000 + 1; // just past 45 min mark
-    const res = generateRepeats({
-      startAt,
-      repeatEvery: "+20m",
-      untilTs,
-    }, BASE);
+    const res = generateRepeats(
+      {
+        startAt,
+        repeatEvery: "+20m",
+        untilTs,
+      },
+      BASE
+    );
 
     // Should include 09:00, 09:20, 09:40; 10:00 would exceed untilTs
-    expect(res.occurrences).toEqual([BASE, BASE + 20 * 60000, BASE + 40 * 60000]);
+    expect(res.occurrences).toEqual([
+      BASE,
+      BASE + 20 * 60000,
+      BASE + 40 * 60000,
+    ]);
     expect(res.meta?.trimmedBy).toBe("untilTs");
   });
 
@@ -180,15 +223,18 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
     const startAt = BASE; // 09:00 local
     const endAnchorTs = resolveAnchor("endOfDay", { baseTs: startAt }); // let impl decide exact EOD
 
-    const res = generateRepeats({
-      startAt,
-      repeatEvery: "PT1H",
-      untilAnchor: "endOfDay",
-    }, BASE);
+    const res = generateRepeats(
+      {
+        startAt,
+        repeatEvery: "PT1H",
+        untilAnchor: "endOfDay",
+      },
+      BASE
+    );
 
     expect(res.occurrences[0]).toBe(startAt);
     // All occurrences <= end-of-day anchor
-    expect(res.occurrences.every(ts => ts <= endAnchorTs)).toBe(true);
+    expect(res.occurrences.every((ts) => ts <= endAnchorTs)).toBe(true);
     // Should produce hourly ticks up to day end
     for (let i = 1; i < res.occurrences.length; i++) {
       expect(res.occurrences[i] - res.occurrences[i - 1]).toBe(3600000);
@@ -206,15 +252,18 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
     const fridayStart = BASE - 3 * 86400000; // prior Friday 09:00
     const sabEndTs = resolveAnchor("sabbathEnd", { baseTs: fridayStart });
 
-    const res = generateRepeats({
-      startAt: fridayStart,
-      repeatEvery: "P1D",
-      untilAnchor: "sabbathEnd",
-      guards: { sabbathGuard: PREFS.sabbathGuard },
-    }, fridayStart);
+    const res = generateRepeats(
+      {
+        startAt: fridayStart,
+        repeatEvery: "P1D",
+        untilAnchor: "sabbathEnd",
+        guards: { sabbathGuard: PREFS.sabbathGuard },
+      },
+      fridayStart
+    );
 
     // Occurrences should not go past sabbathEnd anchor
-    expect(res.occurrences.every(ts => ts <= sabEndTs)).toBe(true);
+    expect(res.occurrences.every((ts) => ts <= sabEndTs)).toBe(true);
     // Daily cadence
     for (let i = 1; i < res.occurrences.length; i++) {
       expect(res.occurrences[i] - res.occurrences[i - 1]).toBe(86400000);
@@ -229,12 +278,15 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
     const startAt = BASE; // morning; anchor resolution should find next quietEnd boundary
     const qEndTs = resolveAnchor("quietEnd", { baseTs: startAt });
 
-    const res = generateRepeats({
-      startAt,
-      repeatEvery: "PT30M",
-      untilAnchor: "quietEnd",
-      guards: { quietHours: PREFS.quietHours },
-    }, BASE);
+    const res = generateRepeats(
+      {
+        startAt,
+        repeatEvery: "PT30M",
+        untilAnchor: "quietEnd",
+        guards: { quietHours: PREFS.quietHours },
+      },
+      BASE
+    );
 
     expect(res.occurrences.length).toBeGreaterThan(0);
     expect(res.occurrences[res.occurrences.length - 1] <= qEndTs).toBe(true);
@@ -244,18 +296,25 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
   it("Favorite overrides: per-favorite repeatEvery supersedes input.repeatEvery", async () => {
     const { generateRepeats } = RelativeScheduler;
     const startAt = BASE;
-    const res = generateRepeats({
-      startAt,
-      repeatEvery: "PT1H", // will be overridden
-      favorite: {
-        isFavorite: true,
-        overrides: { repeatEvery: "PT10M" },
+    const res = generateRepeats(
+      {
+        startAt,
+        repeatEvery: "PT1H", // will be overridden
+        favorite: {
+          isFavorite: true,
+          overrides: { repeatEvery: "PT10M" },
+        },
+        count: 3,
       },
-      count: 3,
-    }, BASE);
+      BASE
+    );
 
     // Expect 10-minute cadence due to override
-    expect(res.occurrences).toEqual([startAt, startAt + 600000, startAt + 1200000]);
+    expect(res.occurrences).toEqual([
+      startAt,
+      startAt + 600000,
+      startAt + 1200000,
+    ]);
   });
 
   it("Explicit untilTs takes precedence over untilAnchor when both provided", async () => {
@@ -264,14 +323,21 @@ describe("RelativeScheduler • repeatEvery & untilAnchor", () => {
     const anchorTs = resolveAnchor("endOfDay", { baseTs: startAt });
     const untilTs = startAt + 75 * 60000; // 1h15m
 
-    const res = generateRepeats({
-      startAt,
-      repeatEvery: "PT30M",
-      untilTs,                 // precedence
-      untilAnchor: "endOfDay", // ignored due to untilTs
-    }, BASE);
+    const res = generateRepeats(
+      {
+        startAt,
+        repeatEvery: "PT30M",
+        untilTs, // precedence
+        untilAnchor: "endOfDay", // ignored due to untilTs
+      },
+      BASE
+    );
 
-    expect(res.occurrences).toEqual([startAt, startAt + 1800000, startAt + 3600000]);
+    expect(res.occurrences).toEqual([
+      startAt,
+      startAt + 1800000,
+      startAt + 3600000,
+    ]);
     expect(res.meta?.trimmedBy).toBe("untilTs");
     // Sanity: untilTs earlier than anchor
     expect(untilTs < anchorTs).toBe(true);

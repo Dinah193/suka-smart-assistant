@@ -1,0 +1,497 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.ethiopian.recipes.injera",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Injera (Fermented Teff Flatbread)",
+    "subtitle": "Ethiopian sourdough-style fermented flatbread with a spongy texture and signature “eyes.”",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "This is a production-ready baseline injera recipe designed for SSA catalogs (fermentation-aware).",
+        "Includes both traditional teff-only and common teff+all-purpose blend variation paths.",
+        "Fermentation time varies by temperature; this recipe includes checks and decision points."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Ethiopian",
+    "category": "bread",
+    "mealArchetypes": [
+      "flatbread",
+      "fermented_bread",
+      "starch_base",
+      "platter_base"
+    ],
+    "servingStyles": [
+      "family_style",
+      "plated_meals",
+      "holiday_feasts",
+      "street_food"
+    ],
+    "plannerTags": [
+      "cuisine.ethiopian",
+      "dish.ethiopian.injera",
+      "bread.fermented",
+      "sourdough_style",
+      "gluten_free_option",
+      "dairy_free",
+      "vegan",
+      "batch.friendly",
+      "meal_base",
+      "fermentation"
+    ]
+  },
+
+  "summary": "Injera is a fermented teff flatbread with a tangy flavor and spongy texture used as both plate and utensil in Ethiopian meals.",
+
+  "yield": {
+    "servings": 10,
+    "servingSize": { "value": 1, "unit": "injera_30cm" },
+    "notes": "Makes ~8–12 injera (28–32 cm) depending on pan size and batter thickness."
+  },
+
+  "time": {
+    "activeMins": 40,
+    "handsOffMins": 4320,
+    "totalMins": 4360
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": "high",
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "weeknightPossible": false,
+    "fermented": true
+  },
+
+  "tasteProfile": {
+    "sourness": "medium",
+    "heat": "none",
+    "aroma": ["fermented_grain", "teff"],
+    "texture": ["spongy", "porous_eyes", "tender"],
+    "finish": ["tangy", "soft"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "tool.mixing_bowl_large",
+        "label": "Large mixing bowl",
+        "required": true
+      },
+      { "id": "tool.whisk", "label": "Whisk", "required": true },
+      {
+        "id": "tool.ladle",
+        "label": "Ladle or measuring cup",
+        "required": true
+      },
+      {
+        "id": "tool.nonstick_pan_lid",
+        "label": "Large nonstick skillet or mitad + lid",
+        "required": true
+      },
+      {
+        "id": "tool.spreaders_optional",
+        "label": "Injera spreader (optional) or quick swirl technique",
+        "required": false
+      }
+    ],
+    "recommended": [
+      "tool.kitchen_scale",
+      "tool.thermometer_instant_read",
+      "tool.timer",
+      "tool.fine_mesh_sieve"
+    ],
+    "optional": [
+      {
+        "id": "tool.mitad",
+        "label": "Mitad (Ethiopian injera griddle)",
+        "required": false,
+        "notes": "Best results; a wide nonstick pan also works."
+      },
+      {
+        "id": "tool.food_safe_bucket",
+        "label": "Food-safe fermentation bucket with lid",
+        "required": false,
+        "notes": "Helpful for larger batches."
+      }
+    ]
+  },
+
+  "dietFlags": ["vegan", "dairy_free"],
+  "allergens": {
+    "mayContain": ["gluten_optional"],
+    "notes": [
+      "100% teff injera is gluten-free if teff is not cross-contaminated.",
+      "The optional blend version includes wheat flour and is not gluten-free."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.flour_base",
+      "label": "Flour base",
+      "items": ["grain.teff_flour", "grain.all_purpose_flour"]
+    },
+    {
+      "id": "group.fermentation",
+      "label": "Fermentation",
+      "items": ["starter.ersho_or_sourdough", "water"]
+    },
+    {
+      "id": "group.absit",
+      "label": "Absit (gelatinized binder)",
+      "items": ["batter.absit_portion"]
+    },
+    {
+      "id": "group.finish_cook",
+      "label": "Cooking",
+      "items": ["salt.kosher", "oil.pan_coat"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "grain.teff_flour",
+      "label": "Teff flour",
+      "role": "flour",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": [
+        "Traditional injera uses teff flour.",
+        "If using a teff blend, see variations for adjusted flour ratios."
+      ]
+    },
+    {
+      "id": "water",
+      "label": "Water (room temperature, for batter)",
+      "role": "liquid",
+      "amount": { "value": 900, "unit": "ml" },
+      "notes": [
+        "Start with 850–900 ml; adjust consistency after fermentation and absit.",
+        "Chlorinated water can slow fermentation; filtered water is recommended."
+      ]
+    },
+    {
+      "id": "starter.ersho_or_sourdough",
+      "label": "Ersho (traditional starter) or active sourdough starter",
+      "role": "starter",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": [
+        "If you have ersho from a prior injera batch, use it for the most traditional result.",
+        "If no ersho, use 60–100 g active sourdough starter.",
+        "If neither is available, you can ferment naturally (wild), but time is less predictable."
+      ]
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "Add after fermentation (salt can slow fermentation if added early)."
+    },
+    {
+      "id": "oil.pan_coat",
+      "label": "Neutral oil (for pan coating, optional)",
+      "role": "fat",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true,
+      "notes": "Many nonstick setups need little to none; use sparingly."
+    },
+
+    {
+      "id": "batter.absit_portion",
+      "label": "Absit portion (reserved batter + water; see steps)",
+      "role": "binder",
+      "amount": { "value": 1, "unit": "batch" },
+      "notes": [
+        "Absit is a cooked paste made from a portion of batter and water to improve texture and ‘eyes.’",
+        "You will make this from your own batter (no separate ingredient purchase)."
+      ]
+    }
+  ],
+
+  "methods": [
+    "method.fermentation",
+    "method.absit",
+    "method.pan_steam_cook",
+    "method.flatbread"
+  ],
+
+  "notes": [
+    "Fermentation target: pleasantly sour aroma, slight tang taste, and visible bubbling.",
+    "A thin watery layer (“hooch”) may form on top—this is normal. Pour it off or stir in depending on taste preference.",
+    "Injera cooks with steam under a lid—no flipping. The top should set and become matte with visible ‘eyes.’",
+    "Pan temperature is critical: too hot burns before eyes form; too cool yields dense injera."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.teff_blend",
+      "label": "Teff + wheat blend (common home-style)",
+      "changes": {
+        "flour": "Use 300 g teff flour + 200 g all-purpose flour (instead of 500 g teff).",
+        "water": "Start with 850 ml water (wheat absorbs differently).",
+        "notes": "This version is easier to get consistent ‘eyes’ with standard nonstick pans but is not gluten-free."
+      }
+    },
+    {
+      "id": "variation.no_starter_wild",
+      "label": "No starter (wild fermentation)",
+      "changes": {
+        "starter": "Omit starter; ferment batter 3–6 days depending on temperature.",
+        "notes": "Expect higher variability. Use sensory checks (smell/taste/bubbles) to decide readiness."
+      }
+    },
+    {
+      "id": "variation.quick_sour",
+      "label": "Faster sourness (warm fermentation)",
+      "changes": {
+        "process": "Ferment in a warm spot 26–30°C (79–86°F).",
+        "notes": "Check at 24–36 hours; avoid overheating which can produce harsh sourness."
+      }
+    },
+    {
+      "id": "variation.mild_sour",
+      "label": "Milder injera",
+      "changes": {
+        "process": "Ferment cooler (18–21°C / 65–70°F) and/or shorten fermentation.",
+        "notes": "Pour off hooch before mixing; reduce fermentation time once tang is present."
+      }
+    }
+  ],
+
+  "safety": {
+    "fermentation": {
+      "notes": [
+        "Fermentation should smell pleasantly sour, not putrid or moldy.",
+        "Discard if you see fuzzy mold, pink/orange growth, or smell strongly rotten.",
+        "Keep container loosely covered to prevent contaminants while allowing gas release."
+      ]
+    },
+    "storage": {
+      "fridgeDays": 4,
+      "freezerMonths": 2,
+      "notes": [
+        "Cool fully before storing to prevent condensation and sticking.",
+        "Freeze with parchment between layers; thaw covered to retain softness."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "up to 4 days",
+      "notes": "Store stacked with parchment between pieces in an airtight bag or container."
+    },
+    "freezer": {
+      "duration": "up to 2 months",
+      "notes": "Freeze with parchment separators. Thaw covered at room temp, then briefly warm to soften."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Mix batter", "timeMins": 10 },
+      { "task": "Ferment batter", "timeMins": 0 },
+      { "task": "Make absit and finish batter", "timeMins": 15 },
+      { "task": "Cook injera batch", "timeMins": 25 }
+    ],
+    "makeAhead": [
+      "Batter can be fermented ahead; after absit step, cook within 24 hours for best results.",
+      "Cooked injera stores well and supports batch meal planning for Ethiopian platters."
+    ]
+  },
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Mix the batter",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a large bowl, whisk teff flour with water until smooth (no dry pockets).",
+        "If using starter (ersho or sourdough), whisk it in until evenly dispersed.",
+        "The batter should be pourable like a thin pancake batter; adjust with small amounts of water if needed."
+      ],
+      "checks": [
+        "Batter is smooth and pourable.",
+        "No dry flour pockets remain."
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Ferment",
+      "activeMins": 2,
+      "handsOffMins": 2880,
+      "instructions": [
+        "Cover the bowl loosely (lid ajar or cloth) to allow gases to escape.",
+        "Ferment at room temperature 2–3 days (longer if cooler; shorter if warm).",
+        "Check daily: look for bubbles and smell for a clean sour aroma."
+      ],
+      "timers": [{ "label": "Ferment (initial check)", "minutes": 1440 }],
+      "checks": [
+        "Bubbles or activity are visible.",
+        "Smell is pleasantly sour (not rotten or moldy)."
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Decide about the top liquid (hooch)",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "If a watery layer forms on top, decide based on flavor:",
+        "• For a sharper tang: stir it back in.",
+        "• For a milder flavor: carefully pour it off, then stir the batter.",
+        "Remove any dark crusty bits on the surface if present."
+      ],
+      "checks": ["Batter is stirred and smells cleanly sour."]
+    },
+    {
+      "id": "step_04",
+      "title": "Make absit (gelatinized binder paste)",
+      "activeMins": 12,
+      "handsOffMins": 10,
+      "instructions": [
+        "In a small saucepan, whisk together 120 ml batter with 240 ml water until smooth.",
+        "Cook over medium heat, whisking constantly, until it thickens to a glossy porridge/paste (2–5 minutes).",
+        "Remove from heat and cool 8–10 minutes until warm (not hot)."
+      ],
+      "timers": [
+        { "label": "Cook absit", "minutes": 5 },
+        { "label": "Cool absit", "minutes": 10 }
+      ],
+      "checks": [
+        "Absit is smooth and glossy (no raw flour taste).",
+        "Absit is warm, not hot, before mixing back in."
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Finish batter (absit + salt + consistency)",
+      "activeMins": 8,
+      "handsOffMins": 30,
+      "instructions": [
+        "Whisk the warm absit back into the fermented batter until fully incorporated.",
+        "Add salt and whisk.",
+        "Rest the batter 20–30 minutes to stabilize.",
+        "Adjust consistency: aim for a thin crepe batter that pours easily and spreads quickly. Add water 15–30 ml at a time if too thick."
+      ],
+      "timers": [{ "label": "Rest batter", "minutes": 25 }],
+      "checks": [
+        "Batter is pourable and slightly thicker than water (thin crepe batter).",
+        "Taste is pleasantly tangy and lightly salted."
+      ]
+    },
+    {
+      "id": "step_06",
+      "title": "Preheat pan and test one injera",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat a large nonstick skillet (or mitad) over medium heat until evenly hot.",
+        "Lightly oil the surface only if needed.",
+        "Ladle batter into the pan (about 120–180 ml depending on pan size).",
+        "Immediately swirl the pan to spread batter thinly and evenly.",
+        "Cover with a lid and cook until the top is set and matte with ‘eyes’ (1–3 minutes). Do not flip."
+      ],
+      "timers": [{ "label": "Test injera cook", "minutes": 2 }],
+      "checks": [
+        "Top is set and matte; many small holes (‘eyes’) are visible.",
+        "Edges lift without tearing."
+      ]
+    },
+    {
+      "id": "step_07",
+      "title": "Cook the batch",
+      "activeMins": 25,
+      "handsOffMins": 0,
+      "instructions": [
+        "Continue cooking injera one at a time: ladle, swirl, cover, and steam-cook until set.",
+        "Adjust heat as needed: if bottom browns too fast, lower heat; if no eyes form, slightly increase heat or thin batter.",
+        "Remove each injera to a clean towel or tray; keep covered to stay soft."
+      ],
+      "checks": [
+        "Injera are soft and flexible with visible eyes.",
+        "No burning; texture is spongy, not gummy."
+      ]
+    },
+    {
+      "id": "step_08",
+      "title": "Cool and store",
+      "activeMins": 2,
+      "handsOffMins": 20,
+      "instructions": [
+        "Cool injera briefly before stacking to avoid excess condensation.",
+        "Stack with parchment if needed to prevent sticking.",
+        "Store covered at room temperature for same-day use or refrigerate/freeze as noted."
+      ],
+      "timers": [{ "label": "Cool before storing", "minutes": 20 }],
+      "checks": ["Injera are cool enough to stack and store without sticking."]
+    }
+  ],
+
+  "adaptations": [
+    {
+      "id": "adapt.pan_too_hot",
+      "kind": "troubleshoot",
+      "when": { "symptom": "bottom_burns_before_eyes" },
+      "change": {
+        "notes": "Lower heat and allow pan to re-equilibrate 2–3 minutes. Consider thinning batter slightly and cooking covered longer."
+      }
+    },
+    {
+      "id": "adapt.no_eyes",
+      "kind": "troubleshoot",
+      "when": { "symptom": "no_eyes_dense" },
+      "change": {
+        "notes": "Batter may be too thick or pan too cool. Thin batter 30–60 ml water, and/or increase heat slightly. Ensure lid traps steam."
+      }
+    },
+    {
+      "id": "adapt_too_sour",
+      "kind": "adjust",
+      "when": { "tastePreference": "less_sour" },
+      "change": {
+        "notes": "Shorten fermentation next time; pour off hooch; ferment cooler; increase resting flour blend variation if acceptable."
+      }
+    },
+    {
+      "id": "adapt_gluten_free",
+      "kind": "confirm",
+      "when": { "diet": "gluten_free" },
+      "change": {
+        "notes": "Use 100% teff flour and verify cross-contamination risk. Do not use the wheat blend variation."
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.ethiopian",
+    "dishId": "dish.ethiopian.injera",
+    "aliases": [
+      "injera",
+      "enjera",
+      "ethiopian teff bread",
+      "fermented teff flatbread"
+    ],
+    "ingredientIdHints": ["grain.teff_flour", "starter.ersho_or_sourdough"],
+    "equipmentIdHints": ["tool.mitad", "tool.nonstick_pan_lid"],
+    "methodIdHints": [
+      "method.fermentation",
+      "method.absit",
+      "method.pan_steam_cook"
+    ]
+  }
+}

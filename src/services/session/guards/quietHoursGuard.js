@@ -8,7 +8,7 @@
 
   let eventBus = { on() {}, off() {}, emit() {} };
   try {
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 

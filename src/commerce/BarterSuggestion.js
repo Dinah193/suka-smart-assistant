@@ -37,13 +37,13 @@
 // - add more “what can we ask for?” sources in buildNeedsFromEvent()
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.js exists
 // - optional hub services exist
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -189,7 +189,10 @@ function buildOfferables(evt = null) {
     }
     if (evt.type === "preservation.completed") {
       const item =
-        evt.data?.item || evt.data?.crop || evt.data?.ingredient || "preserved-goods";
+        evt.data?.item ||
+        evt.data?.crop ||
+        evt.data?.ingredient ||
+        "preserved-goods";
       offerables.push({
         name: item,
         qty: evt.data?.weightOut || evt.data?.jars || 1,

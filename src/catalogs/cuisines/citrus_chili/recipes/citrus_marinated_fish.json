@@ -1,0 +1,441 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.citrus_chili.recipes.citrus_marinated_fish",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Citrus-Marinated Fish",
+    "subtitle": "Bright citrus + garlic + chili, cooked quickly (pan, grill, or oven) — not a long acid cure"
+  },
+  "classification": {
+    "cuisine": "citrus_chili",
+    "category": "main",
+    "mealArchetypes": ["protein_main", "weeknight_main", "light_main"],
+    "servingStyles": ["plates", "bowls", "street_food"],
+    "plannerTags": [
+      "cuisine.citrus_chili",
+      "protein.fish",
+      "flavor.citrus_bright",
+      "flavor.spicy",
+      "weeknight.friendly",
+      "quick_cook",
+      "marinade"
+    ]
+  },
+  "summary": "Fast, flavor-forward fish with a citrus-garlic-chili marinade that’s designed for short contact time (to avoid “cooking” the fish in acid). Great for tacos, bowls, or plated meals.",
+  "yield": {
+    "servings": 4,
+    "notes": "Plan 4–6 oz fish per person depending on sides."
+  },
+  "time": {
+    "activeMins": 18,
+    "handsOffMins": 20,
+    "totalMins": 38
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": "limited",
+    "leftoversGood": true,
+    "freezerFriendly": false,
+    "spiceAdjustable": true,
+    "acidSensitiveProtein": true
+  },
+  "tasteProfile": {
+    "heatLevel": 2,
+    "acidity": "bright",
+    "salt": "medium",
+    "sweetness": "low",
+    "notes": [
+      "lime-forward",
+      "clean fish flavor",
+      "garlic aroma",
+      "gentle chili warmth"
+    ]
+  },
+  "equipment": {
+    "minimum": [
+      "mixing_bowl",
+      "measuring_spoons",
+      "cutting_board",
+      "knife",
+      "skillet_or_sheet_pan",
+      "fish_spatula_or_spatula"
+    ],
+    "recommended": [
+      "instant_read_thermometer",
+      "zester",
+      "citrus_juicer",
+      "nonstick_skillet"
+    ],
+    "optional": [
+      {
+        "id": "grill",
+        "label": "Grill",
+        "notes": "Great for firm fish; use a grill basket if needed."
+      },
+      {
+        "id": "parchment_paper",
+        "label": "Parchment paper",
+        "notes": "Makes cleanup easier for oven method."
+      }
+    ]
+  },
+  "allergens": ["fish", "citrus"],
+  "dietFlags": ["gluten_free", "dairy_free", "high_protein", "pescatarian"],
+  "keywords": [
+    "citrus marinated fish",
+    "lime fish",
+    "chili lime fish",
+    "quick fish dinner",
+    "fish tacos"
+  ],
+  "tags": [
+    "cuisine.citrus_chili",
+    "protein.fish",
+    "weeknight.friendly",
+    "quick_cook",
+    "gluten_free",
+    "dairy_free"
+  ],
+  "methods": ["short_marinade", "pan_sear", "oven_roast", "grill"],
+  "ingredientGroups": [
+    {
+      "id": "fish",
+      "label": "Fish",
+      "items": ["white_fish_fillets"]
+    },
+    {
+      "id": "marinade",
+      "label": "Citrus-Chili Marinade",
+      "items": [
+        "lime_juice",
+        "orange_juice",
+        "lime_zest",
+        "garlic",
+        "olive_oil",
+        "chili_powder",
+        "ground_cumin",
+        "salt",
+        "black_pepper",
+        "honey_optional"
+      ]
+    },
+    {
+      "id": "finish",
+      "label": "Finish & Serve",
+      "items": ["fresh_cilantro_optional", "lime_wedges_optional"]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "white_fish_fillets",
+      "label": "Firm white fish fillets (cod, mahi-mahi, snapper, halibut)",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": [
+        "Aim for firm fish that holds up to quick searing.",
+        "If using delicate fish (tilapia/sole), prefer oven method and handle gently."
+      ]
+    },
+    {
+      "id": "lime_juice",
+      "label": "Fresh lime juice",
+      "role": "acid",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Short marinade only — do not exceed recommended time."
+    },
+    {
+      "id": "orange_juice",
+      "label": "Fresh orange juice",
+      "role": "acid",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Adds sweetness and rounds lime sharpness."
+    },
+    {
+      "id": "lime_zest",
+      "label": "Lime zest",
+      "role": "aroma",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, finely minced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "cloves" }
+    },
+    {
+      "id": "olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 20, "unit": "ml" }
+    },
+    {
+      "id": "chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Use mild chili powder for low heat; ancho is excellent."
+    },
+    {
+      "id": "ground_cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "honey_optional",
+      "label": "Honey (optional)",
+      "role": "balance",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Helps browning and balances acidity."
+    },
+    {
+      "id": "fresh_cilantro_optional",
+      "label": "Cilantro, chopped (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 10, "unit": "g" }
+    },
+    {
+      "id": "lime_wedges_optional",
+      "label": "Lime wedges (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Make the citrus-chili marinade",
+      "instructions": [
+        "In a bowl, whisk together lime juice, orange juice, lime zest, garlic, olive oil, chili powder, cumin, salt, pepper, and honey (if using).",
+        "Set aside 2 tablespoons of the marinade for serving (do not contaminate it with raw fish)."
+      ],
+      "activeMins": 5,
+      "checks": [
+        "Marinade tastes bright, slightly salty, and gently spicy",
+        "Reserved portion is kept separate from raw fish"
+      ],
+      "timers": [
+        {
+          "label": "Marinade mix time",
+          "minutes": 5
+        }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Marinate briefly (important for texture)",
+      "instructions": [
+        "Pat fish dry. Add fish to the marinade and turn gently to coat.",
+        "Refrigerate 10–15 minutes for firm fish. Do not exceed 20 minutes (acid can start changing texture)."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 12,
+      "timers": [
+        {
+          "label": "Preferred fish marinade",
+          "minutes": 12
+        },
+        {
+          "label": "Maximum marinade (do not exceed)",
+          "minutes": 20
+        }
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Choose your cook method",
+      "instructions": [
+        "Skillet (fastest): Heat a nonstick or well-seasoned skillet over medium-high until hot.",
+        "Oven: Preheat to 425°F / 218°C. Line a sheet pan with parchment if desired.",
+        "Grill: Preheat to medium-high. Oil grates and use a grill basket for delicate fillets."
+      ],
+      "activeMins": 4,
+      "temperature": {
+        "type": "oven",
+        "value": 218,
+        "unit": "C",
+        "notes": "If using oven method."
+      }
+    },
+    {
+      "id": "step_04",
+      "title": "Cook the fish",
+      "instructions": [
+        "Skillet: Remove fish from marinade (let excess drip off). Sear 2–4 minutes per side depending on thickness until opaque and flakes easily.",
+        "Oven: Arrange fish on sheet pan. Roast 8–12 minutes until opaque and flaky (time depends on thickness).",
+        "Grill: Grill 2–4 minutes per side for firm fish; avoid moving too early."
+      ],
+      "activeMins": 10,
+      "temperature": {
+        "type": "internal",
+        "value": 63,
+        "unit": "C",
+        "notes": "Common target for cooked fish (145°F / 63°C)."
+      },
+      "checks": [
+        "Fish is opaque and flakes easily with a fork",
+        "No raw translucent center remains",
+        "Surface has light browning without burnt garlic"
+      ],
+      "timers": [
+        {
+          "label": "Typical skillet cook time",
+          "minutes": 7
+        },
+        {
+          "label": "Typical oven roast time",
+          "minutes": 10
+        }
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Finish and serve",
+      "instructions": [
+        "Drizzle reserved marinade over cooked fish (or serve on the side).",
+        "Top with cilantro (optional) and serve with lime wedges.",
+        "Great in tacos, bowls, or on plates with rice and vegetables."
+      ],
+      "activeMins": 3
+    }
+  ],
+  "pairings": {
+    "sides": [
+      "citrus_chili.recipes.cilantro_lime_rice (if available)",
+      "simple_slaw",
+      "black_beans",
+      "grilled_corn_or_corn_salad",
+      "herb_garlic.recipes.garlic_mashed_potatoes (if plated and you want comfort)"
+    ],
+    "taco_build": [
+      "warm_corn_tortillas",
+      "cabbage_slaw",
+      "avocado",
+      "pickled_onions_optional"
+    ]
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 3,
+      "notes": "Fish is best day-of. Store cooked leftovers tightly covered."
+    },
+    "reheat": {
+      "methods": ["low oven (300°F / 150°C)", "gentle skillet"],
+      "notes": "Avoid microwaving on high; it can toughen fish. Add reserved sauce after reheating."
+    }
+  },
+  "safety": {
+    "handling": [
+      "Keep fish refrigerated until cooking.",
+      "Do not reuse marinade that contacted raw fish unless boiled for at least 1 minute."
+    ],
+    "internalTemp": {
+      "target": 63,
+      "unit": "C",
+      "notes": "145°F / 63°C is commonly referenced as a safe cooked fish temp."
+    }
+  },
+  "variations": [
+    {
+      "id": "variation_lemon_lime",
+      "label": "Lemon-lime version",
+      "notes": [
+        "Swap half the orange juice for lemon juice for sharper citrus.",
+        "Add 1 tsp grated ginger for extra brightness."
+      ]
+    },
+    {
+      "id": "variation_spicy",
+      "label": "Spicier version",
+      "notes": [
+        "Add 1/4 tsp cayenne or 1 minced jalapeño.",
+        "Finish with chili flakes and extra lime zest."
+      ]
+    },
+    {
+      "id": "variation_taco_style",
+      "label": "Taco-style fish",
+      "notes": [
+        "Dust fish lightly with extra chili powder before searing for deeper color.",
+        "Serve with slaw and a squeeze of lime; add a creamy drizzle if desired."
+      ]
+    }
+  ],
+  "planner": {
+    "cuisineId": "cuisines.citrus_chili",
+    "defaultCourse": "main",
+    "weeknightNotes": [
+      "Marinate fish only 10–15 minutes while you prep sides.",
+      "Use oven method if cooking multiple fillets at once."
+    ],
+    "shopping": {
+      "corePantry": [
+        "salt",
+        "black_pepper",
+        "chili_powder",
+        "ground_cumin",
+        "olive_oil"
+      ],
+      "fresh": [
+        "limes",
+        "oranges",
+        "garlic",
+        "cilantro_optional",
+        "fish_fillets"
+      ]
+    }
+  },
+  "compat": {
+    "cuisine": "citrus_chili",
+    "dishId": "citrus_chili_fish",
+    "ingredientIds": [
+      "white_fish_fillets",
+      "lime_juice",
+      "orange_juice",
+      "lime_zest",
+      "garlic",
+      "olive_oil",
+      "chili_powder",
+      "ground_cumin",
+      "salt",
+      "black_pepper",
+      "honey_optional",
+      "fresh_cilantro_optional",
+      "lime_wedges_optional"
+    ],
+    "equipmentIds": [
+      "mixing_bowl",
+      "measuring_spoons",
+      "cutting_board",
+      "knife",
+      "skillet_or_sheet_pan",
+      "fish_spatula_or_spatula",
+      "instant_read_thermometer",
+      "zester",
+      "citrus_juicer",
+      "grill",
+      "parchment_paper"
+    ],
+    "methodIds": ["short_marinade", "pan_sear", "oven_roast", "grill"]
+  }
+}

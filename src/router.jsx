@@ -21,7 +21,7 @@
 //   useRouteParams(), useQuery(), toQueryString(query), ROUTES (frozen).
 //
 // ASSUMPTIONS:
-// - src/services/eventBus.js exports a default { emit, on }-style bus
+// - src/services/events/eventBus.js exports a default { emit, on }-style bus
 // - src/services/automationRuntime.js exports initAutomationRuntime(), handleEvent()
 // - pages may not all exist yet → we provide Stub(...) for missing ones
 // -----------------------------------------------------------------------------
@@ -219,6 +219,8 @@ const Knowledge = lazyPage(
 );
 const Homestead = lazyPage(
   [
+    "@/pages/homesteadplanner/homestead.jsx",
+    "@/pages/homesteadplanner/index.jsx",
     "@/pages/homestead.jsx",
     "@/pages/Homestead.jsx",
     "@/pages/homestead/index.jsx",
@@ -267,6 +269,8 @@ const MultiTimer = lazyPage(
 // Domains
 const MealPage = lazyPage(
   [
+    "@/pages/mealplanner/index.jsx",
+    "@/pages/mealplanner/mealplanner.jsx",
     "@/pages/meals/MealsPage.jsx",
     "@/domain/meals/MealPlanner.jsx",
     "@/pages/meals/index.jsx",
@@ -316,7 +320,11 @@ const InventoryPage = lazyPage(
   "Inventory"
 );
 const StorehousePage = lazyPage(
-  ["@/pages/storehouse/StorehousePage.jsx", "@/pages/storehouse/index.jsx"],
+  [
+    "@/pages/storehouse/storehouse.jsx",
+    "@/pages/storehouse/StorehousePage.jsx",
+    "@/pages/storehouse/index.jsx",
+  ],
   "Storehouse"
 );
 
@@ -624,6 +632,14 @@ function AppRoutes() {
           <Route
             path="/kg"
             element={<Navigate to={ROUTES.knowledge.path} replace />}
+          />
+          <Route
+            path="/homesteadplanner"
+            element={<Navigate to={ROUTES.homestead.path} replace />}
+          />
+          <Route
+            path="/homesteadplanner/*"
+            element={<Navigate to={ROUTES.homestead.path} replace />}
           />
 
           {/* 404 — do NOT redirect to "/" silently */}

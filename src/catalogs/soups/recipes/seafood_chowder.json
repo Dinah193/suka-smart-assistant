@@ -1,0 +1,384 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.seafood_chowder",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Seafood Chowder",
+    "subtitle": "Creamy seafood base • optional bacon/smoked notes • adaptable with what you have",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "SSA baseline chowder: a flexible seafood chowder using a light roux + dairy. Supports optional bacon/smoked flavor and mixed seafood (shrimp, fish, scallops)."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "seafood",
+      "comfort",
+      "stovetop",
+      "family-friendly",
+      "use-what-you-have",
+      "batch-cooking-with-notes"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "chowder",
+      "seafood soup",
+      "creamy soup",
+      "shrimp",
+      "fish",
+      "potato soup"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~14–16 cups depending on potato size and simmer."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 30,
+    "totalMins": 60
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon",
+      "measuring cup"
+    ],
+    "recommended": [
+      "whisk",
+      "fine mesh strainer (optional)",
+      "instant-read thermometer (optional)"
+    ],
+    "optional": ["fish spatula (optional)", "smoker salt (optional)"]
+  },
+
+  "dietFlags": [],
+  "allergens": ["fish", "shellfish", "dairy", "wheat"],
+
+  "signals": {
+    "useWhatYouHave": true,
+    "batchCooking": true,
+    "highSatiety": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "richness": "high",
+    "savory": "high",
+    "notes": "Creamy, briny seafood flavor with tender potatoes. Optional bacon/smoked notes add depth."
+  },
+
+  "ingredients": [
+    {
+      "id": "bacon_optional",
+      "label": "Bacon, diced (optional for smoky base)",
+      "role": "flavor",
+      "amount": { "value": 90, "unit": "g" },
+      "optional": true,
+      "notes": "About 3 slices. If omitted, start with butter/olive oil."
+    },
+    {
+      "id": "butter",
+      "label": "Butter",
+      "role": "cook",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons. If using bacon, reduce butter to 15g."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "celery",
+      "label": "Celery, diced",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 2–3 stalks."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 3 cloves."
+    },
+    {
+      "id": "flour",
+      "label": "All-purpose flour",
+      "role": "thickener",
+      "amount": { "value": 40, "unit": "g" },
+      "notes": "About 1/3 cup."
+    },
+    {
+      "id": "white_wine_optional",
+      "label": "Dry white wine (optional)",
+      "role": "deglaze",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. Helps lift browned bits and adds brightness."
+    },
+    {
+      "id": "broth",
+      "label": "Seafood stock or chicken broth (low-sodium preferred)",
+      "role": "liquid",
+      "amount": { "value": 1200, "unit": "g" },
+      "notes": "About 5 cups. Seafood stock is best; chicken broth works in a pinch."
+    },
+    {
+      "id": "clam_juice_optional",
+      "label": "Clam juice (optional for stronger seafood flavor)",
+      "role": "liquid",
+      "amount": { "value": 240, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 cup. If used, reduce broth by the same amount."
+    },
+    {
+      "id": "potatoes",
+      "label": "Yukon gold or russet potatoes, diced",
+      "role": "starch",
+      "amount": { "value": 700, "unit": "g" },
+      "notes": "About 4 medium. Yukon gold stays creamy; russet breaks down more."
+    },
+    {
+      "id": "thyme_optional",
+      "label": "Dried thyme (optional)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "paprika_optional",
+      "label": "Smoked paprika (optional smoked note)",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "milk",
+      "label": "Whole milk",
+      "role": "finish",
+      "amount": { "value": 480, "unit": "g" },
+      "notes": "About 2 cups."
+    },
+    {
+      "id": "cream",
+      "label": "Heavy cream",
+      "role": "finish",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup. For lighter chowder, use more milk and less cream."
+    },
+    {
+      "id": "corn_optional",
+      "label": "Corn (optional)",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Frozen or canned; adds sweetness and color."
+    },
+    {
+      "id": "seafood_mix",
+      "label": "Mixed seafood (shrimp + firm white fish + scallops optional)",
+      "role": "protein",
+      "amount": { "value": 600, "unit": "g" },
+      "notes": "Example: 250g shrimp + 350g cod/haddock. Add scallops if desired; see planner notes for timing."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start with ~1 teaspoon; seafood stock can be salty—final-season at end."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "lemon_optional",
+      "label": "Lemon juice (optional, brightness)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 teaspoons to taste."
+    },
+    {
+      "id": "parsley_optional",
+      "label": "Fresh parsley or chives, chopped (optional garnish)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Build the base (optional bacon)",
+      "instructions": [
+        "If using bacon: add diced bacon to a cold pot and cook over medium heat until it renders and crisps (6–8 minutes).",
+        "Spoon off excess fat if needed, leaving ~1–2 tablespoons fat in the pot.",
+        "Add butter (reduce to ~15g if using bacon)."
+      ],
+      "activeMins": 10,
+      "timers": [{ "label": "Render bacon (optional)", "mins": 7 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "Add onion and celery. Cook 6–8 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 9,
+      "timers": [
+        { "label": "Cook onion/celery", "mins": 7 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Make a roux",
+      "instructions": [
+        "Sprinkle flour over the aromatics and stir well.",
+        "Cook 1–2 minutes, stirring, to remove raw flour taste (do not brown heavily)."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Cook flour", "mins": 2 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Deglaze and add stock",
+      "instructions": [
+        "If using wine: pour it in and scrape the bottom of the pot; simmer 1 minute.",
+        "Slowly whisk in broth (and clam juice if using) until smooth.",
+        "Add potatoes, thyme, bay leaf, smoked paprika (optional), salt, and pepper.",
+        "Bring to a gentle simmer."
+      ],
+      "activeMins": 7,
+      "timers": [{ "label": "Deglaze (optional)", "mins": 1 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Simmer until potatoes are tender",
+      "instructions": [
+        "Simmer 15–20 minutes, stirring occasionally, until potatoes are tender.",
+        "If you want a thicker chowder, lightly mash a cup of potatoes against the side of the pot and stir back in."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 18,
+      "timers": [{ "label": "Cook potatoes", "mins": 18 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Add dairy and gently heat",
+      "instructions": [
+        "Lower heat to keep the soup below a boil.",
+        "Stir in milk and cream. Warm 3–5 minutes."
+      ],
+      "activeMins": 5,
+      "timers": [{ "label": "Warm with dairy", "mins": 4 }]
+    },
+    {
+      "id": "step_07",
+      "title": "Cook seafood (do not overcook)",
+      "instructions": [
+        "Add fish pieces first (if using), simmer gently 2–3 minutes.",
+        "Add shrimp (and scallops if using) and cook 2–4 minutes more, just until opaque.",
+        "If using corn, stir it in during the last 2 minutes to warm through."
+      ],
+      "activeMins": 8,
+      "timers": [
+        { "label": "Cook fish", "mins": 3 },
+        { "label": "Cook shrimp", "mins": 3 }
+      ]
+    },
+    {
+      "id": "step_08",
+      "title": "Season and serve",
+      "instructions": [
+        "Remove bay leaf (if used). Taste and adjust salt/pepper.",
+        "Add lemon juice (optional) to brighten.",
+        "Serve hot, topped with parsley/chives (optional)."
+      ],
+      "activeMins": 3
+    }
+  ],
+
+  "planner": {
+    "useWhatYouHaveLogic": {
+      "seafoodOptions": [
+        "Best mix: firm white fish (cod/haddock) + shrimp.",
+        "Scallops: add in the last 2–3 minutes.",
+        "Crab or lobster: add pre-cooked at the very end just to warm.",
+        "Canned clams: add at the end with a bit of the clam juice."
+      ],
+      "smokedNotes": [
+        "Bacon gives classic smoky depth.",
+        "No bacon? Use smoked paprika, smoked salt, or a tiny splash of liquid smoke (very little)."
+      ],
+      "thicknessControl": [
+        "Thicker: mash some potatoes, or increase flour to 50g.",
+        "Thinner: add broth or milk."
+      ],
+      "dairyHandling": [
+        "Avoid boiling after adding dairy to prevent curdling.",
+        "If your stock is very hot, lower heat before adding milk/cream."
+      ]
+    },
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "bestPractices": [
+        "Chowder is best fresh. For make-ahead: cook base through potatoes + dairy, then cool.",
+        "Add seafood only when reheating/serving for best texture."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 3 days. Seafood texture is best within 24–48 hours. Reheat gently; do not boil.",
+    "freezer": "Not ideal due to dairy + seafood texture changes, but the potato-dairy base can be frozen up to 2 months (add seafood fresh later).",
+    "reheat": "Warm over low heat, stirring. Add a splash of milk/broth if thickened."
+  },
+
+  "notes": [
+    "If using raw fish, cut into 1-inch chunks so it cooks evenly without falling apart.",
+    "Seafood cooks fast—keep heat gentle and stop as soon as shrimp are opaque."
+  ],
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions; no disallowed top-level properties."
+  }
+}

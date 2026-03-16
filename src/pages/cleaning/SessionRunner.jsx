@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // src/pages/cleaning/SessionRunner.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 /* -----------------------------------------------------------------------------
@@ -10,18 +16,27 @@ const isBrowser = typeof window !== "undefined";
 
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
-let automation = { emit: () => {}, on: () => {}, off: () => {}, rules: { get: () => [] } };
+let automation = {
+  emit: () => {},
+  on: () => {},
+  off: () => {},
+  rules: { get: () => [] },
+};
 try {
   const mod = require("@/services/automation/runtime");
   automation = (mod && (mod.automation || mod.default || mod)) || automation;
 } catch (_e) {}
 
 let pausePolicies = {
-  constants: { REASON_USER: "user", REASON_SAFETY: "safety", REASON_SABBATH: "sabbath" },
+  constants: {
+    REASON_USER: "user",
+    REASON_SAFETY: "safety",
+    REASON_SABBATH: "sabbath",
+  },
   shouldFreeze: () => false,
   canContinue: () => true,
   normalize: (p) => ({ ...p }),
@@ -35,9 +50,10 @@ let offsetParser = {
   parse: (s) => {
     // Very small fallback: "+20m", "PT1H", "10m"
     if (!s) return 0;
-    const m = /(?:(\+)?PT)?(?:(\d+)H)?(?:(\d+)M)?/.exec(s) ||
-              /^(\+)?(\d+)\s*m(in)?$/.exec(s) ||
-              /^(\+)?(\d+)\s*h(ours?)?$/.exec(s);
+    const m =
+      /(?:(\+)?PT)?(?:(\d+)H)?(?:(\d+)M)?/.exec(s) ||
+      /^(\+)?(\d+)\s*m(in)?$/.exec(s) ||
+      /^(\+)?(\d+)\s*h(ours?)?$/.exec(s);
     if (!m) return 0;
     const nums = m.slice(2).map((x) => (x ? parseInt(x, 10) : 0));
     let minutes = 0;
@@ -75,7 +91,8 @@ let useSettingsStore = () => ({
 });
 try {
   const mod = require("@/stores/settingsStore");
-  useSettingsStore = (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
+  useSettingsStore =
+    (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
 } catch (_e) {}
 
 let useFavoriteSessions = () => ({
@@ -108,12 +125,17 @@ const localFavAPI = {
     if (!isBrowser) return [];
     try {
       return JSON.parse(localStorage.getItem(fallbackFavKey) || "[]");
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   },
   save: async (fav) => {
     if (!isBrowser) return { ok: false };
     const all = localFavAPI.list();
-    const next = [...all.filter((f) => f.id !== fav.id), { ...fav, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((f) => f.id !== fav.id),
+      { ...fav, updatedAt: Date.now() },
+    ];
     localStorage.setItem(fallbackFavKey, JSON.stringify(next));
     return { ok: true };
   },
@@ -129,12 +151,17 @@ const localSchedAPI = {
     if (!isBrowser) return [];
     try {
       return JSON.parse(localStorage.getItem(fallbackSchedKey) || "[]");
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   },
   save: async (s) => {
     if (!isBrowser) return { ok: false };
     const all = localSchedAPI.list();
-    const next = [...all.filter((x) => x.id !== s.id), { ...s, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((x) => x.id !== s.id),
+      { ...s, updatedAt: Date.now() },
+    ];
     localStorage.setItem(fallbackSchedKey, JSON.stringify(next));
     return { ok: true };
   },
@@ -187,7 +214,11 @@ const Timeline = ({ steps = [], currentIndex = 0 }) => (
           key={s.id || i}
           className={[
             "p-3 rounded-xl border",
-            active ? "bg-blue-50 border-blue-300" : done ? "bg-green-50 border-green-300" : "bg-zinc-50 border-zinc-200",
+            active
+              ? "bg-blue-50 border-blue-300"
+              : done
+              ? "bg-green-50 border-green-300"
+              : "bg-zinc-50 border-zinc-200",
           ].join(" ")}
         >
           <div className="font-medium">
@@ -213,10 +244,16 @@ const PauseModal = ({ open, reason, onClose, onContinue }) => {
           {reason || "Session is paused."}
         </div>
         <div className="flex justify-end gap-2">
-          <button className="px-3 py-2 rounded-xl border bg-zinc-50" onClick={onClose}>
+          <button
+            className="px-3 py-2 rounded-xl border bg-zinc-50"
+            onClick={onClose}
+          >
             Close
           </button>
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={onContinue}>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={onContinue}
+          >
             Continue
           </button>
         </div>
@@ -259,22 +296,52 @@ export default function CleaningSessionRunner() {
 
   // Router state may carry templateId, seed steps, or resume info
   const routeState = (location && location.state) || {};
-  const templateId = routeState.templateId || defaults?.cleaningTemplateId || "speed-clean-30";
+  const templateId =
+    routeState.templateId || defaults?.cleaningTemplateId || "speed-clean-30";
 
   // Session state
   const [sessionId] = useState(() => routeState.sessionId || `clean-${uid()}`);
   const [title, setTitle] = useState(routeState.title || "Cleaning Session");
-  const [subtitle, setSubtitle] = useState(routeState.subtitle || "Let’s reset your home.");
+  const [subtitle, setSubtitle] = useState(
+    routeState.subtitle || "Let’s reset your home."
+  );
   const [steps, setSteps] = useState(() => {
-    const seed = (routeState.steps || []).map((s, i) => ({ id: s.id || `st-${i}-${uid()}`, ...s }));
-    return seed.length ? seed : [
-      { id: `st-${uid()}`, title: "Tidy entry & living room", duration: 10, hints: "Collect clutter, quick surfaces" },
-      { id: `st-${uid()}`, title: "Kitchen reset", duration: 10, hints: "Dishes, counters, spot mop" },
-      { id: `st-${uid()}`, title: "Bathroom refresh", duration: 7, hints: "Mirror, sink, toilet, quick floor" },
-      { id: `st-${uid()}`, title: "Hallway & trash", duration: 3, hints: "Gather bins, swap liners" },
-    ];
+    const seed = (routeState.steps || []).map((s, i) => ({
+      id: s.id || `st-${i}-${uid()}`,
+      ...s,
+    }));
+    return seed.length
+      ? seed
+      : [
+          {
+            id: `st-${uid()}`,
+            title: "Tidy entry & living room",
+            duration: 10,
+            hints: "Collect clutter, quick surfaces",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Kitchen reset",
+            duration: 10,
+            hints: "Dishes, counters, spot mop",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Bathroom refresh",
+            duration: 7,
+            hints: "Mirror, sink, toilet, quick floor",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Hallway & trash",
+            duration: 3,
+            hints: "Gather bins, swap liners",
+          },
+        ];
   });
-  const [idx, setIdx] = useState(() => Math.min(routeState.currentIndex || 0, Math.max(steps.length - 1, 0)));
+  const [idx, setIdx] = useState(() =>
+    Math.min(routeState.currentIndex || 0, Math.max(steps.length - 1, 0))
+  );
   const [paused, setPaused] = useState(false);
   const [pauseReason, setPauseReason] = useState("");
   const [startedAt] = useState(routeState.startedAt || nowISO());
@@ -310,7 +377,12 @@ export default function CleaningSessionRunner() {
         const guardRes = await inventoryGuard.ensureOnHand?.({
           domain: "cleaning",
           sessionId,
-          items: ["All-purpose cleaner", "Glass cleaner", "Trash bags", "Microfiber cloths"],
+          items: [
+            "All-purpose cleaner",
+            "Glass cleaner",
+            "Trash bags",
+            "Microfiber cloths",
+          ],
         });
         if (guardRes?.shortages?.length) {
           setShortages(guardRes.shortages);
@@ -391,7 +463,8 @@ export default function CleaningSessionRunner() {
   // Orchestration listeners (defensive)
   useEffect(() => {
     const onStep = (payload) => {
-      if (payload?.sessionId !== sessionId || payload?.domain !== "cleaning") return;
+      if (payload?.sessionId !== sessionId || payload?.domain !== "cleaning")
+        return;
       if (payload.type === "next") goNext();
       if (payload.type === "prev") goPrev();
       if (payload.type === "pause") onPause(payload.reason);
@@ -427,17 +500,24 @@ export default function CleaningSessionRunner() {
     });
   }, [idx, sessionId]);
 
-  const onPause = useCallback((reason = pausePolicies.constants?.REASON_USER || "user") => {
-    setPaused(true);
-    const message =
-      reason === pausePolicies.constants?.REASON_SAFETY
-        ? "Paused for safety."
-        : reason === pausePolicies.constants?.REASON_SABBATH
-        ? "Paused by household guard (Sabbath/Quiet Hours)."
-        : "Paused by user.";
-    setPauseReason(message);
-    eventBus.emit("session:paused", { sessionId, domain: "cleaning", reason });
-  }, [sessionId]);
+  const onPause = useCallback(
+    (reason = pausePolicies.constants?.REASON_USER || "user") => {
+      setPaused(true);
+      const message =
+        reason === pausePolicies.constants?.REASON_SAFETY
+          ? "Paused for safety."
+          : reason === pausePolicies.constants?.REASON_SABBATH
+          ? "Paused by household guard (Sabbath/Quiet Hours)."
+          : "Paused by user.";
+      setPauseReason(message);
+      eventBus.emit("session:paused", {
+        sessionId,
+        domain: "cleaning",
+        reason,
+      });
+    },
+    [sessionId]
+  );
 
   const onResume = useCallback(() => {
     const ok = pausePolicies.canContinue?.({
@@ -456,7 +536,11 @@ export default function CleaningSessionRunner() {
   }, [sessionId, quietHours, sabbath]);
 
   const onExit = useCallback(() => {
-    eventBus.emit("session:ended", { sessionId, domain: "cleaning", finishedAt: nowISO() });
+    eventBus.emit("session:ended", {
+      sessionId,
+      domain: "cleaning",
+      finishedAt: nowISO(),
+    });
     navigate("/tier2/household/chores", { replace: true });
   }, [navigate, sessionId]);
 
@@ -479,7 +563,15 @@ export default function CleaningSessionRunner() {
     } else {
       alert("Could not save favorite.");
     }
-  }, [favHook, scheduleSuggestion, sessionId, startedAt, steps, templateId, title]);
+  }, [
+    favHook,
+    scheduleSuggestion,
+    sessionId,
+    startedAt,
+    steps,
+    templateId,
+    title,
+  ]);
 
   /* -------------------------------- Save: Schedule Template ------------------------------ */
   const saveScheduleTemplate = useCallback(async () => {
@@ -500,7 +592,8 @@ export default function CleaningSessionRunner() {
     setScheduleSuggestion(sched);
 
     // Persist schedule template (hook or localStorage)
-    const res = await (schedHook.save?.(sched) || Promise.resolve({ ok: false }));
+    const res = await (schedHook.save?.(sched) ||
+      Promise.resolve({ ok: false }));
     if (res?.ok) {
       eventBus.emit("schedules:changed", { domain: "cleaning" });
       alert("Schedule template saved ✓");
@@ -518,7 +611,14 @@ export default function CleaningSessionRunner() {
         meta: { sessionTemplateId: sched.id, source: "SessionRunner" },
       });
     } catch (_e) {}
-  }, [calendarSync, rhythms?.preferMorning, schedHook, steps, templateId, title]);
+  }, [
+    calendarSync,
+    rhythms?.preferMorning,
+    schedHook,
+    steps,
+    templateId,
+    title,
+  ]);
 
   /* --------------------------------- Render --------------------------------- */
   const currentStep = steps[idx] || {};
@@ -533,7 +633,9 @@ export default function CleaningSessionRunner() {
       {/* Top bar */}
       <div className="mb-3 flex items-center justify-between">
         <div className="text-sm opacity-70">
-          <Link className="underline" to="/tier2/household/chores">Chores</Link>
+          <Link className="underline" to="/tier2/household/chores">
+            Chores
+          </Link>
           <span className="mx-1">/</span>
           <span>Session</span>
           {shortagesBadge}
@@ -576,7 +678,9 @@ export default function CleaningSessionRunner() {
       {/* Current step card */}
       <div className="mt-4 p-4 rounded-2xl border bg-white dark:bg-zinc-900">
         <div className="flex items-baseline justify-between">
-          <div className="text-lg font-semibold">{currentStep.title || "Step"}</div>
+          <div className="text-lg font-semibold">
+            {currentStep.title || "Step"}
+          </div>
           <div className="text-xs opacity-70">
             Step {idx + 1} of {steps.length}
           </div>
@@ -617,7 +721,8 @@ export default function CleaningSessionRunner() {
 
       {/* Footer / secondary info */}
       <div className="mt-6 text-xs opacity-60">
-        Template: <code>{templateId}</code> • Session ID: <code>{sessionId}</code> • Started:{" "}
+        Template: <code>{templateId}</code> • Session ID:{" "}
+        <code>{sessionId}</code> • Started:{" "}
         <time dateTime={startedAt}>{new Date(startedAt).toLocaleString()}</time>
       </div>
     </div>

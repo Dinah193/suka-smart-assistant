@@ -1,0 +1,341 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.broccoli_cheddar_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Broccoli Cheddar Soup",
+    "subtitle": "Creamy broccoli + sharp cheddar • cafe-style vibe (Panera-inspired feel, not a copy)",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Original formulation designed for a Panera-style texture and flavor: creamy base, broccoli-forward, carrot/onion notes, sharp cheddar finish. Not a proprietary copy."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "creamy",
+      "cheddar",
+      "broccoli",
+      "cafe-style-vibe",
+      "stovetop",
+      "comfort-food",
+      "batch-cooking"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl", "bread-bowl"],
+    "plannerTags": [
+      "broccoli cheddar",
+      "cream soup",
+      "family-friendly",
+      "grilled cheese pair",
+      "bread bowl"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~14–16 cups depending on broccoli size and final thickness."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 25,
+    "totalMins": 50
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "whisk",
+      "knife",
+      "cutting board",
+      "measuring cup"
+    ],
+    "recommended": [
+      "immersion blender (optional)",
+      "box grater (if shredding your own cheese)"
+    ],
+    "optional": ["fine mesh strainer (optional)"]
+  },
+
+  "dietFlags": [],
+  "allergens": ["milk", "wheat"],
+
+  "signals": {
+    "batchCooking": true,
+    "freezerFriendly": "partial",
+    "highSatiety": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "richness": "high",
+    "savory": "high",
+    "sharpness": "medium",
+    "notes": "Creamy, cheddar-forward soup with broccoli bite and subtle sweetness from carrot/onion."
+  },
+
+  "ingredients": [
+    {
+      "id": "butter",
+      "label": "Unsalted butter",
+      "role": "cook",
+      "amount": { "value": 57, "unit": "g" },
+      "notes": "4 tablespoons."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced small",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, diced small",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 2 medium. Small dice helps 'cafe-style' texture."
+    },
+    {
+      "id": "celery_optional",
+      "label": "Celery, diced small (optional)",
+      "role": "vegetable",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 stalks. Adds classic soup-base aroma."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 cloves."
+    },
+    {
+      "id": "flour",
+      "label": "All-purpose flour",
+      "role": "thickener",
+      "amount": { "value": 40, "unit": "g" },
+      "notes": "About 1/3 cup. Creates the roux."
+    },
+    {
+      "id": "broth",
+      "label": "Chicken broth or vegetable broth (low-sodium preferred)",
+      "role": "liquid",
+      "amount": { "value": 950, "unit": "g" },
+      "notes": "About 4 cups."
+    },
+    {
+      "id": "milk",
+      "label": "Milk (2% or whole)",
+      "role": "liquid",
+      "amount": { "value": 720, "unit": "g" },
+      "notes": "About 3 cups."
+    },
+    {
+      "id": "heavy_cream_optional",
+      "label": "Heavy cream (optional, extra rich)",
+      "role": "liquid",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. If using, reduce milk slightly or keep total liquid the same."
+    },
+    {
+      "id": "mustard_powder_optional",
+      "label": "Dry mustard powder (optional, boosts cheddar flavor)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "paprika_optional",
+      "label": "Paprika (optional)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "nutmeg_optional",
+      "label": "Ground nutmeg (optional)",
+      "role": "seasoning",
+      "amount": { "value": 0.2, "unit": "g" },
+      "optional": true,
+      "notes": "A tiny pinch adds 'cafe' cream-soup depth."
+    },
+    {
+      "id": "broccoli",
+      "label": "Broccoli florets (chopped bite-size) + peeled stems (optional, diced)",
+      "role": "vegetable",
+      "amount": { "value": 600, "unit": "g" },
+      "notes": "About 1.25–1.5 lb. Include diced stems for less waste."
+    },
+    {
+      "id": "cheddar",
+      "label": "Sharp cheddar cheese, freshly shredded",
+      "role": "dairy",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "About 12 oz. Freshly shredded melts smoother than pre-shredded."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "Start with ~1 1/4 teaspoons; adjust after cheese melts."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "hot_sauce_optional",
+      "label": "Hot sauce (optional, for balance)",
+      "role": "finish",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true,
+      "notes": "A few dashes. Helps cut richness without making it spicy."
+    },
+    {
+      "id": "lemon_optional",
+      "label": "Lemon juice (optional, brightness)",
+      "role": "finish",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true,
+      "notes": "1 teaspoon, to taste."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat vegetables",
+      "instructions": [
+        "Melt butter in a large pot over medium heat.",
+        "Add onion, carrots, and celery (if using). Cook 6–8 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Cook vegetables", "mins": 8 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Make the roux (thickener)",
+      "instructions": [
+        "Sprinkle flour over the vegetables and stir continuously for 1–2 minutes to cook out raw flour taste.",
+        "The mixture should look thick and slightly pasty (roux coating the vegetables)."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Cook roux", "mins": 2 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Add liquids and seasonings; simmer",
+      "instructions": [
+        "Slowly whisk in broth to avoid lumps, then whisk in milk (and cream if using).",
+        "Add mustard powder/paprika/nutmeg (optional), salt, and pepper.",
+        "Bring to a gentle simmer (do not boil hard). Simmer 10 minutes, stirring occasionally, until slightly thickened."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Simmer base", "mins": 10 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Cook broccoli until tender",
+      "instructions": [
+        "Add chopped broccoli (and diced stems if using).",
+        "Simmer 10–12 minutes until broccoli is tender but not mushy."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 12,
+      "timers": [{ "label": "Simmer broccoli", "mins": 12 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Optional: blend a portion for cafe-style texture",
+      "instructions": [
+        "For a smoother cafe-style soup, blend briefly with an immersion blender (5–10 seconds bursts) to puree part of the broccoli and thicken the soup.",
+        "Alternatively, ladle 2 cups into a blender, puree, then return to pot. (Vent blender carefully.)"
+      ],
+      "activeMins": 5
+    },
+    {
+      "id": "step_06",
+      "title": "Melt in cheddar off heat",
+      "instructions": [
+        "Remove pot from heat (important to prevent grainy cheese).",
+        "Add cheddar in small handfuls, stirring until fully melted before adding more.",
+        "Return to very low heat only if needed to keep warm—avoid boiling."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_07",
+      "title": "Finish and serve",
+      "instructions": [
+        "Taste and adjust salt/pepper.",
+        "Add optional hot sauce and/or lemon juice to brighten and balance richness.",
+        "Serve hot, especially good with toasted bread or in a bread bowl."
+      ],
+      "activeMins": 3
+    }
+  ],
+
+  "planner": {
+    "useWhatYouHaveLogic": {
+      "broccoli": [
+        "Frozen broccoli works: add straight from frozen; simmer a few minutes longer.",
+        "If broccoli is very coarse, chop smaller for a more 'cafe-style' bite."
+      ],
+      "cheese": [
+        "Use sharp cheddar for best flavor. Avoid pre-shredded if possible (anti-caking agents can make it grainy).",
+        "If substituting: use a mix of sharp cheddar + mild cheddar for a less sharp finish."
+      ],
+      "thickness": [
+        "If too thick: add a splash of milk or broth.",
+        "If too thin: simmer a few extra minutes before adding cheese, or blend more broccoli."
+      ],
+      "grainyPrevention": [
+        "Keep heat gentle; never boil after adding cheese.",
+        "Add cheese off heat and in handfuls."
+      ]
+    },
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "bestPractices": [
+        "Best fresh. If freezing, expect some texture change due to dairy—stir well when reheating.",
+        "For best freezer results: freeze the base before adding cheese, then add cheese after thawing/reheating."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 4 days. Reheat gently (low heat) to avoid separating.",
+    "freezer": "Freeze up to 2 months. Dairy soups may separate; reheat slowly and whisk to re-emulsify. Best practice: freeze base without cheese and add cheese after thawing.",
+    "reheat": "Warm on low, stirring frequently. Do not boil. Add a splash of milk/broth if needed."
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; all ingredients include id+label+amount; all steps include id+title+instructions; no disallowed top-level properties per current recipe.schema.json."
+  }
+}

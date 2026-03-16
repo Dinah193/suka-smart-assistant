@@ -411,9 +411,9 @@ export function createCouponNormalizers(deps = {}) {
       c.offer.stackable = {
         withManufacturer: !!raw.stackable?.withManufacturer,
         withStore: !!raw.stackable?.withStore,
-        withLoyalty: !!raw.stackable?.withLoyalty ?? true,
-        withRebate: !!raw.stackable?.withRebate ?? true,
-        withPromoCode: !!raw.stackable?.withPromoCode ?? true,
+        withLoyalty: Boolean(raw.stackable?.withLoyalty ?? true),
+        withRebate: Boolean(raw.stackable?.withRebate ?? true),
+        withPromoCode: Boolean(raw.stackable?.withPromoCode ?? true),
       };
     }
     // loyalty Required?

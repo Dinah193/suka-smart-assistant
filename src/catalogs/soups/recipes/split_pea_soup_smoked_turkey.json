@@ -1,0 +1,310 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.split_pea_soup_smoked_turkey",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Split Pea Soup (Smoked Turkey)",
+    "subtitle": "Classic comfort soup • smoky, hearty • supports smoked turkey or lamb options",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Designed for SSA batch cooking + freezer use. Includes smoked turkey baseline with optional smoked lamb swap and meatless fallback."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "comfort",
+      "batch-cooking",
+      "freezer-friendly",
+      "high-protein",
+      "stovetop",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "split pea soup",
+      "smoked turkey",
+      "smoky",
+      "batch cooking",
+      "freezer friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~14–16 cups depending on simmer and thickness."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 75,
+    "totalMins": 95
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon",
+      "ladle"
+    ],
+    "recommended": [
+      "fine mesh strainer (for rinsing peas)",
+      "tongs (for removing smoked meat)"
+    ],
+    "optional": ["immersion blender (texture control)"]
+  },
+
+  "signals": {
+    "freezerFriendly": true,
+    "batchCooking": true,
+    "highSatiety": true,
+    "useWhatYouHave": true
+  },
+
+  "ingredients": [
+    {
+      "id": "oil",
+      "label": "Olive oil or neutral oil",
+      "role": "cook",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 1 large."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, diced",
+      "role": "vegetable",
+      "amount": { "value": 220, "unit": "g" },
+      "notes": "About 3 medium."
+    },
+    {
+      "id": "celery",
+      "label": "Celery, diced",
+      "role": "vegetable",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "About 4 stalks."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "split_peas",
+      "label": "Green split peas, rinsed and picked over",
+      "role": "base",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 2 1/4 cups dry."
+    },
+    {
+      "id": "broth",
+      "label": "Chicken or turkey broth (low-sodium preferred)",
+      "role": "liquid",
+      "amount": { "value": 2000, "unit": "g" },
+      "notes": "About 8 1/2 cups. Use water if needed; adjust salt at the end."
+    },
+    {
+      "id": "water_optional",
+      "label": "Water (optional, adjust thickness)",
+      "role": "liquid",
+      "amount": { "value": 500, "unit": "g" },
+      "optional": true,
+      "notes": "Add during simmer if soup thickens too much."
+    },
+    {
+      "id": "bay_leaves",
+      "label": "Bay leaves",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "thyme",
+      "label": "Dried thyme (or fresh thyme sprigs)",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 teaspoon dried (or 4–6 sprigs)."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon to start."
+    },
+    {
+      "id": "smoked_turkey",
+      "label": "Smoked turkey leg/drumstick/wing (bone-in)",
+      "role": "protein",
+      "amount": { "value": 700, "unit": "g" },
+      "notes": "1–2 pieces. Add whole for simmer; shred and return meat to soup."
+    },
+    {
+      "id": "smoked_lamb_optional",
+      "label": "Smoked lamb (optional swap for turkey)",
+      "role": "protein",
+      "amount": { "value": 500, "unit": "g" },
+      "optional": true,
+      "notes": "Use smoked lamb neck/bones/chunks. Swap in place of smoked turkey."
+    },
+    {
+      "id": "salt",
+      "label": "Salt (adjust to broth and smoked meat)",
+      "role": "seasoning",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "Start light; smoked meats vary widely in salt."
+    },
+    {
+      "id": "vinegar_optional",
+      "label": "Apple cider vinegar or lemon juice (optional, for brightness)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 teaspoons to taste."
+    },
+    {
+      "id": "parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "For serving."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat the aromatics",
+      "instructions": [
+        "Heat oil in a large pot over medium heat.",
+        "Add onion, carrots, and celery. Cook 8–10 minutes, stirring, until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 12,
+      "timers": [
+        { "label": "Cook aromatics", "mins": 9 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Add peas, broth, and smoked meat",
+      "instructions": [
+        "Add rinsed split peas, broth, bay leaves, thyme, black pepper, and a light pinch of salt.",
+        "Nestle smoked turkey into the pot (or smoked lamb if using).",
+        "Bring to a gentle simmer, then reduce heat to maintain a steady simmer."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_03",
+      "title": "Simmer until peas are creamy",
+      "instructions": [
+        "Simmer partially covered 60–75 minutes, stirring occasionally, until split peas are very tender and the soup thickens.",
+        "If the soup becomes too thick, add water a little at a time."
+      ],
+      "handsOffMins": 70,
+      "timers": [{ "label": "Simmer soup", "mins": 70 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Shred smoked turkey (or lamb) and return to soup",
+      "instructions": [
+        "Remove smoked turkey from the pot and let cool briefly.",
+        "Pull meat from bones, shred into bite-size pieces, and discard skin/bones (or reserve bones for stock).",
+        "Return shredded meat to the pot and stir."
+      ],
+      "activeMins": 10
+    },
+    {
+      "id": "step_05",
+      "title": "Adjust texture and seasoning",
+      "instructions": [
+        "For a smoother texture, blend 1–2 cups of soup with an immersion blender and stir back in (optional).",
+        "Taste and adjust salt and pepper.",
+        "Add a small splash of vinegar or lemon juice (optional) to brighten.",
+        "Serve hot; garnish with parsley if desired."
+      ],
+      "activeMins": 8
+    }
+  ],
+
+  "planner": {
+    "batchCooking": {
+      "recommendedBatchMultiplier": 1,
+      "freezerPortionSizeCups": 2,
+      "bestPractices": [
+        "Cool quickly and portion for freezer. Soup thickens when chilled; loosen with broth/water when reheating.",
+        "If you prefer distinct chunks, skip blending; if you prefer creamy, blend a portion."
+      ]
+    },
+    "flex": {
+      "proteinSwap": [
+        "smoked turkey",
+        "smoked lamb",
+        "leftover roast turkey (add near end)",
+        "meatless (omit meat; add extra seasoning)"
+      ],
+      "vegSwap": [
+        "carrots",
+        "celery",
+        "onion",
+        "leeks",
+        "parsnips",
+        "potatoes (optional)"
+      ],
+      "finish": ["vinegar", "lemon juice", "hot sauce (optional)"]
+    },
+    "useWhatYouHaveLogic": {
+      "notes": "If no smoked meat: add 2g smoked paprika and a bit more salt; optionally add 10g soy sauce or bouillon for depth."
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 5 days. Thickens as it sits; add broth/water to loosen.",
+    "freezer": "Freeze up to 3 months. Thaw overnight and reheat gently, adding liquid as needed.",
+    "reheat": "Reheat to a simmer, stirring often to prevent sticking."
+  },
+
+  "notes": [
+    "Split peas can scorch as the soup thickens—stir more frequently in the last 15–20 minutes.",
+    "Smoked meats vary in salt; always season at the end after tasting.",
+    "For a thinner, brothy version, increase broth by 250–500g and reduce simmer time slightly."
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "cornbread",
+      "buttermilk biscuits",
+      "sandwich bread",
+      "flatbread"
+    ],
+    "notes": "Great with a simple salad or pickled vegetables for contrast."
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions. Optional smoked lamb swap provided."
+  }
+}

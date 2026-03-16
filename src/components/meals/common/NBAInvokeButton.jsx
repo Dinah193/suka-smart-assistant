@@ -24,17 +24,24 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
  */
 
 let Icons = {};
-try { Icons = require("lucide-react"); } catch {}
+try {
+  Icons = require("lucide-react");
+} catch {}
 
 let eventBus = null;
-try { eventBus = require("@/services/eventBus").eventBus || null; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus || null;
+} catch {}
 
 let automation = null;
-try { automation = require("@/services/automation/runtime").automation || null; } catch {}
+try {
+  automation = require("@/services/automation/runtime").automation || null;
+} catch {}
 
 /* ------------------------------- Utilities ----------------------------------- */
 const cx = (...xs) => xs.filter(Boolean).join(" ");
-const clamp = (n, a = 0, b = Infinity) => Math.max(a, Math.min(b, Number.isFinite(+n) ? +n : a));
+const clamp = (n, a = 0, b = Infinity) =>
+  Math.max(a, Math.min(b, Number.isFinite(+n) ? +n : a));
 const prefersReduceMotion =
   typeof window !== "undefined" &&
   window.matchMedia &&
@@ -43,17 +50,17 @@ const prefersReduceMotion =
 /* -------------------------------- Component ---------------------------------- */
 const NBAInvokeButton = ({
   label = "Get suggestions",
-  scope = "meal-planner",                 // which surface this button belongs to
-  context = {},                           // any context you want to pass to NBAs
-  variant = "primary",                    // "primary" | "outline" | "ghost" | "pill"
-  size = "md",                            // "sm" | "md" | "lg"
-  badge = null,                           // initial badge number (nullable)
+  scope = "meal-planner", // which surface this button belongs to
+  context = {}, // any context you want to pass to NBAs
+  variant = "primary", // "primary" | "outline" | "ghost" | "pill"
+  size = "md", // "sm" | "md" | "lg"
+  badge = null, // initial badge number (nullable)
   badgeTitle = "New suggestions",
-  loading: loadingProp = false,           // external override
+  loading: loadingProp = false, // external override
   disabled = false,
-  hotkey = "Alt+N",                       // display + binding (Alt+N by default)
-  longPressMs = 450,                      // hold to open palette
-  onInvoke,                               // callback after emit
+  hotkey = "Alt+N", // display + binding (Alt+N by default)
+  longPressMs = 450, // hold to open palette
+  onInvoke, // callback after emit
   className = "",
   id,
 }) => {
@@ -79,7 +86,8 @@ const NBAInvokeButton = ({
   useEffect(() => {
     if (!eventBus?.on) return;
     const onCount = ({ scope: s, count: c }) => {
-      if (!s || s === scope) setCount(Number.isFinite(c) ? clamp(c, 0, 9999) : null);
+      if (!s || s === scope)
+        setCount(Number.isFinite(c) ? clamp(c, 0, 9999) : null);
     };
     const onLoading = ({ scope: s, loading: l }) => {
       if (!s || s === scope) setLoading(!!l);
@@ -94,8 +102,12 @@ const NBAInvokeButton = ({
 
   /* ------------------------------- Emits ------------------------------------- */
   const emit = (type, payload) => {
-    try { eventBus?.emit?.(type, payload); } catch {}
-    try { automation?.runTemplate?.(type, payload); } catch {}
+    try {
+      eventBus?.emit?.(type, payload);
+    } catch {}
+    try {
+      automation?.runTemplate?.(type, payload);
+    } catch {}
   };
 
   const doInvoke = () => {
@@ -152,25 +164,29 @@ const NBAInvokeButton = ({
   }, [hotkey, disabled, loading]);
 
   /* ------------------------------ Styling maps ------------------------------- */
-  const sizeCls = {
-    sm: "h-8 px-2.5 text-xs rounded-lg",
-    md: "h-10 px-3 text-sm rounded-xl",
-    lg: "h-12 px-4 text-base rounded-2xl",
-  }[size] || "h-10 px-3 text-sm rounded-xl";
+  const sizeCls =
+    {
+      sm: "h-8 px-2.5 text-xs rounded-lg",
+      md: "h-10 px-3 text-sm rounded-xl",
+      lg: "h-12 px-4 text-base rounded-2xl",
+    }[size] || "h-10 px-3 text-sm rounded-xl";
 
-  const varCls = {
-    primary:
-      "bg-gray-900 text-white hover:bg-gray-800 border border-gray-900",
-    outline:
-      "bg-white text-gray-900 hover:bg-gray-50 border border-gray-300",
-    ghost:
-      "bg-transparent text-gray-900 hover:bg-gray-50 border border-transparent",
-    pill:
-      "bg-indigo-600 text-white hover:bg-indigo-500 border border-indigo-600",
-  }[variant] || "bg-gray-900 text-white hover:bg-gray-800 border border-gray-900";
+  const varCls =
+    {
+      primary:
+        "bg-gray-900 text-white hover:bg-gray-800 border border-gray-900",
+      outline: "bg-white text-gray-900 hover:bg-gray-50 border border-gray-300",
+      ghost:
+        "bg-transparent text-gray-900 hover:bg-gray-50 border border-transparent",
+      pill: "bg-indigo-600 text-white hover:bg-indigo-500 border border-indigo-600",
+    }[variant] ||
+    "bg-gray-900 text-white hover:bg-gray-800 border border-gray-900";
 
-  const disabledCls = disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
-  const ringCls = "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500";
+  const disabledCls = disabled
+    ? "opacity-50 cursor-not-allowed"
+    : "cursor-pointer";
+  const ringCls =
+    "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500";
 
   /* ------------------------------- Badge pill -------------------------------- */
   const Badge = () =>
@@ -210,7 +226,10 @@ const NBAInvokeButton = ({
             e.preventDefault();
             doInvoke();
           }
-          if ((e.altKey && e.key.toLowerCase() === "p") || e.key === "ArrowDown") {
+          if (
+            (e.altKey && e.key.toLowerCase() === "p") ||
+            e.key === "ArrowDown"
+          ) {
             // Alt+P or ArrowDown opens the palette
             e.preventDefault();
             openPalette();

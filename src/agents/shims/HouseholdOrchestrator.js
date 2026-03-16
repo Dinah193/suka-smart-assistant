@@ -53,7 +53,7 @@ import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
 import { db } from "@/services/db"; // Dexie instance with db.sessions
 
 // NEW: domain-specific shim imports
-import { invokeCookingSessionShim } from "./cookingSessionShim";
+import { invokecookingSessionShim } from "./cookingSessionShim";
 
 const SOURCE = "agents/shims/HouseholdOrchestrator";
 
@@ -232,7 +232,7 @@ async function runReasonerWithGuards({ req, mode, context }) {
  */
 const SHIM_REGISTRY = {
   // Cooking
-  "cooking.session.generate": invokeCookingSessionShim,
+  "cooking.session.generate": invokecookingSessionShim,
 
   // placeholders for future domains:
   // "cleaning.session.generate": invokeCleaningSessionShim,
@@ -410,11 +410,11 @@ export async function invokeShim(req) {
       case "quickSession":
         return await handleQuickSession({ req, mode, warnings, debug });
 
-          case "import.parse":
-    case "session.generate.fromImport": {
-      return await invokeImportSessionShim({ intent, payload });
-    }
-default:
+      case "import.parse":
+      case "session.generate.fromImport": {
+        return await invokeImportSessionShim({ intent, payload });
+      }
+      default:
         warnings.push({ code: "UNKNOWN_INTENT", intent });
         return {
           ok: false,

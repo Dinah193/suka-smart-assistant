@@ -1,0 +1,525 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai.recipes.pad_krapow",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Pad Krapow (Thai Holy Basil Stir-Fry)",
+    "subtitle": "Fast, spicy basil-garlic stir-fry with a savory-sweet sauce—served over jasmine rice with a crispy fried egg.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Canonical pad krapow (ผัดกะเพรา) profile for SSA catalogs.",
+        "Includes optional chicken/beef/pork substitutions and basil fallback guidance."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "thai",
+    "subprofiles": ["thai.street_food", "thai.stir_fry", "thai.pad_family"],
+    "category": "main",
+    "mealArchetypes": ["meal.dinner", "meal.lunch"],
+    "servingStyles": ["serving.plates", "serving.street_food"],
+    "plannerTags": [
+      "cuisine.thai",
+      "dish.pad_krapow",
+      "category.main",
+      "method.stir_fry",
+      "weeknight.fast",
+      "high_heat",
+      "spicy",
+      "rice_bowl"
+    ]
+  },
+
+  "summary": "Pad krapow is a classic Thai stir-fry built on a garlic-chili base, a punchy savory sauce, and holy basil stirred in at the end. It’s commonly served over jasmine rice with a crispy fried egg (kai dao).",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 with rice (or 2–3 if served street-food style with a fried egg each)."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "totalMins": 25,
+    "handsOffMins": 5
+  },
+
+  "difficulty": 2,
+
+  "signals": {
+    "batchFriendly": "low",
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": false,
+    "notes": [
+      "Best made fresh. Reheats well for 1–2 days; basil aroma is brightest day-of.",
+      "Sauce can be pre-mixed for faster weeknight cooking."
+    ]
+  },
+
+  "tasteProfile": {
+    "pillars": ["savory", "spicy", "garlic", "herbal"],
+    "heatTypical": 4,
+    "sweetnessTypical": 2,
+    "saltinessTypical": 4,
+    "notes": "Holy basil is peppery and clove-like; add at the end so it stays fragrant."
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.wok",
+        "label": "Wok or large skillet",
+        "required": true
+      },
+      {
+        "id": "equipment.spatuIa",
+        "label": "Spatula",
+        "required": true,
+        "notes": "Any sturdy spatula works."
+      },
+      { "id": "equipment.knife", "label": "Chef's knife", "required": true },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.rice_cooker",
+      "equipment.mortar_pestle",
+      "equipment.small_bowl",
+      "equipment.measuring_spoons"
+    ],
+    "optional": [
+      {
+        "id": "equipment.thermometer_instant",
+        "label": "Instant-read thermometer",
+        "required": false
+      }
+    ],
+    "minimum": [
+      "equipment.skillet",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ]
+  },
+
+  "dietFlags": [],
+
+  "allergens": ["allergen.fish", "allergen.soy", "allergen.egg"],
+
+  "ingredientGroups": [
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": [
+        "ingredient.ground_pork",
+        "ingredient.ground_chicken",
+        "ingredient.ground_beef",
+        "ingredient.ground_turkey"
+      ]
+    },
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics",
+      "items": ["ingredient.garlic", "ingredient.thai_chili"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Sauce",
+      "items": [
+        "ingredient.fish_sauce",
+        "ingredient.soy_sauce_dark",
+        "ingredient.oyster_sauce",
+        "ingredient.sugar",
+        "ingredient.stock_chicken",
+        "ingredient.cornstarch"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish",
+      "items": ["ingredient.holy_basil", "ingredient.lime_wedges"]
+    },
+    {
+      "id": "group.serve",
+      "label": "To serve",
+      "items": [
+        "ingredient.jasmine_rice_cooked",
+        "ingredient.egg",
+        "ingredient.oil_neutral"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.ground_pork",
+      "label": "Ground pork",
+      "role": "protein",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": [
+        "Traditional. Swap with ground chicken, beef, or turkey (see variations)."
+      ]
+    },
+
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 24, "unit": "g" },
+      "notes": "About 6–8 cloves."
+    },
+    {
+      "id": "ingredient.thai_chili",
+      "label": "Thai bird's eye chilies, finely chopped (adjust to taste)",
+      "role": "heat",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": [
+        "For mild: use 1–2 chilies or a milder chili.",
+        "For extra heat: add 1–2 more chilies or a pinch of chili flakes."
+      ]
+    },
+
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (for stir-fry)",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" }
+    },
+
+    {
+      "id": "ingredient.oyster_sauce",
+      "label": "Oyster sauce",
+      "role": "umami",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Adds sweetness and depth."
+    },
+    {
+      "id": "ingredient.fish_sauce",
+      "label": "Fish sauce",
+      "role": "umami",
+      "amount": { "value": 20, "unit": "ml" }
+    },
+    {
+      "id": "ingredient.soy_sauce_dark",
+      "label": "Dark soy sauce (or light soy + a pinch of sugar as fallback)",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "Mainly for color and a deeper soy note."
+    },
+    {
+      "id": "ingredient.sugar",
+      "label": "Sugar (palm sugar preferred)",
+      "role": "sweetener",
+      "amount": { "value": 8, "unit": "g" }
+    },
+    {
+      "id": "ingredient.stock_chicken",
+      "label": "Chicken stock or water",
+      "role": "base",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Helps dissolve the sauce and keeps the stir-fry juicy."
+    },
+    {
+      "id": "ingredient.cornstarch",
+      "label": "Cornstarch (optional, for glossy sauce)",
+      "role": "thickener",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tsp; whisk into the stock before adding."
+    },
+
+    {
+      "id": "ingredient.holy_basil",
+      "label": "Holy basil leaves (krapow), loosely packed",
+      "role": "herb",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": [
+        "If unavailable: Thai basil is the best fallback; sweet basil works but is less authentic.",
+        "Add at the very end to preserve aroma."
+      ]
+    },
+
+    {
+      "id": "ingredient.jasmine_rice_cooked",
+      "label": "Cooked jasmine rice (to serve)",
+      "role": "starch",
+      "amount": { "value": 800, "unit": "g" },
+      "notes": "About 4 cups cooked."
+    },
+    {
+      "id": "ingredient.egg",
+      "label": "Eggs (for crispy fried eggs, optional but classic)",
+      "role": "garnish",
+      "amount": { "value": 4, "unit": "each" },
+      "optional": true,
+      "notes": "Kai dao: crispy edges, runny yolk."
+    },
+    {
+      "id": "ingredient.oil_neutral_fry",
+      "label": "Neutral oil (for frying eggs)",
+      "role": "fat",
+      "amount": { "value": 120, "unit": "ml" },
+      "optional": true,
+      "notes": "Use enough oil to shallow-fry for crispy edges."
+    },
+    {
+      "id": "ingredient.lime_wedges",
+      "label": "Lime wedges (optional)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "A squeeze at the end brightens the dish."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Prep: basil, aromatics, and sauce mix",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pick holy basil leaves; discard tough stems.",
+        "Mince garlic and chop chilies finely.",
+        "In a small bowl, mix oyster sauce, fish sauce, dark soy, sugar, and stock (whisk in cornstarch if using)."
+      ],
+      "checks": [
+        "Sauce is pre-mixed (stir-fry will move fast).",
+        "Basil is ready to add at the end."
+      ]
+    },
+    {
+      "id": "step.stir_fry_base",
+      "title": "Start the stir-fry: garlic-chili base",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat wok/skillet over high heat until very hot.",
+        "Add neutral oil, then add garlic and chilies.",
+        "Stir-fry 15–30 seconds until fragrant (do not burn)."
+      ],
+      "timers": [{ "label": "Bloom aromatics", "seconds": 25 }],
+      "checks": ["Aromatics smell fragrant; garlic is not browned bitterly."]
+    },
+    {
+      "id": "step.cook_protein",
+      "title": "Cook the ground pork",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add ground pork and spread it out so it sears.",
+        "Stir-fry, breaking up clumps, until mostly cooked through and lightly browned in spots."
+      ],
+      "checks": [
+        "No pink remains in the majority of the meat.",
+        "Some browning adds flavor (wok hei)."
+      ]
+    },
+    {
+      "id": "step.add_sauce_reduce",
+      "title": "Add sauce and reduce to glossy",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pour in the pre-mixed sauce.",
+        "Toss and simmer 60–90 seconds until the sauce clings lightly to the meat.",
+        "Taste and adjust: a splash more fish sauce for salt/umami, a pinch more sugar for balance."
+      ],
+      "timers": [{ "label": "Reduce sauce", "seconds": 75 }],
+      "checks": ["Sauce is glossy and coats; not watery."]
+    },
+    {
+      "id": "step.finish_basil",
+      "title": "Finish with holy basil",
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "instructions": [
+        "Turn off heat.",
+        "Add holy basil and toss just until wilted and fragrant (10–20 seconds)."
+      ],
+      "timers": [{ "label": "Wilt basil", "seconds": 15 }],
+      "checks": ["Basil is just wilted; still aromatic and bright."]
+    },
+    {
+      "id": "step.fry_eggs_optional",
+      "title": "Optional: fry crispy eggs (kai dao)",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat oil in a small pan over medium-high until shimmering.",
+        "Crack in an egg; spoon hot oil over the whites for crisp edges and set whites while keeping yolk runny.",
+        "Remove to a plate; repeat for remaining eggs."
+      ],
+      "optional": true,
+      "timers": [{ "label": "Fry each egg", "minutes": 2 }],
+      "checks": [
+        "Edges are crisp; whites set; yolk is runny (unless you prefer set yolks)."
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Spoon pad krapow over hot jasmine rice.",
+        "Top with a crispy fried egg if using.",
+        "Serve with lime wedges on the side if desired."
+      ]
+    }
+  ],
+
+  "methods": ["method.stir_fry", "method.high_heat", "method.quick_cook"],
+
+  "pairings": {
+    "sides": [
+      { "id": "thai.cucumber_slices", "label": "Cucumber slices" },
+      {
+        "id": "thai.nam_pla_prik",
+        "label": "Nam pla prik (fish sauce + chilies + lime)"
+      }
+    ],
+    "notes": "Cucumber cools the heat; nam pla prik boosts salt/acid/heat at the table."
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 2,
+      "notes": "Reheat gently; add a small splash of water to loosen sauce. Add fresh basil only if you want to refresh aroma."
+    },
+    "freezer": {
+      "recommended": false,
+      "notes": "Texture is acceptable but basil aroma fades; freeze only if needed."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cook ground meat to a safe internal temperature (USDA guidance: 160°F/71°C for ground pork/beef; 165°F/74°C for ground poultry).",
+      "Use good ventilation—high heat stir-fry can smoke."
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.basil_fallback",
+      "title": "Holy basil substitutions",
+      "notes": [
+        "Best: holy basil (krapow).",
+        "Fallback: Thai basil (anise note; closer than sweet basil).",
+        "Last resort: sweet basil + a pinch of ground clove or allspice to mimic holy basil’s peppery/clove edge."
+      ]
+    },
+    {
+      "id": "adapt.heat_control",
+      "title": "Heat control without losing flavor",
+      "notes": [
+        "For milder versions: use fewer chilies and remove seeds; keep garlic quantity for flavor.",
+        "Add a little extra lime at serving for brightness if heat is reduced."
+      ]
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.chicken",
+      "label": "Pad krapow gai (chicken)",
+      "when": { "preference": { "protein": "chicken" } },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.ground_pork": {
+            "use": ["ingredient.ground_chicken"],
+            "notes": "Use the same amount. Poultry dries faster—avoid overcooking."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.beef",
+      "label": "Pad krapow nuea (beef)",
+      "when": { "preference": { "protein": "beef" } },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.ground_pork": {
+            "use": ["ingredient.ground_beef"],
+            "notes": "Choose 85/15 for better texture; drain excess fat if needed."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.tofu",
+      "label": "Vegetarian pad krapow (tofu)",
+      "when": { "dietFlags": ["diet.vegetarian"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.ground_pork": {
+            "use": ["ingredient.tofu_firm"],
+            "notes": "Press and crumble tofu; sear until lightly browned before adding sauce."
+          },
+          "ingredient.fish_sauce": {
+            "use": [
+              "ingredient.soy_sauce_light",
+              "ingredient.mushroom_seasoning"
+            ],
+            "notes": "Season to taste; keep balance with a touch more lime at serving."
+          },
+          "ingredient.oyster_sauce": {
+            "use": ["ingredient.vegetarian_oyster_sauce"],
+            "notes": "Use mushroom-based vegetarian oyster sauce."
+          }
+        }
+      }
+    }
+  ],
+
+  "notes": [
+    "Key technique: pre-mix the sauce. Once garlic and chilies hit the oil, the dish finishes in minutes.",
+    "If your wok isn’t very hot, cook in smaller batches to avoid steaming.",
+    "Street-food style often uses a slightly sweeter sauce and very crispy-edged egg; adjust sugar up by 2–4g if desired."
+  ],
+
+  "compat": {
+    "catalog": {
+      "cuisinePath": "src/catalogs/cuisines/thai/recipes/pad_krapow.json",
+      "dishId": "thai.pad_krapow"
+    },
+    "search": {
+      "aliases": [
+        "pad krapow",
+        "pad kra pao",
+        "phat kaphrao",
+        "ผัดกะเพรา",
+        "kaprao"
+      ],
+      "keywords": [
+        "holy basil",
+        "garlic chili",
+        "stir fry",
+        "thai street food",
+        "kai dao"
+      ]
+    }
+  },
+
+  "audit": {
+    "createdBy": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "reviewed": true,
+    "reviewNotes": [
+      "Schema-required fields present: schemaVersion/meta/ingredients/steps.",
+      "All ingredients include id+label and amount.value/unit; optional flags used where appropriate.",
+      "All steps include id+title and instructions[]; timers use seconds/minutes per schema."
+    ]
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.chocolate_cake_slices",
+    "slug": "chocolate_cake_slices",
+    "name": "Chocolate Cake Slices (Bakery-Style Portioned)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "bakery",
+      "cake",
+      "chocolate",
+      "slices",
+      "portioned",
+      "bakery-style",
+      "sheet-cake",
+      "make-ahead",
+      "freezer-friendly"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A bakery-style chocolate sheet cake designed specifically for clean portioned slices. Built with slice logic: stable crumb, level bake, chill-and-cut workflow, and a simple ganache-style glaze that sets cleanly for display. Includes both commercial flour and fresh-milled flour guidance (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "sheet_pan_9x13", "label": "9x13-inch pan (or quarter-sheet pan)" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    {
+      "id": "hand_mixer_or_stand_mixer",
+      "label": "Hand mixer or stand mixer (optional)"
+    },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "saucepan", "label": "Saucepan (for cocoa bloom and ganache)" },
+    { "id": "cooling_rack", "label": "Cooling rack" },
+    { "id": "chef_knife", "label": "Long sharp knife (for slicing)" },
+    {
+      "id": "bench_scraper",
+      "label": "Bench scraper (optional, for squared edges)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR the fresh-milled option): all-purpose flour",
+      "amount": { "value": 280, "unit": "g" },
+      "notes": "About 2 1/4 cups. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR the commercial option): fine-milled, sifted",
+      "amount": { "value": 280, "unit": "g" },
+      "notes": "Fresh-milled absorbs more and can add texture; sift coarse bran for cleaner slice crumb. Batter may need +15–45 ml extra buttermilk/coffee."
+    },
+    {
+      "id": "cocoa_powder",
+      "label": "Cocoa powder (natural or Dutch)",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 2/3 cup."
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 350, "unit": "g" },
+      "notes": "About 1 3/4 cups."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 3/4 tsp."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+
+    {
+      "id": "eggs",
+      "label": "Large eggs",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil (canola/avocado/grapeseed)",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": "About 1/2 cup."
+    },
+    {
+      "id": "buttermilk",
+      "label": "Buttermilk",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "hot_coffee_or_water",
+      "label": "Hot coffee (preferred) or hot water",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Hot liquid blooms cocoa and improves chocolate flavor."
+    },
+    {
+      "id": "liquid_adjustment_optional",
+      "label": "Extra hot coffee/water or buttermilk (for fresh-milled adjustment)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is too thick; up to ~45 ml total depending on flour.",
+      "optional": true
+    },
+
+    {
+      "id": "ganache_chocolate",
+      "label": "Semi-sweet chocolate (chips or chopped) for ganache glaze",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "About 12 oz / 2 cups chips."
+    },
+    {
+      "id": "ganache_cream",
+      "label": "Heavy cream (for ganache glaze)",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup."
+    },
+    {
+      "id": "ganache_corn_syrup_optional",
+      "label": "Light corn syrup or honey (optional, for shine and softer set)",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "About 1 tbsp. Optional but gives bakery-style sheen.",
+      "optional": true
+    },
+    {
+      "id": "ganache_salt",
+      "label": "Pinch of salt (for ganache glaze)",
+      "amount": { "value": 1, "unit": "g" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_pan_oven",
+      "title": "Prep pan and oven (slice logic)",
+      "body": "Heat oven to 350°F (175°C). Line a 9x13 pan with parchment with overhang on two sides for easy lifting. Lightly grease parchment. This enables clean lift-out and clean slice edges."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). For fresh-milled flour, fine-mill and sift coarse bran for a cleaner slice crumb."
+    },
+    {
+      "id": "step_03_mix_dry",
+      "title": "Mix dry ingredients",
+      "body": "In a large bowl, whisk chosen flour, cocoa powder, sugar, baking powder, baking soda, and salt."
+    },
+    {
+      "id": "step_04_mix_wet",
+      "title": "Mix wet ingredients",
+      "body": "In a medium bowl, whisk eggs, oil, buttermilk, and vanilla."
+    },
+    {
+      "id": "step_05_combine",
+      "title": "Combine wet into dry",
+      "body": "Pour wet mixture into dry and whisk until mostly smooth."
+    },
+    {
+      "id": "step_06_add_hot_liquid",
+      "title": "Add hot coffee/water (cocoa bloom)",
+      "body": "Whisk in hot coffee/water slowly. Batter will be thin—this is correct for a moist, even crumb that slices cleanly."
+    },
+    {
+      "id": "step_07_adjust_freshmilled",
+      "title": "Adjust batter for fresh-milled flour (if needed)",
+      "body": "If using fresh-milled flour and batter is thicker than expected, add extra hot coffee/water or buttermilk 15 ml at a time until batter is pourable. Rest 5 minutes to hydrate, then whisk gently once more."
+    },
+    {
+      "id": "step_08_bake",
+      "title": "Bake",
+      "body": "Pour batter into prepared pan. Bake 26–34 minutes until a toothpick comes out with a few moist crumbs (not wet batter). Do not overbake—overbaking dries slices."
+    },
+    {
+      "id": "step_09_cool_and_chill_for_slicing",
+      "title": "Cool, then chill for clean slicing (bakery portion logic)",
+      "body": "Cool in pan 20 minutes, then lift cake out using parchment and cool completely. For the cleanest slices, chill the cake (wrapped) 1–2 hours before glazing and cutting."
+    },
+    {
+      "id": "step_10_make_ganache",
+      "title": "Make ganache glaze",
+      "body": "Place chocolate in a bowl. Heat cream to just simmering (not boiling). Pour over chocolate, add optional corn syrup/honey and salt, let stand 2 minutes, then stir until smooth and glossy."
+    },
+    {
+      "id": "step_11_glaze_and_set",
+      "title": "Glaze and set",
+      "body": "Pour ganache over chilled cake and spread evenly. Chill 20–40 minutes until glaze is set but not rock-hard (for clean cuts without cracking)."
+    },
+    {
+      "id": "step_12_portion_slices",
+      "title": "Portion into bakery slices",
+      "body": "Trim edges for perfectly squared presentation (optional). Cut into 12 large slices (3x4 grid) or 16 standard slices (4x4 grid). Use a long knife warmed in hot water and wiped dry between cuts."
+    }
+  ],
+  "notes": [
+    "Portioned cake logic: bake flat, cool fully, chill, then glaze and cut. Chilling firms crumb and glaze for clean edges.",
+    "Hot-liquid chocolate cakes look thin but bake up moist and even—ideal for slices.",
+    "Fresh-milled flour: sift coarse bran for cleaner slice; batter may need a small extra liquid adjustment and a brief rest.",
+    "If you plan to display slices individually, chill slices before wrapping for the neatest packaging."
+  ],
+  "storage": {
+    "roomTemp": "Covered: 1 day (cool room).",
+    "refrigerator": "Airtight: up to 5 days. Bring to room temp for softer crumb.",
+    "freezer": "Freeze unglazed cake or individually wrapped slices up to 2 months. Thaw overnight in refrigerator."
+  }
+}

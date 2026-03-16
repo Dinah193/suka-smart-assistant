@@ -8,7 +8,7 @@ import { I } from "@/components/icons/SafeIcon"; // use <I> for icons safely
 // Optional stores (graceful fallback)
 import { useFoodStore } from "@/store/FoodStore";
 import { useInventoryStore } from "@/store/InventoryStore";
-import { useCalendarStore } from "@/store/CalendarStore";
+import { useCalendarStore } from "@/store/CalendarStore.js";
 
 /* ------------------ tiny UI atoms (DaisyUI/Tailwind) ------------------ */
 const Card = ({ title, subtitle, right, children }) => (

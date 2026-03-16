@@ -8,56 +8,210 @@ import {
   NavLink,
   Navigate,
   useLocation,
-  useNavigate, // ✅ FIX: needed for guaranteed fallback to /:domain/play/:id
+  useNavigate,
+  // ✅ FIX: needed for guaranteed fallback to /:domain/play/:id
 } from "react-router-dom";
+
 import RightSidebar from "@/components/layout/RightSidebar";
 import { VisionProvider } from "@/context/VisionContext";
 import "./index.css";
 
+/* -------------------------------------------------------------------------- */
+/* ✅ CRITICAL: purge stale Service Worker + caches on localhost ASAP          */
+/*                                                                            */
+/* Why: If a stale SW is serving an old app shell, you’ll see:                */
+/* - HouseholdMealsCuisinePage “not defined” (old App bundle)                 */
+/* - index.js / index.js / featureFlags.json served as text/html              */
+/*                                                                            */
+/* This runs at MODULE LOAD (before React render), so it works even if the    */
+/* app crashes during initial render.                                         */
+/* -------------------------------------------------------------------------- */
+(() => {
+  try {
+    const host = window?.location?.hostname;
+    const isLocal =
+      host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+    if (!isLocal) return;
+    if (!("serviceWorker" in navigator)) return;
+
+    const key = "__ssa_sw_purged_once__";
+    const alreadyPurged =
+      window.sessionStorage && window.sessionStorage.getItem(key) === "1";
+
+    (async () => {
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      } catch {}
+
+      try {
+        if (window.caches && typeof window.caches.keys === "function") {
+          const keys = await window.caches.keys();
+          await Promise.all(keys.map((k) => window.caches.delete(k)));
+        }
+      } catch {}
+
+      try {
+        window.sessionStorage?.setItem(key, "1");
+      } catch {}
+
+      // Reload once to ensure we fetch the real, current modules.
+      if (!alreadyPurged) {
+        try {
+          window.location.reload();
+        } catch {}
+      }
+    })();
+  } catch {}
+})();
+
 /* --------------------- Optional soft imports (safe if missing) --------------------- */
+/**
+ * ✅ FIX: remove require() usage (browser ESM + Vite-safe)
+ * - require is not defined in the browser; even inside try/catch it can create brittle builds
+ * - We load these lazily in bootSoftModulesOnce()
+ */
 let ProfileCapsule = () => null;
-try {
-  ProfileCapsule = require("@/components/profile/ProfileCapsule.jsx").default;
-} catch {}
-
 let Jobs = { on: () => () => {}, emit: () => {} };
-try {
-  Jobs = require("@/services/jobs/engine");
-} catch {}
-
 let Events = { emit: () => {}, on: () => () => {} };
-try {
-  Events = require("@/services/automation/events");
-} catch {}
 
 /* -------------------------------------------------------------------------- */
-/*  ✅ FIX #1: Vite/ESM-safe soft imports (no require())                       */
-/*  - require() fails under Vite ESM and silently leaves modules as null       */
-/*  - We load these once asynchronously and also expose them on window.__suka  */
+/* ✅ FIX #1: Vite/ESM-safe soft imports (no require())                        */
+/* - require() fails under Vite ESM and silently leaves modules as null       */
+/* - We load these once asynchronously and also expose them on window.__suka  */
 /* -------------------------------------------------------------------------- */
-
 let eventBus = null;
 let automationRuntime = null;
+
 /* NEW: HouseholdReasoner shim (shared cross-domain orchestration) */
 let HouseholdReasoner = null;
 
-/* ✅ NEW: Global SessionRunner modal (soft import, safe if missing)
-   We mount this at the App chrome level so it behaves like Cooking Play.
-   If you already have a centralized runner component, this will use it. */
+/**
+ * ✅ NEW: Global SessionRunner modal (soft import, safe if missing)
+ * We mount this at the App chrome level so it behaves like Cooking Play.
+ * If you already have a centralized runner component, this will use it.
+ */
 let SessionRunnerModal = null;
 
+/* ✅ FIX: ProfileCapsule soft import must NOT hardcode a missing path. Use glob to include candidates without breaking build. */
+const PROFILE_CAPSULE_MODULES = import.meta.glob(
+  [
+    "./components/profile/ProfileCapsule.jsx",
+    "./components/profile/ProfileCapsule.tsx",
+    "./features/profile/ProfileCapsule.jsx",
+    "./features/profile/ProfileCapsule.tsx",
+    "./profile/ProfileCapsule.jsx",
+    "./profile/ProfileCapsule.tsx",
+  ],
+  { eager: false },
+);
+
 // Collect possible runner components so Vite includes them.
+// ✅ UPDATED: include your real runner at ./features/session/SessionRunnerModal.jsx
 const SESSION_RUNNER_MODULES = import.meta.glob(
   [
+    // ✅ preferred (exists in your project)
+    "./features/session/SessionRunnerModal.jsx",
+    "./features/session/SessionRunnerModal.tsx",
+
+    // legacy candidates (safe if missing)
     "./components/session/SessionRunnerModal.jsx",
     "./components/session/SessionRunner.jsx",
     "./components/session/SessionRunnerHost.jsx",
+
     // allow alternate casing/paths if they exist (no harm if missing)
     "./components/session/SessionRunnerModal.tsx",
     "./components/session/SessionRunner.tsx",
     "./components/session/SessionRunnerHost.tsx",
   ],
-  { eager: false }
+  { eager: false },
+);
+
+/* ✅ NEW: soft module registries (prevent build failure if files don’t exist) */
+const JOBS_ENGINE_MODULES = import.meta.glob(
+  [
+    "./services/jobs/engine.js",
+    "./services/jobs/engine.jsx",
+    "./services/jobs/engine.ts",
+    "./services/jobs/engine.tsx",
+    "./services/jobs/engine/index.js",
+    "./services/jobs/engine/index.jsx",
+    "./services/jobs/Engine.js",
+    "./services/jobs/Engine.jsx",
+    "./services/jobs/Engine.ts",
+    "./services/jobs/Engine.tsx",
+  ],
+  { eager: false },
+);
+
+const AUTOMATION_EVENTS_MODULES = import.meta.glob(
+  [
+    "./services/automation/events.js",
+    "./services/automation/events.jsx",
+    "./services/automation/events.ts",
+    "./services/automation/events.tsx",
+    "./services/automation/events/index.js",
+    "./services/automation/events/index.jsx",
+    "./services/automation/Events.js",
+    "./services/automation/Events.jsx",
+    "./services/automation/Events.ts",
+    "./services/automation/Events.tsx",
+  ],
+  { eager: false },
+);
+
+const EVENTBUS_MODULES = import.meta.glob(
+  [
+    "./services/events/eventBus.js",
+    "./services/events/eventBus.jsx",
+    "./services/events/eventBus.ts",
+    "./services/events/eventBus.tsx",
+    "./services/events/eventBus/index.js",
+    "./services/events/eventBus/index.jsx",
+    "./services/eventBus.js",
+    "./services/eventBus.jsx",
+    "./services/eventBus.ts",
+    "./services/eventBus.tsx",
+    "./services/events/EventBus.js",
+    "./services/events/EventBus.jsx",
+    "./services/events/EventBus.ts",
+    "./services/events/EventBus.tsx",
+  ],
+  { eager: false },
+);
+
+const AUTOMATION_RUNTIME_MODULES = import.meta.glob(
+  [
+    "./services/automation/runtime.js",
+    "./services/automation/runtime.jsx",
+    "./services/automation/runtime.ts",
+    "./services/automation/runtime.tsx",
+    "./services/automation/runtime/index.js",
+    "./services/automation/runtime/index.jsx",
+    "./services/automation/Runtime.js",
+    "./services/automation/Runtime.jsx",
+    "./services/automation/Runtime.ts",
+    "./services/automation/Runtime.tsx",
+  ],
+  { eager: false },
+);
+
+const HOUSEHOLD_REASONER_MODULES = import.meta.glob(
+  [
+    "./agents/shims/HouseholdReasoner.js",
+    "./agents/shims/HouseholdReasoner.jsx",
+    "./agents/shims/HouseholdReasoner.ts",
+    "./agents/shims/HouseholdReasoner.tsx",
+    "./agents/HouseholdReasoner.js",
+    "./agents/HouseholdReasoner.jsx",
+    "./agents/HouseholdReasoner.ts",
+    "./agents/HouseholdReasoner.tsx",
+    "./services/reasoner/HouseholdReasoner.js",
+    "./services/reasoner/HouseholdReasoner.jsx",
+    "./services/reasoner/HouseholdReasoner.ts",
+    "./services/reasoner/HouseholdReasoner.tsx",
+  ],
+  { eager: false },
 );
 
 async function loadFirstModuleFromMap(map, keys = []) {
@@ -77,24 +231,115 @@ async function bootSoftModulesOnce() {
   if (window.__suka.__appSoftBooted) return;
   window.__suka.__appSoftBooted = true;
 
-  // eventBus
+  // ProfileCapsule (soft) ✅ FIX: glob-based so missing file won't break build
   try {
-    const mod = await import("./services/events/eventBus");
-    eventBus = mod?.default || mod;
+    const mod = await loadFirstModuleFromMap(PROFILE_CAPSULE_MODULES, [
+      "./components/profile/ProfileCapsule.jsx",
+      "./components/profile/ProfileCapsule.tsx",
+      "./features/profile/ProfileCapsule.jsx",
+      "./features/profile/ProfileCapsule.tsx",
+      "./profile/ProfileCapsule.jsx",
+      "./profile/ProfileCapsule.tsx",
+    ]);
+    if (mod) {
+      ProfileCapsule = mod;
+      window.__suka.ProfileCapsule = ProfileCapsule;
+    }
+  } catch {}
+
+  // Jobs engine (soft) ✅ FIX: glob-based so missing file won't break build
+  try {
+    const mod = await loadFirstModuleFromMap(JOBS_ENGINE_MODULES, [
+      "./services/jobs/engine.js",
+      "./services/jobs/engine.jsx",
+      "./services/jobs/engine.ts",
+      "./services/jobs/engine.tsx",
+      "./services/jobs/engine/index.js",
+      "./services/jobs/engine/index.jsx",
+      "./services/jobs/Engine.js",
+      "./services/jobs/Engine.jsx",
+      "./services/jobs/Engine.ts",
+      "./services/jobs/Engine.tsx",
+    ]);
+    Jobs = mod || Jobs;
+    window.__suka.Jobs = Jobs;
+  } catch {}
+
+  // Automation events (soft) ✅ FIX: glob-based so missing file won't break build
+  try {
+    const mod = await loadFirstModuleFromMap(AUTOMATION_EVENTS_MODULES, [
+      "./services/automation/events.js",
+      "./services/automation/events.jsx",
+      "./services/automation/events.ts",
+      "./services/automation/events.tsx",
+      "./services/automation/events/index.js",
+      "./services/automation/events/index.jsx",
+      "./services/automation/Events.js",
+      "./services/automation/Events.jsx",
+      "./services/automation/Events.ts",
+      "./services/automation/Events.tsx",
+    ]);
+    Events = mod || Events;
+    window.__suka.Events = Events;
+  } catch {}
+
+  // eventBus ✅ FIX: glob-based so missing file won't break build
+  try {
+    const mod = await loadFirstModuleFromMap(EVENTBUS_MODULES, [
+      "./services/events/eventBus.js",
+      "./services/events/eventBus.jsx",
+      "./services/events/eventBus.ts",
+      "./services/events/eventBus.tsx",
+      "./services/events/eventBus/index.js",
+      "./services/events/eventBus/index.jsx",
+      "./services/eventBus.js",
+      "./services/eventBus.jsx",
+      "./services/eventBus.ts",
+      "./services/eventBus.tsx",
+      "./services/events/EventBus.js",
+      "./services/events/EventBus.jsx",
+      "./services/events/EventBus.ts",
+      "./services/events/EventBus.tsx",
+    ]);
+    eventBus = mod || eventBus;
     window.__suka.eventBus = eventBus;
   } catch {}
 
-  // automationRuntime
+  // automationRuntime ✅ FIX: glob-based so missing file won't break build
   try {
-    const mod = await import("./services/automation/runtime");
-    automationRuntime = mod?.default || mod;
+    const mod = await loadFirstModuleFromMap(AUTOMATION_RUNTIME_MODULES, [
+      "./services/automation/runtime.js",
+      "./services/automation/runtime.jsx",
+      "./services/automation/runtime.ts",
+      "./services/automation/runtime.tsx",
+      "./services/automation/runtime/index.js",
+      "./services/automation/runtime/index.jsx",
+      "./services/automation/Runtime.js",
+      "./services/automation/Runtime.jsx",
+      "./services/automation/Runtime.ts",
+      "./services/automation/Runtime.tsx",
+    ]);
+    automationRuntime = mod || automationRuntime;
     window.__suka.automationRuntime = automationRuntime;
   } catch {}
 
-  // HouseholdReasoner
+  // HouseholdReasoner ✅ FIX: glob-based so missing file won't break build
   try {
-    const mod = await import("./agents/shims/HouseholdReasoner");
-    HouseholdReasoner = mod?.default || mod;
+    const mod = await loadFirstModuleFromMap(HOUSEHOLD_REASONER_MODULES, [
+      "./agents/shims/HouseholdReasoner.js",
+      "./agents/shims/HouseholdReasoner.jsx",
+      "./agents/shims/HouseholdReasoner.ts",
+      "./agents/shims/HouseholdReasoner.tsx",
+      "./agents/HouseholdReasoner.js",
+      "./agents/HouseholdReasoner.jsx",
+      "./agents/HouseholdReasoner.ts",
+      "./agents/HouseholdReasoner.tsx",
+      "./services/reasoner/HouseholdReasoner.js",
+      "./services/reasoner/HouseholdReasoner.jsx",
+      "./services/reasoner/HouseholdReasoner.ts",
+      "./services/reasoner/HouseholdReasoner.tsx",
+    ]);
+    HouseholdReasoner = mod || HouseholdReasoner;
     window.__suka.householdReasoner = HouseholdReasoner;
   } catch {}
 
@@ -102,6 +347,10 @@ async function bootSoftModulesOnce() {
   try {
     SessionRunnerModal =
       (await loadFirstModuleFromMap(SESSION_RUNNER_MODULES, [
+        // ✅ prefer features/session modal
+        "./features/session/SessionRunnerModal.jsx",
+        "./features/session/SessionRunnerModal.tsx",
+        // legacy fallbacks
         "./components/session/SessionRunnerModal.jsx",
         "./components/session/SessionRunner.jsx",
         "./components/session/SessionRunnerHost.jsx",
@@ -109,15 +358,13 @@ async function bootSoftModulesOnce() {
         "./components/session/SessionRunner.tsx",
         "./components/session/SessionRunnerHost.tsx",
       ])) || null;
-
     window.__suka.SessionRunnerModal = SessionRunnerModal;
   } catch {}
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Vite page registry + helpers                                              */
+/* Vite page registry + helpers                                               */
 /* -------------------------------------------------------------------------- */
-
 // Vite will statically collect every page file that matches this pattern.
 // Keys will look like: "./pages/home.jsx", "./pages/cooking/index.jsx", etc.
 const PAGE_MODULES = import.meta.glob("./pages/**/*.{jsx,tsx}");
@@ -153,18 +400,17 @@ function resolvePageLoaderFromCandidates(candidates = []) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Lazy page helper — tolerant of file vs folder paths                       */
-/*  🔧 UPDATED to avoid "@/pages/..." runtime spec errors                     */
+/* Lazy page helper — tolerant of file vs folder paths                         */
+/* 🔧 UPDATED to avoid "@/pages/..." runtime spec errors                        */
 /* -------------------------------------------------------------------------- */
 function lazyPage(candidates = [], FallbackName = "Page") {
   // First try to resolve via PAGE_MODULES (only ./pages/**)
   const pageLoader = resolvePageLoaderFromCandidates(candidates);
-
   if (pageLoader) {
     if (import.meta.env.DEV) {
       console.info(
         `[lazyPage] Using PAGE_MODULES loader for ${FallbackName}`,
-        candidates
+        candidates,
       );
     }
     // React.lazy can take the () => import() function directly
@@ -176,7 +422,7 @@ function lazyPage(candidates = [], FallbackName = "Page") {
     for (const raw of candidates) {
       const p = normalizeDynamicSpecifier(raw);
       try {
-        const mod = await import(p);
+        const mod = await import(/* @vite-ignore */ p);
         if (mod?.default) return { default: mod.default };
         return mod;
       } catch (err) {
@@ -190,7 +436,7 @@ function lazyPage(candidates = [], FallbackName = "Page") {
     if (import.meta.env.DEV) {
       console.warn(
         `[lazyPage] All candidates failed for ${FallbackName}`,
-        candidates
+        candidates,
       );
     }
 
@@ -210,7 +456,7 @@ function lazyPage(candidates = [], FallbackName = "Page") {
 /* ------------------------------- Lazy pages ------------------------------- */
 const Home = lazyPage(
   ["@/pages/home.jsx", "./pages/home.jsx", "@/pages/home/index.jsx"],
-  "Home"
+  "Home",
 );
 
 /** Domains */
@@ -220,16 +466,18 @@ const Inventory = lazyPage(
     "./pages/inventory.jsx",
     "@/pages/inventory/index.jsx",
   ],
-  "Inventory"
+  "Inventory",
 );
+
 const Cooking = lazyPage(
   [
     "@/pages/cooking/index.jsx",
     "./pages/cooking/index.jsx",
     "@/domain/meals/MealPlanner.jsx",
   ],
-  "Cooking"
+  "Cooking",
 );
+
 const Cleaning = lazyPage(
   [
     "@/pages/cleaning.jsx",
@@ -237,8 +485,9 @@ const Cleaning = lazyPage(
     "@/pages/cleaning/index.jsx",
     "@/domain/cleaning/CleaningPlanner.jsx",
   ],
-  "Cleaning"
+  "Cleaning",
 );
+
 const Garden = lazyPage(
   [
     "@/pages/garden/index.jsx",
@@ -246,8 +495,9 @@ const Garden = lazyPage(
     "@/pages/garden/GardenPage.jsx",
     "./pages/garden.jsx",
   ],
-  "Garden"
+  "Garden",
 );
+
 const Animals = lazyPage(
   [
     "@/pages/animals/index.jsx",
@@ -255,7 +505,7 @@ const Animals = lazyPage(
     "@/pages/animals/AnimalsPage.jsx",
     "./pages/animals.jsx",
   ],
-  "Animals"
+  "Animals",
 );
 
 /** NEW: Play/Remote surfaces per domain (mobile runner + controller/overlay) */
@@ -268,8 +518,9 @@ const CookingPlay = lazyPage(
     "./pages/cooking/play/index.jsx",
     "@/pages/cooking/play.jsx",
   ],
-  "CookingPlay"
+  "CookingPlay",
 );
+
 const CookingRemote = lazyPage(
   [
     "@/pages/cooking/Remote.jsx",
@@ -278,7 +529,7 @@ const CookingRemote = lazyPage(
     "./pages/cooking/remote/index.jsx",
     "@/pages/cooking/remote.jsx",
   ],
-  "CookingRemote"
+  "CookingRemote",
 );
 
 // Cleaning
@@ -290,8 +541,9 @@ const CleaningPlay = lazyPage(
     "./pages/cleaning/play/index.jsx",
     "@/pages/cleaning/play.jsx",
   ],
-  "CleaningPlay"
+  "CleaningPlay",
 );
+
 const CleaningRemote = lazyPage(
   [
     "@/pages/cleaning/Remote.jsx",
@@ -300,7 +552,7 @@ const CleaningRemote = lazyPage(
     "./pages/cleaning/remote/index.jsx",
     "@/pages/cleaning/remote.jsx",
   ],
-  "CleaningRemote"
+  "CleaningRemote",
 );
 
 // Garden
@@ -312,8 +564,9 @@ const GardenPlay = lazyPage(
     "./pages/garden/play/index.jsx",
     "@/pages/garden/play.jsx",
   ],
-  "GardenPlay"
+  "GardenPlay",
 );
+
 const GardenRemote = lazyPage(
   [
     "@/pages/garden/Remote.jsx",
@@ -322,7 +575,7 @@ const GardenRemote = lazyPage(
     "./pages/garden/remote/index.jsx",
     "@/pages/garden/remote.jsx",
   ],
-  "GardenRemote"
+  "GardenRemote",
 );
 
 // Animals
@@ -334,8 +587,9 @@ const AnimalsPlay = lazyPage(
     "./pages/animals/play/index.jsx",
     "@/pages/animals/play.jsx",
   ],
-  "AnimalsPlay"
+  "AnimalsPlay",
 );
+
 const AnimalsRemote = lazyPage(
   [
     "@/pages/animals/Remote.jsx",
@@ -344,25 +598,25 @@ const AnimalsRemote = lazyPage(
     "./pages/animals/remote/index.jsx",
     "@/pages/animals/remote.jsx",
   ],
-  "AnimalsRemote"
+  "AnimalsRemote",
 );
 
 /** General nav */
 const CustomLocations = lazyPage(
   ["./pages/custom-locations.jsx", "./pages/custom-locations.jsx"],
-  "CustomLocations"
+  "CustomLocations",
 );
 const CalendarPage = lazyPage(
   ["@/pages/calendar.jsx", "./pages/calendar.jsx"],
-  "Calendar"
+  "Calendar",
 );
 const CommunityPage = lazyPage(
   ["./pages/community.jsx", "./pages/community.jsx"],
-  "Community"
+  "Community",
 );
 const BadgesPage = lazyPage(
   ["./pages/badges.jsx", "./pages/badges.jsx"],
-  "Badges"
+  "Badges",
 );
 
 /* ✅ UPDATED: Meal Planner page path (folder-based) */
@@ -371,40 +625,121 @@ const MealPlanningPage = lazyPage(
     "@/pages/mealplanner/mealplanner.jsx",
     "./pages/mealplanner/mealplanner.jsx",
   ],
-  "MealPlanning"
+  "MealPlanning",
 );
 
 const JobsPage = lazyPage(["./pages/jobs.jsx", "./pages/jobs.jsx"], "Jobs");
+
+/* ✅ FIX: Roles route should use the real roles page (not jobs) */
+const RolesPage = lazyPage(["./pages/roles.jsx", "@/pages/roles.jsx"], "Roles");
 
 /** Storehouse */
 /* ✅ UPDATED: Storehouse page path (folder-based) */
 const StorehousePage = lazyPage(
   ["@/pages/storehouse/storehouse.jsx", "./pages/storehouse/storehouse.jsx"],
-  "Storehouse"
+  "Storehouse",
 );
+
 const StorehouseAutoFillPlanner = lazyPage(
   [
     "@/domain/storehouse/AutoFillPlanner.jsx",
     "./components/storehouse/StorehouseAutoFillPlanner.jsx",
   ],
-  "StorehouseAutoFill"
+  "StorehouseAutoFill",
 );
+
 const PreservationQueuePlanner = lazyPage(
   [
     "@/domain/storehouse/PreserveQueue.jsx",
     "./components/storehouse/PreservationQueuePlanner.jsx",
   ],
-  "PreservationQueue"
+  "PreservationQueue",
 );
 
 /** NEW: Homestead + Knowledge (and Knowledge panels) */
-/* ✅ UPDATED: Homestead Planner page path (folder-based) */
+/* ✅ UPDATED: Homestead Planner page path (subroutes; Overview is index.jsx) */
+/* ✅ NOTE: Your real path is: src/pages/homesteadplanner/index.jsx */
 const HomesteadPage = lazyPage(
   [
+    "@/pages/homesteadplanner/index.jsx",
+    "./pages/homesteadplanner/index.jsx",
+    // legacy fallback (keep existing working file if present)
     "@/pages/homesteadplanner/homestead.jsx",
     "./pages/homesteadplanner/homestead.jsx",
   ],
-  "Homestead"
+  "HomesteadOverview",
+);
+
+const HomesteadTargetsPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/targets.jsx",
+    "./pages/homesteadplanner/targets.jsx",
+  ],
+  "HomesteadTargets",
+);
+
+const HomesteadComponentsPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/components.jsx",
+    "./pages/homesteadplanner/components.jsx",
+  ],
+  "HomesteadComponents",
+);
+
+const HomesteadInventoryPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/inventory.jsx",
+    "./pages/homesteadplanner/inventory.jsx",
+  ],
+  "HomesteadInventory",
+);
+
+const HomesteadBatchesPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/batches.jsx",
+    "./pages/homesteadplanner/batches.jsx",
+  ],
+  "HomesteadBatches",
+);
+
+const HomesteadGardenTargetsPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/garden-targets.jsx",
+    "./pages/homesteadplanner/garden-targets.jsx",
+  ],
+  "HomesteadGardenTargets",
+);
+
+const HomesteadAnimalTargetsPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/animal-targets.jsx",
+    "./pages/homesteadplanner/animal-targets.jsx",
+  ],
+  "HomesteadAnimalTargets",
+);
+
+const HomesteadCuisinesPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/cuisines.jsx",
+    "./pages/homesteadplanner/cuisines.jsx",
+  ],
+  "HomesteadCuisines",
+);
+
+const HomesteadPreferencesPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/preferences.jsx",
+    "./pages/homesteadplanner/preferences.jsx",
+  ],
+  "HomesteadPreferences",
+);
+
+const HomesteadSkillsPage = lazyPage(
+  [
+    "@/pages/homesteadplanner/skills.jsx",
+    "./pages/homesteadplanner/skills.jsx",
+  ],
+  "HomesteadSkills",
 );
 
 // ✅ Put the RELATIVE path first so it works with @vite-ignore dynamic import
@@ -415,7 +750,7 @@ const KnowledgePage = lazyPage(
     "./pages/knowledge/index.jsx",
     "./pages/knowledge-base.jsx",
   ],
-  "Knowledge"
+  "Knowledge",
 );
 
 /* 🔧 Expanded candidates here (alias + relative for both page and feature) */
@@ -426,8 +761,9 @@ const KnowledgeEvents = lazyPage(
     "@/features/events/EventCatalog.jsx",
     "./features/events/EventCatalog.jsx",
   ],
-  "EventCatalog"
+  "EventCatalog",
 );
+
 const KnowledgeYieldCurves = lazyPage(
   [
     "@/pages/knowledge/yield-curves.jsx",
@@ -435,8 +771,9 @@ const KnowledgeYieldCurves = lazyPage(
     "@/features/yield/YieldCurves.jsx",
     "./features/yield/YieldCurves.jsx",
   ],
-  "YieldCurves"
+  "YieldCurves",
 );
+
 const KnowledgeRules = lazyPage(
   [
     "@/pages/knowledge/rules.jsx",
@@ -444,8 +781,9 @@ const KnowledgeRules = lazyPage(
     "@/features/inventory/InventoryRules.jsx",
     "./features/inventory/InventoryRules.jsx",
   ],
-  "InventoryRules"
+  "InventoryRules",
 );
+
 const KnowledgeDocs = lazyPage(
   [
     "@/pages/knowledge/docs.jsx",
@@ -453,38 +791,54 @@ const KnowledgeDocs = lazyPage(
     "@/features/docs/DocsIndex.jsx",
     "./features/docs/DocsIndex.jsx",
   ],
-  "Docs"
+  "Docs",
 );
 
 /** Import Settings + Scan/Extreme couponing + Tools */
 const ImportSettings = lazyPage(
   ["@/features/import/ImportSettings.jsx", "./pages/import/settings.jsx"],
-  "ImportSettings"
+  "ImportSettings",
 );
 const ScanExtreme = lazyPage(
   [
     "@/features/scan-compare-trust/ExtremeCouponing.jsx",
     "./pages/scan/index.jsx",
   ],
-  "ScanExtreme"
+  "ScanExtreme",
 );
 const MacroCalc = lazyPage(
   ["@/tools/MacroCalculator.jsx", "./pages/tools/macro-calculator.jsx"],
-  "MacroCalculator"
+  "MacroCalculator",
 );
 const BmiCalc = lazyPage(
   ["@/tools/BMICalculator.jsx", "./pages/tools/bmi-calculator.jsx"],
-  "BMICalculator"
+  "BMICalculator",
 );
 const MultiTimer = lazyPage(
   ["@/tools/MultiTimerPanel.jsx", "./pages/tools/multi-timer.jsx"],
-  "MultiTimer"
+  "MultiTimer",
 );
 
 /** NEW: Favorites – user-saved sessions & schedules (cross-domain) */
 const FavoritesPage = lazyPage(
   ["./pages/favorites/index.jsx", "@/pages/favorites/index.jsx"],
-  "Favorites"
+  "Favorites",
+);
+
+/**
+ * ✅ FIX: Household meals route should load the real page first.
+ * Your project includes:
+ * - src/pages/household/meals.jsx (primary dashboard page)
+ * - src/pages/household/HouseholdMealsCuisine.jsx (editor/settings page)
+ */
+const HouseholdMealsCuisinePage = lazyPage(
+  [
+    "@/pages/household/meals.jsx",
+    "./pages/household/meals.jsx",
+    "@/pages/household/HouseholdMealsCuisine.jsx",
+    "./pages/household/HouseholdMealsCuisine.jsx",
+  ],
+  "HouseholdMeals",
 );
 
 /* ✅ Settings route factory */
@@ -530,6 +884,7 @@ async function safeDynImport(path) {
     return null;
   }
 }
+
 async function prewarmCandidates(candidates = []) {
   for (const p of candidates) {
     const ok = await safeDynImport(p);
@@ -539,7 +894,7 @@ async function prewarmCandidates(candidates = []) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  DEV prewarm – candidate-based                                             */
+/* DEV prewarm – candidate-based                                              */
 /* -------------------------------------------------------------------------- */
 async function prewarmAllRoutesDev() {
   if (!import.meta.env.DEV) return;
@@ -581,6 +936,9 @@ async function prewarmAllRoutesDev() {
       "./pages/mealplanner/mealplanner.jsx",
     ],
 
+    /* ✅ NEW: Household meals page prewarm */
+    ["@/pages/household/meals.jsx", "./pages/household/meals.jsx"],
+
     ["@/pages/calendar.jsx", "./pages/calendar.jsx"],
     ["./pages/community.jsx", "./pages/community.jsx"],
     ["./pages/badges.jsx", "./pages/badges.jsx"],
@@ -588,7 +946,6 @@ async function prewarmAllRoutesDev() {
 
     /* ✅ UPDATED: Storehouse prewarm */
     ["@/pages/storehouse/storehouse.jsx", "./pages/storehouse/storehouse.jsx"],
-
     [
       "@/domain/storehouse/AutoFillPlanner.jsx",
       "./components/storehouse/StorehouseAutoFillPlanner.jsx",
@@ -597,14 +954,53 @@ async function prewarmAllRoutesDev() {
       "@/domain/storehouse/PreserveQueue.jsx",
       "./components/storehouse/PreservationQueuePlanner.jsx",
     ],
+
     ["./pages/custom-locations.jsx", "./pages/custom-locations.jsx"],
-    ["./pages/roles.jsx", "./pages/roles.jsx"],
+    ["./pages/roles.jsx", "@/pages/roles.jsx"],
     ["./pages/jobs.jsx", "./pages/jobs.jsx"],
 
-    /* ✅ UPDATED: Homestead Planner prewarm */
+    /* ✅ UPDATED: Homestead Planner prewarm (overview + subroutes) */
     [
+      "@/pages/homesteadplanner/index.jsx",
+      "./pages/homesteadplanner/index.jsx",
       "@/pages/homesteadplanner/homestead.jsx",
       "./pages/homesteadplanner/homestead.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/targets.jsx",
+      "./pages/homesteadplanner/targets.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/components.jsx",
+      "./pages/homesteadplanner/components.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/inventory.jsx",
+      "./pages/homesteadplanner/inventory.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/batches.jsx",
+      "./pages/homesteadplanner/batches.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/garden-targets.jsx",
+      "./pages/homesteadplanner/garden-targets.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/animal-targets.jsx",
+      "./pages/homesteadplanner/animal-targets.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/cuisines.jsx",
+      "./pages/homesteadplanner/cuisines.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/preferences.jsx",
+      "./pages/homesteadplanner/preferences.jsx",
+    ],
+    [
+      "@/pages/homesteadplanner/skills.jsx",
+      "./pages/homesteadplanner/skills.jsx",
     ],
 
     [
@@ -637,6 +1033,7 @@ async function prewarmAllRoutesDev() {
       "@/features/docs/DocsIndex.jsx",
       "./features/docs/DocsIndex.jsx",
     ],
+
     [
       "@/features/scan-compare-trust/ExtremeCouponing.jsx",
       "./pages/scan/index.jsx",
@@ -716,6 +1113,7 @@ async function prewarmAllRoutesDev() {
 function EnsureContent({ children, fallback }) {
   const ref = React.useRef(null);
   const [empty, setEmpty] = React.useState(false);
+
   React.useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -726,6 +1124,7 @@ function EnsureContent({ children, fallback }) {
       if (isEmpty) setEmpty(true);
     });
   }, []);
+
   if (empty) return fallback || null;
   return <div ref={ref}>{children}</div>;
 }
@@ -798,10 +1197,7 @@ function SmallBadge({ tone = "zinc", label }) {
 }
 
 function TButton({ variant = "ghost", size = "sm", children, ...props }) {
-  const sizes = {
-    sm: "text-sm px-3 py-1.5",
-    md: "text-sm px-3.5 py-2",
-  };
+  const sizes = { sm: "text-sm px-3 py-1.5", md: "text-sm px-3.5 py-2" };
   const variants = {
     ghost: "hover:bg-neutral-100 border border-transparent",
     outline: "border border-neutral-300 hover:bg-neutral-50",
@@ -829,6 +1225,7 @@ function Panel({ children }) {
 function UndoNbaDock() {
   const [offer, setOffer] = React.useState(null);
   const [nba, setNba] = React.useState(null);
+
   React.useEffect(() => {
     const onOffer = (e) => setOffer(e.detail || null);
     const onNba = (e) => setNba(e.detail || null);
@@ -839,7 +1236,9 @@ function UndoNbaDock() {
       window.removeEventListener("ui.nba.suggest", onNba);
     };
   }, []);
+
   if (!offer && !nba) return null;
+
   return (
     <div className="fixed bottom-3 left-0 right-0 mx-auto max-w-5xl px-4 z-40">
       <div className="flex flex-col md:flex-row gap-2 justify-center">
@@ -874,6 +1273,7 @@ function UndoNbaDock() {
             </div>
           </Panel>
         )}
+
         {nba && (
           <Panel>
             <div className="flex items-center justify-between gap-2">
@@ -899,6 +1299,7 @@ function UndoNbaDock() {
 /* -------------------------- Orchestration Bridge -------------------------- */
 function OrchestrationBridge() {
   const location = useLocation();
+
   React.useEffect(() => {
     try {
       installAutomationBridge?.();
@@ -938,12 +1339,14 @@ function OrchestrationBridge() {
     const onMessage = (evt) => {
       const msg = evt.data;
       if (!msg || typeof msg !== "object") return;
+
       const envelope = {
         type: msg.type || "external.message",
         ts: new Date().toISOString(),
         source: "app.messageBridge",
         data: msg.payload || msg.data || {},
       };
+
       safeEmit(envelope.type, envelope);
 
       // Normalize imports from outside surfaces (recipes, cleaning, garden, animals, storehouse)
@@ -982,6 +1385,7 @@ function OrchestrationBridge() {
         HouseholdReasoner?.handleEvent?.(envelope);
       } catch {}
     };
+
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, []);
@@ -998,19 +1402,22 @@ function safeEmit(type, detail) {
   } catch {}
 }
 
-/* ✅ NEW: Global SessionRunner host
-   - Listens for session.play.requested (cleaning/garden/animals + cooking)
-   - Opens the centrally-mounted SessionRunner modal:
-       1) try window.__suka.sessionRunner.open(payload)
-       2) else dispatch window event "ui.sessionrunner.open"
-       3) ✅ FIX: if no modal catches it, navigate to /:domain/play/:id
-
-   ✅ FIX (Stack overflow): guard against re-entrant openRunner loops where
-   ui.sessionrunner.open triggers our own listener again.
-*/
+/**
+ * ✅ NEW: Global SessionRunner host
+ * - Listens for session.play.requested (cleaning/garden/animals + cooking)
+ * - Opens the centrally-mounted SessionRunner modal:
+ *   1) try window.__suka.sessionRunner.open(payload)
+ *   2) else dispatch window event "ui.sessionrunner.open"
+ *   3) ✅ FIX: if no modal catches it, navigate to /:domain/play/:id
+ * - ✅ FIX (Stack overflow): guard against re-entrant openRunner loops where ui.sessionrunner.open triggers our own listener again.
+ */
 function GlobalSessionRunnerHost() {
   const location = useLocation();
   const navigate = useNavigate(); // ✅ FIX: fallback route push
+
+  // ✅ Local modal state (supports features/session/SessionRunnerModal.jsx)
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalDomain, setModalDomain] = React.useState("cooking");
 
   // ✅ Re-entrancy / recursion guard
   const _runnerOpenLockRef = React.useRef(false);
@@ -1019,7 +1426,6 @@ function GlobalSessionRunnerHost() {
   const shouldBlockRunnerOpen = React.useCallback((sessionId) => {
     const sid = String(sessionId || "");
     const key = sid || "no-session-id";
-
     if (_runnerOpenLockRef.current) return true;
     if (_runnerOpenLastKeyRef.current === key) return true;
 
@@ -1037,6 +1443,32 @@ function GlobalSessionRunnerHost() {
     });
 
     return false;
+  }, []);
+
+  // ✅ Modal open listener (if a modal exists, it can “catch” ui.sessionrunner.open)
+  React.useEffect(() => {
+    if (!window.__suka) window.__suka = {};
+
+    const mapDomainToModal = (d) => {
+      // Keep this conservative—your modal supports these domain keys.
+      if (d === "garden") return "garden_care";
+      if (d === "animals") return "animals_care";
+      if (d === "cleaning") return "cleaning";
+      return "cooking";
+    };
+
+    const onUiOpen = (evt) => {
+      const payload = evt?.detail || {};
+      try {
+        // Mark as handled so the dispatcher doesn’t navigate to /:domain/play/:id
+        window.__suka.__sessionRunnerHandled = true;
+      } catch {}
+      setModalDomain(mapDomainToModal(payload.domain));
+      setModalOpen(true);
+    };
+
+    window.addEventListener("ui.sessionrunner.open", onUiOpen);
+    return () => window.removeEventListener("ui.sessionrunner.open", onUiOpen);
   }, []);
 
   React.useEffect(() => {
@@ -1063,9 +1495,7 @@ function GlobalSessionRunnerHost() {
         envelope?.detail ||
         envelope ||
         {};
-
       const inferred = inferDomainFromPath(location.pathname);
-
       const domain =
         data?.domain ||
         data?.session?.domain ||
@@ -1129,11 +1559,20 @@ function GlobalSessionRunnerHost() {
       // own listener. The guard above prevents stack overflow.
       let dispatched = false;
       try {
+        window.__suka.__sessionRunnerHandled = false;
+      } catch {}
+
+      try {
         window.dispatchEvent(
-          new CustomEvent("ui.sessionrunner.open", { detail: payload })
+          new CustomEvent("ui.sessionrunner.open", { detail: payload }),
         );
         dispatched = true;
       } catch {}
+
+      // ✅ If a modal caught it, stop here (don’t force /play)
+      if (dispatched && window.__suka.__sessionRunnerHandled) {
+        return;
+      }
 
       // 3) Guaranteed fallback: route to Play surface
       if (dispatched) {
@@ -1157,10 +1596,10 @@ function GlobalSessionRunnerHost() {
     try {
       if (eventBus && typeof eventBus.on === "function") {
         const off1 = eventBus.on("session.play.requested", (envelope) =>
-          openRunner(envelope)
+          openRunner(envelope),
         );
         const off2 = eventBus.on("play.started", (envelope) =>
-          openRunner(envelope)
+          openRunner(envelope),
         );
         offBus = () => {
           try {
@@ -1180,13 +1619,25 @@ function GlobalSessionRunnerHost() {
     };
   }, [location.pathname, navigate, shouldBlockRunnerOpen]);
 
-  // Keep this, but it’s not the thing preventing Play from opening.
-  if (SessionRunnerModal) return <SessionRunnerModal />;
+  // ✅ Mount modal if available (extra props are safe for legacy components too)
+  if (SessionRunnerModal) {
+    return (
+      <SessionRunnerModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        initialDomain={modalDomain}
+      />
+    );
+  }
   return null;
 }
 
 /* ------------------------------- App Chrome ------------------------------- */
 function AppChrome({ children }) {
+  // ✅ NEW: only mount the Session Builder (GlobalSessionRunnerHost) on Home
+  const location = useLocation();
+  const isHome = (location?.pathname || "/") === "/";
+
   return (
     <div className="min-h-screen grid bg-background text-foreground">
       <style>{`
@@ -1237,6 +1688,7 @@ function AppChrome({ children }) {
           <div className="px-3 pt-1 text-[11px] uppercase tracking-wide text-neutral-500">
             Home
           </div>
+
           <ul
             className="menu px-2 pt-1"
             style={{
@@ -1255,7 +1707,12 @@ function AppChrome({ children }) {
             <NavItem to="/storehouse" icon="📦" label="Storehouse" />
             <NavItem to="/community" icon="🤝" label="Community" />
             <NavItem to="/badges" icon="🏅" label="Badges" />
-            <NavItem to="/homestead" icon="🏡" label="Homestead Planner" />
+            {/* ✅ UPDATED: Homestead Planner only surfaces at /homesteadplanner */}
+            <NavItem
+              to="/homesteadplanner"
+              icon="🏡"
+              label="Homestead Planner"
+            />
             <NavItem to="/favorites" icon="⭐" label="Favorites" />
             <NavItem to="/settings" icon="⚙️" label="Settings" />
           </ul>
@@ -1263,6 +1720,7 @@ function AppChrome({ children }) {
           <div className="px-3 pt-3 text-[11px] uppercase tracking-wide text-neutral-500">
             Household
           </div>
+
           <ul
             className="menu px-2 pt-1"
             style={{
@@ -1338,8 +1796,8 @@ function AppChrome({ children }) {
         )}
       </div>
 
-      {/* ✅ Mount global SessionRunner host AFTER chrome so it overlays all routes */}
-      <GlobalSessionRunnerHost />
+      {/* ✅ Mount global SessionRunner host ONLY on Home so Session Builder doesn't appear elsewhere */}
+      {isHome ? <GlobalSessionRunnerHost /> : null}
 
       <UndoNbaDock />
       <FloatingAutomationPanel />
@@ -1348,9 +1806,37 @@ function AppChrome({ children }) {
 }
 
 /* ------------------------ PWA Service Worker (prod) ------------------------ */
+/**
+ * ✅ FIX: The "MIME type text/html" module errors on localhost preview are
+ * commonly caused by a stale Service Worker serving an old app shell (index.html)
+ * that references /index.js, /index.js, /featureFlags.json, etc.
+ *
+ * So:
+ * - On localhost/127.0.0.1, we proactively unregister SWs (prevents cache poison)
+ * - In real prod, we register normally
+ */
+async function unregisterServiceWorkersOnLocalhost() {
+  try {
+    const host = window.location.hostname;
+    const isLocal =
+      host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+    if (!isLocal) return;
+    if (!("serviceWorker" in navigator)) return;
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((r) => r.unregister()));
+    console.info("[PWA] Unregistered service workers on localhost.");
+  } catch {}
+}
+
 async function registerServiceWorkerIfProd() {
   if (!("serviceWorker" in navigator)) return;
   if (!import.meta.env.PROD) return;
+
+  // ✅ Skip SW on localhost to avoid stale-cache module MIME errors
+  const host = window.location.hostname;
+  const isLocal =
+    host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+  if (isLocal) return;
 
   const candidates = ["/sw.js", "/service-worker.js", "/pwa-sw.js"];
   for (const url of candidates) {
@@ -1358,7 +1844,7 @@ async function registerServiceWorkerIfProd() {
       const reg = await navigator.serviceWorker.register(url);
       console.info("[PWA] Service worker registered:", url, reg?.scope);
       return;
-    } catch (err) {
+    } catch {
       // try next candidate
     }
   }
@@ -1374,19 +1860,24 @@ export default function App() {
     try {
       installAutomationBridge?.();
     } catch {}
+
+    // ✅ FIX: stop SW from serving stale index.html on localhost preview
+    unregisterServiceWorkersOnLocalhost();
+
     prewarmAllRoutesDev();
     registerServiceWorkerIfProd();
   }, []);
 
   const settingsRoutes = React.useMemo(
     () => getSettingsRoutes("/settings"),
-    []
+    [],
   );
 
   return (
     <VisionProvider>
       {/* Router is provided by main.jsx */}
       <OrchestrationBridge />
+
       <AppChrome>
         <Routes>
           {/* Core */}
@@ -1420,18 +1911,23 @@ export default function App() {
           <Route path="/garden" element={<Garden />} />
           <Route path="/animals" element={<Animals />} />
           <Route path="/custom-locations" element={<CustomLocations />} />
-          <Route path="/roles" element={<JobsPage />} />
+
+          {/* ✅ FIX: roles route uses RolesPage (not JobsPage) */}
+          <Route path="/roles" element={<RolesPage />} />
 
           {/* NEW: Play/Remote execution routes (domain surfaces) */}
           {/* Cooking */}
           <Route path="/cooking/play/:id" element={<CookingPlay />} />
           <Route path="/cooking/remote/:room" element={<CookingRemote />} />
+
           {/* Cleaning */}
           <Route path="/cleaning/play/:id" element={<CleaningPlay />} />
           <Route path="/cleaning/remote/:room" element={<CleaningRemote />} />
+
           {/* Garden */}
           <Route path="/garden/play/:id" element={<GardenPlay />} />
           <Route path="/garden/remote/:room" element={<GardenRemote />} />
+
           {/* Animals */}
           <Route path="/animals/play/:id" element={<AnimalsPlay />} />
           <Route path="/animals/remote/:room" element={<AnimalsRemote />} />
@@ -1441,6 +1937,13 @@ export default function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/badges" element={<BadgesPage />} />
           <Route path="/meal-planning" element={<MealPlanningPage />} />
+
+          {/* ✅ UPDATED: load the real household meals page first */}
+          <Route
+            path="/household/meals"
+            element={<HouseholdMealsCuisinePage />}
+          />
+
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
 
@@ -1461,7 +1964,87 @@ export default function App() {
           />
 
           {/* NEW sections */}
-          <Route path="/homestead" element={<HomesteadPage />} />
+          {/* ✅ Homestead Planner ONLY surfaces here: /homesteadplanner/** */}
+          <Route path="/homesteadplanner" element={<HomesteadPage />} />
+          <Route
+            path="/homesteadplanner/targets"
+            element={<HomesteadTargetsPage />}
+          />
+          <Route
+            path="/homesteadplanner/components"
+            element={<HomesteadComponentsPage />}
+          />
+          <Route
+            path="/homesteadplanner/inventory"
+            element={<HomesteadInventoryPage />}
+          />
+          <Route
+            path="/homesteadplanner/batches"
+            element={<HomesteadBatchesPage />}
+          />
+          <Route
+            path="/homesteadplanner/garden-targets"
+            element={<HomesteadGardenTargetsPage />}
+          />
+          <Route
+            path="/homesteadplanner/animal-targets"
+            element={<HomesteadAnimalTargetsPage />}
+          />
+          <Route
+            path="/homesteadplanner/cuisines"
+            element={<HomesteadCuisinesPage />}
+          />
+          <Route
+            path="/homesteadplanner/preferences"
+            element={<HomesteadPreferencesPage />}
+          />
+          <Route
+            path="/homesteadplanner/skills"
+            element={<HomesteadSkillsPage />}
+          />
+
+          {/* ✅ Back-compat redirects to keep old links working, but NOT surface outputs elsewhere */}
+          <Route
+            path="/homestead"
+            element={<Navigate to="/homesteadplanner" replace />}
+          />
+          <Route
+            path="/homestead/targets"
+            element={<Navigate to="/homesteadplanner/targets" replace />}
+          />
+          <Route
+            path="/homestead/components"
+            element={<Navigate to="/homesteadplanner/components" replace />}
+          />
+          <Route
+            path="/homestead/inventory"
+            element={<Navigate to="/homesteadplanner/inventory" replace />}
+          />
+          <Route
+            path="/homestead/batches"
+            element={<Navigate to="/homesteadplanner/batches" replace />}
+          />
+          <Route
+            path="/homestead/garden-targets"
+            element={<Navigate to="/homesteadplanner/garden-targets" replace />}
+          />
+          <Route
+            path="/homestead/animal-targets"
+            element={<Navigate to="/homesteadplanner/animal-targets" replace />}
+          />
+          <Route
+            path="/homestead/cuisines"
+            element={<Navigate to="/homesteadplanner/cuisines" replace />}
+          />
+          <Route
+            path="/homestead/preferences"
+            element={<Navigate to="/homesteadplanner/preferences" replace />}
+          />
+          <Route
+            path="/homestead/skills"
+            element={<Navigate to="/homesteadplanner/skills" replace />}
+          />
+
           <Route path="/knowledge" element={<KnowledgePage />} />
 
           {/* Knowledge panels & tools & scan */}
@@ -1519,4 +2102,22 @@ export default function App() {
       </AppChrome>
     </VisionProvider>
   );
+}
+
+/* ----------------------------- tiny helpers ------------------------------ */
+function asArray(v) {
+  if (v == null) return [];
+  return Array.isArray(v) ? v : [v];
+}
+
+// Stable, tiny 32-bit hash for deterministic auto skillIds (session ingest)
+function stableHash32(str) {
+  const s = String(str || "");
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  // unsigned
+  return (h >>> 0).toString(36);
 }

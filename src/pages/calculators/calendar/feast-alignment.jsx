@@ -25,16 +25,11 @@
  *     - SessionRunner sessions for prep / observance
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import FeastDayAlignmentCalculatorView from "@/features/calculators/calendar/FeastDayAlignmentCalculator.view";
+import FeastDayAlignmentCalculatorView from "@/features/calculators/calendar/FeastDayAlignmentCalculator/FeastDayAlignmentCalculator.view.jsx";
 
 const CALCULATOR_ID = "calendar.feastAlignment";
 
@@ -267,9 +262,12 @@ function CategoryPill({ category }) {
 
   const base =
     "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border";
-  const cls = colorMap[category] || "bg-slate-600/20 text-slate-200 border-slate-400/70";
+  const cls =
+    colorMap[category] || "bg-slate-600/20 text-slate-200 border-slate-400/70";
 
-  return <span className={`${base} ${cls}`}>{labelMap[category] || category}</span>;
+  return (
+    <span className={`${base} ${cls}`}>{labelMap[category] || category}</span>
+  );
 }
 
 /**
@@ -336,9 +334,7 @@ function FeastDayTable({ feastDays }) {
                     </span>
                   )}
                   {d.isCookingAllowed === false && (
-                    <span className="ml-1 text-amber-300">
-                      (No cooking)
-                    </span>
+                    <span className="ml-1 text-amber-300">(No cooking)</span>
                   )}
                 </td>
               </tr>
@@ -390,10 +386,7 @@ function FeastAlignmentSummaryCard({
     notes,
   } = result;
 
-  const headerLabel = useMemo(
-    () => buildHeaderLabel(result),
-    [result]
-  );
+  const headerLabel = useMemo(() => buildHeaderLabel(result), [result]);
 
   const totalHighSabbaths = Array.isArray(feastDays)
     ? feastDays.filter((d) => d.category === "highSabbath").length
@@ -410,9 +403,9 @@ function FeastAlignmentSummaryCard({
             Feast Day Alignment Summary &amp; Next Steps
           </h2>
           <p className="text-xs text-slate-400 max-w-xl">
-            Review the aligned feast dates for this anchored month/year, see
-            how they cluster by type, and then push them out to your calendar,
-            feast planner, meal planning, and storehouse goals.
+            Review the aligned feast dates for this anchored month/year, see how
+            they cluster by type, and then push them out to your calendar, feast
+            planner, meal planning, and storehouse goals.
           </p>
         </div>
         <div className="text-[11px] text-right text-slate-300">
@@ -462,8 +455,7 @@ function FeastAlignmentSummaryCard({
             <span className="text-slate-100">{totalHighSabbaths}</span>
           </span>
           <span className="text-slate-500">
-            Prep days:{" "}
-            <span className="text-slate-100">{totalPrepDays}</span>
+            Prep days: <span className="text-slate-100">{totalPrepDays}</span>
           </span>
         </div>
 
@@ -543,7 +535,9 @@ function FeastAlignmentSummaryCard({
           </button>
           <button
             type="button"
-            onClick={() => result && onStorehouseSync && onStorehouseSync(result)}
+            onClick={() =>
+              result && onStorehouseSync && onStorehouseSync(result)
+            }
             className="inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md shadow-amber-500/30 transition"
           >
             Align Storehouse
@@ -573,8 +567,7 @@ export default function FeastDayAlignmentCalculatorPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.title =
-      "Feast Day Alignment Calculator | Suka Smart Assistant";
+    document.title = "Feast Day Alignment Calculator | Suka Smart Assistant";
   }, []);
 
   /**
@@ -586,14 +579,10 @@ export default function FeastDayAlignmentCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.calendar.feast-alignment",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.calendar.feast-alignment",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -606,7 +595,7 @@ export default function FeastDayAlignmentCalculatorPage() {
         ruleId:
           typeof calcResult.ruleId === "string"
             ? calcResult.ruleId
-            : (input?.ruleId || "unknown-rule"),
+            : input?.ruleId || "unknown-rule",
         ruleLabel:
           typeof calcResult.ruleLabel === "string"
             ? calcResult.ruleLabel
@@ -614,11 +603,11 @@ export default function FeastDayAlignmentCalculatorPage() {
         feastSetId:
           typeof calcResult.feastSetId === "string"
             ? calcResult.feastSetId
-            : (input?.feastSetId || "custom-set"),
+            : input?.feastSetId || "custom-set",
         feastSetLabel:
           typeof calcResult.feastSetLabel === "string"
             ? calcResult.feastSetLabel
-            : (input?.feastSetLabel || "Selected feast set"),
+            : input?.feastSetLabel || "Selected feast set",
         timezone:
           typeof calcResult.timezone === "string"
             ? calcResult.timezone
@@ -644,9 +633,7 @@ export default function FeastDayAlignmentCalculatorPage() {
           typeof calcResult.reasoningSummary === "string"
             ? calcResult.reasoningSummary
             : "",
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };
@@ -706,8 +693,8 @@ export default function FeastDayAlignmentCalculatorPage() {
             <p className="mt-1 text-sm text-slate-400 max-w-2xl">
               Align your appointed times, high Sabbaths, and preparation days
               with your anchored Hebrew month and real-world Gregorian dates.
-              SSA will then sync your calendar, feast planner, meals,
-              storehouse pulls, and prep sessions around these dates.
+              SSA will then sync your calendar, feast planner, meals, storehouse
+              pulls, and prep sessions around these dates.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">

@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/farm_to_table/substitutions.catalog.schema.json",
+  "title": "SSA • Farm-to-Table Substitutions Catalog Schema",
+  "description": "Schema for SSA farm-to-table substitutions catalogs. Substitutions are deterministic, planner-safe replacement rules between farm-to-table components (and/or roles), used by engines to swap unavailable items while preserving intent (role, diet, allergens, readiness, sourcing priority). Compatible with SSA generic catalog schema (id + tags) but adds structured substitution rule fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "meta", "items"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$id": { "type": "string" },
+
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "scope": {
+      "description": "Optional scoping for planners/resolvers (e.g., module, locale).",
+      "type": ["string", "object"],
+      "additionalProperties": true
+    },
+
+    "defaults": {
+      "description": "Optional defaults used by substitution engines (e.g., max depth, default score weights).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "items": {
+      "description": "Substitution entries (minimal or rich).",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/SubstitutionItem" }
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 6000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Meta": {
+      "type": "object",
+      "required": ["id", "type", "name"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "catalog" },
+        "domain": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "minLength": 2 },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "subtitle": { "$ref": "#/$defs/ShortText" },
+        "source": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "ComponentRef": {
+      "description": "Reference to a farm-to-table component ID.",
+      "allOf": [{ "$ref": "#/$defs/Id" }]
+    },
+
+    "RoleRef": {
+      "description": "Reference to a component role ID (ties into component_roles.catalog.json).",
+      "allOf": [{ "$ref": "#/$defs/Id" }]
+    },
+
+    "ReadinessRef": {
+      "description": "Reference to a readiness ID (ties into readiness_levels.catalog.json).",
+      "allOf": [{ "$ref": "#/$defs/Id" }]
+    },
+
+    "ConstraintTags": {
+      "description": "Tag constraints used by substitution matching/filtering.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mustHave": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "mustNotHave": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "anyOf": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+
+    "DietConstraint": {
+      "description": "Optional diet/allergen constraints for safe substitution (planner-facing; authorization/safety handled elsewhere).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requireDietFlags": {
+          "description": "Diet flags that must be present on the substitute (e.g., diet.vegan).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        },
+        "avoidAllergens": {
+          "description": "Allergen IDs to avoid in the substitute.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        },
+        "notes": { "$ref": "#/$defs/ShortText" }
+      },
+      "default": {}
+    },
+
+    "SubstitutionIntent": {
+      "description": "Describes what the substitution is trying to preserve (role/readiness/behavior).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preserveRole": { "type": "boolean", "default": true },
+        "preserveReadiness": { "type": "boolean", "default": false },
+        "preserveCuisineHint": { "type": "boolean", "default": false },
+        "preserveSourcingPriority": { "type": "boolean", "default": true }
+      },
+      "default": {}
+    },
+
+    "MatchSource": {
+      "description": "What triggers this substitution: a specific component, a role, or tags.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["component", "role", "tags"] },
+
+        "componentId": { "$ref": "#/$defs/ComponentRef" },
+
+        "roleId": { "$ref": "#/$defs/RoleRef" },
+
+        "tags": { "$ref": "#/$defs/ConstraintTags" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "component" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["componentId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "role" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["roleId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "tags" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["tags"] }
+        }
+      ]
+    },
+
+    "Candidate": {
+      "description": "A single candidate replacement option.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "scoreDelta"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["component", "role", "query"] },
+
+        "componentId": { "$ref": "#/$defs/ComponentRef" },
+        "roleId": { "$ref": "#/$defs/RoleRef" },
+
+        "query": {
+          "description": "Deterministic query hint used by engines (e.g., match tags/role + diet constraints).",
+          "type": "object",
+          "additionalProperties": true
+        },
+
+        "scoreDelta": {
+          "description": "Relative desirability adjustment. Higher = better.",
+          "type": "number",
+          "minimum": -1000,
+          "maximum": 1000,
+          "default": 0
+        },
+
+        "notes": { "$ref": "#/$defs/ShortText" },
+
+        "constraints": {
+          "description": "Optional additional constraints for this candidate only.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tags": { "$ref": "#/$defs/ConstraintTags" },
+            "diet": { "$ref": "#/$defs/DietConstraint" },
+            "minReadiness": { "$ref": "#/$defs/ReadinessRef" }
+          },
+          "default": {}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "component" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["componentId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "role" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["roleId"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "query" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["query"] }
+        }
+      ]
+    },
+
+    "UiHints": {
+      "description": "Optional UI hints for rendering substitution explanations.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "badge": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "explain": { "$ref": "#/$defs/ShortText" }
+      },
+      "default": {}
+    },
+
+    "SubstitutionRule": {
+      "description": "Structured substitution rule: when a source matches, choose a candidate replacement.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "candidates"],
+      "properties": {
+        "source": { "$ref": "#/$defs/MatchSource" },
+
+        "intent": { "$ref": "#/$defs/SubstitutionIntent" },
+
+        "diet": { "$ref": "#/$defs/DietConstraint" },
+
+        "minReadiness": {
+          "description": "Optional minimum readiness required of replacements.",
+          "anyOf": [{ "$ref": "#/$defs/ReadinessRef" }, { "type": "null" }]
+        },
+
+        "candidates": {
+          "description": "Ordered candidate list. Engines should try in order and apply scoring.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Candidate" }
+        },
+
+        "ui": { "$ref": "#/$defs/UiHints" }
+      }
+    },
+
+    "SubstitutionItem": {
+      "description": "A single substitution entry. Minimum required is id + tags (SSA catalog compatibility).",
+      "type": "object",
+      "required": ["id", "tags"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "description": "Canonical substitution ID (recommend prefix 'sub.'), e.g., sub.protein.chicken_to_turkey.",
+          "allOf": [{ "$ref": "#/$defs/Id" }]
+        },
+
+        "tags": {
+          "description": "Search/filter tags.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "group": { "$ref": "#/$defs/ShortText" },
+        "rank": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "draft", "deprecated"]
+        },
+        "notes": { "$ref": "#/$defs/Text" },
+
+        "path": {
+          "description": "Optional relative path to a richer substitution definition.",
+          "type": "string"
+        },
+
+        "rule": { "$ref": "#/$defs/SubstitutionRule" },
+
+        "refs": {
+          "description": "Optional cross references.",
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+
+      "allOf": [
+        {
+          "if": { "required": ["rule"] },
+          "then": {
+            "properties": { "rule": { "$ref": "#/$defs/SubstitutionRule" } }
+          }
+        }
+      ]
+    }
+  }
+}

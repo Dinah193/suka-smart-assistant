@@ -1,6 +1,6 @@
 # Agent Telemetry Events (`agent.*`)
 
-This document defines the **agent-level telemetry events** for the Suka Smart Assistant (SSA).  
+This document defines the **agent-level telemetry events** for the Suka Smart Assistant (SSA).
 
 These events sit **above** the raw domain imports and **alongside** `session.*`, `import.*`, and `automation.*` events:
 
@@ -14,7 +14,7 @@ These events sit **above** the raw domain imports and **alongside** `session.*`,
 All events are emitted through the shared event bus:
 
 ```js
-// src/services/eventBus.js
+// src/services/events/eventBus.js
 emit({
   type,   // string, e.g. "agent.session.generated"
   ts,     // ISO timestamp
@@ -742,3 +742,4 @@ Reverse generation can be triggered:
 explicitly from UI (“Build a template from my last 60 days”)
 
 implicitly from automation runtime when enough history exists.
+```

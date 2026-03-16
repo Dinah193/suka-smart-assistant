@@ -26,7 +26,7 @@ let emitEvent = null;
 
 try {
   // eslint-disable-next-line import/no-unresolved
-  const bus = require("@/services/eventBus");
+  const bus = require("@/services/events/eventBus");
   emitEvent = typeof bus.emit === "function" ? bus.emit : null;
 } catch (err) {
   // In tests or isolated builds, eventBus may not be available.
@@ -148,7 +148,11 @@ function toBoundedNumber(value, fallback, min, max) {
 
   if (typeof value === "number" && !Number.isNaN(value)) {
     n = value;
-  } else if (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value))) {
+  } else if (
+    typeof value === "string" &&
+    value.trim() !== "" &&
+    !Number.isNaN(Number(value))
+  ) {
     n = Number(value);
   } else {
     n = fallback;
@@ -198,7 +202,9 @@ function flagToScore(flag) {
  * @returns {number}
  */
 function safeAverage(nums) {
-  const filtered = nums.filter((n) => typeof n === "number" && !Number.isNaN(n));
+  const filtered = nums.filter(
+    (n) => typeof n === "number" && !Number.isNaN(n)
+  );
   if (!filtered.length) return 0;
   const total = filtered.reduce((sum, n) => sum + n, 0);
   return total / filtered.length;
@@ -231,19 +237,68 @@ function computeStability(input) {
   const metrics = input?.metrics || {};
   const flags = input?.flags || {};
 
-  const storehouseMonths = toBoundedNumber(metrics.storehouseMonthsCovered, 0, 0);
+  const storehouseMonths = toBoundedNumber(
+    metrics.storehouseMonthsCovered,
+    0,
+    0
+  );
   const storehouseScore = toStorehouseScore(storehouseMonths);
 
-  const mealReadinessScore = toBoundedNumber(metrics.mealReadinessScore, 50, 0, 100);
-  const cleaningCoverageScore = toBoundedNumber(metrics.cleaningCoverageScore, 50, 0, 100);
-  const gardenSupportScore = toBoundedNumber(metrics.gardenSupportScore, 50, 0, 100);
-  const preservationCapacityScore = toBoundedNumber(metrics.preservationCapacityScore, 50, 0, 100);
-  const financialMarginScore = toBoundedNumber(metrics.financialMarginScore, 50, 0, 100);
-  const routineConsistencyScore = toBoundedNumber(metrics.routineConsistencyScore, 50, 0, 100);
-  const healthBaselineScore = toBoundedNumber(metrics.healthBaselineScore, 50, 0, 100);
-  const relationshipSupportScore = toBoundedNumber(metrics.relationshipSupportScore, 50, 0, 100);
+  const mealReadinessScore = toBoundedNumber(
+    metrics.mealReadinessScore,
+    50,
+    0,
+    100
+  );
+  const cleaningCoverageScore = toBoundedNumber(
+    metrics.cleaningCoverageScore,
+    50,
+    0,
+    100
+  );
+  const gardenSupportScore = toBoundedNumber(
+    metrics.gardenSupportScore,
+    50,
+    0,
+    100
+  );
+  const preservationCapacityScore = toBoundedNumber(
+    metrics.preservationCapacityScore,
+    50,
+    0,
+    100
+  );
+  const financialMarginScore = toBoundedNumber(
+    metrics.financialMarginScore,
+    50,
+    0,
+    100
+  );
+  const routineConsistencyScore = toBoundedNumber(
+    metrics.routineConsistencyScore,
+    50,
+    0,
+    100
+  );
+  const healthBaselineScore = toBoundedNumber(
+    metrics.healthBaselineScore,
+    50,
+    0,
+    100
+  );
+  const relationshipSupportScore = toBoundedNumber(
+    metrics.relationshipSupportScore,
+    50,
+    0,
+    100
+  );
   const crisisLoadScore = toBoundedNumber(metrics.crisisLoadScore, 50, 0, 100);
-  const sabbathProtectionScore = toBoundedNumber(metrics.sabbathProtectionScore, 50, 0, 100);
+  const sabbathProtectionScore = toBoundedNumber(
+    metrics.sabbathProtectionScore,
+    50,
+    0,
+    100
+  );
 
   const crisisStabilityScore = toCrisisStabilityScore(crisisLoadScore);
 
@@ -259,38 +314,35 @@ function computeStability(input) {
       storehouseScore * 1.5,
       mealReadinessScore * 1.5,
       preservationCapacityScore,
-      gardenSupportScore
+      gardenSupportScore,
     ]),
 
     calendar: safeAverage([
       feastCalendarScore * 1.2,
       sabbathProtectionScore * 1.2,
       routineConsistencyScore,
-      crisisStabilityScore * 0.5
+      crisisStabilityScore * 0.5,
     ]),
 
     routine: safeAverage([
       cleaningCoverageScore * 1.3,
       routineConsistencyScore * 1.3,
       sabbathGuardRespectedScore,
-      quietHoursScore
+      quietHoursScore,
     ]),
 
     health: safeAverage([
       healthBaselineScore * 1.2,
       crisisStabilityScore,
-      sabbathProtectionScore * 0.5
+      sabbathProtectionScore * 0.5,
     ]),
 
-    finance: safeAverage([
-      financialMarginScore * 1.5,
-      storehouseScore * 0.7
-    ]),
+    finance: safeAverage([financialMarginScore * 1.5, storehouseScore * 0.7]),
 
     relationships: safeAverage([
       relationshipSupportScore * 1.2,
-      crisisStabilityScore * 0.8
-    ])
+      crisisStabilityScore * 0.8,
+    ]),
   };
 
   // Overall stability index – weighted blend of subscores.
@@ -300,7 +352,7 @@ function computeStability(input) {
     subScores.routine * 1.2,
     subScores.health,
     subScores.finance,
-    subScores.relationships
+    subScores.relationships,
   ]);
 
   const band = classifyBand(stabilityIndex);
@@ -313,13 +365,15 @@ function computeStability(input) {
     alerts.push({
       code: "LOW_STOREHOUSE_CRITICAL",
       level: "critical",
-      message: "Storehouse coverage is below 1 month. Prioritize staple restocking."
+      message:
+        "Storehouse coverage is below 1 month. Prioritize staple restocking.",
     });
   } else if (storehouseMonths < 3) {
     alerts.push({
       code: "LOW_STOREHOUSE",
       level: "warning",
-      message: "Storehouse coverage is under 3 months. Plan a restocking session soon."
+      message:
+        "Storehouse coverage is under 3 months. Plan a restocking session soon.",
     });
   }
 
@@ -327,7 +381,8 @@ function computeStability(input) {
     alerts.push({
       code: "MEAL_READINESS_LOW",
       level: "warning",
-      message: "Meal readiness is low. Consider batch cooking or a simple menu reset."
+      message:
+        "Meal readiness is low. Consider batch cooking or a simple menu reset.",
     });
   }
 
@@ -335,7 +390,8 @@ function computeStability(input) {
     alerts.push({
       code: "CLEANING_COVERAGE_LOW",
       level: "warning",
-      message: "Cleaning routines are falling behind. A reset session can restore order."
+      message:
+        "Cleaning routines are falling behind. A reset session can restore order.",
     });
   }
 
@@ -343,7 +399,8 @@ function computeStability(input) {
     alerts.push({
       code: "CRISIS_LOAD_HIGH",
       level: "critical",
-      message: "Crisis/chaos load is high. Reduce extra tasks and protect rest windows."
+      message:
+        "Crisis/chaos load is high. Reduce extra tasks and protect rest windows.",
     });
   }
 
@@ -351,7 +408,8 @@ function computeStability(input) {
     alerts.push({
       code: "FINANCIAL_MARGIN_LOW",
       level: "warning",
-      message: "Financial margin is tight. Consider a budget and storehouse-first planning session."
+      message:
+        "Financial margin is tight. Consider a budget and storehouse-first planning session.",
     });
   }
 
@@ -359,7 +417,8 @@ function computeStability(input) {
     alerts.push({
       code: "SABBATH_WEAK",
       level: "info",
-      message: "Sabbath protection is weak. Strengthening it may improve overall stability."
+      message:
+        "Sabbath protection is weak. Strengthening it may improve overall stability.",
     });
   }
 
@@ -373,7 +432,7 @@ function computeStability(input) {
       label: "Plan a 3-month staple restock session",
       domain: "storehouse",
       sessionTemplateKey: "storehouse.restock-3-month",
-      priority: storehouseMonths < 1 ? "critical" : "high"
+      priority: storehouseMonths < 1 ? "critical" : "high",
     });
   }
 
@@ -383,7 +442,7 @@ function computeStability(input) {
       label: "Schedule a batch cooking basics session for everyday meals",
       domain: "cooking",
       sessionTemplateKey: "cooking.batch-basics",
-      priority: "high"
+      priority: "high",
     });
   }
 
@@ -393,7 +452,7 @@ function computeStability(input) {
       label: "Run a weekly cleaning + routine reset session",
       domain: "cleaning",
       sessionTemplateKey: "cleaning.weekly-reset",
-      priority: "medium"
+      priority: "medium",
     });
   }
 
@@ -403,17 +462,18 @@ function computeStability(input) {
       label: "Align garden sowing/harvest to the scriptural seasons",
       domain: "garden",
       sessionTemplateKey: "garden.seasonal-alignment",
-      priority: "medium"
+      priority: "medium",
     });
   }
 
   if (preservationCapacityScore < 60 && storehouseMonths >= 3) {
     recommendations.push({
       id: "boost-preservation",
-      label: "Plan a preservation training session (canning, dehydrating, freezing)",
+      label:
+        "Plan a preservation training session (canning, dehydrating, freezing)",
       domain: "preservation",
       sessionTemplateKey: "preservation.training-overview",
-      priority: "medium"
+      priority: "medium",
     });
   }
 
@@ -423,7 +483,7 @@ function computeStability(input) {
       label: "Schedule a simple home gathering or family check-in night",
       domain: "stability",
       sessionTemplateKey: "stability.relationship-checkin",
-      priority: "medium"
+      priority: "medium",
     });
   }
 
@@ -433,20 +493,28 @@ function computeStability(input) {
       label: "Protect Sabbath windows and reduce non-essential tasks",
       domain: "stability",
       sessionTemplateKey: "stability.sabbath-protection",
-      priority: "high"
+      priority: "high",
     });
   }
 
   // Status summary text
-  const periodLabel = input?.period?.yearLabel || `${input?.period?.startDate || ""} – ${input?.period?.endDate || ""}`.trim();
+  const periodLabel =
+    input?.period?.yearLabel ||
+    `${input?.period?.startDate || ""} – ${
+      input?.period?.endDate || ""
+    }`.trim();
   const statusSummary = [
-    periodLabel ? `Stability for ${periodLabel}: ${band.toUpperCase()}.` : `Stability band: ${band.toUpperCase()}.`,
-    `Overall index is ${Math.round(stabilityIndex)}. Storehouse coverage is ~${storehouseMonths.toFixed(
+    periodLabel
+      ? `Stability for ${periodLabel}: ${band.toUpperCase()}.`
+      : `Stability band: ${band.toUpperCase()}.`,
+    `Overall index is ${Math.round(
+      stabilityIndex
+    )}. Storehouse coverage is ~${storehouseMonths.toFixed(
       1
     )} months and meal readiness is ${Math.round(mealReadinessScore)}.`,
     alerts.length
       ? `There are ${alerts.length} alert(s) to review and ${recommendations.length} suggested next step(s).`
-      : `No major alerts detected. Consider the recommended next steps to keep building stability.`
+      : `No major alerts detected. Consider the recommended next steps to keep building stability.`,
   ].join(" ");
 
   return {
@@ -458,13 +526,13 @@ function computeStability(input) {
       routine: Math.round(subScores.routine),
       health: Math.round(subScores.health),
       finance: Math.round(subScores.finance),
-      relationships: Math.round(subScores.relationships)
+      relationships: Math.round(subScores.relationships),
     },
     statusSummary,
     alerts,
     recommendations,
     generatedAt: new Date().toISOString(),
-    version: "1.0.0"
+    version: "1.0.0",
   };
 }
 
@@ -483,7 +551,9 @@ async function runHouseholdStabilityCalculatorShim(request) {
   const rawInput = request?.payload?.input;
 
   if (!rawInput || typeof rawInput !== "object") {
-    const error = new Error("HouseholdStabilityCalculatorShim: missing or invalid `payload.input`.");
+    const error = new Error(
+      "HouseholdStabilityCalculatorShim: missing or invalid `payload.input`."
+    );
     // We keep errors local to the shim; callers can catch if needed.
     throw error;
   }
@@ -496,7 +566,7 @@ async function runHouseholdStabilityCalculatorShim(request) {
   const response = {
     nodeKey,
     input,
-    output
+    output,
   };
 
   // Emit an event for observability / downstream listeners.
@@ -506,12 +576,15 @@ async function runHouseholdStabilityCalculatorShim(request) {
         type: "stability.calculated",
         ts: new Date().toISOString(),
         source: "calculators/stability/HouseholdStabilityCalculator",
-        data: response
+        data: response,
       });
     } catch (err) {
       // Swallow to avoid breaking the shim if eventBus fails.
       // eslint-disable-next-line no-console
-      console.warn("HouseholdStabilityCalculatorShim: failed to emit event", err);
+      console.warn(
+        "HouseholdStabilityCalculatorShim: failed to emit event",
+        err
+      );
     }
   }
 
@@ -526,5 +599,14 @@ module.exports = {
   id: "HouseholdStabilityCalculatorShim",
   label: "Household Stability Calculator Shim",
   kind: "calculator-shim",
-  run: runHouseholdStabilityCalculatorShim
+  run: runHouseholdStabilityCalculatorShim,
+};
+
+export const run = runHouseholdStabilityCalculatorShim;
+
+export default {
+  id: "HouseholdStabilityCalculatorShim",
+  label: "Household Stability Calculator Shim",
+  kind: "calculator-shim",
+  run,
 };

@@ -1,15 +1,24 @@
 // src/pages/mealplanner.jsx
 import React, { useMemo, useState, useEffect, Suspense, useRef } from "react";
 
+// SV (Sacred Village) shared styling used by Cooking/Cleaning/Garden pages
+import "@/styles/household.css";
+import "@/pages/cooking/cooking.css";
+
 /* ---------------- Existing panels ---------------- */
 import MealPlannerDashboard from "../../components/meals/MealPlannerDashboard.jsx";
 import MealCyclePlannerCalendar from "./MealCyclePlannerCalendar.jsx";
 import MealPrepNeedsReport from "../../components/meals/MealPrepNeedsReport.jsx";
 import FoodProductionForecast from "../../components/meals/FoodProductionForecast.jsx";
 import ProcurementReport from "../../components/meals/ProcurementReport.jsx";
+import ShoppingListGenerator from "../../components/meals/ShoppingListGenerator.jsx";
 import MealToMarketScalePanel from "../../components/meals/MealToMarketScalePanel.jsx";
 import SeedAnimalInventoryForm from "../../components/meals/SeedAnimalInventoryForm.jsx";
 import ZoneAwareCalendar from "../../components/meals/ZoneAwareCalendar.jsx";
+import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
+import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
+import { useFoodSecurityEstimator } from "@/hooks/estimators/useFoodSecurityEstimator";
+import { useCostDeltaEstimator } from "@/hooks/estimators/useCostDeltaEstimator";
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -142,6 +151,15 @@ try {
 /* ---------------- Dev automations ---------------- */
 import AutomationPanel from "../../ui/AutomationPanel.jsx";
 import { automation } from "@/services/automation/runtime";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
+import { eventBus } from "@/services/events/eventBus";
+import {
+  emitHomesteadMealPlanGenerated,
+  buildEstimateInputsFromNormalizedPlan,
+  emitPlannerGapsUpdated,
+} from "@/services/planners/mealPlannerBridge";
+import { useStorehousePlannerStore } from "@/store/StorehousePlannerStore";
+import { useHomesteadPlannerStore } from "@/store/homesteadPlannerStore";
 
 /* ---------------- Vision (household profile) ---------------- */
 import { useVision } from "@/context/VisionContext";
@@ -150,6 +168,7 @@ import { useVision } from "@/context/VisionContext";
 import {
   useMealPlanDraftStore,
   saveDraft as saveDraftAPI,
+  getDraft as getDraftAPI,
   publishDraft as publishDraftAPI,
   exportDraftJSON as exportDraftJSONAPI,
   importDraftJSON as importDraftJSONAPI,
@@ -217,11 +236,16 @@ class ToolErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="card" style={{ borderColor: "var(--danger)" }}>
-          <div style={{ fontWeight: 700, color: "var(--danger)" }}>
-            A panel failed to load.
+        <div
+          className="sv-card sv-pad"
+          style={{ border: "1px solid var(--danger)" }}
+        >
+          <div className="sv-row" style={{ alignItems: "center", gap: 10 }}>
+            <div style={{ fontWeight: 900, color: "var(--danger)" }}>
+              A panel failed to load.
+            </div>
           </div>
-          <div className="subtitle" style={{ marginTop: 6 }}>
+          <div className="sv-muted" style={{ marginTop: 6 }}>
             Check the console for details. The rest of the page is still usable.
           </div>
         </div>
@@ -250,7 +274,7 @@ const TOOL_REGISTRY = [
     id: "cycle",
     label: "Meal Cycle Planner",
     loader: () => (
-      <div className="calendar card" style={{ padding: 0 }}>
+      <div className="sv-card" style={{ padding: 0 }}>
         <div
           className="calendar-header"
           style={{
@@ -314,23 +338,29 @@ function Pill({ active, children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`btn sm ${active ? "primary" : ""}`}
+      className={`sv-chip ${active ? "is-active" : ""}`}
       style={{ borderRadius: 999, lineHeight: 1.2 }}
     >
-      <span className="label">{children}</span>
+      {children}
     </button>
   );
 }
+
 function SectionTitle({ title, subtitle }) {
   return (
-    <div
-      className="flex items-start justify-between gap-3"
-      style={{ marginBottom: 6 }}
-    >
-      <div>
-        <h2 className="mb-1 text-xl md:text-2xl font-extrabold">{title}</h2>
-        {subtitle ? <div className="subtitle">{subtitle}</div> : null}
+    <div className="sv-sectionHead">
+      <div
+        className="sv-row sv-wrap"
+        style={{
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+        }}
+      >
+        <div style={{ fontWeight: 900, fontSize: 20, letterSpacing: -0.2 }}>
+          {title}
+        </div>
       </div>
+      {subtitle ? <div className="sv-muted">{subtitle}</div> : null}
     </div>
   );
 }
@@ -566,7 +596,7 @@ function InlinePlanViewer({ envelope }) {
     ? envelope.prepSchedule
     : [];
   return (
-    <div className="card" style={{ marginTop: 16 }}>
+    <div className="sv-card sv-pad" style={{ marginTop: 16 }}>
       <SectionTitle
         title={envelope.title || "Meal Plan"}
         subtitle={envelope.summary || ""}
@@ -575,14 +605,14 @@ function InlinePlanViewer({ envelope }) {
         className="grid"
         style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr" }}
       >
-        <div className="card">
-          <div className="font-bold mb-2">Schedule</div>
+        <div className="sv-card sv-pad">
+          <div className="subtitle">Schedule</div>
           {days.length ? (
             <div className="grid" style={{ display: "grid", gap: 8 }}>
               {days.map((d, i) => (
-                <div key={i} className="rounded-2xl border p-3">
-                  <div className="font-bold mb-1">Day {d.day ?? i + 1}</div>
-                  <ul className="list-disc pl-5">
+                <div key={i} className="sv-card sv-pad">
+                  <div className="subtitle">Day {d.day ?? i + 1}</div>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
                     {(d.meals || []).map((m, j) => (
                       <li key={j}>
                         {m.time || "meal"} — {m.title || m.name || "Meal"}
@@ -597,10 +627,10 @@ function InlinePlanViewer({ envelope }) {
           )}
         </div>
 
-        <div className="card">
-          <div className="font-bold mb-2">Shopping List</div>
+        <div className="sv-card sv-pad">
+          <div className="subtitle">Shopping List</div>
           {groceries.length ? (
-            <ul className="list-disc pl-5">
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
               {groceries.map((g, i) => {
                 const txt =
                   typeof g === "string"
@@ -616,10 +646,10 @@ function InlinePlanViewer({ envelope }) {
           )}
         </div>
 
-        <div className="card">
-          <div className="font-bold mb-2">Prep Schedule</div>
+        <div className="sv-card sv-pad">
+          <div className="subtitle">Prep Schedule</div>
           {prep.length ? (
-            <ul className="list-disc pl-5">
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
               {prep.map((p, i) => (
                 <li key={i}>
                   {typeof p === "string" ? p : p?.title || p?.name || "Task"}
@@ -644,9 +674,30 @@ function DraftReview({ data, onViewPlan }) {
   const prep = Array.isArray(data.prepTasks) ? data.prepTasks : [];
   const budget = data.budget || {};
   const macros = data.macros || {};
+  const shoppingSeeds = shopping
+    .map((it, i) => {
+      if (typeof it === "string") {
+        return {
+          name: it,
+          neededQty: 1,
+          unit: "unit",
+          recipeId: `plan-${i + 1}`,
+          recipeTitle: "Meal Plan",
+        };
+      }
+
+      return {
+        name: it?.name,
+        neededQty: Number(it?.qty ?? it?.neededQty ?? 0) || 0,
+        unit: it?.unit || "unit",
+        recipeId: it?.recipeId || `plan-${i + 1}`,
+        recipeTitle: it?.recipeTitle || "Meal Plan",
+      };
+    })
+    .filter((row) => String(row?.name || "").trim().length > 0);
 
   return (
-    <div className="card" style={{ marginTop: 16 }}>
+    <div className="sv-card sv-pad" style={{ marginTop: 16 }}>
       <SectionTitle
         title="Draft Review"
         subtitle="Readable summary of the generated plan."
@@ -660,7 +711,7 @@ function DraftReview({ data, onViewPlan }) {
           <div className="subtitle" style={{ marginBottom: 6 }}>
             Meals at a glance
           </div>
-          <ul className="list-disc pl-5">
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
             {meals.slice(0, 21).map((m, i) => {
               const label =
                 typeof m === "string"
@@ -684,7 +735,7 @@ function DraftReview({ data, onViewPlan }) {
           <div className="subtitle" style={{ marginBottom: 6 }}>
             Shopping list (highlights)
           </div>
-          <ul className="list-disc pl-5">
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
             {shopping.slice(0, 15).map((it, i) => {
               const line =
                 typeof it === "string"
@@ -698,12 +749,27 @@ function DraftReview({ data, onViewPlan }) {
         </div>
       )}
 
+      <div style={{ marginTop: 12 }}>
+        <ShoppingListGenerator
+          recipes={[]}
+          seedProvisionItems={shoppingSeeds}
+          stewardshipMode
+          sessionId={data?.id || data?.draftId || null}
+          onSendToGrocery={(payload) => {
+            automation?.emit?.("meal/shoppingForwarded", {
+              source: "mealplanner:draftReview",
+              payload,
+            });
+          }}
+        />
+      </div>
+
       {prep.length > 0 && (
         <div style={{ marginTop: 12 }}>
           <div className="subtitle" style={{ marginBottom: 6 }}>
             Prep tasks
           </div>
-          <ul className="list-disc pl-5">
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
             {prep.slice(0, 12).map((t, i) => (
               <li key={i}>
                 {typeof t === "string" ? t : t?.title || t?.name || "Task"}
@@ -721,8 +787,8 @@ function DraftReview({ data, onViewPlan }) {
           marginTop: 12,
         }}
       >
-        <div className="card">
-          <div className="font-bold">Budget</div>
+        <div className="sv-card sv-pad">
+          <div className="subtitle">Budget</div>
           <div className="subtitle">
             {budget.estimate
               ? `$${Number(budget.estimate).toFixed(2)} estimated`
@@ -730,8 +796,8 @@ function DraftReview({ data, onViewPlan }) {
           </div>
           {budget.notes ? <div className="subtitle">{budget.notes}</div> : null}
         </div>
-        <div className="card">
-          <div className="font-bold">Macros (avg/day)</div>
+        <div className="sv-card sv-pad">
+          <div className="subtitle">Macros (avg/day)</div>
           <div className="subtitle">
             {macros.calories ? `${macros.calories} kcal` : "—"} •{" "}
             {macros.protein ? `${macros.protein}g protein` : "—"} •{" "}
@@ -742,11 +808,11 @@ function DraftReview({ data, onViewPlan }) {
       </div>
 
       <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-        <button className="btn sm" onClick={onViewPlan}>
+        <button className="sv-btn sv-btn--outline" onClick={onViewPlan}>
           <span className="label">View Plan</span>
         </button>
         <button
-          className="btn sm"
+          className="sv-btn sv-btn--outline"
           onClick={() =>
             window.dispatchEvent(
               new CustomEvent("ui:navigate", {
@@ -758,7 +824,7 @@ function DraftReview({ data, onViewPlan }) {
           <span className="label">Send to Calendar</span>
         </button>
         <button
-          className="btn sm"
+          className="sv-btn sv-btn--outline"
           onClick={() =>
             window.dispatchEvent(
               new CustomEvent("ui:navigate", {
@@ -770,6 +836,276 @@ function DraftReview({ data, onViewPlan }) {
           <span className="label">Open Procurement</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+function toPlannerMealsFromPlan(plan, fallbackMealCount = 0) {
+  const rawMeals = Array.isArray(plan?.meals) ? plan.meals : [];
+  if (rawMeals.length) {
+    return rawMeals.map((meal, idx) => ({
+      id: String(meal?.id || `planner_meal_${idx + 1}`),
+      title: String(meal?.title || meal?.name || `Meal ${idx + 1}`),
+      servingsNeeded: Number.isFinite(Number(meal?.servingsNeeded))
+        ? Number(meal.servingsNeeded)
+        : null,
+    }));
+  }
+
+  const count = Math.max(0, Number(fallbackMealCount || 0));
+  return Array.from({ length: count }, (_, idx) => ({
+    id: `planner_meal_${idx + 1}`,
+    title: `Planned meal ${idx + 1}`,
+    servingsNeeded: null,
+  }));
+}
+
+function toPlannerInventoryFromPlan(plan) {
+  const rows = Array.isArray(plan?.shoppingList) ? plan.shoppingList : [];
+  return rows
+    .map((row, idx) => {
+      const isString = typeof row === "string";
+      const label = String(isString ? row : row?.name || "").trim();
+      if (!label) return null;
+      const quantity = Number(isString ? 1 : row?.qty ?? row?.neededQty ?? 0);
+      return {
+        id: `inv_${idx + 1}`,
+        label,
+        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        unit: String((isString ? "unit" : row?.unit) || "unit"),
+      };
+    })
+    .filter(Boolean);
+}
+
+function toProductionCreditsFromEstimateInputs(estimateInputs) {
+  const protein = estimateInputs?.animal?.proteinDemandByType || {};
+  const tasks = Array.isArray(estimateInputs?.preservation?.tasks)
+    ? estimateInputs.preservation.tasks
+    : [];
+
+  const proteinCredits = Object.entries(protein)
+    .map(([key, qty], idx) => {
+      const n = Number(qty);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return {
+        id: `prod_protein_${idx + 1}`,
+        key: `${String(key || "protein").toLowerCase()}`,
+        qtyUnits: n,
+        source: "mealplanner.estimateInputs",
+      };
+    })
+    .filter(Boolean);
+
+  const preservationCredits = tasks
+    .map((task, idx) => {
+      const produce = String(task?.produce || "").trim().toLowerCase();
+      if (!produce) return null;
+      const qty = Number(task?.quantity ?? 1);
+      return {
+        id: `prod_pres_${idx + 1}`,
+        key: produce,
+        qtyUnits: Number.isFinite(qty) && qty > 0 ? qty : 1,
+        source: "mealplanner.preservation",
+      };
+    })
+    .filter(Boolean);
+
+  return [...proteinCredits, ...preservationCredits];
+}
+
+function UnifiedReadinessCard() {
+  const lastEstimateInputs = useHomesteadPlannerStore(
+    (s) => s.ingest?.lastEstimateInputs
+  );
+  const lastGeneratedPlan = useHomesteadPlannerStore(
+    (s) => s.ingest?.lastGeneratedPlan
+  );
+  const lastIngestedAt = useHomesteadPlannerStore((s) => s.ingest?.lastIngestedAt);
+
+  const adapters = useMemo(
+    () => ({
+      getMealPlan: () => ({
+        items: toPlannerMealsFromPlan(
+          lastGeneratedPlan,
+          lastEstimateInputs?.animal?.mealCount
+        ),
+      }),
+      getInventory: () => ({
+        items: toPlannerInventoryFromPlan(lastGeneratedPlan),
+      }),
+      getTargets: () => {
+        const needs =
+          useStorehousePlannerStore.getState?.()?.storehouseNeeds || [];
+        return {
+          targets: needs.map((need) => ({
+            key: String(need?.name || "").toLowerCase(),
+            qty: Number(need?.qty ?? 0),
+            unit: need?.unit || "unit",
+            label: need?.name || "Item",
+          })),
+        };
+      },
+      getProduction: () => ({
+        credits: toProductionCreditsFromEstimateInputs(lastEstimateInputs),
+      }),
+      emit: (eventName, payload) => {
+        try {
+          eventBus?.emit?.(eventName, payload);
+        } catch {
+          // no-op
+        }
+      },
+      getMealPlanKey: () =>
+        `${lastIngestedAt || "none"}:meal:${
+          Array.isArray(lastGeneratedPlan?.meals)
+            ? lastGeneratedPlan.meals.length
+            : Number(lastEstimateInputs?.animal?.mealCount || 0)
+        }`,
+      getInventoryKey: () =>
+        `${lastIngestedAt || "none"}:inv:${
+          Array.isArray(lastGeneratedPlan?.shoppingList)
+            ? lastGeneratedPlan.shoppingList.length
+            : 0
+        }`,
+      getTargetsKey: () => {
+        const needs =
+          useStorehousePlannerStore.getState?.()?.storehouseNeeds || [];
+        return `${lastIngestedAt || "none"}:targets:${needs.length}`;
+      },
+      getProductionKey: () =>
+        `${lastIngestedAt || "none"}:prod:${
+          Array.isArray(lastEstimateInputs?.preservation?.tasks)
+            ? lastEstimateInputs.preservation.tasks.length
+            : 0
+        }`,
+    }),
+    [lastEstimateInputs, lastGeneratedPlan, lastIngestedAt]
+  );
+
+  const food = useFoodSecurityEstimator({
+    context: { mode: "meal_planner", route: "mealplanner" },
+    adapters,
+    autoRun: true,
+  });
+
+  const cost = useCostDeltaEstimator({
+    context: { mode: "meal_planner", route: "mealplanner" },
+    adapters,
+    autoRun: true,
+  });
+
+  const readiness = useMemo(() => {
+    const coverageDays = Number(food?.result?.outputs?.coverageDays || 0);
+    const weeklySavings = Number(cost?.result?.outputs?.weeklySavings || 0);
+    const confidenceA = Number(food?.result?.outputs?.confidence || 0);
+    const confidenceB = Number(cost?.result?.outputs?.confidence || 0);
+    const confidence =
+      confidenceA > 0 || confidenceB > 0
+        ? (confidenceA + confidenceB) / (confidenceB > 0 ? 2 : 1)
+        : 0;
+
+    const scoreRaw = coverageDays * 8 + Math.max(0, weeklySavings) * 1.2 + confidence * 20;
+    const score = Math.max(0, Math.min(100, Math.round(scoreRaw)));
+
+    const status =
+      score >= 75 ? "Ready" : score >= 45 ? "Stabilizing" : "Needs prep";
+
+    return {
+      score,
+      status,
+      coverageDays,
+      weeklySavings,
+      monthlySavings: Number(cost?.result?.outputs?.monthlySavings || 0),
+      confidence: Number.isFinite(confidence) ? confidence : 0,
+    };
+  }, [food?.result, cost?.result]);
+
+  const publishKey = useMemo(
+    () =>
+      JSON.stringify({
+        at: lastIngestedAt || null,
+        score: readiness.score,
+        coverageDays: readiness.coverageDays,
+        weeklySavings: readiness.weeklySavings,
+      }),
+    [lastIngestedAt, readiness]
+  );
+
+  const lastPublishKeyRef = useRef("");
+  useEffect(() => {
+    if (!lastIngestedAt) return;
+    if (publishKey === lastPublishKeyRef.current) return;
+    lastPublishKeyRef.current = publishKey;
+
+    eventBus?.emit?.("planner.readiness.updated", {
+      source: "mealplanner:unifiedReadinessCard",
+      updatedAt: new Date().toISOString(),
+      readiness,
+      estimators: {
+        foodSecurity: food?.result || null,
+        costDelta: cost?.result || null,
+      },
+      estimateInputs: lastEstimateInputs || null,
+    });
+  }, [publishKey, lastIngestedAt, readiness, food?.result, cost?.result, lastEstimateInputs]);
+
+  const isWaiting = !lastIngestedAt;
+  const isHidden = !food?.gatedOn && !cost?.gatedOn;
+
+  return (
+    <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+      <SectionTitle
+        title="Unified Readiness"
+        subtitle="Food security + budget delta combined from planner estimate inputs."
+      />
+
+      {isWaiting ? (
+        <div className="sv-muted">Generate a meal plan to publish estimate inputs and compute readiness.</div>
+      ) : isHidden ? (
+        <div className="sv-muted">
+          Homestead estimators are gated off. Enable homestead mode (level 1+) to display readiness scoring.
+        </div>
+      ) : (
+        <>
+          <div
+            className="sv-grid-3"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", marginTop: 8 }}
+          >
+            <div className="sv-card sv-pad">
+              <div style={{ fontWeight: 800 }}>Readiness Score</div>
+              <div style={{ fontSize: 28, fontWeight: 900 }}>{readiness.score}/100</div>
+              <div className="sv-muted">{readiness.status}</div>
+            </div>
+            <div className="sv-card sv-pad">
+              <div style={{ fontWeight: 800 }}>Coverage Days</div>
+              <div style={{ fontSize: 24, fontWeight: 800 }}>
+                {Number.isFinite(readiness.coverageDays)
+                  ? readiness.coverageDays.toFixed(1)
+                  : "0.0"}
+              </div>
+              <div className="sv-muted">from food-security estimator</div>
+            </div>
+            <div className="sv-card sv-pad">
+              <div style={{ fontWeight: 800 }}>Weekly Savings</div>
+              <div style={{ fontSize: 24, fontWeight: 800 }}>
+                ${Number.isFinite(readiness.weeklySavings)
+                  ? readiness.weeklySavings.toFixed(2)
+                  : "0.00"}
+              </div>
+              <div className="sv-muted">
+                Monthly: ${Number.isFinite(readiness.monthlySavings)
+                  ? readiness.monthlySavings.toFixed(2)
+                  : "0.00"}
+              </div>
+            </div>
+          </div>
+
+          <div className="sv-muted" style={{ marginTop: 8 }}>
+            Confidence: {(readiness.confidence * 100).toFixed(0)}% · Updated {new Date(lastIngestedAt).toLocaleString()}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -847,26 +1183,23 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
   };
 
   return (
-    <div
-      className="grid grid-cols-1 gap-6 lg:grid-cols-3"
-      style={{ marginTop: 16 }}
-    >
-      <div className="lg:col-span-2">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-lg font-semibold">Your Drafts</div>
-          <div className="flex gap-2">
+    <div className="sv-grid-2" style={{ marginTop: 12, alignItems: "start" }}>
+      <div>
+        <div className="sv-row sv-wrap" style={{ marginBottom: 10 }}>
+          <div className="sv-card-title">Your Drafts</div>
+          <div className="sv-row sv-wrap" style={{ gap: 8 }}>
             <input
               placeholder="Search drafts…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="btn sm"
+              className="sv-btn sv-btn--outline"
               style={{ width: 220 }}
             />
             <input
               placeholder="Filter by tag (e.g., keto)"
               value={tagFilter}
               onChange={(e) => setTagFilter(e.target.value)}
-              className="btn sm"
+              className="sv-btn sv-btn--outline"
               style={{ width: 180 }}
             />
             <label>
@@ -875,74 +1208,84 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
                 type="file"
                 accept="application/json"
                 onChange={onImport}
-                className="hidden"
+                style={{ display: "none" }}
               />
-              <button className="btn sm">
+              <button className="sv-btn sv-btn--outline" type="button">
                 <span className="label">Import JSON</span>
               </button>
             </label>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="sv-grid-2" style={{ gap: 12 }}>
           {filteredDrafts.length ? (
             filteredDrafts.map((d) => (
               <div
                 key={d.id}
-                className={`rounded-2xl border p-3 ${
-                  d.id === selectedDraftId ? "ring-2 ring-indigo-500" : ""
-                }`}
+                className={`card ${d.id === selectedDraftId ? "" : ""}`}
+                style={
+                  d.id === selectedDraftId
+                    ? { border: "2px solid var(--primary)" }
+                    : null
+                }
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="sv-row sv-wrap">
                   <InlineRename draft={d} />
-                  <div className="text-xs text-slate-500">
+                  <div className="subtitle">
                     Updated {new Date(d.updatedAt).toLocaleString()}
                   </div>
                 </div>
-                <div className="mt-1 text-xs text-slate-500">
+                <div className="subtitle">
                   {d.meta?.duration ? (
-                    <span className="mr-2">Duration: {d.meta.duration}</span>
+                    <span style={{ marginRight: 8 }}>
+                      Duration: {d.meta.duration}
+                    </span>
                   ) : null}
                   {d.meta?.source ? (
-                    <span className="mr-2">Source: {d.meta.source}</span>
+                    <span style={{ marginRight: 8 }}>
+                      Source: {d.meta.source}
+                    </span>
                   ) : null}
                   {d.tags?.length ? (
-                    <span className="mr-2">
+                    <span style={{ marginRight: 8 }}>
                       {d.tags.map((t) => (
-                        <span
-                          key={t}
-                          className="mr-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px]"
-                        >
+                        <span key={t} className="sv-badge">
                           #{t}
                         </span>
                       ))}
                     </span>
                   ) : null}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div
+                  className="sv-row sv-wrap"
+                  style={{ gap: 8, marginTop: 8 }}
+                >
                   <button
-                    className="btn sm"
+                    className="sv-btn sv-btn--outline"
                     onClick={() => selectDraftAPI(d.id)}
                     title="Preview"
+                    type="button"
                   >
                     <span className="label">Preview</span>
                   </button>
                   <button
-                    className="btn sm"
+                    className="sv-btn sv-btn--outline"
                     onClick={() => onPublish(d.id)}
                     title="Publish to Current"
+                    type="button"
                   >
                     <span className="label">Publish</span>
                   </button>
                   <button
-                    className="btn sm"
+                    className="sv-btn sv-btn--outline"
                     onClick={() => duplicateDraftAPI(d.id)}
                     title="Duplicate"
+                    type="button"
                   >
                     <span className="label">Duplicate</span>
                   </button>
                   <button
-                    className="btn sm"
+                    className="sv-btn sv-btn--outline"
                     onClick={() => {
                       const json = exportDraftJSONAPI(d.id);
                       if (!json) return alert("Export failed.");
@@ -957,13 +1300,15 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
                       URL.revokeObjectURL(url);
                     }}
                     title="Export JSON"
+                    type="button"
                   >
                     <span className="label">Export</span>
                   </button>
                   <button
-                    className="btn sm"
+                    className="sv-btn sv-btn--outline"
                     onClick={() => deleteDraftAPI(d.id)}
                     title="Delete"
+                    type="button"
                   >
                     <span className="label">Delete</span>
                   </button>
@@ -971,28 +1316,32 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
               </div>
             ))
           ) : (
-            <div className="rounded-2xl border p-6 text-slate-500">
+            <div className="sv-card sv-pad" style={{ opacity: 0.85 }}>
               No drafts match your filter.
             </div>
           )}
         </div>
       </div>
 
-      <div className="rounded-2xl border p-4">
-        <div className="mb-3 text-lg font-semibold">Draft Preview</div>
+      <div className="sv-card sv-pad">
+        <div className="sv-card-title" style={{ marginBottom: 10 }}>
+          Draft Preview
+        </div>
         {selectedDraft ? (
-          <div className="space-y-3">
-            <div className="flex gap-2">
+          <div className="stack-sm">
+            <div className="sv-row sv-wrap" style={{ gap: 8 }}>
               <button
-                className="btn sm"
+                className="sv-btn sv-btn--outline"
                 onClick={() => onPublish(selectedDraft.id)}
+                type="button"
               >
                 <span className="label">Publish to Current</span>
               </button>
               {onQuickViewAsCurrent ? (
                 <button
-                  className="btn sm"
+                  className="sv-btn sv-btn--outline"
                   onClick={() => onQuickViewAsCurrent(selectedDraft)}
+                  type="button"
                 >
                   <span className="label">Quick View as Current</span>
                 </button>
@@ -1000,12 +1349,10 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
             </div>
             {/* Minimal inline digest */}
             <div className="subtitle">{selectedDraft.title}</div>
-            <div className="text-xs text-slate-500">
-              {selectedDraft.plan?.summary || ""}
-            </div>
-            <div className="mt-2">
-              <div className="font-bold text-sm mb-1">Meals</div>
-              <ul className="list-disc pl-5">
+            <div className="subtitle">{selectedDraft.plan?.summary || ""}</div>
+            <div style={{ marginTop: 8 }}>
+              <div className="subtitle">Meals</div>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
                 {(selectedDraft.plan?.plan || [])
                   .flatMap((d) =>
                     (d.meals || []).map((m) => ({
@@ -1024,7 +1371,7 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border p-6 text-slate-500">
+          <div className="sv-card sv-pad" style={{ opacity: 0.85 }}>
             Select a draft to preview.
           </div>
         )}
@@ -1052,24 +1399,183 @@ function InlineRename({ draft }) {
     );
   }
   return (
-    <div className="flex items-center gap-2">
+    <div className="sv-row sv-wrap" style={{ gap: 8, alignItems: "center" }}>
       <input
-        className="btn sm"
+        className="sv-btn sv-btn--outline"
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onCommit()}
         autoFocus
         style={{ width: 220 }}
       />
-      <button className="btn sm" onClick={onCommit}>
+      <button
+        className="sv-btn sv-btn--outline"
+        onClick={onCommit}
+        type="button"
+      >
         <span className="label">Save</span>
       </button>
     </div>
   );
 }
 
+function MyAssignmentsStrip({ onOpenCoordination }) {
+  const rt = useRealtimeCoordination();
+  const [busyId, setBusyId] = useState(null);
+
+  const priorityMeta = (item) => {
+    const urgency = String(item?.urgency || "").toLowerCase();
+    const score = Number(item?.priorityScore || 0);
+    const isHigh = urgency === "high" || score >= 80;
+    const isLow = urgency === "low" || score <= 35;
+
+    if (isHigh) {
+      return {
+        label: "High",
+        chipStyle: {
+          border: "1px solid #ef4444",
+          background: "#fef2f2",
+          color: "#991b1b",
+        },
+      };
+    }
+    if (isLow) {
+      return {
+        label: "Low",
+        chipStyle: {
+          border: "1px solid #9ca3af",
+          background: "#f9fafb",
+          color: "#374151",
+        },
+      };
+    }
+    return {
+      label: "Normal",
+      chipStyle: {
+        border: "1px solid #3b82f6",
+        background: "#eff6ff",
+        color: "#1e3a8a",
+      },
+    };
+  };
+
+  const roles = useMemo(() => {
+    if (typeof window === "undefined") return [];
+    const fromGlobal = window.__suka?.profile?.roles;
+    if (Array.isArray(fromGlobal)) return fromGlobal.map((r) => String(r).toLowerCase());
+    const singleRole = window.__suka?.profile?.role;
+    if (singleRole) return [String(singleRole).toLowerCase()];
+    return [];
+  }, []);
+
+  const mine = useMemo(() => {
+    const rank = (item) => {
+      const urgency = String(item?.urgency || "").toLowerCase();
+      const score = Number(item?.priorityScore || 0);
+      if (urgency === "high" || score >= 80) return 0;
+      if (urgency === "low" || score <= 35) return 2;
+      return 1;
+    };
+
+    const pending = (rt.suggestions || []).filter((x) => !x.consumedAt);
+    const userId = String(rt.userId || "");
+    return pending
+      .filter((item) => {
+        const assignedUser = String(item?.assignedToUserId || "");
+        const assignedRole = String(item?.assignedRole || "").toLowerCase();
+        const isMineByUser = !!userId && assignedUser && assignedUser === userId;
+        const isMineByRole = !!assignedRole && roles.includes(assignedRole);
+        return isMineByUser || isMineByRole;
+      })
+      .sort((a, b) => {
+        const r = rank(a) - rank(b);
+        if (r !== 0) return r;
+        const sa = Number(a?.priorityScore || 0);
+        const sb = Number(b?.priorityScore || 0);
+        return sb - sa;
+      })
+      .slice(0, 4);
+  }, [rt.suggestions, rt.userId, roles]);
+
+  const consume = async (id) => {
+    if (!id) return;
+    setBusyId(id);
+    try {
+      await rt.consumeSuggestion(id);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+      <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 8 }}>
+        <div>
+          <div className="sv-card-title">My Assignments</div>
+          <div className="sv-muted" style={{ fontSize: 12 }}>
+            Assigned to you/your role first.
+          </div>
+        </div>
+        <div className="sv-row sv-wrap" style={{ gap: 8 }}>
+          <span className={`sv-badge ${rt.connected ? "" : "sv-badge--muted"}`}>
+            {rt.connected ? "Live" : "Offline"}
+          </span>
+          <button
+            type="button"
+            className="sv-btn sv-btn--outline"
+            onClick={onOpenCoordination}
+          >
+            <span className="label">Open Coordination</span>
+          </button>
+        </div>
+      </div>
+
+      {mine.length ? (
+        <div className="sv-row sv-wrap" style={{ marginTop: 10, gap: 8 }}>
+          {mine.map((item) => {
+            const p = priorityMeta(item);
+            return (
+            <div key={item.id} className="sv-chip" style={{ maxWidth: 420, ...p.chipStyle }}>
+              <span className="sv-badge" style={{ marginRight: 6 }}>{p.label}</span>
+              <span
+                style={{
+                  display: "inline-block",
+                  maxWidth: 230,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  verticalAlign: "bottom",
+                }}
+                title={item.title || item.action || "Assignment"}
+              >
+                {item.title || item.action || "Assignment"}
+              </span>
+              <button
+                type="button"
+                className="sv-btn sv-btn--outline"
+                style={{ marginLeft: 8 }}
+                onClick={() => consume(item.id)}
+                disabled={busyId === item.id}
+              >
+                <span className="label">
+                  {busyId === item.id ? "Consuming..." : "Done"}
+                </span>
+              </button>
+            </div>
+          );})}
+        </div>
+      ) : (
+        <div className="sv-muted" style={{ marginTop: 8 }}>
+          No current assignments for your user/role.
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------------- Main page ---------------- */
 export default function MealPlanningPage() {
+  const coordinationRef = useRef(null);
   const [activeTool, setActiveTool] = useState("dashboard");
 
   /* Form state */
@@ -1165,6 +1671,7 @@ export default function MealPlanningPage() {
   }, [visionOptions]);
 
   const cuisineOptions = useMemo(() => suggestFlavorOptions(), []);
+
   const activeToolEntry = useMemo(
     () => TOOL_REGISTRY.find((t) => t.id === activeTool),
     [activeTool]
@@ -1346,26 +1853,124 @@ export default function MealPlanningPage() {
         );
       }
 
-      // If saveAsDraft was requested but not handled upstream, save locally
-      if (saveAsDraft && !res?.data?.draftId) {
-        const planObj = res?.mealPlan;
-        if (planObj?.plan?.length) {
-          await saveDraftAPI(planObj, {
-            title: planObj.summary || "Generated draft",
-            meta: { duration, createdBy: "agent:generate" },
-            tags: ["generated"],
-          });
-        }
-      }
-
       const normalized = normalizePlan(res);
       setResult(normalized);
       setOk(true);
 
+      // Auto-forward normalized generated plan into downstream estimate inputs.
+      // This keeps animal/garden/preservation estimation grounded in final outputs.
+      const estimateInputs = buildEstimateInputsFromNormalizedPlan({
+        normalizedPlan: normalized,
+        meta: {
+          sessionId: res?.data?.draftId || null,
+          horizonMonths,
+        },
+      });
+
+      try {
+        const upsertPreservationTasks =
+          useStorehousePlannerStore?.getState?.()?.upsertPreservationTasks;
+        if (
+          typeof upsertPreservationTasks === "function" &&
+          Array.isArray(estimateInputs?.preservation?.tasks) &&
+          estimateInputs.preservation.tasks.length
+        ) {
+          upsertPreservationTasks(estimateInputs.preservation.tasks);
+        }
+      } catch (e) {
+        console.warn("[MealPlanner] preservation forward failed", e);
+      }
+
+      eventBus?.emit?.("planner.estimateInputs.updated", {
+        source: "mealplanner:onGenerate",
+        estimateInputs,
+        normalizedPlan: normalized,
+      });
+
+      const gapsEmission = emitPlannerGapsUpdated({
+        estimateInputs,
+        normalizedPlan: normalized,
+        meta: {
+          sessionId: res?.data?.draftId || null,
+          duration,
+        },
+        eventBusEmit: eventBus?.emit,
+      });
+
+      const plannerGaps = gapsEmission?.plannerGaps || null;
+
+      buildCompanions({
+        ...payload,
+        normalizedPlan: normalized,
+        estimateInputs,
+      });
+
+      // Ensure a real local draft record exists whenever draft mode is used.
+      // Some upstream flows may return draftId without persisting to MealPlanDraftStore.
+      let ensuredDraftId = res?.data?.draftId || null;
+      let usedLocalDraftFallback = false;
       if (saveAsDraft) {
-        if (res?.data?.draftId) {
+        const existing = ensuredDraftId ? getDraftAPI(ensuredDraftId) : null;
+        if (!existing) {
+          const candidatePlan =
+            res?.mealPlan ||
+            res?.data?.mealPlan ||
+            res?.data?.plan ||
+            coerceToEnvelope(normalized);
+
+          if (candidatePlan?.plan?.length) {
+            ensuredDraftId = await saveDraftAPI(candidatePlan, {
+              id: ensuredDraftId || undefined,
+              title: candidatePlan.summary || "Generated draft",
+              meta: {
+                duration,
+                createdBy: "agent:generate",
+                source: "mealplanner:onGenerate",
+              },
+              tags: ["generated"],
+            });
+            usedLocalDraftFallback = true;
+          }
+        }
+      }
+
+      /* ✅ PATCH: always force the generated plan into the Current Plan store and switch to Dashboard */
+      if (!saveAsDraft) {
+        try {
+          const envelope = coerceToEnvelope(normalized);
+          const setter =
+            useMealPlanStore?.getState?.()?.setPlan ||
+            (typeof setPlan === "function" ? setPlan : null);
+
+          if (envelope && typeof setter === "function") {
+            // setPlan signature may be (plan, meta) – we pass meta defensively
+            setter(envelope, {
+              createdAt: new Date().toISOString(),
+              source: "mealplanner:onGenerate",
+              templateId,
+              cuisines,
+              presets: selectedPresets,
+              duration,
+            });
+          } else if (envelope) {
+            // fallback: inline full viewer if store is missing
+            setInlineEnvelope(envelope);
+          }
+        } catch (e) {
+          console.warn("[MealPlanner] setPlan fallback failed", e);
           try {
-            selectDraftAPI(res.data.draftId);
+            const envelope = coerceToEnvelope(normalized);
+            if (envelope) setInlineEnvelope(envelope);
+          } catch {}
+        }
+        setActiveTool("dashboard");
+      }
+      /* ✅ END PATCH */
+
+      if (saveAsDraft) {
+        if (ensuredDraftId) {
+          try {
+            selectDraftAPI(ensuredDraftId);
           } catch {}
         }
         setActiveTool("drafts");
@@ -1375,6 +1980,39 @@ export default function MealPlanningPage() {
         res: normalized,
         meta: { templateId, cuisines, presets: selectedPresets },
       });
+
+      // Canonical realtime signal for aggregator queue routing.
+      emitCanonicalSignal({
+        type: currentPlan?.plan?.length ? "mealUpdated" : "mealAdded",
+        sourceModule: "planner.meal",
+        urgency: "normal",
+        completionPct: 100,
+        dependencies: ["inventory", "storehouse", "sessions"],
+        payload: {
+          templateId,
+          cuisines,
+          presets: selectedPresets,
+          duration,
+          saveAsDraft,
+          mealCount: Array.isArray(normalized?.meals) ? normalized.meals.length : 0,
+          shoppingCount: Array.isArray(normalized?.shoppingList)
+            ? normalized.shoppingList.length
+            : 0,
+        },
+      });
+
+      emitHomesteadMealPlanGenerated({
+        normalizedPlan: normalized,
+        meta: {
+          templateId,
+          cuisines,
+          presets: selectedPresets,
+          duration,
+          saveAsDraft,
+        },
+        eventBusEmit: eventBus?.emit?.bind(eventBus),
+      });
+
       window.dispatchEvent(
         new CustomEvent("toast", {
           detail: {
@@ -1383,6 +2021,18 @@ export default function MealPlanningPage() {
           },
         })
       );
+
+      if (saveAsDraft && usedLocalDraftFallback) {
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: {
+              type: "success",
+              message: "Draft auto-saved locally.",
+            },
+          })
+        );
+      }
+
       setTimeout(() => setOk(false), 900);
     } catch (e) {
       setResult({
@@ -1413,6 +2063,18 @@ export default function MealPlanningPage() {
     if (!res?.ok) {
       alert(res?.error || "Failed to publish draft.");
     } else {
+      emitCanonicalSignal({
+        type: "mealUpdated",
+        sourceModule: "planner.meal",
+        urgency: "normal",
+        completionPct: 100,
+        dependencies: ["inventory", "sessions"],
+        payload: {
+          draftId,
+          action: "publishDraft",
+        },
+      });
+
       setActiveTool("dashboard");
       window.dispatchEvent(
         new CustomEvent("toast", {
@@ -1484,594 +2146,648 @@ export default function MealPlanningPage() {
 
   /* ---------------------------- Render ---------------------------- */
   return (
-    <div>
-      <h1>🍽️ Meal Planner</h1>
-      <p className="subtitle">
-        Organize cycles, prep tasks, drafts, and procurement with one click.
-      </p>
-
-      {/* Tool Selector */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 8,
-          margin: "6px 0 12px",
-        }}
-      >
-        {TOOL_REGISTRY.map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTool(id)}
-            className={`btn sm ${activeTool === id ? "primary" : ""}`}
-            aria-pressed={activeTool === id}
-          >
-            <span className="label">{label}</span>
-          </button>
-        ))}
-        {/* Drafts tab */}
-        <button
-          onClick={() => setActiveTool("drafts")}
-          className={`btn sm ${activeTool === "drafts" ? "primary" : ""}`}
-          aria-pressed={activeTool === "drafts"}
-        >
-          <span className="label">Drafts</span>
-        </button>
-      </div>
-
-      {/* Active Tool */}
-      {activeTool === "drafts" ? (
-        <DraftsPane
-          onPublish={onPublishDraft}
-          onQuickViewAsCurrent={
-            useMealPlanStore
-              ? (d) =>
-                  useMealPlanStore.getState()?.setPlan?.(d.plan, {
-                    createdAt: new Date().toISOString(),
-                    source: "draft-preview",
-                    draftId: d.id,
-                  })
-              : null
-          }
-        />
-      ) : (
-        <ToolErrorBoundary>
-          <div className="card">
-            <Suspense fallback={<div className="subtitle">Loading panel…</div>}>
-              <SafeProps>{ActiveToolElement}</SafeProps>
-            </Suspense>
-          </div>
-        </ToolErrorBoundary>
-      )}
-
-      {/* Presets */}
-      <div className="card" style={{ marginTop: 16 }}>
-        <SectionTitle
-          title="Quick Start Presets"
-          subtitle="Pick a vibe and we’ll prefill the form below. You can still tweak anything."
-        />
+    <div className="sv-container">
+      <div className="sv-hero sv-pad">
         <div
-          style={{
-            display: "flex",
-            gap: 6,
-            flexWrap: "wrap",
-            marginBottom: 10,
-          }}
+          className="sv-row sv-wrap"
+          style={{ justifyContent: "space-between", alignItems: "flex-end" }}
         >
-          {selectedPresets.length > 0 ? (
-            <>
-              <span className="subtitle">Selected:</span>
-              {selectedPresets.map((id) => {
-                const p = PRESETS.find((x) => x.id === id);
-                return p ? (
-                  <span key={id} className="badge sm">
-                    {p.title}
-                  </span>
-                ) : null;
-              })}
-              <button className="btn sm" onClick={() => setSelectedPresets([])}>
-                <span className="label">Reset</span>
-              </button>
-            </>
-          ) : (
-            <span className="subtitle">No preset selected yet.</span>
-          )}
-        </div>
-
-        <div
-          className="grid"
-          style={{
-            display: "grid",
-            gap: 12,
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          }}
-        >
-          {PRESETS.map((p) => {
-            const active = selectedPresets.includes(p.id);
-            return (
-              <div
-                key={p.id}
-                className="card"
-                style={{
-                  border: active
-                    ? "2px solid var(--primary)"
-                    : "1px solid var(--border)",
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-bold">{p.title}</div>
-                  <div className="text-xs opacity-70">{p.duration}</div>
-                </div>
-                <div className="subtitle" style={{ marginTop: 6 }}>
-                  {p.prompt}
-                </div>
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: "flex",
-                    gap: 6,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {p.tags.map((t) => (
-                    <span key={t} className="badge sm">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-                <div style={{ marginTop: 10 }}>
-                  <button
-                    className={`btn sm ${active ? "primary" : ""}`}
-                    onClick={() => togglePreset(p)}
-                  >
-                    <span className="label">
-                      {active ? "Selected" : "Use this preset"}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Smart Meal Plan Form */}
-      <div className="card" style={{ marginTop: 16 }}>
-        <SectionTitle
-          title="Plan Settings"
-          subtitle="Minimal inputs → full plan with shopping list, prep, and scheduling."
-        />
-
-        {/* Template + Duration + Budget */}
-        <div
-          style={{
-            display: "grid",
-            gap: 12,
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            marginBottom: 8,
-          }}
-        >
-          <label>
-            <div style={{ fontWeight: 600 }}>AI Template</div>
-            <select
-              className="btn"
-              value={templateId}
-              onChange={(e) => setTemplateId(e.target.value)}
-              style={{ width: "100%" }}
-            >
-              <option value="balanced-week">Balanced Week</option>
-              <option value="budget-batch">Budget + Batch Friendly</option>
-              <option value="feast-day-cycle">Feast Day Cycle</option>
-              <option value="wellness-hair-growth">
-                Wellness: Hair Growth
-              </option>
-              <option value="garden-forward">
-                Garden-Forward + Preservation
-              </option>
-            </select>
-          </label>
-
-          <label>
-            <div style={{ fontWeight: 600 }}>Duration</div>
-            <select
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className="btn"
-              style={{ width: "100%" }}
-            >
-              <option>1-day</option>
-              <option>7-day</option>
-              <option>14-day</option>
-              <option>1-month</option>
-              <option>3-month</option>
-              <option>6-month</option>
-            </select>
-          </label>
-
-          <label>
-            <div style={{ fontWeight: 600 }}>Budget (USD)</div>
-            <input
-              className="btn"
-              type="number"
-              min="0"
-              placeholder="e.g., 120"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              style={{ width: "100%" }}
-            />
-          </label>
-        </div>
-
-        {/* Prompt */}
-        <label style={{ display: "block", marginBottom: 8 }}>
-          <div style={{ fontWeight: 600 }}>Prompt</div>
-          <input
-            className="btn"
-            placeholder="What should the plan optimize for?"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            style={{ width: "100%" }}
-          />
-        </label>
-
-        {/* Cuisines */}
-        <div className="card" style={{ marginTop: 8 }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            Cuisines / Flavor Focus
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {cuisineOptions.map((c) => (
-              <Pill
-                key={c}
-                active={cuisines.includes(c)}
-                onClick={() => toggleCuisine(c)}
-              >
-                {c}
-              </Pill>
-            ))}
-          </div>
-          <div className="subtitle" style={{ marginTop: 6 }}>
-            Weekly Rhythm from Household Profile is applied automatically, but
-            you can override it here.
-          </div>
-        </div>
-
-        {/* Daily Goals: grams vs percent */}
-        <div className="card" style={{ marginTop: 8 }}>
-          <div className="flex items-center justify-between">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>Daily Goals</div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button
-                className={`btn sm ${macroMode === "grams" ? "primary" : ""}`}
-                onClick={() => setMacroMode("grams")}
-              >
-                <span className="label">By grams</span>
-              </button>
-              <button
-                className={`btn sm ${macroMode === "percent" ? "primary" : ""}`}
-                onClick={() => setMacroMode("percent")}
-              >
-                <span className="label">% of calories</span>
-              </button>
+          <div>
+            <div className="sv-pageTitle">Meal Planner</div>
+            <div className="sv-muted">
+              Organize cycles, prep tasks, drafts, and procurement with one
+              click.
             </div>
           </div>
 
-          {/* Calories */}
-          <div style={{ marginBottom: 8 }}>
-            <label>
-              <div>Calories (kcal)</div>
+          <div className="sv-actions" style={{ flexWrap: "wrap" }}>
+            <button
+              className="sv-btn sv-btn--primary"
+              aria-busy={busy}
+              onClick={() => onGenerate(false)}
+              title="Generate and publish to Current Plan"
+              type="button"
+            >
+              <span className="label">
+                {busy ? "Working…" : "Generate Plan"}
+              </span>
+            </button>
+            <button
+              className="sv-btn sv-btn--outline"
+              aria-busy={busy}
+              onClick={() => onGenerate(true)}
+              title="Generate and store as a Draft (does not overwrite current plan)"
+              type="button"
+            >
+              <span className="label">
+                {busy ? "Working…" : "Generate → Draft"}
+              </span>
+            </button>
+            <button
+              className="sv-btn sv-btn--outline"
+              onClick={onSaveCurrentAsDraft}
+              type="button"
+            >
+              <span className="label">Save Current as Draft</span>
+            </button>
+            <button
+              className="sv-btn sv-btn--outline"
+              onClick={() => setResult(null)}
+              type="button"
+            >
+              <span className="label">Clear</span>
+            </button>
+            {ok ? (
+              <span className="sv-muted" style={{ color: "var(--success)" }}>
+                ✓ Done
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <MyAssignmentsStrip
+        onOpenCoordination={() => {
+          coordinationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+      />
+
+      <div style={{ marginTop: 12 }} ref={coordinationRef}>
+        <RealtimeCoordinationPanel />
+      </div>
+
+      {/* Two-column workbench: left = inputs, right = outputs */}
+      <div className="sv-grid-2" style={{ marginTop: 14, alignItems: "start" }}>
+        <div className="sv-stack-sm">
+          {/* Plan Settings (moved to replace Workspace) */}
+          <div className="sv-card sv-pad">
+            <SectionTitle
+              title="Plan Settings"
+              subtitle="Minimal inputs → full plan with shopping list, prep, and scheduling."
+            />
+
+            {/* Tabs moved here (Workspace removed) */}
+            <div
+              className="sv-row sv-wrap"
+              style={{
+                gap: 8,
+                marginTop: 10,
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
+            >
+              {TOOL_REGISTRY.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTool(id)}
+                  className={`sv-chip ${activeTool === id ? "is-active" : ""}`}
+                  aria-pressed={activeTool === id}
+                  type="button"
+                >
+                  <span className="label">{label}</span>
+                </button>
+              ))}
+              <button
+                onClick={() => setActiveTool("drafts")}
+                className={`sv-chip ${
+                  activeTool === "drafts" ? "is-active" : ""
+                }`}
+                aria-pressed={activeTool === "drafts"}
+                type="button"
+              >
+                <span className="label">Drafts</span>
+              </button>
+            </div>
+
+            {/* Template + Duration + Budget */}
+            <div
+              className="sv-grid-3"
+              style={{
+                gap: 12,
+                marginTop: 12,
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              }}
+            >
+              <label>
+                <div style={{ fontWeight: 700 }}>Template</div>
+                <select
+                  className="sv-input"
+                  value={templateId}
+                  onChange={(e) => setTemplateId(e.target.value)}
+                  style={{ width: "100%" }}
+                >
+                  <option value="balanced-week">Balanced Week</option>
+                  <option value="budget-batch">Budget + Batch Friendly</option>
+                  <option value="feast-day-cycle">Feast Day Cycle</option>
+                  <option value="wellness-hair-growth">
+                    Wellness: Hair Growth
+                  </option>
+                  <option value="garden-forward">
+                    Garden-Forward + Preservation
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <div style={{ fontWeight: 700 }}>Duration</div>
+                <select
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="sv-input"
+                  style={{ width: "100%" }}
+                >
+                  <option>1-day</option>
+                  <option>7-day</option>
+                  <option>14-day</option>
+                  <option>1-month</option>
+                  <option>3-month</option>
+                  <option>6-month</option>
+                </select>
+              </label>
+
+              <label>
+                <div style={{ fontWeight: 700 }}>Budget (USD)</div>
+                <input
+                  className="sv-input"
+                  type="number"
+                  min="0"
+                  placeholder="e.g., 120"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  style={{ width: "100%" }}
+                />
+              </label>
+            </div>
+
+            {/* Prompt */}
+            <label style={{ display: "block", marginTop: 12 }}>
+              <div style={{ fontWeight: 700 }}>Prompt</div>
               <input
-                className="btn"
-                type="number"
-                value={dietary.calories}
-                onChange={(e) =>
-                  setDietary({
-                    ...dietary,
-                    calories: Number(e.target.value || 0),
-                  })
-                }
+                className="sv-input"
+                placeholder="What should the plan optimize for?"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 style={{ width: "100%" }}
               />
             </label>
-          </div>
 
-          {macroMode === "grams" ? (
-            <div
-              style={{
-                display: "grid",
-                gap: 8,
-                gridTemplateColumns: "repeat(3, minmax(120px, 1fr))",
-              }}
-            >
-              {["protein", "carbs", "fat"].map((k) => (
-                <label key={k}>
-                  <div style={{ textTransform: "capitalize" }}>{k} (g)</div>
+            {/* Cuisines */}
+            <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>
+                Cuisines / Flavor Focus
+              </div>
+              <div className="sv-row sv-wrap" style={{ gap: 8 }}>
+                {cuisineOptions.map((c) => (
+                  <Pill
+                    key={c}
+                    active={cuisines.includes(c)}
+                    onClick={() => toggleCuisine(c)}
+                  >
+                    {c}
+                  </Pill>
+                ))}
+              </div>
+              <div className="sv-muted" style={{ marginTop: 8 }}>
+                Weekly Rhythm from Household Profile is applied automatically,
+                but you can override it here.
+              </div>
+            </div>
+
+            {/* Daily Goals: grams vs percent */}
+            <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+              <div
+                className="sv-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontWeight: 800 }}>Daily Goals</div>
+                <div className="sv-row" style={{ gap: 6 }}>
+                  <button
+                    className={`sv-chip ${
+                      macroMode === "grams" ? "is-active" : ""
+                    }`}
+                    onClick={() => setMacroMode("grams")}
+                    type="button"
+                  >
+                    <span className="label">By grams</span>
+                  </button>
+                  <button
+                    className={`sv-chip ${
+                      macroMode === "percent" ? "is-active" : ""
+                    }`}
+                    onClick={() => setMacroMode("percent")}
+                    type="button"
+                  >
+                    <span className="label">% of calories</span>
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <label>
+                  <div>Calories (kcal)</div>
                   <input
-                    className="btn"
+                    className="sv-input"
                     type="number"
-                    value={dietary[k]}
+                    value={dietary.calories}
                     onChange={(e) =>
                       setDietary({
                         ...dietary,
-                        [k]: Number(e.target.value || 0),
+                        calories: Number(e.target.value || 0),
                       })
                     }
                     style={{ width: "100%" }}
                   />
                 </label>
-              ))}
+              </div>
+
+              {macroMode === "grams" ? (
+                <div
+                  className="sv-grid-3"
+                  style={{
+                    gap: 8,
+                    marginTop: 10,
+                    gridTemplateColumns: "repeat(3, minmax(120px, 1fr))",
+                  }}
+                >
+                  {["protein", "carbs", "fat"].map((k) => (
+                    <label key={k}>
+                      <div style={{ textTransform: "capitalize" }}>{k} (g)</div>
+                      <input
+                        className="sv-input"
+                        type="number"
+                        value={dietary[k]}
+                        onChange={(e) =>
+                          setDietary({
+                            ...dietary,
+                            [k]: Number(e.target.value || 0),
+                          })
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="sv-grid-3"
+                    style={{
+                      gap: 8,
+                      marginTop: 10,
+                      gridTemplateColumns: "repeat(3, minmax(120px, 1fr))",
+                    }}
+                  >
+                    {["protein", "carbs", "fat"].map((k) => (
+                      <label key={k}>
+                        <div style={{ textTransform: "capitalize" }}>
+                          {k} (%)
+                        </div>
+                        <input
+                          className="sv-input"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={macroPct[k]}
+                          onChange={(e) =>
+                            setMacroPct({
+                              ...macroPct,
+                              [k]: Number(e.target.value || 0),
+                            })
+                          }
+                          style={{ width: "100%" }}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <div className="sv-muted" style={{ marginTop: 8 }}>
+                    Converted:{" "}
+                    {(() => {
+                      const g = pctToGrams(
+                        Number(dietary.calories || 0),
+                        macroPct
+                      );
+                      return `${g.protein}g protein • ${g.carbs}g carbs • ${g.fat}g fat`;
+                    })()}
+                  </div>
+                </>
+              )}
             </div>
-          ) : (
-            <>
+
+            {/* Bundles */}
+            <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>
+                Recipe Bundles (Optional)
+              </div>
               <div
                 style={{
                   display: "grid",
                   gap: 8,
-                  gridTemplateColumns: "repeat(3, minmax(120px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                 }}
               >
-                {["protein", "carbs", "fat"].map((k) => (
-                  <label key={k}>
-                    <div style={{ textTransform: "capitalize" }}>{k} (%)</div>
-                    <input
-                      className="btn"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={macroPct[k]}
-                      onChange={(e) =>
-                        setMacroPct({
-                          ...macroPct,
-                          [k]: Number(e.target.value || 0),
-                        })
-                      }
-                      style={{ width: "100%" }}
-                    />
-                  </label>
-                ))}
+                {bundles.map((b) => {
+                  const checked = selectedBundleIds.includes(b.id);
+                  return (
+                    <label
+                      key={b.id}
+                      className="sv-card sv-pad"
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleBundle(b.id)}
+                      />
+                      <span>{b.name}</span>
+                    </label>
+                  );
+                })}
               </div>
-              <div className="subtitle" style={{ marginTop: 6 }}>
-                Converted:{" "}
-                {(() => {
-                  const g = pctToGrams(Number(dietary.calories || 0), macroPct);
-                  return `${g.protein}g protein • ${g.carbs}g carbs • ${g.fat}g fat`;
-                })()}
+              <div className="sv-muted" style={{ marginTop: 8 }}>
+                Choose a pack to start from curated meals.
               </div>
-            </>
-          )}
+            </div>
+
+            {/* Inventory */}
+            <label className="sv-row" style={{ gap: 8, marginTop: 12 }}>
+              <input
+                type="checkbox"
+                checked={useInventory}
+                onChange={(e) => setUseInventory(e.target.checked)}
+              />
+              Prioritize pantry/inventory items
+            </label>
+
+            {/* Forecast Horizon */}
+            <div
+              className="sv-row sv-wrap"
+              style={{ gap: 10, marginTop: 12, alignItems: "center" }}
+            >
+              <div className="sv-muted">Forecast Horizon:</div>
+              <select
+                className="sv-btn sv-btn--outline"
+                value={horizonMonths}
+                onChange={(e) => setHorizonMonths(Number(e.target.value))}
+              >
+                <option value={1}>1 month</option>
+                <option value={3}>3 months</option>
+                <option value={6}>6 months</option>
+                <option value={12}>1 year</option>
+                <option value={24}>2 years</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Quick Start Presets (condensed) */}
+          <div className="sv-card sv-pad">
+            <SectionTitle
+              title="Quick Start Presets"
+              subtitle="Pick a vibe and we’ll prefill the form. You can still tweak anything."
+            />
+
+            <div className="sv-row sv-wrap" style={{ gap: 8, marginTop: 8 }}>
+              {selectedPresets.length > 0 ? (
+                <>
+                  <span className="sv-muted">Selected:</span>
+                  {selectedPresets.map((id) => {
+                    const p = PRESETS.find((x) => x.id === id);
+                    return p ? (
+                      <span key={id} className="sv-badge">
+                        {p.title}
+                      </span>
+                    ) : null;
+                  })}
+                  <button
+                    className="sv-btn sv-btn--outline"
+                    onClick={() => setSelectedPresets([])}
+                    type="button"
+                  >
+                    <span className="label">Reset</span>
+                  </button>
+                </>
+              ) : (
+                <span className="sv-muted">No preset selected yet.</span>
+              )}
+            </div>
+
+            {/* Compact preset rows */}
+            <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+              {PRESETS.map((p) => {
+                const active = selectedPresets.includes(p.id);
+                return (
+                  <div
+                    key={p.id}
+                    className="sv-card sv-pad"
+                    style={{
+                      border: active
+                        ? "2px solid var(--primary)"
+                        : "1px solid var(--border)",
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <div
+                      className="sv-row sv-wrap"
+                      style={{ justifyContent: "space-between", gap: 10 }}
+                    >
+                      <div style={{ minWidth: 220 }}>
+                        <div
+                          className="sv-row"
+                          style={{ gap: 10, alignItems: "baseline" }}
+                        >
+                          <div style={{ fontWeight: 900 }}>{p.title}</div>
+                          <span className="sv-badge">{p.duration}</span>
+                        </div>
+                        <div
+                          className="sv-muted"
+                          style={{
+                            marginTop: 6,
+                            fontSize: 13,
+                            lineHeight: 1.35,
+                          }}
+                        >
+                          {p.prompt}
+                        </div>
+                        <div
+                          className="sv-row sv-wrap"
+                          style={{ marginTop: 8, gap: 6 }}
+                        >
+                          {p.tags.map((t) => (
+                            <span key={t} className="sv-badge">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div
+                        className="sv-row"
+                        style={{
+                          gap: 8,
+                          alignItems: "center",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <button
+                          className={`sv-btn ${
+                            active ? "sv-btn--primary" : "sv-btn--outline"
+                          }`}
+                          onClick={() => togglePreset(p)}
+                          type="button"
+                        >
+                          <span className="label">
+                            {active ? "Selected" : "Use"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Bundles */}
-        <div className="card" style={{ marginTop: 8 }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            Recipe Bundles (Optional)
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gap: 8,
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            }}
-          >
-            {bundles.map((b) => {
-              const checked = selectedBundleIds.includes(b.id);
-              return (
-                <label
-                  key={b.id}
-                  className="card"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleBundle(b.id)}
+        <div className="sv-stack-sm">
+          {/* Active Tool Panel (tabs pages) */}
+          <div className="sv-card sv-pad">
+            <ToolErrorBoundary>
+              <div className="sv-card sv-pad">
+                {activeTool === "drafts" ? (
+                  <DraftsPane
+                    onPublish={onPublishDraft}
+                    onQuickViewAsCurrent={
+                      useMealPlanStore
+                        ? (d) =>
+                            useMealPlanStore.getState()?.setPlan?.(d.plan, {
+                              createdAt: new Date().toISOString(),
+                              source: "draft-preview",
+                              draftId: d.id,
+                            })
+                        : null
+                    }
                   />
-                  <span>{b.name}</span>
-                </label>
-              );
-            })}
+                ) : (
+                  <Suspense
+                    fallback={<div className="sv-muted">Loading panel…</div>}
+                  >
+                    <SafeProps>{ActiveToolElement}</SafeProps>
+                  </Suspense>
+                )}
+              </div>
+            </ToolErrorBoundary>
           </div>
-          <div className="subtitle" style={{ marginTop: 6 }}>
-            Choose a pack to start from curated meals.
-          </div>
-        </div>
 
-        {/* Inventory */}
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 8,
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={useInventory}
-            onChange={(e) => setUseInventory(e.target.checked)}
-          />
-          Prioritize pantry/inventory items
-        </label>
+          {/* Auto Estimates & Forecasts */}
+          <div className="sv-card sv-pad">
+            <SectionTitle
+              title="Auto Estimates & Forecasts"
+              subtitle="Pulled from cooking, batch, garden, animal, and cleaning agents when available. Uses the forecast horizon."
+            />
 
-        {/* Forecast Horizon */}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            marginTop: 12,
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          <div className="subtitle">Forecast Horizon:</div>
-          <select
-            className="btn sm"
-            value={horizonMonths}
-            onChange={(e) => setHorizonMonths(Number(e.target.value))}
-          >
-            <option value={1}>1 month</option>
-            <option value={3}>3 months</option>
-            <option value={6}>6 months</option>
-            <option value={12}>1 year</option>
-            <option value={24}>2 years</option>
-          </select>
-        </div>
+            <div
+              className="sv-grid-3"
+              style={{
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              }}
+            >
+              <div className="sv-card sv-pad">
+                <div style={{ fontWeight: 800 }}>Prep Time</div>
+                <div className="sv-muted">
+                  {estimates.prepTimeHrs != null
+                    ? `${estimates.prepTimeHrs} hrs`
+                    : "—"}
+                </div>
+              </div>
+              <div className="sv-card sv-pad">
+                <div style={{ fontWeight: 800 }}>Shopping Cost</div>
+                <div className="sv-muted">
+                  {estimates.shoppingCost != null
+                    ? `$${Number(estimates.shoppingCost).toFixed(2)}`
+                    : "—"}
+                </div>
+              </div>
+              <div className="sv-card sv-pad">
+                <div style={{ fontWeight: 800 }}>Garden Utilization</div>
+                <div className="sv-muted">
+                  {estimates.gardenUsePct != null
+                    ? `${Math.round(estimates.gardenUsePct)}%`
+                    : "—"}
+                </div>
+              </div>
+            </div>
 
-        {/* Actions */}
-        <div
-          style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}
-        >
-          <button
-            className="btn primary sm"
-            aria-busy={busy}
-            onClick={() => onGenerate(false)}
-          >
-            <span className="label">{busy ? "Working…" : "Generate Plan"}</span>
-          </button>
-          <button
-            className="btn sm"
-            aria-busy={busy}
-            onClick={() => onGenerate(true)}
-            title="Generate and store as a draft (does not overwrite current plan)"
-          >
-            <span className="label">
-              {busy ? "Working…" : "Generate → Draft"}
-            </span>
-          </button>
-          <button className="btn sm" onClick={() => setResult(null)}>
-            <span className="label">Clear</span>
-          </button>
-          <button className="btn sm" onClick={onSaveCurrentAsDraft}>
-            <span className="label">Save Current as Draft</span>
-          </button>
-          {ok ? (
-            <span className="subtitle" style={{ color: "var(--success)" }}>
-              ✓ Done
-            </span>
-          ) : null}
-        </div>
-      </div>
-
-      {/* Auto Estimates & Forecasts */}
-      <div className="card" style={{ marginTop: 16 }}>
-        <SectionTitle
-          title="Auto Estimates & Forecasts"
-          subtitle="Pulled from cooking, batch, garden, animal, and cleaning agents when available. Uses the forecast horizon above."
-        />
-        <div
-          style={{
-            display: "grid",
-            gap: 12,
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          }}
-        >
-          <div className="card">
-            <div className="font-bold">Prep Time</div>
-            <div className="subtitle">
-              {estimates.prepTimeHrs != null
-                ? `${estimates.prepTimeHrs} hrs`
-                : "—"}
+            <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                Suggestions
+              </div>
+              {estimates.suggestions && estimates.suggestions.length ? (
+                <ul className="list-disc" style={{ paddingLeft: 18 }}>
+                  {estimates.suggestions.map((s, i) => (
+                    <li key={i}>
+                      {typeof s === "string" ? s : s?.text || JSON.stringify(s)}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="sv-muted">—</div>
+              )}
             </div>
           </div>
-          <div className="card">
-            <div className="font-bold">Shopping Cost</div>
-            <div className="subtitle">
-              {estimates.shoppingCost != null
-                ? `$${Number(estimates.shoppingCost).toFixed(2)}`
-                : "—"}
-            </div>
-          </div>
-          <div className="card">
-            <div className="font-bold">Garden Utilization</div>
-            <div className="subtitle">
-              {estimates.gardenUsePct != null
-                ? `${Math.round(estimates.gardenUsePct)}%`
-                : "—"}
-            </div>
-          </div>
-          <div className="card">
-            <div className="font-bold">Animal Outputs</div>
-            <div className="subtitle">
-              {estimates.animalOutputs
-                ? JSON.stringify(estimates.animalOutputs)
-                : "—"}
-            </div>
-          </div>
-          <div className="card">
-            <div className="font-bold">Cleaning Ripple</div>
-            <div className="subtitle">
-              {estimates.cleaningImpact
-                ? estimates.cleaningImpact.note ||
-                  JSON.stringify(estimates.cleaningImpact)
-                : "—"}
-            </div>
-          </div>
-        </div>
 
-        {/* Suggestions list */}
-        <div style={{ marginTop: 12 }}>
-          <div className="font-bold">Suggestions</div>
-          {estimates.suggestions && estimates.suggestions.length ? (
-            <ul className="list-disc pl-5">
-              {estimates.suggestions.map((s, i) => (
-                <li key={i}>
-                  {typeof s === "string" ? s : s?.text || JSON.stringify(s)}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="subtitle">—</div>
-          )}
-        </div>
-      </div>
+          <UnifiedReadinessCard />
 
-      {/* Draft Review (View Plan switches tool and also guarantees a display) */}
-      <DraftReview
-        data={result}
-        onViewPlan={() => {
-          // Try to push into the centralized store (Dashboard will pick it up)
-          const envelope = coerceToEnvelope(result);
-          if (useMealPlanStore?.getState && envelope) {
-            const setter = useMealPlanStore.getState().setPlan;
-            if (typeof setter === "function") {
-              setter(envelope, {
-                createdAt: new Date().toISOString(),
-                source: "preview-from-draft",
-              });
+          {/* Draft Review (View Plan switches tool and also guarantees a display) */}
+          <DraftReview
+            data={result}
+            onViewPlan={() => {
+              // Try to push into the centralized store (Dashboard will pick it up)
+              const envelope = coerceToEnvelope(result);
+              if (useMealPlanStore?.getState && envelope) {
+                const setter = useMealPlanStore.getState().setPlan;
+                if (typeof setter === "function") {
+                  setter(envelope, {
+                    createdAt: new Date().toISOString(),
+                    source: "preview-from-draft",
+                  });
+                  setActiveTool("dashboard");
+                  return;
+                }
+              }
+              // Fallback: render a full inline plan viewer on this page
+              setInlineEnvelope(envelope);
               setActiveTool("dashboard");
-              return;
-            }
-          }
-          // Fallback: render a full inline plan viewer on this page
-          setInlineEnvelope(envelope);
-          setActiveTool("dashboard"); // still show dashboard shell, but inline viewer will appear below
-          setTimeout(() => {
-            try {
-              inlineRef.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            } catch {}
-          }, 0);
-        }}
-      />
+              setTimeout(() => {
+                try {
+                  inlineRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                } catch {}
+              }, 0);
+            }}
+          />
 
-      {/* Inline fallback full-plan viewer */}
-      <div ref={inlineRef}>
-        {inlineEnvelope ? <InlinePlanViewer envelope={inlineEnvelope} /> : null}
+          {/* Inline fallback full-plan viewer */}
+          <div ref={inlineRef}>
+            {inlineEnvelope ? (
+              <InlinePlanViewer envelope={inlineEnvelope} />
+            ) : null}
+          </div>
+        </div>
       </div>
 
       {/* Dev automations (optional) */}
       {SHOW_DEV_AUTOMATIONS && AutomationPanel && (
-        <AutomationPanel
-          title="Quick Automations (Dev)"
-          agents={quickAgents}
-          onEmit={handleAutomationEmit}
-        />
+        <div className="sv-card sv-pad" style={{ marginTop: 14 }}>
+          <AutomationPanel
+            title="Quick Automations (Dev)"
+            agents={quickAgents}
+            onEmit={handleAutomationEmit}
+          />
+        </div>
       )}
     </div>
   );

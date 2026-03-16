@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/farm_to_table/plate_templates.catalog.schema.json",
+  "title": "SSA • Farm-to-Table Plate Templates Catalog Schema",
+  "description": "Schema for SSA farm-to-table plate templates catalogs. Plate templates are deterministic meal composition blueprints used by planners/resolvers (e.g., 1 protein + 2 veg + 1 starch + sauce). Compatible with SSA generic catalog schema (id + tags) while adding structured template slots, role requirements, and planner/UI hints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "meta", "items"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$id": { "type": "string" },
+
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "scope": {
+      "description": "Optional scoping for planners/resolvers (e.g., module, locale).",
+      "type": ["string", "object"],
+      "additionalProperties": true
+    },
+
+    "defaults": {
+      "description": "Optional defaults used by planners (e.g., default slot counts, role weights, template ranking).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "items": {
+      "description": "Plate template entries (minimal or rich).",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/PlateTemplateItem" }
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 6000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Meta": {
+      "type": "object",
+      "required": ["id", "type", "name"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "catalog" },
+        "domain": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "minLength": 2 },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "subtitle": { "$ref": "#/$defs/ShortText" },
+        "source": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "RoleId": {
+      "description": "Role ID reference (ties into component_roles.catalog.json).",
+      "allOf": [{ "$ref": "#/$defs/Id" }]
+    },
+
+    "ReadinessId": {
+      "description": "Readiness ID reference (ties into readiness_levels.catalog.json).",
+      "allOf": [{ "$ref": "#/$defs/Id" }]
+    },
+
+    "SlotKind": {
+      "description": "High-level slot grouping used for UI and deterministic scoring.",
+      "type": "string",
+      "enum": [
+        "protein",
+        "vegetable",
+        "starch",
+        "fat",
+        "acid",
+        "sauce",
+        "garnish",
+        "fresh_element",
+        "crunch",
+        "carrier",
+        "side",
+        "main",
+        "drink",
+        "dessert",
+        "other"
+      ]
+    },
+
+    "CountRange": {
+      "description": "Count constraints for a slot.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "max": { "type": "integer", "minimum": 0, "maximum": 12 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "min": { "type": "integer" },
+              "max": { "type": "integer" }
+            },
+            "required": ["min", "max"]
+          },
+          "then": {
+            "properties": {
+              "max": { "type": "integer", "minimum": 0, "maximum": 12 }
+            }
+          }
+        }
+      ]
+    },
+
+    "RoleRequirement": {
+      "description": "One or more acceptable roles for a slot.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anyOfRoles"],
+      "properties": {
+        "anyOfRoles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/RoleId" }
+        },
+        "preferredRole": {
+          "description": "Optional preferred role when multiple roles are allowed.",
+          "anyOf": [{ "$ref": "#/$defs/RoleId" }, { "type": "null" }]
+        },
+        "roleWeights": {
+          "description": "Optional per-role weights used by scoring (roleId -> weight).",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/RoleId" },
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "default": {}
+        }
+      }
+    },
+
+    "TagConstraints": {
+      "description": "Optional tag constraints for selecting components to fill a slot.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mustHave": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "mustNotHave": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "anyOf": {
+          "description": "At least one of these tags should be present (if provided).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+
+    "SlotReadinessPolicy": {
+      "description": "Optional readiness policy used by weeknight/batch planners.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minReadiness": {
+          "description": "Minimum readiness required (id order semantics handled by engine).",
+          "anyOf": [{ "$ref": "#/$defs/ReadinessId" }, { "type": "null" }]
+        },
+        "preferredReadiness": {
+          "anyOf": [{ "$ref": "#/$defs/ReadinessId" }, { "type": "null" }]
+        },
+        "allowRaw": { "type": "boolean", "default": true }
+      },
+      "default": {}
+    },
+
+    "PlateSlot": {
+      "description": "A single plate template slot (component selection constraint).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "kind", "count", "roles"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "kind": { "$ref": "#/$defs/SlotKind" },
+
+        "count": { "$ref": "#/$defs/CountRange" },
+
+        "roles": { "$ref": "#/$defs/RoleRequirement" },
+
+        "tags": { "$ref": "#/$defs/TagConstraints" },
+
+        "readiness": { "$ref": "#/$defs/SlotReadinessPolicy" },
+
+        "optional": {
+          "description": "If true, slot may be left empty without invalidating the template.",
+          "type": "boolean",
+          "default": false
+        },
+
+        "notes": { "$ref": "#/$defs/ShortText" }
+      }
+    },
+
+    "TemplateSignals": {
+      "description": "Planner-friendly signals for selecting a template.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "weeknightFriendly": { "type": "boolean", "default": false },
+        "batchFriendly": { "type": "boolean", "default": false },
+        "freezerFriendly": { "type": "boolean", "default": false },
+        "leftoversFriendly": { "type": "boolean", "default": false },
+        "kidFriendly": { "type": "boolean", "default": false }
+      },
+      "default": {}
+    },
+
+    "UiHints": {
+      "description": "Optional UI hints for template browsing.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "icon": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "colorToken": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "sortOrder": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "chipLabel": { "$ref": "#/$defs/ShortText" }
+      },
+      "default": {}
+    },
+
+    "PlateTemplateItem": {
+      "description": "A single plate template definition. Minimum required is id + tags (SSA catalog compatibility).",
+      "type": "object",
+      "required": ["id", "tags"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "description": "Canonical template ID (recommend prefix 'plate.'), e.g., plate.standard_dinner.",
+          "allOf": [{ "$ref": "#/$defs/Id" }]
+        },
+
+        "tags": {
+          "description": "Search/filter tags.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "group": { "$ref": "#/$defs/ShortText" },
+        "rank": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "draft", "deprecated"]
+        },
+        "notes": { "$ref": "#/$defs/Text" },
+
+        "path": {
+          "description": "Optional relative path to a richer template definition.",
+          "type": "string"
+        },
+
+        "slots": {
+          "description": "Structured plate slots that define what components are needed.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/PlateSlot" }
+        },
+
+        "signals": { "$ref": "#/$defs/TemplateSignals" },
+
+        "ui": { "$ref": "#/$defs/UiHints" },
+
+        "refs": {
+          "description": "Optional cross references: related templates, aliases, etc.",
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+
+      "allOf": [
+        {
+          "if": { "required": ["slots"] },
+          "then": {
+            "properties": { "slots": { "type": "array", "minItems": 1 } }
+          }
+        }
+      ]
+    }
+  }
+}

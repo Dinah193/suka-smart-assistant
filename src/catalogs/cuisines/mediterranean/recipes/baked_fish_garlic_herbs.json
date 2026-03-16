@@ -1,0 +1,251 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.baked_fish_garlic_herbs",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Baked Fish with Garlic, Olive Oil, Lemon, and Herbs",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Mediterranean baseline: olive oil + garlic + herbs + lemon finish.",
+        "Designed for adaptable white fish fillets (cod/tilapia/haddock) with safe internal temp guidance."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.mediterranean",
+    "category": "main",
+    "mealArchetypes": ["main", "protein_main", "weeknight"],
+    "servingStyles": ["plated", "family_style"],
+    "plannerTags": [
+      "cuisine.mediterranean",
+      "method.bake",
+      "protein.fish",
+      "olive_oil_forward",
+      "lemon_forward",
+      "herb_forward",
+      "quick",
+      "sheet_pan"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 170, "unit": "g" },
+    "notes": "4 fillets (~5–6 oz / 140–170 g each)."
+  },
+
+  "time": {
+    "activeMins": 10,
+    "handsOffMins": 15,
+    "totalMins": 25
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "oven",
+      "baking_dish",
+      "mixing_bowl",
+      "chef_knife",
+      "cutting_board"
+    ],
+    "recommended": [
+      "parchment_paper",
+      "microplane",
+      "instant_read_thermometer"
+    ],
+    "optional": ["foil"]
+  },
+
+  "dietFlags": ["gluten_free", "dairy_free", "pescatarian"],
+
+  "allergens": ["fish"],
+
+  "keywords": [
+    "baked fish",
+    "Mediterranean",
+    "garlic",
+    "lemon",
+    "olive oil",
+    "herbs",
+    "cod",
+    "tilapia"
+  ],
+
+  "tags": [
+    "cuisine.mediterranean",
+    "method.roast",
+    "method.bake",
+    "protein.fish",
+    "flavor.olive_oil",
+    "flavor.herb_forward",
+    "flavor.lemon"
+  ],
+
+  "signals": {
+    "profile": "olive_oil_lemon_herb_forward",
+    "methodCore": "bake",
+    "protein": "fish",
+    "quickCook": true,
+    "finishHint": "lemon_herb_finish"
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredients.fish_white_fillet",
+      "label": "White fish fillets (cod, tilapia, haddock), patted dry",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": "Target ~4 fillets. For thicker fillets, increase bake time slightly."
+    },
+    {
+      "id": "ingredients.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Plus extra to grease the pan if needed."
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 3 cloves."
+    },
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon (zest + juice)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Use zest in the oil mixture; juice for baking and finishing."
+    },
+    {
+      "id": "ingredients.parsley",
+      "label": "Flat-leaf parsley, chopped",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "Or mix parsley + dill."
+    },
+    {
+      "id": "ingredients.dill",
+      "label": "Fresh dill, chopped",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.oregano",
+      "label": "Dried oregano",
+      "amount": { "value": 1.5, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Fine salt",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "Adjust to fish thickness and sides."
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.red_pepper_flakes",
+      "label": "Red pepper flakes",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true,
+      "notes": "For gentle heat."
+    },
+    {
+      "id": "ingredients.capers",
+      "label": "Capers, drained (optional)",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Adds briny Mediterranean punch."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven and prep baking dish",
+      "body": "Heat oven to 400°F (205°C). Lightly oil a baking dish or line with parchment. Pat fish dry to help the seasoning cling and prevent steaming.",
+      "timers": [{ "label": "Oven preheat (typical)", "seconds": 600 }]
+    },
+    {
+      "id": "step_02_make_garlic_herb_oil",
+      "title": "Mix garlic-herb olive oil",
+      "body": "In a bowl, mix olive oil, minced garlic, lemon zest, oregano (optional), a pinch of salt, black pepper (optional), and red pepper flakes (optional)."
+    },
+    {
+      "id": "step_03_season_fish",
+      "title": "Season fish and add lemon",
+      "body": "Place fish in the baking dish. Sprinkle remaining salt lightly over fillets. Spoon garlic-herb oil over the top (and under edges if possible). Squeeze 1–2 tablespoons lemon juice over the fish. Scatter capers (optional) around and on top."
+    },
+    {
+      "id": "step_04_bake",
+      "title": "Bake until flaky and just cooked through",
+      "body": "Bake 10–14 minutes depending on thickness, until the fish flakes easily and is opaque. If using an instant-read thermometer, target 145°F (63°C) at the thickest part.",
+      "temperature": {
+        "type": "oven",
+        "value": 400,
+        "unit": "F",
+        "notes": "400°F / 205°C"
+      },
+      "timers": [{ "label": "Bake", "seconds": 720 }]
+    },
+    {
+      "id": "step_05_finish",
+      "title": "Finish with herbs and lemon; serve",
+      "body": "Remove from oven. Sprinkle chopped parsley and/or dill over the fish. Add a final squeeze of lemon to brighten. Spoon pan juices over fillets when serving."
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 2,
+      "container": "airtight",
+      "notes": "Reheat gently (low oven or covered skillet) to avoid drying. Great cold over salad with extra lemon + olive oil."
+    }
+  },
+
+  "variations": [
+    {
+      "id": "variation_foil_packets",
+      "title": "Foil packet method (extra moist)",
+      "changes": [
+        "Place fish on foil, add garlic-herb oil + lemon, seal packets.",
+        "Bake 12–16 minutes (thicker pieces may need longer).",
+        "Open carefully to avoid steam burns."
+      ]
+    },
+    {
+      "id": "variation_tomato_olive_traybake",
+      "title": "Tomato + olive tray bake",
+      "changes": [
+        "Add 250 g cherry tomatoes and 60 g olives to the dish.",
+        "Roast tomatoes 8 minutes first, then add fish and bake 10–12 minutes."
+      ]
+    },
+    {
+      "id": "variation_butter_finish_noncore",
+      "title": "Butter finish (not strictly core Mediterranean)",
+      "changes": [
+        "Stir 15 g butter into the hot pan juices off-heat for a glossy sauce.",
+        "Keep lemon finish to maintain brightness."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Cooking time depends mostly on thickness. Avoid overbaking—fish dries fast.",
+    "If your fish is very thin (tilapia), start checking at 8–9 minutes.",
+    "Pair with: roasted_vegetables_olive_oil, Greek salad, lemon rice, or pita + hummus."
+  ]
+}

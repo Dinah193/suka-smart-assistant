@@ -18,18 +18,13 @@
  *   • export to the Hub when familyFundMode is enabled.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // Hair protein view component (create if not present yet)
-import HairProteinCalculatorView from "@/features/calculators/health/HairProteinCalculator.view";
+import HairProteinCalculatorView from "@/features/calculators/health/HairProteinCalculator.view.jsx";
 
 const CALCULATOR_ID = "hair-protein-requirement";
 
@@ -42,11 +37,7 @@ const CALCULATOR_ID = "hair-protein-requirement";
  * @property {Object<string, any>} [meta]  - any extra details from calculator
  */
 
-function HairProteinNextStepsPanel({
-  result,
-  loadingNext,
-  onRequestSession,
-}) {
+function HairProteinNextStepsPanel({ result, loadingNext, onRequestSession }) {
   const navigate = useNavigate();
   const hasResult = !!result;
 
@@ -119,13 +110,11 @@ function HairProteinNextStepsPanel({
     <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0">
       <div className="bg-slate-900/60 border border-slate-700 rounded-2xl shadow-lg p-4 lg:p-5 flex flex-col h-full">
         <header className="mb-3">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Next Steps
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-50">Next Steps</h2>
           <p className="text-xs text-slate-400 mt-1">
             SSA turns your hair protein estimate into calm nudges: how to eat,
-            stock, and plan your week so your hair has what it needs to grow
-            and recover from styling.
+            stock, and plan your week so your hair has what it needs to grow and
+            recover from styling.
           </p>
         </header>
 
@@ -148,7 +137,7 @@ function HairProteinNextStepsPanel({
                 "bg-slate-800/60 hover:bg-slate-800 focus:outline-none",
                 "focus-visible:ring-2 focus-visible:ring-emerald-400/70",
                 "transition-all px-3 py-3 flex flex-col gap-1",
-                (action.disabled || loadingNext)
+                action.disabled || loadingNext
                   ? "opacity-70 cursor-not-allowed"
                   : "cursor-pointer",
               ].join(" ")}
@@ -291,14 +280,10 @@ export default function HairProteinCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.health.hair-protein",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.health.hair-protein",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -329,10 +314,7 @@ export default function HairProteinCalculatorPage() {
       setTimeout(() => setLoadingNext(false), 350);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(
-        "[hair-protein.jsx] Hair protein calculator error",
-        err
-      );
+      console.error("[hair-protein.jsx] Hair protein calculator error", err);
       setError(
         err && err.message
           ? err.message
@@ -426,9 +408,7 @@ export default function HairProteinCalculatorPage() {
                     </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-slate-400 mb-0.5">
-                      Current Gap
-                    </span>
+                    <span className="text-slate-400 mb-0.5">Current Gap</span>
                     <span className="text-slate-50 font-semibold">
                       {result.gapGrams > 0
                         ? `+${Math.round(result.gapGrams)} g needed`
@@ -439,9 +419,7 @@ export default function HairProteinCalculatorPage() {
                   </div>
                   {statusLabel && (
                     <div className="flex flex-col">
-                      <span className="text-slate-400 mb-0.5">
-                        Status
-                      </span>
+                      <span className="text-slate-400 mb-0.5">Status</span>
                       <span className="text-slate-50 font-semibold">
                         {statusLabel}
                       </span>
@@ -459,9 +437,9 @@ export default function HairProteinCalculatorPage() {
                   )}
                 <p className="mt-2 text-[11px] text-slate-400 leading-snug">
                   SSA will use this profile to prioritize recipes, storehouse
-                  items, and batch sessions that support both your body and
-                  your hair—so length and thickness are a by-product of how the
-                  whole house eats.
+                  items, and batch sessions that support both your body and your
+                  hair—so length and thickness are a by-product of how the whole
+                  house eats.
                 </p>
               </section>
             )}

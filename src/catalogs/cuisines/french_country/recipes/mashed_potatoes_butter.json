@@ -1,0 +1,424 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country.recipes.mashed_potatoes_butter",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "French Country Butter Mashed Potatoes",
+    "subtitle": "Pomme purée-style mash: buttery, silky, and richly seasoned.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Canonical SSA recipe modeled after French-style pomme purée: steam-dried potatoes, warm dairy, lots of butter, finished silky.",
+        "Designed for predictable results, batch prep, and service holding guidance."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.french_country",
+    "category": "side",
+    "mealArchetypes": ["archetype.side", "archetype.starch_side"],
+    "servingStyles": ["family_style", "plates", "plated_meals"],
+    "plannerTags": [
+      "cuisine.french_country",
+      "side",
+      "starch",
+      "dish.mashed_potatoes",
+      "method.boil",
+      "method.mash",
+      "weeknight.friendly",
+      "holiday.friendly",
+      "batch.friendly"
+    ]
+  },
+
+  "summary": "Rich French country mashed potatoes: Yukon Golds cooked until tender, steam-dried, then mashed with warm milk/cream and plenty of butter until silky. Seasoned simply with salt and white pepper.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a side. Scale linearly."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "weeknightPossible": true,
+    "notes": [
+      "Best texture same-day; leftovers reheat well with added dairy.",
+      "Freezing can make texture slightly grainy unless re-whipped with hot dairy."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 2,
+    "sourness": 0,
+    "sweetness": 1,
+    "umami": 1,
+    "heat": 0,
+    "richness": 4,
+    "notes": [
+      "Butter-forward, creamy, and cleanly seasoned.",
+      "French style favors smooth texture: ricer/food mill recommended."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.large_pot",
+      "equipment.colander",
+      "equipment.potato_ricer",
+      "equipment.saucepan_small",
+      "equipment.silicone_spatula",
+      "equipment.whisk"
+    ],
+    "minimum": [
+      "equipment.large_pot",
+      "equipment.colander",
+      "equipment.potato_masher",
+      "equipment.stove"
+    ],
+    "optional": [
+      {
+        "id": "equipment.food_mill",
+        "label": "Food mill",
+        "required": false,
+        "notes": "Excellent for ultra-smooth mash; use medium disk."
+      },
+      {
+        "id": "equipment.stand_mixer",
+        "label": "Stand mixer",
+        "required": false,
+        "notes": "Use cautiously on low speed only; overmixing can make potatoes gummy."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian", "diet.gluten_free"],
+  "allergens": {
+    "common": ["allergen.dairy"],
+    "notes": [
+      "Contains dairy (butter, milk/cream). Use plant butter and oat milk for dairy-free variant."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.potatoes_yukon_gold",
+      "label": "Yukon Gold potatoes, peeled and cut into 2-inch chunks",
+      "role": "starch",
+      "amount": { "value": 3, "unit": "lb" },
+      "notes": [
+        "Yukon Gold gives a naturally buttery flavor and creamy texture.",
+        "Russets work too (lighter/fluffier); reduce mixing and add dairy gradually."
+      ]
+    },
+    {
+      "id": "ingredient.kosher_salt",
+      "label": "Kosher salt (for cooking water and seasoning)",
+      "role": "seasoning",
+      "amount": { "value": 2.5, "unit": "tsp" },
+      "notes": [
+        "Salt the cooking water well—this seasons the potatoes from within."
+      ]
+    },
+    {
+      "id": "ingredient.butter_unsalted",
+      "label": "Unsalted butter, cubed",
+      "role": "fat",
+      "amount": { "value": 8, "unit": "tbsp" },
+      "notes": [
+        "For very rich French-style purée, increase to 10–12 tbsp.",
+        "Keep butter cold until ready to incorporate (then melt into hot potatoes)."
+      ]
+    },
+    {
+      "id": "ingredient.milk_whole",
+      "label": "Whole milk (or half-and-half)",
+      "role": "liquid",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": ["Warm the milk before adding to avoid cooling the potatoes."]
+    },
+    {
+      "id": "ingredient.heavy_cream",
+      "label": "Heavy cream (optional, for extra silkiness)",
+      "role": "liquid",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.white_pepper",
+      "label": "White pepper (or black pepper), to taste",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "White pepper keeps the mash visually clean; black pepper is fine."
+      ]
+    },
+    {
+      "id": "ingredient.nutmeg",
+      "label": "Ground nutmeg (tiny pinch, optional)",
+      "role": "spice",
+      "amount": { "value": 0.06, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Use a very small pinch—classic French accent."]
+    },
+    {
+      "id": "ingredient.chives",
+      "label": "Chives, finely sliced (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_potatoes",
+      "title": "Prep potatoes and start in cold salted water",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Peel potatoes and cut into evenly sized 2-inch chunks for even cooking.",
+        "Place potatoes in a large pot and cover with cold water by 1–2 inches.",
+        "Add about 2 tsp kosher salt to the water."
+      ],
+      "checks": [
+        "Potato chunks are similar size.",
+        "Potatoes are fully submerged in cold water."
+      ]
+    },
+    {
+      "id": "step_02_boil_until_tender",
+      "title": "Boil gently until very tender",
+      "activeMins": 2,
+      "handsOffMins": 18,
+      "instructions": [
+        "Bring to a boil over high heat, then reduce to a steady simmer.",
+        "Cook 15–20 minutes until a knife slides in with almost no resistance.",
+        "Do not undercook—slightly over-tender is better for smooth mash."
+      ],
+      "timers": [
+        { "label": "Simmer potatoes (check at 15 min)", "minutes": 15 },
+        { "label": "Optional extra simmer", "minutes": 5 }
+      ],
+      "checks": ["Potatoes are fully tender; centers are not chalky."]
+    },
+    {
+      "id": "step_03_warm_dairy",
+      "title": "Warm the milk (and optional cream)",
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "instructions": [
+        "While potatoes cook, warm milk (and optional cream) in a small saucepan over low heat.",
+        "Heat until steaming but not boiling; keep warm."
+      ],
+      "timers": [{ "label": "Warm dairy", "minutes": 5 }],
+      "checks": ["Milk/cream is hot to the touch but not scalded."]
+    },
+    {
+      "id": "step_04_drain_and_steam_dry",
+      "title": "Drain and steam-dry the potatoes",
+      "activeMins": 4,
+      "handsOffMins": 2,
+      "instructions": [
+        "Drain potatoes thoroughly in a colander.",
+        "Return potatoes to the hot pot over low heat for 1–2 minutes, shaking/stirring gently.",
+        "This drives off excess water for a richer, less watery mash."
+      ],
+      "timers": [{ "label": "Steam-dry", "minutes": 2 }],
+      "checks": [
+        "Potatoes look dry and slightly chalky on the surface (not wet)."
+      ]
+    },
+    {
+      "id": "step_05_rice_or_mash",
+      "title": "Rice (preferred) or mash the potatoes",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "For the smoothest result, pass hot potatoes through a ricer or food mill into a warm bowl.",
+        "If using a masher, mash gently while potatoes are hot; avoid aggressive mixing."
+      ],
+      "checks": ["Potatoes are broken down evenly with no large lumps."]
+    },
+    {
+      "id": "step_06_add_butter_then_dairy",
+      "title": "Incorporate butter, then add warm dairy gradually",
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add butter to the hot potatoes and fold until melted and absorbed.",
+        "Add warm milk (and cream if using) a little at a time, folding or stirring until silky.",
+        "Stop when texture is creamy and holds soft peaks; do not overwork."
+      ],
+      "checks": [
+        "Mash is glossy and smooth, not gluey.",
+        "Texture is creamy and spoonable."
+      ]
+    },
+    {
+      "id": "step_07_season_and_serve",
+      "title": "Season, adjust consistency, and serve",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Taste and adjust salt. Add white pepper (and optional nutmeg).",
+        "If too thick, add a splash more warm milk. If too loose, cook 1–2 minutes over low heat, stirring gently.",
+        "Serve warm; garnish with chives if desired."
+      ],
+      "checks": ["Seasoning is balanced and texture is creamy."]
+    }
+  ],
+
+  "methods": ["method.boil", "method.mash"],
+
+  "pairings": {
+    "with": [
+      "dishes.french_country.roast_chicken",
+      "dishes.french_country.beef_stew",
+      "dishes.french_country.green_beans_butter"
+    ],
+    "notes": [
+      "Perfect with roast chicken, beef stew, or saucy mains.",
+      "For a classic French plate, pair with a simple green salad and vinaigrette."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "notes": [
+        "Cool quickly and refrigerate within 2 hours.",
+        "Mash firms up in the fridge; reheat with added warm milk/cream."
+      ]
+    },
+    "freeze": {
+      "maxMonths": 2,
+      "notes": [
+        "Freezing is possible but texture may change slightly.",
+        "For best results, reheat gently and re-whip with hot dairy and a little butter."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Stovetop: reheat over low heat with splashes of milk, stirring gently.",
+        "Microwave: heat in short bursts, stirring between, adding milk as needed."
+      ]
+    },
+    "hold": {
+      "notes": [
+        "To hold for service: keep covered in a warm oven (~200°F / 95°C) or bain-marie, stirring occasionally.",
+        "Add a pat of butter on top to prevent drying."
+      ]
+    }
+  },
+
+  "safety": {
+    "core": [
+      "Do not leave at room temperature longer than 2 hours (1 hour if very warm room).",
+      "Reheat leftovers until steaming hot throughout."
+    ]
+  },
+
+  "notes": [
+    "For the silkiest texture, avoid food processors (they can make potatoes gummy).",
+    "Add butter before milk—fat coats starch and improves texture.",
+    "Warm dairy is key: cold milk cools the potatoes and can cause gumminess."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.pomme_puree_extra_rich",
+      "label": "Extra-rich pomme purée",
+      "when": { "preferences": ["extra_rich"] },
+      "adapt": {
+        "notes": [
+          "Increase butter to 10–12 tbsp and use half milk + half cream.",
+          "Pass through a fine sieve after ricing for ultra-silky texture (optional)."
+        ]
+      }
+    },
+    {
+      "id": "variation.garlic_mash",
+      "label": "Garlic mash (French country style)",
+      "when": { "preferences": ["garlic"] },
+      "adapt": {
+        "notes": [
+          "Simmer 3–6 peeled garlic cloves with the potatoes, then mash together.",
+          "Or fold in roasted garlic paste at the end."
+        ]
+      }
+    },
+    {
+      "id": "variation.dairy_free",
+      "label": "Dairy-free mashed potatoes",
+      "when": { "dietFlags": ["diet.dairy_free"] },
+      "adapt": {
+        "notes": [
+          "Use plant butter and warm oat milk (or unsweetened almond milk).",
+          "Add olive oil for richness; season a touch more aggressively."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "leftovers": {
+      "remixIdeas": [
+        "Crisp potato cakes in a skillet",
+        "Shepherd’s pie topping",
+        "Thicken soups/stews by stirring in a spoonful"
+      ]
+    },
+    "shopping": {
+      "pantryFirst": ["ingredient.kosher_salt", "ingredient.black_pepper"],
+      "niceToHave": [
+        "ingredient.white_pepper",
+        "ingredient.nutmeg",
+        "ingredient.chives"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.french_country",
+    "dishId": "dishes.french_country.mashed_potatoes_butter",
+    "search": {
+      "aliases": [
+        "pomme puree",
+        "buttery mashed potatoes",
+        "french mashed potatoes"
+      ],
+      "keywords": [
+        "yukon gold",
+        "butter",
+        "milk",
+        "cream",
+        "ricer",
+        "smooth mash"
+      ]
+    },
+    "normalization": {
+      "recommendedIdCase": "lower",
+      "ingredientIdStyle": "ingredient.*",
+      "methodIdStyle": "method.*",
+      "equipmentIdStyle": "equipment.*"
+    }
+  }
+}

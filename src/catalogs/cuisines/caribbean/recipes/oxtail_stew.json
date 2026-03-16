@@ -1,0 +1,457 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.oxtail_stew",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Oxtail Stew",
+    "subtitle": "Jamaican-style oxtail simmered until falling-off-the-bone in a rich brown gravy with butter beans",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from common Jamaican oxtail patterns: browned oxtails, aromatic gravy, thyme + scallion, optional scotch bonnet, finished with butter beans.",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": ["jamaican"],
+    "category": "main",
+    "mealArchetypes": ["braise_plus_sides", "stewed_meat_plus_bean"],
+    "servingStyles": ["family_style", "plated_meals", "holiday_feasts"],
+    "plannerTags": [
+      "caribbean",
+      "jamaican",
+      "oxtail",
+      "stew",
+      "brown_stew",
+      "batch",
+      "freezer_friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "Rich and filling; commonly served with rice and peas or plain rice."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "totalMins": 200,
+    "handsOffMins": 150
+  },
+
+  "difficulty": 3,
+
+  "nutritionHints": {
+    "proteinForward": true,
+    "fiberForward": true,
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "heatTypical": 2,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 2,
+    "sourness": 1,
+    "saltiness": 2,
+    "umami": 3,
+    "signature": [
+      "deep_brown_gravy",
+      "thyme",
+      "scallion",
+      "garlic",
+      "allspice_pimento",
+      "ginger",
+      "scotch_bonnet_aroma"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "heavy_pot_or_dutch_oven",
+      "tongs",
+      "wooden_spoon",
+      "cutting_board",
+      "chef_knife",
+      "instant_read_thermometer"
+    ],
+    "minimum": ["pot_with_lid", "stovetop"],
+    "optional": ["pressure_cooker", "oven_safe_dutch_oven"]
+  },
+
+  "dietFlags": ["gluten_free", "dairy_free"],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "oxtail",
+      "label": "Oxtail pieces",
+      "amount": { "value": 3.5, "unit": "lb" },
+      "role": "protein",
+      "notes": "Trim excess surface fat if desired; keep some for flavor."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "role": "acid",
+      "notes": "Common Caribbean practice for seasoning/washing meat."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 2.0, "unit": "tsp" },
+      "role": "seasoning",
+      "notes": "Adjust later depending on stock and soy sauce use."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "role": "seasoning"
+    },
+    {
+      "id": "allspice",
+      "label": "Allspice (ground)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "spice",
+      "notes": "Pimento flavor is classic."
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic (minced)",
+      "amount": { "value": 6, "unit": "clove" },
+      "role": "aromatic"
+    },
+    {
+      "id": "ginger",
+      "label": "Ginger (grated)",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "role": "aromatic",
+      "optional": true,
+      "notes": "Optional but very common."
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (chopped)",
+      "amount": { "value": 5, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "thyme",
+      "label": "Thyme (fresh sprigs) or dried",
+      "amount": { "value": 8, "unit": "sprig" },
+      "role": "herb",
+      "notes": "If dried: 1 tbsp."
+    },
+    {
+      "id": "onion",
+      "label": "Onion (sliced)",
+      "amount": { "value": 1, "unit": "large" },
+      "role": "aromatic"
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Bell pepper (sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "carrot",
+      "label": "Carrot (sliced)",
+      "amount": { "value": 2, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "base",
+      "optional": true,
+      "notes": "Adds depth and color; common in many homes."
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "sweetener",
+      "notes": "Balances the savory gravy; can reduce if you prefer less sweet."
+    },
+    {
+      "id": "browning_sauce",
+      "label": "Browning sauce",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "role": "color",
+      "optional": true,
+      "notes": "Optional. Use sparingly; it deepens the classic brown stew look."
+    },
+    {
+      "id": "soy_sauce_or_tamari",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "umami",
+      "optional": true,
+      "notes": "Optional but common for deep savory flavor. Use tamari for GF."
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "fat",
+      "notes": "For browning the oxtails."
+    },
+    {
+      "id": "stock_beef_or_water",
+      "label": "Beef stock or water",
+      "amount": { "value": 6.0, "unit": "cup" },
+      "role": "liquid",
+      "notes": "Start with 5 cups; add as needed to keep oxtails barely covered."
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaves",
+      "amount": { "value": 2, "unit": "each" },
+      "role": "herb",
+      "optional": true
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (whole)",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "heat",
+      "optional": true,
+      "notes": "Keep whole for aroma; do NOT burst unless you want it hotter."
+    },
+    {
+      "id": "butter_beans",
+      "label": "Butter beans (cooked/drained)",
+      "amount": { "value": 2.0, "unit": "cup" },
+      "role": "legume",
+      "notes": "Add near the end so they don't break down."
+    },
+    {
+      "id": "cornstarch_slurry",
+      "label": "Cornstarch + water slurry",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "thickener",
+      "optional": true,
+      "notes": "Optional: 1 tbsp cornstarch + 2 tbsp water, to thicken gravy if needed."
+    },
+    {
+      "id": "vinegar",
+      "label": "White vinegar or apple cider vinegar",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "acid",
+      "optional": true,
+      "notes": "Optional: brightens and balances the stew at the end."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "season_oxtail",
+      "title": "Season the oxtails",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Pat oxtails dry.",
+        "Toss with lime juice, salt, black pepper, allspice, paprika (optional), half the garlic, half the ginger (optional), and half the scallion.",
+        "Rest 20–30 minutes (or refrigerate up to overnight for deeper flavor)."
+      ],
+      "timers": [{ "label": "Rest/Marinate", "mins": 25 }],
+      "inputs": {
+        "ingredients": [
+          "oxtail",
+          "lime_juice",
+          "salt",
+          "black_pepper",
+          "allspice",
+          "paprika",
+          "garlic",
+          "ginger",
+          "scallion"
+        ],
+        "equipment": ["mixing_bowl"]
+      }
+    },
+    {
+      "id": "brown_oxtail",
+      "title": "Brown the oxtails",
+      "domain": "cooking",
+      "activeMins": 12,
+      "instructions": [
+        "Heat a heavy pot over medium-high; add oil.",
+        "Brown oxtails in batches on multiple sides (6–10 minutes total per batch) to build deep flavor.",
+        "Remove browned oxtails to a plate; reduce heat to medium."
+      ],
+      "inputs": {
+        "ingredients": ["neutral_oil", "oxtail"],
+        "equipment": ["heavy_pot_or_dutch_oven", "stovetop", "tongs", "plate"]
+      }
+    },
+    {
+      "id": "build_base",
+      "title": "Build the stew base",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "In the same pot, add onion (and optional bell pepper/carrot). Saute 4–5 minutes until softened.",
+        "Add remaining garlic/ginger; cook 30 seconds.",
+        "Stir in brown sugar and cook 20–30 seconds to lightly caramelize (watch closely).",
+        "Stir in tomato paste (optional) for 30 seconds.",
+        "Add stock/water, soy sauce (optional), browning sauce (optional), thyme, bay leaves (optional), and whole scotch bonnet (optional).",
+        "Scrape the bottom to release browned bits, then return oxtails to the pot."
+      ],
+      "inputs": {
+        "ingredients": [
+          "onion",
+          "bell_pepper",
+          "carrot",
+          "garlic",
+          "ginger",
+          "brown_sugar",
+          "tomato_paste",
+          "stock_beef_or_water",
+          "soy_sauce_or_tamari",
+          "browning_sauce",
+          "thyme",
+          "bay_leaf",
+          "scotch_bonnet",
+          "oxtail"
+        ],
+        "equipment": ["heavy_pot_or_dutch_oven", "stovetop", "wooden_spoon"]
+      }
+    },
+    {
+      "id": "braise",
+      "title": "Braise until tender",
+      "domain": "cooking",
+      "activeMins": 3,
+      "handsOffMins": 135,
+      "instructions": [
+        "Bring to a gentle simmer, cover, and cook 2 to 3 hours until oxtails are tender (check at 2 hours).",
+        "Stir occasionally and add a little water/stock if the liquid drops below the meat.",
+        "Skim excess fat if desired for a cleaner gravy."
+      ],
+      "timers": [{ "label": "Covered braise", "mins": 150 }],
+      "inputs": {
+        "ingredients": [],
+        "equipment": ["heavy_pot_or_dutch_oven", "lid", "stovetop"]
+      }
+    },
+    {
+      "id": "finish_beans",
+      "title": "Add butter beans and finish the gravy",
+      "domain": "cooking",
+      "activeMins": 6,
+      "handsOffMins": 10,
+      "instructions": [
+        "When oxtails are tender, add butter beans and simmer uncovered 8–12 minutes to warm through and slightly reduce the sauce.",
+        "If you want a thicker gravy, stir in a cornstarch slurry a little at a time and simmer 1–2 minutes until glossy.",
+        "Taste and adjust salt/pepper. Optional: add a tiny splash of vinegar to brighten.",
+        "Remove thyme stems, bay leaves, and whole scotch bonnet before serving."
+      ],
+      "timers": [{ "label": "Uncovered finish", "mins": 10 }],
+      "inputs": {
+        "ingredients": ["butter_beans", "cornstarch_slurry", "vinegar"],
+        "equipment": ["heavy_pot_or_dutch_oven", "stovetop", "spoon"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "starches": ["caribbean.rice_and_peas", "rice", "boiled_yam", "dumplings"],
+    "vegSides": [
+      "caribbean.callaloo",
+      "steamed_cabbage",
+      "cabbage_slaw",
+      "salad"
+    ],
+    "condiments": ["pepper_sauce", "lime_juice"],
+    "drinks": ["caribbean.sorrel_drink", "caribbean.ginger_beer"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.oxtail_stew.pressure",
+      "label": "Pressure Cooker Oxtail",
+      "when": { "hasEquipmentAll": ["pressure_cooker"] },
+      "adapt": {
+        "method": "brown_then_pressure_then_reduce",
+        "notes": "Brown oxtails first. Pressure cook with aromatics + liquid 45–55 min (depending on size), natural release 10–15 min, then reduce uncovered and add butter beans at the end."
+      }
+    },
+    {
+      "id": "caribbean.oxtail_stew.low_heat",
+      "label": "Lower Heat Version",
+      "when": { "tasteMaxHeat": 1 },
+      "adapt": {
+        "reduceHeat": true,
+        "notes": "Skip scotch bonnet or keep it whole and remove early. Avoid bursting pepper."
+      }
+    },
+    {
+      "id": "caribbean.oxtail_stew.less_sweet",
+      "label": "Less Sweet Gravy",
+      "when": { "tasteMaxSweetness": 1 },
+      "adapt": {
+        "notes": "Reduce brown sugar to 1 tsp, and rely on browned onions + tomato paste for balance."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 4,
+      "notes": "Oxtail tastes even better next day. Cool quickly; reheat to steaming hot."
+    },
+    "freezer": {
+      "safeMonths": 3,
+      "notes": "Freeze in portions. Thaw overnight in fridge."
+    },
+    "reheat": {
+      "methods": ["stovetop_simmer", "microwave"],
+      "notes": "Add a splash of water/stock to loosen gravy when reheating."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": [
+        "Slice onion/pepper/carrot",
+        "Mince garlic/ginger",
+        "Measure seasoning",
+        "Rinse/sort beans if using dried"
+      ],
+      "makeAhead": ["Season oxtails (overnight)", "Pre-chop aromatics"],
+      "notes": "Excellent for batch cooking and freezer portions."
+    }
+  }
+}

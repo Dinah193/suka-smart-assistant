@@ -1,0 +1,666 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean.recipes.korean_fried_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Korean Fried Chicken (Yangnyeom & Soy-Garlic Options)",
+    "subtitle": "Extra-crispy double-fried chicken with classic Korean sticky glaze options.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": "Canonical SSA KFC: double-fry method, batter/starch crust, and two primary sauces (yangnyeom + soy-garlic). Includes oven/air-fryer adaptations and safety checks."
+    }
+  },
+
+  "classification": {
+    "cuisine": "korean",
+    "category": "fried_chicken",
+    "mealArchetypes": ["korean.meal.fried_and_sides", "korean.meal.anjoo"],
+    "servingStyles": ["street_food", "family_style", "plates", "snacks"],
+    "plannerTags": [
+      "korean",
+      "korean_fried_chicken",
+      "fried_chicken",
+      "double_fry",
+      "crispy",
+      "yangnyeom",
+      "soy_garlic",
+      "party_food",
+      "game_day",
+      "leftovers_ok"
+    ],
+    "subprofiles": ["korean.street_food", "korean.bar_food"]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 280, "unit": "g" },
+    "notes": "Makes ~900–1100 g cooked chicken depending on cut; best eaten hot and crispy."
+  },
+
+  "time": {
+    "activeMins": 40,
+    "handsOffMins": 50,
+    "totalMins": 90
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "weeknightFriendly": false,
+    "batchFriendly": "low",
+    "leftoversGood": true,
+    "freezerFriendly": "none",
+    "partyFood": true
+  },
+
+  "tasteProfile": {
+    "sweet": 3,
+    "salty": 3,
+    "umami": 4,
+    "sour": 2,
+    "heat": 3,
+    "notes": [
+      "shatter-crisp crust",
+      "sticky glaze (optional)",
+      "garlic-forward (soy-garlic)",
+      "gochujang chili-sweet (yangnyeom)"
+    ]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.deep_pot_or_dutch_oven",
+        "label": "Deep pot or Dutch oven",
+        "required": true
+      },
+      {
+        "id": "equipment.thermometer_instant_read",
+        "label": "Instant-read thermometer",
+        "required": true,
+        "notes": "For oil temp and chicken doneness."
+      },
+      { "id": "equipment.tongs", "label": "Tongs", "required": true },
+      {
+        "id": "equipment.wire_rack",
+        "label": "Wire rack",
+        "required": true,
+        "notes": "For draining; keeps crust crisp (avoid paper towels)."
+      },
+      { "id": "equipment.sheet_pan", "label": "Sheet pan", "required": true },
+      {
+        "id": "equipment.mixing_bowls",
+        "label": "Mixing bowls",
+        "required": true
+      },
+      {
+        "id": "equipment.saucepan",
+        "label": "Small saucepan",
+        "required": true,
+        "notes": "For glaze."
+      }
+    ],
+    "recommended": [
+      "equipment.spider_strainer",
+      "equipment.kitchen_scale",
+      "equipment.splatter_screen"
+    ],
+    "optional": [
+      {
+        "id": "equipment.air_fryer",
+        "label": "Air fryer",
+        "required": false,
+        "notes": "Use the baked/air-fried variation (not as shatter-crisp as double-fry)."
+      },
+      {
+        "id": "equipment.oven",
+        "label": "Oven",
+        "required": false,
+        "notes": "Use baked variation if deep frying is not possible."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.omnivore"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame", "allergen.wheat_optional"],
+    "notes": [
+      "Use gluten-free soy sauce/tamari and ensure gochujang is gluten-free if needed.",
+      "Some recipes use wheat flour; this version uses potato/corn starch as primary for crispness."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_wings_drums_flats",
+      "label": "Chicken wings (drumettes & flats), split if needed",
+      "role": "protein",
+      "amount": { "value": 1200, "unit": "g" },
+      "notes": "You can also use boneless thigh chunks (see variations)."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 3/4 tsp kosher; adjust to your salt."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" }
+    },
+    {
+      "id": "ingredient.garlic_powder",
+      "label": "Garlic powder",
+      "role": "seasoning",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.ginger_powder",
+      "label": "Ginger powder",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.rice_wine_or_vodka",
+      "label": "Soju / vodka / rice wine (for de-odorizing)",
+      "role": "aromatic",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true,
+      "notes": "Optional; helps reduce poultry odor. Do not overdo."
+    },
+
+    {
+      "id": "ingredient.cornstarch_or_potato_starch",
+      "label": "Potato starch (or cornstarch)",
+      "role": "coating",
+      "amount": { "value": 220, "unit": "g" },
+      "notes": "Primary crisping starch."
+    },
+    {
+      "id": "ingredient.rice_flour",
+      "label": "Rice flour",
+      "role": "coating",
+      "amount": { "value": 40, "unit": "g" },
+      "optional": true,
+      "notes": "Optional for extra crisp; otherwise replace with more starch."
+    },
+    {
+      "id": "ingredient.baking_powder",
+      "label": "Baking powder",
+      "role": "coating",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 1/2 tsp; improves airy, craggy crust."
+    },
+
+    {
+      "id": "ingredient.egg",
+      "label": "Egg",
+      "role": "binder",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Optional—some KFC styles use only starch. Egg helps coating adhesion."
+    },
+
+    {
+      "id": "ingredient.frying_oil_neutral",
+      "label": "Neutral frying oil (canola/peanut/soybean)",
+      "role": "fat",
+      "amount": { "value": 1500, "unit": "ml" },
+      "notes": "Use enough oil for 5–7 cm depth in your pot; amount varies by pot size."
+    },
+
+    {
+      "id": "ingredient.toasted_sesame_seeds",
+      "label": "Toasted sesame seeds (for finishing)",
+      "role": "garnish",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions, thinly sliced (for finishing)",
+      "role": "garnish",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.sauce_choice_note",
+      "label": "Sauce choice: pick Yangnyeom OR Soy-Garlic (ingredients below)",
+      "role": "other",
+      "amount": { "value": 1, "unit": "choice" },
+      "optional": true,
+      "notes": "You can also serve plain with a light sprinkle of salt and sesame."
+    },
+
+    {
+      "id": "ingredient.ketchup",
+      "label": "Ketchup (Yangnyeom)",
+      "role": "sauce",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.gochujang",
+      "label": "Gochujang (Yangnyeom)",
+      "role": "sauce",
+      "amount": { "value": 55, "unit": "g" },
+      "optional": true,
+      "notes": "About 3 tbsp; adjust for heat."
+    },
+    {
+      "id": "ingredient.honey_or_rice_syrup",
+      "label": "Honey or rice syrup (Yangnyeom)",
+      "role": "sweetener",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce (Yangnyeom)",
+      "role": "seasoning",
+      "amount": { "value": 20, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.rice_vinegar",
+      "label": "Rice vinegar (Yangnyeom)",
+      "role": "acid",
+      "amount": { "value": 12, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.gochugaru",
+      "label": "Gochugaru (Yangnyeom, optional)",
+      "role": "spice",
+      "amount": { "value": 4, "unit": "g" },
+      "optional": true,
+      "notes": "Optional: deeper chili flavor; omit for milder sauce."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced (Yangnyeom)",
+      "role": "aromatic",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.soy_sauce_soy_garlic",
+      "label": "Soy sauce (Soy-Garlic glaze)",
+      "role": "sauce",
+      "amount": { "value": 60, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.brown_sugar",
+      "label": "Brown sugar (Soy-Garlic glaze)",
+      "role": "sweetener",
+      "amount": { "value": 35, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.honey",
+      "label": "Honey (Soy-Garlic glaze)",
+      "role": "sweetener",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.garlic_soy_garlic",
+      "label": "Garlic, minced (Soy-Garlic glaze)",
+      "role": "aromatic",
+      "amount": { "value": 18, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Ginger, minced (Soy-Garlic glaze)",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.sesame_oil",
+      "label": "Toasted sesame oil (Soy-Garlic glaze)",
+      "role": "fat",
+      "amount": { "value": 5, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.rice_vinegar_soy_garlic",
+      "label": "Rice vinegar or lemon juice (Soy-Garlic glaze)",
+      "role": "acid",
+      "amount": { "value": 8, "unit": "ml" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken + Seasoning",
+      "items": [
+        "ingredient.chicken_wings_drums_flats",
+        "ingredient.salt",
+        "ingredient.black_pepper",
+        "ingredient.garlic_powder",
+        "ingredient.ginger_powder",
+        "ingredient.rice_wine_or_vodka"
+      ]
+    },
+    {
+      "id": "group.coating",
+      "label": "Crispy Coating",
+      "items": [
+        "ingredient.cornstarch_or_potato_starch",
+        "ingredient.rice_flour",
+        "ingredient.baking_powder",
+        "ingredient.egg"
+      ]
+    },
+    {
+      "id": "group.fry",
+      "label": "Frying",
+      "items": ["ingredient.frying_oil_neutral"]
+    },
+    {
+      "id": "group.yangnyeom",
+      "label": "Yangnyeom (Spicy-Sweet) Sauce",
+      "items": [
+        "ingredient.ketchup",
+        "ingredient.gochujang",
+        "ingredient.honey_or_rice_syrup",
+        "ingredient.soy_sauce",
+        "ingredient.rice_vinegar",
+        "ingredient.gochugaru",
+        "ingredient.garlic"
+      ]
+    },
+    {
+      "id": "group.soy_garlic",
+      "label": "Soy-Garlic Sauce",
+      "items": [
+        "ingredient.soy_sauce_soy_garlic",
+        "ingredient.brown_sugar",
+        "ingredient.honey",
+        "ingredient.garlic_soy_garlic",
+        "ingredient.ginger",
+        "ingredient.sesame_oil",
+        "ingredient.rice_vinegar_soy_garlic"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish",
+      "items": ["ingredient.toasted_sesame_seeds", "ingredient.scallions"]
+    }
+  ],
+
+  "methods": ["method.fry", "method.double_fry", "method.glaze"],
+
+  "safety": {
+    "notes": [
+      "Hot oil can cause severe burns. Use a deep pot, keep kids away, and avoid overfilling.",
+      "Maintain oil temperature for crispness and safety; avoid adding wet chicken.",
+      "Cook chicken to safe internal temperature (74°C / 165°F)."
+    ],
+    "oilSafety": {
+      "targetTempC": 175,
+      "targetTempF": 350,
+      "notes": [
+        "If oil smokes, it is too hot—remove from heat briefly.",
+        "Fry in batches to prevent boil-over and temperature drop."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 3,
+      "notes": "Sauced chicken softens faster; store sauce separately when possible."
+    },
+    "freezer": {
+      "maxDays": 0,
+      "notes": "Not recommended for best texture."
+    },
+    "reheat": {
+      "notes": [
+        "Re-crisp unsauced chicken in oven/air fryer at 200°C / 400°F for 8–12 minutes.",
+        "If already sauced, reheat gently and accept softer crust."
+      ]
+    }
+  },
+
+  "pairings": {
+    "banchan": [
+      "dish.pickled_radish",
+      "dish.cabbage_slaw_korean",
+      "dish.kimchi"
+    ],
+    "sauces": ["sauce.gochujang_mayo_optional"],
+    "drinks": ["drink.barley_tea", "drink.sparkling_water"]
+  },
+
+  "planner": {
+    "roles": {
+      "protein": ["ingredient.chicken_wings_drums_flats"],
+      "sauce": ["ingredient.gochujang", "ingredient.soy_sauce_soy_garlic"],
+      "garnish": ["ingredient.toasted_sesame_seeds", "ingredient.scallions"]
+    },
+    "signals": {
+      "bestFresh": true,
+      "serveWithPickles": true
+    }
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.air_fryer",
+      "label": "Air fryer (lower mess, less crisp than double-fry)",
+      "when": { "equipment": ["equipment.air_fryer"] },
+      "changes": {
+        "notes": [
+          "Use the same seasoning and coating, but spray coated chicken lightly with oil.",
+          "Air fry at 200°C / 390°F for 18–22 minutes, flipping halfway, until 74°C / 165°F internal.",
+          "Sauce after cooking; optionally return to air fryer 2 minutes to set glaze."
+        ]
+      }
+    },
+    {
+      "id": "adapt.oven_baked",
+      "label": "Oven-baked (best with rack + oil spray)",
+      "when": { "equipment": ["equipment.oven"] },
+      "changes": {
+        "notes": [
+          "Bake on a wire rack over a sheet pan at 220°C / 425°F for 35–45 minutes, flipping once.",
+          "Spray with oil for browning. Sauce after baking."
+        ]
+      }
+    },
+    {
+      "id": "adapt.boneless_thigh_bites",
+      "label": "Boneless thigh bites",
+      "when": { "preference": ["boneless"] },
+      "changes": {
+        "notes": [
+          "Use 900 g boneless skinless chicken thighs, cut into 3–4 cm chunks.",
+          "Fry slightly shorter: first fry 5–6 minutes, second fry 2–3 minutes, until 74°C / 165°F."
+        ]
+      }
+    },
+    {
+      "id": "adapt.mild_kids",
+      "label": "Milder sauce (kid-friendly)",
+      "when": { "preference": ["low_spice"] },
+      "changes": {
+        "notes": [
+          "Choose soy-garlic glaze OR reduce gochujang to 1–2 tbsp and omit gochugaru in yangnyeom."
+        ]
+      }
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.half_and_half",
+      "label": "Half-and-half (two sauces)",
+      "notes": [
+        "Split fried chicken into two bowls. Toss half in yangnyeom and half in soy-garlic for variety."
+      ]
+    },
+    {
+      "id": "var.no_sauce_salt_sesame",
+      "label": "Plain crispy (no sauce)",
+      "notes": [
+        "Serve unsauced with a light sprinkle of salt and sesame; add dipping sauce on the side."
+      ]
+    }
+  ],
+
+  "notes": [
+    "The signature crisp comes from a starch-heavy coating + double-frying.",
+    "Keep fried chicken on a rack (not paper towels) to preserve crunch.",
+    "Sauce just before serving; saucing early will soften the crust."
+  ],
+
+  "steps": [
+    {
+      "id": "step.01_prep_dry",
+      "title": "Prep chicken and dry it well",
+      "instructions": [
+        "Pat chicken very dry with paper towels (dry surface = crisp crust, safer frying).",
+        "Season with salt, pepper, and optional garlic/ginger powder.",
+        "Optional: add 1 tbsp soju/vodka/rice wine; toss briefly."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": ["Chicken surface is dry (not wet/shiny)."]
+    },
+    {
+      "id": "step.02_mix_coating",
+      "title": "Mix coating",
+      "instructions": [
+        "In a bowl, whisk potato starch (or cornstarch), optional rice flour, and baking powder until uniform.",
+        "Optional egg method: in a separate bowl, beat 1 egg. (If using, dip chicken in egg before coating.)"
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Coating is evenly mixed; baking powder is distributed."]
+    },
+    {
+      "id": "step.03_coat_chicken",
+      "title": "Coat chicken",
+      "instructions": [
+        "Working in batches, coat chicken thoroughly in starch mix, pressing lightly to adhere.",
+        "Shake off excess and place on a rack for 5–10 minutes to hydrate slightly (helps crust set)."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Rest coated chicken", "minutes": 8 }],
+      "checks": [
+        "Chicken looks evenly dusted; no large dry clumps falling off."
+      ]
+    },
+    {
+      "id": "step.04_heat_oil_first_fry",
+      "title": "Heat oil and first fry (cook-through)",
+      "instructions": [
+        "Heat oil to 165–170°C / 330–340°F in a deep pot.",
+        "Fry chicken in small batches 7–8 minutes (wings) until pale golden and cooked through.",
+        "Transfer to rack. Let rest 10–12 minutes while you fry remaining batches."
+      ],
+      "activeMins": 18,
+      "handsOffMins": 12,
+      "timers": [
+        { "label": "First fry batch", "minutes": 8 },
+        { "label": "Rest before second fry", "minutes": 12 }
+      ],
+      "checks": [
+        "Oil temp stays in range (avoid crowding).",
+        "Chicken reaches 74°C / 165°F at thickest point (or will after second fry)."
+      ]
+    },
+    {
+      "id": "step.05_make_sauce_choice",
+      "title": "Make sauce (choose one)",
+      "instructions": [
+        "While chicken rests, make ONE sauce:",
+        "Yangnyeom: In a small saucepan over low heat, combine ketchup, gochujang, honey/rice syrup, soy sauce, rice vinegar, optional gochugaru, and minced garlic. Simmer 2–3 minutes until glossy.",
+        "Soy-Garlic: In a small saucepan over low heat, combine soy sauce, brown sugar, honey, minced garlic, minced ginger, and rice vinegar/lemon. Simmer 2–3 minutes; finish with sesame oil off heat."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Simmer sauce", "minutes": 3 }],
+      "checks": [
+        "Sauce is glossy and lightly thickened; not burnt or overly reduced."
+      ]
+    },
+    {
+      "id": "step.06_second_fry_crisp",
+      "title": "Second fry (crisp and deepen color)",
+      "instructions": [
+        "Increase oil temp to 175–180°C / 350–355°F.",
+        "Refry chicken in batches for 2–3 minutes until deep golden and very crisp.",
+        "Drain on rack for 2 minutes."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 2,
+      "timers": [{ "label": "Second fry batch", "minutes": 2.5 }],
+      "checks": [
+        "Crust is audibly crisp; chicken is deeply golden without burning."
+      ]
+    },
+    {
+      "id": "step.07_toss_and_finish",
+      "title": "Toss in sauce and finish",
+      "instructions": [
+        "For sauced chicken: toss hot fried chicken with warm sauce in a large bowl until evenly coated.",
+        "For extra crisp: sauce lightly or serve sauce on the side.",
+        "Finish with toasted sesame seeds and sliced scallions if using.",
+        "Serve immediately with pickled radish or slaw."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": ["Chicken is served quickly after saucing to preserve crunch."]
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.korean",
+    "dishId": "dish.korean_fried_chicken",
+    "sourcePaths": [
+      "src/catalogs/cuisines/korean/recipes/korean_fried_chicken.json"
+    ],
+    "search": {
+      "aliases": [
+        "kfc",
+        "yangnyeom chicken",
+        "soy garlic chicken",
+        "korean style fried chicken"
+      ],
+      "keywords": [
+        "korean fried chicken",
+        "double fried",
+        "crispy chicken",
+        "gochujang",
+        "yangnyeom",
+        "soy garlic",
+        "party food"
+      ]
+    }
+  }
+}

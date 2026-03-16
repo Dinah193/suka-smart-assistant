@@ -32,9 +32,11 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
  */
 
 // ---------------- safe requires (no hard deps at import time) ----------------
-let eventBus = { emit: (...a) => console.debug("[useMediaSession:eventBus.emit]", ...a) };
+let eventBus = {
+  emit: (...a) => console.debug("[useMediaSession:eventBus.emit]", ...a),
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -53,7 +55,9 @@ try {
 // ---------------- internals ----------------
 const isoNow = () => new Date().toISOString();
 const hasMediaSession = () =>
-  typeof navigator !== "undefined" && navigator.mediaSession && typeof navigator.mediaSession === "object";
+  typeof navigator !== "undefined" &&
+  navigator.mediaSession &&
+  typeof navigator.mediaSession === "object";
 
 function emitEvent(type, data = {}) {
   const payload = { type, ts: isoNow(), source: "hooks.useMediaSession", data };
@@ -78,7 +82,8 @@ async function exportToHubIfEnabled(payload) {
 function normalizeArtwork(artwork) {
   if (!artwork) return undefined;
   if (Array.isArray(artwork)) return artwork;
-  if (typeof artwork === "string") return [{ src: artwork, sizes: "512x512", type: "image/png" }];
+  if (typeof artwork === "string")
+    return [{ src: artwork, sizes: "512x512", type: "image/png" }];
   if (artwork?.src) return [artwork];
   return undefined;
 }
@@ -131,7 +136,15 @@ export default function useMediaSession(opts = {}) {
     onSeekRel,
   });
   useEffect(() => {
-    cb.current = { onPlay, onPause, onStop, onNext, onPrev, onSeekTo, onSeekRel };
+    cb.current = {
+      onPlay,
+      onPause,
+      onStop,
+      onNext,
+      onPrev,
+      onSeekTo,
+      onSeekRel,
+    };
   }, [onPlay, onPause, onStop, onNext, onPrev, onSeekTo, onSeekRel]);
 
   useEffect(() => {
@@ -139,47 +152,72 @@ export default function useMediaSession(opts = {}) {
   }, [getPositionState]);
 
   // -- helpers exposed to consumer --
-  const setMetadata = useCallback((meta) => {
-    if (!supported || !enabled) return;
-    metaRef.current = meta;
-    const built = buildMetadata(meta);
-    if (!built) return;
-    try {
-      navigator.mediaSession.metadata = built;
-      const e = emitEvent("play.mediaSession.metadata.set", {
-        title: meta?.title,
-        album: meta?.album,
-        artist: meta?.artist,
-      });
-      if (hubSync) exportToHubIfEnabled(e);
-    } catch (err) {
-      emitEvent("play.mediaSession.error", { phase: "setMetadata", message: String(err?.message || err) });
-    }
-  }, [supported, enabled, hubSync]);
+  const setMetadata = useCallback(
+    (meta) => {
+      if (!supported || !enabled) return;
+      metaRef.current = meta;
+      const built = buildMetadata(meta);
+      if (!built) return;
+      try {
+        navigator.mediaSession.metadata = built;
+        const e = emitEvent("play.mediaSession.metadata.set", {
+          title: meta?.title,
+          album: meta?.album,
+          artist: meta?.artist,
+        });
+        if (hubSync) exportToHubIfEnabled(e);
+      } catch (err) {
+        emitEvent("play.mediaSession.error", {
+          phase: "setMetadata",
+          message: String(err?.message || err),
+        });
+      }
+    },
+    [supported, enabled, hubSync]
+  );
 
-  const setPlaybackState = useCallback((state = "none") => {
-    if (!supported || !enabled) return;
-    try {
-      navigator.mediaSession.playbackState = state; // "playing" | "paused" | "none"
-      emitEvent("play.mediaSession.state", { state });
-    } catch (err) {
-      emitEvent("play.mediaSession.error", { phase: "setPlaybackState", message: String(err?.message || err) });
-    }
-  }, [supported, enabled]);
+  const setPlaybackState = useCallback(
+    (state = "none") => {
+      if (!supported || !enabled) return;
+      try {
+        navigator.mediaSession.playbackState = state; // "playing" | "paused" | "none"
+        emitEvent("play.mediaSession.state", { state });
+      } catch (err) {
+        emitEvent("play.mediaSession.error", {
+          phase: "setPlaybackState",
+          message: String(err?.message || err),
+        });
+      }
+    },
+    [supported, enabled]
+  );
 
-  const setPositionState = useCallback((pos) => {
-    if (!supported || !enabled || !navigator.mediaSession.setPositionState) return;
-    if (!pos || typeof pos.duration !== "number" || typeof pos.position !== "number") return;
-    try {
-      navigator.mediaSession.setPositionState({
-        duration: Math.max(0, pos.duration),
-        position: Math.max(0, pos.position),
-        playbackRate: typeof pos.playbackRate === "number" ? pos.playbackRate : 1,
-      });
-    } catch (err) {
-      emitEvent("play.mediaSession.error", { phase: "setPositionState", message: String(err?.message || err) });
-    }
-  }, [supported, enabled]);
+  const setPositionState = useCallback(
+    (pos) => {
+      if (!supported || !enabled || !navigator.mediaSession.setPositionState)
+        return;
+      if (
+        !pos ||
+        typeof pos.duration !== "number" ||
+        typeof pos.position !== "number"
+      )
+        return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: Math.max(0, pos.duration),
+          position: Math.max(0, pos.position),
+          playbackRate:
+            typeof pos.playbackRate === "number" ? pos.playbackRate : 1,
+        });
+      } catch (err) {
+        emitEvent("play.mediaSession.error", {
+          phase: "setPositionState",
+          message: String(err?.message || err),
+        });
+      }
+    },
+    [supported, enabled]
+  );
 
   const clear = useCallback(() => {
     if (!supported) return;
@@ -204,7 +242,10 @@ export default function useMediaSession(opts = {}) {
       });
       emitEvent("play.mediaSession.cleared", {});
     } catch (err) {
-      emitEvent("play.mediaSession.error", { phase: "clear", message: String(err?.message || err) });
+      emitEvent("play.mediaSession.error", {
+        phase: "clear",
+        message: String(err?.message || err),
+      });
     }
   }, [supported]);
 
@@ -219,33 +260,55 @@ export default function useMediaSession(opts = {}) {
       } catch {}
     }
 
-    const safe = (fn, action, data = {}) => async () => {
-      const evt = emitEvent("play.transport.action", { action, ...data });
-      if (hubSync) exportToHubIfEnabled(evt);
-      try {
-        if (typeof fn === "function") {
-          await fn(data?.position ?? data?.seekTime ?? data?.delta ?? undefined);
+    const safe =
+      (fn, action, data = {}) =>
+      async () => {
+        const evt = emitEvent("play.transport.action", { action, ...data });
+        if (hubSync) exportToHubIfEnabled(evt);
+        try {
+          if (typeof fn === "function") {
+            await fn(
+              data?.position ?? data?.seekTime ?? data?.delta ?? undefined
+            );
+          }
+        } catch (err) {
+          emitEvent("play.mediaSession.error", {
+            phase: action,
+            message: String(err?.message || err),
+          });
         }
-      } catch (err) {
-        emitEvent("play.mediaSession.error", { phase: action, message: String(err?.message || err) });
-      }
-    };
+      };
 
     // Core transport
     try {
-      navigator.mediaSession.setActionHandler("play", safe(cb.current.onPlay, "play"));
+      navigator.mediaSession.setActionHandler(
+        "play",
+        safe(cb.current.onPlay, "play")
+      );
     } catch {}
     try {
-      navigator.mediaSession.setActionHandler("pause", safe(cb.current.onPause, "pause"));
+      navigator.mediaSession.setActionHandler(
+        "pause",
+        safe(cb.current.onPause, "pause")
+      );
     } catch {}
     try {
-      navigator.mediaSession.setActionHandler("stop", safe(cb.current.onStop, "stop"));
+      navigator.mediaSession.setActionHandler(
+        "stop",
+        safe(cb.current.onStop, "stop")
+      );
     } catch {}
     try {
-      navigator.mediaSession.setActionHandler("previoustrack", safe(cb.current.onPrev, "prev"));
+      navigator.mediaSession.setActionHandler(
+        "previoustrack",
+        safe(cb.current.onPrev, "prev")
+      );
     } catch {}
     try {
-      navigator.mediaSession.setActionHandler("nexttrack", safe(cb.current.onNext, "next"));
+      navigator.mediaSession.setActionHandler(
+        "nexttrack",
+        safe(cb.current.onNext, "next")
+      );
     } catch {}
 
     // Seeking
@@ -257,7 +320,7 @@ export default function useMediaSession(opts = {}) {
             const pos = seekEvt?.seekTime ?? seekEvt?.position;
             return cb.current.onSeekTo?.(typeof pos === "number" ? pos : 0);
           },
-          "seekto",
+          "seekto"
           /* data on emit comes from the event object at call time; see wrapper below */
         )
       );
@@ -280,7 +343,8 @@ export default function useMediaSession(opts = {}) {
     let rafId = null;
     const tick = () => {
       if (!enabled) return;
-      const pos = typeof getPosRef.current === "function" ? getPosRef.current() : null;
+      const pos =
+        typeof getPosRef.current === "function" ? getPosRef.current() : null;
       if (pos && navigator.mediaSession.setPositionState) {
         try {
           navigator.mediaSession.setPositionState({
@@ -292,7 +356,10 @@ export default function useMediaSession(opts = {}) {
       }
       rafId = window.requestAnimationFrame(tick);
     };
-    if (typeof window !== "undefined" && typeof getPosRef.current === "function") {
+    if (
+      typeof window !== "undefined" &&
+      typeof getPosRef.current === "function"
+    ) {
       rafId = window.requestAnimationFrame(tick);
     }
 

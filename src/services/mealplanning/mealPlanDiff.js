@@ -103,9 +103,7 @@ async function getTargets(dateIso) {
   // Fallback to Preferences
   const Pref = await PreferencesStore();
   // Handle both default export (with getState) and named export `preferencesStore`
-  const st =
-    Pref?.getState?.() ||
-    Pref?.preferencesStore?.getState?.();
+  const st = Pref?.getState?.() || Pref?.preferencesStore?.getState?.();
 
   const ft = st?.foodTargets || st?.nutrition?.dailyGoals;
   if (ft) {
@@ -130,7 +128,12 @@ function ingredientsFromDay(entries = []) {
       const L = Array.isArray(r?.ingredients) ? r.ingredients : [];
       for (const ing of L) {
         if (!ing?.name) continue;
-        lines.push({ name: ing.name, qty: ing.qty, unit: ing.unit, meta: { recipeId: r.id, title: r.title || r.name } });
+        lines.push({
+          name: ing.name,
+          qty: ing.qty,
+          unit: ing.unit,
+          meta: { recipeId: r.id, title: r.title || r.name },
+        });
       }
     }
   }
@@ -147,7 +150,8 @@ function indexBySlotId(entries = []) {
 }
 function recipeIndex(recipes = []) {
   const m = new Map();
-  for (let i = 0; i < (recipes?.length || 0); i++) m.set(normId(recipes[i].id), { i, r: recipes[i] });
+  for (let i = 0; i < (recipes?.length || 0); i++)
+    m.set(normId(recipes[i].id), { i, r: recipes[i] });
   return m;
 }
 function pick(obj, keys) {
@@ -174,12 +178,26 @@ function diffDay(oldEntries = [], newEntries = [], { dateIso }) {
     const next = b.get(slotId);
     // slot meta changes
     const metaKeys = ["label", "type", "start", "end", "dietTag"];
-    const metaChanged = metaKeys.some((k) => (oldSlot?.[k] || null) !== (next?.[k] || null));
+    const metaChanged = metaKeys.some(
+      (k) => (oldSlot?.[k] || null) !== (next?.[k] || null)
+    );
     if (metaChanged) {
-      ops.push({ kind: "slot.update", dateIso, slotId, before: pick(oldSlot, metaKeys), after: pick(next, metaKeys) });
+      ops.push({
+        kind: "slot.update",
+        dateIso,
+        slotId,
+        before: pick(oldSlot, metaKeys),
+        after: pick(next, metaKeys),
+      });
     }
     if ((oldSlot?.status || "planned") !== (next?.status || "planned")) {
-      ops.push({ kind: "slot.status", dateIso, slotId, before: oldSlot?.status || "planned", after: next?.status || "planned" });
+      ops.push({
+        kind: "slot.status",
+        dateIso,
+        slotId,
+        before: oldSlot?.status || "planned",
+        after: next?.status || "planned",
+      });
     }
 
     // recipe-level diffs
@@ -187,25 +205,55 @@ function diffDay(oldEntries = [], newEntries = [], { dateIso }) {
     const B = recipeIndex(next.recipes || []);
     for (const [rid, { r }] of A.entries()) {
       if (!B.has(rid)) {
-        ops.push({ kind: "recipe.remove", dateIso, slotId, recipeId: rid, recipe: r });
+        ops.push({
+          kind: "recipe.remove",
+          dateIso,
+          slotId,
+          recipeId: rid,
+          recipe: r,
+        });
       } else {
         const { r: nr } = B.get(rid);
         const metaKeysR = ["title", "name", "nutrition"];
         if (!shallowEq(pick(r, metaKeysR), pick(nr, metaKeysR))) {
-          ops.push({ kind: "recipe.update", dateIso, slotId, recipeId: rid, before: pick(r, metaKeysR), after: pick(nr, metaKeysR) });
+          ops.push({
+            kind: "recipe.update",
+            dateIso,
+            slotId,
+            recipeId: rid,
+            before: pick(r, metaKeysR),
+            after: pick(nr, metaKeysR),
+          });
         }
       }
     }
     // additions
     for (const [rid, { r }] of B.entries()) {
-      if (!A.has(rid)) ops.push({ kind: "recipe.add", dateIso, slotId, recipeId: rid, recipe: r });
+      if (!A.has(rid))
+        ops.push({
+          kind: "recipe.add",
+          dateIso,
+          slotId,
+          recipeId: rid,
+          recipe: r,
+        });
     }
 
     // movements within the same slot (order change)
     const oldOrder = (oldSlot.recipes || []).map((x) => normId(x.id));
     const newOrder = (next.recipes || []).map((x) => normId(x.id));
-    if (oldOrder.length && newOrder.length && JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) {
-      ops.push({ kind: "recipe.reorder", dateIso, slotId, before: oldOrder, after: newOrder });
+    if (
+      oldOrder.length &&
+      newOrder.length &&
+      JSON.stringify(oldOrder) !== JSON.stringify(newOrder)
+    ) {
+      ops.push({
+        kind: "recipe.reorder",
+        dateIso,
+        slotId,
+        before: oldOrder,
+        after: newOrder,
+      });
     }
   }
 
@@ -224,7 +272,9 @@ function diffDay(oldEntries = [], newEntries = [], { dateIso }) {
  */
 export function diffMealPlans(oldPlan = {}, newPlan = {}) {
   const ops = [];
-  const dates = new Set([...Object.keys(oldPlan || {}), ...Object.keys(newPlan || {})].map(toISO));
+  const dates = new Set(
+    [...Object.keys(oldPlan || {}), ...Object.keys(newPlan || {})].map(toISO)
+  );
   for (const dateIso of Array.from(dates).sort()) {
     const oldEntries = oldPlan?.[dateIso] || [];
     const newEntries = newPlan?.[dateIso] || [];
@@ -291,8 +341,18 @@ function buildReservationPlan(ops) {
   const release = [];
 
   for (const op of ops) {
-    if (op.kind === "recipe.add") reserve.push({ key: op.recipeId, slotId: op.slotId, dateIso: op.dateIso });
-    if (op.kind === "recipe.remove") release.push({ key: op.recipeId, slotId: op.slotId, dateIso: op.dateIso });
+    if (op.kind === "recipe.add")
+      reserve.push({
+        key: op.recipeId,
+        slotId: op.slotId,
+        dateIso: op.dateIso,
+      });
+    if (op.kind === "recipe.remove")
+      release.push({
+        key: op.recipeId,
+        slotId: op.slotId,
+        dateIso: op.dateIso,
+      });
     // Note: recipe.update might trigger re-reserve if ingredients changed; left to Orchestrator
   }
   return { reserve, release };
@@ -306,22 +366,64 @@ function buildSuggestionsFromAnalysis(day, ops) {
 
   // Nutrition nudges
   if (targets) {
-    if (d.protein > 20) s.push({ type: "macro", text: `Add ~${d.protein}g protein (e.g., eggs, chicken, beans).`, severity: "info", macro: "protein" });
-    if (d.calories > 250 && (totals.kcal > 0 ? totals.protein / totals.kcal : 0) < 0.2)
-      s.push({ type: "macro", text: "Calories low with protein lagging—consider a protein-forward snack.", severity: "info" });
-    if (d.carbs < -50) s.push({ type: "macro", text: "Carbs trending high—swap one carb-heavy side for greens.", severity: "warn", macro: "carbs" });
-    if (d.fat < -30) s.push({ type: "macro", text: "Fat trending high—choose leaner prep (grill/steam).", severity: "warn", macro: "fat" });
+    if (d.protein > 20)
+      s.push({
+        type: "macro",
+        text: `Add ~${d.protein}g protein (e.g., eggs, chicken, beans).`,
+        severity: "info",
+        macro: "protein",
+      });
+    if (
+      d.calories > 250 &&
+      (totals.kcal > 0 ? totals.protein / totals.kcal : 0) < 0.2
+    )
+      s.push({
+        type: "macro",
+        text: "Calories low with protein lagging—consider a protein-forward snack.",
+        severity: "info",
+      });
+    if (d.carbs < -50)
+      s.push({
+        type: "macro",
+        text: "Carbs trending high—swap one carb-heavy side for greens.",
+        severity: "warn",
+        macro: "carbs",
+      });
+    if (d.fat < -30)
+      s.push({
+        type: "macro",
+        text: "Fat trending high—choose leaner prep (grill/steam).",
+        severity: "warn",
+        macro: "fat",
+      });
   }
 
   // Ops-driven suggestions
   const added = ops.filter((o) => o.kind === "recipe.add").length;
   const removed = ops.filter((o) => o.kind === "recipe.remove").length;
-  if (added && !removed) s.push({ type: "inventory", text: "Reserve ingredients for newly added recipes.", severity: "action", action: "reserve" });
-  if (removed) s.push({ type: "inventory", text: "Release any reserved ingredients for removed recipes.", severity: "action", action: "release" });
+  if (added && !removed)
+    s.push({
+      type: "inventory",
+      text: "Reserve ingredients for newly added recipes.",
+      severity: "action",
+      action: "reserve",
+    });
+  if (removed)
+    s.push({
+      type: "inventory",
+      text: "Release any reserved ingredients for removed recipes.",
+      severity: "action",
+      action: "release",
+    });
 
   // Rhythm/fasting awareness—if large deficit, suggest refeed
   if (targets && day.totals.kcal < Math.max(800, targets.calories * 0.5)) {
-    s.push({ type: "strategy", text: "Large calorie gap—consider a refeed meal or denser sides.", severity: "info", action: "refeed" });
+    s.push({
+      type: "strategy",
+      text: "Large calorie gap—consider a refeed meal or denser sides.",
+      severity: "info",
+      action: "refeed",
+    });
   }
 
   return s;
@@ -333,7 +435,8 @@ function buildSuggestionsFromAnalysis(day, ops) {
 export async function applyOps(ops = []) {
   if (!ops?.length) return { ok: true, applied: 0 };
   const M = await MealPlanStore();
-  if (!M?.useMealPlanStore) return { ok: false, reason: "MealPlanStore not available" };
+  if (!M?.useMealPlanStore)
+    return { ok: false, reason: "MealPlanStore not available" };
   const api = M.useMealPlanStore.getState();
 
   let applied = 0;
@@ -345,7 +448,10 @@ export async function applyOps(ops = []) {
           applied++;
           break;
         case "slot.update":
-          api.upsertSlotForDay?.(op.dateIso, { slotId: op.slotId, ...op.after });
+          api.upsertSlotForDay?.(op.dateIso, {
+            slotId: op.slotId,
+            ...op.after,
+          });
           applied++;
           break;
         case "slot.remove": {
@@ -370,7 +476,14 @@ export async function applyOps(ops = []) {
         case "recipe.update":
           // Replace by remove+add for simplicity if nutrition/title changed
           api.removeRecipeFromDay?.(op.dateIso, op.recipeId);
-          api.addRecipeToDay?.(op.dateIso, { id: op.recipeId, ...(op.after?.title ? { title: op.after.title } : {}) }, op.slotId);
+          api.addRecipeToDay?.(
+            op.dateIso,
+            {
+              id: op.recipeId,
+              ...(op.after?.title ? { title: op.after.title } : {}),
+            },
+            op.slotId
+          );
           applied++;
           break;
         case "recipe.reorder": {
@@ -378,7 +491,9 @@ export async function applyOps(ops = []) {
           const idx = entries.findIndex((e) => e.slotId === op.slotId);
           if (idx >= 0) {
             const slot = clone(entries[idx]);
-            const byId = new Map((slot.recipes || []).map((r) => [normId(r.id), r]));
+            const byId = new Map(
+              (slot.recipes || []).map((r) => [normId(r.id), r])
+            );
             slot.recipes = op.after.map((rid) => byId.get(rid)).filter(Boolean);
             entries[idx] = slot;
             api.updateMealPlanForDay?.(op.dateIso, entries);
@@ -401,7 +516,8 @@ export async function applyOps(ops = []) {
 --------------------------------------------------------------------------- */
 export async function enactInventoryReservations(reservationPlan) {
   const Inv = await InventoryStore();
-  if (!Inv?.useInventoryStore) return { ok: false, reason: "InventoryStore not available" };
+  if (!Inv?.useInventoryStore)
+    return { ok: false, reason: "InventoryStore not available" };
 
   const api = Inv.useInventoryStore.getState();
   let holdId = null;
@@ -415,16 +531,26 @@ export async function enactInventoryReservations(reservationPlan) {
     for (const r of reservationPlan.reserve) {
       const dayEntries = mapi?.getDayEntries?.(r.dateIso) || [];
       const slot = dayEntries.find((e) => e.slotId === r.slotId);
-      const recipe = (slot?.recipes || []).find((x) => normId(x.id) === normId(r.key));
+      const recipe = (slot?.recipes || []).find(
+        (x) => normId(x.id) === normId(r.key)
+      );
       if (!recipe) continue;
       const ings = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
       for (const ing of ings) {
         if (!ing?.name) continue;
-        lines.push({ name: ing.name, qty: ing.qty, unit: ing.unit, meta: { dateIso: r.dateIso, slotId: r.slotId, recipeId: recipe.id } });
+        lines.push({
+          name: ing.name,
+          qty: ing.qty,
+          unit: ing.unit,
+          meta: { dateIso: r.dateIso, slotId: r.slotId, recipeId: recipe.id },
+        });
       }
     }
     if (lines.length) {
-      const res = await api.reserveForIngredients?.(lines, { scale: 1, reason: "meal-plan" });
+      const res = await api.reserveForIngredients?.(lines, {
+        scale: 1,
+        reason: "meal-plan",
+      });
       holdId = res?.id || holdId;
     }
   }
@@ -440,15 +566,40 @@ export function summarizeOps(ops = []) {
   const out = [];
   for (const op of ops) {
     switch (op.kind) {
-      case "slot.add": out.push(`${op.dateIso}: Added slot ${op.slotId} (${op.slot?.label})`); break;
-      case "slot.update": out.push(`${op.dateIso}: Updated slot ${op.slotId}`); break;
-      case "slot.remove": out.push(`${op.dateIso}: Removed slot ${op.slotId}`); break;
-      case "slot.status": out.push(`${op.dateIso}: ${op.slotId} → status ${op.after}`); break;
-      case "recipe.add": out.push(`${op.dateIso}: + Recipe ${op.recipe?.title || op.recipeId} to ${op.slotId}`); break;
-      case "recipe.remove": out.push(`${op.dateIso}: − Recipe ${op.recipe?.title || op.recipeId} from ${op.slotId}`); break;
-      case "recipe.update": out.push(`${op.dateIso}: ~ Recipe ${op.recipeId} updated`); break;
-      case "recipe.reorder": out.push(`${op.dateIso}: Reordered recipes in ${op.slotId}`); break;
-      default: break;
+      case "slot.add":
+        out.push(`${op.dateIso}: Added slot ${op.slotId} (${op.slot?.label})`);
+        break;
+      case "slot.update":
+        out.push(`${op.dateIso}: Updated slot ${op.slotId}`);
+        break;
+      case "slot.remove":
+        out.push(`${op.dateIso}: Removed slot ${op.slotId}`);
+        break;
+      case "slot.status":
+        out.push(`${op.dateIso}: ${op.slotId} → status ${op.after}`);
+        break;
+      case "recipe.add":
+        out.push(
+          `${op.dateIso}: + Recipe ${op.recipe?.title || op.recipeId} to ${
+            op.slotId
+          }`
+        );
+        break;
+      case "recipe.remove":
+        out.push(
+          `${op.dateIso}: − Recipe ${op.recipe?.title || op.recipeId} from ${
+            op.slotId
+          }`
+        );
+        break;
+      case "recipe.update":
+        out.push(`${op.dateIso}: ~ Recipe ${op.recipeId} updated`);
+        break;
+      case "recipe.reorder":
+        out.push(`${op.dateIso}: Reordered recipes in ${op.slotId}`);
+        break;
+      default:
+        break;
     }
   }
   return out;
@@ -463,7 +614,11 @@ export function summarizeOps(ops = []) {
  * - Returns nutrition & suggestions per date
  * - Optionally triggers inventory reservations
  */
-export async function planReconcile(oldPlan, newPlan, { apply = true, reserve = false } = {}) {
+export async function planReconcile(
+  oldPlan,
+  newPlan,
+  { apply = true, reserve = false } = {}
+) {
   const analysis = await analyzeDiff(oldPlan, newPlan);
   if (apply) await applyOps(analysis.ops);
   if (reserve) {
@@ -482,3 +637,32 @@ export async function planReconcile(oldPlan, newPlan, { apply = true, reserve = 
 export function diffDayArrays(oldEntries = [], newEntries = [], dateIso) {
   return diffDay(oldEntries, newEntries, { dateIso: toISO(dateIso) });
 }
+
+/* ---------------------------------------------------------------------------
+   ✅ Compatibility export expected by mealPlanEngine.js
+   It imports:  import { diffPlans } from "@/services/mealplanning/mealPlanDiff";
+--------------------------------------------------------------------------- */
+/**
+ * diffPlans(oldPlan, newPlan)
+ * Alias for diffMealPlans() to keep legacy import stable.
+ */
+export function diffPlans(oldPlan = {}, newPlan = {}) {
+  return diffMealPlans(oldPlan, newPlan);
+}
+
+/* ---------------------------------------------------------------------------
+   ✅ Default export for consumers that do `import diff from ...`
+--------------------------------------------------------------------------- */
+const MealPlanDiffModule = {
+  diffMealPlans,
+  diffPlans,
+  analyzeDay,
+  analyzeDiff,
+  applyOps,
+  enactInventoryReservations,
+  summarizeOps,
+  planReconcile,
+  diffDayArrays,
+};
+
+export default MealPlanDiffModule;

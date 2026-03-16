@@ -1,0 +1,402 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.nigerian_fried_rice",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Nigerian Fried Rice",
+    "description": "Party-style Nigerian fried rice with parboiled rice, mixed vegetables, liver (optional), and the signature curry-thyme aroma. Best when rice is cooked, cooled, then stir-fried hot and fast.",
+    "tags": [
+      "cuisine.nigerian",
+      "course.main",
+      "rice",
+      "stir_fry",
+      "party_food",
+      "batch.friendly",
+      "freezer.friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "Suka Smart Assistant",
+      "reference": "Traditional Nigerian party fried rice profile (curry + thyme). Standardized for SSA catalog.",
+      "url": ""
+    }
+  },
+  "summary": "Nigerian party fried rice: fragrant curry-thyme rice stir-fried with vegetables and optional diced liver for classic depth, designed for high-heat wok/pan cooking and meal prep.",
+  "yields": {
+    "servings": 8,
+    "makes": "About 10–12 cups cooked fried rice"
+  },
+  "difficulty": "intermediate",
+  "time": {
+    "prepMinutes": 25,
+    "cookMinutes": 35,
+    "totalMinutes": 60
+  },
+  "diet": {
+    "suitableFor": ["gluten_free"],
+    "notes": ["Confirm bouillon/curry powder is gluten-free if needed."]
+  },
+  "allergens": ["egg"],
+  "safety": {
+    "notes": [
+      "Cool cooked rice quickly and refrigerate within 2 hours to reduce risk (rice safety).",
+      "Reheat rice until steaming hot throughout (165°F / 74°C)."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.rice_base",
+      "label": "Rice base",
+      "ingredients": [
+        {
+          "id": "ingredient.rice_parboiled_long_grain",
+          "label": "Parboiled long-grain rice (uncooked)",
+          "amount": {
+            "value": 450,
+            "unit": "g"
+          },
+          "notes": [
+            "About 2 1/2 cups. Parboiled stays separate and is classic for Nigerian fried rice."
+          ]
+        },
+        {
+          "id": "ingredient.chicken_stock",
+          "label": "Chicken stock (or seasoned water) for cooking rice",
+          "amount": {
+            "value": 900,
+            "unit": "ml"
+          },
+          "notes": ["Adjust to your rice brand; aim for fluffy, not wet."]
+        },
+        {
+          "id": "ingredient.curry_powder",
+          "label": "Curry powder",
+          "amount": {
+            "value": 8,
+            "unit": "g"
+          },
+          "notes": ["Start here; add more to taste."]
+        },
+        {
+          "id": "ingredient.thyme_dried",
+          "label": "Dried thyme",
+          "amount": {
+            "value": 2,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.bay_leaf",
+          "label": "Bay leaf",
+          "amount": {
+            "value": 1,
+            "unit": "each"
+          },
+          "notes": ["Optional but common for fragrance."]
+        },
+        {
+          "id": "ingredient.salt",
+          "label": "Salt",
+          "amount": {
+            "value": 6,
+            "unit": "g"
+          },
+          "notes": ["Add to taste depending on stock/bouillon."]
+        },
+        {
+          "id": "ingredient.bouillon_powder",
+          "label": "Bouillon powder or cube (crumbled)",
+          "amount": {
+            "value": 4,
+            "unit": "g"
+          },
+          "notes": ["Optional; classic party flavor."]
+        }
+      ]
+    },
+    {
+      "id": "group.veg_mix",
+      "label": "Vegetables and aromatics",
+      "ingredients": [
+        {
+          "id": "ingredient.onion_yellow",
+          "label": "Yellow onion, diced",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.carrot_diced",
+          "label": "Carrots, diced small",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.green_beans_diced",
+          "label": "Green beans, diced",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.green_peas",
+          "label": "Green peas (fresh or frozen)",
+          "amount": {
+            "value": 120,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.sweet_corn",
+          "label": "Sweet corn kernels (fresh or frozen)",
+          "amount": {
+            "value": 120,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.red_bell_pepper",
+          "label": "Red bell pepper, diced",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.scallions",
+          "label": "Scallions, sliced (white + green)",
+          "amount": {
+            "value": 60,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.garlic",
+          "label": "Garlic, minced",
+          "amount": {
+            "value": 12,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.ginger",
+          "label": "Ginger, minced",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["Optional but excellent for freshness."]
+        }
+      ]
+    },
+    {
+      "id": "group.protein_options",
+      "label": "Protein options (choose one or mix)",
+      "ingredients": [
+        {
+          "id": "ingredient.chicken_cooked_diced",
+          "label": "Cooked chicken, diced",
+          "amount": {
+            "value": 350,
+            "unit": "g"
+          },
+          "notes": [
+            "Optional; party rice often pairs with chicken, but can be served alongside instead."
+          ]
+        },
+        {
+          "id": "ingredient.beef_liver",
+          "label": "Beef liver, parboiled and diced small (optional but classic)",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          },
+          "notes": ["Parboil 8–10 minutes with a little salt, then dice."]
+        },
+        {
+          "id": "ingredient.shrimp_cooked_optional",
+          "label": "Cooked shrimp (optional)",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          }
+        }
+      ]
+    },
+    {
+      "id": "group.fry_finish",
+      "label": "Frying and finish",
+      "ingredients": [
+        {
+          "id": "ingredient.vegetable_oil",
+          "label": "Neutral oil (vegetable/canola)",
+          "amount": {
+            "value": 60,
+            "unit": "ml"
+          }
+        },
+        {
+          "id": "ingredient.butter",
+          "label": "Butter (optional, for party richness)",
+          "amount": {
+            "value": 28,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.white_pepper",
+          "label": "White pepper (or black pepper)",
+          "amount": {
+            "value": 1,
+            "unit": "g"
+          },
+          "notes": ["To taste."]
+        },
+        {
+          "id": "ingredient.curry_powder_extra",
+          "label": "Extra curry powder (optional, to finish)",
+          "amount": {
+            "value": 2,
+            "unit": "g"
+          },
+          "notes": ["Use if you want a more pronounced curry aroma."]
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.water_optional",
+      "label": "Water (as needed for cooking rice, depending on stock strength/absorption)",
+      "amount": {
+        "value": 250,
+        "unit": "ml"
+      },
+      "notes": [
+        "Use only if needed to reach the correct liquid level for your rice."
+      ]
+    }
+  ],
+  "methods": ["boil", "steam", "stir_fry"],
+  "compat": {
+    "equipmentRequired": [
+      "pot.medium",
+      "pan.wok_or_large_skillet",
+      "knife.chef",
+      "cutting_board",
+      "spoon.wooden",
+      "spatula"
+    ],
+    "appliancesOptional": ["rice_cooker"],
+    "utensilsOptional": ["colander", "sheet_pan"],
+    "notes": [
+      "For best texture, cook rice ahead and spread on a tray to cool/dry before frying."
+    ]
+  },
+  "steps": [
+    {
+      "id": "step.rinse_rice",
+      "title": "Rinse the rice",
+      "body": "Rinse parboiled rice in several changes of cool water until the water runs mostly clear. Drain well."
+    },
+    {
+      "id": "step.cook_rice",
+      "title": "Cook curry-thyme rice until just done",
+      "body": "In a pot, bring chicken stock to a simmer. Stir in curry powder, dried thyme, bay leaf (optional), salt, and bouillon (optional). Add rinsed rice, stir once, cover, and cook on low until rice is just tender and liquid is absorbed. Turn off heat and rest covered 10 minutes. Fluff and spread on a tray to cool (best: chill 30–60 minutes).",
+      "timers": [
+        {
+          "id": "timer.rice_cook",
+          "label": "Cook rice (brand dependent)",
+          "minutes": 20
+        },
+        {
+          "id": "timer.rice_rest",
+          "label": "Rest rice",
+          "minutes": 10
+        }
+      ]
+    },
+    {
+      "id": "step.prep_proteins",
+      "title": "Prep proteins (optional)",
+      "body": "If using liver: parboil 8–10 minutes with a pinch of salt, drain, cool, and dice small. If using chicken or shrimp: ensure cooked and diced/ready."
+    },
+    {
+      "id": "step.saute_aromatics",
+      "title": "Sauté aromatics",
+      "body": "Heat a large wok or wide skillet over medium-high. Add oil (and butter if using). Add diced onions and cook 2–3 minutes until slightly softened. Stir in garlic and ginger and cook 30–60 seconds until fragrant."
+    },
+    {
+      "id": "step.stirfry_veg",
+      "title": "Stir-fry vegetables",
+      "body": "Add carrots and green beans first; stir-fry 3–4 minutes. Add red bell pepper, peas, and corn; stir-fry 2–3 minutes more. Keep vegetables bright and slightly crisp.",
+      "timers": [
+        {
+          "id": "timer.veg_stirfry",
+          "label": "Stir-fry vegetables",
+          "minutes": 6
+        }
+      ]
+    },
+    {
+      "id": "step.add_proteins",
+      "title": "Add proteins (optional)",
+      "body": "Add diced liver/chicken/shrimp (as using) and stir to warm through, 1–2 minutes."
+    },
+    {
+      "id": "step.add_rice_and_fry",
+      "title": "Add rice and fry hot and fast",
+      "body": "Increase heat to high if your pan allows without smoking. Add cooled rice in batches if needed. Toss and press lightly against the pan to dry and separate grains. Add scallions, white pepper/black pepper, and a pinch more curry powder if desired. Taste and adjust salt. Stir-fry until rice is hot, fragrant, and evenly mixed, 4–6 minutes.",
+      "timers": [
+        {
+          "id": "timer.rice_fry",
+          "label": "Stir-fry rice",
+          "minutes": 5
+        }
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "body": "Serve immediately as a main or alongside grilled chicken, suya, fried fish, or stew. Cool leftovers quickly; refrigerate up to 4 days or freeze up to 2 months."
+    }
+  ],
+  "notes": [
+    "Signature profile: Nigerian fried rice is defined by curry powder + thyme aroma (not soy sauce).",
+    "Texture key: Use rice that’s cooked, cooled, and slightly dried before frying for separate grains.",
+    "Vegetable cut: Dice small and uniform so everything cooks fast and evenly.",
+    "Heat management: If your pan is small, fry in 2 batches to avoid steaming.",
+    "Protein: Diced liver is traditional; chicken/shrimp are optional. Many serve protein on the side instead of inside the rice."
+  ],
+  "variations": [
+    {
+      "id": "variation.party_rich",
+      "label": "Party-rich",
+      "notes": [
+        "Use 2 Tbsp butter in addition to oil, increase curry powder slightly, and finish with extra scallions."
+      ]
+    },
+    {
+      "id": "variation.veg_only",
+      "label": "Vegetable-only",
+      "notes": [
+        "Omit liver/chicken/shrimp. Increase carrots/green beans by ~25% and add diced cabbage for extra volume."
+      ]
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicy",
+      "notes": [
+        "Add finely minced scotch bonnet to the aromatics (start with 1/2 pepper) or serve with ata din din/pepper sauce."
+      ]
+    }
+  ]
+}

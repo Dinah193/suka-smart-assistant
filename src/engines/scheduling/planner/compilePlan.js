@@ -37,7 +37,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -86,7 +86,8 @@ const MEM_PLANS = new Map(); // planId -> snapshot
 const nowISO = () => new Date().toISOString();
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 const isStr = (v) => typeof v === "string";
-const clone = (obj) => (obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj);
+const clone = (obj) =>
+  obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj;
 const toMs = (isoOrDate) => {
   if (isoOrDate instanceof Date) return isoOrDate.getTime();
   if (isStr(isoOrDate)) {
@@ -95,7 +96,10 @@ const toMs = (isoOrDate) => {
   }
   return null;
 };
-const addMinutes = (epochMs, minutes) => (isNum(epochMs) && isNum(minutes) ? epochMs + Math.round(minutes * 60000) : null);
+const addMinutes = (epochMs, minutes) =>
+  isNum(epochMs) && isNum(minutes)
+    ? epochMs + Math.round(minutes * 60000)
+    : null;
 const toISO = (epochMs) => {
   try {
     return new Date(epochMs).toISOString();
@@ -176,25 +180,29 @@ async function applyCalibrationToTask(task) {
     durationMax: isNum(task.durationMax) ? task.durationMax : undefined,
     duration: isNum(task.duration) ? task.duration : undefined,
     effortScore: isNum(task.effortScore) ? task.effortScore : undefined,
-    resources: task.resources && typeof task.resources === "object" ? { ...task.resources } : undefined,
+    resources:
+      task.resources && typeof task.resources === "object"
+        ? { ...task.resources }
+        : undefined,
   };
 
   const adjusted = await calibration.applyCalibration(estimate, ctx);
-  const withDuration =
-    isNum(adjusted.duration)
-      ? adjusted.duration
-      : isNum(adjusted.durationMin) && isNum(adjusted.durationMax)
-        ? Math.round((adjusted.durationMin + adjusted.durationMax) / 2)
-        : isNum(adjusted.durationMin)
-          ? adjusted.durationMin
-          : isNum(adjusted.durationMax)
-            ? adjusted.durationMax
-            : 0;
+  const withDuration = isNum(adjusted.duration)
+    ? adjusted.duration
+    : isNum(adjusted.durationMin) && isNum(adjusted.durationMax)
+    ? Math.round((adjusted.durationMin + adjusted.durationMax) / 2)
+    : isNum(adjusted.durationMin)
+    ? adjusted.durationMin
+    : isNum(adjusted.durationMax)
+    ? adjusted.durationMax
+    : 0;
 
   return {
     ...task,
     duration: Math.max(0, withDuration),
-    effortScore: isNum(adjusted.effortScore) ? adjusted.effortScore : task.effortScore,
+    effortScore: isNum(adjusted.effortScore)
+      ? adjusted.effortScore
+      : task.effortScore,
     resources: adjusted.resources || task.resources,
   };
 }
@@ -206,8 +214,13 @@ function serializeScheduleMap(schedMap) {
   for (const [id, r] of schedMap) {
     arr.push({
       id,
-      es: r.es, ef: r.ef, ls: r.ls, lf: r.lf, slack: r.slack,
-      level: r.level, critical: !!r.critical,
+      es: r.es,
+      ef: r.ef,
+      ls: r.ls,
+      lf: r.lf,
+      slack: r.slack,
+      level: r.level,
+      critical: !!r.critical,
       plannedStartMin: r.plannedStartMin,
       plannedFinishMin: r.plannedFinishMin,
       plannedStartISO: r.plannedStartISO,
@@ -218,7 +231,9 @@ function serializeScheduleMap(schedMap) {
 }
 
 function planIdOrDefault(planId) {
-  return planId || `plan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return (
+    planId || `plan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  );
 }
 
 /* ------------------------------- Public API -------------------------------- */
@@ -263,13 +278,22 @@ async function compilePlan(req = {}) {
     if (!Array.isArray(req.tasks) || req.tasks.length === 0) {
       const message = "No tasks provided.";
       emit("scheduling.plan.error", source, { message });
-      return { planId: planIdOrDefault(req.planId), order: null, criticalPath: [], makespan: 0, windows: [], schedule: [] };
+      return {
+        planId: planIdOrDefault(req.planId),
+        order: null,
+        criticalPath: [],
+        makespan: 0,
+        windows: [],
+        schedule: [],
+      };
     }
 
     const planId = planIdOrDefault(req.planId);
     const links = Array.isArray(req.links) ? req.links.slice() : [];
     const allocate = req.allocate !== false;
-    const resources = Array.isArray(req.resources) ? req.resources.map(clone) : [];
+    const resources = Array.isArray(req.resources)
+      ? req.resources.map(clone)
+      : [];
 
     // --------- 2) Calibration pass (imports → intelligence) ----------
     const calibratedTasks = [];
@@ -282,7 +306,14 @@ async function compilePlan(req = {}) {
     if (calibratedTasks.length === 0) {
       const message = "No valid tasks after calibration.";
       emit("scheduling.plan.error", source, { message });
-      return { planId, order: null, criticalPath: [], makespan: 0, windows: [], schedule: [] };
+      return {
+        planId,
+        order: null,
+        criticalPath: [],
+        makespan: 0,
+        windows: [],
+        schedule: [],
+      };
     }
 
     // Prepare DAG tasks (must carry resolved duration)
@@ -310,13 +341,20 @@ async function compilePlan(req = {}) {
 
     if (req.deadline && backplanner?.backplanSchedule) {
       // Backward from deadline
-      const { order: o, schedule, criticalPath: cp, makespan: ms, planStartISO: ps, planEndISO: pe, graph } =
-        await backplanner.backplanSchedule(dagTasks, links, {
-          deadline: req.deadline,
-          anchor: "latest", // backplanner decides LS/ES based on opts; we pick "latest" to hit the deadline tightly
-          export: false,
-          planMeta: req.planMeta || { mode: "backplan" },
-        });
+      const {
+        order: o,
+        schedule,
+        criticalPath: cp,
+        makespan: ms,
+        planStartISO: ps,
+        planEndISO: pe,
+        graph,
+      } = await backplanner.backplanSchedule(dagTasks, links, {
+        deadline: req.deadline,
+        anchor: "latest", // backplanner decides LS/ES based on opts; we pick "latest" to hit the deadline tightly
+        export: false,
+        planMeta: req.planMeta || { mode: "backplan" },
+      });
       order = o;
       scheduleMap = schedule;
       criticalPath = cp || [];
@@ -325,21 +363,51 @@ async function compilePlan(req = {}) {
       planEndISO = pe || null;
 
       if (!order) {
-        emit("scheduling.plan.error", source, { message: "Cycle detected; cannot compile plan." });
-        return { planId, order: null, criticalPath: [], makespan: 0, windows: [], schedule: [] };
+        emit("scheduling.plan.error", source, {
+          message: "Cycle detected; cannot compile plan.",
+        });
+        return {
+          planId,
+          order: null,
+          criticalPath: [],
+          makespan: 0,
+          windows: [],
+          schedule: [],
+        };
       }
     } else if (dag?.planSchedule) {
       // Forward plan, anchor to startAt (default now), choose ES or LS per anchor
-      const startAtISO = req.startAt ? (req.startAt instanceof Date ? req.startAt.toISOString() : String(req.startAt)) : nowISO();
+      const startAtISO = req.startAt
+        ? req.startAt instanceof Date
+          ? req.startAt.toISOString()
+          : String(req.startAt)
+        : nowISO();
       const startMs = toMs(startAtISO) ?? Date.now();
       const anchor = String(req.anchor || "earliest").toLowerCase(); // "earliest" uses ES; "latest" uses LS
 
-      const { order: o, schedule, criticalPath: cp, makespan: ms, graph } =
-        await dag.planSchedule(dagTasks, links, { export: false, planMeta: req.planMeta || { mode: "forward" } });
+      const {
+        order: o,
+        schedule,
+        criticalPath: cp,
+        makespan: ms,
+        graph,
+      } = await dag.planSchedule(dagTasks, links, {
+        export: false,
+        planMeta: req.planMeta || { mode: "forward" },
+      });
 
       if (!o) {
-        emit("scheduling.plan.error", source, { message: "Cycle detected; cannot compile plan." });
-        return { planId, order: null, criticalPath: [], makespan: 0, windows: [], schedule: [] };
+        emit("scheduling.plan.error", source, {
+          message: "Cycle detected; cannot compile plan.",
+        });
+        return {
+          planId,
+          order: null,
+          criticalPath: [],
+          makespan: 0,
+          windows: [],
+          schedule: [],
+        };
       }
 
       order = o;
@@ -363,7 +431,14 @@ async function compilePlan(req = {}) {
     } else {
       const message = "Planner modules are unavailable.";
       emit("scheduling.plan.error", source, { message });
-      return { planId, order: null, criticalPath: [], makespan: 0, windows: [], schedule: [] };
+      return {
+        planId,
+        order: null,
+        criticalPath: [],
+        makespan: 0,
+        windows: [],
+        schedule: [],
+      };
     }
 
     // --------- 4) Build executable windows (automation) ----------
@@ -419,9 +494,17 @@ async function compilePlan(req = {}) {
     // --------- 7) Emit & optional Hub export ----------
     const eventPayload = { planId, ...snapshot };
     if (conflicts.length) {
-      emit("scheduling.plan.partial", "engines/scheduling/planner/compilePlan", eventPayload);
+      emit(
+        "scheduling.plan.partial",
+        "engines/scheduling/planner/compilePlan",
+        eventPayload
+      );
     }
-    emit("scheduling.plan.compiled", "engines/scheduling/planner/compilePlan", eventPayload);
+    emit(
+      "scheduling.plan.compiled",
+      "engines/scheduling/planner/compilePlan",
+      eventPayload
+    );
 
     if (req.export === true) {
       await exportToHubIfEnabled({ action: "plan.compiled", ...eventPayload });
@@ -440,7 +523,9 @@ async function compilePlan(req = {}) {
       planEndISO,
     };
   } catch (err) {
-    emit("scheduling.plan.error", "engines/scheduling/planner/compilePlan", { message: String(err?.message || err) });
+    emit("scheduling.plan.error", "engines/scheduling/planner/compilePlan", {
+      message: String(err?.message || err),
+    });
     return {
       planId: planIdOrDefault(req?.planId),
       order: null,
@@ -448,7 +533,9 @@ async function compilePlan(req = {}) {
       makespan: 0,
       windows: [],
       reservations: [],
-      conflicts: [{ type: "internalError", message: String(err?.message || err) }],
+      conflicts: [
+        { type: "internalError", message: String(err?.message || err) },
+      ],
       schedule: [],
     };
   }

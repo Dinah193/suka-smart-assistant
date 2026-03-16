@@ -1,0 +1,654 @@
+{
+  "$schema": "../../schemas/techniques.glossary.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "notes": [
+    "SSA Techniques Glossary (shared across cuisines).",
+    "Purpose: canonical technique IDs + plain-language definitions + aliases to support recipe parsing, UI tooltips, and skill-building.",
+    "IDs are stable; do not rename IDs once shipped. Add new items instead.",
+    "Aliases should be lowercased phrases as they appear in recipes; the app should normalize text before matching.",
+    "This glossary is cuisine-agnostic. Cuisine-specific variants belong in cuisine profiles/rulesets."
+  ],
+  "meta": {
+    "id": "cuisines_shared.techniques.glossary",
+    "type": "glossary",
+    "domain": "techniques",
+    "locale": "en-US",
+    "normalization": {
+      "case": "lower",
+      "trim": true,
+      "collapseWhitespace": true,
+      "stripPunctuation": true
+    }
+  },
+  "techniques": [
+    {
+      "id": "prep_mise_en_place",
+      "label": "Mise en place",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Prepare and organize all ingredients and tools before cooking (measured, chopped, and ready).",
+      "why_it_matters": "Reduces mistakes and keeps cooking smooth when timing matters.",
+      "common_tools": [
+        "knife",
+        "cutting_board",
+        "bowls",
+        "measuring_spoons",
+        "measuring_cups",
+        "scale"
+      ],
+      "signals_of_success": [
+        "ingredients portioned",
+        "tools staged",
+        "no scrambling during cooking"
+      ],
+      "common_mistakes": [
+        "starting heat before prep",
+        "forgetting to measure spices or liquids"
+      ],
+      "aliases": [
+        "mise en place",
+        "mise",
+        "prep station",
+        "set up ingredients"
+      ],
+      "tags": ["organization", "timing", "workflow"]
+    },
+    {
+      "id": "prep_chop",
+      "label": "Chop",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Cut ingredients into roughly uniform pieces (size varies by recipe).",
+      "why_it_matters": "Even pieces cook at the same rate and give consistent texture.",
+      "common_tools": ["knife", "cutting_board"],
+      "signals_of_success": [
+        "mostly uniform pieces",
+        "minimal crushing",
+        "clean cuts"
+      ],
+      "common_mistakes": ["uneven sizes", "dull knife causing tearing"],
+      "aliases": ["chop", "rough chop", "coarsely chop", "chopped"],
+      "tags": ["knife_skills", "even_cooking"]
+    },
+    {
+      "id": "prep_dice",
+      "label": "Dice",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Cut food into small cubes of fairly even size.",
+      "why_it_matters": "Even cubes cook evenly and distribute through the dish.",
+      "common_tools": ["knife", "cutting_board"],
+      "signals_of_success": ["even cubes", "consistent size within a batch"],
+      "common_mistakes": ["mixing large and small pieces"],
+      "aliases": ["dice", "diced", "small dice", "medium dice", "large dice"],
+      "tags": ["knife_skills", "even_cooking"]
+    },
+    {
+      "id": "prep_mince",
+      "label": "Mince",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Chop very finely into tiny pieces (often garlic, ginger, herbs).",
+      "why_it_matters": "Releases aroma quickly and disperses flavor evenly.",
+      "common_tools": ["knife", "cutting_board"],
+      "signals_of_success": ["very small pieces", "fragrant aroma released"],
+      "common_mistakes": [
+        "smashing into paste unintentionally",
+        "uneven pieces"
+      ],
+      "aliases": ["mince", "minced", "finely chop", "finely chopped"],
+      "tags": ["knife_skills", "flavor_release"]
+    },
+    {
+      "id": "prep_julienne",
+      "label": "Julienne",
+      "category": "prep",
+      "difficulty": "intermediate",
+      "definition": "Cut into thin matchstick strips.",
+      "why_it_matters": "Creates quick-cooking pieces and a specific texture/presentation.",
+      "common_tools": ["knife", "cutting_board", "mandoline_optional"],
+      "signals_of_success": ["thin uniform strips", "similar length"],
+      "common_mistakes": [
+        "uneven thickness",
+        "unsafe knife/mandoline handling"
+      ],
+      "aliases": ["julienne", "matchstick", "cut into strips"],
+      "tags": ["knife_skills", "presentation", "quick_cook"]
+    },
+    {
+      "id": "prep_grate",
+      "label": "Grate",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Shred or reduce an ingredient into small fragments using a grater.",
+      "why_it_matters": "Increases surface area for faster melting, dissolving, or flavor release.",
+      "common_tools": ["box_grater", "microplane"],
+      "signals_of_success": ["fine shreds", "minimal waste"],
+      "common_mistakes": ["grating knuckles", "using wrong grater size"],
+      "aliases": ["grate", "grated", "shred finely", "microplane"],
+      "tags": ["texture", "flavor_release"]
+    },
+    {
+      "id": "prep_zest",
+      "label": "Zest",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Remove only the colored outer peel of citrus (avoid bitter white pith).",
+      "why_it_matters": "Adds bright aromatic oils without extra liquid.",
+      "common_tools": ["microplane", "zester"],
+      "signals_of_success": ["bright fragrant zest", "no white pith"],
+      "common_mistakes": ["including pith", "over-zesting in one spot"],
+      "aliases": ["zest", "zested", "citrus zest"],
+      "tags": ["aroma", "finishing"]
+    },
+
+    {
+      "id": "heat_preheat",
+      "label": "Preheat",
+      "category": "heat",
+      "difficulty": "beginner",
+      "definition": "Bring an oven, pan, or oil to the target temperature before cooking.",
+      "why_it_matters": "Prevents sticking, improves browning, and stabilizes cooking time.",
+      "common_tools": ["oven", "skillet", "thermometer_optional"],
+      "signals_of_success": ["pan hot before food", "oven at set temperature"],
+      "common_mistakes": [
+        "adding food too early",
+        "overheating oil until smoking"
+      ],
+      "aliases": ["preheat", "heat until hot", "bring to temperature"],
+      "tags": ["timing", "browning"]
+    },
+    {
+      "id": "heat_simmer",
+      "label": "Simmer",
+      "category": "heat",
+      "difficulty": "beginner",
+      "definition": "Cook in liquid at gentle bubbling (small bubbles, not a rolling boil).",
+      "why_it_matters": "Develops flavor without breaking delicate ingredients or making meat tough.",
+      "common_tools": ["pot", "stove"],
+      "signals_of_success": ["small steady bubbles", "gentle movement"],
+      "common_mistakes": ["boiling hard", "not stirring when needed"],
+      "aliases": ["simmer", "gentle simmer", "low simmer"],
+      "tags": ["sauces", "stews"]
+    },
+    {
+      "id": "heat_boil",
+      "label": "Boil",
+      "category": "heat",
+      "difficulty": "beginner",
+      "definition": "Cook in liquid at vigorous bubbling.",
+      "why_it_matters": "Cooks pasta, grains, and vegetables quickly and predictably.",
+      "common_tools": ["pot", "stove"],
+      "signals_of_success": ["rolling bubbles", "steam release"],
+      "common_mistakes": ["boiling over", "not salting water for pasta"],
+      "aliases": ["boil", "rolling boil", "bring to a boil"],
+      "tags": ["pasta", "grains", "blanching"]
+    },
+    {
+      "id": "heat_blanch",
+      "label": "Blanch",
+      "category": "heat",
+      "difficulty": "intermediate",
+      "definition": "Briefly boil, then quickly cool (often in ice water) to stop cooking.",
+      "why_it_matters": "Sets color, loosens skins, and partially cooks for later steps.",
+      "common_tools": ["pot", "slotted_spoon", "ice_bath"],
+      "signals_of_success": ["bright color", "crisp-tender texture"],
+      "common_mistakes": ["skipping ice bath", "over-blanching"],
+      "aliases": ["blanch", "parboil then chill", "boil briefly"],
+      "tags": ["vegetables", "prep"]
+    },
+    {
+      "id": "heat_steam",
+      "label": "Steam",
+      "category": "heat",
+      "difficulty": "beginner",
+      "definition": "Cook with moist heat from steam without submerging in water.",
+      "why_it_matters": "Preserves nutrients and delicate textures.",
+      "common_tools": ["steamer_basket", "pot", "lid"],
+      "signals_of_success": ["tender texture", "minimal waterlogging"],
+      "common_mistakes": ["letting pot run dry", "overcrowding steamer"],
+      "aliases": ["steam", "steamed"],
+      "tags": ["healthy", "gentle_cooking"]
+    },
+
+    {
+      "id": "saute",
+      "label": "Sauté",
+      "category": "stovetop",
+      "difficulty": "beginner",
+      "definition": "Cook quickly in a hot pan with a small amount of fat, stirring or tossing.",
+      "why_it_matters": "Builds flavor and texture through light browning.",
+      "common_tools": ["skillet", "spatula", "oil"],
+      "signals_of_success": ["light browning", "no steaming puddles"],
+      "common_mistakes": ["crowding pan", "heat too low causing steaming"],
+      "aliases": ["saute", "sauté", "pan fry lightly", "cook in a little oil"],
+      "tags": ["browning", "aromatics"]
+    },
+    {
+      "id": "stir_fry",
+      "label": "Stir-fry",
+      "category": "stovetop",
+      "difficulty": "intermediate",
+      "definition": "Cook quickly over very high heat while stirring constantly, usually in small batches.",
+      "why_it_matters": "Keeps vegetables crisp and develops wok hei (toasty aroma) when done right.",
+      "common_tools": ["wok", "high_heat_spatula", "oil_high_smoke_point"],
+      "signals_of_success": [
+        "crisp-tender veg",
+        "no soggy pooling",
+        "toasty aroma"
+      ],
+      "common_mistakes": [
+        "overcrowding",
+        "low heat",
+        "adding wet ingredients too early"
+      ],
+      "aliases": ["stir fry", "stir-fry", "wok fry"],
+      "tags": ["high_heat", "quick_cook"]
+    },
+    {
+      "id": "pan_fry",
+      "label": "Pan-fry",
+      "category": "stovetop",
+      "difficulty": "beginner",
+      "definition": "Cook in a shallow layer of oil, turning to brown both sides.",
+      "why_it_matters": "Creates crisp exterior without deep frying.",
+      "common_tools": ["skillet", "tongs", "thermometer_optional"],
+      "signals_of_success": ["even golden crust", "cooked through"],
+      "common_mistakes": ["oil too cool (greasy)", "oil too hot (burning)"],
+      "aliases": ["pan fry", "pan-fry", "shallow fry"],
+      "tags": ["crisping", "browning"]
+    },
+    {
+      "id": "deep_fry",
+      "label": "Deep-fry",
+      "category": "stovetop",
+      "difficulty": "advanced",
+      "definition": "Cook fully submerged in hot oil at controlled temperature.",
+      "why_it_matters": "Produces the crispiest texture when oil temperature is stable.",
+      "common_tools": ["deep_pot_or_fryer", "thermometer", "spider", "rack"],
+      "signals_of_success": ["crisp exterior", "not greasy", "even browning"],
+      "common_mistakes": [
+        "overcrowding (temp drops)",
+        "no thermometer",
+        "wet batter splatter"
+      ],
+      "aliases": ["deep fry", "deep-fry", "fry in hot oil"],
+      "tags": ["crisping", "temperature_control"]
+    },
+
+    {
+      "id": "bake",
+      "label": "Bake",
+      "category": "oven",
+      "difficulty": "beginner",
+      "definition": "Cook with dry heat in an enclosed oven.",
+      "why_it_matters": "Even heat develops structure and browning without constant attention.",
+      "common_tools": ["oven", "baking_sheet", "baking_dish"],
+      "signals_of_success": ["set interior", "even browning"],
+      "common_mistakes": ["not preheating", "wrong rack position"],
+      "aliases": ["bake", "baked"],
+      "tags": ["oven", "hands_off"]
+    },
+    {
+      "id": "roast",
+      "label": "Roast",
+      "category": "oven",
+      "difficulty": "beginner",
+      "definition": "Cook with dry heat (often higher) to brown and concentrate flavors, usually uncovered.",
+      "why_it_matters": "Caramelizes surfaces and deepens flavor (especially vegetables and meats).",
+      "common_tools": ["oven", "sheet_pan", "roasting_pan"],
+      "signals_of_success": ["browned edges", "tender interior"],
+      "common_mistakes": [
+        "overcrowding pan",
+        "not enough oil/salt on vegetables"
+      ],
+      "aliases": ["roast", "roasted"],
+      "tags": ["caramelization", "oven"]
+    },
+    {
+      "id": "broil",
+      "label": "Broil",
+      "category": "oven",
+      "difficulty": "intermediate",
+      "definition": "Cook with intense top heat to quickly brown or blister the surface.",
+      "why_it_matters": "Adds fast browning and char when time is short.",
+      "common_tools": ["oven_broiler", "sheet_pan", "tongs"],
+      "signals_of_success": ["quick browning", "blistered top"],
+      "common_mistakes": ["walking away (burn risk)", "rack too close/far"],
+      "aliases": ["broil", "broiled", "grill (oven)"],
+      "tags": ["high_heat", "finishing"]
+    },
+
+    {
+      "id": "sear",
+      "label": "Sear",
+      "category": "stovetop",
+      "difficulty": "intermediate",
+      "definition": "Brown the surface quickly over high heat to build a flavorful crust.",
+      "why_it_matters": "Creates deep savory flavor (fond) that enriches sauces and braises.",
+      "common_tools": ["skillet", "tongs"],
+      "signals_of_success": [
+        "dark golden crust",
+        "releases from pan when ready"
+      ],
+      "common_mistakes": [
+        "moving too soon",
+        "wet surface preventing browning",
+        "crowding"
+      ],
+      "aliases": ["sear", "brown well", "get a crust"],
+      "tags": ["browning", "fond"]
+    },
+    {
+      "id": "deglaze",
+      "label": "Deglaze",
+      "category": "stovetop",
+      "difficulty": "intermediate",
+      "definition": "Add liquid to a hot pan to dissolve browned bits (fond) into a sauce.",
+      "why_it_matters": "Turns stuck-on flavor into the base of sauces and gravies.",
+      "common_tools": ["skillet", "wooden_spoon", "liquid_stock_wine_water"],
+      "signals_of_success": ["fond dissolves", "sauce becomes glossy"],
+      "common_mistakes": ["heat too low", "using too little liquid"],
+      "aliases": ["deglaze", "scrape up browned bits", "add wine and scrape"],
+      "tags": ["sauces", "fond"]
+    },
+
+    {
+      "id": "braise",
+      "label": "Braise",
+      "category": "wet_cook",
+      "difficulty": "intermediate",
+      "definition": "Cook slowly with a combination of searing then gentle simmering in a small amount of liquid, covered.",
+      "why_it_matters": "Transforms tough cuts into tender meat and builds layered flavor.",
+      "common_tools": ["dutch_oven", "lid", "oven_or_stove"],
+      "signals_of_success": ["fork-tender texture", "rich cooking liquid"],
+      "common_mistakes": ["boiling hard", "too much liquid (becomes stew)"],
+      "aliases": ["braise", "slow cook in liquid", "pot roast style"],
+      "tags": ["low_and_slow", "tough_cuts"]
+    },
+    {
+      "id": "stew",
+      "label": "Stew",
+      "category": "wet_cook",
+      "difficulty": "beginner",
+      "definition": "Slowly simmer ingredients fully or mostly submerged in liquid until tender.",
+      "why_it_matters": "Blends flavors into a hearty one-pot meal.",
+      "common_tools": ["pot", "stove"],
+      "signals_of_success": ["tender pieces", "thickened broth"],
+      "common_mistakes": ["boiling hard", "adding delicate items too early"],
+      "aliases": ["stew", "simmer until tender"],
+      "tags": ["one_pot", "comfort"]
+    },
+
+    {
+      "id": "emulsify",
+      "label": "Emulsify",
+      "category": "sauce",
+      "difficulty": "advanced",
+      "definition": "Combine oil and water-based liquids into a stable mixture (like vinaigrette or mayo).",
+      "why_it_matters": "Creates creamy sauces and dressings without separation.",
+      "common_tools": ["whisk", "blender_optional"],
+      "signals_of_success": ["smooth unified sauce", "does not split quickly"],
+      "common_mistakes": ["adding oil too fast", "wrong temperature"],
+      "aliases": ["emulsify", "make an emulsion", "whisk until thick"],
+      "tags": ["sauce", "texture"]
+    },
+    {
+      "id": "reduce",
+      "label": "Reduce",
+      "category": "sauce",
+      "difficulty": "intermediate",
+      "definition": "Simmer a liquid to evaporate water, concentrating flavor and thickening slightly.",
+      "why_it_matters": "Intensifies sauces and broths without extra ingredients.",
+      "common_tools": ["pot", "stove"],
+      "signals_of_success": ["smaller volume", "coats spoon lightly"],
+      "common_mistakes": ["heat too high scorching", "walking away too long"],
+      "aliases": ["reduce", "simmer down", "cook until reduced"],
+      "tags": ["sauce", "concentration"]
+    },
+    {
+      "id": "thicken_slurry",
+      "label": "Thicken with slurry",
+      "category": "sauce",
+      "difficulty": "beginner",
+      "definition": "Mix starch (cornstarch/arrowroot) with cold water, then stir into hot liquid to thicken.",
+      "why_it_matters": "Quick thickening without lumps when done correctly.",
+      "common_tools": ["bowl", "whisk", "spoon"],
+      "signals_of_success": [
+        "smooth thickened sauce",
+        "no raw starch taste after brief simmer"
+      ],
+      "common_mistakes": [
+        "adding dry starch directly",
+        "not simmering briefly"
+      ],
+      "aliases": ["slurry", "cornstarch slurry", "starch slurry"],
+      "tags": ["sauce", "quick_fix"]
+    },
+
+    {
+      "id": "knead",
+      "label": "Knead",
+      "category": "dough",
+      "difficulty": "intermediate",
+      "definition": "Work dough by folding and pressing to develop gluten and structure.",
+      "why_it_matters": "Creates elasticity and chew in breads and some noodles.",
+      "common_tools": ["hands", "bench_scraper_optional"],
+      "signals_of_success": [
+        "smooth elastic dough",
+        "windowpane test passes (bread)"
+      ],
+      "common_mistakes": ["adding too much flour", "under-kneading"],
+      "aliases": ["knead", "knead until smooth", "work the dough"],
+      "tags": ["baking", "structure"]
+    },
+    {
+      "id": "proof",
+      "label": "Proof",
+      "category": "dough",
+      "difficulty": "intermediate",
+      "definition": "Allow yeast dough to rise as yeast produces gas, increasing volume.",
+      "why_it_matters": "Develops texture and flavor in breads.",
+      "common_tools": ["bowl", "cover", "warm_spot"],
+      "signals_of_success": [
+        "dough doubles (recipe dependent)",
+        "holds indentation gently"
+      ],
+      "common_mistakes": ["over-proofing collapse", "too cold slowing rise"],
+      "aliases": ["proof", "rise", "let rise", "first rise", "second rise"],
+      "tags": ["baking", "fermentation"]
+    },
+
+    {
+      "id": "marinate",
+      "label": "Marinate",
+      "category": "prep",
+      "difficulty": "beginner",
+      "definition": "Soak food in a seasoned liquid/paste to add flavor and sometimes tenderize.",
+      "why_it_matters": "Improves flavor penetration and balances seasoning.",
+      "common_tools": ["bowl_or_bag", "refrigerator"],
+      "signals_of_success": ["flavor present beyond surface", "even seasoning"],
+      "common_mistakes": ["too long in strong acid", "uneven coverage"],
+      "aliases": ["marinate", "marinated", "soak in marinade"],
+      "tags": ["flavor", "planning"]
+    },
+    {
+      "id": "dry_brine",
+      "label": "Dry brine",
+      "category": "prep",
+      "difficulty": "intermediate",
+      "definition": "Salt food in advance (often uncovered) to season deeply and improve browning.",
+      "why_it_matters": "Enhances juiciness and crisp skin on poultry; seasons throughout.",
+      "common_tools": ["salt", "tray", "rack_optional"],
+      "signals_of_success": ["better browning", "seasoned interior"],
+      "common_mistakes": ["oversalting", "not allowing time"],
+      "aliases": ["dry brine", "salt ahead", "pre-salt"],
+      "tags": ["meat", "browning"]
+    },
+
+    {
+      "id": "rest",
+      "label": "Rest",
+      "category": "finishing",
+      "difficulty": "beginner",
+      "definition": "Let cooked food sit before cutting/serving so juices redistribute and carryover heat finishes gently.",
+      "why_it_matters": "Keeps meats juicier and improves final texture.",
+      "common_tools": ["rack_optional", "foil_optional"],
+      "signals_of_success": ["less juice loss when cut", "more even doneness"],
+      "common_mistakes": [
+        "cutting immediately",
+        "resting too long uncovered (gets cold)"
+      ],
+      "aliases": ["rest", "let rest", "rest before slicing"],
+      "tags": ["doneness", "juiciness"]
+    },
+
+    {
+      "id": "season_to_taste",
+      "label": "Season to taste",
+      "category": "finishing",
+      "difficulty": "beginner",
+      "definition": "Adjust salt/acid/spice at the end by tasting and correcting balance.",
+      "why_it_matters": "Final tasting prevents flat or over-salted food.",
+      "common_tools": ["spoon", "salt", "acid_lemon_vinegar"],
+      "signals_of_success": [
+        "flavor feels balanced",
+        "no single note dominates"
+      ],
+      "common_mistakes": [
+        "adjusting without tasting",
+        "adding salt when acid is needed"
+      ],
+      "aliases": ["season to taste", "adjust seasoning", "salt to taste"],
+      "tags": ["balance", "finishing"]
+    }
+  ],
+  "aliasIndex": {
+    "mise en place": "prep_mise_en_place",
+    "prep station": "prep_mise_en_place",
+    "set up ingredients": "prep_mise_en_place",
+
+    "chop": "prep_chop",
+    "rough chop": "prep_chop",
+    "chopped": "prep_chop",
+
+    "dice": "prep_dice",
+    "diced": "prep_dice",
+    "small dice": "prep_dice",
+    "medium dice": "prep_dice",
+    "large dice": "prep_dice",
+
+    "mince": "prep_mince",
+    "minced": "prep_mince",
+    "finely chop": "prep_mince",
+    "finely chopped": "prep_mince",
+
+    "julienne": "prep_julienne",
+    "matchstick": "prep_julienne",
+    "cut into strips": "prep_julienne",
+
+    "grate": "prep_grate",
+    "grated": "prep_grate",
+    "microplane": "prep_grate",
+
+    "zest": "prep_zest",
+    "zested": "prep_zest",
+    "citrus zest": "prep_zest",
+
+    "preheat": "heat_preheat",
+    "heat until hot": "heat_preheat",
+    "bring to temperature": "heat_preheat",
+
+    "simmer": "heat_simmer",
+    "gentle simmer": "heat_simmer",
+    "low simmer": "heat_simmer",
+
+    "boil": "heat_boil",
+    "rolling boil": "heat_boil",
+    "bring to a boil": "heat_boil",
+
+    "blanch": "heat_blanch",
+    "boil briefly": "heat_blanch",
+    "parboil then chill": "heat_blanch",
+
+    "steam": "heat_steam",
+    "steamed": "heat_steam",
+
+    "saute": "saute",
+    "sauté": "saute",
+    "pan fry lightly": "saute",
+
+    "stir fry": "stir_fry",
+    "stir-fry": "stir_fry",
+    "wok fry": "stir_fry",
+
+    "pan fry": "pan_fry",
+    "pan-fry": "pan_fry",
+    "shallow fry": "pan_fry",
+
+    "deep fry": "deep_fry",
+    "deep-fry": "deep_fry",
+
+    "bake": "bake",
+    "baked": "bake",
+
+    "roast": "roast",
+    "roasted": "roast",
+
+    "broil": "broil",
+    "broiled": "broil",
+    "grill oven": "broil",
+
+    "sear": "sear",
+    "brown well": "sear",
+    "get a crust": "sear",
+
+    "deglaze": "deglaze",
+    "scrape up browned bits": "deglaze",
+    "add wine and scrape": "deglaze",
+
+    "braise": "braise",
+    "slow cook in liquid": "braise",
+
+    "stew": "stew",
+    "simmer until tender": "stew",
+
+    "emulsify": "emulsify",
+    "make an emulsion": "emulsify",
+    "whisk until thick": "emulsify",
+
+    "reduce": "reduce",
+    "simmer down": "reduce",
+    "cook until reduced": "reduce",
+
+    "slurry": "thicken_slurry",
+    "cornstarch slurry": "thicken_slurry",
+    "starch slurry": "thicken_slurry",
+
+    "knead": "knead",
+    "work the dough": "knead",
+
+    "proof": "proof",
+    "rise": "proof",
+    "let rise": "proof",
+    "first rise": "proof",
+    "second rise": "proof",
+
+    "marinate": "marinate",
+    "marinated": "marinate",
+    "soak in marinade": "marinate",
+
+    "dry brine": "dry_brine",
+    "salt ahead": "dry_brine",
+    "pre-salt": "dry_brine",
+
+    "rest": "rest",
+    "let rest": "rest",
+    "rest before slicing": "rest",
+
+    "season to taste": "season_to_taste",
+    "adjust seasoning": "season_to_taste",
+    "salt to taste": "season_to_taste"
+  }
+}

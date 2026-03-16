@@ -1,11 +1,18 @@
 // File: C:\Users\larho\suka-smart-assistant\src\ui\pages\scheduling\index.jsx
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
-// 🔌 Shared services (assumed to exist per SSA conventions)
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags";
-import HubPacketFormatter from "../../hub/HubPacketFormatter";
-import FamilyFundConnector from "../../hub/FamilyFundConnector";
+// 🔌 Shared services (SSA conventions)
+import eventBus from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // 🧭 Purpose
 // Main Scheduling Dashboard (day/week view)
@@ -34,7 +41,15 @@ function exportToHubIfEnabled(payload) {
   }
 }
 
-const DOMAINS = ["all", "cooking", "cleaning", "garden", "animals", "storehouse", "preservation"];
+const DOMAINS = [
+  "all",
+  "cooking",
+  "cleaning",
+  "garden",
+  "animals",
+  "storehouse",
+  "preservation",
+];
 const VIEW_MODES = ["day", "week"];
 
 function startOfDay(d = new Date()) {
@@ -107,7 +122,11 @@ function reducer(state, action) {
     case "SET_CONFLICTS":
       return { ...state, conflicts: action.conflicts || [] };
     case "LOAD_ERROR":
-      return { ...state, loading: false, error: action.error || "Failed to load schedule." };
+      return {
+        ...state,
+        loading: false,
+        error: action.error || "Failed to load schedule.",
+      };
     default:
       return state;
   }
@@ -158,7 +177,10 @@ export default function SchedulingDashboardPage() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const windowStart = useMemo(() => (view === "day" ? anchor : startOfDay(anchor)), [view, anchor]);
+  const windowStart = useMemo(
+    () => (view === "day" ? anchor : startOfDay(anchor)),
+    [view, anchor]
+  );
   const windowEnd = useMemo(
     () => (view === "day" ? addDays(windowStart, 1) : addDays(windowStart, 7)),
     [view, windowStart]
@@ -170,12 +192,19 @@ export default function SchedulingDashboardPage() {
   const load = useCallback(async () => {
     dispatch({ type: "LOAD_START" });
     try {
-      const res = await fetchSchedule({ fromISO, toISO, domain: domain === "all" ? undefined : domain });
+      const res = await fetchSchedule({
+        fromISO,
+        toISO,
+        domain: domain === "all" ? undefined : domain,
+      });
       dispatch({
         type: "LOAD_SUCCESS",
         sessions: (res.sessions || []).map(normalizeSession),
         conflicts: (res.conflicts || []).map(normalizeConflict),
-        planMeta: { planId: res?.meta?.planId || null, modelVersion: res?.meta?.modelVersion || null },
+        planMeta: {
+          planId: res?.meta?.planId || null,
+          modelVersion: res?.meta?.modelVersion || null,
+        },
       });
     } catch (err) {
       dispatch({ type: "LOAD_ERROR", error: String(err?.message || err) });
@@ -191,7 +220,8 @@ export default function SchedulingDashboardPage() {
     const offRecompute = eventBus.on("schedule.plan.recomputed", (e) => {
       const d = e?.data || {};
       // If the recompute intersects our window, refresh
-      if (rangesIntersect(d.window?.start, d.window?.end, fromISO, toISO)) load();
+      if (rangesIntersect(d.window?.start, d.window?.end, fromISO, toISO))
+        load();
     });
     const offOverrun = eventBus.on("schedule.overrun.detected", (e) => {
       const d = e?.data || {};
@@ -212,9 +242,15 @@ export default function SchedulingDashboardPage() {
     });
 
     return () => {
-      try { offRecompute?.(); } catch {}
-      try { offOverrun?.(); } catch {}
-      try { offConflict?.(); } catch {}
+      try {
+        offRecompute?.();
+      } catch {}
+      try {
+        offOverrun?.();
+      } catch {}
+      try {
+        offConflict?.();
+      } catch {}
     };
   }, [fromISO, toISO, load]);
 
@@ -261,18 +297,19 @@ export default function SchedulingDashboardPage() {
 
   const openConflictModal = useCallback(
     (conflict) => {
-      emit("ui.modal.open", { modal: "ResourceConflictModal", props: { isOpen: true, conflict } });
+      emit("ui.modal.open", {
+        modal: "ResourceConflictModal",
+        props: { isOpen: true, conflict },
+      });
     },
     [emit]
   );
 
   // Derived session maps for grid
-  const gridModel = useMemo(() => buildGridModel(state.sessions, windowStart, windowEnd, view), [
-    state.sessions,
-    windowStart,
-    windowEnd,
-    view,
-  ]);
+  const gridModel = useMemo(
+    () => buildGridModel(state.sessions, windowStart, windowEnd, view),
+    [state.sessions, windowStart, windowEnd, view]
+  );
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -283,7 +320,9 @@ export default function SchedulingDashboardPage() {
           <p className="text-sm text-slate-600">
             Plan view for {view === "day" ? "today" : "this week"} · Plan{" "}
             <span className="font-mono">{state.planMeta.planId || "—"}</span>{" "}
-            <span className="text-slate-400">(model {state.planMeta.modelVersion || "—"})</span>
+            <span className="text-slate-400">
+              (model {state.planMeta.modelVersion || "—"})
+            </span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -335,14 +374,21 @@ export default function SchedulingDashboardPage() {
             <h3 className="text-sm font-semibold text-slate-900">
               {view === "day"
                 ? `${fmtShort(windowStart)} timeline`
-                : `${fmtShort(windowStart)} → ${fmtShort(addDays(windowStart, 6))}`}
+                : `${fmtShort(windowStart)} → ${fmtShort(
+                    addDays(windowStart, 6)
+                  )}`}
             </h3>
-            {state.loading && <span className="text-[11px] text-slate-600">Loading…</span>}
+            {state.loading && (
+              <span className="text-[11px] text-slate-600">Loading…</span>
+            )}
           </div>
           <ScheduleGrid
             model={gridModel}
             onSessionClick={(s) =>
-              emit("ui.session.open_details", { sessionId: s.sessionId || s.id, domain: s.domain })
+              emit("ui.session.open_details", {
+                sessionId: s.sessionId || s.id,
+                domain: s.domain,
+              })
             }
             onSessionNudge={(s, minutes) => {
               // Simple reschedule +/- minutes
@@ -367,7 +413,9 @@ export default function SchedulingDashboardPage() {
         {/* Conflict / Alerts panel */}
         <div className="lg:col-span-1 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <div className="px-4 py-2 border-b border-slate-200 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-900">Conflicts & alerts</h3>
+            <h3 className="text-sm font-semibold text-slate-900">
+              Conflicts & alerts
+            </h3>
             <button
               onClick={() => load()}
               className="text-[11px] px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50"
@@ -377,7 +425,9 @@ export default function SchedulingDashboardPage() {
           </div>
           <div className="p-3 space-y-2">
             {(state.conflicts || []).length === 0 && (
-              <div className="text-xs text-slate-500">No conflicts detected.</div>
+              <div className="text-xs text-slate-500">
+                No conflicts detected.
+              </div>
             )}
             {(state.conflicts || []).map((c) => (
               <div
@@ -390,8 +440,10 @@ export default function SchedulingDashboardPage() {
                 <ul className="mt-1 space-y-0.5">
                   {(c.overlaps || []).map((o) => (
                     <li key={o.bookingId} className="text-[11px]">
-                      {(o.label || "Task")} #{o.bookingId} ·{" "}
-                      <span className="font-mono">{timeRangeLabel(o.start, o.end)}</span>
+                      {o.label || "Task"} #{o.bookingId} ·{" "}
+                      <span className="font-mono">
+                        {timeRangeLabel(o.start, o.end)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -449,7 +501,9 @@ function ViewToggle({ view, setView }) {
             key={v}
             onClick={() => setView(v)}
             className={`px-3 py-1.5 text-sm rounded-md ${
-              active ? "bg-slate-900 text-white" : "text-slate-900 hover:bg-slate-50"
+              active
+                ? "bg-slate-900 text-white"
+                : "text-slate-900 hover:bg-slate-50"
             }`}
           >
             {v}
@@ -538,7 +592,9 @@ function ScheduleGrid({ model, onSessionClick, onSessionNudge }) {
 
         {/* Columns wrapper */}
         <div
-          className={`grid ${columns.length > 1 ? `grid-cols-${columns.length}` : "grid-cols-1"}`}
+          className={`grid ${
+            columns.length > 1 ? `grid-cols-${columns.length}` : "grid-cols-1"
+          }`}
           style={{ position: "relative", marginTop: "-100%" }}
         />
 
@@ -549,7 +605,9 @@ function ScheduleGrid({ model, onSessionClick, onSessionNudge }) {
               const topPct = s.relTopPct;
               const heightPct = s.relHeightPct;
               const leftPct =
-                columns.length === 1 ? 0 : (colIdx * 100) / columns.length + s.laneOffsetPct;
+                columns.length === 1
+                  ? 0
+                  : (colIdx * 100) / columns.length + s.laneOffsetPct;
               const widthPct =
                 columns.length === 1
                   ? s.laneWidthPct
@@ -574,9 +632,14 @@ function ScheduleGrid({ model, onSessionClick, onSessionNudge }) {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <div className="text-xs font-medium text-slate-900 truncate">{s.title}</div>
+                      <div className="text-xs font-medium text-slate-900 truncate">
+                        {s.title}
+                      </div>
                       <div className="text-[11px] text-slate-600">
-                        {s.domain} · <span className="font-mono">{timeRangeLabel(s.startISO, s.endISO)}</span>
+                        {s.domain} ·{" "}
+                        <span className="font-mono">
+                          {timeRangeLabel(s.startISO, s.endISO)}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
@@ -603,11 +666,12 @@ function ScheduleGrid({ model, onSessionClick, onSessionNudge }) {
                   >
                     Details
                   </button>
-                  {Number.isFinite(s.flags?.overrunMs) && s.flags.overrunMs > 0 && (
-                    <div className="mt-1 text-[11px] text-amber-700">
-                      Overrun: {Math.round(s.flags.overrunMs / 60000)}m
-                    </div>
-                  )}
+                  {Number.isFinite(s.flags?.overrunMs) &&
+                    s.flags.overrunMs > 0 && (
+                      <div className="mt-1 text-[11px] text-amber-700">
+                        Overrun: {Math.round(s.flags.overrunMs / 60000)}m
+                      </div>
+                    )}
                 </div>
               );
             })
@@ -642,9 +706,16 @@ function normalizeSession(x) {
 function normalizeConflict(c) {
   if (!c) return null;
   return {
-    id: c.id || c.conflictId || `${c.resourceId || "res"}:${c.window?.start || ""}`,
+    id:
+      c.id ||
+      c.conflictId ||
+      `${c.resourceId || "res"}:${c.window?.start || ""}`,
     domain: c.domain || "general",
-    resource: c.resource || { id: c.resourceId, type: c.resourceType, name: c.resourceName },
+    resource: c.resource || {
+      id: c.resourceId,
+      type: c.resourceType,
+      name: c.resourceName,
+    },
     overlaps: Array.isArray(c.overlaps) ? c.overlaps : c.bookings || [],
     window: c.window || { start: c.start, end: c.end },
   };
@@ -658,7 +729,10 @@ function buildGridModel(sessions, start, end, view) {
   }
 
   // Partition by day for week, single bucket for day
-  const days = view === "day" ? [start] : Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const days =
+    view === "day"
+      ? [start]
+      : Array.from({ length: 7 }, (_, i) => addDays(start, i));
   const columns = days.map((d) => ({ date: d, items: [] }));
 
   // Compute relative positions and simple lane packing per column
@@ -672,11 +746,16 @@ function buildGridModel(sessions, start, end, view) {
     if (sEnd <= start || sStart >= end) return; // outside window
 
     // Assign day index
-    const dayIdx = clamp(Math.floor((startOfDay(sStart) - start) / (24 * 3600 * 1000)), 0, columns.length - 1);
+    const dayIdx = clamp(
+      Math.floor((startOfDay(sStart) - start) / (24 * 3600 * 1000)),
+      0,
+      columns.length - 1
+    );
 
     // Relative top/height (0-100%)
-    const relTopPct = ((Math.max(0, sStart - start) / totalMs) * 100);
-    const relHeightPct = ((Math.max(15 * 60 * 1000, sEnd - sStart) / totalMs) * 100); // min 15min
+    const relTopPct = (Math.max(0, sStart - start) / totalMs) * 100;
+    const relHeightPct =
+      (Math.max(15 * 60 * 1000, sEnd - sStart) / totalMs) * 100; // min 15min
 
     byDay.get(dayIdx).push({
       ...s,
@@ -723,10 +802,10 @@ function buildGridModel(sessions, start, end, view) {
 function timeRangeLabel(a, b) {
   const A = new Date(a);
   const B = new Date(b);
-  return `${A.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}–${B.toLocaleTimeString(
-    [],
-    { hour: "2-digit", minute: "2-digit" }
-  )}`;
+  return `${A.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}–${B.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 function rangesIntersect(a1, a2, b1, b2) {

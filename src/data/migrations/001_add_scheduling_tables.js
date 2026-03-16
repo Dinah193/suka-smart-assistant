@@ -30,7 +30,7 @@
 let eventBus = null;
 try {
   // assumed path per SSA
-  eventBus = require("@/services/eventBus").default;
+  eventBus = require("@/services/events/eventBus").default;
 } catch {}
 
 function safeEmit(type, data) {
@@ -171,24 +171,26 @@ async function applyMigration(db) {
   const version = nextSchemaVersion(db);
   const stores = getStoreDefinitions();
 
-  db.version(version).stores(stores).upgrade(async (tx) => {
-    // Seed minimal metadata or migrate existing shapes if needed.
-    // (No-op right now; reserved for future backfills.)
-    try {
-      const meta = tx.table("meta");
-      if (meta) {
-        await meta.put({
-          key: "migration.001",
-          value: {
-            appliedAt: new Date().toISOString(),
-            stores,
-          },
-        });
+  db.version(version)
+    .stores(stores)
+    .upgrade(async (tx) => {
+      // Seed minimal metadata or migrate existing shapes if needed.
+      // (No-op right now; reserved for future backfills.)
+      try {
+        const meta = tx.table("meta");
+        if (meta) {
+          await meta.put({
+            key: "migration.001",
+            value: {
+              appliedAt: new Date().toISOString(),
+              stores,
+            },
+          });
+        }
+      } catch {
+        /* meta table may not exist — ignore */
       }
-    } catch {
-      /* meta table may not exist — ignore */
-    }
-  });
+    });
 
   // Open / re-open to apply schema
   await db.open().catch((err) => {

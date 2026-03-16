@@ -21,11 +21,13 @@
  */
 
 import { useState, useCallback } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 import { runBatchYieldCalculation } from "./BatchYieldCalculator.shim";
 import batchYieldConfig from "./BatchYieldCalculator.config.json";
+
+const familyFundMode = !!featureFlags?.familyFundMode;
 
 /**
  * @typedef {Object} BatchYieldCalculatorInput
@@ -148,8 +150,7 @@ export function useBatchYieldCalculator() {
             emit({
               type: "session.exported",
               ts: new Date().toISOString(),
-              source:
-                "calculators/storehouseMeals/BatchYieldCalculator.hooks",
+              source: "calculators/storehouseMeals/BatchYieldCalculator.hooks",
               data: {
                 calculatorNodeId: batchYieldConfig.nodeId,
                 hubPacketMeta: packet?.meta || null,
@@ -160,10 +161,7 @@ export function useBatchYieldCalculator() {
           // Silently fail but log for debugging in dev tools
           if (typeof console !== "undefined") {
             // eslint-disable-next-line no-console
-            console.warn(
-              "[BatchYieldCalculator] Hub export failed",
-              hubErr
-            );
+            console.warn("[BatchYieldCalculator] Hub export failed", hubErr);
           }
         }
       }
@@ -253,10 +251,7 @@ export function useBatchYieldCalculator() {
               id: `${tempId}-step-3`,
               title: "Portion & label",
               desc: "Fill containers, label with date and contents, and store in the right zone.",
-              durationSec: Math.max(
-                Math.round(totalDurationSec * 0.3),
-                900
-              ),
+              durationSec: Math.max(Math.round(totalDurationSec * 0.3), 900),
               blockers: ["equipment"],
               metadata: {
                 tempTargetF: 0,

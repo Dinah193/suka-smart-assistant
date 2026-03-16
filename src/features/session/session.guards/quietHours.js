@@ -42,8 +42,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "../../../services/eventBus";
-import { featureFlags } from "../../../services/featureFlags";
+import eventBus from "../../../services/events/eventBus";
+import { featureFlags } from "../../../config/featureFlags";
 
 /**
  * @typedef {Object} SessionStep
@@ -173,7 +173,9 @@ export async function evaluateQuietHoursGuard(session, stepIndex, ctx = {}) {
     return { allowed: true, guard: "quietHours" };
   }
 
-  const msg = `Quiet hours are active until ${humanTime(state.endsAt)}. This step appears noisy.`;
+  const msg = `Quiet hours are active until ${humanTime(
+    state.endsAt
+  )}. This step appears noisy.`;
   const retryAtIso = state.endsAt ? state.endsAt.toISOString() : undefined;
 
   safeEmitDebug("guard.quietHours.blocked", {
@@ -199,7 +201,10 @@ function isGuardEnabled(settings) {
   if (typeof fromSettings === "boolean") return fromSettings;
 
   try {
-    if (featureFlags && Object.prototype.hasOwnProperty.call(featureFlags, "quietHoursGuard")) {
+    if (
+      featureFlags &&
+      Object.prototype.hasOwnProperty.call(featureFlags, "quietHoursGuard")
+    ) {
       return !!featureFlags.quietHoursGuard;
     }
   } catch {
@@ -236,10 +241,15 @@ function isStepNoisy(step, session, settings) {
   if (step?.metadata?.noisy === true) return true;
 
   // Voice guidance counts as noise unless explicitly allowed.
-  if (session?.prefs?.voiceGuidance && !settings.allowVoiceDuringQuiet) return true;
+  if (session?.prefs?.voiceGuidance && !settings.allowVoiceDuringQuiet)
+    return true;
 
   // Timer beeps/buzzers
-  if (step?.metadata?.donenessCue === "timer" && !settings.allowTimersDuringQuiet) return true;
+  if (
+    step?.metadata?.donenessCue === "timer" &&
+    !settings.allowTimersDuringQuiet
+  )
+    return true;
 
   return false;
 }
@@ -320,7 +330,11 @@ function evaluateWindows(now, windows) {
       end = addDays(end, 1);
     }
     // Only keep if it touches today.
-    if (end.getFullYear() === y && end.getMonth() === m && end.getDate() === d) {
+    if (
+      end.getFullYear() === y &&
+      end.getMonth() === m &&
+      end.getDate() === d
+    ) {
       intervals.push({ start, end });
     }
   }
@@ -370,7 +384,10 @@ function addDays(dt, days) {
 function humanTime(dt) {
   try {
     // Best-effort locale-friendly time only.
-    return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(dt);
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(dt);
   } catch {
     return dt.toLocaleTimeString();
   }
@@ -379,12 +396,18 @@ function humanTime(dt) {
 /* ------------------------------- Step Utils -------------------------------- */
 
 function resolveStep(session, stepIndex) {
-  if (!session || !Array.isArray(session.steps) || session.steps.length === 0) return null;
-  if (typeof stepIndex === "number" && stepIndex >= 0 && stepIndex < session.steps.length) {
+  if (!session || !Array.isArray(session.steps) || session.steps.length === 0)
+    return null;
+  if (
+    typeof stepIndex === "number" &&
+    stepIndex >= 0 &&
+    stepIndex < session.steps.length
+  ) {
     return session.steps[stepIndex];
   }
   const idx =
-    Number.isFinite(session?.progress?.currentStepIndex) && session.progress.currentStepIndex >= 0
+    Number.isFinite(session?.progress?.currentStepIndex) &&
+    session.progress.currentStepIndex >= 0
       ? session.progress.currentStepIndex
       : 0;
   return session.steps[idx] || null;
@@ -402,7 +425,12 @@ function safeId(session) {
 function safeEmitDebug(type, data) {
   try {
     if (eventBus && typeof eventBus.emit === "function") {
-      eventBus.emit({ type, ts: new Date().toISOString(), source: "quietHoursGuard", data });
+      eventBus.emit({
+        type,
+        ts: new Date().toISOString(),
+        source: "quietHoursGuard",
+        data,
+      });
     }
   } catch {
     // no-op

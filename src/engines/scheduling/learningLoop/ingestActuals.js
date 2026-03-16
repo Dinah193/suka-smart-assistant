@@ -26,30 +26,42 @@
  */
 
 let eventBus = {
-  emit: (...a) => console.debug("[learningLoop:ingestActuals:eventBus.emit]", ...a),
+  emit: (...a) =>
+    console.debug("[learningLoop:ingestActuals:eventBus.emit]", ...a),
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* noop for build/tests */ }
+} catch {
+  /* noop for build/tests */
+}
 
-let featureFlags = { familyFundMode: false, learning: { ewmaAlpha: 0.3, outlierIQR: true } };
+let featureFlags = {
+  familyFundMode: false,
+  learning: { ewmaAlpha: 0.3, outlierIQR: true },
+};
 try {
   const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff || featureFlags;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let dataGateway;
 try {
   dataGateway = require("@/services/dataGateway");
-} catch { /* noop; will be validated later */ }
+} catch {
+  /* noop; will be validated later */
+}
 
 let HubPacketFormatter, FamilyFundConnector;
 try {
   HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
   FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-} catch { /* optional hub layer */ }
+} catch {
+  /* optional hub layer */
+}
 
 /* ---------------------------------- Types ---------------------------------- */
 /**
@@ -96,7 +108,12 @@ module.exports = {
       const { safeCtx, items, warnings } = normalizeInputs(stepActuals, ctx);
       if (!items.length) {
         const reason = "no-valid-actuals";
-        emit("scheduling.actuals.error", source, { sessionId: safeCtx.sessionId, domain: safeCtx.domain, reason, warnings });
+        emit("scheduling.actuals.error", source, {
+          sessionId: safeCtx.sessionId,
+          domain: safeCtx.domain,
+          reason,
+          warnings,
+        });
         return { storedCount: 0, sessionSummary: {}, aggregates: [] };
       }
       if (!dataGateway) throw new Error("dataGateway not available");
@@ -105,10 +122,15 @@ module.exports = {
       const enriched = items.map((it) => enrichActual(it, safeCtx));
 
       // Optional: filter outliers (defensive; configurable)
-      const filtered = featureFlags?.learning?.outlierIQR ? iqrTrim(enriched, "actualMinutes") : enriched;
+      const filtered = featureFlags?.learning?.outlierIQR
+        ? iqrTrim(enriched, "actualMinutes")
+        : enriched;
 
       // Persist step rows (upsert by compound key)
-      const storedCount = await upsertMany("actuals.steps", filtered, ["sessionId", "stepId"]);
+      const storedCount = await upsertMany("actuals.steps", filtered, [
+        "sessionId",
+        "stepId",
+      ]);
 
       // Compute session-level summary
       const sessionSummary = buildSessionSummary(filtered, safeCtx);
@@ -125,7 +147,13 @@ module.exports = {
         domain: safeCtx.domain,
         storedCount,
         warnings,
-        summary: pick(sessionSummary, ["totalPlannedMin", "totalActualMin", "deltaMin", "qualityMean", "successRate"]),
+        summary: pick(sessionSummary, [
+          "totalPlannedMin",
+          "totalActualMin",
+          "deltaMin",
+          "qualityMean",
+          "successRate",
+        ]),
         aggregatesPreview: aggregates.slice(0, 3),
       });
 
@@ -139,7 +167,12 @@ module.exports = {
           sessionId: safeCtx.sessionId,
           householdId: safeCtx.householdId || null,
           aggregates, // safe, statistical
-          summary: pick(sessionSummary, ["totalActualMin", "deltaMin", "qualityMean", "successRate"]),
+          summary: pick(sessionSummary, [
+            "totalActualMin",
+            "deltaMin",
+            "qualityMean",
+            "successRate",
+          ]),
           meta: { version: "1.0.0", ...safeCtx.meta },
         },
       });
@@ -173,13 +206,17 @@ function normalizeInputs(stepActuals, ctx) {
   const items = [];
 
   for (const raw of arr) {
-    if (!raw || typeof raw !== "object") { warnings.push("skip:bad-item"); continue; }
+    if (!raw || typeof raw !== "object") {
+      warnings.push("skip:bad-item");
+      continue;
+    }
     const base = { ...raw };
 
     // Defensive: parse and compute times
     const start = parseISOorNull(base.startISO);
     const end = parseISOorNull(base.endISO);
-    const derivedMinutes = (start && end && end > start) ? Math.round((end - start) / 60000) : null;
+    const derivedMinutes =
+      start && end && end > start ? Math.round((end - start) / 60000) : null;
     const actualMinutes = toNonNegInt(base.actualMinutes ?? derivedMinutes);
     const plannedMinutes = toNonNegInt(base.plannedMinutes ?? 0);
 
@@ -195,8 +232,12 @@ function normalizeInputs(stepActuals, ctx) {
       actualMinutes,
       startISO: start ? start.toISOString() : null,
       endISO: end ? end.toISOString() : null,
-      equipmentUsed: Array.isArray(base.equipmentUsed) ? base.equipmentUsed.filter(Boolean) : [],
-      resourcesUsed: Array.isArray(base.resourcesUsed) ? base.resourcesUsed.filter(Boolean) : [],
+      equipmentUsed: Array.isArray(base.equipmentUsed)
+        ? base.equipmentUsed.filter(Boolean)
+        : [],
+      resourcesUsed: Array.isArray(base.resourcesUsed)
+        ? base.resourcesUsed.filter(Boolean)
+        : [],
       conditions: sanitizeConditions(base.conditions),
       outcome: sanitizeOutcome(base.outcome),
       actorId: base.actorId || null,
@@ -227,8 +268,10 @@ function sanitizeOutcome(o) {
   const out = {};
   if (!o || typeof o !== "object") return out;
   if (typeof o.success === "boolean") out.success = o.success;
-  if (isFinite(o.qualityScore)) out.qualityScore = clamp(Number(o.qualityScore), 0, 1);
-  if (Array.isArray(o.anomalies)) out.anomalies = o.anomalies.filter(Boolean).slice(0, 12);
+  if (isFinite(o.qualityScore))
+    out.qualityScore = clamp(Number(o.qualityScore), 0, 1);
+  if (Array.isArray(o.anomalies))
+    out.anomalies = o.anomalies.filter(Boolean).slice(0, 12);
   return out;
 }
 
@@ -239,9 +282,10 @@ function enrichActual(item, ctx) {
   const taskType = item.taskType || extractTaskType(ctx.domain, item);
 
   // Equipment signature used for bucketing
-  const equipmentSig = (item.equipmentUsed && item.equipmentUsed.length)
-    ? item.equipmentUsed.slice().sort().join("|")
-    : "none";
+  const equipmentSig =
+    item.equipmentUsed && item.equipmentUsed.length
+      ? item.equipmentUsed.slice().sort().join("|")
+      : "none";
 
   const deltaMinutes = Number.isFinite(item.plannedMinutes)
     ? item.actualMinutes - item.plannedMinutes
@@ -266,7 +310,11 @@ function enrichActual(item, ctx) {
  */
 async function updateAggregates(rows, ctx) {
   if (!rows.length) return [];
-  const alpha = clamp(Number(featureFlags?.learning?.ewmaAlpha ?? 0.3), 0.01, 0.95);
+  const alpha = clamp(
+    Number(featureFlags?.learning?.ewmaAlpha ?? 0.3),
+    0.01,
+    0.95
+  );
 
   // Group by bucket key
   const buckets = new Map();
@@ -281,13 +329,22 @@ async function updateAggregates(rows, ctx) {
     const [domain, taskType, equipmentSig] = key.split("::");
 
     // Load existing aggregate if present
-    const existing = await getOne("learning.aggregates", { domain, taskType, equipmentSig }) || {};
+    const existing =
+      (await getOne("learning.aggregates", {
+        domain,
+        taskType,
+        equipmentSig,
+      })) || {};
 
     // Start with existing stats
-    let ewma = isFinite(existing.ewmaMinutes) ? Number(existing.ewmaMinutes) : null;
+    let ewma = isFinite(existing.ewmaMinutes)
+      ? Number(existing.ewmaMinutes)
+      : null;
     let n = toNonNegInt(existing.n || 0);
     let successN = toNonNegInt(existing.successN || 0);
-    let qualityMean = isFinite(existing.qualityMean) ? Number(existing.qualityMean) : 0;
+    let qualityMean = isFinite(existing.qualityMean)
+      ? Number(existing.qualityMean)
+      : 0;
 
     // Update with each observation
     for (const obs of group) {
@@ -300,12 +357,15 @@ async function updateAggregates(rows, ctx) {
       n += 1;
       // Quality mean (simple running mean; keep bounded)
       if (isFinite(obs?.outcome?.qualityScore)) {
-        qualityMean = ((qualityMean * (n - 1)) + clamp(obs.outcome.qualityScore, 0, 1)) / n;
+        qualityMean =
+          (qualityMean * (n - 1) + clamp(obs.outcome.qualityScore, 0, 1)) / n;
       }
     }
 
     const aggRow = {
-      domain, taskType, equipmentSig,
+      domain,
+      taskType,
+      equipmentSig,
       ewmaMinutes: Math.round(ewma ?? 0),
       n,
       successN,
@@ -316,7 +376,11 @@ async function updateAggregates(rows, ctx) {
       lastSessionId: ctx.sessionId || null,
     };
 
-    await upsertMany("learning.aggregates", [aggRow], ["domain", "taskType", "equipmentSig"]);
+    await upsertMany(
+      "learning.aggregates",
+      [aggRow],
+      ["domain", "taskType", "equipmentSig"]
+    );
     aggregates.push(aggRow);
   }
 
@@ -326,15 +390,25 @@ async function updateAggregates(rows, ctx) {
 /* ------------------------------- Summarizers ------------------------------- */
 
 function buildSessionSummary(rows, ctx) {
-  const planned = sum(rows.map(r => toNonNegInt(r.plannedMinutes || 0)));
-  const actual = sum(rows.map(r => toNonNegInt(r.actualMinutes || 0)));
-  const deltas = rows.map(r => Number.isFinite(r.deltaMinutes) ? r.deltaMinutes : 0);
+  const planned = sum(rows.map((r) => toNonNegInt(r.plannedMinutes || 0)));
+  const actual = sum(rows.map((r) => toNonNegInt(r.actualMinutes || 0)));
+  const deltas = rows.map((r) =>
+    Number.isFinite(r.deltaMinutes) ? r.deltaMinutes : 0
+  );
   const deltaMin = sum(deltas);
-  const quality = rows.map(r => isFinite(r?.outcome?.qualityScore) ? r.outcome.qualityScore : null).filter(v => v != null);
-  const successBools = rows.map(r => r?.outcome?.success === true);
+  const quality = rows
+    .map((r) =>
+      isFinite(r?.outcome?.qualityScore) ? r.outcome.qualityScore : null
+    )
+    .filter((v) => v != null);
+  const successBools = rows.map((r) => r?.outcome?.success === true);
 
-  const qualityMean = quality.length ? +(sum(quality) / quality.length).toFixed(3) : 0;
-  const successRate = successBools.length ? +(successBools.filter(Boolean).length / successBools.length).toFixed(3) : 0;
+  const qualityMean = quality.length
+    ? +(sum(quality) / quality.length).toFixed(3)
+    : 0;
+  const successRate = successBools.length
+    ? +(successBools.filter(Boolean).length / successBools.length).toFixed(3)
+    : 0;
 
   return {
     sessionId: ctx.sessionId,
@@ -368,38 +442,66 @@ function getTaskTypeExtractors() {
       if (eq.includes("pressure.canner")) return "pressure-canning";
       if (eq.includes("oven")) return "bake";
       if (eq.includes("range.top")) return "stovetop";
-      return keywordClassify(step, {
-        boil: ["boil", "blanch", "parboil"],
-        roast: ["roast", "bake"],
-        saute: ["sauté", "saute", "sear"],
-        simmer: ["simmer", "braise", "stew"],
-        cure: ["cure", "brine"],
-      }, "general");
+      return keywordClassify(
+        step,
+        {
+          boil: ["boil", "blanch", "parboil"],
+          roast: ["roast", "bake"],
+          saute: ["sauté", "saute", "sear"],
+          simmer: ["simmer", "braise", "stew"],
+          cure: ["cure", "brine"],
+        },
+        "general"
+      );
     },
-    cleaning: (step) => step.taskType || keywordClassify(step, {
-      mop: ["mop"],
-      sweep: ["sweep", "broom"],
-      sanitize: ["sanitize", "disinfect"],
-      dust: ["dust", "wipe"],
-    }, "general"),
-    garden: (step) => step.taskType || keywordClassify(step, {
-      plant: ["plant", "sow", "transplant"],
-      water: ["water", "irrigate"],
-      harvest: ["harvest", "pick"],
-      weed: ["weed"],
-    }, "general"),
-    animal: (step) => step.taskType || keywordClassify(step, {
-      feed: ["feed"],
-      water: ["water"],
-      butcher: ["butcher", "process"],
-      milk: ["milk"],
-    }, "general"),
-    preservation: (step) => step.taskType || keywordClassify(step, {
-      canning: ["water bath", "pressure can"],
-      dehydrate: ["dehydrate"],
-      freeze: ["flash freeze", "freeze"],
-      cure: ["cure", "smoke"],
-    }, "general"),
+    cleaning: (step) =>
+      step.taskType ||
+      keywordClassify(
+        step,
+        {
+          mop: ["mop"],
+          sweep: ["sweep", "broom"],
+          sanitize: ["sanitize", "disinfect"],
+          dust: ["dust", "wipe"],
+        },
+        "general"
+      ),
+    garden: (step) =>
+      step.taskType ||
+      keywordClassify(
+        step,
+        {
+          plant: ["plant", "sow", "transplant"],
+          water: ["water", "irrigate"],
+          harvest: ["harvest", "pick"],
+          weed: ["weed"],
+        },
+        "general"
+      ),
+    animal: (step) =>
+      step.taskType ||
+      keywordClassify(
+        step,
+        {
+          feed: ["feed"],
+          water: ["water"],
+          butcher: ["butcher", "process"],
+          milk: ["milk"],
+        },
+        "general"
+      ),
+    preservation: (step) =>
+      step.taskType ||
+      keywordClassify(
+        step,
+        {
+          canning: ["water bath", "pressure can"],
+          dehydrate: ["dehydrate"],
+          freeze: ["flash freeze", "freeze"],
+          cure: ["cure", "smoke"],
+        },
+        "general"
+      ),
     storehouse: (step) => step.taskType || "store-op",
   };
 }
@@ -411,12 +513,10 @@ function extractTaskType(domain, step) {
 }
 
 function keywordClassify(step, dict, fallback) {
-  const text = [
-    step?.conditions?.note || "",
-  ].join(" ").toLowerCase();
+  const text = [step?.conditions?.note || ""].join(" ").toLowerCase();
 
   for (const [klass, words] of Object.entries(dict)) {
-    if (words.some(w => text.includes(w))) return klass;
+    if (words.some((w) => text.includes(w))) return klass;
   }
   return fallback;
 }
@@ -436,7 +536,12 @@ async function upsertMany(table, rows, keyFields) {
     return await dataGateway.upsertMany(table, safeRows, keyFields);
   }
   if (typeof dataGateway.writeMany === "function") {
-    return await dataGateway.writeMany({ table, rows: safeRows, keyFields, mode: "upsert" });
+    return await dataGateway.writeMany({
+      table,
+      rows: safeRows,
+      keyFields,
+      mode: "upsert",
+    });
   }
   if (typeof dataGateway.putMany === "function") {
     // emulate upsert: rely on putMany semantics
@@ -445,7 +550,10 @@ async function upsertMany(table, rows, keyFields) {
   }
   if (typeof dataGateway.put === "function") {
     let n = 0;
-    for (const r of safeRows) { await dataGateway.put(table, r); n++; }
+    for (const r of safeRows) {
+      await dataGateway.put(table, r);
+      n++;
+    }
     return n;
   }
 
@@ -488,10 +596,13 @@ function clamp(n, lo, hi) {
   if (!Number.isFinite(x)) return lo;
   return Math.max(lo, Math.min(hi, x));
 }
-function sum(arr) { return arr.reduce((a, b) => a + (Number(b) || 0), 0); }
+function sum(arr) {
+  return arr.reduce((a, b) => a + (Number(b) || 0), 0);
+}
 function pick(obj, keys) {
   const o = {};
-  for (const k of keys) if (Object.prototype.hasOwnProperty.call(obj, k)) o[k] = obj[k];
+  for (const k of keys)
+    if (Object.prototype.hasOwnProperty.call(obj, k)) o[k] = obj[k];
   return o;
 }
 
@@ -500,14 +611,17 @@ function pick(obj, keys) {
  * Keeps rows where value within [Q1 - 1.5*IQR, Q3 + 1.5*IQR].
  */
 function iqrTrim(rows, field) {
-  const vals = rows.map(r => Number(r[field])).filter(Number.isFinite).sort((a, b) => a - b);
+  const vals = rows
+    .map((r) => Number(r[field]))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
   if (vals.length < 8) return rows; // not enough data to justify trimming
   const q1 = quantile(vals, 0.25);
   const q3 = quantile(vals, 0.75);
   const iqr = q3 - q1;
   const lo = q1 - 1.5 * iqr;
   const hi = q3 + 1.5 * iqr;
-  return rows.filter(r => {
+  return rows.filter((r) => {
     const v = Number(r[field]);
     return !Number.isFinite(v) || (v >= lo && v <= hi);
   });

@@ -1,0 +1,253 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.bbq_sausage",
+    "type": "recipe",
+    "name": "BBQ Sausage (Smoked or Grilled Links)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "BBQ sausage cook method for pre-made raw or fully-cooked sausages with smoke/grill finishing.",
+        "Designed as a repeatable baseline for brats, hot links, kielbasa, and beef/lamb sausages."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "main",
+    "mealArchetypes": ["dinner", "cookout", "quick_meal"],
+    "servingStyles": ["bbq_plate", "sandwich", "handheld"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "protein.sausage",
+      "method.grill",
+      "method.smoke",
+      "weeknight_fast",
+      "cookout",
+      "crowd_friendly"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "notes": "Plan 1 link per adult (2 for big eaters) or 1 link + sides for a plate."
+  },
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 25,
+    "totalMins": 40
+  },
+  "difficulty": "beginner",
+  "equipment": {
+    "minimum": [
+      "equipment.grill",
+      "equipment.tongs",
+      "equipment.knife",
+      "equipment.sheet_pan"
+    ],
+    "recommended": [
+      "equipment.instant_read_thermometer",
+      "equipment.probe_thermometer",
+      "equipment.smoker",
+      "equipment.cast_iron_skillet"
+    ],
+    "optional": [
+      "equipment.basting_brush",
+      "equipment.spray_bottle",
+      "equipment.wire_rack"
+    ]
+  },
+  "dietFlags": ["gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredients.sausage_links",
+      "label": "Sausage links",
+      "qty": 8,
+      "unit": "each",
+      "notes": "Brats, hot links, kielbasa, smoked sausage, or beef/lamb sausage. Note whether they are RAW or FULLY COOKED.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.neutral_oil",
+      "label": "Neutral oil (optional, for grill grates / casing sheen)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Optional—helps prevent sticking and supports even browning.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.bbq_sauce",
+      "label": "BBQ sauce (optional glaze)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "Use in the last 5–10 minutes to avoid burning sugar.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.beer",
+      "label": "Beer (optional simmer, brat-style)",
+      "qty": 12,
+      "unit": "oz",
+      "notes": "Optional pre-cook for RAW brats/links before grilling. Can substitute broth/water.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.onion",
+      "label": "Onion, sliced (optional simmer)",
+      "qty": 1,
+      "unit": "each",
+      "notes": "Optional for brat-style simmer.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.water",
+      "label": "Water (optional simmer)",
+      "qty": 12,
+      "unit": "oz",
+      "notes": "Optional—use with or instead of beer.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.crusty_rolls",
+      "label": "Crusty rolls / brat buns (optional serving)",
+      "qty": 4,
+      "unit": "each",
+      "notes": "Use SSA bread catalog crusty rolls when available.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.mustard",
+      "label": "Mustard (optional serving)",
+      "qty": 0.25,
+      "unit": "cup",
+      "optional": true
+    },
+    {
+      "id": "ingredients.pickles",
+      "label": "Pickles or pickled onions (optional serving)",
+      "qty": 0.5,
+      "unit": "cup",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.choose_path",
+      "title": "Choose your cook path (RAW vs fully cooked)",
+      "body": "Check the sausage package: RAW sausages must be cooked through to a safe internal temp. Fully-cooked smoked sausage only needs reheating and browning. Use the matching path below.",
+      "timers": []
+    },
+    {
+      "id": "step.preheat",
+      "title": "Preheat grill (or smoker) and set up two-zone heat",
+      "body": "Preheat grill to medium-high (about 400–450°F) and create a two-zone setup: one hot side for browning and one cooler side to finish cooking without bursting casings. If smoking, set smoker to 250–275°F for flavor, then finish on hot grill for snap.",
+      "timers": [{ "label": "Preheat", "mins": 10 }]
+    },
+    {
+      "id": "step.optional_simmer_raw",
+      "title": "Optional: brat-style simmer for RAW sausages (recommended)",
+      "body": "For RAW sausages: simmer gently (do NOT hard-boil) in beer + sliced onions + a splash of water for 10–15 minutes. This cooks them most of the way and keeps casings from splitting on the grill. Drain and pat dry before grilling.",
+      "timers": [{ "label": "Gentle simmer", "mins": 12 }]
+    },
+    {
+      "id": "step.grill_brown",
+      "title": "Grill to brown and heat through",
+      "body": "Lightly oil grates if needed. Place sausages over the hot side to brown, turning every 1–2 minutes to color all sides. Move to cooler side to finish (especially for RAW). Avoid puncturing casings so juices stay inside.",
+      "timers": [{ "label": "Brown + finish (typical)", "mins": 18 }]
+    },
+    {
+      "id": "step_temp_targets",
+      "title": "Check doneness by temperature",
+      "body": "RAW sausage target: 160°F (71°C) internal (or per package). Fully-cooked sausage target: 145°F+ and hot throughout. If sausages are splitting, your heat is too high—move to cooler zone and finish gently.",
+      "timers": []
+    },
+    {
+      "id": "step_glaze_optional",
+      "title": "Optional: BBQ sauce glaze",
+      "body": "If glazing, brush a thin coat of BBQ sauce during the last 5–10 minutes, turning frequently to set without burning. Keep over cooler heat while sauced.",
+      "timers": [{ "label": "Glaze set", "mins": 7 }]
+    },
+    {
+      "id": "step_rest_serve",
+      "title": "Rest briefly, then serve",
+      "body": "Rest sausages 3–5 minutes. Serve on crusty rolls with mustard, pickles, and classic BBQ sides. For plates, slice on bias and serve with beans/slaw/mac.",
+      "timers": [{ "label": "Rest", "mins": 4 }]
+    }
+  ],
+  "pairings": {
+    "sides": [
+      { "id": "dishes.bbq.cole_slaw", "label": "Cole Slaw" },
+      { "id": "dishes.bbq.baked_beans", "label": "Baked Beans" },
+      { "id": "dishes.bbq.potato_salad", "label": "Potato Salad" },
+      { "id": "dishes.bbq.mac_and_cheese", "label": "Mac and Cheese" },
+      { "id": "dishes.bbq.grilled_corn", "label": "Grilled Corn" }
+    ],
+    "sauces": [
+      {
+        "id": "dishes.bbq.tomato_based_bbq_sauce",
+        "label": "Tomato-Based BBQ Sauce"
+      },
+      {
+        "id": "dishes.bbq.vinegar_pepper_sauce",
+        "label": "Vinegar Pepper Sauce (optional)"
+      }
+    ]
+  },
+  "planner": {
+    "batchable": true,
+    "leftovers": {
+      "goodFor": [
+        "sausage_and_peppers",
+        "bbq_sausage_pasta",
+        "sausage_breakfast_hash",
+        "bbq_loaded_fries",
+        "sausage_gumbo_variant"
+      ],
+      "notes": "Slice leftovers cold for easier clean cuts. Reheat gently to avoid drying."
+    },
+    "serveModes": [
+      {
+        "id": "serveMode.bun",
+        "label": "On a Bun",
+        "notes": "Best for brats/hot links—toast bun on grill for 30–60 seconds."
+      },
+      {
+        "id": "serveMode.bbq_plate",
+        "label": "BBQ Plate",
+        "notes": "Serve whole or sliced with 2–3 sides."
+      },
+      {
+        "id": "serveMode.sliced_platter",
+        "label": "Sliced Party Platter",
+        "notes": "Slice and hold warm in a covered pan; keep sauce on the side to preserve snap."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "equipment",
+      "notes": [
+        "No grill: roast at 400°F on a sheet pan, turning once, until browned and at target temp.",
+        "Smoker-only: smoke at 250–275°F until nearly done, then raise to 325°F+ to tighten casing and improve snap."
+      ]
+    },
+    {
+      "kind": "doneness",
+      "notes": [
+        "RAW links: cook to 160°F internal (or package guidance). Avoid high heat early—finish on cooler zone.",
+        "Fully-cooked: heat until sizzling hot; overcooking can burst casings and dry interiors."
+      ]
+    },
+    {
+      "kind": "flavor",
+      "notes": [
+        "For a deeper BBQ profile, dust lightly with paprika/black pepper before grilling, then glaze at the end.",
+        "For vinegar-style BBQ, finish with a light splash of vinegar-pepper sauce instead of a sweet glaze."
+      ]
+    }
+  ]
+}

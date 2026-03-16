@@ -1,0 +1,129 @@
+{
+  "id": "creole_courtbouillon",
+  "name": "Creole Courtbouillon (Fish Stew)",
+  "servings": 6,
+  "ingredients": [
+    {
+      "item": "white fish fillets",
+      "amount": 2.5,
+      "unit": "lb",
+      "prep": "catfish/redfish/grouper; cut into large chunks"
+    },
+    {
+      "item": "kosher salt",
+      "amount": 1.5,
+      "unit": "tsp",
+      "prep": "divided, plus more to taste"
+    },
+    { "item": "black pepper", "amount": 1, "unit": "tsp", "prep": "divided" },
+
+    { "item": "neutral oil", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "unsalted butter",
+      "amount": 2,
+      "unit": "tbsp",
+      "prep": "optional for richness"
+    },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 2, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 5, "unit": "cloves", "prep": "minced" },
+
+    { "item": "tomato paste", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "diced tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz"
+    },
+    {
+      "item": "crushed tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz (or use another can of diced)"
+    },
+
+    {
+      "item": "seafood stock",
+      "amount": 2.5,
+      "unit": "cups",
+      "prep": "or chicken stock"
+    },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "dried oregano", "amount": 0.5, "unit": "tsp" },
+    { "item": "paprika", "amount": 1.5, "unit": "tsp" },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.25,
+      "unit": "tsp",
+      "prep": "adjust to heat preference"
+    },
+    { "item": "Creole seasoning", "amount": 2, "unit": "tsp" },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+
+    { "item": "lemon juice", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (reserve some for garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (reserve some for garnish)"
+    },
+
+    { "item": "cooked white rice", "amount": 6, "unit": "servings" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep fish: Cut fish into large chunks. Pat dry and season lightly with a pinch of salt and black pepper. Keep chilled."
+    },
+    {
+      "order": 2,
+      "text": "Sweat the trinity: In a Dutch oven over medium heat, warm oil and optional butter. Add onion, bell pepper, and celery. Cook until softened. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 3,
+      "text": "Bloom tomato paste: Stir in tomato paste and cook 1 minute to deepen flavor."
+    },
+    {
+      "order": 4,
+      "text": "Build the stew base: Add diced tomatoes, crushed tomatoes, stock, bay leaves, thyme, oregano, paprika, cayenne, Creole seasoning, Worcestershire, optional hot sauce, remaining black pepper, and part of the salt. Bring to a gentle simmer."
+    },
+    {
+      "order": 5,
+      "text": "Simmer and reduce: Simmer until the sauce thickens slightly and tastes well-developed. If it gets too thick, add a splash of stock."
+    },
+    {
+      "order": 6,
+      "text": "Poach fish gently: Reduce heat to low. Nestle fish chunks into the simmering sauce. Cover and cook just until fish is opaque and flakes easily. Avoid boiling so the fish stays intact."
+    },
+    {
+      "order": 7,
+      "text": "Finish: Remove bay leaves. Stir in lemon juice, most green onions, and most parsley. Taste and adjust salt, pepper, and heat."
+    },
+    {
+      "order": 8,
+      "text": "Serve: Spoon courtbouillon over hot cooked rice. Garnish with remaining green onions and parsley."
+    }
+  ]
+}

@@ -59,7 +59,7 @@
  * - Emits eventBus analytics (no-op if bus missing).
  */
 
-import { emit } from "@/services/eventBus"; // safe optional; guarded below
+import { emit } from "@/services/events/eventBus"; // safe optional; guarded below
 
 /* ------------------------------- Defaults ---------------------------------- */
 
@@ -86,13 +86,15 @@ export function registerSiteAdapter(host, fn) {
 
 const ING_ALIASES = new Map(); // "bicarb" -> "baking soda"
 export function registerIngredientAlias(from, to) {
-  const f = norm(from), t = cleanSpace(to);
+  const f = norm(from),
+    t = cleanSpace(to);
   if (f && t) ING_ALIASES.set(f, t);
 }
 
 const UNIT_ALIASES = new Map(); // "tsp." -> "tsp"
 export function registerUnitAlias(from, to) {
-  const f = norm(from), t = norm(to);
+  const f = norm(from),
+    t = norm(to);
   if (f && t) UNIT_ALIASES.set(f, t);
 }
 
@@ -122,12 +124,15 @@ registerUnitAlias("liters", "l");
 /* Minimal density heuristics by ingredient keyword (very rough; callers can override via registerUomConverter) */
 registerUomConverter("cup", ({ name, qty }) => {
   const n = norm(name);
-  const ml =
-    n.includes("flour") ? 120 * qty :
-    n.includes("sugar") && n.includes("brown") ? 220 * qty :
-    n.includes("sugar") ? 200 * qty :
-    n.includes("butter") ? 227 * qty :      // 1 cup ≈ 227 g butter
-    240 * qty;                              // default liquid cup ml
+  const ml = n.includes("flour")
+    ? 120 * qty
+    : n.includes("sugar") && n.includes("brown")
+    ? 220 * qty
+    : n.includes("sugar")
+    ? 200 * qty
+    : n.includes("butter")
+    ? 227 * qty // 1 cup ≈ 227 g butter
+    : 240 * qty; // default liquid cup ml
   return n.includes("water") || n.includes("milk") || n.includes("broth")
     ? { ml }
     : { grams: ml }; // treat as g when not obviously liquid
@@ -161,18 +166,25 @@ registerUomConverter("l", ({ qty }) => ({ ml: qty * 1000 }));
 export async function normalizeMany(items = [], options = {}) {
   const opts = { ...DEFAULTS, ...pickDefined(options) };
   const out = [];
-  let ok = 0, failed = 0;
+  let ok = 0,
+    failed = 0;
 
   // Optional helpers (soft imports to avoid hard coupling)
-  const cues = await softImport("@/agents/skills/cooking/cues");                // { inferDonenessCue? }
-  const scaleAndYield = await softImport("@/agents/skills/cooking/scaleAndYield"); // not required here
-  const substitutions = await softImport("@/agents/skills/cooking/substitutions"); // local fallback table
+  const cues = await softImport("@/agents/skills/cooking/cues"); // { inferDonenessCue? }
+  const scaleAndYield = await softImport(
+    "@/agents/skills/cooking/scaleAndYield"
+  ); // not required here
+  const substitutions = await softImport(
+    "@/agents/skills/cooking/substitutions"
+  ); // local fallback table
 
   for (const raw of items) {
     const res = { ok: false, warnings: [], errors: [] };
     try {
       const primed = applySiteAdapter(raw);
-      const canon = normalizeOne(primed, { inferDurations: opts.inferDurations });
+      const canon = normalizeOne(primed, {
+        inferDurations: opts.inferDurations,
+      });
 
       // Optional: attach default cues per step (probe temp/color/timer)
       if (opts.enableSessionScaffold && Array.isArray(canon.steps)) {
@@ -183,11 +195,17 @@ export async function normalizeMany(items = [], options = {}) {
           const tempF = extractTempF(`${step.title || ""} ${step.desc || ""}`);
           if (Number.isFinite(tempF)) {
             step.metadata.tempTargetF = tempF;
-            step.metadata.cueNotes = joinCue(step.metadata.cueNotes, `Target ~${Math.round(tempF)}°F`);
+            step.metadata.cueNotes = joinCue(
+              step.metadata.cueNotes,
+              `Target ~${Math.round(tempF)}°F`
+            );
           }
           // infer generic doneness cue if missing
           if (!step.metadata.donenessCue && cues?.inferDonenessCue) {
-            const guess = safeCall(cues.inferDonenessCue, step.desc || step.title || "");
+            const guess = safeCall(
+              cues.inferDonenessCue,
+              step.desc || step.title || ""
+            );
             if (guess) step.metadata.donenessCue = guess;
           }
           // sanity duration
@@ -195,7 +213,9 @@ export async function normalizeMany(items = [], options = {}) {
             step.durationSec = DEFAULTS.defaultStepDurationSec;
           }
           // blockers heuristics (equipment/inventory are checked by runner; we annotate)
-          step.blockers = Array.from(new Set([...(step.blockers || []), "equipment"]));
+          step.blockers = Array.from(
+            new Set([...(step.blockers || []), "equipment"])
+          );
           step.id = step.id || `step-${pad2(idx + 1)}`;
           return step;
         });
@@ -204,10 +224,14 @@ export async function normalizeMany(items = [], options = {}) {
 
       // suggest substitutions list for inventory pane (non-binding)
       const subTips = [];
-      if (Array.isArray(canon.sections?.[0]?.ingredients) && substitutions?.suggestSubstitutions) {
+      if (
+        Array.isArray(canon.sections?.[0]?.ingredients) &&
+        substitutions?.suggestSubstitutions
+      ) {
         for (const ing of canon.sections[0].ingredients) {
           const sug = safeCall(substitutions.suggestSubstitutions, ing.name);
-          if (Array.isArray(sug) && sug.length) subTips.push({ for: ing.name, options: sug.slice(0, 3) });
+          if (Array.isArray(sug) && sug.length)
+            subTips.push({ for: ing.name, options: sug.slice(0, 3) });
         }
       }
       if (subTips.length) {
@@ -225,7 +249,12 @@ export async function normalizeMany(items = [], options = {}) {
           type: "import.parsed",
           ts: new Date().toISOString(),
           source: "recipes.normalizemany",
-          data: { id: canon.id, site: canon?.source?.site || null, title: canon.title, ok: true },
+          data: {
+            id: canon.id,
+            site: canon?.source?.site || null,
+            title: canon.title,
+            ok: true,
+          },
         });
       } catch {}
 
@@ -240,7 +269,13 @@ export async function normalizeMany(items = [], options = {}) {
           type: "import.parse.failed",
           ts: new Date().toISOString(),
           source: "recipes.normalizemany",
-          data: { id, site: raw?.site || null, title: raw?.title || null, ok: false, reason: String(res.errors[0]) },
+          data: {
+            id,
+            site: raw?.site || null,
+            title: raw?.title || null,
+            ok: false,
+            reason: String(res.errors[0]),
+          },
         });
       } catch {}
     }
@@ -260,16 +295,23 @@ export async function normalizeMany(items = [], options = {}) {
  */
 export function normalizeOne(item, options = {}) {
   const inferTime = !!options.inferDurations;
-  if (!item || typeof item !== "object") throw new Error("Invalid recipe payload");
+  if (!item || typeof item !== "object")
+    throw new Error("Invalid recipe payload");
 
   const nowIso = new Date().toISOString();
   const id = String(item.id || item.url || randomId());
 
   const title = cleanTitle(item.title || item.name || "Untitled Recipe");
   const site = (item.site || hostFromUrl(item.url)).toLowerCase() || null;
-  const author = cleanSpace(item.author || (item.raw?.author && (item.raw.author.name || item.raw.author)) || "");
+  const author = cleanSpace(
+    item.author ||
+      (item.raw?.author && (item.raw.author.name || item.raw.author)) ||
+      ""
+  );
   const image = item.image || firstImage(item.raw) || null;
-  const description = cleanSpace(item.description || item.raw?.description || "");
+  const description = cleanSpace(
+    item.description || item.raw?.description || ""
+  );
 
   const yieldObj = parseYield(item.yield);
   const time = {
@@ -292,27 +334,49 @@ export function normalizeOne(item, options = {}) {
     .concat(extractLDSteps(item.raw))
     .filter(Boolean);
 
-  let steps = rawSteps.map((raw, idx) => normalizeStep(raw, idx, { inferTime }));
+  let steps = rawSteps.map((raw, idx) =>
+    normalizeStep(raw, idx, { inferTime })
+  );
 
   // Equipment/tags
-  const equipment = dedupeStrings([...(item.equipment || []), ...inferEquipment(steps)]);
+  const equipment = dedupeStrings([
+    ...(item.equipment || []),
+    ...inferEquipment(steps),
+  ]);
   const tags = dedupeStrings(toArray(item.tags || item.keywords));
 
   // If no durations at all, amortize totalSec or apply defaults
-  if (steps.length && steps.every((s) => !Number.isFinite(s.durationSec) || s.durationSec <= 0)) {
-    const usableTotal = time.totalSec && time.totalSec > 0 ? time.totalSec : (time.cookSec || 0) + (time.prepSec || 0);
+  if (
+    steps.length &&
+    steps.every((s) => !Number.isFinite(s.durationSec) || s.durationSec <= 0)
+  ) {
+    const usableTotal =
+      time.totalSec && time.totalSec > 0
+        ? time.totalSec
+        : (time.cookSec || 0) + (time.prepSec || 0);
     if (usableTotal > 0) {
-      const per = Math.max(DEFAULTS.defaultStepDurationSec, Math.floor(usableTotal / steps.length));
+      const per = Math.max(
+        DEFAULTS.defaultStepDurationSec,
+        Math.floor(usableTotal / steps.length)
+      );
       steps = steps.map((s) => ({ ...s, durationSec: per }));
     } else if (inferTime) {
-      steps = steps.map((s) => ({ ...s, durationSec: DEFAULTS.defaultStepDurationSec }));
+      steps = steps.map((s) => ({
+        ...s,
+        durationSec: DEFAULTS.defaultStepDurationSec,
+      }));
     }
   }
 
   return {
     id,
     title,
-    source: { type: "recipe", url: item.url || null, site, refId: item.id || null },
+    source: {
+      type: "recipe",
+      url: item.url || null,
+      site,
+      refId: item.id || null,
+    },
     author: author || null,
     description: description || null,
     image,
@@ -331,7 +395,9 @@ export function normalizeOne(item, options = {}) {
 /* ----------------------------- Site Adapters ------------------------------- */
 
 function applySiteAdapter(item) {
-  const host = (item?.site || hostFromUrl(item?.url) || "").toLowerCase().trim();
+  const host = (item?.site || hostFromUrl(item?.url) || "")
+    .toLowerCase()
+    .trim();
   const fn = host && SITE_ADAPTERS.get(host);
   if (!fn) return item;
   try {
@@ -363,7 +429,8 @@ function normalizeIngredientRow(row) {
     name,
     qty: Number.isFinite(qty) ? round(qty, 3) : null,
     unit: unit || null,
-    original: original || (name ? `${qty || ""} ${unit || ""} ${name}`.trim() : null),
+    original:
+      original || (name ? `${qty || ""} ${unit || ""} ${name}`.trim() : null),
     notes: row?.notes || parsed.notes || null,
     grams: vol.grams || null,
     ml: vol.ml || null,
@@ -381,7 +448,9 @@ function parseIngredientString(s) {
   const t = normalizeFractions(s).replace(/\s+/g, " ").trim();
 
   // Extract qty (supports ranges; use average)
-  const qtyMatch = t.match(/^([0-9]+(?:\s+[0-9\/¼½¾⅓⅔⅛⅜⅝⅞])?|[0-9]*\s*[¼½¾⅓⅔⅛⅜⅝⅞]|[0-9]+(?:\.[0-9]+)?)(?:\s*[-–]\s*([0-9]+(?:\.[0-9]+)?))?\b/);
+  const qtyMatch = t.match(
+    /^([0-9]+(?:\s+[0-9\/¼½¾⅓⅔⅛⅜⅝⅞])?|[0-9]*\s*[¼½¾⅓⅔⅛⅜⅝⅞]|[0-9]+(?:\.[0-9]+)?)(?:\s*[-–]\s*([0-9]+(?:\.[0-9]+)?))?\b/
+  );
   let qty = null;
   let rest = t;
   if (qtyMatch) {
@@ -392,7 +461,9 @@ function parseIngredientString(s) {
   }
 
   // Unit next
-  const unitMatch = rest.match(/^(cups?|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lb|pounds?|g|grams?|kg|ml|milliliters?|l|liters?)\b\.?/i);
+  const unitMatch = rest.match(
+    /^(cups?|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lb|pounds?|g|grams?|kg|ml|milliliters?|l|liters?)\b\.?/i
+  );
   let unit = unitMatch ? unitMatch[0] : null;
   if (unit) rest = rest.slice(unit.length).trim();
 
@@ -417,7 +488,9 @@ function tryConvert(unit, qty, name) {
     try {
       const res = fn({ qty, unit, name });
       return { grams: Number(res?.grams) || null, ml: Number(res?.ml) || null };
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
   return { grams: null, ml: null };
 }
@@ -425,9 +498,17 @@ function tryConvert(unit, qty, name) {
 /* ------------------------------- Step parsing ------------------------------ */
 
 function normalizeStep(raw, idx, { inferTime }) {
-  const title = typeof raw === "string" ? deriveStepTitle(raw) : raw?.title || deriveStepTitle(raw?.desc || "");
-  const desc = typeof raw === "string" ? raw : raw?.desc || raw?.instruction || "";
-  const dur = Number.isFinite(raw?.durationSec) ? raw.durationSec : (inferTime ? extractDurationSec(desc) : null);
+  const title =
+    typeof raw === "string"
+      ? deriveStepTitle(raw)
+      : raw?.title || deriveStepTitle(raw?.desc || "");
+  const desc =
+    typeof raw === "string" ? raw : raw?.desc || raw?.instruction || "";
+  const dur = Number.isFinite(raw?.durationSec)
+    ? raw.durationSec
+    : inferTime
+    ? extractDurationSec(desc)
+    : null;
   const tempF = extractTempF(`${title} ${desc}`);
   const meta = {};
   if (Number.isFinite(tempF)) meta.tempTargetF = tempF;
@@ -483,9 +564,10 @@ function parseDuration(v) {
   const nums = t.match(/(\d+(?:\.\d+)?)/g);
   if (nums) {
     let sec = 0;
-    if (t.includes("hour")) sec += (toNumber(nums[0]) || 0) * 3600, nums.shift();
-    if (t.includes("min")) sec += (toNumber(nums[0]) || 0) * 60, nums.shift();
-    if (t.includes("sec")) sec += (toNumber(nums[0]) || 0), nums.shift();
+    if (t.includes("hour"))
+      (sec += (toNumber(nums[0]) || 0) * 3600), nums.shift();
+    if (t.includes("min")) (sec += (toNumber(nums[0]) || 0) * 60), nums.shift();
+    if (t.includes("sec")) (sec += toNumber(nums[0]) || 0), nums.shift();
     if (sec > 0) return sec;
     // plain minutes fallback
     return Math.round((toNumber(nums[0]) || 0) * 60);
@@ -496,7 +578,9 @@ function parseDuration(v) {
 function extractDurationSec(s) {
   // Scan for "12–15 min", "10-12 minutes", "about 45 min", "2 hrs"
   const t = (s || "").toLowerCase();
-  const m = t.match(/(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?\s*(hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)\b/);
+  const m = t.match(
+    /(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?\s*(hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)\b/
+  );
   if (!m) return null;
   const a = toNumber(m[1]);
   const b = toNumber(m[2]);
@@ -520,7 +604,7 @@ function extractTempF(s) {
   const c = t.match(/(\d{2,3})\s*°?\s*c\b/);
   if (c) {
     const cNum = clampInt(parseInt(c[1], 10), 30, 350);
-    return Math.round(cNum * 9 / 5 + 32);
+    return Math.round((cNum * 9) / 5 + 32);
   }
   return null;
 }
@@ -551,7 +635,9 @@ function extractLDIngredients(raw) {
     const ld = Array.isArray(raw) ? raw : [raw];
     for (const blob of ld) {
       const g = blob?.["@graph"] || (Array.isArray(blob) ? blob : null);
-      const cand = g ? g.find((n) => (n?.["@type"] || n?.type) === "Recipe") : blob;
+      const cand = g
+        ? g.find((n) => (n?.["@type"] || n?.type) === "Recipe")
+        : blob;
       const list = cand?.recipeIngredient || cand?.ingredients;
       if (Array.isArray(list)) return list;
     }
@@ -564,10 +650,16 @@ function extractLDSteps(raw) {
     const ld = Array.isArray(raw) ? raw : [raw];
     for (const blob of ld) {
       const g = blob?.["@graph"] || (Array.isArray(blob) ? blob : null);
-      const cand = g ? g.find((n) => (n?.["@type"] || n?.type) === "Recipe") : blob;
+      const cand = g
+        ? g.find((n) => (n?.["@type"] || n?.type) === "Recipe")
+        : blob;
       const inst = cand?.recipeInstructions;
       if (Array.isArray(inst)) {
-        return inst.map((x) => (typeof x === "string" ? { desc: x } : { title: x?.name, desc: x?.text || x?.description || "" }));
+        return inst.map((x) =>
+          typeof x === "string"
+            ? { desc: x }
+            : { title: x?.name, desc: x?.text || x?.description || "" }
+        );
       }
     }
   } catch {}
@@ -579,7 +671,9 @@ function firstImage(raw) {
     const ld = Array.isArray(raw) ? raw : [raw];
     for (const blob of ld) {
       const g = blob?.["@graph"] || (Array.isArray(blob) ? blob : null);
-      const cand = g ? g.find((n) => (n?.["@type"] || n?.type) === "Recipe") : blob;
+      const cand = g
+        ? g.find((n) => (n?.["@type"] || n?.type) === "Recipe")
+        : blob;
       const img = cand?.image;
       if (typeof img === "string") return img;
       if (img?.url) return img.url;
@@ -592,10 +686,16 @@ function firstImage(raw) {
 /* --------------------------------- Utils ----------------------------------- */
 
 function hostFromUrl(url) {
-  try { return new URL(url).host.replace(/^www\./, ""); } catch { return ""; }
+  try {
+    return new URL(url).host.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
 }
 
-function randomId() { return Math.random().toString(36).slice(2, 10); }
+function randomId() {
+  return Math.random().toString(36).slice(2, 10);
+}
 
 function pickDefined(o) {
   const out = {};
@@ -603,11 +703,25 @@ function pickDefined(o) {
   return out;
 }
 
-function cleanSpace(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
-function cleanTitle(s) { return capitalize(cleanSpace(s)); }
-function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
-function norm(s) { return String(s || "").toLowerCase().trim(); }
-function pad2(n) { return String(n).padStart(2, "0"); }
+function cleanSpace(s) {
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function cleanTitle(s) {
+  return capitalize(cleanSpace(s));
+}
+function capitalize(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+function norm(s) {
+  return String(s || "")
+    .toLowerCase()
+    .trim();
+}
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
 function dedupeStrings(arr) {
   const set = new Set();
   for (const a of arr || []) {
@@ -623,7 +737,7 @@ function toNumber(s) {
   if (/^\d+\s+\d+\/\d+$/.test(t)) {
     const [i, f] = t.split(/\s+/);
     const [n, d] = f.split("/").map(Number);
-    return Number(i) + (n / d);
+    return Number(i) + n / d;
   }
   if (/^\d+\/\d+$/.test(t)) {
     const [n, d] = t.split("/").map(Number);
@@ -666,18 +780,30 @@ function joinCue(prev, next) {
   return `${prev} ${next}`.trim();
 }
 
-function clampInt(n, min, max) { const v = Math.round(Number(n) || 0); return Math.min(Math.max(v, min), max); }
-function round(n, p = 2) { const f = Math.pow(10, p); return Math.round((Number(n) || 0) * f) / f; }
+function clampInt(n, min, max) {
+  const v = Math.round(Number(n) || 0);
+  return Math.min(Math.max(v, min), max);
+}
+function round(n, p = 2) {
+  const f = Math.pow(10, p);
+  return Math.round((Number(n) || 0) * f) / f;
+}
 
 async function softImport(path) {
   try {
     const mod = await import(/* @vite-ignore */ path);
     return mod?.default || mod;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function safeCall(fn, ...args) {
-  try { return fn?.(...args); } catch { return null; }
+  try {
+    return fn?.(...args);
+  } catch {
+    return null;
+  }
 }
 
 /* --------------------------------- Export ---------------------------------- */

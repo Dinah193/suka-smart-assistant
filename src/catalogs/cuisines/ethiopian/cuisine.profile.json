@@ -1,0 +1,953 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.ethiopian",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Ethiopian",
+    "shortName": "Ethiopian",
+    "description": "Communal, spice-forward cooking centered on injera (teff sourdough flatbread) and richly layered stews (wot/wat) built from aromatics, niter kibbeh, and signature blends like berbere and mitmita. Strong lentil/legume tradition and deep roasting/simmering flavors.",
+    "subtitle": "Injera + wot (stews), berbere heat, niter kibbeh depth, long-simmered comfort",
+    "originRegions": ["Horn of Africa"],
+    "regions": ["Ethiopia", "Horn of Africa"],
+    "primaryCountriesAndIslands": ["Ethiopia"],
+    "tags": [
+      "cuisine.ethiopian",
+      "region.horn_of_africa",
+      "style.stew_forward",
+      "style.communal_platter",
+      "spice.berbere",
+      "fermentation.injera",
+      "legume_forward",
+      "batch.friendly"
+    ],
+    "icon": "icon.injera_platter",
+    "colorHint": "warm_amber",
+    "heritageNotes": [
+      "Many dishes are built for sharing: stews and sautéed dishes are served on a large injera and eaten by hand.",
+      "Spice blends and clarified butter are foundational: berbere/mitmita for heat and aroma; niter kibbeh for fat-based flavor."
+    ],
+    "version": "1.0.0",
+    "author": "SSA Catalog",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19",
+    "status": "canonical",
+    "source": {
+      "curation": "canonical",
+      "maintainer": "SSA",
+      "license": "internal_catalog",
+      "attribution": "Traditional Ethiopian cooking patterns (non-exhaustive).",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "curated",
+      "type": "cuisine_profile",
+      "notes": "IDs referenced here are SSA-style canonical tokens; map to your actual catalogs via resolver/aliases.",
+      "url": null
+    },
+    "family": {
+      "parent": "cuisines.horn_of_africa",
+      "siblings": ["cuisines.eritrean"],
+      "overlapsWith": [
+        {
+          "id": "cuisines.east_african",
+          "reason": "Shared regional ingredients and some overlapping stew/legume patterns."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.ethiopian.highlands",
+        "name": "Highlands",
+        "signatureNotes": "Teff-forward injera with lentil stews and long-simmered aromatics; strong berbere backbone.",
+        "commonSauceBases": ["base.wot_onion_reduction", "base.berbere_paste"]
+      },
+      {
+        "id": "cuisines.ethiopian.rift_valley",
+        "name": "Rift Valley",
+        "signatureNotes": "Greens and sautéed components (e.g., gomen) alongside stews; balanced fat and aromatics.",
+        "commonSauceBases": [
+          "base.niter_kibbeh_aromatics",
+          "base.garlic_ginger"
+        ]
+      },
+      {
+        "id": "cuisines.ethiopian.spicy_red",
+        "name": "Red (Berbere/Mitmita)",
+        "signatureNotes": "Heat-forward dishes (e.g., doro wot) with berbere complexity; slower cooking for depth.",
+        "commonSauceBases": ["base.berbere_paste", "base.wot_onion_reduction"]
+      }
+    ],
+    "regionHints": ["Horn of Africa", "Ethiopia"],
+    "countryHints": ["Ethiopia"]
+  },
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "family_style",
+      "stew_and_starch",
+      "plated_meals",
+      "holiday_feasts"
+    ],
+    "weeknightBias": "Use batch bases (onion reduction, berbere paste, cooked lentils) and quick sauté sides (gomen, cabbage/carrot/potato) to make Ethiopian weeknight-friendly.",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "batch.wot_onion_base",
+        "batch.berbere_paste",
+        "batch.cooked_lentils",
+        "batch.shiro_mix"
+      ],
+      "notes": "Ethiopian stews reheat extremely well; cook bases in bulk and build multiple wot variations across the week."
+    },
+    "spiceHeatDefault": 3,
+    "saltinessDefault": "medium",
+    "sournessDefault": "medium",
+    "sweetnessDefault": "low",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": [
+      "fat.niter_kibbeh",
+      "fat.ghee",
+      "fat.butter",
+      "fat.neutral_oil",
+      "fat.olive_oil"
+    ],
+    "primaryStarches": [
+      "starch.injera_teff",
+      "starch.rice",
+      "starch.flatbread"
+    ],
+    "primaryProteins": [
+      "protein.chicken",
+      "protein.beef",
+      "protein.lamb",
+      "protein.lentils",
+      "protein.chickpeas"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.injera_platter",
+      "archetype.wot_stew",
+      "archetype.legume_stew",
+      "archetype.saute_side",
+      "archetype.spiced_meat"
+    ],
+    "defaultPlateTemplateIds": ["plate.ethiopian.platter_3wot_2side"]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "deep onion sweetness from long reduction",
+      "toasted chile + warm spice complexity (berbere)",
+      "clarified butter aromatics (niter kibbeh)",
+      "garlic/ginger backbone",
+      "fermented tang from injera"
+    ],
+    "aromaticsCore": [
+      "aromatic.onion",
+      "aromatic.garlic",
+      "aromatic.ginger",
+      "aromatic.shallot"
+    ],
+    "spiceCore": [
+      "spice.berbere",
+      "spice.mitmita",
+      "spice.korarima",
+      "spice.fenugreek",
+      "spice.black_cardamom",
+      "spice.clove",
+      "spice.cinnamon",
+      "spice.cumin",
+      "spice.paprika",
+      "spice.black_pepper"
+    ],
+    "umamiBuilders": [
+      "umami.niter_kibbeh",
+      "umami.browned_onion_base",
+      "umami.tomato_paste",
+      "umami.fermented_injera"
+    ],
+    "acidOptions": [
+      "acid.injera_tang",
+      "acid.lemon",
+      "acid.lime",
+      "acid.vinegar"
+    ],
+    "sweetBalanceOptions": [
+      "sweet.onion_reduction",
+      "sweet.carrot",
+      "sweet.honey"
+    ],
+    "heatOptions": [
+      "heat.berbere",
+      "heat.mitmita",
+      "heat.green_chile",
+      "heat.red_chile_flakes"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Build Ethiopian-inspired stews and sides with common pantry items plus one key spice blend.",
+      "items": [
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "spice.cumin",
+        "spice.paprika",
+        "spice.black_pepper",
+        "fat.neutral_oil",
+        "umami.tomato_paste",
+        "legume.red_lentils",
+        "legume.chickpeas",
+        "produce.kale_or_collards",
+        "acid.lemon",
+        "salt.kosher"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core Ethiopian pantry for authentic wot structure and injera-adjacent meals.",
+      "items": [
+        "fat.niter_kibbeh",
+        "spice.mitmita",
+        "spice.fenugreek",
+        "spice.korarima",
+        "grain.teff_flour",
+        "starch.injera_teff",
+        "legume.split_peas",
+        "legume.brown_lentils",
+        "produce.cabbage",
+        "produce.potato",
+        "produce.carrot"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional helpers and specialty items for deeper authenticity and variety.",
+      "items": [
+        "blend.shiro_powder",
+        "blend.awaze_paste",
+        "produce.ethiopian_kale",
+        "produce.green_chile",
+        "starter.injera_culture"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items (regional/rare) used occasionally or for deep dives.",
+      "items": [
+        "spice.besobela",
+        "spice.rue",
+        "grain.teff_dark",
+        "grain.teff_ivory"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.onion_reduction",
+      "method.simmer",
+      "method.saute",
+      "method.toasting_spices",
+      "method.bloom_spices_in_fat",
+      "method.fermentation"
+    ],
+    "common": [
+      "method.braise",
+      "method.stew",
+      "method.griddle",
+      "method.batch_cook"
+    ],
+    "notes": [
+      "The 'wot base' onion reduction is the core engine for many stews.",
+      "Spice blooming in fat (niter kibbeh or oil) is essential for aroma release.",
+      "Injera is fermented; plan ahead or use a starter/substitute strategy."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.injera_platter",
+      "label": "Injera Platter",
+      "description": "A communal platter built on injera with multiple stews/sautés arranged for sharing.",
+      "commonExamples": [
+        "Doro wot + misir wot + gomen",
+        "Shiro + atkilt + tibs"
+      ],
+      "defaults": {
+        "starchOptions": ["starch.injera_teff", "starch.flatbread"],
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.beef",
+          "protein.lamb",
+          "protein.goat",
+          "protein.eggs"
+        ],
+        "legumeOptions": [
+          "legume.red_lentils",
+          "legume.chickpeas",
+          "legume.split_peas"
+        ],
+        "greensOptions": ["produce.kale_or_collards", "produce.spinach"],
+        "vegOptions": ["produce.cabbage", "produce.carrot", "produce.potato"],
+        "sideOptions": ["side.atkilt", "side.salad"],
+        "riceOptions": ["starch.rice"],
+        "baseOptions": ["base.wot_onion_reduction", "base.garlic_ginger"],
+        "thickenerOptions": [
+          "thickener.reduced_onion",
+          "thickener.lentil_puree"
+        ],
+        "sauceOptions": ["sauce.wot_red", "sauce.shiro", "sauce.awaze"],
+        "grainOptions": ["grain.teff_flour"],
+        "garnishOptions": ["garnish.lemon", "garnish.herbs"],
+        "pairings": ["condiment.awaze", "condiment.spiced_butter", "drink.tea"]
+      }
+    },
+    {
+      "id": "archetype.wot_stew",
+      "label": "Wot (Wat) Stew",
+      "description": "Thick, richly spiced stew built on onion reduction and berbere with a fat-based bloom.",
+      "commonExamples": ["Doro wot", "Siga wot", "Misir wot"],
+      "defaults": {
+        "baseOptions": ["base.wot_onion_reduction", "base.berbere_paste"],
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.beef",
+          "protein.lamb",
+          "protein.goat"
+        ],
+        "legumeOptions": ["legume.red_lentils"],
+        "thickenerOptions": [
+          "thickener.reduced_onion",
+          "thickener.lentil_puree"
+        ],
+        "pairings": ["starch.injera_teff", "side.gomen", "side.atkilt"]
+      }
+    },
+    {
+      "id": "archetype.legume_stew",
+      "label": "Legume Stew",
+      "description": "Hearty lentil/pea/chickpea stew; can be berbere-forward (red) or milder (yellow).",
+      "commonExamples": ["Misir wot", "Shiro", "Kik alicha"],
+      "defaults": {
+        "legumeOptions": [
+          "legume.red_lentils",
+          "legume.split_peas",
+          "legume.chickpeas"
+        ],
+        "baseOptions": ["base.wot_onion_reduction", "base.garlic_ginger"],
+        "pairings": ["starch.injera_teff", "side.atkilt", "side.gomen"]
+      }
+    },
+    {
+      "id": "archetype.saute_side",
+      "label": "Sauté Side (Greens/Veg)",
+      "description": "Quick sautéed vegetable sides balancing rich stews (e.g., garlicky greens).",
+      "commonExamples": ["Gomen", "Atkilt (cabbage/potato/carrot)"],
+      "defaults": {
+        "greensOptions": ["produce.kale_or_collards", "produce.spinach"],
+        "vegOptions": ["produce.cabbage", "produce.carrot", "produce.potato"],
+        "pairings": ["archetype.wot_stew", "starch.injera_teff"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "grain.teff_flour",
+      "starch.injera_teff",
+      "spice.berbere",
+      "spice.mitmita",
+      "fat.niter_kibbeh",
+      "aromatic.onion",
+      "aromatic.garlic",
+      "aromatic.ginger",
+      "legume.red_lentils",
+      "legume.chickpeas",
+      "produce.kale_or_collards",
+      "produce.cabbage",
+      "umami.tomato_paste",
+      "acid.lemon"
+    ],
+    "optional_traditional": [
+      "spice.korarima",
+      "spice.besobela",
+      "blend.shiro_powder",
+      "blend.awaze_paste",
+      "starter.injera_culture"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid.heavy_cream",
+        "label": "Heavy cream",
+        "reason": "Most Ethiopian savory dishes build richness through clarified butter and reduction rather than cream."
+      },
+      {
+        "id": "avoid.sweet_ketchup",
+        "label": "Sweet ketchup-based sauces",
+        "reason": "Can distort berbere-forward flavor balance; use tomato paste + aromatics for sweetness instead."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.chicken",
+        "options": ["protein.turkey", "protein.goat", "protein.lamb"],
+        "notes": "For doro-style stews, poultry is classic; goat/lamb works but increase simmer time until tender."
+      },
+      {
+        "for": "protein.beef",
+        "options": ["protein.lamb", "protein.goat"],
+        "notes": "Tibs and siga wot adapt well to lamb/goat; adjust fat and cook time."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "starch.injera_teff",
+        "options": [
+          "starch.injera_blend",
+          "starch.sourdough_flatbread",
+          "starch.rice"
+        ],
+        "notes": "If teff injera is unavailable, use teff-blend injera or a tangy flatbread. Rice can stand in for weeknight plates."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "blend.shiro_powder",
+        "options": ["legume.chickpea_flour", "legume.split_pea_flour"],
+        "notes": "Shiro is seasoned chickpea flour; plain chickpea flour works—add berbere/garlic and simmer until glossy."
+      }
+    ],
+    "notes": [
+      "If niter kibbeh is unavailable, use ghee plus a small spice bloom (garlic/ginger + a pinch of warm spices) to approximate the aroma.",
+      "For berbere, a mild chili powder + paprika + warm spices can approximate in a pinch; adjust heat gradually."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.ethiopian.platter_3wot_2side",
+      "label": "Injera Platter (3 stews + 2 sides)",
+      "archetypeId": "archetype.injera_platter",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": ["starch.injera_teff", "starch.injera_blend"],
+          "chooseOne": true,
+          "notes": "Use injera if possible for the full experience."
+        },
+        {
+          "role": "stew_base",
+          "ingredientIds": ["base.wot_onion_reduction"],
+          "chooseOne": false,
+          "notes": "Batch onion base; split into different stews."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.beef",
+            "protein.lamb",
+            "protein.goat"
+          ],
+          "chooseOne": true,
+          "notes": "Choose one meat stew OR go vegetarian with more legume stews."
+        },
+        {
+          "role": "legume",
+          "ingredientIds": [
+            "legume.red_lentils",
+            "blend.shiro_powder",
+            "legume.split_peas"
+          ],
+          "chooseOne": false,
+          "notes": "Include at least one legume stew for balance and pantry economy."
+        },
+        {
+          "role": "greens",
+          "ingredientIds": ["produce.kale_or_collards", "produce.spinach"],
+          "chooseOne": true,
+          "notes": "Garlic greens (gomen-style) offset rich stews."
+        },
+        {
+          "role": "side",
+          "ingredientIds": ["side.atkilt", "side.salad", "side.lentil_salad"],
+          "chooseOne": true,
+          "notes": "Add one mild veg side to balance heat."
+        }
+      ],
+      "prepNotes": [
+        "Cook a big wot onion base first; then split into 2–3 pots for different stews.",
+        "Make injera ahead or source from a local market; keep warm wrapped."
+      ]
+    },
+    {
+      "id": "template.ethiopian.weeknight_misir_wot_plate",
+      "label": "Weeknight Misir Wot Plate",
+      "archetypeId": "archetype.legume_stew",
+      "components": [
+        {
+          "role": "legume",
+          "ingredientIds": ["legume.red_lentils"],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "ingredientIds": ["spice.berbere"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "ingredientIds": ["fat.niter_kibbeh", "fat.ghee", "fat.neutral_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "ingredientIds": [
+            "starch.injera_teff",
+            "starch.rice",
+            "starch.flatbread"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "greens",
+          "ingredientIds": ["produce.kale_or_collards", "produce.spinach"],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Use pre-made onion base or frozen portions for 25–35 minute cook time.",
+        "Cook lentils until silky; finish with lemon if desired."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.injera_fermentation",
+      "label": "Injera fermentation & storage",
+      "notes": [
+        "Injera batter ferments at room temperature; use clean containers and avoid contamination.",
+        "Cooked injera should be cooled, wrapped, and refrigerated within a few hours; reheat by steaming or warming in a covered pan."
+      ]
+    },
+    {
+      "id": "safety.spice_heat",
+      "label": "Managing berbere/mitmita heat",
+      "notes": [
+        "Berbere and mitmita can be very hot depending on blend; start small and scale gradually.",
+        "Bloom spices in fat gently to prevent scorching, which can create bitterness."
+      ]
+    },
+    {
+      "id": "safety.legume_thickening",
+      "label": "Legume stew thickening",
+      "notes": [
+        "Chickpea flour (shiro-style) thickens as it simmers; keep whisking at first to prevent lumps.",
+        "Ensure adequate simmer time to fully cook flour-based stews."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "injera",
+      "wot",
+      "wat",
+      "berbere",
+      "mitmita",
+      "niter kibbeh",
+      "doro wot",
+      "misir wot",
+      "shiro",
+      "tibs",
+      "gomen",
+      "atkilt"
+    ],
+    "commonAlternateNames": [
+      "Ethiopian",
+      "Wat (stew)",
+      "Wot (stew)",
+      "Injera (teff flatbread)"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "aromatic.onion",
+      "aromatic.garlic",
+      "aromatic.ginger",
+      "produce.lemon",
+      "produce.kale_or_collards"
+    ],
+    "proteinsCommon": [
+      "protein.chicken",
+      "protein.beef",
+      "protein.lamb",
+      "protein.goat",
+      "protein.eggs"
+    ],
+    "produceCommon": [
+      "produce.cabbage",
+      "produce.carrot",
+      "produce.potato",
+      "produce.spinach",
+      "produce.green_chile"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "fat.niter_kibbeh",
+        "fallbacks": ["fat.ghee", "fat.butter", "fat.neutral_oil"],
+        "note": "Use ghee or butter and bloom garlic/ginger + warm spices briefly to approximate niter kibbeh aroma."
+      },
+      {
+        "ingredient": "grain.teff_flour",
+        "fallbacks": [
+          "grain.teff_blend_flour",
+          "grain.sorghum_flour",
+          "grain.buckwheat_flour"
+        ],
+        "note": "For injera-like results without pure teff, use blends; maintain fermentation tang and cook on a hot griddle."
+      },
+      {
+        "ingredient": "spice.berbere",
+        "fallbacks": [
+          "spice.ethiopian_chili_blend",
+          "spice.chili_powder_paprika_mix"
+        ],
+        "note": "Blend mild chili powder + paprika + warm spices (cumin, clove, cinnamon) if berbere is unavailable; adjust heat slowly."
+      }
+    ],
+    "staples": {},
+    "coreStaples": {},
+    "optionalRegionalStaples": {}
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.onion_reduction",
+      "method.simmer",
+      "method.braise",
+      "method.saute",
+      "method.toasting_spices",
+      "method.bloom_spices_in_fat",
+      "method.fermentation",
+      "method.griddle"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.wot_base",
+        "name": "Wot Onion Base",
+        "steps": [
+          "step.slice_onions",
+          "step.slow_cook_onions",
+          "step.reduce_to_paste",
+          "step.bloom_spices_in_fat",
+          "step.simmer_to_deepen"
+        ],
+        "notes": "Cook onions low and slow until deeply reduced; this forms the base for many stews."
+      },
+      {
+        "id": "process.injera_ferment_cook",
+        "name": "Injera Ferment + Cook",
+        "steps": [
+          "step.mix_batter",
+          "step.ferment",
+          "step.adjust_thickness",
+          "step.griddle_pour",
+          "step.steam_cover"
+        ],
+        "notes": "Injera relies on fermentation for tang and texture; cook with a lid to steam."
+      }
+    ],
+    "coreTechniques": [],
+    "equipmentAffinity": {
+      "bestFor": {
+        "method.onion_reduction": ["tool.heavy_pot", "tool.wooden_spoon"],
+        "method.griddle": ["tool.griddle", "tool.nonstick_pan", "tool.lid"]
+      }
+    },
+    "core": [],
+    "signatureMethods": [
+      "Long onion reduction for stew base.",
+      "Spice bloom in niter kibbeh/ghee.",
+      "Fermented batter griddle-steamed into injera."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.heavy_pot",
+      "tool.dutch_oven",
+      "tool.wooden_spoon",
+      "tool.griddle",
+      "tool.nonstick_pan",
+      "tool.lid",
+      "tool.blender",
+      "tool.whisk"
+    ],
+    "optionalButHelpful": [
+      "tool.spice_grinder",
+      "tool.fermentation_container",
+      "tool.cast_iron_skillet"
+    ],
+    "notes": [
+      "A heavy pot helps prevent scorching during long onion reductions.",
+      "A large lidded pan or griddle helps steam-cook injera properly."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": ["allergen.gluten", "allergen.dairy"],
+    "dietCompatibility": {
+      "vegan": {
+        "friendly": true,
+        "notes": "Many Ethiopian staples are lentil/pea-based; use oil instead of niter kibbeh and focus on misir, shiro, kik alicha, gomen, atkilt."
+      },
+      "gluten_free": {
+        "friendly": true,
+        "notes": "True teff injera is gluten-free; confirm blends if using wheat/barley. Many stews are naturally GF if thickened without wheat."
+      },
+      "dairy_free": {
+        "friendly": true,
+        "notes": "Use oil instead of niter kibbeh/butter; the cuisine adapts well for dairy-free households."
+      }
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.ethiopian.doro_wot",
+        "name": "Doro_wot",
+        "subprofiles": ["cuisines.ethiopian.spicy_red"],
+        "difficulty": "advanced",
+        "heatTypical": 4,
+        "notes": "Iconic berbere-forward chicken stew often served with eggs; traditionally slow-simmered for deep flavor."
+      },
+      {
+        "id": "dish.ethiopian.misir_wot",
+        "name": "Misir_wot",
+        "subprofiles": ["cuisines.ethiopian.highlands"],
+        "difficulty": "beginner",
+        "heatTypical": 3,
+        "notes": "Weeknight-friendly, pantry-based lentil stew with berbere and onion base."
+      },
+      {
+        "id": "dish.ethiopian.shiro",
+        "name": "Shiro",
+        "subprofiles": ["cuisines.ethiopian.highlands"],
+        "difficulty": "beginner",
+        "heatTypical": 2,
+        "notes": "Creamy stew made from seasoned chickpea flour; fast and highly adaptable."
+      },
+      {
+        "id": "dish.ethiopian.tibs",
+        "name": "Tibs",
+        "subprofiles": ["cuisines.ethiopian.rift_valley"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Quick-cooked meat with aromatics and spices; great for weeknights when base is prepped."
+      },
+      {
+        "id": "dish.ethiopian.gomen",
+        "name": "Gomen",
+        "subprofiles": ["cuisines.ethiopian.rift_valley"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Greens sautéed with garlic and spiced fat; essential balancing side."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.ethiopian.spiced_tea",
+        "name": "Spiced_tea",
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Warm spice tea often served alongside meals or after."
+      }
+    ],
+    "examples": [
+      "doro_wot_with_eggs_on_injera",
+      "misir_wot_with_gomen_and_atkilt",
+      "shiro_with_salad_and_injera",
+      "tibs_platter_with_lemon"
+    ],
+    "mealPatterns": [
+      "one_or_two_rich_stews_plus_one_mild_veg_side_plus_greens_on_injera",
+      "batch_onion_base_then_split_into_red_and_yellow_variations"
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": ["starch.injera_teff", "starch.injera_blend"],
+    "typicalVegSides": ["side.gomen", "side.atkilt", "side.salad"],
+    "typicalCondiments": [
+      "condiment.awaze",
+      "condiment.spiced_butter",
+      "condiment.green_chile"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "dish.ethiopian.doro_wot",
+        "pair": ["starch.injera_teff", "side.atkilt", "garnish.lemon"],
+        "note": "Rich berbere chicken stew pairs best with mild cabbage/potato sides and bright citrus."
+      },
+      {
+        "with": "dish.ethiopian.misir_wot",
+        "pair": ["side.gomen", "side.salad", "starch.injera_teff"],
+        "note": "Lentil stew is balanced by garlicky greens and fresh salad."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "antipairing.over_sweet",
+        "avoid": ["sweet.ketchup", "sweet.bbq_sauce"],
+        "note": "Overly sweet sauces can clash with berbere and onion-reduction depth."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.niter_kibbeh_to_ghee",
+        "whenMissing": ["fat.niter_kibbeh"],
+        "use": ["fat.ghee"],
+        "ratio": 1,
+        "notes": "Use ghee as a direct substitute; bloom garlic/ginger + warm spices briefly to mimic niter kibbeh."
+      },
+      {
+        "id": "sub.shiro_to_chickpea_flour",
+        "whenMissing": ["blend.shiro_powder"],
+        "use": ["legume.chickpea_flour"],
+        "ratio": 1,
+        "notes": "Season chickpea flour with berbere, garlic, and salt; whisk into simmering liquid to thicken."
+      },
+      {
+        "id": "sub.injera_to_tangy_flatbread",
+        "whenMissing": ["starch.injera_teff"],
+        "use": ["starch.sourdough_flatbread"],
+        "ratio": 1,
+        "notes": "Use tangy flatbread as a practical substitute; serve stews family-style."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.no_griddle_injera_pan",
+        "whenNoEquipment": ["tool.griddle"],
+        "adapt": "method.griddle_in_pan",
+        "notes": "Cook injera in a wide nonstick pan; pour, cover with lid to steam, remove when set."
+      }
+    ],
+    "rules": []
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.wot_onion_base",
+        "name": "Wot Onion Base",
+        "makes": "base.wot_onion_reduction",
+        "freezerFriendly": true,
+        "notes": "Cook a large onion reduction and freeze in 1–2 cup portions; base for multiple stews."
+      },
+      {
+        "id": "batch.berbere_paste",
+        "name": "Berbere Paste",
+        "makes": "base.berbere_paste",
+        "freezerFriendly": true,
+        "notes": "Mix berbere with aromatics and fat; freeze small portions for quick weeknight stews."
+      },
+      {
+        "id": "batch.cooked_lentils",
+        "name": "Cooked Lentils",
+        "makes": "component.cooked_lentils",
+        "freezerFriendly": true,
+        "notes": "Cook red lentils plain; use as a fast base for misir wot by adding wot base + berbere."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use frozen wot base + canned chickpeas to make a fast shiro-style stew in 20–25 minutes.",
+      "Make garlicky greens while a stew simmers; it’s a quick balance dish.",
+      "Serve stews with rice or flatbread if injera is not available on a given weeknight."
+    ],
+    "seasonality": [
+      {
+        "season": "season.cool_weather",
+        "focus": ["dish.ethiopian.wot_variants", "dish.ethiopian.lentil_stews"]
+      },
+      {
+        "season": "season.warm_weather",
+        "focus": ["side.salad", "dish.ethiopian.tibs", "dish.ethiopian.greens"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Start Here",
+        "items": [
+          "dish.ethiopian.misir_wot",
+          "dish.ethiopian.shiro",
+          "dish.ethiopian.gomen"
+        ]
+      },
+      {
+        "title": "Weekend Project",
+        "items": [
+          "dish.ethiopian.doro_wot",
+          "process.injera_ferment_cook",
+          "process.wot_base"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "injera",
+      "berbere",
+      "wot",
+      "wat",
+      "shiro",
+      "misir",
+      "doro",
+      "tibs",
+      "gomen",
+      "niter_kibbeh"
+    ],
+    "colorHints": {
+      "primary": "warm_amber",
+      "secondary": "deep_red",
+      "accent": "earth_brown"
+    },
+    "iconHints": ["icon.injera_platter", "icon.spice_bowl", "icon.stew_pot"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.ethiopian",
+      "region.horn_of_africa",
+      "stew_and_starch",
+      "family_style"
+    ],
+    "defaultPlateTemplateIds": ["plate.ethiopian.platter_3wot_2side"],
+    "notes": [
+      "If your ingredient/equipment catalogs use different IDs, wire aliases in cuisine rulesets or global alias maps.",
+      "This profile is designed to work with deterministic planners: batch bases + modular stew/side composition."
+    ]
+  },
+
+  "notes": [
+    "Ethiopian cooking is modular: one onion base can become multiple stews by changing spices and main components.",
+    "Many staples are legume-forward and can be vegan while still rich and satisfying.",
+    "Injera is a key experience component; when unavailable, prioritize tangy/fermented breads or serve as bowls over rice."
+  ]
+}

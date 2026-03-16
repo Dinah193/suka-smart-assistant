@@ -20,8 +20,8 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 // If you already have a hub export helper, point this import there.
 import { exportToHubIfEnabled } from "@/services/hubExport";
 
@@ -114,8 +114,12 @@ export function mapMonthStartsToPlantingWindows(months, cropProfiles) {
   const windows = [];
 
   for (const crop of cropProfiles) {
-    const preferred = Array.isArray(crop.preferredMonths) ? crop.preferredMonths : [];
-    const fallback = Array.isArray(crop.fallbackMonths) ? crop.fallbackMonths : [];
+    const preferred = Array.isArray(crop.preferredMonths)
+      ? crop.preferredMonths
+      : [];
+    const fallback = Array.isArray(crop.fallbackMonths)
+      ? crop.fallbackMonths
+      : [];
 
     if (preferred.length === 0 && fallback.length === 0) continue;
 
@@ -130,7 +134,7 @@ export function mapMonthStartsToPlantingWindows(months, cropProfiles) {
           hebrewMonth: monthIndex,
           gregorianStartDate: m.gregorianStartDate,
           windowType: "primary",
-          flags: m.flags || []
+          flags: m.flags || [],
         });
       } else if (fallback.includes(monthIndex)) {
         windows.push({
@@ -140,7 +144,7 @@ export function mapMonthStartsToPlantingWindows(months, cropProfiles) {
           hebrewMonth: monthIndex,
           gregorianStartDate: m.gregorianStartDate,
           windowType: "fallback",
-          flags: m.flags || []
+          flags: m.flags || [],
         });
       }
     }
@@ -181,7 +185,7 @@ export function mapMonthStartsToFeastAnchors(months) {
       hebrewMonth: 1,
       hebrewDay: 14,
       approxGregorianDate: m1.gregorianStartDate,
-      flags: ["anchor-only", "approximate"]
+      flags: ["anchor-only", "approximate"],
     });
 
     // Unleavened Bread (15–21 of Month 1) – we store just the anchor.
@@ -192,7 +196,7 @@ export function mapMonthStartsToFeastAnchors(months) {
       hebrewMonth: 1,
       hebrewDay: 15,
       approxGregorianDate: m1.gregorianStartDate,
-      flags: ["anchor-only", "approximate"]
+      flags: ["anchor-only", "approximate"],
     });
 
     // Firstfruits (day after the Sabbath within UB); we just anchor.
@@ -203,7 +207,7 @@ export function mapMonthStartsToFeastAnchors(months) {
       hebrewMonth: 1,
       hebrewDay: 16,
       approxGregorianDate: m1.gregorianStartDate,
-      flags: ["anchor-only", "approximate"]
+      flags: ["anchor-only", "approximate"],
     });
   }
 
@@ -216,7 +220,7 @@ export function mapMonthStartsToFeastAnchors(months) {
       hebrewMonth: 7,
       hebrewDay: 1,
       approxGregorianDate: m7.gregorianStartDate,
-      flags: ["anchor-only", "approximate"]
+      flags: ["anchor-only", "approximate"],
     });
 
     // Yom Kippur (10th of Month 7)
@@ -227,7 +231,7 @@ export function mapMonthStartsToFeastAnchors(months) {
       hebrewMonth: 7,
       hebrewDay: 10,
       approxGregorianDate: m7.gregorianStartDate,
-      flags: ["anchor-only", "approximate"]
+      flags: ["anchor-only", "approximate"],
     });
 
     // Sukkot (15th of Month 7)
@@ -238,7 +242,7 @@ export function mapMonthStartsToFeastAnchors(months) {
       hebrewMonth: 7,
       hebrewDay: 15,
       approxGregorianDate: m7.gregorianStartDate,
-      flags: ["anchor-only", "approximate"]
+      flags: ["anchor-only", "approximate"],
     });
   }
 
@@ -267,7 +271,11 @@ export function buildFeastSessionDrafts(anchors, meta) {
     // Choose domain based on feast type (simple heuristic).
     /** @type {"storehouse"|"cooking"|"animals"} */
     let domain = "storehouse";
-    if (anchor.feastKey === "pesach" || anchor.feastKey === "chagMatzot" || anchor.feastKey === "sukkot") {
+    if (
+      anchor.feastKey === "pesach" ||
+      anchor.feastKey === "chagMatzot" ||
+      anchor.feastKey === "sukkot"
+    ) {
       domain = "cooking";
     } else if (anchor.feastKey === "firstfruits") {
       domain = "storehouse";
@@ -281,54 +289,52 @@ export function buildFeastSessionDrafts(anchors, meta) {
       title,
       source: {
         type: "manual",
-        refId: null
+        refId: null,
       },
       steps: [
         {
           id: `${id}-step-1`,
           title: "Review feast requirements",
-          desc:
-            "Review commands, household size, and storehouse levels to decide offerings, meals, and guest list.",
+          desc: "Review commands, household size, and storehouse levels to decide offerings, meals, and guest list.",
           durationSec: 1800,
           blockers: ["inventory", "quietHours"],
           metadata: {
             tempTargetF: 0,
             donenessCue: "timer",
-            cueNotes: ""
-          }
+            cueNotes: "",
+          },
         },
         {
           id: `${id}-step-2`,
           title: "Build batch cooking / preparation session",
-          desc:
-            "Generate or link a cooking / storehouse session for this feast using SSA’s planning tools.",
+          desc: "Generate or link a cooking / storehouse session for this feast using SSA’s planning tools.",
           durationSec: 1200,
           blockers: ["inventory", "equipment"],
           metadata: {
             tempTargetF: 0,
             donenessCue: "timer",
-            cueNotes: ""
-          }
-        }
+            cueNotes: "",
+          },
+        },
       ],
       prefs: {
         voiceGuidance: true,
         haptic: true,
-        autoAdvance: false
+        autoAdvance: false,
       },
       status: "pending",
       progress: {
         currentStepIndex: 0,
         elapsedSec: 0,
         startedAt: null,
-        pausedAt: null
+        pausedAt: null,
       },
       analytics: {
         skippedSteps: [],
-        adjustments: []
+        adjustments: [],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     sessions.push({
@@ -337,7 +343,7 @@ export function buildFeastSessionDrafts(anchors, meta) {
       title,
       feastKey: anchor.feastKey,
       approxGregorianDate: anchor.approxGregorianDate,
-      sessionDraft
+      sessionDraft,
     });
   }
 
@@ -372,7 +378,7 @@ export function useHebrewPlantingPlans(options) {
       calculatorId: "calendar.hebrewMonthStart",
       nodeKey: "calendar.hebrewMonthStart",
       zone: zone || null,
-      windows
+      windows,
     };
 
     emitSafe("planningGraph.calendar.planting.derived", payload);
@@ -381,7 +387,7 @@ export function useHebrewPlantingPlans(options) {
       exportToHubIfEnabled({
         topic: "calendar.planting",
         payload,
-        source: "HebrewMonthStartCalendar.hooks"
+        source: "HebrewMonthStartCalendar.hooks",
       }).catch(() => {
         // Hub export failures should never break local UX
       });
@@ -392,7 +398,7 @@ export function useHebrewPlantingPlans(options) {
   useEffect(() => {
     if (!windows.length) return;
     emitSafe("planningGraph.calendar.planting.preview", {
-      windowsCount: windows.length
+      windowsCount: windows.length,
     });
   }, [windows]);
 
@@ -427,7 +433,7 @@ export function useHebrewFeastSessions(options) {
     () =>
       buildFeastSessionDrafts(anchors, {
         rulePresetId,
-        gregorianYear
+        gregorianYear,
       }),
     [anchors, rulePresetId, gregorianYear]
   );
@@ -441,7 +447,7 @@ export function useHebrewFeastSessions(options) {
       rulePresetId,
       gregorianYear,
       anchors,
-      sessionCount: sessions.length
+      sessionCount: sessions.length,
     };
 
     emitSafe("planningGraph.calendar.feasts.derived", payload);
@@ -450,7 +456,7 @@ export function useHebrewFeastSessions(options) {
       exportToHubIfEnabled({
         topic: "calendar.feasts",
         payload,
-        source: "HebrewMonthStartCalendar.hooks"
+        source: "HebrewMonthStartCalendar.hooks",
       }).catch(() => {});
     }
   }, [anchors, gregorianYear, rulePresetId, sessions.length]);
@@ -461,7 +467,7 @@ export function useHebrewFeastSessions(options) {
     emitSafe("session.builder.requested", {
       domain: "storehouse",
       reason: "hebrewMonthStartCalendar.feasts",
-      sessions
+      sessions,
     });
   }, [sessions]);
 
@@ -470,7 +476,7 @@ export function useHebrewFeastSessions(options) {
     if (!anchors.length) return;
     emitSafe("planningGraph.calendar.feasts.preview", {
       anchorsCount: anchors.length,
-      sessionsCount: sessions.length
+      sessionsCount: sessions.length,
     });
   }, [anchors.length, sessions.length]);
 
@@ -478,7 +484,7 @@ export function useHebrewFeastSessions(options) {
     anchors,
     sessions,
     emitFeastPlanningEvent,
-    requestFeastSessionsNow
+    requestFeastSessionsNow,
   };
 }
 
@@ -498,7 +504,7 @@ function emitSafe(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/calendar/HebrewMonthStartCalendar.hooks",
-      data
+      data,
     });
   } catch {
     // Never crash if the event bus misbehaves.

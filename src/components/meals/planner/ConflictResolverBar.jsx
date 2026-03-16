@@ -35,7 +35,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let automation = null;
@@ -62,20 +62,22 @@ let useMealPlanStore = () => ({
   getConflicts: () => [],
 });
 try {
-  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
+  useMealPlanStore =
+    require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
 } catch {}
 
 let useHouseholdCalendar = () => ({ events: [] });
 try {
   useHouseholdCalendar =
-    require("@/store/HouseholdCalendarStore").useHouseholdCalendar || useHouseholdCalendar;
+    require("@/store/HouseholdCalendarStore").useHouseholdCalendar ||
+    useHouseholdCalendar;
 } catch {}
 
 let usePersonalFoodStandards = () => ({ standards: {} });
 try {
   usePersonalFoodStandards =
-    require("@/app/context/HouseholdSettingsContext").usePersonalFoodStandards ||
-    usePersonalFoodStandards;
+    require("@/app/context/HouseholdSettingsContext")
+      .usePersonalFoodStandards || usePersonalFoodStandards;
 } catch {}
 
 /* --------------------------------- Helpers ---------------------------------- */
@@ -90,7 +92,10 @@ const SEVERITY_COLORS = {
 
 function persistUI(state) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ expanded: state.expanded }));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ expanded: state.expanded })
+    );
   } catch {}
 }
 function loadUI() {
@@ -104,7 +109,9 @@ function loadUI() {
 /** Minimal standards check (aligns with RecipeCard/LibraryFilters logic) */
 function standardsViolation(recipe = {}, standards = {}) {
   const title = recipe?.title || "";
-  const tags = new Set((recipe?.tags || []).map((t) => (typeof t === "string" ? t : t?.id)));
+  const tags = new Set(
+    (recipe?.tags || []).map((t) => (typeof t === "string" ? t : t?.id))
+  );
   if (standards?.noPork && (tags.has("pork") || /pork/i.test(title))) {
     return "Contains pork";
   }
@@ -133,9 +140,13 @@ function deriveConflicts(planItems = [], standards = {}, calendarEvents = []) {
         id: `dup-${key}`,
         type: "time-overlap",
         severity: "med",
-        message: `Multiple meals planned for ${m.slot || "unslotted"} on ${m.date}`,
+        message: `Multiple meals planned for ${m.slot || "unslotted"} on ${
+          m.date
+        }`,
         context: { date: m.date, slot: m.slot, items: [seen.get(key), m] },
-        fixes: [{ label: "Auto move to next slot", action: "reschedule-next-slot" }],
+        fixes: [
+          { label: "Auto move to next slot", action: "reschedule-next-slot" },
+        ],
       });
     } else {
       seen.set(key, m);
@@ -152,7 +163,10 @@ function deriveConflicts(planItems = [], standards = {}, calendarEvents = []) {
         severity: "high",
         message: `${reason}: ${m.recipe?.title || "Recipe"}`,
         context: { item: m },
-        fixes: [{ label: "Swap recipe", action: "swap" }, { label: "Remove", action: "remove" }],
+        fixes: [
+          { label: "Swap recipe", action: "swap" },
+          { label: "Remove", action: "remove" },
+        ],
       });
     }
   }
@@ -166,7 +180,9 @@ function deriveConflicts(planItems = [], standards = {}, calendarEvents = []) {
           id: `inv-${m.id}`,
           type: "inventory",
           severity: "med",
-          message: `${inv.missing.length} ingredient(s) missing for ${m.recipe?.title || "meal"}`,
+          message: `${inv.missing.length} ingredient(s) missing for ${
+            m.recipe?.title || "meal"
+          }`,
           context: { item: m, missing: inv.missing },
           fixes: [
             { label: "Add to Grocery", action: "add-missing-grocery" },
@@ -183,10 +199,16 @@ function deriveConflicts(planItems = [], standards = {}, calendarEvents = []) {
     if (!prepWindow || !m.date || !m.time) continue;
     const target = new Date(`${m.date}T${m.time}`);
     const start = new Date(target.getTime() - prepWindow * 60000);
-    const end = new Date(target.getTime() + (m.recipe?.cookMinutes || 0) * 60000);
+    const end = new Date(
+      target.getTime() + (m.recipe?.cookMinutes || 0) * 60000
+    );
     const hit = calendarEvents.find((ev) => {
-      const evStart = new Date(ev.start || ev.startTime || ev.startsAt || ev.dtStart || ev);
-      const evEnd = new Date(ev.end || ev.endTime || ev.endsAt || ev.dtEnd || evStart);
+      const evStart = new Date(
+        ev.start || ev.startTime || ev.startsAt || ev.dtStart || ev
+      );
+      const evEnd = new Date(
+        ev.end || ev.endTime || ev.endsAt || ev.dtEnd || evStart
+      );
       return start < evEnd && end > evStart;
     });
     if (hit) {
@@ -211,7 +233,12 @@ function deriveConflicts(planItems = [], standards = {}, calendarEvents = []) {
 const Badge = ({ children, tone = "med" }) => {
   const cls = SEVERITY_COLORS[tone] || SEVERITY_COLORS.med;
   return (
-    <span className={cx("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border", cls)}>
+    <span
+      className={cx(
+        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border",
+        cls
+      )}
+    >
       {children}
     </span>
   );
@@ -223,7 +250,9 @@ const Row = ({ icon: Icon, title, subtitle, tone = "med", actions = [] }) => (
       {Icon ? <Icon className="w-5 h-5 mt-0.5 text-gray-600" /> : null}
       <div>
         <div className="text-sm font-medium text-gray-900">{title}</div>
-        {subtitle ? <div className="text-xs text-gray-600 mt-0.5">{subtitle}</div> : null}
+        {subtitle ? (
+          <div className="text-xs text-gray-600 mt-0.5">{subtitle}</div>
+        ) : null}
       </div>
     </div>
     {actions?.length ? (
@@ -261,8 +290,29 @@ export default function ConflictResolverBar({
   /** Called after "Resolve All" */
   onResolveAll,
 }) {
-  const { TriangleAlert, CheckCircle2, XCircle, Clock, CalendarClock, ShoppingCart, ChefHat, Scale, RefreshCcw, Sparkles, ListChecks, Layers, Replace, MoveRight, Plus, Minus, ChevronDown, ChevronUp, Settings2, ShieldAlert, Ban } =
-    Icons;
+  const {
+    TriangleAlert,
+    CheckCircle2,
+    XCircle,
+    Clock,
+    CalendarClock,
+    ShoppingCart,
+    ChefHat,
+    Scale,
+    RefreshCcw,
+    Sparkles,
+    ListChecks,
+    Layers,
+    Replace,
+    MoveRight,
+    Plus,
+    Minus,
+    ChevronDown,
+    ChevronUp,
+    Settings2,
+    ShieldAlert,
+    Ban,
+  } = Icons;
 
   const { standards } = usePersonalFoodStandards();
   const cal = useHouseholdCalendar();
@@ -299,7 +349,10 @@ export default function ConflictResolverBar({
       high: all.filter((c) => c.severity === "high").length,
       med: all.filter((c) => c.severity === "med").length,
       low: all.filter((c) => c.severity === "low").length,
-      byType: all.reduce((acc, c) => ((acc[c.type] = (acc[c.type] || 0) + 1), acc), {}),
+      byType: all.reduce(
+        (acc, c) => ((acc[c.type] = (acc[c.type] || 0) + 1), acc),
+        {}
+      ),
       open: all,
     };
   }, [conflicts]);
@@ -355,7 +408,9 @@ export default function ConflictResolverBar({
         case "standards": {
           // Swap recipe: let store choose a similar one
           const it = ctx.item;
-          mealPlan.swapRecipe?.(it?.id, { strategy: "match-tags-with-standards" });
+          mealPlan.swapRecipe?.(it?.id, {
+            strategy: "match-tags-with-standards",
+          });
           break;
         }
         case "macros":
@@ -367,7 +422,10 @@ export default function ConflictResolverBar({
       }
 
       onResolved?.(conf.id, { type: conf.type });
-      eventBus.emit("meals.planner.conflict.resolved", { id: conf.id, type: conf.type });
+      eventBus.emit("meals.planner.conflict.resolved", {
+        id: conf.id,
+        type: conf.type,
+      });
     } finally {
       setBusy(false);
     }
@@ -383,7 +441,9 @@ export default function ConflictResolverBar({
         await resolveOne(c);
       }
       onResolveAll?.();
-      eventBus.emit("meals.planner.conflict.resolveAll", { total: counts.total });
+      eventBus.emit("meals.planner.conflict.resolveAll", {
+        total: counts.total,
+      });
       if (automation?.runTemplate) {
         // Optionally trigger post-resolve automation (e.g., regenerate grocery list)
         automation.runTemplate("meals.postResolve.regenerateDerivedLists", {
@@ -398,7 +458,12 @@ export default function ConflictResolverBar({
   /* ------------------------------ Row render map ------------------------------ */
   function rowFor(conf) {
     const title = conf.message;
-    const tone = conf.severity === "high" ? "high" : conf.severity === "low" ? "low" : "med";
+    const tone =
+      conf.severity === "high"
+        ? "high"
+        : conf.severity === "low"
+        ? "low"
+        : "med";
     const common = [
       {
         label: "Resolve",
@@ -416,7 +481,11 @@ export default function ConflictResolverBar({
             key={conf.id}
             icon={ShoppingCart}
             title={title}
-            subtitle={missing.length ? `Missing: ${missing.map((m) => m.name || m).join(", ")}` : null}
+            subtitle={
+              missing.length
+                ? `Missing: ${missing.map((m) => m.name || m).join(", ")}`
+                : null
+            }
             tone={tone}
             actions={[
               {
@@ -425,16 +494,21 @@ export default function ConflictResolverBar({
                 onClick: () => {
                   try {
                     InventoryMonitor.addToGroceryList?.(missing, {
-                      note: `Auto-added for ${conf.context?.item?.recipe?.title || "meal"}`,
+                      note: `Auto-added for ${
+                        conf.context?.item?.recipe?.title || "meal"
+                      }`,
                     });
-                    eventBus.emit("meals.grocery.added", { count: missing.length });
+                    eventBus.emit("meals.grocery.added", {
+                      count: missing.length,
+                    });
                   } catch {}
                 },
               },
               {
                 label: "Suggest substitutes",
                 icon: Replace,
-                onClick: () => eventBus.emit("meals.substitutes.request", conf.context),
+                onClick: () =>
+                  eventBus.emit("meals.substitutes.request", conf.context),
               },
               ...common,
             ]}
@@ -453,9 +527,13 @@ export default function ConflictResolverBar({
                 label: "Move to next slot",
                 icon: MoveRight,
                 onClick: () =>
-                  mealPlan.moveMeal?.(conf.context?.items?.[1]?.id || conf.context?.items?.[0]?.id, {
-                    strategy: "next-slot",
-                  }),
+                  mealPlan.moveMeal?.(
+                    conf.context?.items?.[1]?.id ||
+                      conf.context?.items?.[0]?.id,
+                    {
+                      strategy: "next-slot",
+                    }
+                  ),
               },
               ...common,
             ]}
@@ -472,12 +550,17 @@ export default function ConflictResolverBar({
               {
                 label: "Shift prep -30m",
                 icon: MoveRight,
-                onClick: () => mealPlan.moveMeal?.(conf.context?.item?.id, { strategy: "shift-prep", minutes: -30 }),
+                onClick: () =>
+                  mealPlan.moveMeal?.(conf.context?.item?.id, {
+                    strategy: "shift-prep",
+                    minutes: -30,
+                  }),
               },
               {
                 label: "Reschedule day",
                 icon: Layers,
-                onClick: () => eventBus.emit("meals.reschedule.modal", conf.context),
+                onClick: () =>
+                  eventBus.emit("meals.reschedule.modal", conf.context),
               },
               ...common,
             ]}
@@ -494,12 +577,18 @@ export default function ConflictResolverBar({
               {
                 label: "Swap similar",
                 icon: Replace,
-                onClick: () => mealPlan.swapRecipe?.(conf.context?.item?.id, { strategy: "match-tags-with-standards" }),
+                onClick: () =>
+                  mealPlan.swapRecipe?.(conf.context?.item?.id, {
+                    strategy: "match-tags-with-standards",
+                  }),
               },
               {
                 label: "Remove",
                 icon: Ban,
-                onClick: () => mealPlan.swapRecipe?.(conf.context?.item?.id, { strategy: "remove" }),
+                onClick: () =>
+                  mealPlan.swapRecipe?.(conf.context?.item?.id, {
+                    strategy: "remove",
+                  }),
               },
               ...common,
             ]}
@@ -517,12 +606,18 @@ export default function ConflictResolverBar({
                 label: "− Servings",
                 icon: Minus,
                 onClick: () =>
-                  mealPlan.changeServings?.(conf.context?.item?.id, { delta: -1, floor: 1 }),
+                  mealPlan.changeServings?.(conf.context?.item?.id, {
+                    delta: -1,
+                    floor: 1,
+                  }),
               },
               {
                 label: "+ Servings",
                 icon: Plus,
-                onClick: () => mealPlan.changeServings?.(conf.context?.item?.id, { delta: +1 }),
+                onClick: () =>
+                  mealPlan.changeServings?.(conf.context?.item?.id, {
+                    delta: +1,
+                  }),
               },
               ...common,
             ]}
@@ -539,14 +634,25 @@ export default function ConflictResolverBar({
               {
                 label: "Swap leaner",
                 icon: Replace,
-                onClick: () => mealPlan.swapRecipe?.(conf.context?.item?.id, { strategy: "leaner-alt" }),
+                onClick: () =>
+                  mealPlan.swapRecipe?.(conf.context?.item?.id, {
+                    strategy: "leaner-alt",
+                  }),
               },
               ...common,
             ]}
           />
         );
       default:
-        return <Row key={conf.id} icon={TriangleAlert} title={title} tone={tone} actions={common} />;
+        return (
+          <Row
+            key={conf.id}
+            icon={TriangleAlert}
+            title={title}
+            tone={tone}
+            actions={common}
+          />
+        );
     }
   }
 
@@ -614,7 +720,9 @@ export default function ConflictResolverBar({
               onClick={() => {
                 eventBus.emit("meals.planner.conflicts.rescan");
                 if (automation?.runTemplate) {
-                  automation.runTemplate("meals.conflicts.rescan", { source: "ConflictResolverBar" });
+                  automation.runTemplate("meals.conflicts.rescan", {
+                    source: "ConflictResolverBar",
+                  });
                 }
               }}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm bg-white border-gray-300 text-gray-800 hover:bg-gray-50"
@@ -632,7 +740,11 @@ export default function ConflictResolverBar({
               aria-expanded={expanded}
               title={expanded ? "Hide details" : "Show details"}
             >
-              {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              {expanded ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              )}
               {expanded ? "Hide" : "Details"}
             </button>
           </div>
@@ -648,7 +760,8 @@ export default function ConflictResolverBar({
             {/* Hints */}
             <div className="mt-3 text-[11px] text-gray-500 flex items-center gap-3">
               <Settings2 className="w-3 h-3" />
-              Tip: You can set default auto-fix rules in Settings → Meals → Planner (e.g., “auto add missing to grocery”).
+              Tip: You can set default auto-fix rules in Settings → Meals →
+              Planner (e.g., “auto add missing to grocery”).
             </div>
           </div>
         ) : null}

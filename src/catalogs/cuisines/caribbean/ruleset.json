@@ -1,0 +1,675 @@
+{
+  "$schema": "../../../schemas/cuisine.ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-14T00:00:00.000Z",
+  "meta": {
+    "id": "caribbean.ruleset",
+    "type": "cuisine_ruleset",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Ruleset",
+    "description": "Deterministic cuisine rules for Caribbean-forward meal planning and recipe adaptation (Jamaican, Trinidad & Tobago, Haitian, Cuban, Puerto Rican, Dominican, Lesser Antilles)."
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "scope": {
+    "cuisineId": "caribbean",
+    "subprofiles": [
+      "jamaican",
+      "trini_tobago",
+      "haitian",
+      "cuban",
+      "puerto_rican",
+      "dominican",
+      "guyanese",
+      "lesser_antilles"
+    ],
+    "supportedMealArchetypes": [
+      "stew_plus_starch_plus_acid",
+      "grill_and_sides",
+      "rice_and_peas_plate",
+      "greens",
+      "fried_street_food",
+      "stew_and_starch",
+      "roast_and_sides",
+      "pickle_quick",
+      "drink"
+    ]
+  },
+
+  "identity": {
+    "signatureAromatics": ["garlic", "onion", "scallion", "thyme", "ginger"],
+    "signatureSpices": [
+      "allspice",
+      "curry_powder",
+      "cumin",
+      "coriander",
+      "oregano",
+      "bay_leaf",
+      "clove",
+      "cinnamon",
+      "smoked_paprika"
+    ],
+    "signatureAcids": [
+      "lime_juice",
+      "orange_juice",
+      "white_vinegar",
+      "tamarind"
+    ],
+    "signatureHeat": ["scotch_bonnet", "habanero", "pepper_sauce"],
+    "signatureBases": [
+      "sofrito",
+      "epis",
+      "jerk_paste",
+      "adobo_blend",
+      "browning_sauce_or_browned_sugar",
+      "coconut_milk"
+    ],
+    "signatureStarches": [
+      "rice_long_grain",
+      "rice_parboiled",
+      "plantain_green",
+      "yuca",
+      "dumplings",
+      "roti",
+      "bara_fried_flatbread"
+    ],
+    "signatureSides": [
+      "rice_and_peas",
+      "black_beans_and_rice",
+      "callaloo",
+      "tostones",
+      "pikliz"
+    ],
+    "signatureDrinks": ["sorrel_drink", "ginger_beer"]
+  },
+
+  "plannerDefaults": {
+    "defaultHeatLevel": 2,
+    "heatScale": { "min": 0, "max": 5 },
+    "defaultSaltStyle": "moderate",
+    "defaultSweetnessStyle": "moderate",
+    "defaultCookingFats": ["neutral_oil", "olive_oil"],
+    "defaultMealBalance": {
+      "aimForArchetypeBalance": true,
+      "preferVegAtLeastOnceDaily": true,
+      "preferLegumesEveryOtherDay": true,
+      "preferFermentsOrPicklesEveryOtherDay": true
+    }
+  },
+
+  "pantry": {
+    "corePantryItems": [
+      {
+        "id": "thyme",
+        "category": "herb",
+        "priority": 5,
+        "notes": "Foundational Caribbean herb."
+      },
+      {
+        "id": "allspice",
+        "category": "spice",
+        "priority": 5,
+        "notes": "Jamaican pimento/allspice is a key signature."
+      },
+      {
+        "id": "scallion",
+        "category": "aromatic",
+        "priority": 5
+      },
+      {
+        "id": "garlic",
+        "category": "aromatic",
+        "priority": 5
+      },
+      {
+        "id": "ginger",
+        "category": "aromatic",
+        "priority": 4
+      },
+      {
+        "id": "lime_juice",
+        "category": "acid",
+        "priority": 5
+      },
+      {
+        "id": "white_vinegar",
+        "category": "acid",
+        "priority": 4
+      },
+      {
+        "id": "coconut_milk",
+        "category": "base",
+        "priority": 4
+      },
+      {
+        "id": "curry_powder",
+        "category": "spice_blend",
+        "priority": 4
+      },
+      {
+        "id": "cumin",
+        "category": "spice",
+        "priority": 3
+      },
+      {
+        "id": "oregano",
+        "category": "herb",
+        "priority": 3
+      },
+      {
+        "id": "bay_leaf",
+        "category": "herb",
+        "priority": 3
+      },
+      {
+        "id": "pepper_sauce",
+        "category": "condiment",
+        "priority": 3
+      },
+      {
+        "id": "browning_sauce_or_browned_sugar",
+        "category": "base",
+        "priority": 3,
+        "notes": "Used to build characteristic color/flavor in stews."
+      },
+      {
+        "id": "hibiscus_dried",
+        "category": "drink_base",
+        "priority": 2
+      },
+      {
+        "id": "tamarind",
+        "category": "acid",
+        "priority": 2
+      }
+    ],
+    "optionalPantryItems": [
+      { "id": "soy_sauce", "category": "seasoning", "priority": 2 },
+      { "id": "brown_sugar", "category": "sweetener", "priority": 2 },
+      { "id": "smoked_paprika", "category": "spice", "priority": 2 },
+      { "id": "clove", "category": "spice", "priority": 1 },
+      { "id": "cinnamon", "category": "spice", "priority": 1 }
+    ]
+  },
+
+  "equipmentPolicy": {
+    "minimums": {
+      "stew_plus_starch_plus_acid": ["pot_with_lid", "stovetop"],
+      "grill_and_sides": ["sheet_pan", "oven"],
+      "fried_street_food": ["skillet", "stovetop"],
+      "roast_and_sides": ["oven", "sheet_pan"],
+      "drink": ["pot", "strainer"]
+    },
+    "preferred": {
+      "stew_plus_starch_plus_acid": [
+        "heavy_pot_or_dutch_oven",
+        "pressure_cooker"
+      ],
+      "grill_and_sides": ["grill", "smoker"],
+      "fried_street_food": ["deep_fryer", "air_fryer"],
+      "greens": ["blender_or_food_processor"],
+      "drink": ["pitcher"]
+    },
+    "adaptationRules": [
+      {
+        "id": "caribbean.equip.no_grill_for_jerk",
+        "when": {
+          "dishIdAny": ["caribbean.jerk_chicken"],
+          "missingEquipmentAny": ["grill", "smoker"]
+        },
+        "adapt": {
+          "preferredMethods": ["oven_roast_then_broil"],
+          "flavorCompensationAdd": ["smoked_paprika", "extra_allspice"]
+        }
+      },
+      {
+        "id": "caribbean.equip.air_fryer_for_fried_sides",
+        "when": {
+          "mealArchetypeAny": ["fried_street_food"],
+          "hasEquipmentAll": ["air_fryer"]
+        },
+        "adapt": {
+          "preferredMethods": ["air_fry"],
+          "notes": "Use light oil spray; flip mid-way for crispness."
+        }
+      },
+      {
+        "id": "caribbean.equip.pressure_for_long_braises",
+        "when": {
+          "dishIdAny": [
+            "caribbean.oxtail_stew",
+            "caribbean.ropa_vieja",
+            "caribbean.brown_stew_chicken",
+            "caribbean.curry_goat",
+            "caribbean.pernil"
+          ],
+          "hasEquipmentAll": ["pressure_cooker"]
+        },
+        "adapt": {
+          "preferredMethods": [
+            "pressure_cook_then_reduce",
+            "pressure_cook_then_shred",
+            "pressure_cook_then_crisp"
+          ],
+          "notes": "Use pressure to shorten total time; reduce sauce after."
+        }
+      }
+    ]
+  },
+
+  "dietPolicy": {
+    "supportedDietFlags": [
+      "dairy_free",
+      "gluten_free",
+      "vegetarian",
+      "vegan",
+      "vegetarian_possible",
+      "vegan_possible",
+      "low_oil",
+      "low_sugar"
+    ],
+    "rules": [
+      {
+        "id": "caribbean.diet.vegan_callaloo",
+        "when": {
+          "dishIdAny": ["caribbean.callaloo"],
+          "dietAny": ["vegan"]
+        },
+        "adapt": {
+          "omit": ["crab", "shrimp", "saltfish"],
+          "add": ["beans_black", "mushrooms"],
+          "notes": "Keep coconut + okra body; add umami from mushrooms."
+        }
+      },
+      {
+        "id": "caribbean.diet.vegan_mofongo",
+        "when": {
+          "dishIdAny": ["caribbean.mofongo"],
+          "dietAny": ["vegan"]
+        },
+        "adapt": {
+          "swapFat": "olive_oil",
+          "swapProtein": "mushrooms",
+          "notes": "Avoid pork cracklings/butter; keep garlic-forward profile."
+        }
+      },
+      {
+        "id": "caribbean.diet.low_sugar_sorrel",
+        "when": {
+          "dishIdAny": ["caribbean.sorrel_drink"],
+          "healthFlagsAny": ["low_sugar"]
+        },
+        "adapt": {
+          "sweetener": "low_cal_sweetener",
+          "notes": "Sweeten lightly; emphasize ginger/spice steep."
+        }
+      },
+      {
+        "id": "caribbean.diet.low_oil_doubles",
+        "when": {
+          "dishIdAny": ["caribbean.doubles"],
+          "dietAny": ["low_oil"]
+        },
+        "adapt": {
+          "preferredMethods": ["pan_cook_or_bake"],
+          "notes": "Not traditional; use when low-oil planning is required."
+        }
+      }
+    ],
+    "allergenSubstitutions": [
+      {
+        "id": "caribbean.allergen.soy_in_jerk",
+        "allergen": "soy",
+        "swapMap": [
+          { "from": "soy_sauce", "to": "coconut_aminos" },
+          {
+            "from": "soy_sauce",
+            "toAlt": ["salt", "lime_juice", "extra_allspice"]
+          }
+        ],
+        "notes": "Maintain salty/umami balance without soy."
+      },
+      {
+        "id": "caribbean.allergen.coconut",
+        "allergen": "tree_nut_coconut",
+        "swapMap": [
+          { "from": "coconut_milk", "to": "oat_milk_unsweetened" },
+          { "from": "coconut_milk", "toAlt": ["broth_chicken", "broth_veg"] }
+        ],
+        "notes": "Not identical; use broth for savory body or oat milk for creaminess."
+      }
+    ]
+  },
+
+  "timePolicy": {
+    "weeknightMaxTotalMins": 45,
+    "rules": [
+      {
+        "id": "caribbean.time.weeknight_shortcuts.beans_rice",
+        "when": {
+          "dishIdAny": ["caribbean.black_beans_and_rice"],
+          "timeMaxTotalMins": 35
+        },
+        "adapt": {
+          "useCannedBeans": true,
+          "notes": "Use canned black beans and quick sofrito base."
+        }
+      },
+      {
+        "id": "caribbean.time.freeze_component_strategy",
+        "when": {
+          "mealArchetypeAny": [
+            "stew_plus_starch_plus_acid",
+            "rice_and_peas_plate"
+          ],
+          "timeMaxTotalMins": 45
+        },
+        "adapt": {
+          "batchSuggestion": {
+            "makeAheadAny": ["rice_and_peas", "black_beans_and_rice", "pikliz"],
+            "freezeIfPossible": true
+          },
+          "notes": "If time is tight, prioritize reheatable bases + quick veg."
+        }
+      }
+    ]
+  },
+
+  "pairingPolicy": {
+    "archetypeDefinitions": {
+      "stew_plus_starch_plus_acid": {
+        "mustHaveRoles": ["protein", "starch", "acid"],
+        "shouldHaveRoles": ["veg", "condiment"],
+        "examples": [
+          "caribbean.brown_stew_chicken + rice + lime_juice",
+          "caribbean.curry_goat + rice + pepper_sauce",
+          "caribbean.oxtail_stew + rice_and_peas + lime_juice"
+        ]
+      },
+      "grill_and_sides": {
+        "mustHaveRoles": ["protein", "side"],
+        "shouldHaveRoles": ["veg", "condiment"],
+        "examples": ["caribbean.jerk_chicken + rice_and_peas + cabbage_slaw"]
+      },
+      "rice_and_peas_plate": {
+        "mustHaveRoles": ["legume", "starch"],
+        "shouldHaveRoles": ["protein", "veg"],
+        "examples": ["caribbean.rice_and_peas + jerk_chicken + greens"]
+      },
+      "greens": {
+        "mustHaveRoles": ["greens"],
+        "shouldHaveRoles": ["base", "protein_optional"],
+        "examples": ["caribbean.callaloo"]
+      },
+      "fried_street_food": {
+        "mustHaveRoles": ["starch", "condiment"],
+        "shouldHaveRoles": ["protein", "acid"],
+        "examples": ["caribbean.tostones + mojo", "caribbean.doubles"]
+      },
+      "stew_and_starch": {
+        "mustHaveRoles": ["starch", "sauce"],
+        "shouldHaveRoles": ["protein", "veg"],
+        "examples": ["caribbean.mofongo + broth_chicken/mojo + shrimp"]
+      },
+      "roast_and_sides": {
+        "mustHaveRoles": ["protein", "side"],
+        "shouldHaveRoles": ["veg", "condiment"],
+        "examples": ["caribbean.pernil + rice + mojo"]
+      },
+      "pickle_quick": {
+        "mustHaveRoles": ["veg", "acid"],
+        "shouldHaveRoles": ["heat", "spice"],
+        "examples": ["caribbean.pikliz"]
+      },
+      "drink": {
+        "mustHaveRoles": ["base"],
+        "shouldHaveRoles": ["spice", "sweetener"],
+        "examples": ["caribbean.sorrel_drink", "caribbean.ginger_beer"]
+      }
+    },
+
+    "recommendedRoleFillers": {
+      "starches": [
+        "rice",
+        "rice_and_peas",
+        "plantain",
+        "yuca",
+        "dumplings",
+        "roti"
+      ],
+      "vegSides": [
+        "greens",
+        "cabbage_slaw",
+        "salad",
+        "quick_pickles",
+        "pikliz"
+      ],
+      "acids": [
+        "lime_juice",
+        "orange_juice",
+        "white_vinegar",
+        "tamarind_sauce"
+      ],
+      "condiments": ["pepper_sauce", "mojo", "pikliz", "aioli_garlic"],
+      "legumes": ["black_beans", "kidney_beans", "pigeon_peas", "chickpeas"]
+    },
+
+    "dishPairingOverrides": [
+      {
+        "dishId": "caribbean.jerk_chicken",
+        "preferSides": ["caribbean.rice_and_peas", "caribbean.tostones"],
+        "preferVeg": ["cabbage_slaw", "greens", "quick_pickles"],
+        "preferCondiments": ["pepper_sauce", "lime_juice"]
+      },
+      {
+        "dishId": "caribbean.haitian_griot",
+        "preferSides": ["rice", "plantain", "yuca"],
+        "preferCondiments": ["caribbean.pikliz", "pepper_sauce"]
+      },
+      {
+        "dishId": "caribbean.doubles",
+        "preferDrinks": ["caribbean.ginger_beer", "caribbean.sorrel_drink"],
+        "preferSides": ["quick_pickles"]
+      }
+    ]
+  },
+
+  "substitutionPolicy": {
+    "ingredientSwapRules": [
+      {
+        "id": "caribbean.swap.heat_peppers",
+        "category": "heat",
+        "swaps": [
+          { "from": "scotch_bonnet", "to": "habanero" },
+          { "from": "habanero", "to": "scotch_bonnet" }
+        ],
+        "notes": "Both are common; scotch bonnet is classic Jamaican."
+      },
+      {
+        "id": "caribbean.swap.base_sofrito_epis",
+        "category": "base",
+        "swaps": [
+          { "from": "sofrito", "to": "epis" },
+          { "from": "epis", "to": "sofrito" }
+        ],
+        "notes": "Use whichever is available; maintain garlic/scallion/herb profile."
+      },
+      {
+        "id": "caribbean.swap.browning",
+        "category": "base",
+        "swaps": [
+          { "from": "browning_sauce_or_browned_sugar", "to": "browned_sugar" },
+          {
+            "from": "browning_sauce_or_browned_sugar",
+            "toAlt": ["brown_sugar", "dark_soy_sauce"]
+          }
+        ],
+        "notes": "Use carefully; goal is color + caramel depth."
+      },
+      {
+        "id": "caribbean.swap.coconut_body",
+        "category": "base",
+        "swaps": [
+          { "from": "coconut_milk", "toAlt": ["broth_chicken", "broth_veg"] }
+        ],
+        "notes": "Not identical; use when coconut is unavailable or avoided."
+      }
+    ],
+    "proteinSwapRules": [
+      {
+        "id": "caribbean.swap.protein_curry",
+        "when": {
+          "dishIdAny": ["caribbean.curry_goat"],
+          "proteinSwapAllowed": true
+        },
+        "swaps": [
+          { "from": "goat", "to": "chicken_thighs" },
+          { "from": "goat", "toAlt": ["lamb_shoulder", "beef_chuck"] }
+        ],
+        "notes": "Goat is canonical; chicken is common in similar curry profile."
+      },
+      {
+        "id": "caribbean.swap.protein_jerk",
+        "when": { "dishIdAny": ["caribbean.jerk_chicken"] },
+        "swaps": [
+          {
+            "from": "chicken_thighs",
+            "toAlt": ["chicken_legs", "chicken_breast"]
+          },
+          { "from": "chicken", "toAlt": ["tofu_extra_firm", "fish_firm_white"] }
+        ],
+        "notes": "Tofu jerk is supported for vegetarian/vegan adaptation."
+      }
+    ]
+  },
+
+  "rotationPolicy": {
+    "defaultRotationDays": 7,
+    "preferredDistribution": {
+      "stew_plus_starch_plus_acid": { "min": 2, "max": 3 },
+      "grill_and_sides": { "min": 1, "max": 2 },
+      "rice_and_peas_plate": { "min": 1, "max": 2 },
+      "greens": { "min": 1, "max": 2 },
+      "fried_street_food": { "min": 0, "max": 1 },
+      "roast_and_sides": { "min": 0, "max": 1 },
+      "pickle_quick": { "min": 1, "max": 2 },
+      "drink": { "min": 0, "max": 2 }
+    },
+    "anchorDishes": [
+      { "dishId": "caribbean.rice_and_peas", "weight": 3 },
+      { "dishId": "caribbean.brown_stew_chicken", "weight": 3 },
+      { "dishId": "caribbean.black_beans_and_rice", "weight": 2 },
+      { "dishId": "caribbean.callaloo", "weight": 2 },
+      { "dishId": "caribbean.pikliz", "weight": 1 },
+      { "dishId": "caribbean.jerk_chicken", "weight": 2 }
+    ],
+    "specialOccasionBoosts": [
+      {
+        "when": { "servingStyleAny": ["holiday_feasts"] },
+        "boostDishIds": [
+          "caribbean.oxtail_stew",
+          "caribbean.pernil",
+          "caribbean.haitian_griot",
+          "caribbean.sorrel_drink"
+        ],
+        "notes": "Feast tables favor long-braise mains + celebratory drinks."
+      }
+    ]
+  },
+
+  "selectionPolicy": {
+    "dishAllowList": [
+      "caribbean.jerk_chicken",
+      "caribbean.rice_and_peas",
+      "caribbean.brown_stew_chicken",
+      "caribbean.oxtail_stew",
+      "caribbean.curry_goat",
+      "caribbean.callaloo",
+      "caribbean.tostones",
+      "caribbean.mofongo",
+      "caribbean.pernil",
+      "caribbean.doubles",
+      "caribbean.haitian_griot",
+      "caribbean.pikliz",
+      "caribbean.ropa_vieja",
+      "caribbean.black_beans_and_rice",
+      "caribbean.sorrel_drink",
+      "caribbean.ginger_beer"
+    ],
+    "tagWeights": {
+      "caribbean": 5,
+      "jamaican": 3,
+      "trini": 3,
+      "haitian": 3,
+      "cuban": 3,
+      "puerto_rican": 3,
+      "dominican": 3,
+      "jerk": 3,
+      "curry": 3,
+      "oxtail": 2,
+      "plantain": 2,
+      "rice": 2,
+      "beans": 2,
+      "coconut": 2,
+      "stew": 2,
+      "batch": 2,
+      "weeknight": 2,
+      "holiday": 2,
+      "drink": 1,
+      "street_food": 1,
+      "spicy": 1,
+      "grill": 1,
+      "roast": 1
+    },
+    "conflictRules": [
+      {
+        "id": "caribbean.conflict.too_many_long_braises",
+        "when": {
+          "horizonDays": 7,
+          "selectedDishIdsMaxFromSet": {
+            "max": 2,
+            "set": [
+              "caribbean.oxtail_stew",
+              "caribbean.pernil",
+              "caribbean.ropa_vieja",
+              "caribbean.curry_goat"
+            ]
+          }
+        },
+        "resolve": {
+          "preferSwapIn": [
+            "caribbean.brown_stew_chicken",
+            "caribbean.black_beans_and_rice",
+            "caribbean.callaloo"
+          ],
+          "notes": "Keep at most 2 long-cook mains in a 7-day window unless holiday mode."
+        }
+      }
+    ]
+  },
+
+  "exports": {
+    "events": [
+      "cuisine.ruleset.loaded",
+      "cuisine.ruleset.applied",
+      "cuisine.ruleset.adaptation.suggested"
+    ],
+    "uiHints": {
+      "badgeLabel": "Caribbean",
+      "badgeTags": ["jamaican", "trini", "haitian", "cuban", "puerto_rican"],
+      "suggestedQuickAdds": [
+        "caribbean.pikliz",
+        "caribbean.rice_and_peas",
+        "caribbean.callaloo"
+      ]
+    }
+  }
+}

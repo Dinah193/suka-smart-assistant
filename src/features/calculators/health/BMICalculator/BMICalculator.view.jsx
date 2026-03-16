@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import BMICalculatorShim, { computeBMI } from "./BMICalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * BMICalculator.view.jsx
@@ -30,23 +30,23 @@ import { emit as emitEvent } from "@/services/eventBus";
 const DEFAULT_BMI_INPUT = {
   height: {
     value: 66,
-    unit: "in"
+    unit: "in",
   },
   weight: {
     value: 180,
-    unit: "lb"
+    unit: "lb",
   },
   sex: "unspecified",
   ageYears: 35,
   unitSystem: "imperial",
   rounding: {
     bmiDecimals: 1,
-    weightDecimals: 1
+    weightDecimals: 1,
   },
   ssaIntegration: {
     autosaveProfile: true,
-    allowLinkToMacroCalculator: true
-  }
+    allowLinkToMacroCalculator: true,
+  },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -64,7 +64,7 @@ function emitBMIEvent(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/health/BMICalculator.view",
-      data
+      data,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -101,7 +101,7 @@ const BMICalculatorView = () => {
   const updateField = useCallback((field, value) => {
     setForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
     setIsDirty(true);
   }, []);
@@ -138,12 +138,12 @@ const BMICalculatorView = () => {
         ...form,
         height: {
           ...form.height,
-          value: toNumberOrZero(form.height?.value)
+          value: toNumberOrZero(form.height?.value),
         },
         weight: {
           ...form.weight,
-          value: toNumberOrZero(form.weight?.value)
-        }
+          value: toNumberOrZero(form.weight?.value),
+        },
       };
 
       const res = computeBMI(input);
@@ -155,8 +155,8 @@ const BMICalculatorView = () => {
           output: res.output,
           uiContext: {
             autoRecalc: Boolean(opts.autoRecalc),
-            source: "BMICalculator"
-          }
+            source: "BMICalculator",
+          },
         });
       }
     },
@@ -186,8 +186,8 @@ const BMICalculatorView = () => {
       output: result.output,
       uiContext: {
         nowClicked: true,
-        source: "BMICalculator"
-      }
+        source: "BMICalculator",
+      },
     });
   }, [result]);
 
@@ -235,8 +235,8 @@ const BMICalculatorView = () => {
             BMI Calculator
           </h1>
           <p className="text-sm text-slate-600">
-            Quick screening tool to estimate Body Mass Index and weight category. 
-            Use it as context for macro planning, not as a diagnosis.
+            Quick screening tool to estimate Body Mass Index and weight
+            category. Use it as context for macro planning, not as a diagnosis.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -434,7 +434,9 @@ const BMICalculatorView = () => {
                 Calculate BMI
               </button>
               <span className="text-xs text-slate-500">
-                {isDirty ? "Inputs changed since last load." : "Using default profile values."}
+                {isDirty
+                  ? "Inputs changed since last load."
+                  : "Using default profile values."}
               </span>
             </div>
           </div>
@@ -448,7 +450,8 @@ const BMICalculatorView = () => {
                 Your BMI Result
               </h2>
               <p className="text-xs text-slate-500">
-                SSA uses this as context for other health planners (macros, micronutrients, and more).
+                SSA uses this as context for other health planners (macros,
+                micronutrients, and more).
               </p>
             </div>
             <button
@@ -467,9 +470,7 @@ const BMICalculatorView = () => {
 
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div className="rounded-lg bg-slate-50 px-3 py-3 flex flex-col gap-1">
-              <span className="text-xs font-medium text-slate-600">
-                BMI
-              </span>
+              <span className="text-xs font-medium text-slate-600">BMI</span>
               <span className="text-2xl font-semibold text-slate-900">
                 {bmiOutput?.bmi ?? "—"}
               </span>
@@ -507,7 +508,8 @@ const BMICalculatorView = () => {
               </div>
             ) : (
               <p className="text-xs text-slate-500">
-                Enter a valid height and weight to see the suggested range for a &ldquo;normal&rdquo; BMI.
+                Enter a valid height and weight to see the suggested range for a
+                &ldquo;normal&rdquo; BMI.
               </p>
             )}
           </div>

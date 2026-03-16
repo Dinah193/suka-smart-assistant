@@ -1,0 +1,421 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:12:00Z",
+  "meta": {
+    "id": "cuisines.japanese.recipes.udon_noodles",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Udon Noodles (Kake Udon Base + Toppings Options)",
+    "subtitle": "Springy udon in a light dashi-soy broth with classic garnishes",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical SSA catalog recipe.",
+        "Designed as a flexible base: swap broth strength and toppings without changing core steps."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "japanese",
+    "category": "noodles",
+    "mealArchetypes": ["bowls", "street_food", "snacks", "breakfast"],
+    "servingStyles": ["bowls", "family_style"],
+    "plannerTags": [
+      "cuisine.japanese",
+      "dish.udon",
+      "course.noodles",
+      "weeknight.friendly",
+      "comfort",
+      "umami.forward",
+      "customizable"
+    ]
+  },
+  "yield": {
+    "servings": 2,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "Makes 2 generous bowls."
+  },
+  "time": {
+    "activeMins": 12,
+    "handsOffMins": 8,
+    "totalMins": 20
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": false,
+    "freezerFriendly": false,
+    "notes": "Best served immediately; noodles soften if held too long in broth."
+  },
+  "tasteProfile": {
+    "sweet": 1,
+    "salty": 2,
+    "umami": 4,
+    "acid": 0,
+    "heat": 0,
+    "balanceNotes": "Adjust soy and mirin to taste; use lighter broth for delicate toppings."
+  },
+  "equipment": {
+    "minimum": [
+      "stockpot",
+      "saucepan",
+      "measuring_cups",
+      "ladle",
+      "knife",
+      "cutting_board"
+    ],
+    "recommended": [
+      "fine_mesh_strainer",
+      "tongs",
+      "small_bowl",
+      "whisk_or_chopsticks"
+    ]
+  },
+  "dietFlags": [],
+  "allergens": {
+    "mayContain": ["wheat", "soy", "fish", "gluten", "sesame", "egg"],
+    "commonTriggers": [
+      "udon_noodles_wheat",
+      "soy_sauce",
+      "dashi_fish_optional",
+      "toppings_optional"
+    ],
+    "notes": [
+      "For gluten-free: use certified GF udon or rice noodles; verify soy sauce is GF (tamari).",
+      "For vegetarian/vegan: use kombu + shiitake dashi (or vegan instant dashi)."
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "udon_noodles",
+      "label": "Udon noodles (fresh or dried)",
+      "role": "starch",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "Fresh or frozen udon preferred for springy texture; dried works too."
+    },
+    {
+      "id": "water_for_noodles",
+      "label": "Water (for boiling noodles)",
+      "role": "base",
+      "amount": { "value": 2000, "unit": "ml" },
+      "notes": "Enough to boil noodles freely."
+    },
+
+    {
+      "id": "dashi",
+      "label": "Dashi stock (prepared)",
+      "role": "base",
+      "amount": { "value": 720, "unit": "ml" },
+      "notes": "About 3 cups. Use prepared dashi, instant dashi, or kombu+bonito dashi."
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 Tbsp; adjust to taste and dashi strength."
+    },
+    {
+      "id": "mirin",
+      "label": "Mirin",
+      "role": "seasoning",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1 Tbsp; adds gentle sweetness and gloss."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar",
+      "role": "seasoning",
+      "amount": { "value": 4, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tsp; optional if mirin is sweet enough."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Only if needed; dashi + soy often provide enough salt."
+    },
+
+    {
+      "id": "green_onion",
+      "label": "Green onion, thinly sliced",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "nori",
+      "label": "Nori (seaweed), shredded or cut into strips",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "sheet" },
+      "optional": true
+    },
+    {
+      "id": "togarashi",
+      "label": "Shichimi togarashi (Japanese chili spice)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional finishing spice."
+    },
+
+    {
+      "id": "kamaboko",
+      "label": "Kamaboko (fish cake), sliced",
+      "role": "protein",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "tempura_shrimp_or_veg",
+      "label": "Tempura (shrimp or vegetables)",
+      "role": "protein",
+      "amount": { "value": 4, "unit": "each" },
+      "optional": true,
+      "notes": "Add on top just before serving so it stays crisp."
+    },
+    {
+      "id": "soft_boiled_egg",
+      "label": "Soft-boiled egg",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "shiitake_mushrooms",
+      "label": "Shiitake mushrooms, sliced",
+      "role": "veg",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "spinach",
+      "label": "Spinach (or baby greens)",
+      "role": "greens",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "Quick blanch in noodle water or broth."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_make_broth",
+      "title": "Make the udon broth (kake-jiru)",
+      "activeMins": 4,
+      "handsOffMins": 6,
+      "instructions": [
+        "In a saucepan, combine dashi, soy sauce, mirin, and (optional) sugar.",
+        "Bring to a gentle simmer, then reduce heat to low and keep warm (do not aggressively boil).",
+        "Taste and adjust: add a splash more soy for salt/umami, or a touch more mirin/sugar for sweetness."
+      ],
+      "timers": [{ "label": "Broth gentle simmer", "minutes": 6 }],
+      "checks": ["Broth is steaming and balanced", "Not reduced too much"]
+    },
+    {
+      "id": "step_02_boil_noodles",
+      "title": "Boil the udon noodles",
+      "activeMins": 4,
+      "handsOffMins": 4,
+      "instructions": [
+        "Bring a large pot of water to a boil.",
+        "Cook udon according to package directions until springy and cooked through.",
+        "Stir occasionally to prevent sticking, especially for fresh/frozen noodles."
+      ],
+      "timers": [
+        { "label": "Noodle cook time (follow package)", "minutes": 4 }
+      ],
+      "checks": ["Noodles are tender but still springy"]
+    },
+    {
+      "id": "step_03_rinse_and_portion",
+      "title": "Rinse, drain, and portion noodles",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Drain noodles well.",
+        "Rinse briefly under hot water to remove excess starch (or cold water then re-warm in broth if noodles are very starchy).",
+        "Divide noodles between two serving bowls."
+      ],
+      "checks": ["Noodles separated and not gummy"]
+    },
+    {
+      "id": "step_04_add_toppings",
+      "title": "Warm toppings (optional) and assemble bowls",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "If using mushrooms or spinach, warm/blanch them quickly (in broth or noodle water).",
+        "Arrange toppings over noodles: sliced kamaboko, egg halves, spinach, mushrooms, or tempura.",
+        "Keep tempura last so it stays crisp."
+      ],
+      "checks": ["Toppings warmed (if needed) and arranged"]
+    },
+    {
+      "id": "step_05_ladle_broth_and_finish",
+      "title": "Ladle broth and finish",
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "instructions": [
+        "Ladle hot broth over noodles until submerged but not overflowing.",
+        "Top with sliced green onion and nori.",
+        "Finish with a pinch of shichimi togarashi if desired. Serve immediately."
+      ],
+      "checks": ["Broth is hot", "Garnishes added", "Served right away"]
+    }
+  ],
+  "pairings": {
+    "serveWith": [
+      {
+        "id": "miso_soup",
+        "label": "Miso soup (if serving smaller udon bowls)"
+      },
+      { "id": "tsukemono", "label": "Tsukemono (Japanese pickles)" },
+      { "id": "edamame", "label": "Edamame" },
+      { "id": "onigiri", "label": "Onigiri" }
+    ],
+    "notes": "Kake udon is a light noodle bowl; pair with pickles or a small side for a complete meal."
+  },
+  "storage": {
+    "refrigerator": {
+      "duration": "1 day",
+      "notes": "Store noodles and broth separately; reheat broth gently and re-warm noodles briefly in hot water."
+    },
+    "freezer": {
+      "duration": "Not recommended",
+      "notes": "Texture suffers; better to freeze broth only (without noodles) if needed."
+    },
+    "reheat": {
+      "methods": [
+        "Broth: stovetop on low until steaming",
+        "Noodles: dip in hot water 30–60 seconds, then drain"
+      ],
+      "notes": "Do not hold noodles in hot broth for long; they soften."
+    }
+  },
+  "planner": {
+    "mealRole": "main",
+    "weeknightNotes": "Use frozen udon + instant dashi for a fast weeknight bowl.",
+    "shoppingSignals": [
+      "udon_noodles",
+      "dashi",
+      "soy_sauce",
+      "mirin",
+      "green_onion",
+      "nori",
+      "toppings_optional"
+    ]
+  },
+  "keywords": [
+    "udon",
+    "kake udon",
+    "dashi broth noodles",
+    "japanese noodles",
+    "noodle soup"
+  ],
+  "tags": [
+    "cuisine.japanese",
+    "dish.udon",
+    "course.noodles",
+    "weeknight.friendly",
+    "comfort",
+    "umami.forward",
+    "customizable"
+  ],
+  "notes": [
+    "Broth strength varies by dashi brand and soy sauce. Adjust to your taste.",
+    "For tempura udon: keep tempura separate and place on top at serving so it stays crisp.",
+    "If using dried udon, cook a little longer and rinse well to remove starch."
+  ],
+  "variations": [
+    {
+      "id": "var_tempura_udon",
+      "label": "Tempura Udon",
+      "when": { "topping": "tempura" },
+      "adapt": {
+        "notes": [
+          "Add tempura on top right before serving.",
+          "Keep broth slightly lighter so tempura flavor stands out."
+        ]
+      }
+    },
+    {
+      "id": "var_kitsune_udon",
+      "label": "Kitsune Udon (inari/aburaage)",
+      "when": { "topping": "aburaage" },
+      "adapt": {
+        "notes": [
+          "Top with sweet-simmered aburaage (inari tofu pouch).",
+          "Increase mirin slightly for a warmer sweetness."
+        ]
+      }
+    },
+    {
+      "id": "var_vegan_dashi",
+      "label": "Vegan Udon",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "notes": [
+          "Use kombu + shiitake dashi or vegan instant dashi.",
+          "Use tamari (GF) if needed and omit fish-based toppings."
+        ]
+      }
+    }
+  ],
+  "summary": "A flexible Japanese udon noodle bowl with light dashi-soy broth and customizable toppings—perfect for fast weeknight comfort.",
+  "safety": {
+    "foodSafety": [
+      "Serve noodles promptly; avoid leaving cooked noodles in hot broth for long periods.",
+      "Refrigerate leftovers within 2 hours; store noodles and broth separately."
+    ],
+    "allergenNotes": [
+      "Contains wheat (udon) and soy (soy sauce); may contain fish (dashi).",
+      "Verify ingredients for gluten-free/vegan needs."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "grp_noodles",
+      "label": "Noodles",
+      "items": ["udon_noodles", "water_for_noodles"]
+    },
+    {
+      "id": "grp_broth",
+      "label": "Broth",
+      "items": ["dashi", "soy_sauce", "mirin", "sugar", "salt"]
+    },
+    {
+      "id": "grp_garnish_toppings",
+      "label": "Garnishes & Toppings (optional)",
+      "items": [
+        "green_onion",
+        "nori",
+        "togarashi",
+        "kamaboko",
+        "tempura_shrimp_or_veg",
+        "soft_boiled_egg",
+        "shiitake_mushrooms",
+        "spinach"
+      ]
+    }
+  ],
+  "methods": ["simmer", "boil_noodles", "assemble_bowl"],
+  "compat": {
+    "cuisineId": "cuisines.japanese",
+    "dishId": "cuisines.japanese.dishes.udon_noodles",
+    "aliases": [
+      "kake udon",
+      "udon noodle soup",
+      "tempura udon",
+      "kitsune udon (base)"
+    ],
+    "searchBoost": ["udon", "dashi", "kake udon", "noodle soup", "tempura udon"]
+  }
+}

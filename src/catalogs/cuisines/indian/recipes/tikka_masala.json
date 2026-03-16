@@ -1,0 +1,521 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.tikka_masala",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chicken Tikka Masala",
+    "subtitle": "Yogurt-marinated chicken with a smoky tikka sear in a creamy tomato masala sauce",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/tikka_masala.json",
+      "notes": [
+        "Weeknight-friendly version using broiler/grill pan or oven; supports stovetop-only fallback.",
+        "Deterministic quantities and timing for consistent results across home kitchens."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "curry",
+    "mealArchetypes": ["meal.main.curry", "meal.main.protein"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.indian.chicken_tikka_masala",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good",
+      "spice.forward"
+    ]
+  },
+
+  "summary": "Aromatic chicken tikka seared hot for char, then simmered in a creamy tomato-onion masala with garam masala and a bright finish.",
+
+  "keywords": [
+    "tikka masala",
+    "chicken tikka masala",
+    "masala",
+    "yogurt marinade",
+    "broiler",
+    "creamy curry"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.indian.chicken_tikka_masala",
+    "weeknight.friendly",
+    "batch.friendly",
+    "leftovers.good",
+    "spice.forward"
+  ],
+
+  "yield": {
+    "servings": 5,
+    "servingSize": { "value": 1.25, "unit": "cups" },
+    "notes": "Serves 4–6 depending on sides. Ideal with basmati rice or naan."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 30,
+    "totalMins": 65
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "highHeatSear": true
+  },
+
+  "dietFlags": [],
+
+  "allergens": {
+    "contains": ["allergen.dairy"],
+    "notes": [
+      "Contains dairy (yogurt/cream/butter). For dairy-free, use coconut yogurt + coconut cream + oil."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equip.chef_knife",
+      "equip.cut_board",
+      "equip.mixing_bowl",
+      "equip.measuring_spoons",
+      "equip.measuring_cups",
+      "equip.large_skillet",
+      "equip.wooden_spoon"
+    ],
+    "recommended": [
+      "equip.oven",
+      "equip.broiler",
+      "equip.sheet_pan",
+      "equip.wire_rack",
+      "equip.instant_read_thermometer",
+      "equip.blender"
+    ],
+    "optional": [
+      {
+        "id": "equip.grill_pan",
+        "label": "Grill pan",
+        "required": false,
+        "notes": "Great for char if you don't want to use the broiler."
+      }
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "title": "Tikka Marinade + Chicken",
+      "items": [
+        "ing.chicken_thighs_boneless",
+        "ing.yogurt_plain",
+        "ing.ginger",
+        "ing.garlic",
+        "spice.cumin",
+        "spice.coriander",
+        "spice.turmeric",
+        "spice.kashmiri_chili",
+        "ing.lemon",
+        "ing.salt_kosher",
+        "ing.oil_neutral"
+      ]
+    },
+    {
+      "title": "Masala Sauce",
+      "items": [
+        "ing.onion",
+        "ing.butter",
+        "ing.tomatoes_crushed",
+        "ing.tomato_paste",
+        "spice.garam_masala",
+        "spice.cumin",
+        "spice.coriander",
+        "spice.smoked_paprika",
+        "ing.cream",
+        "ing.sugar",
+        "ing.salt_kosher",
+        "ing.water"
+      ]
+    },
+    {
+      "title": "Finish",
+      "items": ["ing.cilantro", "ing.mint", "ing.lemon", "ing.kasuri_methi"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.chicken_thighs_boneless",
+      "label": "Chicken thighs, boneless",
+      "role": "role.protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": [
+        "Thighs stay juicy under high heat.",
+        "You can use breast, but reduce sear time and simmer gently."
+      ]
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt (full-fat preferred)",
+      "role": "role.marinade",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": ["Whisk smooth for even coating; avoid sweetened yogurt."]
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": ["For more heat, add 1/4–1/2 tsp cayenne."]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.acid",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 3, "unit": "tsp" },
+      "notes": ["Split between marinade, sauce, and final adjustment."]
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": ["For the tikka sear; use avocado/canola/grapeseed."]
+    },
+
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, finely diced",
+      "role": "role.base",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "ing.butter",
+      "label": "Butter",
+      "role": "role.fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": [
+        "Use ghee for a more Indian-forward profile; oil for dairy-free."
+      ]
+    },
+    {
+      "id": "ing.tomatoes_crushed",
+      "label": "Crushed tomatoes",
+      "role": "role.base",
+      "amount": { "value": 14, "unit": "oz" },
+      "notes": ["One standard can (14–15 oz)."]
+    },
+    {
+      "id": "ing.tomato_paste",
+      "label": "Tomato paste",
+      "role": "role.base",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.spice_finish",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.smoked_paprika",
+      "label": "Smoked paprika (optional but helps tikka-style smokiness)",
+      "role": "role.spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.cream",
+      "label": "Heavy cream",
+      "role": "role.enricher",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": ["Use coconut cream for dairy-free."]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Sugar (to balance acidity; optional)",
+      "role": "role.balance",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "role": "role.liquid",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": ["Adjust to desired sauce thickness."]
+    },
+
+    {
+      "id": "ing.kasuri_methi",
+      "label": "Kasuri methi (dried fenugreek leaves), crushed",
+      "role": "role.finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Classic restaurant aroma; optional but strongly recommended."]
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Cilantro, chopped",
+      "role": "role.finish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ing.mint",
+      "label": "Mint, chopped",
+      "role": "role.finish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.yogurt_marinate",
+    "method.high_heat_sear",
+    "method.onion_tomato_masala",
+    "method.bloom_spices"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_marinate",
+      "title": "Marinate the chicken",
+      "instructions": [
+        "In a bowl, whisk yogurt, ginger, garlic, cumin, coriander, turmeric, Kashmiri chili, 1 tbsp lemon juice, 1.5 tsp salt, and 1 tbsp oil.",
+        "Add chicken and toss until evenly coated.",
+        "Marinate 20–30 minutes at room temp (or up to 24 hours refrigerated)."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 20,
+      "timers": [{ "label": "Marinate", "minutes": 20 }],
+      "checks": [
+        "Marinade should coat chicken without being watery.",
+        "If marinating overnight, bring chicken closer to room temp before broiling for better char."
+      ]
+    },
+    {
+      "id": "step_02_broil_tikka",
+      "title": "Cook chicken tikka (broiler or skillet)",
+      "instructions": [
+        "Heat broiler to high. Line a sheet pan with foil and place a wire rack on top (recommended for airflow).",
+        "Arrange chicken pieces in a single layer. Broil 6–8 minutes, then flip and broil 4–6 minutes until charred at edges and mostly cooked.",
+        "Alternative (stovetop): Sear chicken in a hot skillet with 1 tbsp oil, 3–4 minutes per side until browned; it will finish in sauce."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Broil side 1", "minutes": 7 },
+        { "label": "Broil side 2", "minutes": 5 }
+      ],
+      "checks": [
+        "Aim for char at edges; do not fully dry out chicken.",
+        "If using breast meat, pull earlier to avoid toughness."
+      ]
+    },
+    {
+      "id": "step_03_build_masala",
+      "title": "Build the tomato-onion masala sauce",
+      "instructions": [
+        "In a large skillet or pot, melt butter over medium heat.",
+        "Add diced onion with a pinch of salt; cook 6–8 minutes until soft and lightly golden.",
+        "Stir in tomato paste and cook 1 minute to toast.",
+        "Add crushed tomatoes, remaining 1.5 tsp salt (start with 1 tsp, adjust later), cumin, coriander, smoked paprika (optional), and 1/2 cup water.",
+        "Simmer 10 minutes, stirring occasionally, until the sauce thickens and tastes less raw."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Simmer masala", "minutes": 10 }],
+      "checks": [
+        "Sauce should bubble gently, not splatter violently.",
+        "If sauce tastes sharp, simmer a few minutes longer."
+      ]
+    },
+    {
+      "id": "step_04_blend_optional",
+      "title": "Blend sauce for a restaurant-smooth texture (optional)",
+      "instructions": [
+        "Optional: Blend sauce until smooth (immersion blender or countertop blender).",
+        "Return sauce to pan and bring back to a gentle simmer."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "If using countertop blender, vent lid to avoid steam pressure."
+      ]
+    },
+    {
+      "id": "step_05_finish_with_cream_and_tikka",
+      "title": "Finish with cream and chicken tikka",
+      "instructions": [
+        "Lower heat to medium-low. Stir in cream and garam masala.",
+        "Add broiled/seared chicken and any collected juices.",
+        "Simmer 8–12 minutes until chicken is cooked through and sauce is cohesive.",
+        "Stir in remaining 1 tbsp lemon juice (to taste) and crushed kasuri methi (optional)."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Simmer chicken in sauce", "minutes": 10 }],
+      "checks": [
+        "Do not boil hard after adding cream—gentle simmer prevents splitting.",
+        "Chicken should be fully cooked (165°F internal at thickest point)."
+      ]
+    },
+    {
+      "id": "step_06_garnish_and_serve",
+      "title": "Garnish and serve",
+      "instructions": [
+        "Taste and adjust: add salt if flat, lemon if dull, or a pinch of sugar if too acidic.",
+        "Garnish with cilantro and mint if using.",
+        "Serve hot with basmati rice, naan, or roti."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Balance should be: savory, aromatic, lightly tangy, creamy."]
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "recipes.cuisines.indian.basmati_rice",
+      "recipes.cuisines.indian.naan",
+      "recipes.cuisines.indian.roti"
+    ],
+    "coolingSides": ["dish.indian.raita", "dish.indian.kachumber_salad"],
+    "notes": [
+      "A cooling yogurt side balances spice and richness.",
+      "If serving with rice, keep sauce slightly looser."
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Cool quickly and refrigerate in a shallow container.",
+        "Reheat gently; add a splash of water to loosen sauce."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze in portions. Thaw overnight in fridge.",
+        "Reheat gently to avoid sauce splitting."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Chicken must reach safe internal temperature before serving.",
+      "Avoid hard boiling once dairy is added to prevent curdling/splitting."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var_breast_meat",
+      "label": "Using chicken breast",
+      "adapt": {
+        "notes": [
+          "Cut into larger chunks to reduce drying.",
+          "Broil 4–5 minutes per side; finish quickly in sauce."
+        ]
+      }
+    },
+    {
+      "id": "var_dairy_free",
+      "label": "Dairy-free version",
+      "adapt": {
+        "notes": [
+          "Use coconut yogurt in marinade and coconut cream in sauce.",
+          "Replace butter with neutral oil or coconut oil."
+        ]
+      }
+    },
+    {
+      "id": "var_spicier",
+      "label": "Spicier tikka masala",
+      "adapt": {
+        "notes": [
+          "Add 1/2 tsp cayenne and 1 sliced green chili to the sauce.",
+          "Finish with extra lemon to keep the heat bright."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "role.curry_or_dal", "primary": true },
+      { "role": "role.rice_or_flatbread", "primary": false }
+    ],
+    "notes": [
+      "Weeknight-friendly if chicken is pre-marinated.",
+      "Excellent for batch cooking; flavors deepen overnight."
+    ]
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.chicken_tikka_masala",
+    "aliases": ["tikka masala", "chicken tikka masala", "murgh tikka masala"],
+    "index": {
+      "primaryTokens": ["tikka", "masala", "chicken", "creamy tomato"],
+      "secondaryTokens": ["yogurt", "garam masala", "kasuri methi", "broiler"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

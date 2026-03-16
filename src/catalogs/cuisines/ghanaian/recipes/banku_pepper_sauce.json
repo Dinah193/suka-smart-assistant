@@ -1,0 +1,274 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipe.ghanaian.banku_pepper_sauce",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Banku Pepper Sauce",
+    "subtitle": "Fresh Ghana-style pepper sauce for banku, kenkey, fish, and grilled meats",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Fresh, raw pepper sauce commonly served with banku/kenkey and fish.",
+        "Designed to be heat-scalable and easy to make without a blender if needed."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.ghanaian",
+    "category": "category.condiment",
+    "mealArchetypes": ["archetype.condiment", "archetype.sauce"],
+    "servingStyles": ["family_style", "street_food"],
+    "plannerTags": [
+      "cuisine.ghanaian",
+      "dish.pepper_sauce",
+      "condiment",
+      "fresh",
+      "spicy",
+      "no_cook",
+      "gluten_free",
+      "dairy_free"
+    ]
+  },
+  "summary": "A bright, fiery, fresh pepper-onion-tomato condiment used to lift banku, kenkey, grilled fish, and soups.",
+  "yield": {
+    "servings": 10,
+    "notes": "Makes about 1 to 1 1/4 cups (10–12 condiment servings)."
+  },
+  "time": {
+    "activeMins": 10,
+    "handsOffMins": 0,
+    "totalMins": 10
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "noCook": true,
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "freezerFriendly": false,
+    "leftoversGood": true,
+    "heatAdjustable": true
+  },
+  "tasteProfile": {
+    "signatureNotes": [
+      "fresh pepper heat",
+      "sharp onion",
+      "bright tomato",
+      "citrus tang",
+      "salty finish"
+    ],
+    "heat": 4,
+    "salt": 3,
+    "acid": 3,
+    "sweet": 1,
+    "umami": 1
+  },
+  "equipment": {
+    "minimum": ["tool.knife", "tool.board", "tool.bowl", "tool.spoon"],
+    "recommended": [
+      "tool.mortar_pestle",
+      "tool.blender",
+      "tool.microplane",
+      "tool.citrus_juicer"
+    ]
+  },
+  "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.vegan"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.hot_pepper_scotch_bonnet",
+      "label": "Scotch bonnet or habanero peppers",
+      "role": "heat",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": [
+        "Use 1–2 for mild/medium, 3–4 for hot, 5+ for very hot.",
+        "Remove seeds for slightly less heat (still hot)."
+      ]
+    },
+    {
+      "id": "ingredient.onion_red",
+      "label": "Red onion",
+      "role": "aromatic",
+      "amount": { "value": 0.5, "unit": "medium" },
+      "notes": "Finely chopped or crushed."
+    },
+    {
+      "id": "ingredient.tomato",
+      "label": "Tomato",
+      "role": "base",
+      "amount": { "value": 1, "unit": "medium" },
+      "notes": "Optional but common; adds moisture and balances heat."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "clove" },
+      "optional": true,
+      "notes": "Optional; adds a sharper savory edge."
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Ginger",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional; adds brightness and aroma."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": "Start here; adjust to taste."
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime juice",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Fresh is best. Lemon juice also works."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (optional)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional—rounds the bite slightly. Many versions use no oil."
+    },
+    {
+      "id": "ingredient.smoked_fish",
+      "label": "Smoked fish powder or crushed smoked fish (optional)",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional, non-vegan boost commonly used alongside fish dishes."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.ps_01_prep",
+      "title": "Prep and choose your method",
+      "instructions": [
+        "Wash peppers and tomato. Peel onion and garlic (if using).",
+        "Choose a method:",
+        "• Mortar & pestle (most traditional texture): crush peppers + salt first, then onion, then tomato.",
+        "• Blender (fast, smoother): pulse everything in short bursts to keep some texture.",
+        "• Knife-chop (no tools): mince peppers and onion very finely; chop tomato small and mix."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Ingredients are ready and your method is selected."]
+    },
+    {
+      "id": "step.ps_02_crush_or_pulse",
+      "title": "Crush/pulse the peppers and aromatics",
+      "instructions": [
+        "Mortar & pestle: add peppers + salt and crush into a coarse paste. Add onion and crush again.",
+        "If using garlic/ginger, add and crush until fragrant.",
+        "Blender: add peppers, onion, tomato, salt, lime juice, and optional garlic/ginger. Pulse 3–6 times.",
+        "Aim for a coarse sauce with visible pepper/onion bits (not a perfectly smooth puree)."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Sauce is coarse and aromatic; not watery."]
+    },
+    {
+      "id": "step.ps_03_finish",
+      "title": "Finish and adjust",
+      "instructions": [
+        "Stir in lime juice (if not already added) and optional oil.",
+        "Taste: add a pinch more salt if needed. Add more lime for brightness.",
+        "Optional umami: stir in smoked fish powder/crushed smoked fish if serving with banku + fish.",
+        "Rest 5 minutes for flavors to mingle (optional but recommended)."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Rest (optional)", "minutes": 5 }],
+      "checks": ["Heat/salt/acid feel balanced for a condiment."]
+    }
+  ],
+  "pairings": {
+    "with": [
+      "dish.ghanaian.banku",
+      "dish.ghanaian.kenkey",
+      "dish.ghanaian.grilled_tilapia",
+      "dish.ghanaian.fried_fish",
+      "recipe.ghanaian.light_soup"
+    ],
+    "notes": "Serve alongside banku/kenkey as a dip or spooned over grilled fish."
+  },
+  "storage": {
+    "fridge": {
+      "durationDays": 4,
+      "notes": "Store covered. Fresh/raw sauces mellow over time; heat remains strong."
+    },
+    "freezer": {
+      "durationDays": 0,
+      "notes": "Not recommended—texture and brightness degrade."
+    },
+    "reheat": {
+      "notes": "Serve cold or at room temperature."
+    }
+  },
+  "notes": [
+    "Handle hot peppers with gloves if sensitive; avoid touching eyes.",
+    "For a thicker sauce: use less tomato or drain watery tomato seeds before adding.",
+    "For a sharper onion bite: rinse chopped onion briefly and drain before mixing."
+  ],
+  "variations": [
+    {
+      "id": "variation.mild",
+      "label": "Milder pepper sauce",
+      "when": { "heatPreference": "low" },
+      "adapt": {
+        "notes": "Use 1–2 peppers and add extra tomato; remove seeds and membranes."
+      }
+    },
+    {
+      "id": "variation.extra_hot",
+      "label": "Extra-hot pepper sauce",
+      "when": { "heatPreference": "high" },
+      "adapt": {
+        "notes": "Use 5–6 peppers; skip tomato or use half. Add a pinch more salt and lime to keep balance."
+      }
+    },
+    {
+      "id": "variation.no_tomato",
+      "label": "Pepper-onion sauce (no tomato)",
+      "when": { "tomato": "omit" },
+      "adapt": {
+        "notes": "Omit tomato for a drier, sharper sauce—great for grilled meats and fish."
+      }
+    }
+  ],
+  "methods": ["method.chop", "method.crush", "method.blend_no_cook"],
+  "compat": {
+    "cuisineId": "cuisines.ghanaian",
+    "dishId": "dish.ghanaian.pepper_sauce",
+    "search": {
+      "aliases": [
+        "banku pepper sauce",
+        "pepper sauce",
+        "ghana pepper sauce",
+        "fresh pepper sauce",
+        "shito (not the same)",
+        "kpakpo shito (related)"
+      ],
+      "keywords": [
+        "scotch bonnet",
+        "habanero",
+        "onion",
+        "tomato",
+        "lime",
+        "condiment",
+        "ghanaian"
+      ]
+    }
+  }
+}

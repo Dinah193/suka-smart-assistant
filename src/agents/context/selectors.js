@@ -24,9 +24,9 @@
  * ```
  */
 
-import { emit } from "../../services/events/eventBus";
-import { db } from "../../services/db"; // Adjust if your Dexie instance is exported elsewhere.
-import * as featureFlagsModule from "../../config/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { db } from "@/services/db"; // Adjust if your Dexie instance is exported elsewhere.
+import * as featureFlagsModule from "@/config/featureFlags";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -490,4 +490,81 @@ function safeEmitContextError(scope, err, extra) {
   } catch {
     // swallow
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Compatibility exports (used by HouseholdOrchestrator)                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * selectProcurementContext
+ * ---------------------------------------------------------------------------
+ * Selector expected by procurementShim.
+ */
+export async function selectProcurementContext(input = {}) {
+  const domain = /** @type {SessionDomain} */ (input?.domain || "storehouse");
+  return getMinimalReasoningContext({ ...input, domain });
+}
+
+/**
+ * selectRecipeConsolidatorContext
+ * ---------------------------------------------------------------------------
+ * Selector expected by recipeConsolidatorShim.
+ *
+ * Default domain is "cooking" since recipe consolidation typically operates
+ * on cooking/meal planning state, but callers can override via input.domain.
+ */
+export async function selectRecipeConsolidatorContext(input = {}) {
+  const domain = /** @type {SessionDomain} */ (input?.domain || "cooking");
+  return getMinimalReasoningContext({ ...input, domain });
+}
+
+/**
+ * getDomainContext
+ * ---------------------------------------------------------------------------
+ * Backward-compatible selector expected by HouseholdOrchestrator.
+ * Returns a minimal reasoning context for a specific domain.
+ */
+export async function getDomainContext(domain, input = {}) {
+  return getMinimalReasoningContext({ ...input, domain });
+}
+
+/**
+ * getPendingOrRunningSessionForDomain
+ * ---------------------------------------------------------------------------
+ * Returns the most relevant session candidate for a domain:
+ *   1) a running session if present
+ *   2) otherwise a pending session if present
+ */
+export async function getPendingOrRunningSessionForDomain(domain, input = {}) {
+  const snap = await getSessionsSnapshotForDomain(domain, {
+    userId: input.userId,
+    limit: input.limit ?? 50,
+  });
+  const runningList = snap?.running || snap?.runningSessions || [];
+  const running = Array.isArray(runningList) ? runningList[0] : null;
+  if (running) return running;
+  const pendingList = snap?.pending || snap?.pendingSessions || [];
+  const pending = Array.isArray(pendingList) ? pendingList[0] : null;
+  return pending || null;
+}
+
+/**
+ * getLatestSessionForDomain
+ * ---------------------------------------------------------------------------
+ * Returns the most recent session for a domain, preferring running/pending
+ * if they exist, otherwise falling back to the latest historical session.
+ */
+export async function getLatestSessionForDomain(domain, input = {}) {
+  const snap = await getSessionsSnapshotForDomain(domain, {
+    userId: input.userId,
+    limit: input.limit ?? 50,
+  });
+  const running = snap?.running || snap?.runningSessions || [];
+  if (running.length) return running[0];
+  const pending = snap?.pending || snap?.pendingSessions || [];
+  if (pending.length) return pending[0];
+  const recent = snap?.recent || snap?.history || snap?.latest || [];
+  if (Array.isArray(recent) && recent.length) return recent[0];
+  return null;
 }

@@ -1,0 +1,151 @@
+{
+  "id": "creole_shrimp_and_grits",
+  "name": "Creole Shrimp and Grits",
+  "servings": 4,
+  "ingredients": [
+    {
+      "item": "shrimp",
+      "amount": 1.5,
+      "unit": "lb",
+      "prep": "peeled and deveined (tails off preferred)"
+    },
+    {
+      "item": "kosher salt",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "divided, plus more to taste"
+    },
+    {
+      "item": "black pepper",
+      "amount": 0.75,
+      "unit": "tsp",
+      "prep": "divided"
+    },
+
+    { "item": "stone-ground grits", "amount": 1, "unit": "cup" },
+    { "item": "water", "amount": 2, "unit": "cups" },
+    {
+      "item": "chicken stock",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "or seafood stock"
+    },
+    {
+      "item": "unsalted butter",
+      "amount": 3,
+      "unit": "tbsp",
+      "prep": "divided"
+    },
+    {
+      "item": "whole milk",
+      "amount": 0.5,
+      "unit": "cup",
+      "prep": "optional for creamier grits"
+    },
+    {
+      "item": "sharp cheddar cheese",
+      "amount": 1,
+      "unit": "cup",
+      "prep": "shredded (optional but common)"
+    },
+
+    {
+      "item": "smoked sausage",
+      "amount": 6,
+      "unit": "oz",
+      "prep": "andouille preferred, diced (optional)"
+    },
+    {
+      "item": "bacon",
+      "amount": 4,
+      "unit": "slices",
+      "prep": "chopped (optional; can replace sausage)"
+    },
+
+    {
+      "item": "yellow onion",
+      "amount": 0.5,
+      "unit": "medium",
+      "prep": "finely diced"
+    },
+    {
+      "item": "green bell pepper",
+      "amount": 0.5,
+      "unit": "medium",
+      "prep": "finely diced"
+    },
+    { "item": "celery", "amount": 1, "unit": "stalk", "prep": "finely diced" },
+    { "item": "garlic", "amount": 3, "unit": "cloves", "prep": "minced" },
+
+    {
+      "item": "tomato paste",
+      "amount": 1,
+      "unit": "tbsp",
+      "prep": "optional for a light Creole tomato note"
+    },
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+    { "item": "lemon juice", "amount": 1, "unit": "tbsp" },
+
+    { "item": "dried thyme", "amount": 0.5, "unit": "tsp" },
+    { "item": "paprika", "amount": 0.75, "unit": "tsp" },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.25,
+      "unit": "tsp",
+      "prep": "adjust to heat preference"
+    },
+
+    {
+      "item": "green onions",
+      "amount": 3,
+      "unit": "stalks",
+      "prep": "sliced (garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Season shrimp: Pat shrimp dry. Season with a pinch of salt and black pepper. Keep chilled while you start the grits."
+    },
+    {
+      "order": 2,
+      "text": "Cook grits: In a saucepan, bring water and stock to a boil. Whisk in grits slowly. Reduce heat to low and simmer, whisking often, until thick and tender. Add milk if using. Stir in 2 tbsp butter and optional cheddar. Keep warm on very low heat, adding a splash of water/stock if needed."
+    },
+    {
+      "order": 3,
+      "text": "Render bacon/sausage (optional): In a skillet over medium heat, cook chopped bacon until crisp (or brown diced sausage). Transfer to a plate, leaving some fat in the pan (or add 1 tbsp butter if lean)."
+    },
+    {
+      "order": 4,
+      "text": "Cook aromatics: Add onion, bell pepper, and celery to the skillet. Cook until softened. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 5,
+      "text": "Build quick Creole pan sauce: Stir in optional tomato paste and cook 30–60 seconds. Add Worcestershire, hot sauce (optional), thyme, paprika, cayenne, and a small splash of stock or water to loosen into a light sauce."
+    },
+    {
+      "order": 6,
+      "text": "Cook shrimp quickly: Increase heat to medium-high. Add 1 tbsp butter, then add shrimp in a single layer. Cook just until pink and opaque, flipping once. Avoid overcooking."
+    },
+    {
+      "order": 7,
+      "text": "Finish: Return bacon/sausage to the pan. Stir in lemon juice. Taste and adjust salt, pepper, and heat."
+    },
+    {
+      "order": 8,
+      "text": "Serve: Spoon creamy grits into bowls and top with shrimp and pan sauce. Garnish with green onions and parsley."
+    }
+  ]
+}

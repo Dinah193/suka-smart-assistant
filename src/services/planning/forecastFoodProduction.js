@@ -9,6 +9,15 @@
  * You can pass an optional `options` bag to unlock richer behaviors.
  *
  * Install: npm i dayjs
+ *
+ * IMPORTANT BUILD FIX:
+ * - Some ES-module callers import this as a DEFAULT export:
+ *     import forecastFoodProduction from "@/services/planning/forecastFoodProduction";
+ * - This file previously used CommonJS `module.exports = { forecastFoodProduction }`
+ *   which does NOT provide a default export for Vite ESM imports.
+ * - To keep all other logic the same while fixing the build, we:
+ *     1) Keep CommonJS exports for any legacy require() callers.
+ *     2) ALSO add ESM exports (default + named) at the bottom.
  */
 
 const dayjs = require("dayjs");
@@ -36,17 +45,83 @@ const DEFAULT_OPTIONS = {
 
 // Yield tables (very coarse, per plant or per unit over a harvest window)
 const CROP_YIELDS = {
-  tomato:   { unit: "lb",   perPlant: 10,  harvestWeeks: 8,  startAfterDays: 70,  spread: 0.18 },
-  cucumber: { unit: "lb",   perPlant: 6,   harvestWeeks: 6,  startAfterDays: 55,  spread: 0.2 },
-  zucchini: { unit: "lb",   perPlant: 8,   harvestWeeks: 8,  startAfterDays: 50,  spread: 0.18 },
-  pepper:   { unit: "lb",   perPlant: 4,   harvestWeeks: 8,  startAfterDays: 70,  spread: 0.18 },
-  lettuce:  { unit: "head", perPlant: 1,   harvestWeeks: 1,  startAfterDays: 45,  spread: 0.1 },
-  spinach:  { unit: "lb",   perSqft: 0.5,  harvestWeeks: 2,  startAfterDays: 40,  spread: 0.15 },
-  kale:     { unit: "lb",   perPlant: 3,   harvestWeeks: 10, startAfterDays: 60,  spread: 0.2 },
-  bean:     { unit: "lb",   perPlant: 1.2, harvestWeeks: 6,  startAfterDays: 55,  spread: 0.22 },
-  potato:   { unit: "lb",   perPlant: 3,   harvestWeeks: 1,  startAfterDays: 90,  spread: 0.12 },
-  onion:    { unit: "lb",   perPlant: 0.5, harvestWeeks: 1,  startAfterDays: 90,  spread: 0.12 },
-  carrot:   { unit: "lb",   perPlant: 0.3, harvestWeeks: 1,  startAfterDays: 70,  spread: 0.12 },
+  tomato: {
+    unit: "lb",
+    perPlant: 10,
+    harvestWeeks: 8,
+    startAfterDays: 70,
+    spread: 0.18,
+  },
+  cucumber: {
+    unit: "lb",
+    perPlant: 6,
+    harvestWeeks: 6,
+    startAfterDays: 55,
+    spread: 0.2,
+  },
+  zucchini: {
+    unit: "lb",
+    perPlant: 8,
+    harvestWeeks: 8,
+    startAfterDays: 50,
+    spread: 0.18,
+  },
+  pepper: {
+    unit: "lb",
+    perPlant: 4,
+    harvestWeeks: 8,
+    startAfterDays: 70,
+    spread: 0.18,
+  },
+  lettuce: {
+    unit: "head",
+    perPlant: 1,
+    harvestWeeks: 1,
+    startAfterDays: 45,
+    spread: 0.1,
+  },
+  spinach: {
+    unit: "lb",
+    perSqft: 0.5,
+    harvestWeeks: 2,
+    startAfterDays: 40,
+    spread: 0.15,
+  },
+  kale: {
+    unit: "lb",
+    perPlant: 3,
+    harvestWeeks: 10,
+    startAfterDays: 60,
+    spread: 0.2,
+  },
+  bean: {
+    unit: "lb",
+    perPlant: 1.2,
+    harvestWeeks: 6,
+    startAfterDays: 55,
+    spread: 0.22,
+  },
+  potato: {
+    unit: "lb",
+    perPlant: 3,
+    harvestWeeks: 1,
+    startAfterDays: 90,
+    spread: 0.12,
+  },
+  onion: {
+    unit: "lb",
+    perPlant: 0.5,
+    harvestWeeks: 1,
+    startAfterDays: 90,
+    spread: 0.12,
+  },
+  carrot: {
+    unit: "lb",
+    perPlant: 0.3,
+    harvestWeeks: 1,
+    startAfterDays: 70,
+    spread: 0.12,
+  },
 };
 
 const ANIMAL_MODELS = {
@@ -73,30 +148,30 @@ const ANIMAL_MODELS = {
 
 const NUTRITION = {
   // per unit in calories + protein grams (very coarse)
-  tomato_lb:   { kcal: 82,  protein: 4 },
-  cucumber_lb: { kcal: 68,  protein: 3 },
-  zucchini_lb: { kcal: 72,  protein: 5 },
-  pepper_lb:   { kcal: 90,  protein: 3 },
-  lettuce_head:{ kcal: 15,  protein: 1 },
-  spinach_lb:  { kcal: 104, protein: 12 },
-  kale_lb:     { kcal: 227, protein: 15 },
-  bean_lb:     { kcal: 610, protein: 38 },
-  potato_lb:   { kcal: 349, protein: 9 },
-  onion_lb:    { kcal: 182, protein: 4 },
-  carrot_lb:   { kcal: 186, protein: 4 },
+  tomato_lb: { kcal: 82, protein: 4 },
+  cucumber_lb: { kcal: 68, protein: 3 },
+  zucchini_lb: { kcal: 72, protein: 5 },
+  pepper_lb: { kcal: 90, protein: 3 },
+  lettuce_head: { kcal: 15, protein: 1 },
+  spinach_lb: { kcal: 104, protein: 12 },
+  kale_lb: { kcal: 227, protein: 15 },
+  bean_lb: { kcal: 610, protein: 38 },
+  potato_lb: { kcal: 349, protein: 9 },
+  onion_lb: { kcal: 182, protein: 4 },
+  carrot_lb: { kcal: 186, protein: 4 },
 
-  egg_each:    { kcal: 70,  protein: 6 },
-  chicken_lb:  { kcal: 748, protein: 88 }, // cooked meat, per lb edible
-  milk_quart:  { kcal: 600, protein: 32 },
-  honey_lb:    { kcal: 1390, protein: 0 },
+  egg_each: { kcal: 70, protein: 6 },
+  chicken_lb: { kcal: 748, protein: 88 }, // cooked meat, per lb edible
+  milk_quart: { kcal: 600, protein: 32 },
+  honey_lb: { kcal: 1390, protein: 0 },
 };
 
 const PRESERVATION = {
   // lossFactor applies to preserved portion; shelfLifeDays suggests rotation
-  freeze:     { lossFactor: 0.05, shelfLifeDays: 365 },
-  can:        { lossFactor: 0.1,  shelfLifeDays: 730 },
-  dehydrate:  { lossFactor: 0.15, shelfLifeDays: 540 },
-  ferment:    { lossFactor: 0.1,  shelfLifeDays: 180 },
+  freeze: { lossFactor: 0.05, shelfLifeDays: 365 },
+  can: { lossFactor: 0.1, shelfLifeDays: 730 },
+  dehydrate: { lossFactor: 0.15, shelfLifeDays: 540 },
+  ferment: { lossFactor: 0.1, shelfLifeDays: 180 },
 };
 
 // Household defaults if prefs not provided
@@ -123,8 +198,10 @@ function cmpInRange(date, start, end) {
 
 function makeBuckets(startISO, endISO, granularity = "week") {
   const out = [];
-  let cursor = dayjs(startISO)[granularity === "day" ? "startOf" : "startOf"](granularity);
-  const end = dayjs(endISO)[granularity === "day" ? "endOf" : "endOf"](granularity);
+  let cursor =
+    dayjs(startISO)[granularity === "day" ? "startOf" : "startOf"](granularity);
+  const end =
+    dayjs(endISO)[granularity === "day" ? "endOf" : "endOf"](granularity);
   while (cursor.isBefore(end) || cursor.isSame(end)) {
     const start = cursor.startOf(granularity);
     const endB = cursor.endOf(granularity);
@@ -210,7 +287,10 @@ function expandSuccessions(plantings = []) {
       // shift sow/transplant/plantedOn by interval * i
       const fields = ["sowDate", "transplantDate", "plantedOn"];
       for (const f of fields) {
-        if (shifted[f]) shifted[f] = dayjs(shifted[f]).add(step * i, "day").format("YYYY-MM-DD");
+        if (shifted[f])
+          shifted[f] = dayjs(shifted[f])
+            .add(step * i, "day")
+            .format("YYYY-MM-DD");
       }
       shifted.id = `${base.id || base.crop || "planting"}#${i + 1}`;
       out.push(shifted);
@@ -229,7 +309,12 @@ function expandSuccessions(plantings = []) {
  *    sowDate:'2025-04-10', daysToMaturity:75, expectedPerPlant:12, succession?:{times,intervalDays} }
  * ]
  */
-function forecastGarden(plantings = [], range, granularity = "week", { zone = null, includeUncertainty = false } = {}) {
+function forecastGarden(
+  plantings = [],
+  range,
+  granularity = "week",
+  { zone = null, includeUncertainty = false } = {}
+) {
   const buckets = makeBuckets(range.start, range.end, granularity);
   const plan = expandSuccessions(plantings);
 
@@ -239,7 +324,8 @@ function forecastGarden(plantings = [], range, granularity = "week", { zone = nu
     if (!model) continue;
 
     // Determine start of harvest window
-    const baseDate = p.transplantDate || p.sowDate || p.plantedOn || range.start;
+    const baseDate =
+      p.transplantDate || p.sowDate || p.plantedOn || range.start;
     const rawD2M = Number(p.daysToMaturity || model.startAfterDays || 60);
     const d2m = climateAdjustMaturity(rawD2M, zone);
     const firstHarvest = dayjs(baseDate).add(d2m, "day");
@@ -259,7 +345,11 @@ function forecastGarden(plantings = [], range, granularity = "week", { zone = nu
 
     if (totalYield <= 0) continue;
 
-    const weeks = clamp(Number(p.harvestWeeks || model.harvestWeeks || 6), 1, 20);
+    const weeks = clamp(
+      Number(p.harvestWeeks || model.harvestWeeks || 6),
+      1,
+      20
+    );
     const weights = harvestWeights(weeks);
 
     // Place yields into buckets
@@ -283,7 +373,8 @@ function forecastGarden(plantings = [], range, granularity = "week", { zone = nu
           };
 
           if (includeUncertainty) {
-            const spread = typeof p.spread === "number" ? p.spread : (model.spread || 0.15);
+            const spread =
+              typeof p.spread === "number" ? p.spread : model.spread || 0.15;
             item.ci = {
               p10: Math.max(0, qty * (1 - spread)),
               p90: qty * (1 + spread),
@@ -313,7 +404,12 @@ function forecastGarden(plantings = [], range, granularity = "week", { zone = nu
  *  { species:'bee',     purpose:'honey', hives:2 }
  * ]
  */
-function forecastAnimals(animals = [], range, granularity = "week", { includeUncertainty = false } = {}) {
+function forecastAnimals(
+  animals = [],
+  range,
+  granularity = "week",
+  { includeUncertainty = false } = {}
+) {
   const buckets = makeBuckets(range.start, range.end, granularity);
 
   for (const a of animals) {
@@ -353,7 +449,9 @@ function forecastAnimals(animals = [], range, granularity = "week", { includeUnc
       if (!count) continue;
       const model = ANIMAL_MODELS.chicken_meat;
       const baseStart = a.startDate ? dayjs(a.startDate) : dayjs(range.start);
-      const harvestDate = a.harvestDate ? dayjs(a.harvestDate) : baseStart.add(model.weeksToHarvest, "week");
+      const harvestDate = a.harvestDate
+        ? dayjs(a.harvestDate)
+        : baseStart.add(model.weeksToHarvest, "week");
       const carcass = model.carcassLbPerBird * count;
       for (const b of buckets) {
         if (cmpInRange(harvestDate, b.start, b.end)) {
@@ -409,7 +507,10 @@ function forecastAnimals(animals = [], range, granularity = "week", { includeUnc
     }
 
     // HONEY
-    if ((species === "bee" || species === "bees" || species === "honeybee") && (purpose === "honey" || !purpose)) {
+    if (
+      (species === "bee" || species === "bees" || species === "honeybee") &&
+      (purpose === "honey" || !purpose)
+    ) {
       const hives = Number(a.hives || a.count || 0);
       if (!hives) continue;
       const total = ANIMAL_MODELS.bee_honey.lbPerHivePerSeason * hives;
@@ -417,10 +518,12 @@ function forecastAnimals(animals = [], range, granularity = "week", { includeUnc
       const drops = [
         { month: 6, share: 0.35 },
         { month: 7, share: 0.45 },
-        { month: 8, share: 0.20 },
+        { month: 8, share: 0.2 },
       ];
       for (const d of drops) {
-        const dt = dayjs(range.start).month(d.month - 1).date(15);
+        const dt = dayjs(range.start)
+          .month(d.month - 1)
+          .date(15);
         for (const b of buckets) {
           if (cmpInRange(dt, b.start, b.end)) {
             const qty = total * d.share;
@@ -469,13 +572,20 @@ function splitFreshVsPreserve(buckets, prefs = DEFAULT_PREFS) {
   const perishBias = (name) => {
     const k = (name || "").toLowerCase();
     if (k.includes("lettuce") || k.includes("spinach")) return 1.0;
-    if (k.includes("kale") || k.includes("zucchini") || k.includes("cucumber")) return 0.6;
-    if (k.includes("tomato") || k.includes("pepper") || k.includes("bean")) return 0.5;
+    if (k.includes("kale") || k.includes("zucchini") || k.includes("cucumber"))
+      return 0.6;
+    if (k.includes("tomato") || k.includes("pepper") || k.includes("bean"))
+      return 0.5;
     if (k.includes("milk") || k.includes("egg")) return 0.7;
     return 0.3;
   };
 
-  const defaultMethods = P.garden?.preservation?.defaultMethods || ["freeze", "can", "dehydrate", "ferment"];
+  const defaultMethods = P.garden?.preservation?.defaultMethods || [
+    "freeze",
+    "can",
+    "dehydrate",
+    "ferment",
+  ];
 
   for (const b of buckets) {
     let freshBudget = weeklyFreshServingCapacity;
@@ -520,7 +630,11 @@ function splitFreshVsPreserve(buckets, prefs = DEFAULT_PREFS) {
 
       freshQty = clamp(freshQty, 0, it.qty);
       preserveQty = clamp(preserveQty, 0, it.qty - freshQty);
-      freshBudget = clamp(freshBudget - toFreshServings, 0, weeklyFreshServingCapacity);
+      freshBudget = clamp(
+        freshBudget - toFreshServings,
+        0,
+        weeklyFreshServingCapacity
+      );
 
       it.split = {
         freshQty,
@@ -530,14 +644,22 @@ function splitFreshVsPreserve(buckets, prefs = DEFAULT_PREFS) {
 
       // Attach nutrition splits
       const tmpRoll = { kcal: 0, protein: 0 };
-      const nutKey = `${(it.crop || it.name || "").toLowerCase()}_${it.unit}`.replace(/\s+/g, "");
+      const nutKey = `${(it.crop || it.name || "").toLowerCase()}_${
+        it.unit
+      }`.replace(/\s+/g, "");
       addNutrition(tmpRoll, nutKey, it.qty);
       const ratioF = it.qty ? freshQty / it.qty : 0;
       const ratioP = it.qty ? preserveQty / it.qty : 0;
       it.nutrition = {
         total: tmpRoll,
-        fresh: { kcal: tmpRoll.kcal * ratioF, protein: tmpRoll.protein * ratioF },
-        preserved: { kcal: tmpRoll.kcal * ratioP, protein: tmpRoll.protein * ratioP },
+        fresh: {
+          kcal: tmpRoll.kcal * ratioF,
+          protein: tmpRoll.protein * ratioF,
+        },
+        preserved: {
+          kcal: tmpRoll.kcal * ratioP,
+          protein: tmpRoll.protein * ratioP,
+        },
       };
     }
   }
@@ -561,11 +683,18 @@ function planPreservationTasks(buckets, prefs = DEFAULT_PREFS) {
       // Simple method selection by item name
       const name = (it.name || "").toLowerCase();
       let method = methods[0];
-      if (name.includes("tomato")) method = methods.includes("can") ? "can" : method;
-      else if (name.includes("zucchini") || name.includes("kale") || name.includes("spinach"))
+      if (name.includes("tomato"))
+        method = methods.includes("can") ? "can" : method;
+      else if (
+        name.includes("zucchini") ||
+        name.includes("kale") ||
+        name.includes("spinach")
+      )
         method = methods.includes("dehydrate") ? "dehydrate" : method;
-      else if (name.includes("cucumber")) method = methods.includes("ferment") ? "ferment" : method;
-      else if (name.includes("milk")) method = methods.includes("ferment") ? "ferment" : method;
+      else if (name.includes("cucumber"))
+        method = methods.includes("ferment") ? "ferment" : method;
+      else if (name.includes("milk"))
+        method = methods.includes("ferment") ? "ferment" : method;
 
       const loss = PRESERVATION[method]?.lossFactor || 0.1;
       const keepQty = pq * (1 - loss);
@@ -625,7 +754,10 @@ function summarize(buckets, { includeCumulative = false } = {}) {
     totals.protein += weekSum.protein;
 
     if (includeCumulative) {
-      running = { kcal: running.kcal + weekSum.kcal, protein: running.protein + weekSum.protein };
+      running = {
+        kcal: running.kcal + weekSum.kcal,
+        protein: running.protein + weekSum.protein,
+      };
     }
 
     timeline.push({
@@ -633,7 +765,12 @@ function summarize(buckets, { includeCumulative = false } = {}) {
       start: b.start.toISOString(),
       end: b.end.toISOString(),
       items: b.items,
-      nutrition: { total: weekSum, fresh, preserved, cumulative: includeCumulative ? running : undefined },
+      nutrition: {
+        total: weekSum,
+        fresh,
+        preserved,
+        cumulative: includeCumulative ? running : undefined,
+      },
     });
   }
 
@@ -667,7 +804,7 @@ async function forecastFoodProduction(
     prefs = null,
     startDate,
     endDate,
-    granularity, // legacy param kept; if provided overrides options.granularity
+    granularity,
   } = {},
   options = {}
 ) {
@@ -676,7 +813,11 @@ async function forecastFoodProduction(
 
   const range = {
     start: startDate ? dayjs(startDate) : dayjs().startOf(usedGranularity),
-    end: endDate ? dayjs(endDate) : dayjs().add(12, usedGranularity === "day" ? "week" : "week").endOf(usedGranularity),
+    end: endDate
+      ? dayjs(endDate)
+      : dayjs()
+          .add(12, usedGranularity === "day" ? "week" : "week")
+          .endOf(usedGranularity),
   };
 
   // Build two independent forecasts then merge per bucket key
@@ -706,16 +847,23 @@ async function forecastFoodProduction(
     tgt.nutrition.protein += b.nutrition.protein;
   }
 
-  const mergedBuckets = [...map.values()].sort((x, y) => x.start.valueOf() - y.start.valueOf());
+  const mergedBuckets = [...map.values()].sort(
+    (x, y) => x.start.valueOf() - y.start.valueOf()
+  );
 
   // Split fresh vs preserve and attach nutrition splits
   splitFreshVsPreserve(mergedBuckets, prefs || DEFAULT_PREFS);
 
   // Plan preservation tasks with losses and shelf life
-  const { buckets: planned, tasks } = planPreservationTasks(mergedBuckets, prefs || DEFAULT_PREFS);
+  const { buckets: planned, tasks } = planPreservationTasks(
+    mergedBuckets,
+    prefs || DEFAULT_PREFS
+  );
 
   // Summaries
-  const { totals, byItem, timeline } = summarize(planned, { includeCumulative: opt.includeCumulative });
+  const { totals, byItem, timeline } = summarize(planned, {
+    includeCumulative: opt.includeCumulative,
+  });
 
   return {
     range: { start: range.start.toISOString(), end: range.end.toISOString() },
@@ -735,6 +883,7 @@ async function forecastFoodProduction(
 /* Exports */
 // =============================================================================
 
+// CommonJS (legacy) — keep as-is for require() callers
 module.exports = {
   forecastFoodProduction,
   // exposed helpers (useful for tests or UI exploration)
@@ -744,4 +893,19 @@ module.exports = {
   planPreservationTasks,
   summarize,
   tables: { CROP_YIELDS, ANIMAL_MODELS, NUTRITION, PRESERVATION },
+};
+
+// ESM exports (Vite/Rollup) — added to fix default import failures
+export default forecastFoodProduction;
+export {
+  forecastFoodProduction,
+  forecastGarden,
+  forecastAnimals,
+  splitFreshVsPreserve,
+  planPreservationTasks,
+  summarize,
+  CROP_YIELDS,
+  ANIMAL_MODELS,
+  NUTRITION,
+  PRESERVATION,
 };

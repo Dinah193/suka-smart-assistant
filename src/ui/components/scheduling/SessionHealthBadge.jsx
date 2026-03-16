@@ -1,12 +1,18 @@
 // File: C:\Users\larho\suka-smart-assistant\src\ui\components\scheduling\SessionHealthBadge.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import PropTypes from "prop-types";
 
 // 🔌 Shared services (assumed to exist per SSA conventions)
-import eventBus from "../../../services/eventBus";
+import eventBus from "../../../services/events/eventBus";
 import featureFlags from "../../../config/featureFlags";
-import HubPacketFormatter from "../../../hub/HubPacketFormatter";
-import FamilyFundConnector from "../../../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * SessionHealthBadge
@@ -51,9 +57,13 @@ function exportToHubIfEnabled(payload) {
  */
 function computeHealthLevel(reasons) {
   const list = Array.isArray(reasons) ? reasons : [];
-  const hasHigh = list.some((r) => (r?.severity || "").toLowerCase() === "high");
+  const hasHigh = list.some(
+    (r) => (r?.severity || "").toLowerCase() === "high"
+  );
   if (hasHigh) return "red";
-  const hasMed = list.some((r) => (r?.severity || "").toLowerCase() === "medium");
+  const hasMed = list.some(
+    (r) => (r?.severity || "").toLowerCase() === "medium"
+  );
   if (hasMed) return "amber";
   return "green";
 }
@@ -182,7 +192,12 @@ export default function SessionHealthBadge({
   // Derive classes & label
   const level = state.level || computeHealthLevel(state.reasons);
   const cls = useMemo(() => classFor(level), [level]);
-  const label = level === "green" ? "On track" : level === "amber" ? "At risk" : "Attention";
+  const label =
+    level === "green"
+      ? "On track"
+      : level === "amber"
+      ? "At risk"
+      : "Attention";
 
   // Actions
   const emit = useCallback((type, data, { exportToHub = false } = {}) => {
@@ -261,9 +276,7 @@ export default function SessionHealthBadge({
           aria-hidden="true"
         />
         {showLabel && (
-          <span className="text-[11px] font-medium tracking-wide">
-            {label}
-          </span>
+          <span className="text-[11px] font-medium tracking-wide">{label}</span>
         )}
       </button>
 
@@ -275,12 +288,16 @@ export default function SessionHealthBadge({
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         className={`${
-          open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-1 pointer-events-none"
+          open
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-1 pointer-events-none"
         } transition-all duration-150 absolute z-50 top-[110%] left-1/2 -translate-x-1/2 min-w-[260px] max-w-[340px]
            rounded-xl border ${cls.border} ${cls.bg} shadow-lg`}
       >
         <div className="p-3">
-          <div className={`text-xs font-semibold ${cls.text} flex items-center justify-between`}>
+          <div
+            className={`text-xs font-semibold ${cls.text} flex items-center justify-between`}
+          >
             <span>Session health</span>
             <span className="text-[10px] opacity-70">
               {new Date(state.updatedAt || nowISO()).toLocaleTimeString([], {
@@ -292,7 +309,9 @@ export default function SessionHealthBadge({
 
           <ul className="mt-2 space-y-1.5">
             {(state.reasons || []).length === 0 ? (
-              <li className="text-[11px] text-slate-600">No issues detected.</li>
+              <li className="text-[11px] text-slate-600">
+                No issues detected.
+              </li>
             ) : (
               (state.reasons || []).map((r, idx) => (
                 <li
@@ -330,7 +349,11 @@ export default function SessionHealthBadge({
               onClick={handleAutofit}
               className="text-[11px] px-2 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700"
               disabled={level === "green"}
-              title={level === "green" ? "No autofit needed" : "Let SSA adjust schedule"}
+              title={
+                level === "green"
+                  ? "No autofit needed"
+                  : "Let SSA adjust schedule"
+              }
             >
               Auto-fit plan
             </button>

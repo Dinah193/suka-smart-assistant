@@ -1,0 +1,1878 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.1",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+  "notes": [
+    "Thai dishes catalog for SSA planners/search/browse.",
+    "Signals are booleans only to satisfy schema validation in this project."
+  ],
+  "meta": {
+    "id": "cuisines.thai.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Thai • Dishes Catalog",
+    "cuisineId": "cuisines.thai",
+    "status": "canonical",
+    "notes": [
+      "Core Thai set: curries, noodles, soups, salads, grills, desserts, drinks."
+    ],
+    "description": "Canonical dish entries for Thai cuisine used by SSA meal planners, search, and UI browse.",
+    "version": "1.0.1",
+    "author": "SSA Catalog",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "updatedAt": "2026-01-21T00:00:00.000Z"
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+  "dishes": [
+    {
+      "id": "thai.pad_thai",
+      "label": "Pad Thai",
+      "aka": [
+        "Phat Thai",
+        "Pad Thai Goong",
+        "Pad Thai (Thai-style stir-fried noodles)"
+      ],
+      "subprofiles": ["thai.central"],
+      "category": "noodles",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 5 },
+      "servingStyles": ["plates", "street_food", "bowls"],
+      "mealArchetypes": ["thai.noodle_bowl"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.rice_noodles"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.shrimp",
+            "ingredient.chicken",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.tamarind_paste",
+            "ingredient.fish_sauce",
+            "ingredient.palm_sugar"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.bean_sprouts", "ingredient.green_onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.crushed_peanuts", "ingredient.lime_wedges"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry", "method.reduce_sauce"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.pot",
+        "equipment.colander"
+      ],
+      "ingredientsCore": [
+        "ingredient.rice_noodles",
+        "ingredient.tamarind_paste",
+        "ingredient.fish_sauce",
+        "ingredient.palm_sugar",
+        "ingredient.garlic",
+        "ingredient.bean_sprouts",
+        "ingredient.lime"
+      ],
+      "allergens": [
+        "allergen.fish",
+        "allergen.peanut",
+        "allergen.soy",
+        "allergen.shellfish"
+      ],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free_possible",
+        "diet.vegetarian_option"
+      ],
+      "pairingHints": {
+        "with": ["thai.vinegar_chile_condiment", "thai.prik_pon"]
+      },
+      "variations": [
+        {
+          "id": "thai.pad_thai.veg",
+          "label": "Vegetarian Pad Thai",
+          "when": { "diet": "diet.vegetarian" },
+          "adapt": {
+            "swap": ["ingredient.fish_sauce", "ingredient.shrimp"],
+            "use": ["ingredient.soy_sauce_light", "ingredient.tofu_firm"]
+          }
+        },
+        {
+          "id": "thai.pad_thai.peanut_free",
+          "label": "Peanut-free garnish",
+          "when": { "allergen": "allergen.peanut" },
+          "adapt": {
+            "swap": ["ingredient.crushed_peanuts"],
+            "use": ["ingredient.toasted_sesame", "ingredient.pumpkin_seeds"]
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "style.balanced",
+        "heat.medium",
+        "weeknight"
+      ]
+    },
+    {
+      "id": "thai.pad_see_ew",
+      "label": "Pad See Ew",
+      "aka": ["Phat Si-io", "Stir-fried wide rice noodles (soy)"],
+      "subprofiles": ["thai.central"],
+      "category": "noodles",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 5 },
+      "servingStyles": ["plates", "street_food", "bowls"],
+      "mealArchetypes": ["thai.noodle_bowl"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.wide_rice_noodles"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken",
+            "ingredient.beef",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.chinese_broccoli", "ingredient.egg"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.soy_sauce_light",
+            "ingredient.thai_black_soy_sauce"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.pot",
+        "equipment.colander"
+      ],
+      "ingredientsCore": [
+        "ingredient.wide_rice_noodles",
+        "ingredient.soy_sauce_light",
+        "ingredient.chinese_broccoli",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.soy", "allergen.egg"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free_possible",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": ["cuisine.thai", "course.main", "weeknight", "heat.low"]
+    },
+    {
+      "id": "thai.pad_kee_mao",
+      "label": "Pad Kee Mao",
+      "aka": ["Drunken Noodles", "Pad Ki Mao"],
+      "subprofiles": ["thai.central"],
+      "category": "noodles",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 25, "totalMins": 35, "handsOffMins": 5 },
+      "servingStyles": ["plates", "street_food", "bowls"],
+      "mealArchetypes": ["thai.noodle_bowl"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.wide_rice_noodles"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken",
+            "ingredient.beef",
+            "ingredient.tofu_firm",
+            "ingredient.shrimp"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.bell_pepper",
+            "ingredient.onion",
+            "ingredient.chinese_broccoli"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.garlic",
+            "ingredient.thai_basil",
+            "ingredient.chile_fresh"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.soy_sauce_light", "ingredient.oyster_sauce"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.pot",
+        "equipment.colander"
+      ],
+      "ingredientsCore": [
+        "ingredient.wide_rice_noodles",
+        "ingredient.thai_basil",
+        "ingredient.chile_fresh",
+        "ingredient.garlic"
+      ],
+      "allergens": ["allergen.soy", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free_possible",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": ["cuisine.thai", "course.main", "heat.high", "weeknight"]
+    },
+    {
+      "id": "thai.pad_krapow_gai",
+      "label": "Pad Krapow (Basil Chicken)",
+      "aka": ["Pad Kra Pao", "Thai Holy Basil Stir-fry", "Basil Chicken"],
+      "subprofiles": ["thai.central"],
+      "category": "stir_fry",
+      "difficulty": 2,
+      "heatTypical": 3,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 2 },
+      "servingStyles": ["bowls", "plates", "street_food"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.ground_chicken",
+            "ingredient.ground_beef",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.chile_fresh"],
+          "chooseOne": false
+        },
+        {
+          "role": "herb",
+          "items": ["ingredient.thai_basil", "ingredient.holy_basil"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.soy_sauce_light", "ingredient.fish_sauce"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.jasmine_rice",
+        "ingredient.garlic",
+        "ingredient.chile_fresh",
+        "ingredient.thai_basil"
+      ],
+      "allergens": ["allergen.soy", "allergen.fish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free_possible",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "heat.high",
+        "weeknight",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "thai.khao_pad",
+      "label": "Khao Pad (Thai Fried Rice)",
+      "aka": ["Thai Fried Rice", "Khao Phat"],
+      "subprofiles": ["thai.central"],
+      "category": "rice",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 2 },
+      "servingStyles": ["bowls", "plates", "street_food"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.cooked_jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken",
+            "ingredient.shrimp",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.carrot",
+            "ingredient.peas",
+            "ingredient.green_onion"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "seasoning",
+          "items": [
+            "ingredient.fish_sauce",
+            "ingredient.soy_sauce_light",
+            "ingredient.lime_wedges"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.skillet"],
+      "ingredientsCore": [
+        "ingredient.cooked_jasmine_rice",
+        "ingredient.garlic",
+        "ingredient.green_onion",
+        "ingredient.lime"
+      ],
+      "allergens": [
+        "allergen.fish",
+        "allergen.soy",
+        "allergen.egg",
+        "allergen.shellfish"
+      ],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free_possible",
+        "diet.vegetarian_option",
+        "diet.leftovers_friendly"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "weeknight",
+        "leftovers",
+        "heat.low"
+      ]
+    },
+
+    {
+      "id": "thai.cashew_chicken",
+      "label": "Chicken with Cashews",
+      "aka": ["Gai Pad Med Mamuang", "Stir-fried cashew chicken"],
+      "subprofiles": ["thai.central"],
+      "category": "stir_fry",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 5 },
+      "servingStyles": ["plates", "bowls"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken", "ingredient.tofu_firm"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.bell_pepper",
+            "ingredient.onion",
+            "ingredient.green_onion"
+          ],
+          "chooseOne": false
+        },
+        { "role": "nuts", "items": ["ingredient.cashews"], "chooseOne": false },
+        {
+          "role": "sauce",
+          "items": ["ingredient.oyster_sauce", "ingredient.soy_sauce_light"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.chicken",
+        "ingredient.cashews",
+        "ingredient.garlic",
+        "ingredient.jasmine_rice"
+      ],
+      "allergens": ["allergen.tree_nut", "allergen.soy", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free_possible",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": ["cuisine.thai", "course.main", "weeknight", "heat.medium"]
+    },
+
+    {
+      "id": "thai.green_curry",
+      "label": "Green Curry",
+      "aka": ["Gaeng Keow Wan", "Thai Green Curry"],
+      "subprofiles": ["thai.central"],
+      "category": "curry",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["bowls", "one_pot", "plated_meals"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["thai.green_curry_paste", "ingredient.coconut_milk"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken_thigh",
+            "ingredient.tofu_firm",
+            "ingredient.shrimp"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.bell_pepper",
+            "ingredient.thai_eggplant",
+            "ingredient.bamboo_shoots"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.thai_basil", "ingredient.lime_wedges"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.curry_simmer", "method.fry_aromatics"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.pot", "equipment.skillet"],
+      "ingredientsCore": [
+        "thai.green_curry_paste",
+        "ingredient.coconut_milk",
+        "ingredient.thai_basil",
+        "ingredient.lime"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option",
+        "diet.freezer_friendly"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "style.balanced",
+        "heat.high",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "thai.red_curry",
+      "label": "Red Curry",
+      "aka": ["Gaeng Phet", "Thai Red Curry"],
+      "subprofiles": ["thai.central"],
+      "category": "curry",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["thai.red_curry_paste", "ingredient.coconut_milk"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken_thigh",
+            "ingredient.beef",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.bell_pepper",
+            "ingredient.zucchini",
+            "ingredient.bamboo_shoots"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.curry_simmer", "method.fry_aromatics"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.pot", "equipment.skillet"],
+      "ingredientsCore": [
+        "thai.red_curry_paste",
+        "ingredient.coconut_milk",
+        "ingredient.lime"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option",
+        "diet.freezer_friendly"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "heat.high",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "thai.panang_curry",
+      "label": "Panang Curry",
+      "aka": ["Phanaeng Curry", "Panang (Peanut) Curry"],
+      "subprofiles": ["thai.central"],
+      "category": "curry",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 40, "handsOffMins": 15 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["thai.panang_curry_paste", "ingredient.coconut_milk"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.beef",
+            "ingredient.chicken_thigh",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.crushed_peanuts", "ingredient.lime_wedges"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.curry_simmer", "method.fry_aromatics"],
+      "equipmentRecommended": ["equipment.pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "thai.panang_curry_paste",
+        "ingredient.coconut_milk",
+        "ingredient.palm_sugar"
+      ],
+      "allergens": ["allergen.peanut", "allergen.fish", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option",
+        "diet.freezer_friendly"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "heat.medium",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "thai.massaman_curry",
+      "label": "Massaman Curry",
+      "aka": ["Gaeng Massaman", "Thai Massaman"],
+      "subprofiles": ["thai.southern"],
+      "category": "curry",
+      "difficulty": 4,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 75, "handsOffMins": 45 },
+      "servingStyles": ["one_pot", "family_style", "bowls"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.beef",
+            "ingredient.lamb",
+            "ingredient.chicken_thigh"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["thai.massaman_curry_paste", "ingredient.coconut_milk"],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.potato", "ingredient.onion"],
+          "chooseOne": false
+        },
+        { "role": "nuts", "items": ["ingredient.peanuts"], "chooseOne": false }
+      ],
+      "techniques": ["method.curry_simmer", "method.braise"],
+      "equipmentRecommended": ["equipment.dutch_oven"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "thai.massaman_curry_paste",
+        "ingredient.coconut_milk",
+        "ingredient.potato",
+        "ingredient.onion"
+      ],
+      "allergens": ["allergen.peanut", "allergen.fish", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.freezer_friendly",
+        "diet.leftovers_friendly"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "heat.low",
+        "batch_friendly",
+        "weekend"
+      ]
+    },
+
+    {
+      "id": "thai.khao_soi",
+      "label": "Khao Soi",
+      "aka": ["Northern Thai Curry Noodle Soup", "Khao Soi Gai"],
+      "subprofiles": ["thai.northern"],
+      "category": "soup",
+      "difficulty": 4,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 60, "handsOffMins": 20 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["thai.noodle_bowl"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.egg_noodles", "ingredient.wheat_noodles"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_thigh", "ingredient.tofu_firm"],
+          "chooseOne": true
+        },
+        {
+          "role": "broth",
+          "items": [
+            "thai.khao_soi_paste",
+            "ingredient.coconut_milk",
+            "ingredient.chicken_stock"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.pickled_mustard_greens",
+            "ingredient.lime_wedges",
+            "ingredient.shallot"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.soup_simmer", "method.fry_aromatics"],
+      "equipmentRecommended": ["equipment.pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.coconut_milk",
+        "ingredient.chicken_stock",
+        "ingredient.lime",
+        "ingredient.shallot"
+      ],
+      "allergens": ["allergen.soy", "allergen.wheat"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.leftovers_friendly",
+        "diet.freezer_friendly_possible"
+      ],
+      "plannerTags": ["cuisine.thai", "course.main", "heat.medium", "weekend"]
+    },
+
+    {
+      "id": "thai.tom_yum_goong",
+      "label": "Tom Yum Goong",
+      "aka": ["Tom Yum Shrimp", "Hot and Sour Shrimp Soup"],
+      "subprofiles": ["thai.central", "thai.southern"],
+      "category": "soup",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 10 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["thai.sour_spicy_soup"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "broth",
+          "items": ["ingredient.seafood_stock", "ingredient.chicken_stock"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.lemongrass",
+            "ingredient.galangal",
+            "ingredient.kefir_lime_leaf"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": ["ingredient.shrimp", "ingredient.mushrooms"],
+          "chooseOne": false
+        },
+        {
+          "role": "finish",
+          "items": [
+            "ingredient.lime_juice",
+            "ingredient.fish_sauce",
+            "ingredient.chile_fresh"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.soup_simmer"],
+      "equipmentRecommended": ["equipment.pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.lemongrass",
+        "ingredient.lime_juice",
+        "ingredient.fish_sauce",
+        "ingredient.chile_fresh"
+      ],
+      "allergens": ["allergen.shellfish", "allergen.fish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "plannerTags": ["cuisine.thai", "course.main", "heat.high", "weeknight"]
+    },
+
+    {
+      "id": "thai.tom_kha_gai",
+      "label": "Tom Kha Gai",
+      "aka": ["Coconut Galangal Chicken Soup", "Tom Kha"],
+      "subprofiles": ["thai.central"],
+      "category": "soup",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 15 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["thai.sour_spicy_soup"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "broth",
+          "items": ["ingredient.coconut_milk", "ingredient.chicken_stock"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatics",
+          "items": [
+            "ingredient.galangal",
+            "ingredient.lemongrass",
+            "ingredient.kefir_lime_leaf"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken",
+            "ingredient.tofu_firm",
+            "ingredient.mushrooms"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "finish",
+          "items": ["ingredient.lime_juice", "ingredient.fish_sauce"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.soup_simmer"],
+      "equipmentRecommended": ["equipment.pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.coconut_milk",
+        "ingredient.galangal",
+        "ingredient.lemongrass",
+        "ingredient.lime_juice"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": ["cuisine.thai", "course.main", "heat.medium", "weeknight"]
+    },
+
+    {
+      "id": "thai.som_tam",
+      "label": "Som Tam (Papaya Salad)",
+      "aka": ["Green Papaya Salad", "Som Tum"],
+      "subprofiles": ["thai.isan"],
+      "category": "salad",
+      "difficulty": 3,
+      "heatTypical": 4,
+      "time": { "activeMins": 20, "totalMins": 20, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "plates", "street_food"],
+      "mealArchetypes": ["thai.som_tam_style_salad"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": ["ingredient.green_papaya"],
+          "chooseOne": false
+        },
+        {
+          "role": "crunch",
+          "items": ["ingredient.long_beans", "ingredient.peanuts"],
+          "chooseOne": false
+        },
+        {
+          "role": "seasoning",
+          "items": [
+            "ingredient.lime_juice",
+            "ingredient.fish_sauce",
+            "ingredient.palm_sugar",
+            "ingredient.chile_fresh"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.pound_paste", "method.toss_salad"],
+      "equipmentRecommended": ["equipment.mortar_pestle"],
+      "equipmentMinimum": ["equipment.bowl", "equipment.knife"],
+      "ingredientsCore": [
+        "ingredient.green_papaya",
+        "ingredient.lime_juice",
+        "ingredient.fish_sauce",
+        "ingredient.chile_fresh"
+      ],
+      "allergens": ["allergen.fish", "allergen.peanut", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": ["cuisine.thai", "course.side", "heat.very_high", "fresh"]
+    },
+
+    {
+      "id": "thai.larb_gai",
+      "label": "Larb Gai",
+      "aka": ["Laab Gai", "Isan minced chicken salad"],
+      "subprofiles": ["thai.isan"],
+      "category": "salad",
+      "difficulty": 3,
+      "heatTypical": 4,
+      "time": { "activeMins": 25, "totalMins": 30, "handsOffMins": 5 },
+      "servingStyles": ["plates", "street_food"],
+      "mealArchetypes": ["thai.som_tam_style_salad"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.ground_chicken",
+            "ingredient.ground_turkey",
+            "ingredient.mushrooms"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "herbs",
+          "items": [
+            "ingredient.mint",
+            "ingredient.cilantro",
+            "ingredient.green_onion"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "seasoning",
+          "items": [
+            "ingredient.lime_juice",
+            "ingredient.fish_sauce",
+            "ingredient.roasted_rice_powder",
+            "ingredient.chile_flakes"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": ["ingredient.sticky_rice"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.quick_cook", "method.toss_salad"],
+      "equipmentRecommended": ["equipment.skillet", "equipment.mortar_pestle"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.bowl"],
+      "ingredientsCore": [
+        "ingredient.lime_juice",
+        "ingredient.fish_sauce",
+        "ingredient.mint",
+        "ingredient.roasted_rice_powder"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.main",
+        "heat.very_high",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "thai.gai_yang",
+      "label": "Gai Yang (Grilled Chicken)",
+      "aka": ["Thai Grilled Chicken", "Isan Grilled Chicken"],
+      "subprofiles": ["thai.isan"],
+      "category": "grill",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 70, "handsOffMins": 30 },
+      "servingStyles": ["grill_and_sides", "family_style", "street_food"],
+      "mealArchetypes": ["thai.grilled_meat_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_thigh", "ingredient.chicken_legs"],
+          "chooseOne": true
+        },
+        {
+          "role": "marinade",
+          "items": [
+            "ingredient.garlic",
+            "ingredient.cilantro_stems",
+            "ingredient.fish_sauce",
+            "ingredient.palm_sugar"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": ["ingredient.sticky_rice", "thai.som_tam"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["thai.nam_jim_jaew", "thai.nam_pla_prik"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.grill", "method.marinade"],
+      "equipmentRecommended": ["equipment.grill"],
+      "equipmentMinimum": ["equipment.grill_pan", "equipment.oven"],
+      "ingredientsCore": [
+        "ingredient.chicken_thigh",
+        "ingredient.garlic",
+        "ingredient.cilantro_stems",
+        "ingredient.fish_sauce"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.leftovers_friendly"
+      ],
+      "plannerTags": ["cuisine.thai", "course.main", "heat.medium", "weekend"]
+    },
+
+    {
+      "id": "thai.moo_ping",
+      "label": "Moo Ping (Grilled Pork Skewers)",
+      "aka": ["Thai Pork Skewers", "Street pork skewers"],
+      "subprofiles": ["thai.central"],
+      "category": "grill",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 60, "handsOffMins": 30 },
+      "servingStyles": ["street_food", "snacks", "grill_and_sides"],
+      "mealArchetypes": ["thai.grilled_meat_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.pork_shoulder", "ingredient.pork_loin"],
+          "chooseOne": true
+        },
+        {
+          "role": "marinade",
+          "items": [
+            "ingredient.garlic",
+            "ingredient.soy_sauce_light",
+            "ingredient.palm_sugar"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": ["ingredient.sticky_rice"],
+          "chooseOne": false
+        },
+        { "role": "dip", "items": ["thai.nam_pla_prik"], "chooseOne": false }
+      ],
+      "techniques": ["method.grill", "method.marinade"],
+      "equipmentRecommended": ["equipment.grill"],
+      "equipmentMinimum": ["equipment.grill_pan", "equipment.oven"],
+      "ingredientsCore": [
+        "ingredient.pork_shoulder",
+        "ingredient.garlic",
+        "ingredient.palm_sugar"
+      ],
+      "allergens": ["allergen.soy"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free_possible"],
+      "plannerTags": ["cuisine.thai", "course.main", "heat.low", "weekend"]
+    },
+
+    {
+      "id": "thai.satay_chicken",
+      "label": "Chicken Satay",
+      "aka": ["Gai Satay", "Thai Satay"],
+      "subprofiles": ["thai.central"],
+      "category": "grill",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 60, "handsOffMins": 25 },
+      "servingStyles": ["snacks", "street_food", "grill_and_sides"],
+      "mealArchetypes": ["thai.grilled_meat_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_thigh", "ingredient.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "marinade",
+          "items": [
+            "ingredient.turmeric",
+            "ingredient.garlic",
+            "ingredient.coconut_milk"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["thai.satay_peanut_sauce"],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": ["thai.quick_cucumber_salad"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.grill", "method.marinade"],
+      "equipmentRecommended": ["equipment.grill"],
+      "equipmentMinimum": ["equipment.grill_pan", "equipment.oven"],
+      "ingredientsCore": [
+        "ingredient.chicken",
+        "ingredient.turmeric",
+        "ingredient.garlic",
+        "ingredient.coconut_milk"
+      ],
+      "allergens": ["allergen.peanut", "allergen.tree_nut"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "plannerTags": ["cuisine.thai", "course.appetizer", "heat.low", "weekend"]
+    },
+
+    {
+      "id": "thai.thai_omelet_khai_jeow",
+      "label": "Thai Omelet (Khai Jeow)",
+      "aka": ["Khai Jiao", "Thai-style fried omelet"],
+      "subprofiles": ["thai.central"],
+      "category": "breakfast",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 12, "handsOffMins": 0 },
+      "servingStyles": ["breakfast", "plates"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.jasmine_rice"],
+          "chooseOne": false
+        },
+        { "role": "protein", "items": ["ingredient.egg"], "chooseOne": false },
+        {
+          "role": "seasoning",
+          "items": ["ingredient.fish_sauce", "ingredient.green_onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "condiment",
+          "items": ["thai.nam_pla_prik", "ingredient.sriracha"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.fry"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.skillet"],
+      "ingredientsCore": [
+        "ingredient.egg",
+        "ingredient.fish_sauce",
+        "ingredient.jasmine_rice"
+      ],
+      "allergens": ["allergen.egg", "allergen.fish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.breakfast",
+        "heat.none",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "thai.fresh_spring_rolls",
+      "label": "Fresh Spring Rolls (Thai-style)",
+      "aka": ["Fresh rice paper rolls", "Herb rolls"],
+      "subprofiles": ["thai.central"],
+      "category": "appetizer",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 30, "totalMins": 35, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "street_food"],
+      "mealArchetypes": ["thai.som_tam_style_salad"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "wrapper",
+          "items": ["ingredient.rice_paper"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.shrimp",
+            "ingredient.tofu_firm",
+            "ingredient.chicken"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "herbs",
+          "items": [
+            "ingredient.cilantro",
+            "ingredient.mint",
+            "ingredient.thai_basil"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.cucumber",
+            "ingredient.carrot",
+            "ingredient.lettuce"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "dip",
+          "items": ["thai.satay_peanut_sauce", "thai.sweet_chile_sauce"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.assemble", "method.toss_salad"],
+      "equipmentRecommended": ["equipment.chef_knife"],
+      "equipmentMinimum": ["equipment.bowl", "equipment.knife"],
+      "ingredientsCore": [
+        "ingredient.rice_paper",
+        "ingredient.mint",
+        "ingredient.cilantro",
+        "ingredient.lime"
+      ],
+      "allergens": ["allergen.peanut", "allergen.shellfish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": ["cuisine.thai", "course.appetizer", "fresh", "heat.low"]
+    },
+
+    {
+      "id": "thai.fried_spring_rolls",
+      "label": "Fried Spring Rolls",
+      "aka": ["Thai fried rolls", "Por Pia Tod"],
+      "subprofiles": ["thai.central"],
+      "category": "appetizer",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 30, "totalMins": 45, "handsOffMins": 5 },
+      "servingStyles": ["snacks", "street_food"],
+      "mealArchetypes": ["thai.noodle_bowl"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "wrapper",
+          "items": ["ingredient.spring_roll_wrappers"],
+          "chooseOne": false
+        },
+        {
+          "role": "filling",
+          "items": [
+            "ingredient.cabbage",
+            "ingredient.carrot",
+            "ingredient.glass_noodles"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.pork",
+            "ingredient.chicken",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "dip",
+          "items": ["thai.sweet_chile_sauce"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.fry", "method.assemble"],
+      "equipmentRecommended": ["equipment.deep_fryer"],
+      "equipmentMinimum": ["equipment.pot", "equipment.thermometer"],
+      "ingredientsCore": [
+        "ingredient.spring_roll_wrappers",
+        "ingredient.cabbage",
+        "ingredient.carrot"
+      ],
+      "allergens": ["allergen.wheat", "allergen.soy"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.freezer_friendly",
+        "diet.vegetarian_option"
+      ],
+      "plannerTags": [
+        "cuisine.thai",
+        "course.appetizer",
+        "batch_friendly",
+        "heat.low"
+      ]
+    },
+
+    {
+      "id": "thai.mango_sticky_rice",
+      "label": "Mango Sticky Rice",
+      "aka": ["Khao Niew Mamuang", "Sticky rice with coconut and mango"],
+      "subprofiles": ["thai.central"],
+      "category": "dessert",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 50, "handsOffMins": 30 },
+      "servingStyles": ["snacks", "holiday_feasts", "plated_meals"],
+      "mealArchetypes": ["thai.curry_over_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.sticky_rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.coconut_milk", "ingredient.palm_sugar"],
+          "chooseOne": false
+        },
+        { "role": "fruit", "items": ["ingredient.mango"], "chooseOne": false }
+      ],
+      "techniques": ["method.steam", "method.reduce_sauce"],
+      "equipmentRecommended": ["equipment.steamer_basket"],
+      "equipmentMinimum": ["equipment.pot", "equipment.steamer_basket"],
+      "ingredientsCore": [
+        "ingredient.sticky_rice",
+        "ingredient.coconut_milk",
+        "ingredient.mango"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "plannerTags": ["cuisine.thai", "course.dessert", "heat.none", "treat"]
+    },
+
+    {
+      "id": "thai.thai_iced_tea",
+      "label": "Thai Iced Tea",
+      "aka": ["Cha Yen", "Thai sweet iced tea"],
+      "subprofiles": ["thai.central"],
+      "category": "drink",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 5, "totalMins": 15, "handsOffMins": 10 },
+      "servingStyles": ["snacks", "street_food"],
+      "mealArchetypes": ["thai.noodle_bowl"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.black_tea"],
+          "chooseOne": false
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar", "ingredient.palm_sugar"],
+          "chooseOne": true
+        },
+        {
+          "role": "cream",
+          "items": ["ingredient.condensed_milk", "ingredient.coconut_milk"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.infuse", "method.chill"],
+      "equipmentRecommended": ["equipment.kettle"],
+      "equipmentMinimum": ["equipment.pot", "equipment.strainer"],
+      "ingredientsCore": ["ingredient.black_tea", "ingredient.sugar"],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.vegetarian", "diet.dairy_free_option"],
+      "plannerTags": ["cuisine.thai", "course.drink", "heat.none"]
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisines.thai": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.cashew_chicken",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry",
+        "thai.khao_soi",
+        "thai.tom_yum_goong",
+        "thai.tom_kha_gai",
+        "thai.som_tam",
+        "thai.larb_gai",
+        "thai.gai_yang",
+        "thai.moo_ping",
+        "thai.satay_chicken",
+        "thai.thai_omelet_khai_jeow",
+        "thai.fresh_spring_rolls",
+        "thai.fried_spring_rolls",
+        "thai.mango_sticky_rice",
+        "thai.thai_iced_tea"
+      ]
+    },
+    "byArchetype": {
+      "thai.noodle_bowl": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.khao_soi",
+        "thai.fried_spring_rolls",
+        "thai.thai_iced_tea"
+      ],
+      "thai.curry_over_rice": [
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry",
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.thai_omelet_khai_jeow",
+        "thai.mango_sticky_rice"
+      ],
+      "thai.sour_spicy_soup": ["thai.tom_yum_goong", "thai.tom_kha_gai"],
+      "thai.som_tam_style_salad": [
+        "thai.som_tam",
+        "thai.larb_gai",
+        "thai.fresh_spring_rolls"
+      ],
+      "thai.grilled_meat_plate": [
+        "thai.gai_yang",
+        "thai.moo_ping",
+        "thai.satay_chicken"
+      ]
+    },
+    "aliasIndex": {
+      "pad thai": "thai.pad_thai",
+      "phat thai": "thai.pad_thai",
+      "pad thai goong": "thai.pad_thai",
+      "pad see ew": "thai.pad_see_ew",
+      "phat si-io": "thai.pad_see_ew",
+      "pad kee mao": "thai.pad_kee_mao",
+      "drunken noodles": "thai.pad_kee_mao",
+      "pad krapow": "thai.pad_krapow_gai",
+      "pad kra pao": "thai.pad_krapow_gai",
+      "basil chicken": "thai.pad_krapow_gai",
+      "khao pad": "thai.khao_pad",
+      "khao phat": "thai.khao_pad",
+      "thai fried rice": "thai.khao_pad",
+      "gai pad med mamuang": "thai.cashew_chicken",
+      "chicken with cashews": "thai.cashew_chicken",
+      "green curry": "thai.green_curry",
+      "gaeng keow wan": "thai.green_curry",
+      "red curry": "thai.red_curry",
+      "gaeng phet": "thai.red_curry",
+      "panang curry": "thai.panang_curry",
+      "phanaeng curry": "thai.panang_curry",
+      "massaman curry": "thai.massaman_curry",
+      "gaeng massaman": "thai.massaman_curry",
+      "khao soi": "thai.khao_soi",
+      "tom yum": "thai.tom_yum_goong",
+      "tom yum goong": "thai.tom_yum_goong",
+      "tom kha": "thai.tom_kha_gai",
+      "tom kha gai": "thai.tom_kha_gai",
+      "som tam": "thai.som_tam",
+      "green papaya salad": "thai.som_tam",
+      "larb gai": "thai.larb_gai",
+      "laab gai": "thai.larb_gai",
+      "gai yang": "thai.gai_yang",
+      "thai grilled chicken": "thai.gai_yang",
+      "moo ping": "thai.moo_ping",
+      "thai pork skewers": "thai.moo_ping",
+      "chicken satay": "thai.satay_chicken",
+      "gai satay": "thai.satay_chicken",
+      "khai jeow": "thai.thai_omelet_khai_jeow",
+      "thai omelet": "thai.thai_omelet_khai_jeow",
+      "fresh spring rolls": "thai.fresh_spring_rolls",
+      "fried spring rolls": "thai.fried_spring_rolls",
+      "por pia tod": "thai.fried_spring_rolls",
+      "mango sticky rice": "thai.mango_sticky_rice",
+      "khao niew mamuang": "thai.mango_sticky_rice",
+      "thai iced tea": "thai.thai_iced_tea",
+      "cha yen": "thai.thai_iced_tea"
+    },
+    "keywordIndex": {
+      "noodles": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.khao_soi"
+      ],
+      "curry": [
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry",
+        "thai.khao_soi"
+      ],
+      "soup": ["thai.tom_yum_goong", "thai.tom_kha_gai", "thai.khao_soi"],
+      "salad": ["thai.som_tam", "thai.larb_gai"],
+      "grilled": ["thai.gai_yang", "thai.moo_ping", "thai.satay_chicken"],
+      "street food": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.gai_yang",
+        "thai.moo_ping",
+        "thai.satay_chicken",
+        "thai.thai_iced_tea"
+      ],
+      "sticky rice": [
+        "thai.mango_sticky_rice",
+        "thai.gai_yang",
+        "thai.larb_gai",
+        "thai.moo_ping"
+      ]
+    },
+    "tagIndex": {
+      "cuisine.thai": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.cashew_chicken",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry",
+        "thai.khao_soi",
+        "thai.tom_yum_goong",
+        "thai.tom_kha_gai",
+        "thai.som_tam",
+        "thai.larb_gai",
+        "thai.gai_yang",
+        "thai.moo_ping",
+        "thai.satay_chicken",
+        "thai.thai_omelet_khai_jeow",
+        "thai.fresh_spring_rolls",
+        "thai.fried_spring_rolls",
+        "thai.mango_sticky_rice",
+        "thai.thai_iced_tea"
+      ],
+      "course.main": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.cashew_chicken",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry",
+        "thai.khao_soi",
+        "thai.tom_yum_goong",
+        "thai.tom_kha_gai",
+        "thai.larb_gai",
+        "thai.gai_yang",
+        "thai.moo_ping"
+      ],
+      "course.appetizer": [
+        "thai.satay_chicken",
+        "thai.fresh_spring_rolls",
+        "thai.fried_spring_rolls"
+      ],
+      "course.breakfast": ["thai.thai_omelet_khai_jeow"],
+      "course.dessert": ["thai.mango_sticky_rice"],
+      "course.drink": ["thai.thai_iced_tea"],
+      "weeknight": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.cashew_chicken",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.tom_yum_goong",
+        "thai.tom_kha_gai",
+        "thai.thai_omelet_khai_jeow"
+      ],
+      "weekend": [
+        "thai.massaman_curry",
+        "thai.khao_soi",
+        "thai.gai_yang",
+        "thai.moo_ping",
+        "thai.satay_chicken"
+      ],
+      "batch_friendly": [
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry",
+        "thai.fried_spring_rolls"
+      ],
+      "leftovers": ["thai.khao_pad"],
+      "fresh": ["thai.som_tam", "thai.fresh_spring_rolls"],
+      "treat": ["thai.mango_sticky_rice"],
+      "heat.none": [
+        "thai.thai_omelet_khai_jeow",
+        "thai.mango_sticky_rice",
+        "thai.thai_iced_tea"
+      ],
+      "heat.low": [
+        "thai.pad_see_ew",
+        "thai.khao_pad",
+        "thai.massaman_curry",
+        "thai.moo_ping",
+        "thai.satay_chicken",
+        "thai.fresh_spring_rolls",
+        "thai.fried_spring_rolls"
+      ],
+      "heat.medium": [
+        "thai.pad_thai",
+        "thai.cashew_chicken",
+        "thai.panang_curry",
+        "thai.khao_soi",
+        "thai.tom_kha_gai",
+        "thai.gai_yang"
+      ],
+      "heat.high": [
+        "thai.pad_kee_mao",
+        "thai.pad_krapow_gai",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.tom_yum_goong"
+      ],
+      "heat.very_high": ["thai.som_tam", "thai.larb_gai"]
+    },
+    "bySubprofile": {
+      "thai.central": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.pad_krapow_gai",
+        "thai.khao_pad",
+        "thai.cashew_chicken",
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.tom_yum_goong",
+        "thai.tom_kha_gai",
+        "thai.moo_ping",
+        "thai.satay_chicken",
+        "thai.thai_omelet_khai_jeow",
+        "thai.fresh_spring_rolls",
+        "thai.fried_spring_rolls",
+        "thai.mango_sticky_rice",
+        "thai.thai_iced_tea"
+      ],
+      "thai.northern": ["thai.khao_soi"],
+      "thai.isan": ["thai.som_tam", "thai.larb_gai", "thai.gai_yang"],
+      "thai.southern": ["thai.massaman_curry", "thai.tom_yum_goong"]
+    },
+    "byCategory": {
+      "noodles": [
+        "thai.pad_thai",
+        "thai.pad_see_ew",
+        "thai.pad_kee_mao",
+        "thai.khao_soi"
+      ],
+      "stir_fry": ["thai.pad_krapow_gai", "thai.cashew_chicken"],
+      "rice": ["thai.khao_pad"],
+      "curry": [
+        "thai.green_curry",
+        "thai.red_curry",
+        "thai.panang_curry",
+        "thai.massaman_curry"
+      ],
+      "soup": ["thai.khao_soi", "thai.tom_yum_goong", "thai.tom_kha_gai"],
+      "salad": ["thai.som_tam", "thai.larb_gai"],
+      "grill": ["thai.gai_yang", "thai.moo_ping", "thai.satay_chicken"],
+      "breakfast": ["thai.thai_omelet_khai_jeow"],
+      "appetizer": ["thai.fresh_spring_rolls", "thai.fried_spring_rolls"],
+      "dessert": ["thai.mango_sticky_rice"],
+      "drink": ["thai.thai_iced_tea"]
+    }
+  }
+}

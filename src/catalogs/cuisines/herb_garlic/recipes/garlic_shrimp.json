@@ -1,0 +1,454 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic.recipes.garlic_shrimp",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Garlic Shrimp",
+    "subtitle": "Fast skillet shrimp with garlic, lemon, herbs, and olive oil (Herb & Garlic style)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Canonical SSA Herb & Garlic baseline garlic shrimp.",
+        "Designed for quick weeknight execution and deterministic doneness targets (avoid overcooking)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Herb & Garlic",
+    "subprofiles": ["cuisines.herb_garlic"],
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.quick_skillet",
+      "archetype.seafood_main",
+      "archetype.weeknight_dinner"
+    ],
+    "servingStyles": ["plated", "family_style", "over_pasta", "with_rice"],
+    "plannerTags": [
+      "herb_garlic",
+      "garlic_forward",
+      "herb_forward",
+      "lemony",
+      "quick",
+      "weeknight",
+      "high_protein"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 with sides, or 2–3 over pasta/rice as a main bowl."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 0,
+    "totalMins": 15
+  },
+
+  "difficulty": 2,
+
+  "signals": {
+    "batchFriendly": "small_batch",
+    "weeknightPossible": true,
+    "leftoversGood": "limited",
+    "freezerFriendly": false,
+    "donenessSensitive": true
+  },
+
+  "tasteProfile": {
+    "dominant": ["garlic", "lemon", "butter_optional", "herbs"],
+    "supporting": ["white_wine_optional", "chili_flakes_optional"],
+    "heat": 0,
+    "acid": "medium",
+    "salt": "medium"
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equip.skillet",
+        "label": "Large skillet",
+        "required": true,
+        "notes": "Use a wide pan so shrimp sear rather than steam."
+      },
+      {
+        "id": "equip.tongs_or_spatula",
+        "label": "Tongs or spatula",
+        "required": true
+      },
+      {
+        "id": "equip.knife",
+        "label": "Chef’s knife",
+        "required": true
+      },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.microplane",
+        "label": "Microplane/zester",
+        "required": false,
+        "notes": "For lemon zest and/or finely grating garlic."
+      }
+    ],
+    "minimum": ["equip.skillet", "equip.tongs_or_spatula"],
+    "recommended": ["equip.microplane"]
+  },
+
+  "dietFlags": ["diet.gluten_free", "diet.low_carb"],
+  "allergens": ["allergen.shellfish"],
+
+  "ingredients": [
+    {
+      "id": "ing.shrimp",
+      "label": "Large shrimp, peeled and deveined",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": [
+        "16/20 or 21/25 count works well.",
+        "Pat dry for best sear.",
+        "If using frozen shrimp, thaw fully and dry thoroughly."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": [
+        "Adjust based on whether you finish with salty butter or cheese."
+      ]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.butter_unsalted",
+      "label": "Unsalted butter (optional but recommended)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "Adds richness and helps carry garlic flavor.",
+        "For dairy-free, omit and add 1 tbsp extra olive oil."
+      ]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced or grated",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "clove" },
+      "notes": [
+        "Grated garlic disperses quickly for strong flavor.",
+        "Avoid burning: garlic goes in after the shrimp sears."
+      ]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon (zest + juice)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": [
+        "Use half for cooking and half for finishing, to keep the flavor bright."
+      ]
+    },
+    {
+      "id": "ing.parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "herb",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": ["Flat-leaf parsley recommended."]
+    },
+    {
+      "id": "ing.thyme",
+      "label": "Fresh thyme leaves (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Optional Herb & Garlic layer; use lightly."]
+    },
+    {
+      "id": "ing.red_pepper_flakes",
+      "label": "Crushed red pepper flakes (optional)",
+      "role": "heat",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.white_wine",
+      "label": "Dry white wine (optional) or broth",
+      "role": "deglaze",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": [
+        "Adds restaurant-style pan sauce. Substitute with chicken/seafood broth."
+      ]
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "grp.shrimp",
+      "label": "Shrimp",
+      "items": ["ing.shrimp", "ing.salt_kosher", "ing.black_pepper"]
+    },
+    {
+      "id": "grp.sauce",
+      "label": "Garlic-Herb Sauce",
+      "items": [
+        "ing.olive_oil",
+        "ing.butter_unsalted",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.parsley",
+        "ing.thyme",
+        "ing.red_pepper_flakes",
+        "ing.white_wine"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep_shrimp",
+      "title": "Prep and season shrimp",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat shrimp very dry with paper towels (this prevents steaming).",
+        "Season shrimp with salt and black pepper.",
+        "Zest the lemon (optional but recommended) and set aside. Cut lemon and squeeze about half the juice into a small bowl (save the rest for finishing)."
+      ],
+      "checks": ["Shrimp is dry to the touch", "Seasoning applied evenly"]
+    },
+    {
+      "id": "step.sear_shrimp",
+      "title": "Sear shrimp quickly",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat a large skillet over medium-high heat. Add olive oil (and butter if using).",
+        "When the fat is hot and shimmering, add shrimp in a single layer.",
+        "Cook 60–90 seconds on the first side until the edges turn pink and the bottom gets light browning.",
+        "Flip and cook 45–75 seconds more. Shrimp should be just opaque and curled into a 'C' shape (not tight 'O').",
+        "Transfer shrimp to a plate immediately to avoid overcooking."
+      ],
+      "timers": [
+        { "label": "Sear side 1", "seconds": 90 },
+        { "label": "Sear side 2", "seconds": 75 }
+      ],
+      "checks": [
+        "Shrimp is mostly opaque with slight translucence in center (will finish in sauce)",
+        "Shrimp is not tightly curled (overcooked)"
+      ]
+    },
+    {
+      "id": "step.build_garlic_sauce",
+      "title": "Build garlic-lemon-herb sauce",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Reduce heat to medium.",
+        "Add garlic (and red pepper flakes if using) to the pan and stir 20–30 seconds until fragrant (do not brown).",
+        "Optional: deglaze with white wine/broth and simmer 30–60 seconds to reduce slightly.",
+        "Add lemon juice (the first half) and a pinch of lemon zest if using."
+      ],
+      "timers": [
+        { "label": "Bloom garlic", "seconds": 30 },
+        { "label": "Reduce deglaze (optional)", "seconds": 60 }
+      ],
+      "checks": [
+        "Garlic is fragrant, not browned",
+        "Sauce looks glossy, not dry"
+      ]
+    },
+    {
+      "id": "step.finish_shrimp",
+      "title": "Return shrimp and finish",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Return shrimp (and any juices) to the pan and toss 30–45 seconds to coat and finish cooking.",
+        "Turn off heat. Stir in parsley (and thyme if using).",
+        "Squeeze remaining lemon juice to taste for brightness and adjust salt/pepper if needed.",
+        "Serve immediately."
+      ],
+      "timers": [{ "label": "Coat + finish shrimp", "seconds": 45 }]
+    }
+  ],
+
+  "methods": ["technique.skillet_sear", "technique.quick_sauce"],
+
+  "pairings": {
+    "starches": [
+      "cuisines.herb_garlic.recipes.garlic_mashed_potatoes",
+      "pasta.simple_buttered_noodles",
+      "rice.white_rice",
+      "grain.couscous"
+    ],
+    "vegetables": [
+      "cuisines.herb_garlic.recipes.herb_roasted_vegetables",
+      "herb_garlic.lemon_garlic_green_beans",
+      "salad.simple_greens"
+    ],
+    "sauces": ["sauce.lemon_garlic_pan_sauce"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Best fresh. If storing, cool quickly and refrigerate airtight. Reheat gently to avoid rubbery shrimp.",
+      "maxDays": 2
+    },
+    "freezer": {
+      "guidance": "Not recommended (shrimp texture degrades).",
+      "maxMonths": 0
+    },
+    "reheat": {
+      "best": [
+        "Skillet on low with a splash of water/broth, just until warmed",
+        "Microwave 30–45 seconds at 50% power, stirring once"
+      ],
+      "avoid": ["High heat or long reheat (overcooks shrimp)"]
+    }
+  },
+
+  "planner": {
+    "dishId": "herb_garlic.garlic_shrimp",
+    "course": "main",
+    "batchNotes": [
+      "Prep garlic, herbs, and lemon before cooking; the cook happens fast.",
+      "Scale by using two skillets if doubling to prevent steaming."
+    ],
+    "leftovers": [
+      "Chop and toss into a cold pasta salad with lemon and herbs",
+      "Add to rice bowls with roasted vegetables"
+    ],
+    "donenessTargets": {
+      "shrimp": {
+        "visual": "Opaque with gentle 'C' curl, not tight 'O'",
+        "texture": "Juicy and tender, not bouncy/rubbery"
+      }
+    }
+  },
+
+  "summary": "Fast Herb & Garlic garlic shrimp: quick sear, then a bright garlic-lemon-herb pan sauce. Weeknight-ready in 15 minutes.",
+
+  "keywords": [
+    "garlic shrimp",
+    "lemon garlic shrimp",
+    "herb shrimp",
+    "quick seafood",
+    "weeknight dinner",
+    "skillet shrimp"
+  ],
+
+  "tags": [
+    "cuisine.herb_garlic",
+    "herb_garlic",
+    "garlic_forward",
+    "herb_forward",
+    "lemony",
+    "quick",
+    "weeknight",
+    "seafood",
+    "shrimp",
+    "gluten_free",
+    "low_carb"
+  ],
+
+  "safety": {
+    "handling": [
+      "Keep shrimp cold until cooking; do not leave at room temperature longer than 30 minutes.",
+      "Cook shrimp promptly after thawing; avoid cross-contamination from raw seafood.",
+      "Reheat leftovers gently and briefly to prevent overcooking."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free (olive oil only)",
+      "when": { "avoidAllergen": "allergen.dairy" },
+      "adapt": {
+        "notes": [
+          "Omit butter; increase olive oil by 1 tbsp for a silky pan sauce.",
+          "Finish with extra lemon zest and parsley for brightness."
+        ],
+        "allergens": ["allergen.shellfish"]
+      }
+    },
+    {
+      "id": "var.spicy",
+      "label": "Spicy garlic shrimp",
+      "when": { "prefersHeat": "high" },
+      "adapt": {
+        "notes": [
+          "Increase red pepper flakes to 1/2 tsp.",
+          "Add a sliced chili (optional) during garlic bloom."
+        ]
+      }
+    },
+    {
+      "id": "var.creamy",
+      "label": "Creamy garlic shrimp (not dairy-free)",
+      "when": { "wantsCreamSauce": true },
+      "adapt": {
+        "notes": [
+          "After deglazing, add 1/3 cup heavy cream and simmer 1–2 minutes to thicken.",
+          "Return shrimp briefly to warm through."
+        ],
+        "allergens": ["allergen.shellfish", "allergen.dairy"]
+      }
+    },
+    {
+      "id": "var.air_fryer",
+      "label": "Air-fryer shrimp + garlic herb toss",
+      "when": { "hasEquipment": "equip.air_fryer" },
+      "adapt": {
+        "notes": [
+          "Toss shrimp with 1 tbsp oil, salt, pepper; air fry 400°F for 6–8 minutes, shaking halfway.",
+          "Warm garlic + oil + lemon in a pan 30 seconds, then toss cooked shrimp with herbs and lemon to finish."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.herb_garlic.recipes.garlic_shrimp",
+    "aliases": [
+      "lemon garlic shrimp",
+      "garlic herb shrimp",
+      "skillet garlic shrimp"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.skillet_sear", "technique.quick_sauce"],
+      "coreIngredients": [
+        "ing.shrimp",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.parsley",
+        "ing.olive_oil"
+      ]
+    }
+  }
+}

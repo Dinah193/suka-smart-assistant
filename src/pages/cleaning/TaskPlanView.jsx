@@ -9,19 +9,34 @@
 // - Empty states, filters, and quick actions (Next Best Action hinting if available)
 // - Inspired by clean, card-based list UIs (Linear, Notion, Asana) with concise metadata badges
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { format, isToday, isPast, parseISO, addMinutes, isAfter } from "date-fns";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  format,
+  isToday,
+  isPast,
+  parseISO,
+  addMinutes,
+  isAfter,
+} from "date-fns";
 
 // ---------- Optional services/contexts (defensive imports) ----------
 let eventBus;
 try {
   // Optional: your global event bus
   // Expected to support eventBus.emit(name, payload)
-  // e.g., src/services/eventBus.js
+  // e.g., src/services/events/eventBus.js
   // eslint-disable-next-line global-require
-  eventBus = require("../../services/eventBus").default;
+  eventBus = require("../../services/events/eventBus").default;
 } catch (_) {
-  eventBus = { emit: (...args) => console.debug("[TaskPlanView:eventBus.emit]", ...args) };
+  eventBus = {
+    emit: (...args) => console.debug("[TaskPlanView:eventBus.emit]", ...args),
+  };
 }
 
 let useMilestoneState;
@@ -37,7 +52,8 @@ let SettingsContext;
 try {
   // Optional: global app settings including sabbath guard, timezone prefs, etc.
   // eslint-disable-next-line global-require
-  SettingsContext = require("../../components/context/SettingsContext").SettingsContext;
+  SettingsContext =
+    require("../../components/context/SettingsContext").SettingsContext;
 } catch (_) {
   SettingsContext = React.createContext({
     sabbathGuard: false,
@@ -50,7 +66,8 @@ let PlanDraftContext;
 try {
   // Optional: plan-level data (selected day, tasks, constraints, etc.)
   // eslint-disable-next-line global-require
-  PlanDraftContext = require("../../components/context/PlanDraftContext").PlanDraftContext;
+  PlanDraftContext =
+    require("../../components/context/PlanDraftContext").PlanDraftContext;
 } catch (_) {
   PlanDraftContext = React.createContext({
     selectedDateISO: new Date().toISOString(),
@@ -63,9 +80,13 @@ let VisionContext;
 try {
   // Optional: for “Next Best Action” nudges aligned with user goals
   // eslint-disable-next-line global-require
-  VisionContext = require("../../components/context/VisionContext").VisionContext;
+  VisionContext =
+    require("../../components/context/VisionContext").VisionContext;
 } catch (_) {
-  VisionContext = React.createContext({ priorities: [], getPriorityFor: () => null });
+  VisionContext = React.createContext({
+    priorities: [],
+    getPriorityFor: () => null,
+  });
 }
 
 let scheduleHelpers = {};
@@ -109,7 +130,10 @@ const prettyTime = (iso) => {
   }
 };
 
-const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }) => {
+const withinSabbath = (
+  now = new Date(),
+  window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }
+) => {
   // Simple, local-approximation guard. For precise halachic times, integrate your astronomy rules.
   const dow = now.getDay(); // 0=Sun .. 6=Sat
   const hour = now.getHours();
@@ -137,25 +161,34 @@ const groupBySlot = (tasks) => {
 
 const defaultFilters = {
   showPast: false,
-  domains: new Set(["meal", "cleaning", "animal", "butchery", "garden", "errand"]),
+  domains: new Set([
+    "meal",
+    "cleaning",
+    "animal",
+    "butchery",
+    "garden",
+    "errand",
+  ]),
   onlyConflicts: false,
   onlyHighPriority: false,
 };
 
 // ---------- Component ----------
 export default function TaskPlanView({
-  dateISO,                 // optional; defaults to PlanDraftContext.selectedDateISO or today
-  tasks: tasksProp,        // optional; defaults to PlanDraftContext.tasks
-  onStartTask,             // optional callback(task)
-  onNavigateToTask,        // optional callback(taskId) for deep-links
+  dateISO, // optional; defaults to PlanDraftContext.selectedDateISO or today
+  tasks: tasksProp, // optional; defaults to PlanDraftContext.tasks
+  onStartTask, // optional callback(task)
+  onNavigateToTask, // optional callback(taskId) for deep-links
   readOnly = false,
 }) {
   const { sabbathGuard, sabbathWindow } = React.useContext(SettingsContext);
-  const { selectedDateISO, tasks: planTasks } = React.useContext(PlanDraftContext);
+  const { selectedDateISO, tasks: planTasks } =
+    React.useContext(PlanDraftContext);
   const { priorities, getPriorityFor } = React.useContext(VisionContext);
   const { recordMilestone } = useMilestoneState();
 
-  const effectiveDateISO = dateISO || selectedDateISO || new Date().toISOString();
+  const effectiveDateISO =
+    dateISO || selectedDateISO || new Date().toISOString();
   const baseTasks = tasksProp || planTasks || [];
 
   // Derived tasks for the day
@@ -171,7 +204,11 @@ export default function TaskPlanView({
   const [filters, setFilters] = useState(defaultFilters);
   const [query, setQuery] = useState("");
   const [activeTaskId, setActiveTaskId] = useState(null);
-  const [timer, setTimer] = useState({ taskId: null, endAt: null, remaining: 0 });
+  const [timer, setTimer] = useState({
+    taskId: null,
+    endAt: null,
+    remaining: 0,
+  });
   const [expanded, setExpanded] = useState(() => new Set()); // expanded card descriptions
   const [jumpOpen, setJumpOpen] = useState(false);
 
@@ -245,7 +282,9 @@ export default function TaskPlanView({
         .map((t) => ({
           id: t.id,
           start: parseISO(t.start),
-          end: t.estMinutes ? addMinutes(parseISO(t.start), t.estMinutes) : addMinutes(parseISO(t.start), 30),
+          end: t.estMinutes
+            ? addMinutes(parseISO(t.start), t.estMinutes)
+            : addMinutes(parseISO(t.start), 30),
         }))
         .sort((a, b) => a.start - b.start);
 
@@ -269,12 +308,18 @@ export default function TaskPlanView({
   useEffect(() => {
     if (!timer.endAt) return;
     const id = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((timer.endAt - Date.now()) / 1000));
+      const remaining = Math.max(
+        0,
+        Math.floor((timer.endAt - Date.now()) / 1000)
+      );
       setTimer((prev) => ({ ...prev, remaining }));
       if (remaining <= 0) {
         clearInterval(id);
         eventBus.emit("task.timer.completed", { taskId: timer.taskId });
-        recordMilestone?.({ key: "task_timer_completed", meta: { taskId: timer.taskId } });
+        recordMilestone?.({
+          key: "task_timer_completed",
+          meta: { taskId: timer.taskId },
+        });
       }
     }, 1000);
     return () => clearInterval(id);
@@ -285,11 +330,15 @@ export default function TaskPlanView({
     (task) => {
       const now = new Date();
       if (sabbathGuard && withinSabbath(now, sabbathWindow)) {
-        eventBus.emit("guard.sabbath.blocked", { reason: "sabbath_guard", taskId: task.id });
+        eventBus.emit("guard.sabbath.blocked", {
+          reason: "sabbath_guard",
+          taskId: task.id,
+        });
         return;
       }
 
-      const estMinutes = task.estMinutes || estimateEngine.estimate(task).timeMinutes || 30;
+      const estMinutes =
+        task.estMinutes || estimateEngine.estimate(task).timeMinutes || 30;
       const endAt = Date.now() + estMinutes * 60 * 1000;
 
       setActiveTaskId(task.id);
@@ -302,14 +351,17 @@ export default function TaskPlanView({
     [onStartTask, sabbathGuard, sabbathWindow, recordMilestone]
   );
 
-  const handleJumpToTask = useCallback((taskId) => {
-    const el = taskRefs.current[taskId];
-    if (el && typeof el.scrollIntoView === "function") {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setActiveTaskId(taskId);
-      onNavigateToTask?.(taskId);
-    }
-  }, [onNavigateToTask]);
+  const handleJumpToTask = useCallback(
+    (taskId) => {
+      const el = taskRefs.current[taskId];
+      if (el && typeof el.scrollIntoView === "function") {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setActiveTaskId(taskId);
+        onNavigateToTask?.(taskId);
+      }
+    },
+    [onNavigateToTask]
+  );
 
   const handleJumpToSlot = useCallback((slotKey) => {
     const el = slotRefs.current[slotKey];
@@ -329,7 +381,11 @@ export default function TaskPlanView({
 
   // ---------- Render helpers ----------
   const Badge = ({ children, className = "" }) => (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${className}`}>{children}</span>
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${className}`}
+    >
+      {children}
+    </span>
   );
 
   const DomainBadge = ({ domain }) => {
@@ -341,7 +397,10 @@ export default function TaskPlanView({
     ppe?.length ? (
       <div className="flex flex-wrap gap-1">
         {ppe.map((p) => (
-          <Badge key={p} className="bg-gray-100 text-gray-700 border border-gray-200">
+          <Badge
+            key={p}
+            className="bg-gray-100 text-gray-700 border border-gray-200"
+          >
             {p}
           </Badge>
         ))}
@@ -354,7 +413,10 @@ export default function TaskPlanView({
     return (
       <div className="flex flex-wrap gap-1">
         {leads.map((l) => (
-          <Badge key={l.key} className="bg-indigo-50 text-indigo-700 border border-indigo-100">
+          <Badge
+            key={l.key}
+            className="bg-indigo-50 text-indigo-700 border border-indigo-100"
+          >
             {l.label}
           </Badge>
         ))}
@@ -374,18 +436,32 @@ export default function TaskPlanView({
   };
 
   const ConflictChip = ({ conflict }) =>
-    conflict ? <Badge className="bg-red-50 text-red-700 border border-red-200">Conflict</Badge> : null;
+    conflict ? (
+      <Badge className="bg-red-50 text-red-700 border border-red-200">
+        Conflict
+      </Badge>
+    ) : null;
 
   const PriorityChip = ({ priority }) =>
-    priority ? <Badge className="bg-yellow-50 text-yellow-700 border border-yellow-200 capitalize">{priority}</Badge> : null;
+    priority ? (
+      <Badge className="bg-yellow-50 text-yellow-700 border border-yellow-200 capitalize">
+        {priority}
+      </Badge>
+    ) : null;
 
   const CostChip = ({ task }) => {
     const est = estimateEngine.estimate?.(task) || {};
     if (!est.cost && !est.timeMinutes) return null;
     return (
       <div className="flex items-center gap-2">
-        {est.timeMinutes ? <Badge className="bg-slate-100 text-slate-700">{est.timeMinutes}m</Badge> : null}
-        {est.cost ? <Badge className="bg-slate-100 text-slate-700">${est.cost}</Badge> : null}
+        {est.timeMinutes ? (
+          <Badge className="bg-slate-100 text-slate-700">
+            {est.timeMinutes}m
+          </Badge>
+        ) : null}
+        {est.cost ? (
+          <Badge className="bg-slate-100 text-slate-700">${est.cost}</Badge>
+        ) : null}
       </div>
     );
   };
@@ -410,7 +486,9 @@ export default function TaskPlanView({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-gray-900 truncate">{task.title || "Untitled task"}</h3>
+              <h3 className="font-semibold text-gray-900 truncate">
+                {task.title || "Untitled task"}
+              </h3>
               <DomainBadge domain={task.domain} />
               <PriorityChip priority={task.priority} />
               <ConflictChip conflict={conflict} />
@@ -441,8 +519,14 @@ export default function TaskPlanView({
                     ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                     : "bg-gray-900 text-white border-black hover:opacity-90",
                 ].join(" ")}
-                disabled={sabbathGuard && withinSabbath(new Date(), sabbathWindow)}
-                title={sabbathGuard && withinSabbath(new Date(), sabbathWindow) ? "Sabbath guard is enabled" : "Start task"}
+                disabled={
+                  sabbathGuard && withinSabbath(new Date(), sabbathWindow)
+                }
+                title={
+                  sabbathGuard && withinSabbath(new Date(), sabbathWindow)
+                    ? "Sabbath guard is enabled"
+                    : "Start task"
+                }
               >
                 {timer.taskId === task.id ? "Running…" : "Start"}
               </button>
@@ -460,7 +544,11 @@ export default function TaskPlanView({
 
         {expanded.has(task.id) ? (
           <div className="mt-3 grid gap-3 text-sm">
-            {task.description ? <p className="text-gray-700 whitespace-pre-wrap">{task.description}</p> : null}
+            {task.description ? (
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {task.description}
+              </p>
+            ) : null}
 
             <div className="flex flex-wrap items-center gap-2">
               <CostChip task={task} />
@@ -469,7 +557,10 @@ export default function TaskPlanView({
               {(task?.tags || []).length ? (
                 <div className="flex flex-wrap gap-1">
                   {task.tags.map((tg) => (
-                    <Badge key={tg} className="bg-gray-50 text-gray-700 border border-gray-200">
+                    <Badge
+                      key={tg}
+                      className="bg-gray-50 text-gray-700 border border-gray-200"
+                    >
                       #{tg}
                     </Badge>
                   ))}
@@ -517,7 +608,9 @@ export default function TaskPlanView({
       .map((t) => ({
         id: t.id,
         start: parseISO(t.start),
-        end: t.estMinutes ? addMinutes(parseISO(t.start), t.estMinutes) : addMinutes(parseISO(t.start), 30),
+        end: t.estMinutes
+          ? addMinutes(parseISO(t.start), t.estMinutes)
+          : addMinutes(parseISO(t.start), 30),
       }))
       .sort((a, b) => a.start - b.start);
 
@@ -536,7 +629,9 @@ export default function TaskPlanView({
   const Empty = () => (
     <div className="rounded-2xl border border-dashed p-10 text-center text-gray-600">
       <div className="text-lg font-semibold">No tasks match your filters.</div>
-      <div className="mt-1">Try clearing the query or enabling more domains.</div>
+      <div className="mt-1">
+        Try clearing the query or enabling more domains.
+      </div>
       <div className="mt-4 flex justify-center gap-2">
         <button
           type="button"
@@ -568,7 +663,9 @@ export default function TaskPlanView({
       .map((t) => ({
         id: t.id,
         label: t.title || "Untitled",
-        meta: `${t.domain || "task"}${t.start ? " • " + prettyTime(t.start) : ""}`,
+        meta: `${t.domain || "task"}${
+          t.start ? " • " + prettyTime(t.start) : ""
+        }`,
       }));
   }, [filteredTasks]);
 
@@ -582,7 +679,14 @@ export default function TaskPlanView({
     }
   }, [effectiveDateISO]);
 
-  const domains = ["meal", "cleaning", "animal", "butchery", "garden", "errand"];
+  const domains = [
+    "meal",
+    "cleaning",
+    "animal",
+    "butchery",
+    "garden",
+    "errand",
+  ];
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
@@ -591,7 +695,8 @@ export default function TaskPlanView({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{dayHeader}</h1>
           <p className="text-gray-600">
-            Slot/task board with quick jump, timers, and priority/lead-time hints.
+            Slot/task board with quick jump, timers, and priority/lead-time
+            hints.
           </p>
         </div>
 
@@ -618,7 +723,9 @@ export default function TaskPlanView({
               <input
                 type="checkbox"
                 checked={filters.showPast}
-                onChange={(e) => setFilters((f) => ({ ...f, showPast: e.target.checked }))}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, showPast: e.target.checked }))
+                }
               />
               Show past
             </label>
@@ -627,7 +734,9 @@ export default function TaskPlanView({
               <input
                 type="checkbox"
                 checked={filters.onlyConflicts}
-                onChange={(e) => setFilters((f) => ({ ...f, onlyConflicts: e.target.checked }))}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, onlyConflicts: e.target.checked }))
+                }
               />
               Conflicts only
             </label>
@@ -636,7 +745,12 @@ export default function TaskPlanView({
               <input
                 type="checkbox"
                 checked={filters.onlyHighPriority}
-                onChange={(e) => setFilters((f) => ({ ...f, onlyHighPriority: e.target.checked }))}
+                onChange={(e) =>
+                  setFilters((f) => ({
+                    ...f,
+                    onlyHighPriority: e.target.checked,
+                  }))
+                }
               />
               High priority
             </label>
@@ -662,7 +776,9 @@ export default function TaskPlanView({
               }
               className={[
                 "rounded-full border px-3 py-1.5 text-sm",
-                on ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50",
+                on
+                  ? "bg-gray-900 text-white border-black"
+                  : "bg-white hover:bg-gray-50",
               ].join(" ")}
             >
               {d}
@@ -684,7 +800,17 @@ export default function TaskPlanView({
                   className="mb-2 flex items-baseline justify-between"
                 >
                   <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-                    {slotKey === "unscheduled" ? "Unscheduled" : format(parseISO(`${format(parseISO(effectiveDateISO), "yyyy-MM-dd")}T${slotKey}:00`), "h:mmaaa")}
+                    {slotKey === "unscheduled"
+                      ? "Unscheduled"
+                      : format(
+                          parseISO(
+                            `${format(
+                              parseISO(effectiveDateISO),
+                              "yyyy-MM-dd"
+                            )}T${slotKey}:00`
+                          ),
+                          "h:mmaaa"
+                        )}
                   </h2>
                   <button
                     type="button"
@@ -696,7 +822,11 @@ export default function TaskPlanView({
                 </div>
                 <div className="grid gap-3">
                   {items.map((task) => (
-                    <TaskCard key={task.id} task={task} conflict={conflictSet.has(task.id)} />
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      conflict={conflictSet.has(task.id)}
+                    />
                   ))}
                 </div>
               </section>
@@ -727,11 +857,15 @@ export default function TaskPlanView({
                     title={j.meta}
                   >
                     <div className="truncate font-medium">{j.label}</div>
-                    <div className="truncate text-xs text-gray-500">{j.meta}</div>
+                    <div className="truncate text-xs text-gray-500">
+                      {j.meta}
+                    </div>
                   </button>
                 </li>
               ))}
-              {!jumpList.length ? <li className="text-sm text-gray-500">No tasks</li> : null}
+              {!jumpList.length ? (
+                <li className="text-sm text-gray-500">No tasks</li>
+              ) : null}
             </ul>
           </div>
 

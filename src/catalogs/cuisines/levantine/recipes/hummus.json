@@ -1,0 +1,493 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.levantine.recipes.hummus",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Hummus (Classic Levantine Chickpea-Tahini Dip)",
+    "subtitle": "Ultra-smooth, lemon-bright, garlic-forward; finished with olive oil and paprika/sumac.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs",
+      "notes": [
+        "Canonical SSA recipe: classic Levantine hummus bi tahini.",
+        "Designed for deterministic planners and adapter pipeline (equipment + doneness neutral).",
+        "Ingredient IDs are stable catalog-style strings (no schema-enforced pattern)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "category": "dip_spread",
+    "mealArchetypes": ["mezze", "snack_plate", "side"],
+    "servingStyles": ["family_style", "shared_plate", "dip"],
+    "plannerTags": [
+      "cuisine.levantine",
+      "category.mezze",
+      "category.condiment",
+      "vegetarian",
+      "vegan",
+      "gluten_free",
+      "batch.friendly",
+      "weeknight.friendly",
+      "make_ahead"
+    ],
+    "subprofiles": ["herb_garlic", "lemon_bright", "olive_oil_rich"]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 60, "unit": "g" },
+    "notes": "Makes ~2 to 2.5 cups (approx. 480–600 g) depending on thickness."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 10,
+    "totalMins": 25
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "equipment.bowl",
+      "equipment.spoon",
+      "equipment.measuring_cups",
+      "equipment.measuring_spoons"
+    ],
+    "recommended": [
+      "equipment.food_processor",
+      "equipment.blender",
+      "equipment.immersion_blender",
+      "equipment.fine_mesh_strainer"
+    ],
+    "required": [
+      {
+        "id": "equipment.food_processor",
+        "label": "Food processor (preferred) or blender",
+        "required": true,
+        "notes": "For ultra-smooth hummus, a processor works best; blender can work with extra liquid and scraping."
+      }
+    ],
+    "optional": [
+      {
+        "id": "equipment.pressure_cooker",
+        "label": "Pressure cooker",
+        "required": false,
+        "notes": "Optional to cook chickpeas quickly if starting from dry."
+      },
+      {
+        "id": "equipment.microplane",
+        "label": "Microplane / fine grater",
+        "required": false,
+        "notes": "For grating garlic very fine to avoid harsh chunks."
+      }
+    ]
+  },
+
+  "dietFlags": ["vegetarian", "vegan", "gluten_free"],
+
+  "allergens": {
+    "sesame": true,
+    "notes": [
+      "Contains sesame (tahini). May contain traces depending on tahini processing facility."
+    ]
+  },
+
+  "tasteProfile": {
+    "salt": 2,
+    "acid": 3,
+    "heat": 0,
+    "sweet": 0,
+    "umami": 1,
+    "aromatics": ["garlic", "lemon", "tahini", "olive_oil"]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "possible_but_texture_changes",
+    "makeAhead": true,
+    "kidFriendly": true
+  },
+
+  "methods": ["technique.blend", "technique.emulsify"],
+
+  "ingredients": [
+    {
+      "id": "ingredient.chickpeas_canned",
+      "label": "Chickpeas (canned), drained and rinsed",
+      "role": "base",
+      "amount": { "value": 850, "unit": "g" },
+      "notes": [
+        "This equals about 2 standard 15-oz / 425 g cans drained.",
+        "If using home-cooked chickpeas, measure about 3 cups cooked (~450 g cooked)."
+      ]
+    },
+    {
+      "id": "ingredient.chickpea_liquid",
+      "label": "Aquafaba (chickpea liquid) or cold water",
+      "role": "texture",
+      "amount": { "value": 90, "unit": "ml" },
+      "notes": [
+        "Start with less; add gradually until creamy.",
+        "Aquafaba adds silkiness and helps emulsify."
+      ],
+      "optional": true
+    },
+    {
+      "id": "ingredient.tahini",
+      "label": "Tahini (sesame paste), well stirred",
+      "role": "flavor_body",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": [
+        "Use a runny, pourable tahini for best texture.",
+        "If tahini is bitter, balance with a little extra lemon and salt."
+      ]
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Fresh lemon juice",
+      "role": "acid",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1.5–2 lemons depending on size/juiciness."]
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves, finely grated or minced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "clove" },
+      "notes": [
+        "Adjust to taste; raw garlic strength varies.",
+        "For a softer garlic note, briefly soak minced garlic in lemon juice for 5 minutes."
+      ]
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["Start at ~1 tsp kosher; adjust at the end."]
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional but common; enhances hummus aroma without making it taste like chili."
+      ]
+    },
+    {
+      "id": "ingredient.baking_soda",
+      "label": "Baking soda",
+      "role": "texture",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional trick for extra-smooth hummus: briefly simmer chickpeas with baking soda to loosen skins.",
+        "Skip if you prefer quicker prep."
+      ]
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "role": "finish",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": [
+        "For serving drizzle. Do not blend too much olive oil into hummus; it can dull the flavor."
+      ]
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (sweet) or Aleppo pepper",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.sumac",
+      "label": "Sumac",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Flat-leaf parsley, chopped",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Base",
+      "items": [
+        "ingredient.chickpeas_canned",
+        "ingredient.tahini",
+        "ingredient.lemon_juice",
+        "ingredient.garlic",
+        "ingredient.salt_kosher"
+      ]
+    },
+    {
+      "id": "group.texture",
+      "label": "Texture adjustments",
+      "items": ["ingredient.chickpea_liquid", "ingredient.baking_soda"]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish + garnish",
+      "items": [
+        "ingredient.olive_oil",
+        "ingredient.paprika",
+        "ingredient.sumac",
+        "ingredient.parsley"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.00.mise",
+      "title": "Mise en place",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Drain and rinse chickpeas well.",
+        "Juice the lemon and grate/mince the garlic very finely.",
+        "Stir tahini thoroughly so it is smooth and pourable."
+      ],
+      "checks": [
+        "Tahini is fully mixed (no separated oil).",
+        "Garlic is fine enough to disappear into the hummus."
+      ]
+    },
+    {
+      "id": "step.01.optional_soften_chickpeas",
+      "title": "Optional: soften chickpeas for extra-smooth hummus",
+      "activeMins": 2,
+      "handsOffMins": 10,
+      "instructions": [
+        "For extra-smooth hummus, add rinsed chickpeas to a small pot with enough water to cover by 1 inch.",
+        "Add baking soda (optional). Bring to a gentle simmer for 8–10 minutes until chickpeas look slightly overcooked and skins loosen.",
+        "Drain and rinse under cool water. Rub gently to remove loose skins (optional)."
+      ],
+      "timers": [{ "label": "Simmer chickpeas", "minutes": 10 }],
+      "inputs": {
+        "optional": true,
+        "uses": ["ingredient.baking_soda"]
+      },
+      "checks": [
+        "Chickpeas are soft and skins loosen easily (optional).",
+        "Chickpeas are well drained before blending."
+      ]
+    },
+    {
+      "id": "step.02.whip_tahini_base",
+      "title": "Whip tahini + lemon into a creamy base",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a food processor, add tahini and lemon juice. Process 30–60 seconds until thickened and pale.",
+        "Add garlic, salt, and cumin (optional). Process 15–20 seconds to combine."
+      ],
+      "timers": [{ "label": "Whip tahini base", "seconds": 60 }],
+      "checks": [
+        "Mixture becomes lighter in color and slightly fluffy.",
+        "No visible garlic chunks."
+      ]
+    },
+    {
+      "id": "step.03.blend_chickpeas",
+      "title": "Blend chickpeas until smooth",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add half the chickpeas to the processor. Process 45–60 seconds, scrape down the sides.",
+        "Add remaining chickpeas. Process 60–90 seconds, scraping as needed, until thick and mostly smooth.",
+        "With the processor running, drizzle in aquafaba or cold water a tablespoon at a time until creamy and spreadable."
+      ],
+      "timers": [
+        { "label": "First blend", "seconds": 60 },
+        { "label": "Second blend", "seconds": 90 }
+      ],
+      "checks": [
+        "Texture is creamy, not grainy.",
+        "Hummus holds soft peaks and spreads easily."
+      ]
+    },
+    {
+      "id": "step.04.adjust_seasoning",
+      "title": "Adjust seasoning and brightness",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Taste and adjust: add more salt for flavor, lemon for brightness, or a splash of water for looseness.",
+        "If garlic is sharp, let hummus sit 5 minutes and re-taste (flavors mellow)."
+      ],
+      "checks": [
+        "Balanced salt + lemon (bright but not sour).",
+        "Garlic present but not harsh."
+      ]
+    },
+    {
+      "id": "step.05.serve",
+      "title": "Serve Levantine-style",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Spoon hummus into a shallow bowl and swirl with the back of a spoon.",
+        "Drizzle with olive oil. Sprinkle paprika or sumac and parsley if using.",
+        "Serve with warm pita, cucumbers, tomatoes, olives, or as part of a mezze spread."
+      ],
+      "checks": [
+        "Olive oil on top (not blended in).",
+        "Garnish added lightly to avoid overpowering."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "dish.levantine.pita",
+      "dish.levantine.fattoush",
+      "dish.levantine.tabouleh",
+      "dish.levantine.pickles",
+      "dish.levantine.olives"
+    ],
+    "proteinAddOns": [
+      "dish.levantine.falafel",
+      "dish.levantine.shawarma_chicken",
+      "dish.levantine.kofte"
+    ],
+    "sauces": ["dish.levantine.toum", "dish.levantine.tahini_sauce"]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "container": "airtight",
+      "maxDays": 5,
+      "notes": [
+        "Press plastic wrap directly on the surface to reduce drying.",
+        "If it thickens, stir in 1–2 tbsp water and a squeeze of lemon to refresh."
+      ]
+    },
+    "freeze": {
+      "recommended": true,
+      "maxMonths": 2,
+      "notes": [
+        "Texture may change slightly after thawing; re-whip in processor with a splash of water/lemon.",
+        "Freeze in small portions for easy thaw."
+      ]
+    }
+  },
+
+  "planner": {
+    "roles": ["mezze", "snack", "side", "spread"],
+    "bestTimes": ["lunch", "snack", "dinner"],
+    "prepNotes": [
+      "Great make-ahead for gatherings.",
+      "Pairs well with grilled meats/veg and fresh salads."
+    ],
+    "leftoversPlan": [
+      "Use as sandwich spread",
+      "Thin with lemon + water for dressing",
+      "Serve with roasted vegetables"
+    ]
+  },
+
+  "safety": {
+    "notes": [
+      "Keep refrigerated if not serving immediately.",
+      "Do not leave at room temperature longer than 2 hours (1 hour if very warm)."
+    ]
+  },
+
+  "notes": [
+    "For ultra-smooth hummus: warm chickpeas (or softened) + whip tahini/lemon first + blend longer than you think.",
+    "If tahini is very thick, add extra cold water gradually to prevent seize.",
+    "Aleppo pepper can replace paprika for gentle warmth."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.roasted_red_pepper",
+      "label": "Roasted Red Pepper Hummus",
+      "adapt": {
+        "add": [
+          {
+            "id": "ingredient.roasted_red_pepper",
+            "label": "Roasted red peppers, drained",
+            "amount": { "value": 120, "unit": "g" },
+            "notes": ["Blend in with chickpeas."]
+          }
+        ],
+        "notes": ["Reduce added water slightly; peppers add moisture."]
+      }
+    },
+    {
+      "id": "variation.beet_hummus",
+      "label": "Beet Hummus",
+      "adapt": {
+        "add": [
+          {
+            "id": "ingredient.beets_roasted",
+            "label": "Roasted beets, peeled",
+            "amount": { "value": 150, "unit": "g" },
+            "notes": [
+              "Blend in with chickpeas for a magenta color and earthy sweetness."
+            ]
+          }
+        ],
+        "notes": ["Add an extra squeeze of lemon to keep it bright."]
+      }
+    },
+    {
+      "id": "variation.extra_garlic_toum_style",
+      "label": "Garlic-Forward (Toum-Lite) Hummus",
+      "adapt": {
+        "set": [
+          {
+            "path": "$.ingredients[?(@.id=='ingredient.garlic')].amount.value",
+            "value": 4
+          }
+        ],
+        "notes": [
+          "Soak minced garlic in lemon juice 5 minutes before blending to soften harshness."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.levantine",
+    "dishId": "dish.levantine.hummus",
+    "canonical": true,
+    "searchAliases": [
+      "hummus bi tahini",
+      "chickpea tahini dip",
+      "mezze hummus"
+    ],
+    "ingredientIds": [
+      "ingredient.chickpeas_canned",
+      "ingredient.tahini",
+      "ingredient.lemon_juice",
+      "ingredient.garlic",
+      "ingredient.olive_oil",
+      "ingredient.salt_kosher"
+    ],
+    "equipmentIds": ["equipment.food_processor", "equipment.blender"]
+  }
+}

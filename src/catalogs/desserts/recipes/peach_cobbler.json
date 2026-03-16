@@ -1,0 +1,201 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.peach_cobbler",
+    "slug": "peach_cobbler",
+    "name": "Southern Peach Cobbler (Baked Fruit Model)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "dessert",
+      "cobbler",
+      "peach",
+      "southern",
+      "baked-fruit",
+      "popular",
+      "canonical",
+      "comfort-food",
+      "make-ahead"
+    ],
+    "allergens": ["wheat", "dairy"],
+    "description": "A popular Southern peach cobbler using a simple baked fruit + batter model. Designed as a baseline: jammy fruit, golden top, and clear thickening logic. Includes guidance for both commercial all-purpose flour and fresh-milled flour (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "baking_dish_9x13", "label": "9x13-inch baking dish" },
+    {
+      "id": "saucepan",
+      "label": "Medium saucepan (optional, for quick peach pre-cook)"
+    },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" }
+  ],
+  "ingredients": [
+    {
+      "id": "peaches_fresh_or_frozen",
+      "label": "Peaches (fresh, peeled and sliced; or frozen, thawed)",
+      "amount": { "value": 1400, "unit": "g" },
+      "notes": "About 3 lb. If using canned peaches, drain well and reduce added sugar."
+    },
+    {
+      "id": "sugar_granulated_fruit",
+      "label": "Granulated sugar (for peaches)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3/4 cup; adjust to peach sweetness."
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Lemon juice",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp; brightens fruit."
+    },
+    {
+      "id": "cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "nutmeg_optional",
+      "label": "Ground nutmeg (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/4 tsp.",
+      "optional": true
+    },
+    {
+      "id": "salt_pin",
+      "label": "Kosher salt",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/4 tsp (fruit)."
+    },
+    {
+      "id": "cornstarch_optional",
+      "label": "Cornstarch (optional, for very juicy fruit)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 tbsp. Use if peaches are very juicy or frozen/canned.",
+      "optional": true
+    },
+    {
+      "id": "vanilla_extract_optional",
+      "label": "Vanilla extract (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter",
+      "amount": { "value": 170, "unit": "g" },
+      "notes": "About 3/4 cup (1 1/2 sticks). Melted in the baking dish."
+    },
+
+    {
+      "id": "flour_ap_option",
+      "label": "All-purpose flour (Option A — use this OR the fresh-milled option)",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 2 cups if spooned/leveled; weigh for best results."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — use this OR the AP option)",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "Fresh-milled can absorb more; if batter is too thick, add a splash more milk (15–45 ml). Sifting out large bran can improve tenderness."
+    },
+
+    {
+      "id": "sugar_granulated_batter",
+      "label": "Granulated sugar (for batter)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 cup."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "salt_batter",
+      "label": "Kosher salt (for batter)",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 3/4 tsp."
+    },
+    {
+      "id": "milk",
+      "label": "Whole milk",
+      "amount": { "value": 360, "unit": "ml" },
+      "notes": "About 1 1/2 cups."
+    },
+    {
+      "id": "milk_adjustment_optional",
+      "label": "Extra milk (only if needed for fresh-milled flour batter)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is overly thick with fresh-milled flour; up to ~45 ml total depending on flour.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_oven_prep",
+      "title": "Heat oven and melt butter in dish",
+      "body": "Heat oven to 350°F (175°C). Put butter in a 9x13-inch baking dish and place in the oven to melt while you prepare the fruit and batter. Watch closely so it melts but doesn’t brown."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the all-purpose flour OR the fresh-milled flour for the batter (not both). Fresh-milled flour may need a little extra milk and benefits from a brief rest for hydration."
+    },
+    {
+      "id": "step_03_prepare_peaches",
+      "title": "Season peaches (baked fruit model)",
+      "body": "In a bowl, toss peaches with sugar, lemon juice, cinnamon, nutmeg (if using), and salt. If peaches are very juicy (or frozen/canned), add cornstarch and toss well. Stir in vanilla if using."
+    },
+    {
+      "id": "step_04_optional_precook",
+      "title": "Optional: quick pre-cook for juicier peaches",
+      "body": "For very juicy fruit (or frozen/canned), simmer the seasoned peaches in a saucepan 4–6 minutes until juices start to thicken. This improves set and reduces a watery cobbler. Let cool slightly before assembling."
+    },
+    {
+      "id": "step_05_make_batter",
+      "title": "Make batter",
+      "body": "In a large bowl, whisk chosen flour with sugar, baking powder, and salt. Whisk in milk until smooth and pourable. If using fresh-milled flour and batter is overly thick, add extra milk 15 ml at a time until it’s pourable (like pancake batter). Rest 5–10 minutes for hydration if using fresh-milled flour."
+    },
+    {
+      "id": "step_06_assemble_do_not_stir",
+      "title": "Assemble (do not stir)",
+      "body": "Carefully remove hot dish with melted butter from oven. Pour batter evenly over the melted butter (do not stir). Spoon peaches and their juices evenly over the batter (do not stir). The batter rises around the fruit as it bakes—this is the baked fruit + batter model."
+    },
+    {
+      "id": "step_07_bake",
+      "title": "Bake until golden and bubbling",
+      "body": "Bake 45–60 minutes until deeply golden and the fruit is bubbling around the edges. Bubbling indicates the fruit juices have thickened and are hot enough to set."
+    },
+    {
+      "id": "step_08_cool_set",
+      "title": "Cool to set",
+      "body": "Cool at least 20–30 minutes before serving so juices thicken slightly and portions hold better."
+    }
+  ],
+  "notes": [
+    "Baked fruit model: bubbling fruit juices are the doneness signal. If the center isn’t bubbling, keep baking.",
+    "If your peaches are very sweet, reduce fruit sugar to 100–120 g. If tart, keep as written.",
+    "Fresh-milled flour: sifting out large bran improves tenderness; batter may need extra milk and a short rest to hydrate.",
+    "Serve warm with vanilla ice cream for the classic pairing."
+  ],
+  "storage": {
+    "roomTemp": "Covered: up to 1 day.",
+    "refrigerator": "Covered: up to 4 days. Rewarm to serve.",
+    "freezer": "Not ideal (texture changes), but can be frozen airtight up to 1 month; thaw and rewarm."
+  }
+}

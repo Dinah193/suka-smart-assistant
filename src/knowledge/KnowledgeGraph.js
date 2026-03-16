@@ -25,7 +25,7 @@
 // keeps an in-memory store with simple APIs.
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.js exists
 // - src/services/hub/HubPacketFormatter.js and src/services/hub/FamilyFundConnector.js exist
 //
@@ -35,8 +35,8 @@
 //   requirement, new session linkage) calls exportToHubIfEnabled(...)
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 // soft imports – ok if not present in light builds
 let HubPacketFormatter = null;
@@ -129,7 +129,9 @@ class KnowledgeGraph {
   // Node helpers
   // ---------------------------------------------------------------------------
   createNodeId(type, hint) {
-    const base = hint ? String(hint).toLowerCase().replace(/\s+/g, "-") : Math.random().toString(36).slice(2);
+    const base = hint
+      ? String(hint).toLowerCase().replace(/\s+/g, "-")
+      : Math.random().toString(36).slice(2);
     return `${type}:${base}:${Date.now().toString(36)}`;
   }
 
@@ -139,7 +141,8 @@ class KnowledgeGraph {
     }
 
     const now = nowIso();
-    const nodeId = id || this.createNodeId(type, label || data?.name || data?.title);
+    const nodeId =
+      id || this.createNodeId(type, label || data?.name || data?.title);
 
     const existing = this.nodes.get(nodeId);
     if (existing) {
@@ -181,12 +184,14 @@ class KnowledgeGraph {
 
   upsertEdge({ from, to, type, meta = {} }) {
     if (!from || !to || !type) {
-      throw new Error("KnowledgeGraph.upsertEdge: 'from', 'to', and 'type' are required");
+      throw new Error(
+        "KnowledgeGraph.upsertEdge: 'from', 'to', and 'type' are required"
+      );
     }
 
     // dedupe: check if we already have an edge with same from-to-type
     const existing = Array.from(this.edges.values()).find(
-      (e) => e.from === from && e.to === to && e.type === type,
+      (e) => e.from === from && e.to === to && e.type === type
     );
 
     const now = nowIso();
@@ -344,7 +349,9 @@ class KnowledgeGraph {
         fromImport: importNode.id,
         items: inventory.updated,
       });
-      emitEvent("inventory.updated", "knowledge:graph", { items: inventory.updated });
+      emitEvent("inventory.updated", "knowledge:graph", {
+        items: inventory.updated,
+      });
     }
 
     emitEvent("import.parsed", "knowledge:graph", {
@@ -638,7 +645,9 @@ class KnowledgeGraph {
     });
 
     // Forward-thinking: detect if video is actually for recipe/cleaning/garden
-    const guessedDomain = this._guessDomainFromText(title || "" + text || "" + url || "");
+    const guessedDomain = this._guessDomainFromText(
+      title || "" + text || "" + url || ""
+    );
     if (guessedDomain && guessedDomain !== "video") {
       const tagNode = this.upsertNode({
         type: "tag",
@@ -666,11 +675,36 @@ class KnowledgeGraph {
 
   _guessDomainFromText(text = "") {
     const lower = text.toLowerCase();
-    if (lower.includes("recipe") || lower.includes("cook") || lower.includes("bake")) return "recipe";
-    if (lower.includes("clean") || lower.includes("laundry") || lower.includes("declutter")) return "cleaning";
-    if (lower.includes("garden") || lower.includes("seed") || lower.includes("harvest")) return "garden";
-    if (lower.includes("butcher") || lower.includes("slaughter") || lower.includes("pasture")) return "animal";
-    if (lower.includes("storehouse") || lower.includes("pantry") || lower.includes("restock")) return "storehouse";
+    if (
+      lower.includes("recipe") ||
+      lower.includes("cook") ||
+      lower.includes("bake")
+    )
+      return "recipe";
+    if (
+      lower.includes("clean") ||
+      lower.includes("laundry") ||
+      lower.includes("declutter")
+    )
+      return "cleaning";
+    if (
+      lower.includes("garden") ||
+      lower.includes("seed") ||
+      lower.includes("harvest")
+    )
+      return "garden";
+    if (
+      lower.includes("butcher") ||
+      lower.includes("slaughter") ||
+      lower.includes("pasture")
+    )
+      return "animal";
+    if (
+      lower.includes("storehouse") ||
+      lower.includes("pantry") ||
+      lower.includes("restock")
+    )
+      return "storehouse";
     return "video";
   }
 }

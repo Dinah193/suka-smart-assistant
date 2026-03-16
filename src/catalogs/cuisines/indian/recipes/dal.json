@@ -1,0 +1,503 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.dal",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Dal Tadka (Everyday Indian Lentils)",
+    "subtitle": "Creamy lentils finished with a sizzling cumin-garlic tempering",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/dal.json",
+      "notes": [
+        "Canonical dal baseline with a separate tadka step (tempering) for identity.",
+        "Designed to be deterministic + adaptable across lentil types (red, toor, moong).",
+        "Pressure cooker / Instant Pot and stovetop paths supported via variations."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "main",
+    "mealArchetypes": ["meal.main.dal", "meal.main.stew"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.dal_tadka",
+      "role.curry_or_dal",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good",
+      "freezer.friendly",
+      "diet.vegetarian",
+      "comfort.food"
+    ]
+  },
+
+  "summary": "Dal Tadka is the Indian weeknight backbone: soft lentils simmered with aromatics, then finished with a hot tadka (tempering) of cumin, garlic, and chili for big flavor. Great with basmati rice or roti.",
+
+  "keywords": [
+    "dal",
+    "dal tadka",
+    "tadka",
+    "tarka",
+    "tempering",
+    "masoor dal",
+    "toor dal",
+    "moong dal"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.dal_tadka",
+    "method.tadka",
+    "method.bloom_spices",
+    "weeknight.friendly",
+    "batch.friendly",
+    "diet.vegetarian"
+  ],
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.0, "unit": "cup" },
+    "notes": "Serves 6 as a main with rice/roti, or 8 as a side."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 35,
+    "totalMins": 60
+  },
+
+  "difficulty": 3,
+
+  "equipment": {
+    "minimum": [
+      "equip.pot",
+      "equip.stove_burner",
+      "equip.knife",
+      "equip.cutting_board"
+    ],
+    "recommended": [
+      "equip.small_pan",
+      "equip.fine_mesh_strainer",
+      "equip.pressure_cooker",
+      "equip.wooden_spoon"
+    ],
+    "optional": [
+      {
+        "id": "equip.immersion_blender",
+        "label": "Immersion blender",
+        "required": false,
+        "notes": "Optional for extra creamy dal; pulse briefly."
+      }
+    ]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "yes (freeze dal base; add fresh tadka after reheating for best aroma)",
+    "weeknightPossible": true
+  },
+
+  "tasteProfile": {
+    "heat": 1,
+    "aroma": ["toasted_cumin", "garlic", "ginger", "tangy_tomato_optional"],
+    "balance": ["savory", "creamy", "bright_finish_acid_optional"]
+  },
+
+  "dietFlags": ["diet.vegetarian"],
+
+  "allergens": {
+    "contains": [],
+    "mayContain": [],
+    "notes": [
+      "Naturally vegetarian; vegan if using oil instead of ghee/butter.",
+      "Gluten-free by default; confirm asafoetida (hing) source if used (some contain wheat)."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "grp.dal_base",
+      "label": "Dal Base",
+      "items": [
+        "ing.lentils_red",
+        "ing.onion",
+        "ing.garlic",
+        "ing.ginger",
+        "spice.turmeric",
+        "ing.tomato",
+        "ing.salt_kosher",
+        "ing.water"
+      ]
+    },
+    {
+      "id": "grp.tadka",
+      "label": "Tadka (Tempering)",
+      "items": [
+        "ing.ghee",
+        "spice.cumin_seed",
+        "spice.mustard_seed",
+        "ing.garlic",
+        "spice.dried_red_chili",
+        "ing.curry_leaves"
+      ]
+    },
+    {
+      "id": "grp.finish",
+      "label": "Finish + Garnish",
+      "items": ["ing.cilantro", "ing.lemon"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.lentils_red",
+      "label": "Red lentils (masoor dal), rinsed",
+      "role": "role.legume",
+      "amount": { "value": 1.5, "unit": "cups" },
+      "notes": [
+        "Red lentils cook quickly and naturally break down into a creamy texture.",
+        "Substitutions: toor dal or moong dal—see variations for time adjustments."
+      ]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "role": "role.liquid",
+      "amount": { "value": 6.0, "unit": "cups" },
+      "notes": [
+        "Add more during simmer if needed; dal should be spoonable and silky.",
+        "If you prefer thicker dal, start with 5 cups."
+      ]
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, finely chopped",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "medium" }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced (base)",
+      "role": "role.aromatic",
+      "amount": { "value": 4, "unit": "cloves" },
+      "notes": "Additional garlic is used in the tadka."
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1.0, "unit": "tbsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "ing.tomato",
+      "label": "Tomato, diced (optional but common)",
+      "role": "role.masalabase",
+      "amount": { "value": 1, "unit": "medium" },
+      "optional": true,
+      "notes": [
+        "Adds brightness and body; you can omit for a simpler dal.",
+        "Substitute: 1/2 cup canned diced tomatoes."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 2.0, "unit": "tsp" },
+      "notes": "Start with 1.5 tsp and adjust after simmering."
+    },
+
+    {
+      "id": "ing.ghee",
+      "label": "Ghee (or oil) for tadka",
+      "role": "role.fat",
+      "amount": { "value": 2.5, "unit": "tbsp" },
+      "notes": [
+        "Ghee is classic. For vegan, use neutral oil or coconut oil.",
+        "If using butter, keep heat moderate to avoid burning milk solids."
+      ]
+    },
+    {
+      "id": "spice.cumin_seed",
+      "label": "Whole cumin seeds",
+      "role": "role.spice_whole",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.mustard_seed",
+      "label": "Mustard seeds (optional)",
+      "role": "role.spice_whole",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Common in South Indian leaning dal; optional here."
+    },
+    {
+      "id": "ing.garlic_tadka",
+      "label": "Garlic, thinly sliced (tadka)",
+      "role": "role.aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "spice.dried_red_chili",
+      "label": "Dried red chili (whole)",
+      "role": "role.heat",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true,
+      "notes": "Use 0–2 depending on heat preference. Break for more heat."
+    },
+    {
+      "id": "ing.curry_leaves",
+      "label": "Curry leaves (optional)",
+      "role": "role.aromatic",
+      "amount": { "value": 10, "unit": "leaf" },
+      "optional": true,
+      "notes": "Adds an unmistakable aroma; omit if unavailable."
+    },
+
+    {
+      "id": "ing.cilantro",
+      "label": "Cilantro, chopped (garnish)",
+      "role": "role.garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon wedges (optional finish)",
+      "role": "role.acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "A squeeze at the end brightens the pot."
+    }
+  ],
+
+  "methods": ["method.simmer", "method.bloom_spices", "method.tadka"],
+
+  "steps": [
+    {
+      "id": "step_01_rinse",
+      "title": "Rinse the lentils",
+      "instructions": [
+        "Place lentils in a fine mesh strainer and rinse under cool water until the water runs mostly clear."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Rinsing reduces foam and keeps flavor clean."]
+    },
+    {
+      "id": "step_02_sweat_aromatics",
+      "title": "Sweat aromatics (optional but adds depth)",
+      "instructions": [
+        "In a pot over medium heat, add 1 tbsp ghee/oil (taken from the tadka amount if desired).",
+        "Add chopped onion and cook 4–6 minutes until soft.",
+        "Add minced garlic and ginger; cook 45–60 seconds until fragrant.",
+        "Stir in turmeric for 15 seconds to bloom."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Sweat onions", "minutes": 5 }]
+    },
+    {
+      "id": "step_03_simmer_dal",
+      "title": "Simmer the dal until creamy",
+      "instructions": [
+        "Add rinsed lentils, water, diced tomato (if using), and 1.5 tsp salt.",
+        "Bring to a boil, then reduce to a steady simmer.",
+        "Simmer 20–30 minutes, stirring occasionally, until lentils are very soft and the dal is creamy.",
+        "If it gets too thick, add water 1/4 cup at a time. If too thin, simmer uncovered a few minutes longer."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 25,
+      "timers": [{ "label": "Simmer lentils", "minutes": 25 }],
+      "checks": [
+        "Red lentils should break down; texture should be spoonable and silky.",
+        "Skim foam if needed during the first 5 minutes."
+      ]
+    },
+    {
+      "id": "step_04_adjust_texture",
+      "title": "Adjust texture and seasoning",
+      "instructions": [
+        "Taste and adjust salt.",
+        "For extra creamy texture, mash a portion of the lentils with the back of a spoon, or briefly pulse with an immersion blender (optional).",
+        "Keep the dal warm on low while you make the tadka."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": [
+        "Dal thickens as it sits—aim slightly looser than your final target.",
+        "Avoid over-blending (it can become gluey)."
+      ]
+    },
+    {
+      "id": "step_05_make_tadka",
+      "title": "Make the tadka (tempering)",
+      "instructions": [
+        "In a small pan over medium-high heat, melt ghee (or heat oil).",
+        "Add cumin seeds (and mustard seeds if using). Let sizzle 15–30 seconds until fragrant; mustard will pop.",
+        "Add sliced garlic and dried chilies; cook 30–60 seconds until garlic is just turning golden (do not burn).",
+        "Add curry leaves if using; they will crackle."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Tadka sizzle", "seconds": 45 }],
+      "checks": [
+        "This step is fast—have everything ready.",
+        "Golden garlic is perfect; burnt garlic makes the whole pot bitter."
+      ]
+    },
+    {
+      "id": "step_06_finish",
+      "title": "Finish the dal with tadka and garnish",
+      "instructions": [
+        "Immediately pour the hot tadka over the dal (it should sizzle).",
+        "Stir gently to distribute (or leave some on top for presentation).",
+        "Finish with cilantro and a squeeze of lemon if desired."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": [
+        "Adding tadka at the end preserves aroma.",
+        "If serving later, make tadka fresh right before serving for best flavor."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "dish.indian.basmati_rice",
+      "dish.indian.jeera_rice",
+      "dish.indian.roti",
+      "dish.indian.naan"
+    ],
+    "sides": [
+      "dish.indian.cucumber_salad",
+      "dish.indian.raita",
+      "dish.indian.pickle"
+    ],
+    "addOns": ["dish.indian.papad", "dish.indian.chutney"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 5,
+      "notes": [
+        "Dal thickens in the fridge; loosen with water when reheating.",
+        "Reheat gently; stir well to prevent scorching."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze dal base in portions.",
+        "For best aroma, make tadka fresh after reheating."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Reheat until steaming hot; stir frequently to avoid scorching."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.toor_dal",
+      "label": "Toor dal (arhar) version",
+      "when": { "lentil": "toor_dal" },
+      "adapt": {
+        "notes": [
+          "Use 1.5 cups toor dal and 7 cups water.",
+          "Simmer time increases to ~40–55 minutes on stovetop; stir more often near the end.",
+          "Pressure cooker: 10–12 minutes at pressure with natural release."
+        ]
+      }
+    },
+    {
+      "id": "var.moong_dal",
+      "label": "Moong dal version (lighter, very digestible)",
+      "when": { "lentil": "moong_dal" },
+      "adapt": {
+        "notes": [
+          "Use split moong dal; simmer ~25–35 minutes.",
+          "Add a pinch of asafoetida (hing) in the tadka if desired."
+        ]
+      }
+    },
+    {
+      "id": "var.instant_pot",
+      "label": "Instant Pot / pressure cooker",
+      "when": { "equipment": "equip.pressure_cooker" },
+      "adapt": {
+        "notes": [
+          "Sauté aromatics, then add lentils + water + turmeric + salt.",
+          "Cook at high pressure: red lentils 6 minutes, toor/moong 10 minutes. Natural release 10 minutes.",
+          "Make tadka separately and pour on top at the end."
+        ]
+      }
+    },
+    {
+      "id": "var.vegan",
+      "label": "Vegan dal",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "swap": [{ "from": "ing.ghee", "to": "ing.oil_neutral" }],
+        "notes": [
+          "Use neutral oil or coconut oil for tadka.",
+          "Finish with lemon for brightness."
+        ]
+      }
+    },
+    {
+      "id": "var_spicy",
+      "label": "Spicier dal",
+      "when": { "preference": "hotter" },
+      "adapt": {
+        "notes": [
+          "Add 1/2 tsp Kashmiri chili powder to the simmering dal or include a fresh green chili in the base.",
+          "Increase dried red chilies in tadka to 2–3."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.dal_tadka",
+    "aliases": ["tadka dal", "tarka dal", "masoor dal tadka"],
+    "index": {
+      "primaryTokens": ["dal", "tadka", "lentils", "cumin", "garlic"],
+      "secondaryTokens": [
+        "tempering",
+        "turmeric",
+        "curry leaves",
+        "masoor",
+        "toor",
+        "moong"
+      ]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

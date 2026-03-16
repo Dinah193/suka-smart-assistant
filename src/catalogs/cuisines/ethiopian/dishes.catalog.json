@@ -1,0 +1,1137 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "SSA Ethiopian dishes catalog (V2 entries).",
+    "All ids/tags are lowercase tokens matching ^[a-z0-9_.-]+$ per schema.",
+    "If your ingredient/equipment ids differ, map via ingredients.aliases.json or cuisine rulesets."
+  ],
+
+  "meta": {
+    "id": "cuisines.ethiopian.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Ethiopian • Dishes Catalog",
+    "cuisineId": "cuisines.ethiopian",
+    "status": "canonical",
+    "notes": [
+      "Designed for deterministic planners: coreComponents + signals + indexes.",
+      "Pairs with cuisines.ethiopian cuisine.profile.json."
+    ],
+    "description": "Canonical Ethiopian dish entries for SSA planners, search, and UI browsing. Focused on injera platters, wot/wat stews, legume stews, sautéed sides, and core condiments.",
+    "version": "1.0.0",
+    "author": "SSA Catalog",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "dish.ethiopian.injera_platter",
+      "label": "Injera_platter",
+      "aka": ["Injera platter", "Injera with wot", "Injera platter (assorted)"],
+      "subprofiles": [
+        "cuisines.ethiopian.highlands",
+        "cuisines.ethiopian.spicy_red"
+      ],
+      "category": "platter",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 75, "handsOffMins": 45 },
+      "servingStyles": ["family_style", "stew_and_starch", "holiday_feasts"],
+      "mealArchetypes": ["archetype.injera_platter"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "medium"
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["starch.injera_teff", "starch.injera_blend"],
+          "chooseOne": true
+        },
+        {
+          "role": "stew",
+          "items": [
+            "dish.ethiopian.misir_wot",
+            "dish.ethiopian.shiro",
+            "dish.ethiopian.doro_wot",
+            "dish.ethiopian.siga_wot"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "side",
+          "items": [
+            "dish.ethiopian.gomen",
+            "dish.ethiopian.atkilt",
+            "dish.ethiopian.timatem_salad"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "method.simmer",
+        "method.saute",
+        "method.bloom_spices_in_fat",
+        "method.onion_reduction"
+      ],
+      "equipmentRecommended": [
+        "tool.griddle",
+        "tool.dutch_oven",
+        "tool.blender",
+        "tool.whisk"
+      ],
+      "equipmentMinimum": [
+        "tool.heavy_pot",
+        "tool.wooden_spoon",
+        "tool.knife",
+        "tool.cutting_board"
+      ],
+      "ingredientsCore": [
+        "starch.injera_teff",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "fat.niter_kibbeh",
+        "legume.red_lentils"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": ["diet.vegetarian_option", "diet.vegan_option"],
+      "pairingHints": {
+        "bestWith": [
+          "dish.ethiopian.misir_wot",
+          "dish.ethiopian.gomen",
+          "dish.ethiopian.atkilt"
+        ],
+        "condiments": ["condiment.awaze", "condiment.green_chile"],
+        "notes": "Use at least one mild side (atkilt or salad) to balance berbere heat."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.injera_platter.veg",
+          "label": "Vegetarian_injera_platter",
+          "when": { "diet": ["vegetarian", "vegan"] },
+          "adapt": {
+            "swapIn": [
+              "dish.ethiopian.misir_wot",
+              "dish.ethiopian.shiro",
+              "dish.ethiopian.kik_alicha"
+            ],
+            "avoid": ["dish.ethiopian.doro_wot", "dish.ethiopian.siga_wot"]
+          }
+        },
+        {
+          "id": "dish.ethiopian.injera_platter.rice",
+          "label": "Platter_over_rice",
+          "when": { "missing": ["starch.injera_teff", "starch.injera_blend"] },
+          "adapt": {
+            "useBase": "starch.rice",
+            "notes": "Serve stews bowl-style over rice when injera is unavailable."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "platter",
+        "family_style",
+        "stew_and_starch",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.doro_wot",
+      "label": "Doro_wot",
+      "aka": ["Doro wat", "Ethiopian chicken stew", "Spicy chicken wot"],
+      "subprofiles": ["cuisines.ethiopian.spicy_red"],
+      "category": "stew",
+      "difficulty": 5,
+      "heatTypical": 4,
+      "time": { "activeMins": 45, "totalMins": 150, "handsOffMins": 105 },
+      "servingStyles": ["family_style", "stew_and_starch", "holiday_feasts"],
+      "mealArchetypes": ["archetype.wot_stew"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["protein.chicken"], "chooseOne": false },
+        {
+          "role": "base",
+          "items": ["base.wot_onion_reduction"],
+          "chooseOne": false
+        },
+        { "role": "spice", "items": ["spice.berbere"], "chooseOne": false },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.ghee"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["protein.eggs", "garnish.lemon"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "method.onion_reduction",
+        "method.bloom_spices_in_fat",
+        "method.simmer",
+        "method.braise"
+      ],
+      "equipmentRecommended": ["tool.dutch_oven", "tool.thermometer"],
+      "equipmentMinimum": [
+        "tool.heavy_pot",
+        "tool.wooden_spoon",
+        "tool.knife",
+        "tool.cutting_board"
+      ],
+      "ingredientsCore": [
+        "protein.chicken",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "fat.niter_kibbeh",
+        "umami.tomato_paste",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy", "allergen.eggs"],
+      "dietFlags": [],
+      "pairingHints": {
+        "serveWith": [
+          "starch.injera_teff",
+          "dish.ethiopian.atkilt",
+          "dish.ethiopian.gomen"
+        ],
+        "notes": "Traditionally served with hard-boiled eggs; keep a mild veg side to balance heat."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.doro_wot.dairy_free",
+          "label": "Doro_wot_dairy_free",
+          "when": { "avoidAllergens": ["allergen.dairy"] },
+          "adapt": {
+            "swapFat": { "from": "fat.niter_kibbeh", "to": "fat.neutral_oil" },
+            "notes": "Bloom spices gently in oil; add extra aromatics for richness."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "stew",
+        "berbere",
+        "holiday",
+        "freezer_friendly",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.misir_wot",
+      "label": "Misir_wot",
+      "aka": ["Misir wat", "Red lentil stew", "Berbere lentils"],
+      "subprofiles": [
+        "cuisines.ethiopian.highlands",
+        "cuisines.ethiopian.spicy_red"
+      ],
+      "category": "legume_stew",
+      "difficulty": 2,
+      "heatTypical": 3,
+      "time": { "activeMins": 20, "totalMins": 45, "handsOffMins": 25 },
+      "servingStyles": ["family_style", "stew_and_starch", "one_pot"],
+      "mealArchetypes": ["archetype.legume_stew", "archetype.wot_stew"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["legume.red_lentils"],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "items": ["base.wot_onion_reduction", "aromatic.onion"],
+          "chooseOne": true
+        },
+        { "role": "spice", "items": ["spice.berbere"], "chooseOne": false },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.neutral_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "method.simmer",
+        "method.bloom_spices_in_fat",
+        "method.onion_reduction"
+      ],
+      "equipmentRecommended": ["tool.dutch_oven", "tool.immersion_blender"],
+      "equipmentMinimum": [
+        "tool.pot",
+        "tool.wooden_spoon",
+        "tool.knife",
+        "tool.cutting_board"
+      ],
+      "ingredientsCore": [
+        "legume.red_lentils",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "fat.niter_kibbeh",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.vegetarian", "diet.vegan_option"],
+      "pairingHints": {
+        "serveWith": [
+          "starch.injera_teff",
+          "dish.ethiopian.gomen",
+          "dish.ethiopian.atkilt"
+        ],
+        "notes": "Finish with lemon if you want brighter balance."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.misir_wot.vegan",
+          "label": "Misir_wot_vegan",
+          "when": { "diet": ["vegan"] },
+          "adapt": {
+            "swapFat": { "from": "fat.niter_kibbeh", "to": "fat.neutral_oil" },
+            "remove": ["allergen.dairy"]
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "lentils",
+        "weeknight",
+        "one_pot",
+        "freezer_friendly",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.shiro",
+      "label": "Shiro",
+      "aka": ["Shiro wat", "Chickpea stew", "Shiro wot"],
+      "subprofiles": ["cuisines.ethiopian.highlands"],
+      "category": "legume_stew",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 15, "totalMins": 35, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "stew_and_starch", "one_pot"],
+      "mealArchetypes": ["archetype.legume_stew"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "medium"
+      },
+      "coreComponents": [
+        {
+          "role": "thickener",
+          "items": ["blend.shiro_powder", "legume.chickpea_flour"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": ["aromatic.onion", "aromatic.garlic", "aromatic.ginger"],
+          "chooseOne": false
+        },
+        { "role": "spice", "items": ["spice.berbere"], "chooseOne": false },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.neutral_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "method.simmer",
+        "method.whisk_thickening",
+        "method.bloom_spices_in_fat"
+      ],
+      "equipmentRecommended": ["tool.whisk", "tool.blender"],
+      "equipmentMinimum": [
+        "tool.pot",
+        "tool.whisk",
+        "tool.knife",
+        "tool.cutting_board"
+      ],
+      "ingredientsCore": [
+        "blend.shiro_powder",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "fat.niter_kibbeh",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [
+        "diet.vegetarian",
+        "diet.vegan_option",
+        "diet.gluten_free_option"
+      ],
+      "pairingHints": {
+        "serveWith": [
+          "starch.injera_teff",
+          "dish.ethiopian.atkilt",
+          "dish.ethiopian.timatem_salad"
+        ],
+        "notes": "Whisk continuously at the start to prevent lumps; simmer until glossy."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.shiro.vegan",
+          "label": "Shiro_vegan",
+          "when": { "diet": ["vegan"] },
+          "adapt": {
+            "swapFat": { "from": "fat.niter_kibbeh", "to": "fat.neutral_oil" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "chickpea",
+        "weeknight",
+        "one_pot",
+        "pantry_friendly",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.kik_alicha",
+      "label": "Kik_alicha",
+      "aka": ["Split pea stew", "Yellow split pea stew", "Alicha kik"],
+      "subprofiles": ["cuisines.ethiopian.highlands"],
+      "category": "legume_stew",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 60, "handsOffMins": 40 },
+      "servingStyles": ["family_style", "stew_and_starch", "one_pot"],
+      "mealArchetypes": ["archetype.legume_stew"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["legume.split_peas"],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "items": ["aromatic.onion", "aromatic.garlic", "aromatic.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.neutral_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["spice.turmeric", "spice.black_pepper"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer", "method.saute"],
+      "equipmentRecommended": ["tool.dutch_oven"],
+      "equipmentMinimum": ["tool.pot", "tool.knife", "tool.cutting_board"],
+      "ingredientsCore": [
+        "legume.split_peas",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "fat.niter_kibbeh",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [
+        "diet.vegetarian",
+        "diet.vegan_option",
+        "diet.gluten_free_option"
+      ],
+      "pairingHints": {
+        "serveWith": [
+          "starch.injera_teff",
+          "dish.ethiopian.misir_wot",
+          "dish.ethiopian.gomen"
+        ],
+        "notes": "Mild 'alicha' style balances spicy red stews on the same platter."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.kik_alicha.vegan",
+          "label": "Kik_alicha_vegan",
+          "when": { "diet": ["vegan"] },
+          "adapt": {
+            "swapFat": { "from": "fat.niter_kibbeh", "to": "fat.neutral_oil" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "split_peas",
+        "mild",
+        "weeknight",
+        "freezer_friendly",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.siga_wot",
+      "label": "Siga_wot",
+      "aka": ["Siga wat", "Ethiopian beef stew", "Berbere beef wot"],
+      "subprofiles": ["cuisines.ethiopian.spicy_red"],
+      "category": "stew",
+      "difficulty": 4,
+      "heatTypical": 4,
+      "time": { "activeMins": 35, "totalMins": 120, "handsOffMins": 85 },
+      "servingStyles": ["family_style", "stew_and_starch", "holiday_feasts"],
+      "mealArchetypes": ["archetype.wot_stew"],
+      "signals": {
+        "batchFriendly": "high",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "high"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["protein.beef", "protein.lamb", "protein.goat"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": ["base.wot_onion_reduction"],
+          "chooseOne": false
+        },
+        { "role": "spice", "items": ["spice.berbere"], "chooseOne": false },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.ghee"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "method.onion_reduction",
+        "method.bloom_spices_in_fat",
+        "method.braise",
+        "method.simmer"
+      ],
+      "equipmentRecommended": ["tool.dutch_oven"],
+      "equipmentMinimum": [
+        "tool.heavy_pot",
+        "tool.knife",
+        "tool.cutting_board"
+      ],
+      "ingredientsCore": [
+        "protein.beef",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "spice.berbere",
+        "fat.niter_kibbeh",
+        "umami.tomato_paste",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [],
+      "pairingHints": {
+        "serveWith": [
+          "starch.injera_teff",
+          "dish.ethiopian.atkilt",
+          "dish.ethiopian.timatem_salad"
+        ],
+        "notes": "Long simmer yields best texture; leftovers deepen in flavor."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.siga_wot.goat",
+          "label": "Goat_wot",
+          "when": { "prefer": ["protein.goat"] },
+          "adapt": {
+            "useProtein": "protein.goat",
+            "notes": "Goat benefits from longer braise; keep liquid level steady."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "stew",
+        "beef",
+        "berbere",
+        "holiday",
+        "freezer_friendly",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.tibs",
+      "label": "Tibs",
+      "aka": ["Ethiopian tibs", "Sautéed meat", "Sauteed beef tibs"],
+      "subprofiles": ["cuisines.ethiopian.rift_valley"],
+      "category": "saute",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 40, "handsOffMins": 15 },
+      "servingStyles": ["family_style", "plated_meals", "street_food"],
+      "mealArchetypes": ["archetype.spiced_meat"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["protein.beef", "protein.lamb", "protein.goat"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["aromatic.onion", "aromatic.garlic", "aromatic.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["spice.berbere", "spice.black_pepper"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.neutral_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "method.saute",
+        "method.high_heat_sear",
+        "method.bloom_spices_in_fat"
+      ],
+      "equipmentRecommended": ["tool.cast_iron_skillet"],
+      "equipmentMinimum": ["tool.skillet", "tool.knife", "tool.cutting_board"],
+      "ingredientsCore": [
+        "protein.beef",
+        "aromatic.onion",
+        "aromatic.garlic",
+        "spice.berbere",
+        "fat.niter_kibbeh",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free_option"],
+      "pairingHints": {
+        "serveWith": [
+          "starch.injera_teff",
+          "dish.ethiopian.gomen",
+          "dish.ethiopian.timatem_salad"
+        ],
+        "notes": "Great weeknight option when you want Ethiopian flavor without long simmer time."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.tibs.mitmita_hot",
+          "label": "Tibs_extra_hot",
+          "when": { "heat": ["high"] },
+          "adapt": {
+            "add": ["spice.mitmita"],
+            "notes": "Use mitmita sparingly; it is very hot."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "saute",
+        "weeknight",
+        "quick",
+        "spiced_meat"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.gomen",
+      "label": "Gomen",
+      "aka": ["Ethiopian greens", "Garlic greens", "Collard greens (gomen)"],
+      "subprofiles": ["cuisines.ethiopian.rift_valley"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 10 },
+      "servingStyles": ["family_style", "stew_and_starch", "plated_meals"],
+      "mealArchetypes": ["archetype.saute_side"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "greens",
+          "items": ["produce.kale_or_collards", "produce.spinach"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["aromatic.garlic", "aromatic.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["fat.niter_kibbeh", "fat.neutral_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.saute", "method.steam_saute"],
+      "equipmentRecommended": ["tool.skillet", "tool.lid"],
+      "equipmentMinimum": ["tool.skillet", "tool.knife", "tool.cutting_board"],
+      "ingredientsCore": [
+        "produce.kale_or_collards",
+        "aromatic.garlic",
+        "fat.niter_kibbeh",
+        "salt.kosher"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": [
+        "diet.vegetarian",
+        "diet.vegan_option",
+        "diet.gluten_free_option"
+      ],
+      "pairingHints": {
+        "bestWith": [
+          "dish.ethiopian.misir_wot",
+          "dish.ethiopian.doro_wot",
+          "dish.ethiopian.siga_wot"
+        ],
+        "notes": "Use as a cooling, garlicky counterpoint to berbere stews."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.gomen.vegan",
+          "label": "Gomen_vegan",
+          "when": { "diet": ["vegan"] },
+          "adapt": {
+            "swapFat": { "from": "fat.niter_kibbeh", "to": "fat.neutral_oil" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "side",
+        "greens",
+        "weeknight",
+        "vegetarian_option"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.atkilt",
+      "label": "Atkilt",
+      "aka": ["Ethiopian cabbage", "Cabbage potato carrot", "Atkilt wat"],
+      "subprofiles": ["cuisines.ethiopian.rift_valley"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 35, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "stew_and_starch", "one_pot"],
+      "mealArchetypes": ["archetype.saute_side"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "veg", "items": ["produce.cabbage"], "chooseOne": false },
+        {
+          "role": "veg",
+          "items": ["produce.potato", "produce.carrot"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["fat.neutral_oil", "fat.niter_kibbeh"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["spice.turmeric", "spice.black_pepper"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.saute", "method.simmer"],
+      "equipmentRecommended": ["tool.dutch_oven"],
+      "equipmentMinimum": ["tool.pot", "tool.knife", "tool.cutting_board"],
+      "ingredientsCore": [
+        "produce.cabbage",
+        "produce.potato",
+        "produce.carrot",
+        "fat.neutral_oil",
+        "salt.kosher"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "bestWith": [
+          "dish.ethiopian.doro_wot",
+          "dish.ethiopian.siga_wot",
+          "dish.ethiopian.misir_wot"
+        ],
+        "notes": "Mild vegetable side that cools and stretches spicy stews."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.atkilt.green_chile",
+          "label": "Atkilt_with_green_chile",
+          "when": { "prefer": ["produce.green_chile"] },
+          "adapt": {
+            "add": ["produce.green_chile"],
+            "notes": "Add sliced green chile for a gentle heat lift."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "side",
+        "vegetables",
+        "mild",
+        "weeknight",
+        "one_pot"
+      ]
+    },
+
+    {
+      "id": "dish.ethiopian.timatem_salad",
+      "label": "Timatem_salad",
+      "aka": ["Ethiopian tomato salad", "Tomato onion salad"],
+      "subprofiles": [],
+      "category": "salad",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 10, "handsOffMins": 0 },
+      "servingStyles": ["family_style", "plated_meals"],
+      "mealArchetypes": ["archetype.side_salad"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "veg", "items": ["produce.tomato"], "chooseOne": false },
+        {
+          "role": "aromatics",
+          "items": ["aromatic.onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["acid.lemon", "acid.lime", "acid.vinegar"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.chop_mix"],
+      "equipmentRecommended": ["tool.citrus_juicer"],
+      "equipmentMinimum": ["tool.knife", "tool.cutting_board", "tool.bowl"],
+      "ingredientsCore": [
+        "produce.tomato",
+        "aromatic.onion",
+        "acid.lemon",
+        "salt.kosher"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "bestWith": [
+          "dish.ethiopian.doro_wot",
+          "dish.ethiopian.tibs",
+          "dish.ethiopian.shiro"
+        ],
+        "notes": "Bright, acidic side to cut through rich stews and sautéed meats."
+      },
+      "variations": [
+        {
+          "id": "dish.ethiopian.timatem_salad.green_chile",
+          "label": "Timatem_salad_with_chile",
+          "when": { "prefer": ["produce.green_chile"] },
+          "adapt": {
+            "add": ["produce.green_chile"],
+            "notes": "Optional sliced green chile for gentle heat."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "salad",
+        "fresh",
+        "quick",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "condiment.awaze",
+      "label": "Awaze",
+      "aka": ["Awaze sauce", "Berbere paste condiment"],
+      "subprofiles": ["cuisines.ethiopian.spicy_red"],
+      "category": "condiment",
+      "difficulty": 2,
+      "heatTypical": 4,
+      "time": { "activeMins": 10, "totalMins": 15, "handsOffMins": 5 },
+      "servingStyles": ["family_style", "street_food"],
+      "mealArchetypes": ["archetype.condiment"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "medium"
+      },
+      "coreComponents": [
+        { "role": "spice", "items": ["spice.berbere"], "chooseOne": false },
+        {
+          "role": "acid",
+          "items": ["acid.lemon", "acid.vinegar"],
+          "chooseOne": true
+        },
+        { "role": "fat", "items": ["fat.neutral_oil"], "chooseOne": false }
+      ],
+      "techniques": ["method.mix_paste", "method.bloom_spices_in_fat"],
+      "equipmentRecommended": ["tool.mortar_pestle"],
+      "equipmentMinimum": ["tool.bowl", "tool.spoon"],
+      "ingredientsCore": [
+        "spice.berbere",
+        "fat.neutral_oil",
+        "acid.lemon",
+        "salt.kosher"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "bestWith": ["dish.ethiopian.tibs", "dish.ethiopian.injera_platter"],
+        "notes": "Very spicy; use in small amounts as a dip or drizzle."
+      },
+      "variations": [
+        {
+          "id": "condiment.awaze.mild",
+          "label": "Awaze_mild",
+          "when": { "heat": ["low"] },
+          "adapt": {
+            "reduce": ["spice.berbere"],
+            "notes": "Reduce berbere and add a touch more oil/acid."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.ethiopian",
+        "condiment",
+        "berbere",
+        "spicy",
+        "batch_friendly"
+      ]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.ethiopian": [
+        "dish.ethiopian.injera_platter",
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha",
+        "dish.ethiopian.siga_wot",
+        "dish.ethiopian.tibs",
+        "dish.ethiopian.gomen",
+        "dish.ethiopian.atkilt",
+        "dish.ethiopian.timatem_salad",
+        "condiment.awaze"
+      ]
+    },
+    "byArchetype": {
+      "archetype.injera_platter": ["dish.ethiopian.injera_platter"],
+      "archetype.wot_stew": [
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.siga_wot"
+      ],
+      "archetype.legume_stew": [
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha"
+      ],
+      "archetype.spiced_meat": ["dish.ethiopian.tibs"],
+      "archetype.saute_side": ["dish.ethiopian.gomen", "dish.ethiopian.atkilt"],
+      "archetype.side_salad": ["dish.ethiopian.timatem_salad"],
+      "archetype.condiment": ["condiment.awaze"]
+    },
+    "aliasIndex": {
+      "injera platter": ["dish.ethiopian.injera_platter"],
+      "injera with wot": ["dish.ethiopian.injera_platter"],
+      "doro wot": ["dish.ethiopian.doro_wot"],
+      "doro wat": ["dish.ethiopian.doro_wot"],
+      "ethiopian chicken stew": ["dish.ethiopian.doro_wot"],
+      "misir wot": ["dish.ethiopian.misir_wot"],
+      "misir wat": ["dish.ethiopian.misir_wot"],
+      "red lentil stew": ["dish.ethiopian.misir_wot"],
+      "shiro": ["dish.ethiopian.shiro"],
+      "shiro wat": ["dish.ethiopian.shiro"],
+      "chickpea stew": ["dish.ethiopian.shiro"],
+      "kik alicha": ["dish.ethiopian.kik_alicha"],
+      "split pea stew": ["dish.ethiopian.kik_alicha"],
+      "siga wot": ["dish.ethiopian.siga_wot"],
+      "siga wat": ["dish.ethiopian.siga_wot"],
+      "ethiopian beef stew": ["dish.ethiopian.siga_wot"],
+      "tibs": ["dish.ethiopian.tibs"],
+      "ethiopian tibs": ["dish.ethiopian.tibs"],
+      "gomen": ["dish.ethiopian.gomen"],
+      "ethiopian greens": ["dish.ethiopian.gomen"],
+      "atkilt": ["dish.ethiopian.atkilt"],
+      "ethiopian cabbage": ["dish.ethiopian.atkilt"],
+      "timatem salad": ["dish.ethiopian.timatem_salad"],
+      "ethiopian tomato salad": ["dish.ethiopian.timatem_salad"],
+      "awaze": ["condiment.awaze"],
+      "awaze sauce": ["condiment.awaze"]
+    },
+    "keywordIndex": {
+      "injera": ["dish.ethiopian.injera_platter"],
+      "wot": [
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.siga_wot"
+      ],
+      "wat": [
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.siga_wot"
+      ],
+      "berbere": [
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.siga_wot",
+        "condiment.awaze"
+      ],
+      "mitmita": ["dish.ethiopian.tibs"],
+      "lentils": ["dish.ethiopian.misir_wot"],
+      "chickpea": ["dish.ethiopian.shiro"],
+      "split peas": ["dish.ethiopian.kik_alicha"],
+      "greens": ["dish.ethiopian.gomen"],
+      "cabbage": ["dish.ethiopian.atkilt"],
+      "tomato": ["dish.ethiopian.timatem_salad"]
+    },
+    "tagIndex": {
+      "cuisine.ethiopian": [
+        "dish.ethiopian.injera_platter",
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha",
+        "dish.ethiopian.siga_wot",
+        "dish.ethiopian.tibs",
+        "dish.ethiopian.gomen",
+        "dish.ethiopian.atkilt",
+        "dish.ethiopian.timatem_salad",
+        "condiment.awaze"
+      ],
+      "stew": ["dish.ethiopian.doro_wot", "dish.ethiopian.siga_wot"],
+      "legume_stew": [
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha"
+      ],
+      "side": ["dish.ethiopian.gomen", "dish.ethiopian.atkilt"],
+      "salad": ["dish.ethiopian.timatem_salad"],
+      "condiment": ["condiment.awaze"],
+      "weeknight": [
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha",
+        "dish.ethiopian.tibs",
+        "dish.ethiopian.gomen",
+        "dish.ethiopian.atkilt",
+        "dish.ethiopian.timatem_salad",
+        "condiment.awaze"
+      ],
+      "batch_friendly": [
+        "dish.ethiopian.injera_platter",
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha",
+        "dish.ethiopian.siga_wot",
+        "condiment.awaze"
+      ],
+      "freezer_friendly": [
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.kik_alicha",
+        "dish.ethiopian.siga_wot"
+      ]
+    },
+    "bySubprofile": {
+      "cuisines.ethiopian.highlands": [
+        "dish.ethiopian.injera_platter",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha"
+      ],
+      "cuisines.ethiopian.rift_valley": [
+        "dish.ethiopian.tibs",
+        "dish.ethiopian.gomen",
+        "dish.ethiopian.atkilt"
+      ],
+      "cuisines.ethiopian.spicy_red": [
+        "dish.ethiopian.injera_platter",
+        "dish.ethiopian.doro_wot",
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.siga_wot",
+        "condiment.awaze"
+      ]
+    },
+    "byCategory": {
+      "platter": ["dish.ethiopian.injera_platter"],
+      "stew": ["dish.ethiopian.doro_wot", "dish.ethiopian.siga_wot"],
+      "legume_stew": [
+        "dish.ethiopian.misir_wot",
+        "dish.ethiopian.shiro",
+        "dish.ethiopian.kik_alicha"
+      ],
+      "saute": ["dish.ethiopian.tibs"],
+      "side": ["dish.ethiopian.gomen", "dish.ethiopian.atkilt"],
+      "salad": ["dish.ethiopian.timatem_salad"],
+      "condiment": ["condiment.awaze"]
+    }
+  }
+}

@@ -19,10 +19,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import GardenPlantingCalendarCalculatorView from "@/features/calculators/gardenAnimal/GardenPlantingCalendarCalculator.view";
+import GardenPlantingCalendarCalculatorView from "@/features/calculators/gardenAnimal/GardenPlantingCalendarCalculator/GardenPlantingCalendarCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.plantingCalendar";
 
@@ -203,10 +203,10 @@ function PlantingSummaryCard({ result, onStartSession, onGardenPlannerSync }) {
             Season Snapshot &amp; Next Plantings
           </h2>
           <p className="text-xs text-slate-400 mt-0.5 max-w-xl">
-            SSA combined your location, zone, and frost dates to map out when
-            to start seeds indoors and when to direct sow outside. Use this
-            summary to schedule real planting sessions and sync with your
-            Garden Planner.
+            SSA combined your location, zone, and frost dates to map out when to
+            start seeds indoors and when to direct sow outside. Use this summary
+            to schedule real planting sessions and sync with your Garden
+            Planner.
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 text-[10px] text-slate-300">
@@ -273,13 +273,15 @@ function PlantingSummaryCard({ result, onStartSession, onGardenPlannerSync }) {
                 <p className="text-slate-100 font-semibold text-[11px]">
                   {w.cropName}{" "}
                   <span className="text-slate-400">
-                    ({w.method === "directSow"
+                    (
+                    {w.method === "directSow"
                       ? "Direct sow"
                       : w.method === "transplant"
                       ? "Transplant"
                       : w.method === "succession"
                       ? "Succession"
-                      : w.method || "Plant"})
+                      : w.method || "Plant"}
+                    )
                   </span>
                 </p>
                 <p className="text-slate-400 text-[11px]">
@@ -374,15 +376,10 @@ export default function GardenPlantingCalendarCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source:
-            "pages.calculators.gardenAnimal.garden-planting-calendar",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.garden-planting-calendar",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -392,8 +389,7 @@ export default function GardenPlantingCalendarCalculatorPage() {
 
       /** @type {PlantingCalendarResult} */
       const normalized = {
-        zone:
-          typeof calcResult.zone === "string" ? calcResult.zone : undefined,
+        zone: typeof calcResult.zone === "string" ? calcResult.zone : undefined,
         locationLabel:
           typeof calcResult.locationLabel === "string"
             ? calcResult.locationLabel
@@ -410,9 +406,7 @@ export default function GardenPlantingCalendarCalculatorPage() {
           typeof calcResult.seasonLabel === "string"
             ? calcResult.seasonLabel
             : undefined,
-        windows: Array.isArray(calcResult.windows)
-          ? calcResult.windows
-          : [],
+        windows: Array.isArray(calcResult.windows) ? calcResult.windows : [],
         indoorStarts: Array.isArray(calcResult.indoorStarts)
           ? calcResult.indoorStarts
           : [],
@@ -422,9 +416,7 @@ export default function GardenPlantingCalendarCalculatorPage() {
         successionCrops: Array.isArray(calcResult.successionCrops)
           ? calcResult.successionCrops
           : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         suggestedSessionTitle:
           typeof calcResult.suggestedSessionTitle === "string"
@@ -473,8 +465,8 @@ export default function GardenPlantingCalendarCalculatorPage() {
             <p className="mt-1 text-sm text-slate-400 max-w-2xl">
               Turn your zip code, zone, and crop list into a living planting
               calendar. SSA maps out indoor starts, direct-sow dates, and
-              succession plantings so you can match garden work with the rest
-              of your household schedule.
+              succession plantings so you can match garden work with the rest of
+              your household schedule.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">

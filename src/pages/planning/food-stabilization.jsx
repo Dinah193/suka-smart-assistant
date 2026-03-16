@@ -28,8 +28,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useCallback, useState } from "react";
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * Emit a “play the next runnable session now” request for Food Stabilization.
@@ -61,7 +61,10 @@ function requestNextSession(domainHints, focusArea) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[FoodStabilizationPlanning] Failed to emit session.requestNext", err);
+    console.error(
+      "[FoodStabilizationPlanning] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -226,7 +229,10 @@ function FoodStabilizationPlanningPage() {
   }, []);
 
   const handleNowGardenAnimals = useCallback(() => {
-    requestNextSession(["garden", "animals", "storehouse"], "production-alignment");
+    requestNextSession(
+      ["garden", "animals", "storehouse"],
+      "production-alignment"
+    );
   }, []);
 
   const handleNowPreservation = useCallback(() => {
@@ -481,7 +487,9 @@ function FoodStabilizationPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-sky-400" />
                   <span>
-                    <span className="font-semibold">Macro & Calorie Planner:</span>{" "}
+                    <span className="font-semibold">
+                      Macro & Calorie Planner:
+                    </span>{" "}
                     design core meals that work with your goals and fit your
                     shelves.
                   </span>
@@ -489,7 +497,9 @@ function FoodStabilizationPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
                   <span>
-                    <span className="font-semibold">Pricebook / Scan-Compare:</span>{" "}
+                    <span className="font-semibold">
+                      Pricebook / Scan-Compare:
+                    </span>{" "}
                     if enabled elsewhere in SSA, use it to choose affordable,
                     repeatable staples for your 30-day plan.
                   </span>
@@ -500,8 +510,8 @@ function FoodStabilizationPlanningPage() {
                     <span>
                       <span className="font-semibold">Family Fund Hub:</span>{" "}
                       later, view how often you run food-related sessions and
-                      how your storehouse trends (months of coverage, categories,
-                      etc.) change over time.
+                      how your storehouse trends (months of coverage,
+                      categories, etc.) change over time.
                     </span>
                   </li>
                 )}
@@ -527,7 +537,10 @@ function FoodStabilizationPlanningPage() {
       </main>
 
       {/* Local informational modal */}
-      <FoodStabilizationFlowModal open={flowOpen} onClose={() => setFlowOpen(false)} />
+      <FoodStabilizationFlowModal
+        open={flowOpen}
+        onClose={() => setFlowOpen(false)}
+      />
     </div>
   );
 }

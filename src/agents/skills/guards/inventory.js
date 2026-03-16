@@ -39,7 +39,7 @@
  *     compatible with `guardsEvaluate.inventoryGuard`.
  */
 
-import { emit } from '../../../services/eventBus';
+import { emit } from "../../../services/events/eventBus";
 
 /**
  * @typedef {'ingredient'|'equipment'|'supply'} RequirementType
@@ -124,7 +124,7 @@ import { emit } from '../../../services/eventBus';
  * @returns {NormalizedInventorySnapshot|null}
  */
 export function normalizeInventorySnapshot(raw) {
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return null;
   }
 
@@ -135,8 +135,8 @@ export function normalizeInventorySnapshot(raw) {
   const list = Array.isArray(raw)
     ? raw
     : Array.isArray(raw.items)
-      ? raw.items
-      : null;
+    ? raw.items
+    : null;
 
   if (list) {
     for (const entry of list) {
@@ -148,7 +148,7 @@ export function normalizeInventorySnapshot(raw) {
   }
 
   // Try keyed-style
-  if (!list && raw.itemsById && typeof raw.itemsById === 'object') {
+  if (!list && raw.itemsById && typeof raw.itemsById === "object") {
     const keys = Object.keys(raw.itemsById);
     for (const key of keys) {
       const entry = raw.itemsById[key];
@@ -165,10 +165,12 @@ export function normalizeInventorySnapshot(raw) {
   /** @type {NormalizedInventorySnapshot} */
   const snapshot = {
     items,
-    missingCritical: Array.isArray(raw.missingCritical) ? raw.missingCritical.slice() : [],
+    missingCritical: Array.isArray(raw.missingCritical)
+      ? raw.missingCritical.slice()
+      : [],
     lowStock: Array.isArray(raw.lowStock) ? raw.lowStock.slice() : [],
     lastUpdated,
-    raw
+    raw,
   };
 
   return snapshot;
@@ -205,22 +207,24 @@ export function evaluateInventory(snapshot, requirements, options = {}) {
   /** @type {InventoryEvaluationResult} */
   const base = {
     ok: true,
-    decision: 'allow',
-    reasonCode: 'ok',
+    decision: "allow",
+    reasonCode: "ok",
     missingCritical: [],
     lowStock: [],
     suggestions: [],
     warnings: [],
-    snapshot: snapshot || null
+    snapshot: snapshot || null,
   };
 
   if (!snapshot) {
     const res = {
       ...base,
       ok: true, // allow by default; SessionRunner UI can still show “Inventory unknown”
-      decision: 'warn',
-      reasonCode: 'noSnapshot',
-      warnings: ['Inventory data unavailable; treating as sufficient by default.']
+      decision: "warn",
+      reasonCode: "noSnapshot",
+      warnings: [
+        "Inventory data unavailable; treating as sufficient by default.",
+      ],
     };
     safeEmitInventoryEvaluated(res);
     return res;
@@ -231,8 +235,8 @@ export function evaluateInventory(snapshot, requirements, options = {}) {
     const res = {
       ...base,
       ok: true,
-      decision: 'allow',
-      reasonCode: 'noRequirements'
+      decision: "allow",
+      reasonCode: "noRequirements",
     };
     safeEmitInventoryEvaluated(res);
     return res;
@@ -248,7 +252,9 @@ export function evaluateInventory(snapshot, requirements, options = {}) {
 
   for (const req of reqs) {
     const normReq = normalizeRequirement(req);
-    const item = snapshot.items[normReq.id] || findItemByName(snapshot.items, normReq.name);
+    const item =
+      snapshot.items[normReq.id] ||
+      findItemByName(snapshot.items, normReq.name);
 
     if (!item || !Number.isFinite(item.qty)) {
       // If optional and configured that way, warn but don't block.
@@ -280,29 +286,29 @@ export function evaluateInventory(snapshot, requirements, options = {}) {
     }
   }
 
-  let decision = /** @type {'allow'|'warn'|'block'} */ ('allow');
+  let decision = /** @type {'allow'|'warn'|'block'} */ ("allow");
   /** @type {'ok'|'noRequirements'|'missingCritical'|'lowStock'|'noSnapshot'} */
-  let reasonCode = 'ok';
+  let reasonCode = "ok";
   const suggestions = [];
   const warnings = [...base.warnings];
 
   if (missingCritical.length) {
-    decision = 'block';
-    reasonCode = 'missingCritical';
+    decision = "block";
+    reasonCode = "missingCritical";
     suggestions.push(
-      'Add missing items to your shopping list or storehouse pickup.',
-      'Use the swap modal to choose a different session or step that fits your current inventory.'
+      "Add missing items to your shopping list or storehouse pickup.",
+      "Use the swap modal to choose a different session or step that fits your current inventory."
     );
   } else if (lowStock.length && !allowLowStock) {
-    decision = 'warn';
-    reasonCode = 'lowStock';
+    decision = "warn";
+    reasonCode = "lowStock";
     suggestions.push(
-      'Consider replacing low-stock items or reducing batch size.',
-      'Add low-stock items to your shopping list to avoid future shortages.'
+      "Consider replacing low-stock items or reducing batch size.",
+      "Add low-stock items to your shopping list to avoid future shortages."
     );
   }
 
-  const ok = decision !== 'block';
+  const ok = decision !== "block";
 
   const result = {
     ...base,
@@ -312,7 +318,7 @@ export function evaluateInventory(snapshot, requirements, options = {}) {
     missingCritical,
     lowStock,
     suggestions,
-    warnings
+    warnings,
   };
 
   safeEmitInventoryEvaluated(result);
@@ -347,7 +353,7 @@ export function toGuardInventorySnapshot(input) {
     return {
       missingCritical: missingNames,
       lowStock: lowNames,
-      lastUpdated: res.snapshot ? res.snapshot.lastUpdated : null
+      lastUpdated: res.snapshot ? res.snapshot.lastUpdated : null,
     };
   }
 
@@ -358,7 +364,7 @@ export function toGuardInventorySnapshot(input) {
       ? snapshot.missingCritical.slice()
       : [],
     lowStock: Array.isArray(snapshot.lowStock) ? snapshot.lowStock.slice() : [],
-    lastUpdated: snapshot.lastUpdated
+    lastUpdated: snapshot.lastUpdated,
   };
 }
 
@@ -373,39 +379,39 @@ export function toGuardInventorySnapshot(input) {
  * @returns {InventoryItem|null}
  */
 function normalizeItem(raw) {
-  if (!raw || typeof raw !== 'object') return null;
+  if (!raw || typeof raw !== "object") return null;
 
   const id =
-    typeof raw.id === 'string' && raw.id.trim()
+    typeof raw.id === "string" && raw.id.trim()
       ? raw.id.trim()
-      : typeof raw.sku === 'string' && raw.sku.trim()
-        ? raw.sku.trim()
-        : null;
+      : typeof raw.sku === "string" && raw.sku.trim()
+      ? raw.sku.trim()
+      : null;
 
   if (!id) return null;
 
   const name =
-    typeof raw.name === 'string' && raw.name.trim()
-      ? raw.name.trim()
-      : id;
+    typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : id;
 
   const qty = Number.isFinite(raw.qty)
     ? Number(raw.qty)
     : Number.isFinite(raw.quantity)
-      ? Number(raw.quantity)
-      : 0;
+    ? Number(raw.quantity)
+    : 0;
 
   const unit =
-    typeof raw.unit === 'string' && raw.unit.trim()
+    typeof raw.unit === "string" && raw.unit.trim()
       ? raw.unit.trim()
-      : typeof raw.uom === 'string' && raw.uom.trim()
-        ? raw.uom.trim()
-        : undefined;
+      : typeof raw.uom === "string" && raw.uom.trim()
+      ? raw.uom.trim()
+      : undefined;
 
   const minQty = Number.isFinite(raw.minQty) ? Number(raw.minQty) : undefined;
 
   const type =
-    raw.type === 'ingredient' || raw.type === 'equipment' || raw.type === 'supply'
+    raw.type === "ingredient" ||
+    raw.type === "equipment" ||
+    raw.type === "supply"
       ? raw.type
       : undefined;
 
@@ -415,7 +421,7 @@ function normalizeItem(raw) {
     qty: qty < 0 ? 0 : qty,
     unit,
     minQty,
-    type
+    type,
   };
 }
 
@@ -426,18 +432,17 @@ function normalizeItem(raw) {
  * @returns {InventoryRequirement}
  */
 function normalizeRequirement(req) {
-  const safe = req || /** @type {InventoryRequirement} */ ({ id: '', quantity: 1 });
+  const safe =
+    req || /** @type {InventoryRequirement} */ ({ id: "", quantity: 1 });
   const id =
-    typeof safe.id === 'string' && safe.id.trim()
+    typeof safe.id === "string" && safe.id.trim()
       ? safe.id.trim()
       : safe.name && safe.name.trim()
-        ? safe.name.trim()
-        : 'unknown';
+      ? safe.name.trim()
+      : "unknown";
 
   const name =
-    typeof safe.name === 'string' && safe.name.trim()
-      ? safe.name.trim()
-      : id;
+    typeof safe.name === "string" && safe.name.trim() ? safe.name.trim() : id;
 
   const quantity =
     Number.isFinite(safe.quantity) && safe.quantity > 0
@@ -445,12 +450,14 @@ function normalizeRequirement(req) {
       : 1;
 
   const type =
-    safe.type === 'ingredient' || safe.type === 'equipment' || safe.type === 'supply'
+    safe.type === "ingredient" ||
+    safe.type === "equipment" ||
+    safe.type === "supply"
       ? safe.type
-      : 'ingredient';
+      : "ingredient";
 
   const unit =
-    typeof safe.unit === 'string' && safe.unit.trim()
+    typeof safe.unit === "string" && safe.unit.trim()
       ? safe.unit.trim()
       : undefined;
 
@@ -462,7 +469,7 @@ function normalizeRequirement(req) {
     quantity,
     unit,
     type,
-    optional
+    optional,
   };
 }
 
@@ -493,7 +500,7 @@ function findItemByName(items, name) {
  * @returns {string|null}
  */
 function extractLastUpdated(raw) {
-  if (!raw || typeof raw !== 'object') return null;
+  if (!raw || typeof raw !== "object") return null;
 
   const ts =
     raw.lastUpdated ||
@@ -503,12 +510,12 @@ function extractLastUpdated(raw) {
 
   if (!ts) return null;
 
-  if (typeof ts === 'number') {
+  if (typeof ts === "number") {
     const d = new Date(ts);
     return Number.isNaN(d.getTime()) ? null : d.toISOString();
   }
 
-  if (typeof ts === 'string') {
+  if (typeof ts === "string") {
     const d = new Date(ts);
     return Number.isNaN(d.getTime()) ? null : d.toISOString();
   }
@@ -535,12 +542,12 @@ function extractLastUpdated(raw) {
  */
 function safeEmitInventoryEvaluated(result) {
   try {
-    if (typeof emit !== 'function') return;
+    if (typeof emit !== "function") return;
     emit({
-      type: 'inventory.evaluated',
+      type: "inventory.evaluated",
       ts: new Date().toISOString(),
-      source: 'guards.inventory',
-      data: result
+      source: "guards.inventory",
+      data: result,
     });
   } catch (_err) {
     // Never crash guard logic because of eventBus failures.

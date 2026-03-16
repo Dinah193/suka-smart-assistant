@@ -11,20 +11,38 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 // Optional stores (gracefully degrade if not present)
-let useMealPlanStore = () => ({ getSelectedScope: () => null, getMealsForScope: () => [] });
-let useNutritionStore = () => ({ goals: null, setGoals: () => {}, templates: {}, refresh: async () => {} });
-let usePreferencesStore = () => ({ unitSystem: "imperial", dietary: {}, sabbathAware: true });
+let useMealPlanStore = () => ({
+  getSelectedScope: () => null,
+  getMealsForScope: () => [],
+});
+let useNutritionStore = () => ({
+  goals: null,
+  setGoals: () => {},
+  templates: {},
+  refresh: async () => {},
+});
+let usePreferencesStore = () => ({
+  unitSystem: "imperial",
+  dietary: {},
+  sabbathAware: true,
+});
 
-try { useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore; } catch {}
-try { useNutritionStore = require("@/store/NutritionStore").useNutritionStore; } catch {}
-try { usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore; } catch {}
+try {
+  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore;
+} catch {}
+try {
+  useNutritionStore = require("@/store/NutritionStore").useNutritionStore;
+} catch {}
+try {
+  usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore;
+} catch {}
 
 /** USDA-ish default daily targets (fallback) */
 const USDA_DEFAULTS = Object.freeze({
   calories: 2000,
-  protein_g: 50,     // 10–35% kcal; set reasonable midpoint baseline
-  carbs_g: 275,      // ~55% of kcal
-  fat_g: 70,         // ~31% of kcal
+  protein_g: 50, // 10–35% kcal; set reasonable midpoint baseline
+  carbs_g: 275, // ~55% of kcal
+  fat_g: 70, // ~31% of kcal
   fiber_g: 28,
   sugar_g: 50,
   sodium_mg: 2300,
@@ -37,8 +55,14 @@ const KCAL_PER_G = { protein: 4, carbs: 4, fat: 9 };
 /** Compute totals + macro split from a list of meals/recipes */
 function aggregateNutrition(items = []) {
   const base = {
-    calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0,
-    fiber_g: 0, sugar_g: 0, sodium_mg: 0, satfat_g: 0,
+    calories: 0,
+    protein_g: 0,
+    carbs_g: 0,
+    fat_g: 0,
+    fiber_g: 0,
+    sugar_g: 0,
+    sodium_mg: 0,
+    satfat_g: 0,
   };
   for (const it of items) {
     const n = it?.nutrition || {};
@@ -54,7 +78,10 @@ function aggregateNutrition(items = []) {
   const kcalProtein = base.protein_g * KCAL_PER_G.protein;
   const kcalCarbs = base.carbs_g * KCAL_PER_G.carbs;
   const kcalFat = base.fat_g * KCAL_PER_G.fat;
-  const kcalTotal = Math.max(1, base.calories || (kcalProtein + kcalCarbs + kcalFat));
+  const kcalTotal = Math.max(
+    1,
+    base.calories || kcalProtein + kcalCarbs + kcalFat
+  );
 
   const macrosPct = {
     protein: Math.round((kcalProtein / kcalTotal) * 100),
@@ -62,7 +89,11 @@ function aggregateNutrition(items = []) {
     fat: Math.round((kcalFat / kcalTotal) * 100),
   };
 
-  return { totals: base, macrosPct, kcalBreakdown: { kcalProtein, kcalCarbs, kcalFat, kcalTotal } };
+  return {
+    totals: base,
+    macrosPct,
+    kcalBreakdown: { kcalProtein, kcalCarbs, kcalFat, kcalTotal },
+  };
 }
 
 /** Merge user goals with defaults. */
@@ -85,14 +116,33 @@ function Ring({ pct = 0, label = "", value = "", title = "" }) {
   const radius = 22;
   const stroke = 6;
   const circumference = 2 * Math.PI * radius;
-  const dash = Math.min(100, Math.max(0, pct)) / 100 * circumference;
+  const dash = (Math.min(100, Math.max(0, pct)) / 100) * circumference;
 
   return (
     <div className="flex items-center gap-3">
-      <svg width="60" height="60" viewBox="0 0 60 60" role="img" aria-label={`${title} ${pct}%`}>
-        <circle cx="30" cy="30" r={radius} strokeWidth={stroke} fill="none" className="text-muted/30" stroke="currentColor" opacity={0.2}/>
+      <svg
+        width="60"
+        height="60"
+        viewBox="0 0 60 60"
+        role="img"
+        aria-label={`${title} ${pct}%`}
+      >
         <circle
-          cx="30" cy="30" r={radius} strokeWidth={stroke} fill="none"
+          cx="30"
+          cy="30"
+          r={radius}
+          strokeWidth={stroke}
+          fill="none"
+          className="text-muted/30"
+          stroke="currentColor"
+          opacity={0.2}
+        />
+        <circle
+          cx="30"
+          cy="30"
+          r={radius}
+          strokeWidth={stroke}
+          fill="none"
           strokeDasharray={`${dash} ${circumference - dash}`}
           strokeLinecap="round"
           className="text-primary"
@@ -110,17 +160,31 @@ function Ring({ pct = 0, label = "", value = "", title = "" }) {
 }
 
 /** Compare totals vs goals and produce status chips */
-function GoalRow({ name, unit = "", value = 0, goal = 0, preferAtMost = true }) {
+function GoalRow({
+  name,
+  unit = "",
+  value = 0,
+  goal = 0,
+  preferAtMost = true,
+}) {
   const pct = goal ? Math.round((value / goal) * 100) : 0;
   const within = preferAtMost ? value <= goal : value >= goal; // e.g. fiber is "at least"
-  const badgeTone = within ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700";
-  const trend = within ? "On track" : (preferAtMost ? "Over" : "Under");
+  const badgeTone = within
+    ? "bg-emerald-100 text-emerald-700"
+    : "bg-rose-100 text-rose-700";
+  const trend = within ? "On track" : preferAtMost ? "Over" : "Under";
   return (
     <div className="flex items-center justify-between py-1.5">
       <div className="text-sm">{name}</div>
       <div className="flex items-center gap-2">
-        <span className="text-sm tabular-nums">{Math.round(value)}{unit}</span>
-        <span className="text-xs text-muted-foreground">/ {Math.round(goal)}{unit}</span>
+        <span className="text-sm tabular-nums">
+          {Math.round(value)}
+          {unit}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          / {Math.round(goal)}
+          {unit}
+        </span>
         <Badge className={cx("ml-1", badgeTone)}>{trend}</Badge>
         <span className="text-xs text-muted-foreground">{pct}%</span>
       </div>
@@ -150,7 +214,10 @@ export default function MealPlanNutritiionPeek({ className }) {
   const meals = getMealsForScope ? getMealsForScope(scope) : [];
 
   // Compute nutrition
-  const { totals, macrosPct, kcalBreakdown } = useMemo(() => aggregateNutrition(meals), [meals]);
+  const { totals, macrosPct, kcalBreakdown } = useMemo(
+    () => aggregateNutrition(meals),
+    [meals]
+  );
 
   // Resolve targets (merge user goals or USDA)
   const targets = useMemo(
@@ -168,15 +235,25 @@ export default function MealPlanNutritiionPeek({ className }) {
       "calendar.synced",
       "session.generated",
       "session.finalized",
-    ].map((evt) => eventBus.on(evt, async () => {
-      try { await refresh?.(); } catch {}
-    }));
+    ].map((evt) =>
+      eventBus.on(evt, async () => {
+        try {
+          await refresh?.();
+        } catch {}
+      })
+    );
 
-    return () => { subs.forEach((off) => off?.()); };
+    return () => {
+      subs.forEach((off) => off?.());
+    };
   }, [refresh]);
 
   // Sabbath guard tag (non-blocking visual cue)
-  const sabbathTag = sabbathAware ? <Badge variant="secondary" className="ml-2">Sabbath-aware</Badge> : null;
+  const sabbathTag = sabbathAware ? (
+    <Badge variant="secondary" className="ml-2">
+      Sabbath-aware
+    </Badge>
+  ) : null;
 
   // Apply a goal template with Undo
   const applyTemplate = (key) => {
@@ -197,7 +274,10 @@ export default function MealPlanNutritiionPeek({ className }) {
           onClick={() => {
             setGoals?.(prev);
             setActiveTemplate(null);
-            toast({ title: "Reverted", description: "Restored previous goals." });
+            toast({
+              title: "Reverted",
+              description: "Restored previous goals.",
+            });
           }}
         >
           Undo
@@ -209,10 +289,18 @@ export default function MealPlanNutritiionPeek({ className }) {
   // Export (stubbed) — you likely have a shared export service already
   const exportSummary = async () => {
     try {
-      await automation.invoke?.("export.nutritionSummary", { scope, totals, targets, macrosPct });
+      await automation.invoke?.("export.nutritionSummary", {
+        scope,
+        totals,
+        targets,
+        macrosPct,
+      });
       toast({ title: "Exported", description: "Nutrition summary exported." });
     } catch (e) {
-      toast({ title: "Export failed", description: "Could not export summary." });
+      toast({
+        title: "Export failed",
+        description: "Could not export summary.",
+      });
     }
   };
 
@@ -228,10 +316,22 @@ export default function MealPlanNutritiionPeek({ className }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          No meals in the current selection. Add recipes to your session/day to see totals and macro split.
+          No meals in the current selection. Add recipes to your session/day to
+          see totals and macro split.
           <div className="mt-3 flex gap-2">
-            <Button size="sm" onClick={() => eventBus.emit("ui.open", { id: "RecipeVault" })}>Open Recipe Vault</Button>
-            <Button size="sm" variant="outline" onClick={() => eventBus.emit("ui.open", { id: "MealPlanEditor" })}>Plan Meals</Button>
+            <Button
+              size="sm"
+              onClick={() => eventBus.emit("ui.open", { id: "RecipeVault" })}
+            >
+              Open Recipe Vault
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => eventBus.emit("ui.open", { id: "MealPlanEditor" })}
+            >
+              Plan Meals
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -242,7 +342,9 @@ export default function MealPlanNutritiionPeek({ className }) {
   const chip = (text) => <Badge variant="secondary">{text}</Badge>;
   const scopeLabel = (() => {
     if (!scope) return "Selection";
-    let base = scope.type ? scope.type.charAt(0).toUpperCase() + scope.type.slice(1) : "Selection";
+    let base = scope.type
+      ? scope.type.charAt(0).toUpperCase() + scope.type.slice(1)
+      : "Selection";
     if (typeof modeLabel === "function") base += ` • ${modeLabel(scope)}`;
     return base;
   })();
@@ -261,7 +363,8 @@ export default function MealPlanNutritiionPeek({ className }) {
               {sabbathTag}
             </CardTitle>
             <div className="mt-1 text-xs text-muted-foreground">
-              Live totals for your current selection. Updates on recipe, plan, or inventory changes.
+              Live totals for your current selection. Updates on recipe, plan,
+              or inventory changes.
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -274,7 +377,9 @@ export default function MealPlanNutritiionPeek({ className }) {
               />
               <span className="text-xs text-muted-foreground">Custom</span>
             </div>
-            <Button size="sm" variant="outline" onClick={exportSummary}>Export</Button>
+            <Button size="sm" variant="outline" onClick={exportSummary}>
+              Export
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -282,20 +387,41 @@ export default function MealPlanNutritiionPeek({ className }) {
       <CardContent className="space-y-4">
         {/* Macro rings */}
         <div className="grid grid-cols-3 gap-3">
-          <Ring title="Protein share" pct={macrosPct.protein} label="Protein" value={`${Math.round(totals.protein_g)} g`} />
-          <Ring title="Carb share" pct={macrosPct.carbs} label="Carbs" value={`${Math.round(totals.carbs_g)} g`} />
-          <Ring title="Fat share" pct={macrosPct.fat} label="Fat" value={`${Math.round(totals.fat_g)} g`} />
+          <Ring
+            title="Protein share"
+            pct={macrosPct.protein}
+            label="Protein"
+            value={`${Math.round(totals.protein_g)} g`}
+          />
+          <Ring
+            title="Carb share"
+            pct={macrosPct.carbs}
+            label="Carbs"
+            value={`${Math.round(totals.carbs_g)} g`}
+          />
+          <Ring
+            title="Fat share"
+            pct={macrosPct.fat}
+            label="Fat"
+            value={`${Math.round(totals.fat_g)} g`}
+          />
         </div>
 
         <div className="flex items-center justify-between">
           <div className="text-sm">
             <div className="font-medium">Calories</div>
-            <div className="text-muted-foreground text-xs">Total from meals in selection</div>
+            <div className="text-muted-foreground text-xs">
+              Total from meals in selection
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-semibold tabular-nums">{Math.round(totals.calories || kcalBreakdown.kcalTotal)} kcal</div>
+            <div className="text-xl font-semibold tabular-nums">
+              {Math.round(totals.calories || kcalBreakdown.kcalTotal)} kcal
+            </div>
             <div className="text-xs text-muted-foreground">
-              P:{Math.round(kcalBreakdown.kcalProtein)} C:{Math.round(kcalBreakdown.kcalCarbs)} F:{Math.round(kcalBreakdown.kcalFat)}
+              P:{Math.round(kcalBreakdown.kcalProtein)} C:
+              {Math.round(kcalBreakdown.kcalCarbs)} F:
+              {Math.round(kcalBreakdown.kcalFat)}
             </div>
           </div>
         </div>
@@ -307,29 +433,91 @@ export default function MealPlanNutritiionPeek({ className }) {
           <div className="flex items-center justify-between">
             <div className="font-medium">Daily Targets</div>
             <div className="flex items-center gap-2">
-              {activeTemplate ? <Badge>Template: {activeTemplate}</Badge> : null}
+              {activeTemplate ? (
+                <Badge>Template: {activeTemplate}</Badge>
+              ) : null}
               {/* Quick templates if available */}
               {templates?.balanced && (
-                <Button size="xs" variant="secondary" onClick={() => applyTemplate("balanced")}>Balanced</Button>
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  onClick={() => applyTemplate("balanced")}
+                >
+                  Balanced
+                </Button>
               )}
               {templates?.keto && (
-                <Button size="xs" variant="secondary" onClick={() => applyTemplate("keto")}>Keto</Button>
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  onClick={() => applyTemplate("keto")}
+                >
+                  Keto
+                </Button>
               )}
               {templates?.highProtein && (
-                <Button size="xs" variant="secondary" onClick={() => applyTemplate("highProtein")}>High-Protein</Button>
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  onClick={() => applyTemplate("highProtein")}
+                >
+                  High-Protein
+                </Button>
               )}
             </div>
           </div>
 
           <div className="mt-2 space-y-1.5">
-            <GoalRow name="Calories" unit=" kcal" value={totals.calories || kcalBreakdown.kcalTotal} goal={targets.calories} />
-            <GoalRow name="Protein" unit=" g" value={totals.protein_g} goal={targets.protein_g} preferAtMost={false} />
-            <GoalRow name="Carbs" unit=" g" value={totals.carbs_g} goal={targets.carbs_g} />
-            <GoalRow name="Fat" unit=" g" value={totals.fat_g} goal={targets.fat_g} />
-            <GoalRow name="Fiber" unit=" g" value={totals.fiber_g} goal={targets.fiber_g} preferAtMost={false} />
-            <GoalRow name="Sugar" unit=" g" value={totals.sugar_g} goal={targets.sugar_g} />
-            <GoalRow name="Sodium" unit=" mg" value={totals.sodium_mg} goal={targets.sodium_mg} />
-            <GoalRow name="Sat. Fat" unit=" g" value={totals.satfat_g} goal={targets.satfat_g} />
+            <GoalRow
+              name="Calories"
+              unit=" kcal"
+              value={totals.calories || kcalBreakdown.kcalTotal}
+              goal={targets.calories}
+            />
+            <GoalRow
+              name="Protein"
+              unit=" g"
+              value={totals.protein_g}
+              goal={targets.protein_g}
+              preferAtMost={false}
+            />
+            <GoalRow
+              name="Carbs"
+              unit=" g"
+              value={totals.carbs_g}
+              goal={targets.carbs_g}
+            />
+            <GoalRow
+              name="Fat"
+              unit=" g"
+              value={totals.fat_g}
+              goal={targets.fat_g}
+            />
+            <GoalRow
+              name="Fiber"
+              unit=" g"
+              value={totals.fiber_g}
+              goal={targets.fiber_g}
+              preferAtMost={false}
+            />
+            <GoalRow
+              name="Sugar"
+              unit=" g"
+              value={totals.sugar_g}
+              goal={targets.sugar_g}
+            />
+            <GoalRow
+              name="Sodium"
+              unit=" mg"
+              value={totals.sodium_mg}
+              goal={targets.sodium_mg}
+            />
+            <GoalRow
+              name="Sat. Fat"
+              unit=" g"
+              value={totals.satfat_g}
+              goal={targets.satfat_g}
+            />
           </div>
         </div>
 
@@ -338,12 +526,18 @@ export default function MealPlanNutritiionPeek({ className }) {
         {/* Actions / Next Best Action */}
         <div className="space-y-2">
           <div className="text-xs text-muted-foreground">
-            Next best action is based on goal gaps. We’ll suggest tweaks from your Recipe Vault.
+            Next best action is based on goal gaps. We’ll suggest tweaks from
+            your Recipe Vault.
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
-              onClick={() => eventBus.emit("nutrition.suggestSwap", { scope, gaps: computeGaps(totals, targets) })}
+              onClick={() =>
+                eventBus.emit("nutrition.suggestSwap", {
+                  scope,
+                  gaps: computeGaps(totals, targets),
+                })
+              }
             >
               Suggest Swaps
             </Button>
@@ -366,8 +560,9 @@ export default function MealPlanNutritiionPeek({ className }) {
 
         {/* Footnotes */}
         <div className="pt-1 text-[11px] leading-snug text-muted-foreground">
-          * Macros are shown as a percentage of total kcal for the current selection (session/day/week/plan).
-          Targets default to USDA-like baselines unless custom goals or templates are applied.
+          * Macros are shown as a percentage of total kcal for the current
+          selection (session/day/week/plan). Targets default to USDA-like
+          baselines unless custom goals or templates are applied.
         </div>
       </CardContent>
     </Card>

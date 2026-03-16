@@ -23,11 +23,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // If you created a dedicated view component for macros:
-import MacroCalculatorView from "@/features/calculators/health/MacroCalculator.view";
+import MacroCalculatorView from "@/features/calculators/health/MacroCalculator/MacroCalculator.view.jsx";
 // If not yet created, you can temporarily point to a generic calculator shell.
 
 // Optional: if/when you wire result persistence or queries, you can import:
@@ -111,9 +111,7 @@ function MacroNextStepsPanel({ result, loadingNext, onRequestSession }) {
     <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0">
       <div className="bg-slate-900/60 border border-slate-700 rounded-2xl shadow-lg p-4 lg:p-5 flex flex-col h-full">
         <header className="mb-3">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Next Steps
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-50">Next Steps</h2>
           <p className="text-xs text-slate-400 mt-1">
             SSA can turn your macro numbers into concrete plans: storehouse
             goals, batch cooking sessions, and stability flows.
@@ -139,7 +137,9 @@ function MacroNextStepsPanel({ result, loadingNext, onRequestSession }) {
                 "bg-slate-800/60 hover:bg-slate-800 focus:outline-none",
                 "focus-visible:ring-2 focus-visible:ring-emerald-400/70",
                 "transition-all px-3 py-3 flex flex-col gap-1",
-                (action.disabled || loadingNext) ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
+                action.disabled || loadingNext
+                  ? "opacity-70 cursor-not-allowed"
+                  : "cursor-pointer",
               ].join(" ")}
             >
               <div className="flex items-center justify-between gap-2">
@@ -253,62 +253,56 @@ export default function MacroCalculatorPage() {
    *
    * @param {Object} input - Calculator input payload from the view.
    */
-  const handleCalculate = useCallback(
-    async (input) => {
-      setIsRunning(true);
-      setError(null);
+  const handleCalculate = useCallback(async (input) => {
+    setIsRunning(true);
+    setError(null);
 
-      try {
-        const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
-          source: "pages.calculators.health.macros",
-          emitEvents: true,
-        });
+    try {
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.health.macros",
+        emitEvents: true,
+      });
 
-        if (!calcResult || typeof calcResult !== "object") {
-          throw new Error("Macro calculator did not return a result object.");
-        }
-
-        /** @type {MacroResult} */
-        const normalized = {
-          calories: Number(calcResult.calories || 0),
-          proteinGrams: Number(calcResult.proteinGrams || 0),
-          carbsGrams: Number(calcResult.carbsGrams || 0),
-          fatGrams: Number(calcResult.fatGrams || 0),
-          meta: calcResult.meta || {},
-        };
-
-        setResult(normalized);
-
-        // Optionally persist; can be wired later if desired.
-        // await saveCalculatorResult(CALCULATOR_ID, normalized, {
-        //   context: { source: "macros-route" },
-        // });
-
-        // Briefly set loadingNext to true to show micro-feedback in the panel.
-        setLoadingNext(true);
-        setTimeout(() => setLoadingNext(false), 350);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("[macros.jsx] Macro calculator error", err);
-        setError(
-          err && err.message
-            ? err.message
-            : "There was a problem running the macro calculator."
-        );
-      } finally {
-        setIsRunning(false);
+      if (!calcResult || typeof calcResult !== "object") {
+        throw new Error("Macro calculator did not return a result object.");
       }
-    },
-    []
-  );
 
-  const handleRequestSession = useCallback(
-    (macroResult) => {
-      if (!macroResult) return;
-      requestMacroSession(macroResult);
-    },
-    []
-  );
+      /** @type {MacroResult} */
+      const normalized = {
+        calories: Number(calcResult.calories || 0),
+        proteinGrams: Number(calcResult.proteinGrams || 0),
+        carbsGrams: Number(calcResult.carbsGrams || 0),
+        fatGrams: Number(calcResult.fatGrams || 0),
+        meta: calcResult.meta || {},
+      };
+
+      setResult(normalized);
+
+      // Optionally persist; can be wired later if desired.
+      // await saveCalculatorResult(CALCULATOR_ID, normalized, {
+      //   context: { source: "macros-route" },
+      // });
+
+      // Briefly set loadingNext to true to show micro-feedback in the panel.
+      setLoadingNext(true);
+      setTimeout(() => setLoadingNext(false), 350);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[macros.jsx] Macro calculator error", err);
+      setError(
+        err && err.message
+          ? err.message
+          : "There was a problem running the macro calculator."
+      );
+    } finally {
+      setIsRunning(false);
+    }
+  }, []);
+
+  const handleRequestSession = useCallback((macroResult) => {
+    if (!macroResult) return;
+    requestMacroSession(macroResult);
+  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-950/90 text-slate-50">
@@ -393,7 +387,10 @@ export default function MacroCalculatorPage() {
 
           <StabilityHintStrip />
 
-          <StabilityMacroNowButton result={result} onRequestSession={handleRequestSession} />
+          <StabilityMacroNowButton
+            result={result}
+            onRequestSession={handleRequestSession}
+          />
 
           <StabilitySeparator />
 

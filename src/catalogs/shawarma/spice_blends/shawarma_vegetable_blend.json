@@ -1,0 +1,172 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.spice_blends.shawarma_vegetable_blend",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Shawarma Vegetable Spice Blend",
+    "tags": [
+      "spice_blend",
+      "shawarma",
+      "vegetables",
+      "vegan",
+      "vegetarian",
+      "middle_eastern",
+      "pantry",
+      "make_ahead",
+      "batch_friendly",
+      "dry_mix"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Shawarma spice blend tuned for vegetables: bright, smoky-warm, with extra herbs and tangy notes that pop on roasted veg."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": ["About 4 1/2 teaspoons (1 tablespoon + 1 1/2 teaspoons)."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": ["About 4 1/2 teaspoons (1 tablespoon + 1 1/2 teaspoons)."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": ["About 6 teaspoons (2 tablespoons)."]
+    },
+    {
+      "id": "ing.paprika_smoked",
+      "label": "Smoked paprika",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": ["About 2 2/3 teaspoons; helps roasted veggies taste grilled."]
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 1/4 teaspoons; color + earthiness."]
+    },
+    {
+      "id": "ing.sumac",
+      "label": "Ground sumac",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": [
+        "About 2 1/2 teaspoons; tangy brightness that loves roasted veg.",
+        "Optional but highly recommended."
+      ]
+    },
+    {
+      "id": "ing.garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": ["About 2 2/3 teaspoons."]
+    },
+    {
+      "id": "ing.onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 1/4 teaspoons."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 2.5, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional warm backbone."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["About 3/8 teaspoon; optional, subtle sweetness."]
+    },
+    {
+      "id": "ing.ginger_ground",
+      "label": "Ground ginger",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 3/4 teaspoon; adds lift."]
+    },
+    {
+      "id": "ing.oregano_dried",
+      "label": "Dried oregano",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 2 teaspoons; herbal pop on veg."]
+    },
+    {
+      "id": "ing.thyme_dried",
+      "label": "Dried thyme",
+      "amount": { "value": 2.5, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons; optional."]
+    },
+    {
+      "id": "ing.mint_dried",
+      "label": "Dried mint",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional but bright."]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["Optional heat (about 1 teaspoon)."]
+    },
+    {
+      "id": "ing.cayenne",
+      "label": "Cayenne pepper",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["Optional extra heat (about 1/4 teaspoon)."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Mix the blend",
+      "instructions": [
+        "Add all spices to a bowl or jar.",
+        "Whisk (or shake in a sealed jar) until evenly combined and uniform in color."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "How to use (application notes)",
+      "instructions": [
+        "Roasted vegetables: use ~10–16 g (1–1 1/2 tbsp) per 450 g (1 lb) vegetables, plus salt and 15 ml oil; roast hot for browning.",
+        "Mushrooms/cauliflower/eggplant love a heavier hand: up to ~18 g per 450 g (1 lb).",
+        "Tofu/tempeh: toss 450 g (1 lb) with 12–16 g blend + 15 ml oil + 10–15 ml lemon juice; rest 20–60 minutes, then roast or sear.",
+        "If your blend includes sumac, add it after roasting too (a pinch) for a fresh tang pop."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Storage",
+      "instructions": [
+        "Store in an airtight jar away from heat and light.",
+        "Best flavor within 3–6 months; usable longer but aroma fades."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Batch notes",
+      "instructions": [
+        "This recipe yields about 95–115 g spice blend (varies by grind).",
+        "Scale up easily for bulk prep and catalog usage."
+      ]
+    }
+  ]
+}

@@ -20,8 +20,8 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * Optional Hub export hook.
@@ -60,7 +60,11 @@ const exportToHubIfEnabled =
  * }}
  */
 export function useButcheryFreezerMappings(butcheryResult, options = {}) {
-  const { defaultLocation = "Freezer", batchLabel = "", householdId = null } = options;
+  const {
+    defaultLocation = "Freezer",
+    batchLabel = "",
+    householdId = null,
+  } = options;
 
   const { freezerItems, totalFreezerWeightKg } = useMemo(() => {
     if (!butcheryResult || !butcheryResult.result) {
@@ -86,10 +90,16 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
       if (!weightKg) continue;
 
       const units = Number(cut.units) || 0;
-      const unitSizeKg = cut.unitSizeKg ? Number(cut.unitSizeKg) || 0 : units ? weightKg / units : weightKg;
+      const unitSizeKg = cut.unitSizeKg
+        ? Number(cut.unitSizeKg) || 0
+        : units
+        ? weightKg / units
+        : weightKg;
 
       items.push({
-        id: `${batchId}-${cut.animalId || "animal"}-${cut.cutKey || "cut"}-${Math.random().toString(36).slice(2)}`,
+        id: `${batchId}-${cut.animalId || "animal"}-${
+          cut.cutKey || "cut"
+        }-${Math.random().toString(36).slice(2)}`,
         sku: `BUTCHERY-${(cut.cutKey || cut.cutName || "cut").toUpperCase()}`,
         label: cut.cutName || "Mixed Cut",
         category: "meat",
@@ -106,14 +116,14 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
         createdAt: ts,
         source: {
           type: "butchery",
-          refId: batchId
+          refId: batchId,
         },
         metadata: {
           cutKey: cut.cutKey || null,
           species: cut.species || null,
           class: cut.class || null,
-          notes: cut.notes || null
-        }
+          notes: cut.notes || null,
+        },
       });
     }
 
@@ -123,9 +133,9 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
       if (!weightKg) continue;
 
       items.push({
-        id: `${batchId}-${bp.animalId || "animal"}-${slugify(bp.name || "byproduct")}-${Math.random()
-          .toString(36)
-          .slice(2)}`,
+        id: `${batchId}-${bp.animalId || "animal"}-${slugify(
+          bp.name || "byproduct"
+        )}-${Math.random().toString(36).slice(2)}`,
         sku: `BUTCHERY-BY-${slugify(bp.name || "byproduct").toUpperCase()}`,
         label: bp.name || "By-product",
         category: "meat",
@@ -142,15 +152,18 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
         createdAt: ts,
         source: {
           type: "butchery",
-          refId: batchId
+          refId: batchId,
         },
         metadata: {
-          notes: bp.notes || null
-        }
+          notes: bp.notes || null,
+        },
       });
     }
 
-    const total = items.reduce((sum, item) => sum + (Number(item.totalWeightKg) || 0), 0);
+    const total = items.reduce(
+      (sum, item) => sum + (Number(item.totalWeightKg) || 0),
+      0
+    );
 
     return { freezerItems: items, totalFreezerWeightKg: total };
   }, [butcheryResult, defaultLocation, batchLabel]);
@@ -165,9 +178,9 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
       payload: {
         items: freezerItems,
         totals: {
-          weightKg: totalFreezerWeightKg
-        }
-      }
+          weightKg: totalFreezerWeightKg,
+        },
+      },
     };
   }, [freezerItems, totalFreezerWeightKg, householdId]);
 
@@ -181,7 +194,7 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
       type: "storehouse.freezer.plan.created",
       ts,
       source: "calculators/gardenAnimal/ButcheryWeightCalculator.hooks",
-      data: envelope
+      data: envelope,
     });
 
     if (familyFundMode && typeof exportToHubIfEnabled === "function") {
@@ -189,13 +202,13 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
         await exportToHubIfEnabled({
           kind: "freezer-plan",
           createdAt: ts,
-          payload: envelope
+          payload: envelope,
         });
         emit({
           type: "session.exported",
           ts,
           source: "calculators/gardenAnimal/ButcheryWeightCalculator.hooks",
-          data: { kind: "freezer-plan", id: envelope.id }
+          data: { kind: "freezer-plan", id: envelope.id },
         });
       } catch (err) {
         // fail silently per contract; console is okay for debugging
@@ -209,7 +222,7 @@ export function useButcheryFreezerMappings(butcheryResult, options = {}) {
     freezerItems,
     totalFreezerWeightKg,
     createFreezerPlanEnvelope,
-    emitFreezerPlanCreated
+    emitFreezerPlanCreated,
   };
 }
 
@@ -251,9 +264,12 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
     const batchId = `butchery-${ts}`;
 
     // Group cuts by high-level use case
-    const { stewCuts, roastCuts, steakCuts, grindCuts } = groupCutsByUse(retailCuts);
+    const { stewCuts, roastCuts, steakCuts, grindCuts } =
+      groupCutsByUse(retailCuts);
     const bonesAndOrgans = byproducts.filter(
-      (bp) => (bp.category || "").toLowerCase().includes("bone") || (bp.category || "").toLowerCase().includes("organ")
+      (bp) =>
+        (bp.category || "").toLowerCase().includes("bone") ||
+        (bp.category || "").toLowerCase().includes("organ")
     );
 
     /** @type {Array<any>} */
@@ -265,7 +281,7 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
           batchId,
           cuts: grindCuts,
           analytics,
-          defaultSessionDurationMin
+          defaultSessionDurationMin,
         })
       );
     }
@@ -277,7 +293,7 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
           stewCuts,
           roastCuts,
           analytics,
-          defaultSessionDurationMin
+          defaultSessionDurationMin,
         })
       );
     }
@@ -288,7 +304,7 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
           batchId,
           byproducts: bonesAndOrgans,
           analytics,
-          defaultSessionDurationMin
+          defaultSessionDurationMin,
         })
       );
     }
@@ -304,8 +320,8 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
       householdId: householdId || null,
       createdAt: ts,
       payload: {
-        sessions: batchSessions
-      }
+        sessions: batchSessions,
+      },
     };
   }, [batchSessions, householdId]);
 
@@ -319,7 +335,7 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
       type: "planning.batchCooking.suggested",
       ts,
       source: "calculators/gardenAnimal/ButcheryWeightCalculator.hooks",
-      data: envelope
+      data: envelope,
     });
 
     if (familyFundMode && typeof exportToHubIfEnabled === "function") {
@@ -327,13 +343,13 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
         await exportToHubIfEnabled({
           kind: "butchery-batch-planning",
           createdAt: ts,
-          payload: envelope
+          payload: envelope,
         });
         emit({
           type: "session.exported",
           ts,
           source: "calculators/gardenAnimal/ButcheryWeightCalculator.hooks",
-          data: { kind: "butchery-batch-planning", id: envelope.id }
+          data: { kind: "butchery-batch-planning", id: envelope.id },
         });
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -345,7 +361,7 @@ export function useButcheryBatchPlanning(butcheryResult, options = {}) {
   return {
     batchSessions,
     createBatchPlanningEnvelope,
-    emitBatchPlanningSuggested
+    emitBatchPlanningSuggested,
   };
 }
 
@@ -377,7 +393,8 @@ function inferBatchLabelFromCut(cut) {
   const species = (cut.species || "").toString().trim();
   const className = (cut.class || "").toString().trim();
   const date = new Date().toLocaleDateString();
-  if (species && className) return `${capitalize(species)} ${capitalize(className)} – ${date}`;
+  if (species && className)
+    return `${capitalize(species)} ${capitalize(className)} – ${date}`;
   if (species) return `${capitalize(species)} – ${date}`;
   return `Butchery Batch – ${date}`;
 }
@@ -420,13 +437,31 @@ function groupCutsByUse(cuts) {
 
     if (!key) continue;
 
-    if (key.includes("stew") || key.includes("shank") || key.includes("chuck")) {
+    if (
+      key.includes("stew") ||
+      key.includes("shank") ||
+      key.includes("chuck")
+    ) {
       stewCuts.push(cut);
-    } else if (key.includes("roast") || key.includes("round") || key.includes("shoulder")) {
+    } else if (
+      key.includes("roast") ||
+      key.includes("round") ||
+      key.includes("shoulder")
+    ) {
       roastCuts.push(cut);
-    } else if (key.includes("steak") || key.includes("loin") || key.includes("ribeye") || key.includes("t-bone")) {
+    } else if (
+      key.includes("steak") ||
+      key.includes("loin") ||
+      key.includes("ribeye") ||
+      key.includes("t-bone")
+    ) {
       steakCuts.push(cut);
-    } else if (key.includes("trim") || key.includes("grind") || key.includes("ground") || key.includes("burger")) {
+    } else if (
+      key.includes("trim") ||
+      key.includes("grind") ||
+      key.includes("ground") ||
+      key.includes("burger")
+    ) {
       grindCuts.push(cut);
     } else {
       // heuristic fallback: heavier cuts → roast/stew
@@ -449,7 +484,12 @@ function groupCutsByUse(cuts) {
  * @param {any} params.analytics
  * @param {number} params.defaultSessionDurationMin
  */
-function buildGrindSessionDraft({ batchId, cuts, analytics, defaultSessionDurationMin }) {
+function buildGrindSessionDraft({
+  batchId,
+  cuts,
+  analytics,
+  defaultSessionDurationMin,
+}) {
   const ts = new Date().toISOString();
   const totalKg = cuts.reduce((sum, c) => sum + (Number(c.weightKg) || 0), 0);
   const title = `Grind & Package (${roundTo(totalKg, 1)} kg)`;
@@ -458,42 +498,45 @@ function buildGrindSessionDraft({ batchId, cuts, analytics, defaultSessionDurati
     {
       id: `${batchId}-grind-setup`,
       title: "Set Up Grinder & Work Area",
-      desc:
-        "Assemble grinder, sanitize work surfaces, set up trays or tubs for ground meat, and prepare labels/bags.",
+      desc: "Assemble grinder, sanitize work surfaces, set up trays or tubs for ground meat, and prepare labels/bags.",
       durationSec: 20 * 60,
       blockers: ["equipment", "inventory"],
       metadata: {
         tempTargetF: 32,
         donenessCue: "probeTemp",
-        cueNotes: "Keep meat close to freezing to improve grind quality and food safety."
-      }
+        cueNotes:
+          "Keep meat close to freezing to improve grind quality and food safety.",
+      },
     },
     {
       id: `${batchId}-grind-process`,
       title: "Grind Meat Batch",
-      desc: `Grind approximately ${roundTo(totalKg, 1)} kg of trim into your target grind size. Mix batches as needed for fat content.`,
+      desc: `Grind approximately ${roundTo(
+        totalKg,
+        1
+      )} kg of trim into your target grind size. Mix batches as needed for fat content.`,
       durationSec: defaultSessionDurationMin * 60,
       blockers: ["equipment"],
       metadata: {
         tempTargetF: 40,
         donenessCue: "timer",
         cueNotes:
-          "Check temperature regularly; if the batch warms too much, pause and chill before continuing the grind."
-      }
+          "Check temperature regularly; if the batch warms too much, pause and chill before continuing the grind.",
+      },
     },
     {
       id: `${batchId}-grind-package`,
       title: "Package & Label Ground Meat",
-      desc:
-        "Weigh portions into target pack sizes, vacuum seal or wrap, and label with species, grind %, and date.",
+      desc: "Weigh portions into target pack sizes, vacuum seal or wrap, and label with species, grind %, and date.",
       durationSec: 30 * 60,
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: "Send final pack weights to the Storehouse freezer inventory tools."
-      }
-    }
+        cueNotes:
+          "Send final pack weights to the Storehouse freezer inventory tools.",
+      },
+    },
   ];
 
   return {
@@ -502,28 +545,28 @@ function buildGrindSessionDraft({ batchId, cuts, analytics, defaultSessionDurati
     title,
     source: {
       type: "animalTask",
-      refId: batchId
+      refId: batchId,
     },
     steps,
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       sourceAnalytics: analytics || {},
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: ts,
-    updatedAt: ts
+    updatedAt: ts,
   };
 }
 
@@ -535,11 +578,17 @@ function buildBatchCookingSessionDraft({
   stewCuts,
   roastCuts,
   analytics,
-  defaultSessionDurationMin
+  defaultSessionDurationMin,
 }) {
   const ts = new Date().toISOString();
-  const stewKg = stewCuts.reduce((sum, c) => sum + (Number(c.weightKg) || 0), 0);
-  const roastKg = roastCuts.reduce((sum, c) => sum + (Number(c.weightKg) || 0), 0);
+  const stewKg = stewCuts.reduce(
+    (sum, c) => sum + (Number(c.weightKg) || 0),
+    0
+  );
+  const roastKg = roastCuts.reduce(
+    (sum, c) => sum + (Number(c.weightKg) || 0),
+    0
+  );
   const totalKg = stewKg + roastKg;
 
   const title = `Batch Cooking – Stews & Roasts (${roundTo(totalKg, 1)} kg)`;
@@ -548,59 +597,55 @@ function buildBatchCookingSessionDraft({
     {
       id: `${batchId}-batch-thaw`,
       title: "Thaw or Temper Cuts",
-      desc:
-        "Move selected stew and roast cuts from deep freeze to refrigerator or controlled thaw area. Confirm enough capacity for planned recipes.",
+      desc: "Move selected stew and roast cuts from deep freeze to refrigerator or controlled thaw area. Confirm enough capacity for planned recipes.",
       durationSec: 12 * 60 * 60, // long passive step
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 40,
         donenessCue: "probeTemp",
         cueNotes:
-          "Use SSA's thaw planning tools to ensure safe time/temperature; actual timings will vary by cut size."
-      }
+          "Use SSA's thaw planning tools to ensure safe time/temperature; actual timings will vary by cut size.",
+      },
     },
     {
       id: `${batchId}-batch-prep`,
       title: "Prep Cuts & Aromatics",
-      desc:
-        "Cube stew meat, trim roasts if needed, and prepare vegetables, aromatics, and herbs for batch recipes.",
+      desc: "Cube stew meat, trim roasts if needed, and prepare vegetables, aromatics, and herbs for batch recipes.",
       durationSec: 45 * 60,
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
         cueNotes:
-          "As you prep, tag cuts to specific recipes inside SSA so leftovers roll into the Meal Planner."
-      }
+          "As you prep, tag cuts to specific recipes inside SSA so leftovers roll into the Meal Planner.",
+      },
     },
     {
       id: `${batchId}-batch-cook`,
       title: "Cook Stews & Roasts",
-      desc:
-        "Brown, braise, or slow-cook roasts and stews according to your chosen recipes. Stagger start times so everything finishes within a safe window.",
+      desc: "Brown, braise, or slow-cook roasts and stews according to your chosen recipes. Stagger start times so everything finishes within a safe window.",
       durationSec: defaultSessionDurationMin * 60,
       blockers: ["equipment", "inventory"],
       metadata: {
         tempTargetF: 195,
         donenessCue: "probeTemp",
         cueNotes:
-          "Use internal temp and tenderness as primary doneness cues. SSA timers & probes can help track multiple pots."
-      }
+          "Use internal temp and tenderness as primary doneness cues. SSA timers & probes can help track multiple pots.",
+      },
     },
     {
       id: `${batchId}-batch-package`,
       title: "Portion & Store Cooked Meals",
-      desc:
-        "Cool, portion into containers, label with recipe name and date, and store in fridge or freezer. Log final portions into SSA Meal & Storehouse tools.",
+      desc: "Cool, portion into containers, label with recipe name and date, and store in fridge or freezer. Log final portions into SSA Meal & Storehouse tools.",
       durationSec: 40 * 60,
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 40,
         donenessCue: "timer",
         cueNotes:
-          "Cool quickly to food-safe temperatures before freezing. Consider single-serve and family-size portions."
-      }
-    }
+          "Cool quickly to food-safe temperatures before freezing. Consider single-serve and family-size portions.",
+      },
+    },
   ];
 
   return {
@@ -609,28 +654,28 @@ function buildBatchCookingSessionDraft({
     title,
     source: {
       type: "animalTask",
-      refId: batchId
+      refId: batchId,
     },
     steps,
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       sourceAnalytics: analytics || {},
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: ts,
-    updatedAt: ts
+    updatedAt: ts,
   };
 }
 
@@ -641,66 +686,66 @@ function buildStockAndOffalSessionDraft({
   batchId,
   byproducts,
   analytics,
-  defaultSessionDurationMin
+  defaultSessionDurationMin,
 }) {
   const ts = new Date().toISOString();
-  const totalKg = byproducts.reduce((sum, b) => sum + (Number(b.weightKg) || 0), 0);
+  const totalKg = byproducts.reduce(
+    (sum, b) => sum + (Number(b.weightKg) || 0),
+    0
+  );
   const title = `Stock, Broth & Offal Prep (${roundTo(totalKg, 1)} kg)`;
 
   const steps = [
     {
       id: `${batchId}-stock-roast`,
       title: "Roast Bones (Optional)",
-      desc:
-        "Spread bones and connective tissue on pans and roast until well browned if you want a richer stock flavor.",
+      desc: "Spread bones and connective tissue on pans and roast until well browned if you want a richer stock flavor.",
       durationSec: 60 * 60,
       blockers: ["equipment"],
       metadata: {
         tempTargetF: 400,
         donenessCue: "smell",
-        cueNotes: "Roast until deeply browned and fragrant but not burnt."
-      }
+        cueNotes: "Roast until deeply browned and fragrant but not burnt.",
+      },
     },
     {
       id: `${batchId}-stock-simmer`,
       title: "Simmer Stock / Broth",
-      desc:
-        "Combine bones and aromatics with water. Simmer gently for several hours, skimming as needed for a clear broth.",
+      desc: "Combine bones and aromatics with water. Simmer gently for several hours, skimming as needed for a clear broth.",
       durationSec: defaultSessionDurationMin * 60 * 2,
       blockers: ["equipment", "inventory"],
       metadata: {
         tempTargetF: 212,
         donenessCue: "smell",
         cueNotes:
-          "Low simmer is key. SSA timers can remind you to skim and top up water periodically."
-      }
+          "Low simmer is key. SSA timers can remind you to skim and top up water periodically.",
+      },
     },
     {
       id: `${batchId}-offal-prep`,
       title: "Prepare Organs & Special By-products",
-      desc:
-        "Trim and portion organs (liver, heart, tongue, etc.) for immediate cooking, freezing, or other preservation methods.",
+      desc: "Trim and portion organs (liver, heart, tongue, etc.) for immediate cooking, freezing, or other preservation methods.",
       durationSec: 45 * 60,
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 40,
         donenessCue: "timer",
-        cueNotes: "Keep offal cold and clearly labeled; many organ cuts thaw faster and have shorter storage windows."
-      }
+        cueNotes:
+          "Keep offal cold and clearly labeled; many organ cuts thaw faster and have shorter storage windows.",
+      },
     },
     {
       id: `${batchId}-stock-package`,
       title: "Cool, Package & Label",
-      desc:
-        "Cool stock and organ dishes rapidly, portion into containers, label, and move to fridge or freezer. Update the Storehouse so stock shows as available.",
+      desc: "Cool stock and organ dishes rapidly, portion into containers, label, and move to fridge or freezer. Update the Storehouse so stock shows as available.",
       durationSec: 40 * 60,
       blockers: ["inventory"],
       metadata: {
         tempTargetF: 40,
         donenessCue: "timer",
-        cueNotes: "Use shallow containers and ice baths to cool stock quickly."
-      }
-    }
+        cueNotes: "Use shallow containers and ice baths to cool stock quickly.",
+      },
+    },
   ];
 
   return {
@@ -709,27 +754,27 @@ function buildStockAndOffalSessionDraft({
     title,
     source: {
       type: "animalTask",
-      refId: batchId
+      refId: batchId,
     },
     steps,
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       sourceAnalytics: analytics || {},
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: ts,
-    updatedAt: ts
+    updatedAt: ts,
   };
 }

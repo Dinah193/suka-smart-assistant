@@ -3,9 +3,7 @@
     "name": "Suka Smart Assistant – AI-Pack Config",
     "version": "1.0.1"
   },
-  "sourceGlobs": [
-    "src/**/*.{js,jsx,ts,tsx}"
-  ],
+  "sourceGlobs": ["src/**/*.{js,jsx,ts,tsx}"],
   "ignoreGlobs": [
     "src/**/__tests__/**",
     "src/**/__mocks__/**",
@@ -64,47 +62,47 @@
   "candidates": [
     {
       "type": "unreferencedFile",
-      "file": "src/agents/animalAgent.js"
+      "file": "src/agents/animalShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/animalHealthAgent.js"
+      "file": "src/agents/animalHealthShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/animalPlannerAgent.js"
+      "file": "src/agents/animalPlannerShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/batchCookingAgent.js"
+      "file": "src/agents/batchCookingShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/breedingAndButcheringAgent.js"
+      "file": "src/agents/breedingAndButcheringShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/butcheryAgent.js"
+      "file": "src/agents/butcheryShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/cleaningAgent.js"
+      "file": "src/agents/cleaningShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/cleaningRoutineAgent.js"
+      "file": "src/agents/cleaningRoutineShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/companionPlantingAgent.js"
+      "file": "src/agents/companionPlantingShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/cookingAgent.js"
+      "file": "src/agents/cookingShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/cookingStylesAgent.js"
+      "file": "src/agents/cookingStylesShim.js"
     },
     {
       "type": "unreferencedFile",
@@ -112,71 +110,71 @@
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/feedOptimizerAgent.js"
+      "file": "src/agents/feedOptimizerShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/gardenEstimateAgent.js"
+      "file": "src/agents/gardenEstimateShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/gardenHarvestAgent.js"
+      "file": "src/agents/gardenHarvestShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/gardenHealthAgent.js"
+      "file": "src/agents/gardenHealthShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/gardeningAgent.js"
+      "file": "src/agents/gardeningShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/gardenPlanAgent.js"
+      "file": "src/agents/gardenPlanShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/inventoryAgent.js"
+      "file": "src/agents/inventoryShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/preservationAgent.js"
+      "file": "src/agents/preservationShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/procurementAgent.js"
+      "file": "src/agents/procurementShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/recipeConsolidatorAgent.js"
+      "file": "src/agents/shims/recipeConsolidatorShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/sababAgent.js"
+      "file": "src/agents/sababShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/sausageAgent.js"
+      "file": "src/agents/sausageShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/shoppingAgent.js"
+      "file": "src/agents/shoppingShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/soilAndWaterAgent.js"
+      "file": "src/agents/soilAndWaterShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/spiceAgent.js"
+      "file": "src/agents/spiceShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/storehouseAgent.js"
+      "file": "src/agents/storehouseShim.js"
     },
     {
       "type": "unreferencedFile",
-      "file": "src/agents/wasteToCompostAgent.js"
+      "file": "src/agents/wasteToCompostShim.js"
     },
     {
       "type": "unreferencedFile",
@@ -2624,77 +2622,77 @@
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/animalAgent.js",
+      "file": "src/agents/animalShim.js",
       "export": "AnimalAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/animalAgent.js",
+      "file": "src/agents/animalShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/animalHealthAgent.js",
+      "file": "src/agents/animalHealthShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/batchCookingAgent.js",
+      "file": "src/agents/batchCookingShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cleaningAgent.js",
+      "file": "src/agents/cleaningShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/companionPlantingAgent.js",
+      "file": "src/agents/companionPlantingShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cookingAgent.js",
+      "file": "src/agents/cookingShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/feedOptimizerAgent.js",
+      "file": "src/agents/feedOptimizerShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/storehouseAgent.js",
+      "file": "src/agents/storehouseShim.js",
       "export": "createAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/animalHealthAgent.js",
+      "file": "src/agents/animalHealthShim.js",
       "export": "AnimalHealthAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/batchCookingAgent.js",
+      "file": "src/agents/batchCookingShim.js",
       "export": "subscribe"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/inventoryAgent.js",
+      "file": "src/agents/inventoryShim.js",
       "export": "subscribe"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/procurementAgent.js",
+      "file": "src/agents/procurementShim.js",
       "export": "subscribe"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/sababAgent.js",
+      "file": "src/agents/sababShim.js",
       "export": "subscribe"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/spiceAgent.js",
+      "file": "src/agents/spiceShim.js",
       "export": "subscribe"
     },
     {
@@ -2709,102 +2707,102 @@
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/batchCookingAgent.js",
+      "file": "src/agents/batchCookingShim.js",
       "export": "BatchCookingAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cleaningAgent.js",
+      "file": "src/agents/cleaningShim.js",
       "export": "CleaningAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cleaningRoutineAgent.js",
+      "file": "src/agents/cleaningRoutineShim.js",
       "export": "suggestMakeBuyActions"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/companionPlantingAgent.js",
+      "file": "src/agents/companionPlantingShim.js",
       "export": "CompanionPlantingAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cookingAgent.js",
+      "file": "src/agents/cookingShim.js",
       "export": "CookingAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cookingStylesAgent.js",
+      "file": "src/agents/cookingStylesShim.js",
       "export": "markStepComplete"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/cookingStylesAgent.js",
+      "file": "src/agents/cookingStylesShim.js",
       "export": "buildStyleCards"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/feedOptimizerAgent.js",
+      "file": "src/agents/feedOptimizerShim.js",
       "export": "FeedOptimizerAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/gardenHealthAgent.js",
+      "file": "src/agents/gardenHealthShim.js",
       "export": "syncHealthToGardenAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/gardenHealthAgent.js",
+      "file": "src/agents/gardenHealthShim.js",
       "export": "GARDEN_HEALTH_COMMANDS"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/mealBundleAgent.js",
+      "file": "src/agents/mealBundleShim.js",
       "export": "listArchetypes"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/mealBundleAgent.js",
+      "file": "src/agents/mealBundleShim.js",
       "export": "toEventsFromSeed"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/preservationAgent.js",
+      "file": "src/agents/preservationShim.js",
       "export": "preservationAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/shoppingAgent.js",
+      "file": "src/agents/shoppingShim.js",
       "export": "preservationAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/recipeConsolidatorAgent.js",
+      "file": "src/agents/shims/recipeConsolidatorShim.js",
       "export": "consolidateRecipes"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/recipeConsolidatorAgent.js",
+      "file": "src/agents/shims/recipeConsolidatorShim.js",
       "export": "__internals"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/sausageAgent.js",
+      "file": "src/agents/sausageShim.js",
       "export": "sausageAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/soilAndWaterAgent.js",
+      "file": "src/agents/soilAndWaterShim.js",
       "export": "SoilAndWaterAgent"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/storehouseAgent.js",
+      "file": "src/agents/storehouseShim.js",
       "export": "estimatePars"
     },
     {
       "type": "unusedExport",
-      "file": "src/agents/storehouseAgent.js",
+      "file": "src/agents/storehouseShim.js",
       "export": "StorehouseAgent"
     },
     {
@@ -4525,7 +4523,7 @@
     {
       "type": "unusedExport",
       "file": "src/workers/agentsWorker.js",
-      "export": "AgentsClient"
+      "export": "shimsClient"
     },
     {
       "type": "unusedExport",
@@ -7887,35 +7885,35 @@
     }
   ],
   "unreferencedFiles": [
-    "src/agents/animalAgent.js",
-    "src/agents/animalHealthAgent.js",
-    "src/agents/animalPlannerAgent.js",
-    "src/agents/batchCookingAgent.js",
-    "src/agents/breedingAndButcheringAgent.js",
-    "src/agents/butcheryAgent.js",
-    "src/agents/cleaningAgent.js",
-    "src/agents/cleaningRoutineAgent.js",
-    "src/agents/companionPlantingAgent.js",
-    "src/agents/cookingAgent.js",
-    "src/agents/cookingStylesAgent.js",
+    "src/agents/animalShim.js",
+    "src/agents/animalHealthShim.js",
+    "src/agents/animalPlannerShim.js",
+    "src/agents/batchCookingShim.js",
+    "src/agents/breedingAndButcheringShim.js",
+    "src/agents/butcheryShim.js",
+    "src/agents/cleaningShim.js",
+    "src/agents/cleaningRoutineShim.js",
+    "src/agents/companionPlantingShim.js",
+    "src/agents/cookingShim.js",
+    "src/agents/cookingStylesShim.js",
     "src/agents/cureCalc.js",
-    "src/agents/feedOptimizerAgent.js",
-    "src/agents/gardenEstimateAgent.js",
-    "src/agents/gardenHarvestAgent.js",
-    "src/agents/gardenHealthAgent.js",
-    "src/agents/gardeningAgent.js",
-    "src/agents/gardenPlanAgent.js",
-    "src/agents/inventoryAgent.js",
-    "src/agents/preservationAgent.js",
-    "src/agents/procurementAgent.js",
-    "src/agents/recipeConsolidatorAgent.js",
-    "src/agents/sababAgent.js",
-    "src/agents/sausageAgent.js",
-    "src/agents/shoppingAgent.js",
-    "src/agents/soilAndWaterAgent.js",
-    "src/agents/spiceAgent.js",
-    "src/agents/storehouseAgent.js",
-    "src/agents/wasteToCompostAgent.js",
+    "src/agents/feedOptimizerShim.js",
+    "src/agents/gardenEstimateShim.js",
+    "src/agents/gardenHarvestShim.js",
+    "src/agents/gardenHealthShim.js",
+    "src/agents/gardeningShim.js",
+    "src/agents/gardenPlanShim.js",
+    "src/agents/inventoryShim.js",
+    "src/agents/preservationShim.js",
+    "src/agents/procurementShim.js",
+    "src/agents/shims/recipeConsolidatorShim.js",
+    "src/agents/sababShim.js",
+    "src/agents/sausageShim.js",
+    "src/agents/shoppingShim.js",
+    "src/agents/soilAndWaterShim.js",
+    "src/agents/spiceShim.js",
+    "src/agents/storehouseShim.js",
+    "src/agents/wasteToCompostShim.js",
     "src/automation/dispatch.js",
     "src/automation/emitters.js",
     "src/automation/events.js",
@@ -8530,63 +8528,63 @@
   ],
   "unusedExports": [
     {
-      "file": "src/agents/animalAgent.js",
+      "file": "src/agents/animalShim.js",
       "export": "AnimalAgent"
     },
     {
-      "file": "src/agents/animalAgent.js",
+      "file": "src/agents/animalShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/animalHealthAgent.js",
+      "file": "src/agents/animalHealthShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/batchCookingAgent.js",
+      "file": "src/agents/batchCookingShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/cleaningAgent.js",
+      "file": "src/agents/cleaningShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/companionPlantingAgent.js",
+      "file": "src/agents/companionPlantingShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/cookingAgent.js",
+      "file": "src/agents/cookingShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/feedOptimizerAgent.js",
+      "file": "src/agents/feedOptimizerShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/storehouseAgent.js",
+      "file": "src/agents/storehouseShim.js",
       "export": "createAgent"
     },
     {
-      "file": "src/agents/animalHealthAgent.js",
+      "file": "src/agents/animalHealthShim.js",
       "export": "AnimalHealthAgent"
     },
     {
-      "file": "src/agents/batchCookingAgent.js",
+      "file": "src/agents/batchCookingShim.js",
       "export": "subscribe"
     },
     {
-      "file": "src/agents/inventoryAgent.js",
+      "file": "src/agents/inventoryShim.js",
       "export": "subscribe"
     },
     {
-      "file": "src/agents/procurementAgent.js",
+      "file": "src/agents/procurementShim.js",
       "export": "subscribe"
     },
     {
-      "file": "src/agents/sababAgent.js",
+      "file": "src/agents/sababShim.js",
       "export": "subscribe"
     },
     {
-      "file": "src/agents/spiceAgent.js",
+      "file": "src/agents/spiceShim.js",
       "export": "subscribe"
     },
     {
@@ -8598,83 +8596,83 @@
       "export": "subscribe"
     },
     {
-      "file": "src/agents/batchCookingAgent.js",
+      "file": "src/agents/batchCookingShim.js",
       "export": "BatchCookingAgent"
     },
     {
-      "file": "src/agents/cleaningAgent.js",
+      "file": "src/agents/cleaningShim.js",
       "export": "CleaningAgent"
     },
     {
-      "file": "src/agents/cleaningRoutineAgent.js",
+      "file": "src/agents/cleaningRoutineShim.js",
       "export": "suggestMakeBuyActions"
     },
     {
-      "file": "src/agents/companionPlantingAgent.js",
+      "file": "src/agents/companionPlantingShim.js",
       "export": "CompanionPlantingAgent"
     },
     {
-      "file": "src/agents/cookingAgent.js",
+      "file": "src/agents/cookingShim.js",
       "export": "CookingAgent"
     },
     {
-      "file": "src/agents/cookingStylesAgent.js",
+      "file": "src/agents/cookingStylesShim.js",
       "export": "markStepComplete"
     },
     {
-      "file": "src/agents/cookingStylesAgent.js",
+      "file": "src/agents/cookingStylesShim.js",
       "export": "buildStyleCards"
     },
     {
-      "file": "src/agents/feedOptimizerAgent.js",
+      "file": "src/agents/feedOptimizerShim.js",
       "export": "FeedOptimizerAgent"
     },
     {
-      "file": "src/agents/gardenHealthAgent.js",
+      "file": "src/agents/gardenHealthShim.js",
       "export": "syncHealthToGardenAgent"
     },
     {
-      "file": "src/agents/gardenHealthAgent.js",
+      "file": "src/agents/gardenHealthShim.js",
       "export": "GARDEN_HEALTH_COMMANDS"
     },
     {
-      "file": "src/agents/mealBundleAgent.js",
+      "file": "src/agents/mealBundleShim.js",
       "export": "listArchetypes"
     },
     {
-      "file": "src/agents/mealBundleAgent.js",
+      "file": "src/agents/mealBundleShim.js",
       "export": "toEventsFromSeed"
     },
     {
-      "file": "src/agents/preservationAgent.js",
+      "file": "src/agents/preservationShim.js",
       "export": "preservationAgent"
     },
     {
-      "file": "src/agents/shoppingAgent.js",
+      "file": "src/agents/shoppingShim.js",
       "export": "preservationAgent"
     },
     {
-      "file": "src/agents/recipeConsolidatorAgent.js",
+      "file": "src/agents/shims/recipeConsolidatorShim.js",
       "export": "consolidateRecipes"
     },
     {
-      "file": "src/agents/recipeConsolidatorAgent.js",
+      "file": "src/agents/shims/recipeConsolidatorShim.js",
       "export": "__internals"
     },
     {
-      "file": "src/agents/sausageAgent.js",
+      "file": "src/agents/sausageShim.js",
       "export": "sausageAgent"
     },
     {
-      "file": "src/agents/soilAndWaterAgent.js",
+      "file": "src/agents/soilAndWaterShim.js",
       "export": "SoilAndWaterAgent"
     },
     {
-      "file": "src/agents/storehouseAgent.js",
+      "file": "src/agents/storehouseShim.js",
       "export": "estimatePars"
     },
     {
-      "file": "src/agents/storehouseAgent.js",
+      "file": "src/agents/storehouseShim.js",
       "export": "StorehouseAgent"
     },
     {
@@ -10051,7 +10049,7 @@
     },
     {
       "file": "src/workers/agentsWorker.js",
-      "export": "AgentsClient"
+      "export": "shimsClient"
     },
     {
       "file": "src/agents/base/AgentContract.js",

@@ -1,0 +1,291 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:05:00Z",
+
+  "notes": [
+    "Canonical Italian dishes catalog for SSA planners, search, and browse.",
+    "Dish IDs are normalized lowercase with dots/underscores only.",
+    "Focuses on widely recognized, planner-friendly Italian dishes."
+  ],
+
+  "meta": {
+    "id": "cuisines.italian.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Italian Dishes",
+    "cuisineId": "cuisines.italian",
+    "status": "canonical",
+    "description": "Canonical dish catalog for Italian cuisine used by SSA meal planning, search, and UI browsing.",
+    "version": "1.0.0",
+    "author": "ssa-core",
+    "createdAt": "2026-01-23",
+    "updatedAt": "2026-01-23T01:05:00Z"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "dish.spaghetti_marinara",
+      "label": "Spaghetti Marinara",
+      "aka": ["Spaghetti al Pomodoro"],
+      "subprofiles": ["cuisines.italian.subprofile.southern"],
+      "category": "pasta",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 10 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.pasta_sauce_protein"],
+      "signals": {
+        "batchFriendly": "sauce",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "sauce_only"
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["starch.pasta"], "chooseOne": false },
+        { "role": "sauce", "items": ["sauce.marinara"], "chooseOne": false }
+      ],
+      "techniques": ["technique.simmer", "technique.saute"],
+      "equipmentRecommended": ["tool.saucepan"],
+      "equipmentMinimum": ["tool.saucepan", "tool.stockpot"],
+      "ingredientsCore": [
+        "tomato.crushed_tomatoes",
+        "aromatic.garlic",
+        "fat.olive_oil",
+        "herb.basil"
+      ],
+      "allergens": ["allergen.gluten"],
+      "dietFlags": ["diet.vegetarian"],
+      "plannerTags": ["weeknight", "pasta", "italian_classic"]
+    },
+
+    {
+      "id": "dish.meatballs_marinara",
+      "label": "Meatballs in Marinara",
+      "aka": ["Polpette al Sugo"],
+      "subprofiles": [
+        "cuisines.italian.subprofile.central",
+        "cuisines.italian.subprofile.southern"
+      ],
+      "category": "protein",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 30, "totalMins": 60, "handsOffMins": 30 },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["archetype.pasta_sauce_protein"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["protein.beef", "protein.pork"],
+          "chooseOne": false
+        },
+        { "role": "sauce", "items": ["sauce.marinara"], "chooseOne": false }
+      ],
+      "techniques": ["technique.brown", "technique.simmer"],
+      "equipmentRecommended": ["tool.skillet", "tool.saucepan"],
+      "equipmentMinimum": ["tool.skillet", "tool.saucepan"],
+      "ingredientsCore": [
+        "protein.beef",
+        "bread.breadcrumbs",
+        "egg.whole",
+        "tomato.crushed_tomatoes",
+        "cheese.parmesan"
+      ],
+      "allergens": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+      "dietFlags": [],
+      "plannerTags": ["batch", "freezer", "italian_classic"]
+    },
+
+    {
+      "id": "dish.chicken_parmesan",
+      "label": "Chicken Parmesan",
+      "aka": ["Chicken Parmigiana"],
+      "subprofiles": ["cuisines.italian.subprofile.southern"],
+      "category": "protein",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 40, "totalMins": 70, "handsOffMins": 30 },
+      "servingStyles": ["plates"],
+      "mealArchetypes": ["archetype.sheet_pan_protein_veg"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["protein.chicken"], "chooseOne": false },
+        { "role": "sauce", "items": ["sauce.marinara"], "chooseOne": false },
+        {
+          "role": "garnish",
+          "items": ["cheese.mozzarella"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.bread", "technique.fry", "technique.bake"],
+      "equipmentRecommended": ["tool.skillet", "tool.sheet_pan"],
+      "equipmentMinimum": ["tool.skillet", "tool.oven"],
+      "ingredientsCore": [
+        "protein.chicken",
+        "bread.breadcrumbs",
+        "cheese.mozzarella",
+        "tomato.crushed_tomatoes"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy", "allergen.egg"],
+      "dietFlags": [],
+      "plannerTags": ["weekend", "italian_classic"]
+    },
+
+    {
+      "id": "dish.lasagna",
+      "label": "Lasagna",
+      "aka": ["Lasagne al Forno"],
+      "subprofiles": ["cuisines.italian.subprofile.central"],
+      "category": "pasta_bake",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 45, "totalMins": 120, "handsOffMins": 75 },
+      "servingStyles": ["family_style"],
+      "mealArchetypes": ["archetype.braise_plus_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["starch.lasagna_noodles"],
+          "chooseOne": false
+        },
+        { "role": "protein", "items": ["protein.beef"], "chooseOne": true },
+        { "role": "sauce", "items": ["sauce.ragu"], "chooseOne": false }
+      ],
+      "techniques": ["technique.bake", "technique.layer"],
+      "equipmentRecommended": ["tool.baking_dish"],
+      "equipmentMinimum": ["tool.oven", "tool.baking_dish"],
+      "ingredientsCore": [
+        "starch.lasagna_noodles",
+        "tomato.crushed_tomatoes",
+        "cheese.ricotta",
+        "cheese.mozzarella"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy", "allergen.egg"],
+      "dietFlags": [],
+      "plannerTags": ["batch", "freezer", "holiday"]
+    },
+
+    {
+      "id": "dish.minestrone",
+      "label": "Minestrone Soup",
+      "aka": [],
+      "subprofiles": [
+        "cuisines.italian.subprofile.central",
+        "cuisines.italian.subprofile.southern"
+      ],
+      "category": "soup",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 60, "handsOffMins": 35 },
+      "servingStyles": ["bowls", "family_style"],
+      "mealArchetypes": ["archetype.soup_bread"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": ["veg.carrot", "veg.celery", "veg.zucchini"],
+          "chooseOne": false
+        },
+        { "role": "legume", "items": ["legume.beans"], "chooseOne": false }
+      ],
+      "techniques": ["technique.simmer"],
+      "equipmentRecommended": ["tool.stockpot"],
+      "equipmentMinimum": ["tool.stockpot"],
+      "ingredientsCore": [
+        "veg.carrot",
+        "veg.celery",
+        "legume.beans",
+        "tomato.crushed_tomatoes"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegetarian", "diet.vegan"],
+      "plannerTags": ["soup", "batch", "weeknight"]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.italian": [
+        "dish.spaghetti_marinara",
+        "dish.meatballs_marinara",
+        "dish.chicken_parmesan",
+        "dish.lasagna",
+        "dish.minestrone"
+      ]
+    },
+    "byArchetype": {
+      "archetype.pasta_sauce_protein": [
+        "dish.spaghetti_marinara",
+        "dish.meatballs_marinara"
+      ],
+      "archetype.sheet_pan_protein_veg": ["dish.chicken_parmesan"],
+      "archetype.braise_plus_starch": ["dish.lasagna"],
+      "archetype.soup_bread": ["dish.minestrone"]
+    },
+    "aliasIndex": {
+      "spaghetti al pomodoro": "dish.spaghetti_marinara",
+      "polpette al sugo": "dish.meatballs_marinara",
+      "lasagne al forno": "dish.lasagna"
+    },
+    "keywordIndex": {
+      "pasta": ["dish.spaghetti_marinara", "dish.lasagna"],
+      "soup": ["dish.minestrone"],
+      "baked": ["dish.lasagna", "dish.chicken_parmesan"]
+    },
+    "tagIndex": {
+      "pasta": ["dish.spaghetti_marinara", "dish.lasagna"],
+      "soup": ["dish.minestrone"],
+      "batch": ["dish.meatballs_marinara", "dish.lasagna", "dish.minestrone"],
+      "weeknight": ["dish.spaghetti_marinara", "dish.minestrone"]
+    },
+    "bySubprofile": {
+      "cuisines.italian.subprofile.southern": [
+        "dish.spaghetti_marinara",
+        "dish.chicken_parmesan"
+      ],
+      "cuisines.italian.subprofile.central": [
+        "dish.meatballs_marinara",
+        "dish.lasagna",
+        "dish.minestrone"
+      ]
+    },
+    "byCategory": {
+      "pasta": ["dish.spaghetti_marinara"],
+      "protein": ["dish.meatballs_marinara", "dish.chicken_parmesan"],
+      "pasta_bake": ["dish.lasagna"],
+      "soup": ["dish.minestrone"]
+    }
+  }
+}

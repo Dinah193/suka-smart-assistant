@@ -43,7 +43,7 @@ import { emit } from "../../services/events/eventBus";
  *
  * @typedef {Object} HandlerRef
  * @property {HandlerKind} kind
- * @property {string} modulePath   Relative path from src root, e.g. 'agents/skills/sessions/compose'
+ * @property {string} modulePath   Relative path from src root, e.g. '@agents/skills/sessions/compose'
  * @property {string} exportName   Named export to call, e.g. 'composeSession'
  */
 
@@ -409,7 +409,7 @@ const INTENT_MAP = {
       'Resolve the next runnable session for a given domain (for the "Now" button).',
     handler: {
       kind: "localSkill",
-      modulePath: "agents/skills/sessions/compose", // convenience: compose module can host resolver
+      modulePath: "@agents/skills/sessions/compose", // convenience: compose module can host resolver
       exportName: "resolveNextRunnableSession",
     },
     budget: {
@@ -454,6 +454,32 @@ export function getIntentConfig(intentId) {
   if (!intentId || typeof intentId !== "string") return null;
   const cfg = INTENT_MAP[intentId];
   return cfg || null;
+}
+
+/**
+ * Back-compat named export expected by `src/agents/modes/validate.js`:
+ *   import { getModeConfig } from "./map.js";
+ *
+ * In this folder, "mode config" historically refers to the *intent config* entry.
+ *
+ * @param {string} intentId
+ * @returns {IntentConfig|null}
+ */
+export function getModeConfig(intentId) {
+  return getIntentConfig(intentId);
+}
+
+/**
+ * Back-compat named export expected by some shims:
+ *   import { getModeForIntent } from "@/agents/modes/map";
+ *
+ * Shopping shim uses this to resolve a mode config from an intent string.
+ *
+ * @param {string} intentId
+ * @returns {IntentConfig|null}
+ */
+export function getModeForIntent(intentId) {
+  return getIntentConfig(intentId);
 }
 
 /**
@@ -523,6 +549,113 @@ export function listIntents() {
   return Object.keys(INTENT_MAP).sort();
 }
 
+/**
+ * Resolve an "agent mode" for HouseholdOrchestrator.
+ *
+ * HouseholdOrchestrator expects a named export `resolveMode`.
+ * This maps a domain (and optional caller overrides) to a root intent id.
+ *
+ * @param {{ domain?: string, intent?: string, mode?: string }} [opts]
+ * @returns {{ mode: 'local'|'reasoner', intentId: string }}
+ */
+export function resolveMode(opts = {}) {
+  const domain = String(opts.domain || "")
+    .trim()
+    .toLowerCase();
+  const explicitIntent = String(opts.intent || "").trim();
+  const explicitMode = String(opts.mode || "")
+    .trim()
+    .toLowerCase();
+
+  // If caller explicitly provides an intent, trust it.
+  if (explicitIntent) {
+    return {
+      mode: explicitMode === "local" ? "local" : "reasoner",
+      intentId: explicitIntent,
+    };
+  }
+
+  // Domain → default session.compose intent
+  const byDomain = {
+    cooking: "session.compose.cooking",
+    cleaning: "session.compose.cleaning",
+    garden: "session.compose.garden",
+    animals: "session.compose.animals",
+    preservation: "session.compose.preservation",
+    storehouse: "session.compose.storehouse",
+  };
+
+  const intentId = byDomain[domain] || "session.compose.cooking";
+
+  return {
+    mode: explicitMode === "local" ? "local" : "reasoner",
+    intentId,
+  };
+}
+
+/**
+ * Back-compat alias expected by some shims:
+ *   import { selectMode } from "@/agents/modes/map";
+ *
+ * @param {{ domain?: string, intent?: string, mode?: string }} [opts]
+ * @returns {{ mode: 'local'|'reasoner', intentId: string }}
+ */
+export function selectMode(opts = {}) {
+  return resolveMode(opts);
+}
+
+/**
+ * resolveSababMode (shim compatibility)
+ * ---------------------------------------------------------------------------
+ * sababShim imports:
+ *   resolveSababMode(req) => { mode: string, schemaId: string }
+ *
+ * We keep this browser-safe and deterministic. If the request includes an
+ * explicit mode/schemaId, we honor it; otherwise we fall back to conservative
+ * defaults so builds never fail.
+ *
+ * @param {any} req
+ * @returns {{ mode: string, schemaId: string }}
+ */
+export function resolveSababMode(req = {}) {
+  const r = req && typeof req === "object" ? req : {};
+  const mode =
+    (typeof r.mode === "string" && r.mode.trim()) ||
+    (typeof r.intent === "string" && r.intent.trim()) ||
+    "sabab.default";
+
+  const schemaId =
+    (typeof r.schemaId === "string" && r.schemaId.trim()) || "sabab.output.v1";
+
+  return { mode, schemaId };
+}
+
+/**
+ * resolveSausageMode (shim compatibility)
+ * ---------------------------------------------------------------------------
+ * sausageShim imports:
+ *   resolveSausageMode(req) => { mode: string, schemaId: string }
+ *
+ * Browser-safe + deterministic. If the request includes explicit mode/schemaId,
+ * we honor it; otherwise we fall back to conservative defaults so builds never fail.
+ *
+ * @param {any} req
+ * @returns {{ mode: string, schemaId: string }}
+ */
+export function resolveSausageMode(req = {}) {
+  const r = req && typeof req === "object" ? req : {};
+  const mode =
+    (typeof r.mode === "string" && r.mode.trim()) ||
+    (typeof r.intent === "string" && r.intent.trim()) ||
+    "sausage.default";
+
+  const schemaId =
+    (typeof r.schemaId === "string" && r.schemaId.trim()) ||
+    "sausage.output.v1";
+
+  return { mode, schemaId };
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Helpers                                                                   */
 /* -------------------------------------------------------------------------- */
@@ -539,7 +672,7 @@ function makeSessionComposeConfig(params) {
     description: params.description,
     handler: {
       kind: "localSkill",
-      modulePath: "agents/skills/sessions/compose",
+      modulePath: "@agents/skills/sessions/compose",
       exportName: "composeSession",
     },
     budget: {

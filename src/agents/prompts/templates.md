@@ -1,13 +1,13 @@
 # Suka Smart Assistant (SSA) – Reasoner Prompt Templates
 
-> **File:** `src/agents/prompts/templates.md`  
+> **File:** `src/agents/runtime/reasoner/prompts/templates.md`  
 > **Role:** Central library of **prompt templates** used when calling the SSA Reasoner (LLM) in different modes.
 
 These templates are combined with:
 
 - The **system instructions** in `system.md`,
 - The **mode → schema mapping** in `src/agents/modes/map.js`,
-- The **JSON Schemas** in `src/agents/prompts/reasoner-contracts/*.schema.json`,
+- The **JSON Schemas** in `src/agents/runtime/reasoner/prompts/reasoner-contracts/*.schema.json`,
 - Dexie-derived **context snippets** from `src/agents/context/selectors.js`.
 
 They should be used by the calling code (not by the Reasoner itself) to construct **strict, JSON-only** requests and responses.
@@ -55,7 +55,7 @@ Use this for new modes or generic reasoning tasks that have a well-defined schem
 
 ### 2.1 Template: `base`
 
-```text
+````text
 You are the SSA Reasoner running in mode "{{mode}}".
 
 You receive:
@@ -108,7 +108,7 @@ Copy code
 
 ## 3. Cooking substitutions template
 
-**File:** `substitutions.delta.schema.json`  
+**File:** `substitutions.delta.schema.json`
 **Mode example:** `"cooking.substitutions"`
 
 This template helps the Reasoner propose substitutions for missing or restricted ingredients, with risk and flavor notes, and links back to inventory and step logic.
@@ -193,7 +193,7 @@ Copy code
 
 ## 4. Garden/animal schedule tradeoffs template
 
-**File:** `scheduleTradeoffs.delta.schema.json`  
+**File:** `scheduleTradeoffs.delta.schema.json`
 **Mode example:** `"homestead.scheduleTradeoffs"`
 
 This template is used to evaluate and propose **schedule tradeoffs** for garden and animal tasks under constraints like weather, labor availability, Sabbath, and quiet hours.
@@ -282,7 +282,7 @@ Copy code
 
 ## 5. Step ordering / parallelization template
 
-**File:** `stepOrdering.delta.schema.json`  
+**File:** `stepOrdering.delta.schema.json`
 **Mode example:** `"session.stepOrdering"`
 
 This template helps the Reasoner propose a better schedule of steps (reordering, grouping, parallelization) for a session’s tasks.
@@ -379,7 +379,7 @@ Copy code
 
 ## 6. Session composition / normalization template
 
-**Mode example:** `"session.compose"`  
+**Mode example:** `"session.compose"`
 **Output schema example:** `session.compose.delta.schema.json` (or equivalent defined in your contracts).
 
 This template is used to transform raw imports (recipes, cleaning plans, garden plans, animal tasks) into normalized session structures suitable for SSA’s SessionRunner and guards.
@@ -472,7 +472,7 @@ Copy code
 
 When adding a new mode:
 
-1. Define or update its **output schema** in `src/agents/prompts/reasoner-contracts/*.schema.json`.
+1. Define or update its **output schema** in `src/agents/runtime/reasoner/prompts/reasoner-contracts/*.schema.json`.
 2. Register the mode in `src/agents/modes/map.js`.
 3. Add a new subsection in this file with:
    - A clear, short description of the mode’s goal,
@@ -485,3 +485,4 @@ Keep all templates:
 - **Concise yet unambiguous,**
 - **Aligned with `system.md`,**
 - **Strict about JSON-only output and schema validation.**
+````

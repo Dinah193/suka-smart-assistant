@@ -1,0 +1,1054 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "Asian Fusion is a flexible overlay cuisine: East + Southeast + modern pantry shortcuts (soy, sesame, ginger, citrus, chili, rice vinegar) paired with weeknight-friendly techniques.",
+    "IDs and tags follow SSA token rules: lowercase, digits, underscore, dot, hyphen."
+  ],
+  "meta": {
+    "id": "cuisines.asian_fusion",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Asian Fusion",
+    "name": "Asian Fusion",
+    "shortName": "Asian Fusion",
+    "description": "A modern, flexible overlay drawing from East and Southeast Asian flavor logic: soy-sesame-ginger aromatics, rice vinegar/citrus acids, chili heat, and quick wok/skillet methods. Built for bowls, stir-fries, marinades, and fast sauces.",
+    "subtitle": "Soy • Sesame • Ginger • Chili • Citrus • Fast sauces",
+    "originRegions": ["East Asia", "Southeast Asia", "Global diaspora"],
+    "regions": ["East Asia", "Southeast Asia"],
+    "primaryCountriesAndIslands": [
+      "China",
+      "Japan",
+      "Korea",
+      "Thailand",
+      "Vietnam",
+      "Philippines",
+      "Malaysia",
+      "Singapore"
+    ],
+    "tags": [
+      "cuisine.asian_fusion",
+      "profile.overlay",
+      "weeknight.friendly",
+      "batch.friendly",
+      "sauce.forward",
+      "stir_fry",
+      "bowls",
+      "umami.forward"
+    ],
+    "icon": "noodles",
+    "colorHint": "jade_ginger",
+    "heritageNotes": [
+      "This profile is not a claim of a single traditional cuisine. It intentionally models a modern fusion pantry and technique set for planning and substitution logic."
+    ],
+    "version": "1.0.0",
+    "author": "SSA Catalog",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA Canonical Cuisine Profile",
+      "maintainer": "SSA Catalog",
+      "license": "internal",
+      "attribution": "Synthesized from common East/Southeast Asian pantry + weeknight cooking patterns.",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "internal",
+      "type": "reference",
+      "notes": "Designed to power deterministic planners, substitutions, and recipe adaptation for Asian-fusion-style meals."
+    },
+    "family": {
+      "parent": "cuisines.global_overlay",
+      "siblings": ["cuisines.citrus_chili", "cuisines.herb_garlic"],
+      "overlapsWith": [
+        {
+          "id": "cuisines.citrus_chili",
+          "reason": "Shared bright acid + chili heat patterns; Asian Fusion often uses lime/chili, especially in Southeast-leaning dishes."
+        },
+        {
+          "id": "cuisines.herb_garlic",
+          "reason": "Shared garlic-forward aromatic base; differs by umami builders (soy/fish sauce) and oils (sesame)."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "asian_fusion.japanese_lean",
+        "name": "Japanese-lean",
+        "signatureNotes": "Cleaner umami (soy, mirin), ginger-scallion, miso, sesame; lighter heat.",
+        "commonSauceBases": [
+          "soy_sauce",
+          "miso",
+          "mirin",
+          "rice_vinegar",
+          "sesame_oil"
+        ]
+      },
+      {
+        "id": "asian_fusion.korean_lean",
+        "name": "Korean-lean",
+        "signatureNotes": "Gochujang/gochugaru heat, garlic-sesame, sweet-spicy glazes, kimchi acidity.",
+        "commonSauceBases": [
+          "soy_sauce",
+          "gochujang",
+          "sesame_oil",
+          "rice_vinegar"
+        ]
+      },
+      {
+        "id": "asian_fusion.southeast_lean",
+        "name": "Southeast-lean",
+        "signatureNotes": "Lime, fish sauce, chili, basil/cilantro, coconut, tamarind; bright and aromatic.",
+        "commonSauceBases": [
+          "fish_sauce",
+          "lime_juice",
+          "rice_vinegar",
+          "coconut_milk"
+        ]
+      },
+      {
+        "id": "asian_fusion.chinese_lean",
+        "name": "Chinese-lean",
+        "signatureNotes": "Soy + aromatics, Shaoxing-style cooking wine, black vinegar, oyster sauce; wok techniques.",
+        "commonSauceBases": [
+          "soy_sauce",
+          "oyster_sauce",
+          "black_vinegar",
+          "cooking_wine"
+        ]
+      }
+    ],
+    "regionHints": ["pan_asian", "modern_fusion"],
+    "countryHints": ["multi_region", "diaspora"]
+  },
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "bowls",
+      "plates",
+      "street_food",
+      "one_pot",
+      "family_style"
+    ],
+    "weeknightBias": "high",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "sauce_pack",
+        "marinade_pack",
+        "rice_batch",
+        "protein_batch"
+      ],
+      "notes": "Batch sauces + prepped aromatics unlock fast meals all week."
+    },
+    "spiceHeatDefault": 2,
+    "saltinessDefault": "medium",
+    "sournessDefault": "medium",
+    "sweetnessDefault": "low",
+    "umamiDefault": "high",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": [
+      "neutral_oil",
+      "sesame_oil",
+      "peanut_oil_optional"
+    ],
+    "primaryStarches": [
+      "jasmine_rice",
+      "short_grain_rice_optional",
+      "rice_noodles",
+      "udon_optional",
+      "ramen_noodles_optional"
+    ],
+    "primaryProteins": [
+      "chicken_thighs",
+      "chicken_breast",
+      "shrimp",
+      "salmon_optional",
+      "tofu",
+      "eggs"
+    ],
+    "defaultMealArchetypes": [
+      "stir_fry",
+      "noodle_bowl",
+      "rice_bowl",
+      "skillet_glaze",
+      "sheet_pan_roast_asian",
+      "soupy_noodles_optional"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.bowl_protein_starch_veg",
+      "plate.stir_fry_family_style",
+      "plate.noodle_bowl"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "soy-sesame-ginger aromatics",
+      "bright rice vinegar or citrus acids",
+      "clean chili heat (optional)",
+      "high-umami fast sauces",
+      "crunch + fresh herb finish"
+    ],
+    "aromaticsCore": [
+      "garlic",
+      "ginger",
+      "scallions",
+      "shallots_optional",
+      "lemongrass_optional",
+      "cilantro_optional"
+    ],
+    "spiceCore": [
+      "white_pepper_optional",
+      "five_spice_optional",
+      "chili_flakes",
+      "gochugaru_optional"
+    ],
+    "umamiBuilders": [
+      "soy_sauce",
+      "tamari_optional",
+      "fish_sauce_optional",
+      "oyster_sauce_optional",
+      "miso_optional",
+      "gochujang_optional",
+      "mushroom_powder_optional"
+    ],
+    "acidOptions": [
+      "rice_vinegar",
+      "black_vinegar_optional",
+      "lime_juice",
+      "lemon_juice_optional"
+    ],
+    "sweetBalanceOptions": [
+      "brown_sugar_optional",
+      "honey_optional",
+      "maple_syrup_optional",
+      "mirin_optional"
+    ],
+    "heatOptions": [
+      "chili_garlic_sauce_optional",
+      "sriracha_optional",
+      "fresh_chili_optional",
+      "chili_flakes",
+      "gochujang_optional"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum Asian-fusion starter kit for bowls and simple stir-fries.",
+      "items": [
+        "soy_sauce",
+        "neutral_oil",
+        "garlic",
+        "ginger",
+        "rice_vinegar",
+        "sesame_oil",
+        "jasmine_rice",
+        "scallions",
+        "chili_flakes_optional"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry for fast sauces, marinades, noodles, and weeknight variety.",
+      "items": [
+        "tamari_optional",
+        "honey_optional",
+        "brown_sugar_optional",
+        "cornstarch",
+        "rice_noodles",
+        "tofu",
+        "eggs",
+        "sesame_seeds_optional",
+        "frozen_vegetable_mix_optional",
+        "lime_optional"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Adds deeper umami builders and a broader Asian-fusion range.",
+      "items": [
+        "oyster_sauce_optional",
+        "fish_sauce_optional",
+        "miso_optional",
+        "gochujang_optional",
+        "mirin_optional",
+        "black_vinegar_optional",
+        "coconut_milk_optional",
+        "curry_paste_optional",
+        "kimchi_optional",
+        "nori_optional"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for high fidelity, regional leaning, and advanced dishes.",
+      "items": [
+        "shaoxing_wine_optional",
+        "dashi_stock_optional",
+        "tamarind_optional",
+        "lemongrass_optional",
+        "galangal_optional",
+        "toasted_rice_powder_optional",
+        "sichuan_peppercorn_optional",
+        "doubanjiang_optional"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": ["stir_fry", "quick_sauce", "pan_sear", "steam", "rice_cooker"],
+    "common": [
+      "marinate",
+      "glaze",
+      "sheet_pan_roast",
+      "broil",
+      "cold_noodle_toss_optional"
+    ],
+    "notes": [
+      "High heat + fast cook times are common. Sauce thickening often uses cornstarch slurry.",
+      "Batch aromatics: mince garlic/ginger/scallion and freeze in small portions."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "stir_fry",
+      "label": "Stir-fry (Protein + Veg + Sauce)",
+      "description": "High-heat skillet or wok cooking with a fast sauce (soy/acid/sweet/umami) over rice or noodles.",
+      "commonExamples": [
+        "Ginger-garlic chicken stir-fry",
+        "Garlic shrimp with vegetables",
+        "Tofu and broccoli"
+      ],
+      "defaults": {
+        "starchOptions": ["jasmine_rice", "rice_noodles", "udon_optional"],
+        "proteinOptions": ["chicken_thighs", "shrimp", "tofu", "eggs"],
+        "vegOptions": [
+          "broccoli",
+          "bell_pepper",
+          "snap_peas_optional",
+          "carrots",
+          "mushrooms_optional"
+        ],
+        "sauceOptions": [
+          "soy_sauce",
+          "rice_vinegar",
+          "sesame_oil",
+          "honey_optional"
+        ],
+        "pairings": ["quick_pickle_optional", "sesame_cucumber_optional"]
+      }
+    },
+    {
+      "id": "rice_bowl",
+      "label": "Rice Bowl (Sauce-forward)",
+      "description": "A composed bowl: rice + protein + veg + sauce + crunchy garnish.",
+      "commonExamples": [
+        "Teriyaki-style chicken bowl",
+        "Gochujang tofu bowl",
+        "Chili-lime shrimp bowl"
+      ],
+      "defaults": {
+        "baseOptions": ["jasmine_rice", "short_grain_rice_optional"],
+        "proteinOptions": [
+          "chicken_breast",
+          "salmon_optional",
+          "shrimp",
+          "tofu",
+          "eggs"
+        ],
+        "vegOptions": [
+          "cabbage_optional",
+          "carrots",
+          "cucumber_optional",
+          "broccoli"
+        ],
+        "garnishOptions": [
+          "sesame_seeds_optional",
+          "scallions",
+          "cilantro_optional"
+        ],
+        "pairings": ["kimchi_optional", "quick_pickle_optional"]
+      }
+    },
+    {
+      "id": "noodle_bowl",
+      "label": "Noodle Bowl (Hot or Cold)",
+      "description": "Noodles tossed with sauce, vegetables, and protein; can be brothy or saucy.",
+      "commonExamples": [
+        "Sesame noodles",
+        "Spicy peanut noodles",
+        "Simple ramen upgrade"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "rice_noodles",
+          "ramen_noodles_optional",
+          "udon_optional"
+        ],
+        "proteinOptions": ["shrimp", "tofu", "eggs", "chicken_thighs"],
+        "vegOptions": [
+          "spinach_optional",
+          "bok_choy_optional",
+          "carrots",
+          "mushrooms_optional"
+        ],
+        "sauceOptions": [
+          "soy_sauce",
+          "sesame_oil",
+          "rice_vinegar",
+          "chili_garlic_sauce_optional"
+        ],
+        "pairings": ["broth_optional", "lime_optional"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "soy_sauce",
+      "sesame_oil",
+      "rice_vinegar",
+      "garlic",
+      "ginger",
+      "scallions",
+      "jasmine_rice",
+      "rice_noodles",
+      "tofu",
+      "eggs"
+    ],
+    "optional_traditional": [
+      "miso_optional",
+      "fish_sauce_optional",
+      "oyster_sauce_optional",
+      "gochujang_optional",
+      "mirin_optional",
+      "black_vinegar_optional",
+      "kimchi_optional",
+      "nori_optional"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "over_sweet_sauces",
+        "label": "Over-sweet bottled sauces",
+        "reason": "Prefer balancing sweet with acid/umami; use small amounts of honey/brown sugar instead."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "chicken_thighs",
+        "options": ["chicken_breast", "tofu", "shrimp"],
+        "notes": "Adjust cook time: thighs stay juicy; breast needs quick sear; tofu benefits from pressing."
+      },
+      {
+        "for": "shrimp",
+        "options": ["chicken_breast", "tofu", "salmon_optional"],
+        "notes": "Shrimp cooks in minutes; proteins need longer. Keep sauce the same."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "jasmine_rice",
+        "options": [
+          "rice_noodles",
+          "short_grain_rice_optional",
+          "cauliflower_rice_optional"
+        ],
+        "notes": "Choose based on diet and time. Rice noodles are fastest."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "cornstarch",
+        "options": ["arrowroot_powder_optional", "tapioca_starch_optional"],
+        "notes": "Use 1:1 for slurries; add at the end to avoid over-thickening."
+      }
+    ],
+    "notes": [
+      "If soy sauce is avoided, use coconut_aminos_optional but increase acid and umami (mushroom powder, miso).",
+      "If sesame oil is unavailable, finish with neutral oil + toasted sesame seeds if on hand."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "meal.stir_fry_basic",
+      "label": "Basic Stir-Fry Bowl",
+      "archetypeId": "stir_fry",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": ["chicken_thighs", "shrimp", "tofu"],
+          "chooseOne": true,
+          "notes": "Pick one protein; portion for bowls."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "broccoli",
+            "carrots",
+            "bell_pepper",
+            "mushrooms_optional"
+          ],
+          "chooseOne": false,
+          "notes": "Use 2–3 vegetables; keep cuts similar for even cooking."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "soy_sauce",
+            "rice_vinegar",
+            "sesame_oil",
+            "honey_optional",
+            "garlic",
+            "ginger"
+          ],
+          "chooseOne": false,
+          "notes": "Balance soy + acid + sweet; add chili if desired."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["jasmine_rice", "rice_noodles"],
+          "chooseOne": true,
+          "notes": "Base for bowls."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "scallions",
+            "sesame_seeds_optional",
+            "cilantro_optional"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Make a double batch of sauce and store in a jar for 3–5 days."
+      ]
+    },
+    {
+      "id": "meal.noodle_toss_sesame",
+      "label": "Sesame Noodle Toss",
+      "archetypeId": "noodle_bowl",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": [
+            "rice_noodles",
+            "udon_optional",
+            "ramen_noodles_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "ingredientIds": ["tofu", "eggs", "shrimp", "chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "soy_sauce",
+            "sesame_oil",
+            "rice_vinegar",
+            "chili_garlic_sauce_optional",
+            "garlic",
+            "ginger"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "ingredientIds": ["cucumber_optional", "carrots", "spinach_optional"],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Rinse noodles after cooking for cold noodles; toss with sauce before adding veg to prevent sticking."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.allergen_soy_sesame",
+      "label": "Soy & Sesame Allergens",
+      "notes": [
+        "Soy sauce, miso, and many umami condiments contain soy.",
+        "Sesame oil and sesame seeds are common allergens; substitute with neutral oil if needed."
+      ]
+    },
+    {
+      "id": "safety.high_heat_stir_fry",
+      "label": "High-Heat Cooking",
+      "notes": [
+        "Preheat pan properly; add oil just before cooking to reduce smoking.",
+        "Avoid overcrowding—cook proteins in batches to prevent steaming."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "asian fusion",
+      "stir fry",
+      "soy ginger",
+      "sesame",
+      "rice bowl",
+      "noodle bowl",
+      "teriyaki style",
+      "gochujang"
+    ],
+    "commonAlternateNames": ["pan-asian", "asian-inspired", "soy-ginger"]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "garlic",
+      "ginger",
+      "scallions",
+      "lime_optional",
+      "cilantro_optional"
+    ],
+    "proteinsCommon": [
+      "chicken_thighs",
+      "chicken_breast",
+      "shrimp",
+      "tofu",
+      "eggs"
+    ],
+    "produceCommon": [
+      "broccoli",
+      "carrots",
+      "bell_pepper",
+      "cabbage_optional",
+      "cucumber_optional"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "mirin_optional",
+        "fallbacks": ["honey_optional", "rice_vinegar"],
+        "note": "If mirin is missing, use a tiny sweetener plus rice vinegar for balance."
+      },
+      {
+        "ingredient": "oyster_sauce_optional",
+        "fallbacks": ["soy_sauce", "miso_optional", "mushroom_powder_optional"],
+        "note": "Oyster sauce adds depth; mimic with soy + miso or mushroom umami."
+      }
+    ],
+    "coreStaples": {
+      "sauces": ["soy_sauce", "rice_vinegar", "sesame_oil"],
+      "starches": ["jasmine_rice", "rice_noodles"],
+      "thickeners": ["cornstarch"]
+    },
+    "optionalRegionalStaples": {
+      "korean": ["gochujang_optional", "kimchi_optional"],
+      "japanese": ["miso_optional", "mirin_optional"],
+      "chinese": ["black_vinegar_optional", "oyster_sauce_optional"],
+      "southeast": [
+        "fish_sauce_optional",
+        "coconut_milk_optional",
+        "tamarind_optional"
+      ]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": ["stir_fry", "pan_sear", "steam", "quick_sauce", "marinate"],
+    "hallmarkProcesses": [
+      {
+        "id": "process.cornstarch_slurry",
+        "name": "Cornstarch Slurry Finish",
+        "steps": ["mix_slurry", "add_to_simmering_sauce", "stir_thicken"],
+        "notes": "Mix cornstarch with cold water; add to simmering sauce while stirring until glossy."
+      },
+      {
+        "id": "process.ginger_garlic_base",
+        "name": "Ginger-Garlic Aromatic Base",
+        "steps": ["mince_aromatics", "bloom_in_oil", "add_protein_or_veg"],
+        "notes": "Bloom aromatics in oil briefly; do not burn garlic—keep heat controlled."
+      }
+    ],
+    "equipmentAffinity": {
+      "best": ["wok_optional", "large_skillet", "rice_cooker_optional"],
+      "helpful": ["microplane", "steamer_basket_optional"]
+    },
+    "signatureMethods": [
+      "High-heat stir-fry with fast sauce finish",
+      "Soy-ginger marinades and glazes",
+      "Rice vinegar/citrus balance for brightness"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "large_skillet",
+      "wok_optional",
+      "rice_cooker_optional",
+      "microplane",
+      "tongs"
+    ],
+    "optionalButHelpful": [
+      "steamer_basket_optional",
+      "spider_strainer_optional"
+    ],
+    "notes": [
+      "A large skillet works fine if you don’t have a wok; cook in batches for best browning."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "soy",
+      "sesame",
+      "shellfish_optional",
+      "fish_optional",
+      "gluten_optional"
+    ],
+    "dietCompatibility": {
+      "gluten_free": "Use tamari and verify sauces; avoid wheat noodles unless labeled GF.",
+      "dairy_free": "Commonly dairy-free; watch for some creamy sauces or mayonnaise-based toppings.",
+      "low_carb": "Swap rice/noodles for cauliflower rice or extra vegetables; keep sauces low-sugar."
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.soy_ginger_chicken_bowl",
+        "name": "Soy-Ginger Chicken Bowl",
+        "subprofiles": ["asian_fusion.japanese_lean"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Soy + ginger + garlic glaze over rice with quick vegetables."
+      },
+      {
+        "id": "dish.chili_sesame_shrimp",
+        "name": "Chili-Sesame Shrimp",
+        "subprofiles": ["asian_fusion.southeast_lean"],
+        "difficulty": "beginner",
+        "heatTypical": 2,
+        "notes": "Fast shrimp sear with chili + lime + sesame finish."
+      },
+      {
+        "id": "dish.gochujang_tofu_bowl",
+        "name": "Gochujang Tofu Bowl",
+        "subprofiles": ["asian_fusion.korean_lean"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Sweet-spicy gochujang glaze with crisp tofu and crunchy vegetables."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.honey_ginger_tea_optional",
+        "name": "Honey-Ginger Tea (Optional)",
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Simple warm drink pattern; not tied to a single region."
+      }
+    ],
+    "examples": [
+      "Ginger-garlic chicken stir-fry",
+      "Sesame noodles with vegetables",
+      "Teriyaki-style salmon (weeknight)",
+      "Spicy peanut noodles (fusion)"
+    ],
+    "mealPatterns": [
+      "Bowl: rice + protein + veg + sauce + crunchy garnish",
+      "Stir-fry: hot pan + quick sauce finish",
+      "Noodles: toss + sauce + aromatics + fresh finish"
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": ["jasmine_rice", "rice_noodles", "udon_optional"],
+    "typicalVegSides": [
+      "quick_pickle_optional",
+      "sesame_cucumber_optional",
+      "steamed_broccoli"
+    ],
+    "typicalCondiments": [
+      "chili_garlic_sauce_optional",
+      "sriracha_optional",
+      "sesame_seeds_optional"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "soy_sauce",
+        "pair": ["rice_vinegar", "sesame_oil", "ginger", "garlic"],
+        "note": "Soy + acid + sesame + aromatics is a base pattern for sauces."
+      },
+      {
+        "with": "gochujang_optional",
+        "pair": ["honey_optional", "rice_vinegar", "sesame_oil"],
+        "note": "Sweet + acid balance makes gochujang sauces feel bright rather than heavy."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "avoid_overcooking_garlic",
+        "avoid": ["garlic"],
+        "note": "Garlic burns quickly at high heat; add after oil warms and keep it moving."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.tamari_for_soy",
+        "replace": ["soy_sauce"],
+        "with": ["tamari_optional"],
+        "notes": "Use tamari for gluten-free soy flavor; adjust salt to taste."
+      },
+      {
+        "id": "sub.rice_vinegar_for_black_vinegar",
+        "replace": ["black_vinegar_optional"],
+        "with": ["rice_vinegar"],
+        "notes": "Rice vinegar is lighter; add a touch of sweetener for balance if needed."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "sub.wok_to_skillet",
+        "whenNoEquipment": ["wok_optional"],
+        "adapt": "pan_sear",
+        "notes": "Use a large skillet and cook in batches for browning."
+      }
+    ],
+    "rules": [
+      {
+        "type": "note",
+        "id": "sub.general_sauce_balance",
+        "text": "If a sauce tastes flat: add acid. If too sharp: add a tiny sweetener. If thin: add slurry. If bland: add umami builder."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.sauce_pack",
+        "name": "Sauce Pack",
+        "makes": "sauce_base",
+        "freezerFriendly": true,
+        "notes": "Mix soy + vinegar/citrus + sweet + aromatics base; store 3–5 days or freeze in cubes."
+      },
+      {
+        "id": "batch.aromatics_pack",
+        "name": "Aromatics Pack",
+        "makes": "ginger_garlic_base",
+        "freezerFriendly": true,
+        "notes": "Minced garlic/ginger/scallion can be portioned and frozen for fast weeknights."
+      },
+      {
+        "id": "batch.rice_batch",
+        "name": "Rice Batch",
+        "makes": "cooked_rice",
+        "freezerFriendly": true,
+        "notes": "Cook extra rice; chill quickly; freeze in portions for quick fried rice or bowls."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use frozen stir-fry veg mixes when fresh prep time is tight.",
+      "Cook protein first, then veg, then sauce; return protein to coat at the end.",
+      "Keep a jar of sauce base + a jar of minced aromatics in the fridge."
+    ],
+    "seasonality": [
+      {
+        "season": "winter",
+        "focus": [
+          "cabbage_optional",
+          "carrots",
+          "frozen_vegetable_mix_optional"
+        ]
+      },
+      {
+        "season": "summer",
+        "focus": ["cucumber_optional", "lime_optional", "fresh_herbs_optional"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Weeknight Asian Fusion",
+        "items": [
+          "dish.soy_ginger_chicken_bowl",
+          "dish.chili_sesame_shrimp",
+          "dish.gochujang_tofu_bowl"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "soy ginger",
+      "sesame",
+      "stir fry",
+      "rice bowl",
+      "noodle bowl",
+      "gochujang"
+    ],
+    "colorHints": {
+      "primary": "jade",
+      "accent": "chili_red",
+      "neutral": "rice_white"
+    },
+    "iconHints": ["wok_optional", "noodles", "rice_bowl", "chopsticks_optional"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.asian_fusion",
+      "weeknight.friendly",
+      "sauce.forward"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.bowl_protein_starch_veg",
+      "plate.stir_fry_family_style",
+      "plate.noodle_bowl"
+    ],
+    "notes": [
+      "If your planner requires strict servingStyles enums, this profile uses the schema's ServingStyle enum list."
+    ]
+  },
+
+  "identity": {
+    "style": "overlay",
+    "positioning": "modern_fusion",
+    "coreIdea": "Fast sauces + aromatics + umami + acid balance applied to proteins/veg over rice/noodles.",
+    "subprofileDefaults": [
+      "asian_fusion.japanese_lean",
+      "asian_fusion.southeast_lean"
+    ]
+  },
+
+  "planning": {
+    "plateModel": "protein + veg + base + sauce + crunchy garnish",
+    "defaultSauceLogic": {
+      "salt": "soy_sauce or tamari",
+      "acid": "rice_vinegar or citrus",
+      "sweet": "honey/brown sugar (small)",
+      "umami": "miso/oyster/fish sauce optional",
+      "heat": "flakes/sriracha/gochujang optional",
+      "thicken": "cornstarch slurry if needed"
+    },
+    "prepStrategy": {
+      "tier0": ["make rice", "mince aromatics", "mix sauce base"],
+      "tier1": [
+        "pre-cut vegetables",
+        "portion proteins",
+        "freeze aromatics cubes"
+      ],
+      "batch": [
+        "double sauces",
+        "cook extra rice",
+        "roast or steam veg for remix bowls"
+      ]
+    }
+  },
+
+  "flavorMatrix": {
+    "axes": ["umami", "acid", "heat", "sweet", "aromatics", "texture"],
+    "defaults": {
+      "umami": "high",
+      "acid": "medium",
+      "heat": "low_to_medium",
+      "sweet": "low",
+      "aromatics": "high",
+      "texture": "crunchy_finish_preferred"
+    },
+    "commonCombos": [
+      {
+        "id": "combo.soy_ginger_sesame",
+        "label": "Soy • Ginger • Sesame",
+        "notes": "Clean umami base for chicken, tofu, shrimp, vegetables. Add rice vinegar to brighten."
+      },
+      {
+        "id": "combo.lime_chili_fish_sauce_optional",
+        "label": "Lime • Chili • Fish Sauce (optional)",
+        "notes": "Southeast-lean brightness. Use with shrimp, chicken, salads, rice bowls."
+      },
+      {
+        "id": "combo.gochujang_sweet_acid",
+        "label": "Gochujang • Sweet • Acid",
+        "notes": "Korean-lean sweet-spicy glaze. Great for tofu, chicken, roasted vegetables."
+      }
+    ]
+  },
+
+  "staples": {
+    "refrigerator": [
+      "soy_sauce",
+      "sesame_oil",
+      "rice_vinegar",
+      "ginger",
+      "garlic",
+      "scallions"
+    ],
+    "freezer": [
+      "frozen_vegetable_mix_optional",
+      "portion_rice_optional",
+      "aromatics_pack_optional"
+    ],
+    "pantry": [
+      "jasmine_rice",
+      "rice_noodles",
+      "cornstarch",
+      "chili_flakes_optional"
+    ]
+  },
+
+  "proteins": {
+    "common": ["chicken_thighs", "chicken_breast", "shrimp", "tofu", "eggs"],
+    "optional": [
+      "salmon_optional",
+      "ground_pork_optional",
+      "beef_strips_optional"
+    ],
+    "patternNotes": [
+      "Thin slicing increases speed and sauce coverage.",
+      "Tofu: press and sear for texture, then sauce."
+    ]
+  },
+
+  "carbsAndBases": {
+    "bases": [
+      "jasmine_rice",
+      "rice_noodles",
+      "ramen_noodles_optional",
+      "udon_optional"
+    ],
+    "swapNotes": [
+      "For low-carb: cauliflower rice or extra vegetables and keep sauces lower-sugar."
+    ]
+  },
+
+  "nutritionBias": {
+    "tendencies": [
+      "high_protein",
+      "veg_forward_optional",
+      "sodium_watch_optional"
+    ],
+    "notes": [
+      "Many sauces are sodium-forward; balance with acid, fresh herbs, and mindful salt adjustments."
+    ]
+  },
+
+  "compatibility": {
+    "planner": {
+      "defaultServingStyles": ["bowls", "plates"],
+      "batchFriendly": true
+    },
+    "capabilities": {
+      "minEquipment": ["large_skillet", "knife", "cutting_board"],
+      "recommended": ["wok_optional", "rice_cooker_optional"]
+    }
+  }
+}

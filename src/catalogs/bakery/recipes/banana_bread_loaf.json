@@ -1,0 +1,211 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.banana_bread_loaf",
+    "slug": "banana_bread_loaf",
+    "name": "Banana Bread Loaf (Quick Bread Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "bakery",
+      "banana-bread",
+      "quick-bread",
+      "loaf",
+      "household-staple",
+      "high-adoption",
+      "breakfast",
+      "snack",
+      "freezer-friendly",
+      "kid-friendly",
+      "one-bowl"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A reliable, moist banana bread loaf designed for high household adoption: one-bowl mixing, flexible add-ins, and clear doneness cues. Supports commercial flour or fine fresh-milled flour (choose one). Fresh-milled flour may require a small hydration adjustment and benefits from sifting coarse bran for a softer crumb."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "loaf_pan_9x5", "label": "9x5-inch loaf pan" },
+    { "id": "parchment_paper", "label": "Parchment paper (recommended)" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "cooling_rack", "label": "Cooling rack" },
+    { "id": "toothpick", "label": "Toothpick or cake tester" }
+  ],
+  "ingredients": [
+    {
+      "id": "bananas_very_ripe",
+      "label": "Very ripe bananas, mashed",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "About 3 large bananas (1 1/2 cups mashed). The riper (spotted/black), the sweeter and more aromatic."
+    },
+    {
+      "id": "butter_unsalted_melted",
+      "label": "Unsalted butter, melted and cooled slightly",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp. Can substitute neutral oil for softer crumb."
+    },
+    {
+      "id": "sugar_brown",
+      "label": "Light brown sugar",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3/4 cup packed. For less sweet bread, use 120 g."
+    },
+    {
+      "id": "sugar_granulated_optional",
+      "label": "Granulated sugar (optional, for sweeter loaf)",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "Optional: brings total sweetness closer to bakery-style.",
+      "optional": true
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "yogurt_or_sour_cream",
+      "label": "Plain yogurt or sour cream",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 1/2 cup. Adds tenderness and moisture."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR the fresh-milled option): all-purpose flour",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 2 cups. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR the commercial option): fine-milled, sifted",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Sift coarse bran for a softer crumb. Fresh-milled can absorb more; batter may need 15–30 ml extra milk if thick."
+    },
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "baking_powder_optional",
+      "label": "Baking powder (optional, slightly taller loaf)",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 1 tsp. Optional; gives extra lift.",
+      "optional": true
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 3/4 tsp."
+    },
+    {
+      "id": "cinnamon_optional",
+      "label": "Ground cinnamon (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "nutmeg_optional",
+      "label": "Ground nutmeg (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/4 tsp.",
+      "optional": true
+    },
+
+    {
+      "id": "milk_adjustment_optional",
+      "label": "Milk (only if needed for fresh-milled flour adjustment)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is very thick; up to ~45 ml total depending on flour.",
+      "optional": true
+    },
+
+    {
+      "id": "walnuts_optional",
+      "label": "Chopped walnuts or pecans (optional)",
+      "amount": { "value": 90, "unit": "g" },
+      "notes": "About 3/4 cup.",
+      "optional": true
+    },
+    {
+      "id": "chocolate_chips_optional",
+      "label": "Chocolate chips (optional)",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 3/4 cup.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_oven_pan",
+      "title": "Prep oven and pan",
+      "body": "Heat oven to 350°F (175°C). Line a 9x5 loaf pan with parchment (with overhang) and lightly grease."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). For fresh-milled flour, fine-mill and sift out coarse bran for best tenderness."
+    },
+    {
+      "id": "step_03_wet_mix_one_bowl",
+      "title": "Mix wet ingredients (one-bowl baseline)",
+      "body": "In a large bowl, mash bananas. Whisk in melted butter, brown sugar (and optional granulated sugar), eggs, vanilla, and yogurt/sour cream until smooth."
+    },
+    {
+      "id": "step_04_add_dry",
+      "title": "Add dry ingredients",
+      "body": "Sprinkle flour, baking soda, optional baking powder, salt, and optional spices over the wet mixture. Fold with a spatula just until no dry flour remains. Do not overmix."
+    },
+    {
+      "id": "step_05_adjust_freshmilled",
+      "title": "Adjust batter for fresh-milled flour (if needed)",
+      "body": "If using fresh-milled flour and batter is very thick (stiff, hard to fold), add milk 15 ml at a time until batter is thick but scoopable. Rest 5 minutes to hydrate, then fold once gently."
+    },
+    {
+      "id": "step_06_add_ins",
+      "title": "Fold in optional add-ins",
+      "body": "Fold in nuts and/or chocolate chips if using."
+    },
+    {
+      "id": "step_07_bake",
+      "title": "Bake",
+      "body": "Scrape batter into pan and smooth the top. Bake 55–70 minutes until a tester comes out clean or with a few moist crumbs. If top browns too fast, tent with foil after ~40 minutes."
+    },
+    {
+      "id": "step_08_cool",
+      "title": "Cool for best slice",
+      "body": "Cool in pan 15 minutes, then lift out and cool on a rack at least 45 minutes before slicing. Quick breads slice cleaner after fully cooled."
+    }
+  ],
+  "notes": [
+    "High household adoption logic: one-bowl method, uses overripe bananas, and freezes well for quick breakfasts.",
+    "Doneness cue: center should be set; wet batter on the tester means it needs more time. Overbaking dries the loaf—check early.",
+    "Fresh-milled flour: sift coarse bran, expect higher absorption, and consider a short batter rest for better texture.",
+    "Flavor boost: add 1 tsp espresso powder or 1 tbsp dark rum (optional) for deeper aroma (not included by default)."
+  ],
+  "storage": {
+    "roomTemp": "Wrapped airtight: 2–3 days.",
+    "refrigerator": "Wrapped airtight: up to 6 days (rewarm slices for best texture).",
+    "freezer": "Freeze whole loaf or slices airtight up to 2 months. Thaw at room temp or rewarm gently."
+  }
+}

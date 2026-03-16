@@ -33,47 +33,38 @@
 /* Imports                                                                    */
 /* -------------------------------------------------------------------------- */
 
-import { emit as emitEventBus } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEventBus } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
-import { enforceBudget } from "@/agents/runtime/budget";
-import { canCallReasoner } from "@/agents/runtime/gating";
-import { enforceConfidence } from "@/agents/runtime/confidence";
+import { enforceBudget } from "@/agents/runtime/reasoner/budget";
+import { canCallReasoner } from "@/reasoner/gating";
+import { enforceConfidence } from "@/agents/runtime/reasoner/confidence";
 
 import {
   selectSpiceContext, // implement in selectors.js for spice/cooking context
 } from "@/agents/runtime/selectors";
 
-import { applyFreshnessRules } from "@/agents/runtime/freshness";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness";
 
-import {
-  getMemo,
-  setMemo,
-} from "@/agents/runtime/cache/memo";
+import { getMemo, setMemo } from "@/agents/runtime/reasoner/cache/memo";
 
 import {
   makeSpiceCacheKey, // implement in cache/keys.js
-} from "@/agents/runtime/cache/keys";
+} from "@/agents/runtime/reasoner/cache/keys";
 
 import { getModeForIntent } from "@/agents/modes/map";
-import { validateModeOutput } from "@/agents/modes/validator";
-import { buildPromptForMode } from "@/agents/prompts/builder";
-import { callReasoner } from "@/agents/reasoner";
+import { validateModeOutput } from "@/agents/runtime/reasoner/modes/validator";
+import { buildPromptForMode } from "@/agents/runtime/reasoner/prompts/builder";
+import { callReasoner } from "@/agents/runtime/reasoner";
 
-import {
-  composeSession,
-} from "@/agents/skills/sessions/compose";
+import { composeSession } from "@/agents/skills/sessions/compose";
 
-import {
-  evaluateGuards,
-} from "@/agents/guards/guardsEvaluate";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
 
-import {
-  sessionsDb,
-} from "@/db/sessions";
+import { sessionsDb } from "@/db/sessions";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -137,7 +128,10 @@ function validateShimRequestShape(req) {
     };
   }
   if (!req.intent || typeof req.intent !== "string") {
-    return { ok: false, reason: "Missing or invalid intent (expected non-empty string)." };
+    return {
+      ok: false,
+      reason: "Missing or invalid intent (expected non-empty string).",
+    };
   }
   if (!req.input || typeof req.input !== "object") {
     return { ok: false, reason: "Missing input object." };
@@ -152,7 +146,9 @@ function validateShimRequestShape(req) {
  * @returns {string}
  */
 function normalizeIntent(intent) {
-  const s = String(intent || "").toLowerCase().trim();
+  const s = String(intent || "")
+    .toLowerCase()
+    .trim();
 
   const map = {
     analyze: "analyzeDish",
@@ -290,7 +286,9 @@ async function normalizeReasonerOutput({ intent, validated, input, context }) {
   const cart = Array.isArray(validated.cart) ? validated.cart : [];
   const gardenPlan = validated.gardenPlan || null;
   const blends = Array.isArray(validated.blends) ? validated.blends : [];
-  const spiceKits = Array.isArray(validated.spiceKits) ? validated.spiceKits : [];
+  const spiceKits = Array.isArray(validated.spiceKits)
+    ? validated.spiceKits
+    : [];
 
   let session;
   const sessionDraft = validated.sessionDraft || null;
@@ -428,11 +426,16 @@ export async function invokeShim(req) {
   debug.push({ stage: "mode.resolved", mode });
 
   // 3. Gating (global / Torah / Sabbath / heavy-mode checks)
-  const gatingDecision = await canCallReasoner({ domain: "cooking", intent, runtime });
+  const gatingDecision = await canCallReasoner({
+    domain: "cooking",
+    intent,
+    runtime,
+  });
   debug.push({ stage: "gating.checked", gatingDecision });
 
   if (!gatingDecision.allowed) {
-    const reason = gatingDecision.reason || "Reasoner call not allowed by gating rules.";
+    const reason =
+      gatingDecision.reason || "Reasoner call not allowed by gating rules.";
     warnings.push(reason);
     return makeShimResponse({
       ok: false,
@@ -491,7 +494,9 @@ export async function invokeShim(req) {
     });
 
     if (!confidenceOk) {
-      warnings.push("Cached result rejected by confidence rules; making fresh Reasoner call.");
+      warnings.push(
+        "Cached result rejected by confidence rules; making fresh Reasoner call."
+      );
       debug.push({ stage: "cache.confidenceRejected" });
     } else {
       return makeShimResponse({
@@ -522,7 +527,9 @@ export async function invokeShim(req) {
   debug.push({ stage: "budget.checked", budgetOk });
 
   if (!budgetOk.allowed) {
-    const reason = budgetOk.reason || "Budget exhausted or unavailable for this Reasoner call.";
+    const reason =
+      budgetOk.reason ||
+      "Budget exhausted or unavailable for this Reasoner call.";
     warnings.push(reason);
     return makeShimResponse({
       ok: false,
@@ -806,15 +813,25 @@ export async function handleCommand(command, payload = {}) {
     plangarden: "planSpiceGarden",
   };
 
-  const norm = (cmd) => mapping[String(cmd || "").toLowerCase().trim()] || cmd;
+  const norm = (cmd) =>
+    mapping[
+      String(cmd || "")
+        .toLowerCase()
+        .trim()
+    ] || cmd;
 
-  let cmd = typeof command === "string"
-    ? command
-    : command?.command || command?.type || "analyze";
+  let cmd =
+    typeof command === "string"
+      ? command
+      : command?.command || command?.type || "analyze";
 
   cmd = norm(cmd);
 
-  if (typeof command === "object" && command?.payload && !Object.keys(payload || {}).length) {
+  if (
+    typeof command === "object" &&
+    command?.payload &&
+    !Object.keys(payload || {}).length
+  ) {
     // eslint-disable-next-line no-param-reassign
     payload = command.payload;
   }

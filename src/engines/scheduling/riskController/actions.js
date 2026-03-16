@@ -32,7 +32,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -71,7 +71,8 @@ const toMs = (iso) => {
   const t = Date.parse(iso);
   return Number.isFinite(t) ? t : null;
 };
-const addMin = (ms, m) => (isNum(ms) && isNum(m) ? ms + Math.round(m * 60000) : null);
+const addMin = (ms, m) =>
+  isNum(ms) && isNum(m) ? ms + Math.round(m * 60000) : null;
 const toISO = (ms) => {
   try {
     return new Date(ms).toISOString();
@@ -170,7 +171,9 @@ async function applyActions(req = {}) {
   try {
     const planId = String(req.planId || "").trim();
     if (!planId) {
-      emit("scheduling.risk.action.error", source, { message: "Missing planId" });
+      emit("scheduling.risk.action.error", source, {
+        message: "Missing planId",
+      });
       return { planId: "", applied: [], skipped: [] };
     }
     const actions = Array.isArray(req.actions) ? req.actions : [];
@@ -180,7 +183,10 @@ async function applyActions(req = {}) {
 
     const snap = await store.getPlan(planId);
     if (!snap || !Array.isArray(snap.windows)) {
-      emit("scheduling.risk.action.error", source, { message: "Plan not found", planId });
+      emit("scheduling.risk.action.error", source, {
+        message: "Plan not found",
+        planId,
+      });
       return { planId, applied: [], skipped: [] };
     }
 
@@ -196,17 +202,23 @@ async function applyActions(req = {}) {
         switch (t) {
           case "parallelize": {
             const ok = await applyParallelize(windows, byId, a);
-            ok ? applied.push(a) : skipped.push({ action: a, reason: "parallelize_failed" });
+            ok
+              ? applied.push(a)
+              : skipped.push({ action: a, reason: "parallelize_failed" });
             break;
           }
           case "trim": {
             const ok = await applyTrim(windows, byId, a);
-            ok ? applied.push(a) : skipped.push({ action: a, reason: "trim_failed" });
+            ok
+              ? applied.push(a)
+              : skipped.push({ action: a, reason: "trim_failed" });
             break;
           }
           case "escalate": {
             const ok = await applyEscalate(windows, byId, a);
-            ok ? applied.push(a) : skipped.push({ action: a, reason: "escalate_failed" });
+            ok
+              ? applied.push(a)
+              : skipped.push({ action: a, reason: "escalate_failed" });
             break;
           }
           default:
@@ -220,23 +232,34 @@ async function applyActions(req = {}) {
     // Re-allocate if there are material changes & allocator is available
     let reservations = snap.reservations || [];
     let conflicts = snap.conflicts || [];
-    if (applied.length && allocator?.reserveResources && Array.isArray(req.resources) && req.resources.length) {
+    if (
+      applied.length &&
+      allocator?.reserveResources &&
+      Array.isArray(req.resources) &&
+      req.resources.length
+    ) {
       try {
         if (allocator?.releaseReservations) {
           // Release all reservations for plan; re-allocate cleanly
           await allocator.releaseReservations({ planId, export: false });
         }
-        const result = await allocator.reserveResources(windows, req.resources, {
-          planId,
-          strategy: "greedy",
-          export: false,
-          planMeta: snap.planMeta || {},
-        });
+        const result = await allocator.reserveResources(
+          windows,
+          req.resources,
+          {
+            planId,
+            strategy: "greedy",
+            export: false,
+            planMeta: snap.planMeta || {},
+          }
+        );
         reservations = result.reservations || [];
         conflicts = result.conflicts || [];
       } catch (e) {
         // Allocation failure is non-fatal; caller can inspect conflicts
-        conflicts = conflicts.concat([{ type: "internalError", message: "Allocator failed after actions" }]);
+        conflicts = conflicts.concat([
+          { type: "internalError", message: "Allocator failed after actions" },
+        ]);
       }
     }
 
@@ -250,7 +273,13 @@ async function applyActions(req = {}) {
     };
     await store.putPlan(planId, updated);
 
-    const payload = { planId, appliedCount: applied.length, skipped, windows: leanWindows(windows), conflicts };
+    const payload = {
+      planId,
+      appliedCount: applied.length,
+      skipped,
+      windows: leanWindows(windows),
+      conflicts,
+    };
     emit("scheduling.risk.action.applied", source, payload);
 
     if (req.export === true && applied.length) {
@@ -259,9 +288,13 @@ async function applyActions(req = {}) {
 
     return { planId, applied, skipped, snapshot: updated };
   } catch (err) {
-    emit("scheduling.risk.action.error", "engines/scheduling/riskController/actions.applyActions", {
-      message: String(err?.message || err),
-    });
+    emit(
+      "scheduling.risk.action.error",
+      "engines/scheduling/riskController/actions.applyActions",
+      {
+        message: String(err?.message || err),
+      }
+    );
     return { planId: String(req?.planId || ""), applied: [], skipped: [] };
   }
 }
@@ -290,7 +323,12 @@ async function applyParallelize(windows, byId, action) {
   const e = toMs(w.endISO);
   if (s == null || e == null) return false;
   const total = Math.max(1, Math.round((e - s) / 60000));
-  const chunk = Math.max(minChunkMinutes, Math.round((total - (overlap ? 0 : spacing * (into - 1))) / (overlap ? 1 : into)));
+  const chunk = Math.max(
+    minChunkMinutes,
+    Math.round(
+      (total - (overlap ? 0 : spacing * (into - 1))) / (overlap ? 1 : into)
+    )
+  );
 
   // Remove original
   const idx = windows.findIndex((x) => x.id === w.id);
@@ -324,10 +362,13 @@ async function applyTrim(windows, byId, action) {
   const value = action?.value || {};
   const pct = Math.max(0, Math.min(0.9, Number(value.byPercent) || 0.2)); // cap at 90% cut
   const floor = Math.max(1, Number(value.floorMinutes) || 5);
-  const removeTags = Array.isArray(value.removeTags) ? value.removeTags.map(String) : [];
+  const removeTags = Array.isArray(value.removeTags)
+    ? value.removeTags.map(String)
+    : [];
   const softenQuality = !!value.softenQuality;
 
-  const s = toMs(w.startISO), e = toMs(w.endISO);
+  const s = toMs(w.startISO),
+    e = toMs(w.endISO);
   if (s == null || e == null) return false;
   const dur = Math.max(1, Math.round((e - s) / 60000));
   const newDur = Math.max(floor, Math.round(dur * (1 - pct)));
@@ -335,7 +376,9 @@ async function applyTrim(windows, byId, action) {
   w.endISO = toISO(addMin(s, newDur));
   w.variant = { ...(w.variant || {}), trimmed: true, byPercent: pct };
   w.removedSubsteps = removeTags;
-  w.qualityNote = softenQuality ? "trimmed_for_time" : (w.qualityNote || undefined);
+  w.qualityNote = softenQuality
+    ? "trimmed_for_time"
+    : w.qualityNote || undefined;
   w.tags = mergeTags(w.tags, ["trimmed"]);
   return true;
 }
@@ -350,7 +393,9 @@ async function applyEscalate(windows, byId, action) {
   const applyAll = !!value.allWindows;
   const targets = applyAll
     ? windows
-    : (action?.targetId ? [byId.get(action.targetId)].filter(Boolean) : []);
+    : action?.targetId
+    ? [byId.get(action.targetId)].filter(Boolean)
+    : [];
 
   if (!targets.length) return false;
 
@@ -366,10 +411,20 @@ async function applyEscalate(windows, byId, action) {
     // Add temporary requirement(s)
     const reqs = Array.isArray(w.requirements) ? w.requirements.slice() : [];
     if (addPersonRole) {
-      reqs.push({ type: "person", role: addPersonRole, quantity: 1, optional: true });
+      reqs.push({
+        type: "person",
+        role: addPersonRole,
+        quantity: 1,
+        optional: true,
+      });
     }
     if (addDeviceRole) {
-      reqs.push({ type: "device", role: addDeviceRole, quantity: 1, optional: true });
+      reqs.push({
+        type: "device",
+        role: addDeviceRole,
+        quantity: 1,
+        optional: true,
+      });
     }
     if (reqs.length) w.requirements = reqs;
 
@@ -382,16 +437,26 @@ async function applyEscalate(windows, byId, action) {
 /* --------------------------------- Helpers ---------------------------------- */
 
 function mergeTags(tags, extra) {
-  const set = new Set([...(Array.isArray(tags) ? tags : []), ...(extra || [])].map(String));
+  const set = new Set(
+    [...(Array.isArray(tags) ? tags : []), ...(extra || [])].map(String)
+  );
   return Array.from(set);
 }
 function safeCloneArray(a) {
-  return Array.isArray(a) ? a.map((x) => (x && typeof x === "object" ? { ...x } : x)) : [];
+  return Array.isArray(a)
+    ? a.map((x) => (x && typeof x === "object" ? { ...x } : x))
+    : [];
 }
 function leanWindows(list) {
   return (list || []).map((w) => ({
-    id: w.id, title: w.title, domain: w.domain, startISO: w.startISO, endISO: w.endISO, priority: w.priority,
-    tags: w.tags, variant: w.variant,
+    id: w.id,
+    title: w.title,
+    domain: w.domain,
+    startISO: w.startISO,
+    endISO: w.endISO,
+    priority: w.priority,
+    tags: w.tags,
+    variant: w.variant,
   }));
 }
 

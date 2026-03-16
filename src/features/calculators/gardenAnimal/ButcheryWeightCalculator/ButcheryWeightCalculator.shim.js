@@ -65,8 +65,8 @@
  * }
  */
 
-import { emit } from "@/services/eventBus";
-import * as featureFlags from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import * as featureFlags from "@/config/featureFlags";
 
 // Soft-ish imports; if paths differ, you can adjust them here.
 let HubPacketFormatter = null;
@@ -94,13 +94,22 @@ export async function runButcheryWeightCalculator(request) {
   const ts = new Date().toISOString();
 
   if (!request || typeof request !== "object") {
-    throw new Error("ButcheryWeightCalculator: request must be a non-null object.");
+    throw new Error(
+      "ButcheryWeightCalculator: request must be a non-null object."
+    );
   }
 
-  const { animals, yieldCurves = [], storehouseInventory = [], context = {} } = request;
+  const {
+    animals,
+    yieldCurves = [],
+    storehouseInventory = [],
+    context = {},
+  } = request;
 
   if (!Array.isArray(animals) || animals.length === 0) {
-    throw new Error("ButcheryWeightCalculator: 'animals' array is required and must be non-empty.");
+    throw new Error(
+      "ButcheryWeightCalculator: 'animals' array is required and must be non-empty."
+    );
   }
 
   const normalizedContext = {
@@ -109,7 +118,7 @@ export async function runButcheryWeightCalculator(request) {
     processingDate: context.processingDate || null,
     location: context.location || null,
     notes: context.notes || "",
-    exportToHub: Boolean(context.exportToHub)
+    exportToHub: Boolean(context.exportToHub),
   };
 
   const normalizedAnimals = animals.map(normalizeAnimal);
@@ -129,7 +138,7 @@ export async function runButcheryWeightCalculator(request) {
     totalByproductWeightKg: 0,
     averageDressingPercent: 0,
     averageRetailYieldPercent: 0,
-    headCount: 0
+    headCount: 0,
   };
 
   normalizedAnimals.forEach((animal) => {
@@ -138,19 +147,16 @@ export async function runButcheryWeightCalculator(request) {
       dressingPercent,
       retailYieldPercent,
       shrinkPercent,
-      cutDistributions
+      cutDistributions,
     } = curve;
 
-    const {
-      carcassEntry,
-      retailEntries,
-      byproductEntries
-    } = computeYieldsForAnimal(animal, {
-      dressingPercent,
-      retailYieldPercent,
-      shrinkPercent,
-      cutDistributions
-    });
+    const { carcassEntry, retailEntries, byproductEntries } =
+      computeYieldsForAnimal(animal, {
+        dressingPercent,
+        retailYieldPercent,
+        shrinkPercent,
+        cutDistributions,
+      });
 
     carcassBreakdown.push(carcassEntry);
     retailCutPlan.push(...retailEntries);
@@ -159,7 +165,8 @@ export async function runButcheryWeightCalculator(request) {
     batchAnalytics.totalLiveWeightKg += carcassEntry.liveWeightKg;
     batchAnalytics.totalCarcassWeightKg += carcassEntry.carcassChilledKg;
     batchAnalytics.totalRetailWeightKg += sumRetailCutWeight(retailEntries);
-    batchAnalytics.totalByproductWeightKg += sumByproductWeight(byproductEntries);
+    batchAnalytics.totalByproductWeightKg +=
+      sumByproductWeight(byproductEntries);
     batchAnalytics.headCount += animal.count;
   });
 
@@ -168,8 +175,10 @@ export async function runButcheryWeightCalculator(request) {
       carcassBreakdown.reduce((sum, c) => sum + (c.dressingPercent || 0), 0) /
       carcassBreakdown.length;
     const avgRetail =
-      carcassBreakdown.reduce((sum, c) => sum + (c._retailYieldPercent || 0), 0) /
-      carcassBreakdown.length;
+      carcassBreakdown.reduce(
+        (sum, c) => sum + (c._retailYieldPercent || 0),
+        0
+      ) / carcassBreakdown.length;
 
     batchAnalytics.averageDressingPercent = roundTo(avgDressing, 2);
     batchAnalytics.averageRetailYieldPercent = roundTo(avgRetail, 2);
@@ -182,9 +191,9 @@ export async function runButcheryWeightCalculator(request) {
       carcassBreakdown,
       retailCutPlan,
       offalAndByproducts,
-      analytics: batchAnalytics
+      analytics: batchAnalytics,
     },
-    storehouseInventory // echoed for convenience if the caller wants to compare.
+    storehouseInventory, // echoed for convenience if the caller wants to compare.
   };
 
   // Emit a calculator-level event for observability.
@@ -193,9 +202,9 @@ export async function runButcheryWeightCalculator(request) {
     requestSummary: {
       animalCount: normalizedAnimals.length,
       headCount: batchAnalytics.headCount,
-      totalLiveWeightKg: batchAnalytics.totalLiveWeightKg
+      totalLiveWeightKg: batchAnalytics.totalLiveWeightKg,
     },
-    analytics: batchAnalytics
+    analytics: batchAnalytics,
   });
 
   // Optional Hub export when enabled.
@@ -233,10 +242,13 @@ function normalizeAnimal(animal) {
 
   const species = (animal.species || "").trim().toLowerCase();
   if (!species) {
-    throw new Error(`ButcheryWeightCalculator: animal '${id}' must have a 'species'.`);
+    throw new Error(
+      `ButcheryWeightCalculator: animal '${id}' must have a 'species'.`
+    );
   }
 
-  const count = Number.isInteger(animal.count) && animal.count > 0 ? animal.count : 1;
+  const count =
+    Number.isInteger(animal.count) && animal.count > 0 ? animal.count : 1;
 
   return {
     id,
@@ -251,7 +263,7 @@ function normalizeAnimal(animal) {
     role: animal.role || "meat",
     location: animal.location || null,
     scheduledProcessingDate: animal.scheduledProcessingDate || null,
-    notes: animal.notes || ""
+    notes: animal.notes || "",
   };
 }
 
@@ -285,7 +297,7 @@ function buildYieldCurveLookup(yieldCurves) {
       retailYieldPercent: clampNumber(curve.retailYieldPercent, 0, 100, 65),
       cutDistributions: Array.isArray(curve.cutDistributions)
         ? curve.cutDistributions.filter(isValidCutDistribution)
-        : []
+        : [],
     };
 
     bySpeciesClass.set(key, safeCurve);
@@ -325,7 +337,7 @@ function selectYieldCurveForAnimal(lookup, animal) {
       dressingPercent: speciesDefaults.dressingPercent,
       retailYieldPercent: speciesDefaults.retailYieldPercent,
       shrinkPercent: speciesDefaults.shrinkPercent,
-      cutDistributions: []
+      cutDistributions: [],
     };
   }
 
@@ -333,7 +345,7 @@ function selectYieldCurveForAnimal(lookup, animal) {
     dressingPercent: curve.dressingPercent,
     retailYieldPercent: curve.retailYieldPercent,
     shrinkPercent: 2, // Default 2% shrink unless specified in the future.
-    cutDistributions: curve.cutDistributions || []
+    cutDistributions: curve.cutDistributions || [],
   };
 }
 
@@ -349,7 +361,7 @@ function computeYieldsForAnimal(animal, yieldParams) {
     dressingPercent,
     retailYieldPercent,
     shrinkPercent = 2,
-    cutDistributions = []
+    cutDistributions = [],
   } = yieldParams;
 
   const totalLiveWeightKg = animal.liveWeightKg * animal.count;
@@ -357,7 +369,10 @@ function computeYieldsForAnimal(animal, yieldParams) {
   const carcassChilledKg = carcassHotKg * (1 - shrinkPercent / 100);
 
   const retailTotalKg = (carcassChilledKg * retailYieldPercent) / 100;
-  const byproductTotalKg = Math.max(totalLiveWeightKg - carcassChilledKg - retailTotalKg, 0);
+  const byproductTotalKg = Math.max(
+    totalLiveWeightKg - carcassChilledKg - retailTotalKg,
+    0
+  );
 
   const carcassEntry = {
     animalId: animal.id,
@@ -372,7 +387,7 @@ function computeYieldsForAnimal(animal, yieldParams) {
     shrinkPercent: roundTo(shrinkPercent, 2),
     primals: [],
     // internal, not in schema, but useful for analytics; will be ignored by consumers if not used
-    _retailYieldPercent: roundTo(retailYieldPercent, 2)
+    _retailYieldPercent: roundTo(retailYieldPercent, 2),
   };
 
   const retailEntries = buildRetailCutEntries(
@@ -381,10 +396,7 @@ function computeYieldsForAnimal(animal, yieldParams) {
     cutDistributions
   );
 
-  const byproductEntries = buildByproductEntries(
-    animal,
-    byproductTotalKg
-  );
+  const byproductEntries = buildByproductEntries(animal, byproductTotalKg);
 
   return { carcassEntry, retailEntries, byproductEntries };
 }
@@ -412,7 +424,7 @@ function buildRetailCutEntries(animal, retailTotalKg, cutDistributions) {
         units: null,
         unitSizeKg: null,
         packageLabel: `${animal.displayName || animal.id} – Mixed Retail`,
-        notes: ""
+        notes: "",
       });
     }
     return entries;
@@ -420,7 +432,8 @@ function buildRetailCutEntries(animal, retailTotalKg, cutDistributions) {
 
   // Ensure percentages roughly sum to 100; we'll normalize if needed.
   const totalPercent = cutDistributions.reduce(
-    (sum, c) => sum + (typeof c.percentOfRetail === "number" ? c.percentOfRetail : 0),
+    (sum, c) =>
+      sum + (typeof c.percentOfRetail === "number" ? c.percentOfRetail : 0),
     0
   );
   const normalizationFactor = totalPercent > 0 ? 100 / totalPercent : 1;
@@ -439,7 +452,7 @@ function buildRetailCutEntries(animal, retailTotalKg, cutDistributions) {
       units: null,
       unitSizeKg: null,
       packageLabel: `${animal.displayName || animal.id} – ${c.cutName}`,
-      notes: ""
+      notes: "",
     });
   });
 
@@ -475,7 +488,7 @@ function buildByproductEntries(animal, byproductTotalKg) {
       name: "Soup Bones",
       weightKg: bonesKg,
       intendedUse: "stock",
-      notes: ""
+      notes: "",
     });
   }
 
@@ -487,7 +500,7 @@ function buildByproductEntries(animal, byproductTotalKg) {
       name: "Trim Fat",
       weightKg: fatKg,
       intendedUse: "render",
-      notes: ""
+      notes: "",
     });
   }
 
@@ -499,7 +512,7 @@ function buildByproductEntries(animal, byproductTotalKg) {
       name: "Mixed Organs",
       weightKg: organsKg,
       intendedUse: "edible",
-      notes: ""
+      notes: "",
     });
   }
 
@@ -514,7 +527,9 @@ function buildByproductEntries(animal, byproductTotalKg) {
  * @param {Object} response
  */
 async function exportToHubIfEnabled(context, animals, response) {
-  const familyFundEnabled = Boolean(featureFlags && featureFlags.familyFundMode);
+  const familyFundEnabled = Boolean(
+    featureFlags && featureFlags.familyFundMode
+  );
   if (!familyFundEnabled) return;
   if (!context || !context.exportToHub) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
@@ -528,7 +543,7 @@ async function exportToHubIfEnabled(context, animals, response) {
       analytics: response?.result?.analytics || {},
       carcassBreakdown: response?.result?.carcassBreakdown || [],
       retailCutPlan: response?.result?.retailCutPlan || [],
-      offalAndByproducts: response?.result?.offalAndByproducts || []
+      offalAndByproducts: response?.result?.offalAndByproducts || [],
     };
 
     const envelope = HubPacketFormatter.format(payload);
@@ -536,7 +551,7 @@ async function exportToHubIfEnabled(context, animals, response) {
 
     safeEmit("calculator.butcheryWeight.exported", {
       ts: new Date().toISOString(),
-      analytics: response?.result?.analytics || {}
+      analytics: response?.result?.analytics || {},
     });
   } catch (err) {
     // Fail silently per spec, but log to console for dev environments.
@@ -557,11 +572,14 @@ function safeEmit(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/ButcheryWeightCalculator.shim",
-      data
+      data,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.warn(`ButcheryWeightCalculator: failed to emit event '${type}'`, err);
+    console.warn(
+      `ButcheryWeightCalculator: failed to emit event '${type}'`,
+      err
+    );
   }
 }
 
@@ -619,7 +637,8 @@ function roundTo(value, decimals) {
 function isValidCutDistribution(c) {
   if (!c || typeof c !== "object") return false;
   if (!c.cutKey || !c.cutName) return false;
-  if (typeof c.percentOfRetail !== "number" || !isFinite(c.percentOfRetail)) return false;
+  if (typeof c.percentOfRetail !== "number" || !isFinite(c.percentOfRetail))
+    return false;
   return true;
 }
 
@@ -683,5 +702,5 @@ function sumByproductWeight(byproductEntries) {
 
 // Default export for convenience when imported as a generic shim.
 export default {
-  run: runButcheryWeightCalculator
+  run: runButcheryWeightCalculator,
 };

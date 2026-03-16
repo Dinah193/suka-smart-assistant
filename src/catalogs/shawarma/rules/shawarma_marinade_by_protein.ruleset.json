@@ -1,0 +1,526 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "kind": "ruleset",
+  "meta": {
+    "id": "rulesets.shawarma.marinade_by_protein",
+    "type": "ruleset",
+    "label": "Shawarma Marinade by Protein",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Catalog",
+      "notes": [
+        "Protein-targeted marinade selection + guidance for SSA recipe adapters.",
+        "Outputs recommended base + spice blend IDs and default ratios/time windows."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": ["and", "or", "the", "a", "an", "of", "to", "with", "for"]
+    },
+    "methodAliases": {
+      "method.roast": ["roast", "oven roast", "bake", "oven bake"],
+      "method.grill": ["grill", "charcoal grill", "gas grill"],
+      "method.sear": ["sear", "pan sear", "skillet sear"],
+      "method.broil": ["broil", "oven broil"],
+      "method.air_fry": ["air fry", "air-fry", "airfryer"],
+      "method.smoke": ["smoke", "smoked"]
+    }
+  },
+  "globals": {
+    "ids": {
+      "bases": {
+        "yogurt": "shawarma.marinades.yogurt_shawarma_base",
+        "vinegar": "shawarma.marinades.vinegar_shawarma_base"
+      },
+      "spiceBlends": {
+        "classic": "shawarma.spice_blends.shawarma_classic_blend",
+        "chicken": "shawarma.spice_blends.shawarma_chicken_blend",
+        "beef": "shawarma.spice_blends.shawarma_beef_blend",
+        "lamb": "shawarma.spice_blends.shawarma_lamb_blend",
+        "vegetable": "shawarma.spice_blends.shawarma_vegetable_blend"
+      }
+    },
+    "defaults": {
+      "proteinMassG": 1000,
+      "vegMassG": 1000,
+      "basePerKgG": {
+        "yogurt": { "min": 160, "ideal": 220, "max": 300 },
+        "vinegar": { "min": 30, "ideal": 45, "max": 70 }
+      },
+      "spicePerKgG": {
+        "meat": { "min": 12, "ideal": 18, "max": 28 },
+        "veg": { "min": 10, "ideal": 16, "max": 26 }
+      },
+      "oilPerKgML": { "min": 20, "ideal": 35, "max": 60 },
+      "acidPerKgML": { "min": 20, "ideal": 35, "max": 55 },
+      "saltPerKgG": { "min": 6, "ideal": 9, "max": 12 }
+    },
+    "timeWindowsHours": {
+      "vegetables": { "min": 0.3, "ideal": 1, "max": 6 },
+      "chicken": { "min": 2, "ideal": 8, "max": 24 },
+      "chickenBreast": { "min": 1, "ideal": 6, "max": 12 },
+      "beef": { "min": 2, "ideal": 8, "max": 24 },
+      "lamb": { "min": 4, "ideal": 10, "max": 24 }
+    }
+  },
+  "rules": [
+    {
+      "id": "shawarma.marinade.select.vegetables",
+      "enabled": true,
+      "priority": 10,
+      "title": "Vegetables: vinegar base + vegetable blend (quick marination)",
+      "description": "Vegetables benefit from a lighter, non-dairy acid base and a brighter herb/sumac-forward blend.",
+      "tags": ["shawarma", "marinade", "vegetables", "selection"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.target",
+        "value": "vegetables"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.baseId",
+            "value": "shawarma.marinades.vinegar_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.spiceBlendId",
+            "value": "shawarma.spice_blends.shawarma_vegetable_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.targets",
+            "value": {
+              "massBasisG": 1000,
+              "baseG": { "min": 0, "ideal": 0, "max": 0 },
+              "spiceG": { "min": 10, "ideal": 16, "max": 26 },
+              "oilML": { "min": 20, "ideal": 35, "max": 60 },
+              "acidML": { "min": 15, "ideal": 25, "max": 45 },
+              "saltG": { "min": 5, "ideal": 8, "max": 11 }
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.timeHours",
+            "value": { "min": 0.3, "ideal": 1, "max": 6 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.select.vegetables",
+                "message": "Vegetables: use vinegar/lemon + oil (light), then the Vegetable Shawarma Blend. Marinate 20–60 minutes for best texture (up to ~6 hours).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.select.chicken_thigh",
+      "enabled": true,
+      "priority": 20,
+      "title": "Chicken thighs: yogurt base + chicken blend",
+      "description": "Thighs handle yogurt + acid well and stay juicy; chicken blend keeps it bright.",
+      "tags": ["shawarma", "marinade", "chicken", "selection"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "chicken_thigh"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.baseId",
+            "value": "shawarma.marinades.yogurt_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.spiceBlendId",
+            "value": "shawarma.spice_blends.shawarma_chicken_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.targets",
+            "value": {
+              "massBasisG": 1000,
+              "baseG": { "min": 160, "ideal": 220, "max": 300 },
+              "spiceG": { "min": 12, "ideal": 18, "max": 28 },
+              "oilML": { "min": 20, "ideal": 35, "max": 60 },
+              "acidML": { "min": 20, "ideal": 35, "max": 55 },
+              "saltG": { "min": 6, "ideal": 9, "max": 12 }
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.timeHours",
+            "value": { "min": 2, "ideal": 8, "max": 24 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.select.chicken_thigh",
+                "message": "Chicken thighs: use Yogurt Shawarma Base + Chicken Blend. Best marination ~6–10 hours (up to 24).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.select.chicken_breast",
+      "enabled": true,
+      "priority": 25,
+      "title": "Chicken breast: yogurt base + chicken blend (shorter time, gentler acid)",
+      "description": "Breast is lean: use yogurt, keep acid gentler, and shorten time to avoid texture issues.",
+      "tags": ["shawarma", "marinade", "chicken", "lean", "selection"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "chicken_breast"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.baseId",
+            "value": "shawarma.marinades.yogurt_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.spiceBlendId",
+            "value": "shawarma.spice_blends.shawarma_chicken_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.targets",
+            "value": {
+              "massBasisG": 1000,
+              "baseG": { "min": 180, "ideal": 240, "max": 320 },
+              "spiceG": { "min": 12, "ideal": 18, "max": 26 },
+              "oilML": { "min": 25, "ideal": 40, "max": 70 },
+              "acidML": { "min": 15, "ideal": 25, "max": 40 },
+              "saltG": { "min": 6, "ideal": 9, "max": 12 }
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.timeHours",
+            "value": { "min": 1, "ideal": 6, "max": 12 }
+          },
+          {
+            "type": "scoreAdjust",
+            "scoreDelta": 0.1
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.select.chicken_breast",
+                "message": "Chicken breast: use Yogurt Base + Chicken Blend, but keep acid lower and marinate shorter (best ~4–8 hours, max ~12).",
+                "severity": "warning"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.select.beef",
+      "enabled": true,
+      "priority": 30,
+      "title": "Beef: vinegar base + beef blend (optional yogurt for tenderness)",
+      "description": "Beef shawarma is commonly vinegar/lemon based; yogurt optional for cling/tenderness.",
+      "tags": ["shawarma", "marinade", "beef", "selection"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "beef"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.baseId",
+            "value": "shawarma.marinades.vinegar_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.spiceBlendId",
+            "value": "shawarma.spice_blends.shawarma_beef_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.targets",
+            "value": {
+              "massBasisG": 1000,
+              "baseG": { "min": 0, "ideal": 0, "max": 0 },
+              "spiceG": { "min": 14, "ideal": 20, "max": 30 },
+              "oilML": { "min": 25, "ideal": 45, "max": 75 },
+              "acidML": { "min": 25, "ideal": 45, "max": 70 },
+              "saltG": { "min": 6, "ideal": 10, "max": 13 },
+              "optionalYogurtG": { "min": 0, "ideal": 100, "max": 200 }
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.timeHours",
+            "value": { "min": 2, "ideal": 8, "max": 24 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.select.beef",
+                "message": "Beef: use vinegar/lemon + oil with the Beef Blend. Optional yogurt (a few spoonfuls) adds cling and tenderness. Marinate 2–12 hours (up to 24).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.select.beef_lean_adjust",
+      "enabled": true,
+      "priority": 31,
+      "title": "Lean beef: increase fat/emulsifier, reduce acid slightly",
+      "description": "Refines beef guidance for very lean cuts (round, sirloin tip).",
+      "tags": ["shawarma", "marinade", "beef", "lean", "adjustment"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "beef_lean"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.baseId",
+            "value": "shawarma.marinades.vinegar_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.spiceBlendId",
+            "value": "shawarma.spice_blends.shawarma_beef_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.targets",
+            "value": {
+              "massBasisG": 1000,
+              "spiceG": { "min": 14, "ideal": 20, "max": 28 },
+              "oilML": { "min": 35, "ideal": 55, "max": 85 },
+              "acidML": { "min": 20, "ideal": 35, "max": 55 },
+              "saltG": { "min": 6, "ideal": 10, "max": 13 },
+              "optionalYogurtG": { "min": 60, "ideal": 140, "max": 240 }
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.timeHours",
+            "value": { "min": 2, "ideal": 6, "max": 16 }
+          },
+          {
+            "type": "scoreAdjust",
+            "scoreDelta": 0.1
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.select.beef_lean_adjust",
+                "message": "Lean beef: reduce acid a bit and increase oil or add some yogurt for tenderness. Marinate 2–10 hours (avoid very long acid soaks).",
+                "severity": "warning"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.select.lamb",
+      "enabled": true,
+      "priority": 40,
+      "title": "Lamb: yogurt or vinegar base + lamb blend (longer window)",
+      "description": "Lamb pairs beautifully with warm spices; allow longer marination for deeper flavor.",
+      "tags": ["shawarma", "marinade", "lamb", "selection"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "lamb"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.baseId",
+            "value": "shawarma.marinades.yogurt_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.alternateBaseId",
+            "value": "shawarma.marinades.vinegar_shawarma_base"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.spiceBlendId",
+            "value": "shawarma.spice_blends.shawarma_lamb_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.targets",
+            "value": {
+              "massBasisG": 1000,
+              "baseG": { "min": 140, "ideal": 200, "max": 280 },
+              "spiceG": { "min": 14, "ideal": 22, "max": 32 },
+              "oilML": { "min": 25, "ideal": 45, "max": 75 },
+              "acidML": { "min": 25, "ideal": 40, "max": 65 },
+              "saltG": { "min": 6, "ideal": 10, "max": 13 }
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.timeHours",
+            "value": { "min": 4, "ideal": 10, "max": 24 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.select.lamb",
+                "message": "Lamb: use Lamb Blend. Yogurt base is great for cling; vinegar/lemon base is brighter. Marinate 4–12 hours (up to 24).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.method.high_heat_reduce_sugar_in_marinade",
+      "enabled": true,
+      "priority": 70,
+      "title": "High heat methods: reduce added sugar to avoid scorching",
+      "description": "If cooking goal/method is high-heat sear/char, reduce sweeteners in marinade unless applied as finishing glaze.",
+      "tags": ["shawarma", "method", "browning", "safety", "adjustment"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.inputs.method",
+        "values": [
+          "method.sear",
+          "method.grill",
+          "method.broil",
+          "method.air_fry"
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.marinade.sweetenerGuidance",
+            "value": {
+              "maxTspPerKg": 2,
+              "note": "If using honey/sugar, keep it low for high heat; prefer adding sweet-heat as a finishing drizzle."
+            }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.method.high_heat_reduce_sugar_in_marinade",
+                "message": "High-heat sear/grill/broil can scorch sugars. Keep honey/sugar low in the marinade and use sweet-heat as a finishing drizzle if desired.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.marinade.method.oven_roast_allow_more_aromatics",
+      "enabled": true,
+      "priority": 80,
+      "title": "Oven roasting: encourage more aromatics and a finishing acid pop",
+      "description": "Oven methods benefit from a little extra garlic/onion and a final squeeze of lemon to brighten.",
+      "tags": ["shawarma", "method", "roast", "finishing"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.inputs.method",
+        "values": ["method.roast"]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.finish",
+            "value": {
+              "acidPop": {
+                "lemonWedges": true,
+                "sumacPinchOptional": true,
+                "note": "Finish cooked shawarma with lemon and/or sumac for brightness."
+              },
+              "aromatics": {
+                "extraGarlicClovesPerKg": { "min": 0, "ideal": 2, "max": 5 },
+                "note": "Roasting mellows aromatics; a bit more is welcome."
+              }
+            }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.marinade_by_protein",
+                "ruleId": "shawarma.marinade.method.oven_roast_allow_more_aromatics",
+                "message": "Oven roast: you can use a bit more aromatics, then finish with lemon (and optional sumac) to brighten the final flavor.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

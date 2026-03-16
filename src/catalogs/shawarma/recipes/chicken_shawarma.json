@@ -1,0 +1,539 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.recipes.chicken_shawarma",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Chicken Shawarma",
+    "subtitle": "Spiced yogurt-marinated chicken, roasted or grilled, with classic shawarma flavors",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Designed for oven-first households (no rotisserie required) with optional grill/air-fryer paths.",
+        "Includes SSA-friendly ingredient IDs and planner signals."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "weeknight", "street_food"],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.wraps",
+      "meal_archetype.grill_and_sides",
+      "meal_archetype.plated_meals"
+    ],
+    "servingStyles": ["street_food", "family_style", "plates"],
+    "plannerTags": [
+      "shawarma",
+      "chicken",
+      "marinated",
+      "oven_roasted",
+      "grill_optional",
+      "wraps",
+      "batch_friendly",
+      "meal_prep"
+    ]
+  },
+
+  "summary": "Juicy chicken marinated with yogurt, lemon, garlic, and warm shawarma spices, then roasted (or grilled) and sliced for wraps, bowls, or plates.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "About 2.5–3 lb chicken yields 6 hearty servings (wraps/bowls) or 8 lighter servings."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 35,
+    "totalMins": 55
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "primary": [
+      "savory",
+      "garlic",
+      "warm_spice",
+      "lemon_bright",
+      "smoky_edges_if_broiled"
+    ],
+    "heat": {
+      "typical": 1,
+      "range": [0, 3],
+      "note": "Add cayenne or extra black pepper for more heat."
+    },
+    "texture": ["juicy", "charred_edges_optional"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.oven",
+      "equipment.sheet_pan",
+      "equipment.bowl",
+      "equipment.measuring_spoons",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "recommended": [
+      "equipment.wire_rack",
+      "equipment.instant_read_thermometer",
+      "equipment.tongs"
+    ],
+    "optional": [
+      {
+        "id": "equipment.cast_iron_skillet",
+        "label": "Cast-iron skillet",
+        "notes": "Great for searing strips quickly after roasting."
+      },
+      {
+        "id": "equipment.grill",
+        "label": "Grill",
+        "notes": "Adds extra smoke/char. Works best with thighs."
+      },
+      {
+        "id": "equipment.air_fryer",
+        "label": "Air fryer",
+        "notes": "Fast option for small batches."
+      }
+    ]
+  },
+
+  "dietFlags": [],
+  "allergens": {
+    "common": ["allergen.dairy"],
+    "notes": [
+      "Contains dairy (yogurt). Use dairy-free yogurt for a dairy-free adaptation."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_thighs_boneless_skinless",
+      "label": "Boneless skinless chicken thighs",
+      "role": "protein",
+      "amount": { "value": 2.75, "unit": "lb" },
+      "notes": "Best flavor/juiciness. Substitute chicken breast, but reduce cook time and avoid overcooking."
+    },
+
+    {
+      "id": "ingredient.yogurt_plain",
+      "label": "Plain yogurt (whole milk preferred)",
+      "role": "marinade_base",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": "Greek yogurt works; thin with 1–2 tbsp water if very thick."
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Lemon juice (fresh)",
+      "role": "acid",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 5, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.25, "unit": "tsp" },
+      "notes": "Adjust if using fine salt or if serving with salty sauces/pickles."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.coriander_ground",
+      "label": "Ground coriander",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (sweet or smoked)",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.turmeric_ground",
+      "label": "Ground turmeric",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.allspice_ground",
+      "label": "Ground allspice",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": "If you don't have allspice, use a pinch of clove + extra cinnamon."
+    },
+    {
+      "id": "ingredient.cardamom_ground",
+      "label": "Ground cardamom",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "notes": "Optional but very authentic; keep light."
+    },
+    {
+      "id": "ingredient.cayenne",
+      "label": "Cayenne pepper",
+      "role": "heat",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "notes": "Optional; increase for more heat."
+    },
+
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, thinly sliced",
+      "role": "aromatic",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "each" },
+      "notes": "Optional for roasting alongside chicken; adds sweetness."
+    },
+
+    {
+      "id": "ingredient.pita",
+      "label": "Pita or flatbread (to serve)",
+      "role": "serving",
+      "optional": true,
+      "amount": { "value": 6, "unit": "each" }
+    },
+    {
+      "id": "ingredient.toum",
+      "label": "Garlic sauce (toum) or garlic mayo (to serve)",
+      "role": "sauce",
+      "optional": true,
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.pickles",
+      "label": "Pickles or pickled turnips (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.tomatoes",
+      "label": "Tomatoes, sliced (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.cucumber",
+      "label": "Cucumber, sliced (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" }
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken",
+      "items": ["ingredient.chicken_thighs_boneless_skinless"]
+    },
+    {
+      "id": "group.marinade",
+      "label": "Shawarma marinade",
+      "items": [
+        "ingredient.yogurt_plain",
+        "ingredient.lemon_juice",
+        "ingredient.garlic",
+        "ingredient.olive_oil",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.cumin_ground",
+        "ingredient.coriander_ground",
+        "ingredient.paprika",
+        "ingredient.turmeric_ground",
+        "ingredient.cinnamon_ground",
+        "ingredient.allspice_ground",
+        "ingredient.cardamom_ground",
+        "ingredient.cayenne"
+      ]
+    },
+    {
+      "id": "group.serving",
+      "label": "To serve (optional)",
+      "items": [
+        "ingredient.pita",
+        "ingredient.toum",
+        "ingredient.pickles",
+        "ingredient.tomatoes",
+        "ingredient.cucumber",
+        "ingredient.onion_yellow"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_mix_marinade",
+      "title": "Mix the shawarma marinade",
+      "instructions": [
+        "In a large bowl, whisk together yogurt, lemon juice, garlic, olive oil, salt, black pepper, cumin, coriander, paprika, turmeric, cinnamon, and allspice.",
+        "Add optional cardamom and cayenne if using.",
+        "Taste the marinade (it should be boldly seasoned). Adjust salt/lemon if needed."
+      ],
+      "timers": [{ "label": "Mix marinade", "minutes": 5 }],
+      "checks": [
+        "Marinade is smooth and evenly mixed (no spice clumps).",
+        "Flavor is strong—marinade should taste slightly over-seasoned before cooking."
+      ]
+    },
+    {
+      "id": "step.002_marinate_chicken",
+      "title": "Coat and marinate the chicken",
+      "instructions": [
+        "Add chicken thighs to the bowl and toss until every piece is well coated.",
+        "Cover and refrigerate at least 30 minutes (best: 4–12 hours).",
+        "If short on time, marinate while the oven preheats and you prep sides."
+      ],
+      "timers": [
+        { "label": "Minimum marinate", "minutes": 30 },
+        { "label": "Ideal marinate", "minutes": 480 }
+      ],
+      "checks": ["Chicken is fully coated; no dry spots."]
+    },
+    {
+      "id": "step.003_roast",
+      "title": "Roast (oven method)",
+      "instructions": [
+        "Heat oven to 425°F.",
+        "Line a sheet pan (or place a wire rack over the pan for better browning).",
+        "Spread chicken pieces out so they’re not crowded. Add optional sliced onion around the chicken.",
+        "Roast until chicken reaches 165°F internal temp (thighs can go to 175°F for best texture)."
+      ],
+      "timers": [{ "label": "Roast chicken", "minutes": 25 }],
+      "temperature": {
+        "type": "oven",
+        "value": 425,
+        "unit": "F",
+        "notes": "High heat encourages browning like a rotisserie edge."
+      },
+      "checks": [
+        "Internal temp at thickest part is at least 165°F.",
+        "Edges are browned; juices run clear."
+      ]
+    },
+    {
+      "id": "step.004_broil_for_char",
+      "title": "Optional: Broil for shawarma-style char",
+      "instructions": [
+        "Switch oven to broil (high).",
+        "Broil 1–3 minutes to deepen color and add charred edges (watch closely)."
+      ],
+      "timers": [{ "label": "Broil", "minutes": 2 }],
+      "checks": ["Edges are lightly charred but not burnt."]
+    },
+    {
+      "id": "step.005_rest_and_slice",
+      "title": "Rest and slice",
+      "instructions": [
+        "Rest chicken 5–10 minutes so juices redistribute.",
+        "Slice thinly against the grain (shawarma-style).",
+        "Optional: For extra street-style texture, quickly sear sliced chicken in a hot skillet for 1–2 minutes."
+      ],
+      "timers": [{ "label": "Rest", "minutes": 8 }],
+      "checks": [
+        "Slices look juicy, not dry.",
+        "If seared, edges are crisp with tender centers."
+      ]
+    },
+    {
+      "id": "step.006_serve",
+      "title": "Serve as wraps, bowls, or plates",
+      "instructions": [
+        "Wrap: Spread toum (or garlic mayo) on warm pita/flatbread, add chicken, pickles/pickled turnips, tomatoes, and cucumber.",
+        "Bowl: Serve over rice or fries with chopped salad and sauce.",
+        "Plate: Serve with roasted vegetables and a bright salad."
+      ],
+      "checks": [
+        "Balance is creamy + bright + savory; add lemon/pickles if it needs lift."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "classic": [
+      "lev.toum",
+      "lev.pickled_turnips",
+      "lev.shirazi_or_tomato_cucumber_salad",
+      "lev.hummus",
+      "lev.fries_or_rice"
+    ],
+    "ssa_household_friendly": [
+      "quick_slaw_lemon_garlic",
+      "herb_rice",
+      "roasted_carrots_or_peppers"
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "4 days",
+      "notes": "Store sliced chicken in an airtight container. Reheat in a hot skillet for best texture."
+    },
+    "freeze": {
+      "duration": "2 months",
+      "notes": "Freeze cooked sliced chicken in flat bags. Reheat from thawed for best results."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Mix shawarma marinade", "mins": 5 },
+      { "task": "Marinate chicken", "mins": 3 },
+      { "task": "Roast + broil", "mins": 28 },
+      { "task": "Slice and serve", "mins": 8 }
+    ],
+    "weeknightTips": [
+      "Marinate the night before; roast when you get home.",
+      "Double batch and freeze half for fast wraps later."
+    ],
+    "scalingNotes": [
+      "Do not overcrowd the pan; use two pans if doubling or you’ll steam instead of brown."
+    ]
+  },
+
+  "methods": [
+    "technique.marinade",
+    "technique.roast",
+    "technique.broil_optional",
+    "technique.slice"
+  ],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "shawarma chicken",
+        "oven chicken shawarma",
+        "chicken shawerma"
+      ],
+      "keywords": [
+        "yogurt marinade",
+        "garlic",
+        "lemon",
+        "cumin",
+        "coriander",
+        "paprika",
+        "turmeric",
+        "wrap"
+      ]
+    },
+    "normalization": {
+      "recommendedIngredientIds": [
+        "ingredient.aji_amarillo_paste",
+        "ingredient.queso_fresco",
+        "ingredient.evaporated_milk"
+      ],
+      "notes": [
+        "Ingredient ids are SSA-style and may be mapped by your ingredient-alias system if needed."
+      ]
+    }
+  },
+
+  "notes": [
+    "If using chicken breast: roast closer to 18–22 minutes and pull at 160–165°F to prevent dryness.",
+    "If yogurt is very thick (Greek), loosen with 1–2 tbsp water so it coats evenly.",
+    "For extra authentic ‘shawarma shop’ flavor, add 1 tsp ground sumac or 1/2 tsp ground cloves (very small amount)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.air_fryer",
+      "label": "Air fryer method (small batch)",
+      "when": { "equipment": ["equipment.air_fryer"] },
+      "adapt": {
+        "notes": [
+          "Air fry at 400°F for 12–16 minutes, turning halfway, until 165°F internal.",
+          "Work in batches; don’t overcrowd."
+        ]
+      }
+    },
+    {
+      "id": "variation.grill",
+      "label": "Grill method",
+      "when": { "equipment": ["equipment.grill"] },
+      "adapt": {
+        "notes": [
+          "Grill thighs over medium-high heat 5–7 minutes per side until 165°F+.",
+          "Rest and slice thinly; finish with a squeeze of lemon."
+        ]
+      }
+    },
+    {
+      "id": "variation.dairy_free",
+      "label": "Dairy-free",
+      "when": { "diet": ["dairy_free"] },
+      "adapt": {
+        "notes": [
+          "Use unsweetened dairy-free yogurt (coconut or cashew).",
+          "If yogurt substitute is thin, reduce lemon slightly and add 1 tbsp olive oil to keep richness."
+        ]
+      }
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicier shawarma",
+      "when": { "heat": ["high"] },
+      "adapt": {
+        "notes": [
+          "Increase cayenne to 1 tsp and add 1 tsp crushed red pepper.",
+          "Serve with a hot sauce or harissa-style mayo."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Marinate chicken in the refrigerator, not at room temperature.",
+      "Cook chicken to at least 165°F internal temperature; thighs are best around 175°F for tenderness.",
+      "Discard leftover marinade that touched raw chicken unless it is boiled."
+    ]
+  }
+}

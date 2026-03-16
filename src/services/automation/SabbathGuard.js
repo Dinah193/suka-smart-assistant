@@ -19,16 +19,28 @@ import { BaseAgent } from "@/services/automation/runtime";
    Defensive optional imports (no hard coupling)
 ---------------------------------------------------------------------------- */
 let PreferencesStore, CalendarStore, eventBus, automation;
-try { ({ usePreferencesStore: PreferencesStore } = await import("@/store/PreferencesStore")); } catch {}
-try { ({ useCalendarStore: CalendarStore } = await import("@/store/CalendarStore")); } catch {}
-try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
+try {
+  ({ usePreferencesStore: PreferencesStore } = await import(
+    "@/store/PreferencesStore"
+  ));
+} catch {}
+try {
+  ({ useCalendarStore: CalendarStore } = await import("@/store/CalendarStore"));
+} catch {}
+try {
+  ({ eventBus } = await import("@/services/events/eventBus"));
+} catch {}
+try {
+  ({ automation } = await import("@/services/automation/runtime"));
+} catch {}
 
 /* ----------------------------------------------------------------------------
    Optional SunCalc for civil sunset/sunrise if available; fallback otherwise
 ---------------------------------------------------------------------------- */
 let SunCalc = null;
-try { SunCalc = (await import("suncalc")).default || (await import("suncalc")); } catch {}
+try {
+  SunCalc = (await import("suncalc")).default || (await import("suncalc"));
+} catch {}
 
 /* =============================================================================
    Defaults & helpers
@@ -63,7 +75,9 @@ const DEFAULTS = {
    Time helpers
 ---------------------------------------------------------------------------- */
 function parseHHMM(s) {
-  const m = String(s || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+  const m = String(s || "")
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})$/);
   if (!m) return null;
   const hh = Math.min(23, Math.max(0, parseInt(m[1], 10)));
   const mm = Math.min(59, Math.max(0, parseInt(m[2], 10)));
@@ -101,9 +115,11 @@ function sunsetTsFor(dateTs, loc, fallbackHHMM = { hh: 18, mm: 0 }) {
       const d = new Date(dateTs);
       const times = SunCalc.getTimes(d, Number(loc.lat), Number(loc.lon));
       // Prefer sunset; if not, fallback to end of civil twilight or default
-      return (times.sunset?.getTime?.() ??
-              times.dusk?.getTime?.() ??
-              atLocal(dateTs, fallbackHHMM.hh, fallbackHHMM.mm));
+      return (
+        times.sunset?.getTime?.() ??
+        times.dusk?.getTime?.() ??
+        atLocal(dateTs, fallbackHHMM.hh, fallbackHHMM.mm)
+      );
     } catch {}
   }
   return atLocal(dateTs, fallbackHHMM.hh, fallbackHHMM.mm);
@@ -130,7 +146,8 @@ function readUserSettings() {
     includeFeasts: sab.includeFeasts ?? DEFAULTS.includeFeasts,
     location: sab.location || guard.location || DEFAULTS.location,
     onBlock: sab.onBlock || guard.onBlock || DEFAULTS.onBlock,
-    allowEmergencyOverride: sab.allowEmergencyOverride ?? DEFAULTS.allowEmergencyOverride,
+    allowEmergencyOverride:
+      sab.allowEmergencyOverride ?? DEFAULTS.allowEmergencyOverride,
     emitUIEvents: guard.emitUIEvents ?? DEFAULTS.emitUIEvents,
   };
   return cfg;
@@ -141,7 +158,10 @@ function readFeastWindows(epochStart = startOfDay(Date.now()), days = 30) {
   // [{ start: ts, end: ts, code: "YOM_TERUAH", name: "...", type: "feast" }, ...]
   try {
     const c = CalendarStore?.();
-    const list = c?.getProtectedWindows?.(epochStart, addDays(epochStart, days)) || c?.feastWindows || [];
+    const list =
+      c?.getProtectedWindows?.(epochStart, addDays(epochStart, days)) ||
+      c?.feastWindows ||
+      [];
     return Array.isArray(list) ? list : [];
   } catch {
     return [];
@@ -158,7 +178,7 @@ function computeSabbathWindow(ts, cfg) {
   const base = startOfDay(ts);
 
   // Determine the Friday and Saturday dates relative to ts
-  const offsetToFriday = ((5 - dow + 7) % 7);
+  const offsetToFriday = (5 - dow + 7) % 7;
   const fridayStart = addDays(base, offsetToFriday);
   const saturdayStart = addDays(fridayStart, 1);
 
@@ -189,12 +209,22 @@ function computeSabbathWindow(ts, cfg) {
     const nextFriStart = addDays(fridayStart, 7);
     const nextSatStart = addDays(saturdayStart, 7);
     return {
-      start: cfg.sabbathStartRule === "sunset"
-        ? sunsetTsFor(nextFriStart, loc)
-        : atLocal(nextFriStart, parseHHMM(cfg.sabbathStartRule)?.hh ?? 18, parseHHMM(cfg.sabbathStartRule)?.mm ?? 0),
-      end: cfg.sabbathEndRule === "sunset"
-        ? sunsetTsFor(nextSatStart, loc)
-        : atLocal(nextSatStart, parseHHMM(cfg.sabbathEndRule)?.hh ?? 18, parseHHMM(cfg.sabbathEndRule)?.mm ?? 0),
+      start:
+        cfg.sabbathStartRule === "sunset"
+          ? sunsetTsFor(nextFriStart, loc)
+          : atLocal(
+              nextFriStart,
+              parseHHMM(cfg.sabbathStartRule)?.hh ?? 18,
+              parseHHMM(cfg.sabbathStartRule)?.mm ?? 0
+            ),
+      end:
+        cfg.sabbathEndRule === "sunset"
+          ? sunsetTsFor(nextSatStart, loc)
+          : atLocal(
+              nextSatStart,
+              parseHHMM(cfg.sabbathEndRule)?.hh ?? 18,
+              parseHHMM(cfg.sabbathEndRule)?.mm ?? 0
+            ),
     };
   }
   return { start: sabStart, end: sabEnd };
@@ -213,15 +243,30 @@ function feastWindowsAround(ts, cfg) {
     if (!w?.start || !w?.end) continue;
     // If store already gives sunset-bounded windows, keep them.
     // Otherwise expand to sunset→sunset around their start day.
-    const startIsDayBoundary = new Date(w.start).getHours() === 0 && new Date(w.start).getMinutes() === 0;
-    const endIsDayBoundary = new Date(w.end).getHours() === 0 && new Date(w.end).getMinutes() === 0;
+    const startIsDayBoundary =
+      new Date(w.start).getHours() === 0 &&
+      new Date(w.start).getMinutes() === 0;
+    const endIsDayBoundary =
+      new Date(w.end).getHours() === 0 && new Date(w.end).getMinutes() === 0;
 
     if (startIsDayBoundary && endIsDayBoundary) {
       const feastStart = sunsetTsFor(w.start, loc);
       const feastEnd = sunsetTsFor(addDays(w.end, -1), loc); // end at following sunset of last day
-      norm.push({ start: feastStart, end: feastEnd, code: w.code, name: w.name, type: w.type || "feast" });
+      norm.push({
+        start: feastStart,
+        end: feastEnd,
+        code: w.code,
+        name: w.name,
+        type: w.type || "feast",
+      });
     } else {
-      norm.push({ start: w.start, end: w.end, code: w.code, name: w.name, type: w.type || "feast" });
+      norm.push({
+        start: w.start,
+        end: w.end,
+        code: w.code,
+        name: w.name,
+        type: w.type || "feast",
+      });
     }
   }
   return norm;
@@ -264,14 +309,22 @@ export function isProtectedNow(ts = nowTs(), settings = null) {
  *  - meta: { purpose, category, tags, requestedBy, override }
  * Returns { allow: boolean, mode: 'normal'|'skip'|'queue'|'error', reason?, until? }
  */
-export function sabbathPolicy({ template, ctx = {}, settings = null, meta = {} } = {}) {
+export function sabbathPolicy({
+  template,
+  ctx = {},
+  settings = null,
+  meta = {},
+} = {}) {
   const cfg = { ...DEFAULTS, ...(settings || readUserSettings()) };
 
   // Short-circuit when disabled
   if (!cfg.enabled) return { allow: true, mode: "normal" };
 
   // Emergency/manual override
-  if (cfg.allowEmergencyOverride && (meta.override === true || ctx?.meta?.override === true)) {
+  if (
+    cfg.allowEmergencyOverride &&
+    (meta.override === true || ctx?.meta?.override === true)
+  ) {
     return { allow: true, mode: "normal", reason: "override" };
   }
 
@@ -299,7 +352,11 @@ export function sabbathPolicy({ template, ctx = {}, settings = null, meta = {} }
   // Category-level exception (health/safety/livestock/etc.)
   const category = meta?.category || "general";
   if (cfg.exceptions.categories.includes(category)) {
-    return { allow: true, mode: "normal", reason: `allowlist-category:${category}` };
+    return {
+      allow: true,
+      mode: "normal",
+      reason: `allowlist-category:${category}`,
+    };
   }
 
   // Otherwise block according to onBlock behavior
@@ -331,7 +388,12 @@ export function attachSabbathMiddleware(runtime, opts = {}) {
     // Read template & decide
     const tpl = rt.getTemplate?.(id);
     const meta = options?.meta || {};
-    const decision = sabbathPolicy({ template: tpl, ctx, settings: opts.settings, meta });
+    const decision = sabbathPolicy({
+      template: tpl,
+      ctx,
+      settings: opts.settings,
+      meta,
+    });
 
     if (decision.allow) return next(id, ctx, options);
 
@@ -352,13 +414,22 @@ export function attachSabbathMiddleware(runtime, opts = {}) {
     // Enforce policy
     if (decision.mode === "error") {
       // Throwing will be caught by runtime retry logic (if configured)
-      throw new Error(`[SabbathGuard] Blocked "${id}" during ${decision.reason || "protected window"}`);
+      throw new Error(
+        `[SabbathGuard] Blocked "${id}" during ${
+          decision.reason || "protected window"
+        }`
+      );
     }
     if (decision.mode === "queue") {
       // Re-queue with a delay (after-until or minimum backoff)
-      const delay = Math.max(1000 * 60 * 5, (decision.until ?? nowTs()) - nowTs()); // 5min or until window end
+      const delay = Math.max(
+        1000 * 60 * 5,
+        (decision.until ?? nowTs()) - nowTs()
+      ); // 5min or until window end
       setTimeout(() => {
-        try { rt.enqueueRun(id, { ...(options || {}), priority: 1 }); } catch {}
+        try {
+          rt.enqueueRun(id, { ...(options || {}), priority: 1 });
+        } catch {}
       }, delay);
       // Soft skip for now
       return { skipped: true, reason: "guard-queued", until: decision.until };
@@ -375,7 +446,11 @@ export function attachSabbathMiddleware(runtime, opts = {}) {
    Convenience: one-shot soft check API (for UI buttons or workflows)
    - Returns { allowed: boolean, message, until }
 ---------------------------------------------------------------------------- */
-export function checkSabbathFor(actionLabel = "this action", settings = null, meta = {}) {
+export function checkSabbathFor(
+  actionLabel = "this action",
+  settings = null,
+  meta = {}
+) {
   const cfg = { ...DEFAULTS, ...(settings || readUserSettings()) };
   if (!cfg.enabled) return { allowed: true, message: "Guard disabled" };
   const p = isProtectedNow(nowTs(), cfg);
@@ -397,11 +472,15 @@ export class SabbathGuardAgent extends BaseAgent {
     // Listen for day/hour ticks (from AutomationRuntime ticker)
     const unsubTick = this.onEvent((evt) => {
       if (evt.topic !== "tick") return;
-      try { this._maybeNudges(); } catch {}
+      try {
+        this._maybeNudges();
+      } catch {}
     });
 
     // React to calendar updates (feasts added/changed)
-    const offCal = (eventBus?.on?.("calendar.updated", () => this._maybeRefresh())) || (() => {});
+    const offCal =
+      eventBus?.on?.("calendar.updated", () => this._maybeRefresh()) ||
+      (() => {});
     this._unsubs.push(unsubTick, offCal);
     // Initial nudge evaluation
     this._maybeNudges();
@@ -409,7 +488,12 @@ export class SabbathGuardAgent extends BaseAgent {
 
   _maybeRefresh() {
     // Optionally emit a small “notice” so UI badges can refresh
-    try { this.automation?.emitEvent?.("guard.notice", { guard: "sabbath", ts: Date.now() }); } catch {}
+    try {
+      this.automation?.emitEvent?.("guard.notice", {
+        guard: "sabbath",
+        ts: Date.now(),
+      });
+    } catch {}
   }
 
   _maybeNudges() {
@@ -435,10 +519,19 @@ export class SabbathGuardAgent extends BaseAgent {
       this.automation.emitEvent("nba", {
         topic: "nba",
         kind: "pre-sabbath-prep",
-        message: "Sabbath begins at sunset. Would you like to auto-prepare a cooking session and finalize the shopping list?",
+        message:
+          "Sabbath begins at sunset. Would you like to auto-prepare a cooking session and finalize the shopping list?",
         actions: [
-          { label: "Plan Batch Cooking", topic: "batch.plan.request", payload: { windowEnd: sab.start } },
-          { label: "Review Shopping List", topic: "shopping.review.request", payload: { windowEnd: sab.start } },
+          {
+            label: "Plan Batch Cooking",
+            topic: "batch.plan.request",
+            payload: { windowEnd: sab.start },
+          },
+          {
+            label: "Review Shopping List",
+            topic: "shopping.review.request",
+            payload: { windowEnd: sab.start },
+          },
         ],
         until: sab.start,
         ts,
@@ -456,7 +549,10 @@ export function enableSabbathGuard(runtime, options = {}) {
   const rt = runtime || automation;
   attachSabbathMiddleware(rt, options);
   try {
-    const agent = new SabbathGuardAgent({ automation: rt, bus: eventBus || rt });
+    const agent = new SabbathGuardAgent({
+      automation: rt,
+      bus: eventBus || rt,
+    });
     agent.start();
   } catch {}
   _booted = true;

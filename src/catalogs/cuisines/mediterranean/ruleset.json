@@ -1,0 +1,539 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.mediterranean.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Mediterranean • Cuisine Ruleset",
+    "cuisineId": "cuisines.mediterranean",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Deterministic cuisine ruleset used by planners and recipe adapters.",
+        "Focuses on Mediterranean core ingredients, techniques, and balanced plate patterns."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.mediterranean",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "with",
+        "in",
+        "on",
+        "of",
+        "to",
+        "for",
+        "style"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredients.olive_oil": ["extra virgin olive oil", "evoo", "olive oil"],
+      "ingredients.garlic": ["garlic", "garlic cloves", "minced garlic"],
+      "ingredients.lemon": ["lemon", "lemon juice", "lemon zest"],
+      "ingredients.tomato": [
+        "tomato",
+        "tomatoes",
+        "roma tomato",
+        "cherry tomatoes"
+      ],
+      "ingredients.cucumber": ["cucumber", "cukes"],
+      "ingredients.yogurt": ["yogurt", "greek yogurt"],
+      "ingredients.feta": ["feta", "feta cheese"],
+      "ingredients.chickpeas": ["chickpeas", "garbanzo beans"],
+      "ingredients.lentils": ["lentils", "brown lentils", "green lentils"],
+      "ingredients.rice": ["rice", "long grain rice", "basmati"],
+      "ingredients.orzo": ["orzo", "orzo pasta"],
+      "ingredients.pasta": ["pasta", "spaghetti", "penne", "rigatoni"],
+      "ingredients.oregano": ["oregano", "dried oregano"],
+      "ingredients.thyme": ["thyme", "dried thyme"],
+      "ingredients.rosemary": ["rosemary", "dried rosemary"],
+      "ingredients.basil": ["basil", "fresh basil", "dried basil"],
+      "ingredients.parsley": ["parsley", "flat-leaf parsley"],
+      "ingredients.mint": ["mint", "fresh mint"],
+      "ingredients.cumin": ["cumin", "ground cumin"],
+      "ingredients.coriander": ["coriander", "ground coriander"],
+      "ingredients.paprika": ["paprika", "sweet paprika"],
+      "ingredients.eggplant": ["eggplant", "aubergine"],
+      "ingredients.zucchini": ["zucchini", "courgette"],
+      "ingredients.bell_pepper": ["bell pepper", "peppers", "sweet pepper"],
+      "ingredients.onion": ["onion", "yellow onion", "red onion"],
+      "ingredients.red_wine_vinegar": ["red wine vinegar", "rwv"],
+      "ingredients.balsamic_vinegar": ["balsamic vinegar"],
+      "ingredients.olives": ["olives", "kalamata olives"],
+      "ingredients.capers": ["capers"],
+      "ingredients.tahini": ["tahini", "sesame paste"],
+      "ingredients.pita": ["pita", "pita bread"],
+      "ingredients.flatbread": ["flatbread"],
+      "ingredients.fish": ["fish", "white fish", "cod", "tilapia"],
+      "ingredients.chicken": ["chicken", "chicken breast", "chicken thighs"],
+      "ingredients.lamb": ["lamb", "lamb shoulder", "lamb chops"]
+    },
+    "dishAliases": {
+      "dishes.greek_salad": ["horiatiki", "greek salad"],
+      "dishes.hummus": ["hummus"],
+      "dishes.tzatziki": ["tzatziki"],
+      "dishes.tabouli": ["tabbouleh", "tabouli"],
+      "dishes.shakshuka": ["shakshuka", "shakshouka"],
+      "dishes.ratatouille": ["ratatouille"],
+      "dishes.gyro": ["gyro", "gyros"],
+      "dishes.falafel": ["falafel"]
+    },
+    "equipmentAliases": {
+      "equipment.oven": ["oven"],
+      "equipment.stovetop": ["stove", "stovetop", "range"],
+      "equipment.grill": ["grill", "grill pan"],
+      "equipment.blender": ["blender"],
+      "equipment.food_processor": ["food processor"],
+      "equipment.mortar_pestle": ["mortar and pestle", "mortar pestle"]
+    },
+    "methodAliases": {
+      "methods.grill": ["grill", "char", "broil"],
+      "methods.roast": ["roast", "bake"],
+      "methods.saute": ["saute", "pan fry"],
+      "methods.braise": ["braise", "stew"],
+      "methods.raw": ["raw", "no-cook"],
+      "methods.blend": ["blend", "puree"]
+    }
+  },
+  "globals": {
+    "signals": {
+      "primaryFat": "olive_oil_forward",
+      "acid": ["lemon", "vinegar"],
+      "herbCore": ["oregano", "parsley", "basil", "mint", "thyme", "rosemary"],
+      "spiceCore": ["cumin", "coriander", "paprika", "black_pepper"],
+      "umamiCore": ["tomato", "olives", "feta", "anchovy_optional"],
+      "baseStaples": ["pasta", "rice", "orzo", "pita", "lentils", "chickpeas"]
+    },
+    "plateModel": {
+      "default": {
+        "vegShareMin": 0.45,
+        "proteinShareTarget": 0.25,
+        "starchShareTarget": 0.3,
+        "fatTypePreferred": "olive_oil",
+        "notes": [
+          "Mediterranean plates skew high-veg with olive oil + acid + herbs.",
+          "Proteins often fish/chicken/legumes; red meat less frequent."
+        ]
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "med.base.tagcuisinemediterranean",
+      "enabled": true,
+      "priority": 900,
+      "title": "Tag cuisine as Mediterranean",
+      "description": "Adds cuisine tag for downstream scoring and filtering.",
+      "tags": ["mediterranean", "cuisine"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.mediterranean"
+          },
+          { "type": "hasTag", "value": "cuisine.mediterranean" }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.mediterranean" },
+          { "type": "addTag", "value": "flavor.olive_oil" },
+          { "type": "addTag", "value": "flavor.herb_forward" }
+        ]
+      }
+    },
+    {
+      "id": "med.search.bias.coreingredients",
+      "enabled": true,
+      "priority": 820,
+      "title": "Prefer Mediterranean core ingredients",
+      "description": "Adjusts scoring toward recipes featuring olive oil, lemon, herbs, tomato, legumes, and yogurt/cheese staples.",
+      "tags": ["mediterranean", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.olive_oil"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.lemon"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": [
+              "ingredients.oregano",
+              "ingredients.parsley",
+              "ingredients.basil",
+              "ingredients.mint",
+              "ingredients.thyme",
+              "ingredients.rosemary"
+            ]
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": [
+              "ingredients.tomato",
+              "ingredients.chickpeas",
+              "ingredients.lentils",
+              "ingredients.yogurt",
+              "ingredients.feta"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 8 },
+          { "type": "addTag", "value": "med.core" }
+        ]
+      }
+    },
+    {
+      "id": "med.search.bias.avoidheavycreambutterdefault",
+      "enabled": true,
+      "priority": 780,
+      "title": "De-emphasize heavy-cream/butter-heavy dishes by default",
+      "description": "Mediterranean patterns favor olive oil; butter/cream are not prohibited but are less characteristic.",
+      "tags": ["mediterranean", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.heavy_cream"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.butter"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -4 },
+          { "type": "addTag", "value": "med.noncore_dairyfat" }
+        ]
+      }
+    },
+    {
+      "id": "med.plan.defaultplateshares",
+      "enabled": true,
+      "priority": 760,
+      "title": "Apply Mediterranean plate share defaults",
+      "description": "If planner is building a plate, set default shares (veg-forward) and preferred fat type.",
+      "tags": ["mediterranean", "planner"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.planner" },
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.mediterranean"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.plateModel",
+            "value": {
+              "vegShareMin": 0.45,
+              "proteinShareTarget": 0.25,
+              "starchShareTarget": 0.3,
+              "fatTypePreferred": "olive_oil"
+            }
+          },
+          { "type": "addTag", "value": "planner.plate.veg_forward" }
+        ]
+      }
+    },
+    {
+      "id": "med.method.bias.grillroastbraise",
+      "enabled": true,
+      "priority": 730,
+      "title": "Prefer grilling/roasting/braising methods",
+      "description": "Mediterranean cooking frequently uses grill, roast, bake, braise, and fresh raw preparations.",
+      "tags": ["mediterranean", "technique", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.methods",
+            "values": [
+              "methods.grill",
+              "methods.roast",
+              "methods.braise",
+              "methods.raw"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.recipe.title",
+            "regex": "(?i)grill|roast|baked|brais|salad|hummus|tzatziki|tabbouleh|shaksh"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 4 },
+          { "type": "addTag", "value": "med.technique_core" }
+        ]
+      }
+    },
+    {
+      "id": "med.substitution.oliveoilforneutraloil",
+      "enabled": true,
+      "priority": 700,
+      "title": "Suggest olive oil substitution for neutral oils (when appropriate)",
+      "description": "If a recipe uses a neutral oil, prefer olive oil unless the method is high-temp deep frying.",
+      "tags": ["mediterranean", "substitution"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.neutral_oil"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.recipe.methods",
+                "values": ["methods.deep_fry"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisineruleset.suggestion",
+              "payload": {
+                "kind": "substitution",
+                "from": "ingredients.neutral_oil",
+                "to": "ingredients.olive_oil",
+                "reason": "Mediterranean default fat is olive oil for sauteing, roasting, dressings."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "med.pairing.defaultsides",
+      "enabled": true,
+      "priority": 680,
+      "title": "Suggest common Mediterranean side pairings",
+      "description": "Provides optional side suggestions (salad, roasted veg, legumes, grains) to build complete plates.",
+      "tags": ["mediterranean", "pairing"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.mediterranean"
+          },
+          { "type": "exists", "path": "$.planner" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.pairingSuggestions",
+            "value": {
+              "sides": [
+                {
+                  "id": "dishes.greek_salad",
+                  "tags": ["salad", "fresh", "acid"]
+                },
+                { "id": "dishes.hummus", "tags": ["dip", "legume", "protein"] },
+                {
+                  "id": "dishes.tzatziki",
+                  "tags": ["sauce", "yogurt", "cooling"]
+                },
+                {
+                  "id": "dishes.tabouli",
+                  "tags": ["grain_salad", "herb_forward"]
+                }
+              ],
+              "starches": [
+                { "id": "dishes.pita", "tags": ["bread"] },
+                { "id": "dishes.orzo", "tags": ["pasta"] },
+                { "id": "dishes.rice", "tags": ["grain"] }
+              ],
+              "veg": [
+                {
+                  "id": "dishes.roasted_vegetables",
+                  "tags": ["roast", "olive_oil"]
+                },
+                { "id": "dishes.grilled_vegetables", "tags": ["grill", "char"] }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "med.adaptation.herbacidfinishhint",
+      "enabled": true,
+      "priority": 650,
+      "title": "Herb + acid finish guidance",
+      "description": "Encourage finishing with fresh herbs and lemon/vinegar to match Mediterranean flavor signatures.",
+      "tags": ["mediterranean", "adaptation"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisines.mediterranean"
+          },
+          { "type": "exists", "path": "$.recipe" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisineruleset.hint",
+              "payload": {
+                "kind": "finish",
+                "hint": "Finish savory dishes with a squeeze of lemon or a splash of vinegar and a handful of fresh herbs (parsley/basil/mint) to brighten flavors.",
+                "tags": ["acid", "herbs", "finish"]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "med.protein.bias.fishlegumechicken",
+      "enabled": true,
+      "priority": 620,
+      "title": "Prefer fish/legumes/chicken over red meat by default",
+      "description": "Mediterranean patterns emphasize fish and plant proteins; lamb/beef are present but less frequent.",
+      "tags": ["mediterranean", "protein", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": [
+              "ingredients.fish",
+              "ingredients.chickpeas",
+              "ingredients.lentils",
+              "ingredients.chicken"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.recipe.title",
+            "regex": "(?i)salmon|fish|chicken|lentil|chickpea|falafel"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 3 },
+          { "type": "addTag", "value": "med.protein_preferred" }
+        ]
+      }
+    },
+    {
+      "id": "med.protein.deemphasize.redmeatdefault",
+      "enabled": true,
+      "priority": 610,
+      "title": "De-emphasize frequent red meat unless user prefers it",
+      "description": "If user has a red-meat-forward preference, planners can override; otherwise slightly reduce ranking.",
+      "tags": ["mediterranean", "protein", "ranking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.recipe.ingredientsCanonical",
+            "values": ["ingredients.beef", "ingredients.pork"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "eq",
+                "path": "$.context.userPrefs.proteinBias",
+                "value": "red_meat_forward"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -2 },
+          { "type": "addTag", "value": "med.red_meat_less_common" }
+        ]
+      }
+    }
+  ]
+}

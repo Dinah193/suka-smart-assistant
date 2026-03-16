@@ -22,7 +22,7 @@
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
   // Optional: we emit small diagnostics on tz-math edges; safe if missing.
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -52,20 +52,21 @@ export function toUTCISO(input) {
 }
 
 /** Adds a duration to a UTC instant; returns UTC ISO */
-export function addDurationUTC(utcISO, { days = 0, hours = 0, minutes = 0, seconds = 0, ms = 0 } = {}) {
+export function addDurationUTC(
+  utcISO,
+  { days = 0, hours = 0, minutes = 0, seconds = 0, ms = 0 } = {}
+) {
   const t =
-    days * 86400000 +
-    hours * 3600000 +
-    minutes * 60000 +
-    seconds * 1000 +
-    ms;
+    days * 86400000 + hours * 3600000 + minutes * 60000 + seconds * 1000 + ms;
   return new Date(new Date(utcISO).getTime() + t).toISOString();
 }
 
 /** Start of UTC day for the given instant (00:00:00.000Z) */
 export function startOfDayUTC(utcISO) {
   const d = new Date(utcISO);
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  ).toISOString();
 }
 
 /** End of UTC day (exclusive bound) = start of next day */
@@ -83,7 +84,8 @@ export function endOfDayUTC(utcISO) {
  * - Positive east of UTC (e.g., +120), negative west (e.g., -360).
  */
 export function offsetMinutesForZoneAt(utcMillis, timeZone) {
-  if (!Intl || !Intl.DateTimeFormat) return -new Date(utcMillis).getTimezoneOffset();
+  if (!Intl || !Intl.DateTimeFormat)
+    return -new Date(utcMillis).getTimezoneOffset();
   try {
     const dtf = new Intl.DateTimeFormat("en-US", {
       timeZone,
@@ -141,10 +143,17 @@ export function fromUTCToZoned(utcISO, timeZone) {
     millisecond: wallDate.getUTCMilliseconds(),
   };
 
-  const wallISO = new Date(Date.UTC(
-    parts.year, parts.month - 1, parts.day,
-    parts.hour, parts.minute, parts.second, parts.millisecond
-  )).toISOString();
+  const wallISO = new Date(
+    Date.UTC(
+      parts.year,
+      parts.month - 1,
+      parts.day,
+      parts.hour,
+      parts.minute,
+      parts.second,
+      parts.millisecond
+    )
+  ).toISOString();
 
   return { wallISO, parts, offsetMinutes: offsetMin };
 }
@@ -160,9 +169,21 @@ export function fromUTCToZoned(utcISO, timeZone) {
  *     • for skipped times (spring-forward gap), chooses 'next' valid instant
  * - Returns { utcISO, offsetMinutes }.
  */
-export function fromZonedToUTC(wall, timeZone, { disambiguation = "earliest" } = {}) {
+export function fromZonedToUTC(
+  wall,
+  timeZone,
+  { disambiguation = "earliest" } = {}
+) {
   const w = typeof wall === "string" ? parseWallString(wall) : wallObject(wall);
-  const wallAsUTC = Date.UTC(w.year, w.month - 1, w.day, w.hour, w.minute, w.second, w.millisecond);
+  const wallAsUTC = Date.UTC(
+    w.year,
+    w.month - 1,
+    w.day,
+    w.hour,
+    w.minute,
+    w.second,
+    w.millisecond
+  );
 
   // Guess offset using the instant we'd get if this wall time actually existed.
   let guessOffset = guessOffsetForWall(w, timeZone);
@@ -194,12 +215,20 @@ export function fromZonedToUTC(wall, timeZone, { disambiguation = "earliest" } =
       if (nextOffset !== actualOffset) {
         // Jump to the start of valid time after the gap by reusing the desired wall as anchor.
         utcMs = wallAsUTC - nextOffset * 60000;
-        eventBus.emit?.({ type: "clock.dst_gap.adjusted", ts: isoNow(), source: "services/clock/time", data: { timeZone, wall, usedOffset: nextOffset } });
+        eventBus.emit?.({
+          type: "clock.dst_gap.adjusted",
+          ts: isoNow(),
+          source: "services/clock/time",
+          data: { timeZone, wall, usedOffset: nextOffset },
+        });
       }
     }
   }
 
-  return { utcISO: new Date(utcMs).toISOString(), offsetMinutes: offsetMinutesForZoneAt(utcMs, timeZone) };
+  return {
+    utcISO: new Date(utcMs).toISOString(),
+    offsetMinutes: offsetMinutesForZoneAt(utcMs, timeZone),
+  };
 }
 
 /**
@@ -208,7 +237,18 @@ export function fromZonedToUTC(wall, timeZone, { disambiguation = "earliest" } =
  */
 export function startOfZonedDayUTC(referenceUTC, timeZone) {
   const local = fromUTCToZoned(referenceUTC, timeZone).parts;
-  const { utcISO } = fromZonedToUTC({ year: local.year, month: local.month, day: local.day, hour: 0, minute: 0, second: 0, millisecond: 0 }, timeZone);
+  const { utcISO } = fromZonedToUTC(
+    {
+      year: local.year,
+      month: local.month,
+      day: local.day,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    },
+    timeZone
+  );
   return utcISO;
 }
 
@@ -226,7 +266,14 @@ export function endOfZonedDayUTC(referenceUTC, timeZone) {
 export function addZonedDaysUTC(utcISO, timeZone, days = 1) {
   const baseStart = startOfZonedDayUTC(utcISO, timeZone);
   const baseLocal = fromUTCToZoned(baseStart, timeZone).parts;
-  const target = { ...baseLocal, day: baseLocal.day + days, hour: 0, minute: 0, second: 0, millisecond: 0 };
+  const target = {
+    ...baseLocal,
+    day: baseLocal.day + days,
+    hour: 0,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+  };
   return fromZonedToUTC(target, timeZone).utcISO;
 }
 
@@ -267,9 +314,13 @@ export function formatZonedWithTZ(utcISO, timeZone, options = {}) {
 /** Returns a stable, localized time zone name (e.g., "Central Time") when possible */
 export function getTimeZoneName(timeZone, { locale, style = "long" } = {}) {
   try {
-    const fmt = new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: style, year: "numeric" });
+    const fmt = new Intl.DateTimeFormat(locale, {
+      timeZone,
+      timeZoneName: style,
+      year: "numeric",
+    });
     const parts = fmt.formatToParts(new Date());
-    const tzPart = parts.find(p => p.type === "timeZoneName");
+    const tzPart = parts.find((p) => p.type === "timeZoneName");
     return tzPart?.value || timeZone;
   } catch {
     return timeZone;
@@ -283,8 +334,11 @@ export function getTimeZoneName(timeZone, { locale, style = "long" } = {}) {
 function parseWallString(s) {
   // Accept "YYYY-MM-DD" or "YYYY-MM-DDTHH:mm[:ss[.SSS]]"
   const [dPart, tPart = "00:00:00.000"] = s.split("T");
-  const [y, m, d] = dPart.split("-").map(n => Number(n));
-  let ms = 0, H = 0, M = 0, S = 0;
+  const [y, m, d] = dPart.split("-").map((n) => Number(n));
+  let ms = 0,
+    H = 0,
+    M = 0,
+    S = 0;
   if (tPart) {
     const [hh, mm, rest = "0"] = tPart.split(":");
     H = Number(hh || 0);
@@ -297,12 +351,25 @@ function parseWallString(s) {
       S = Number(rest || 0);
     }
   }
-  return wallObject({ year: y, month: m, day: d, hour: H, minute: M, second: S, millisecond: ms });
+  return wallObject({
+    year: y,
+    month: m,
+    day: d,
+    hour: H,
+    minute: M,
+    second: S,
+    millisecond: ms,
+  });
 }
 
 function wallObject(o = {}) {
-  const year = Number(o.year), month = Number(o.month), day = Number(o.day);
-  const hour = Number(o.hour || 0), minute = Number(o.minute || 0), second = Number(o.second || 0), millisecond = Number(o.millisecond || 0);
+  const year = Number(o.year),
+    month = Number(o.month),
+    day = Number(o.day);
+  const hour = Number(o.hour || 0),
+    minute = Number(o.minute || 0),
+    second = Number(o.second || 0),
+    millisecond = Number(o.millisecond || 0);
   return { year, month, day, hour, minute, second, millisecond };
 }
 
@@ -315,7 +382,15 @@ function guessOffsetForWall(w, timeZone) {
 
 function compareWall(a, b) {
   // Compare two wall time parts (a vs b). Returns -1,0,1
-  const seq = ["year", "month", "day", "hour", "minute", "second", "millisecond"];
+  const seq = [
+    "year",
+    "month",
+    "day",
+    "hour",
+    "minute",
+    "second",
+    "millisecond",
+  ];
   for (const k of seq) {
     const d = (a[k] || 0) - (b[k] || 0);
     if (d < 0) return -1;
@@ -331,7 +406,12 @@ function compareWall(a, b) {
 /** Emits a heartbeat tick (purely informational) */
 export function emitTick(label = "clock.tick") {
   try {
-    eventBus.emit({ type: label, ts: isoNow(), source: "services/clock/time", data: {} });
+    eventBus.emit({
+      type: label,
+      ts: isoNow(),
+      source: "services/clock/time",
+      data: {},
+    });
   } catch {}
 }
 

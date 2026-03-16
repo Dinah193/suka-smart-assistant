@@ -1,0 +1,520 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.asian_fusion.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Asian Fusion • Deterministic Ruleset",
+    "cuisineId": "cuisines.asian_fusion",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisine rulesets",
+      "notes": [
+        "Workaround for schema oneOf ambiguity: Condition.value must avoid JSON integers because the schema lists both number and integer under oneOf.",
+        "Numeric thresholds are encoded as strings (e.g., \"35\", \"3\"). Engines should coerce where needed.",
+        "Rule ids and tokens are id-safe (^[a-z0-9_.-]+$)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.asian_fusion",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": ["the", "a", "an", "and", "or", "with", "style", "inspired"]
+    },
+    "ingredientAliases": {
+      "ingredient.soy_sauce": ["soy sauce", "shoyu"],
+      "ingredient.tamari": ["tamari", "gluten free soy sauce", "gf soy sauce"],
+      "ingredient.fish_sauce": ["fish sauce", "nam pla", "nuoc mam"],
+      "ingredient.oyster_sauce": ["oyster sauce"],
+      "ingredient.sesame_oil": ["sesame oil", "toasted sesame oil"],
+      "ingredient.rice_vinegar": ["rice vinegar", "rice wine vinegar"],
+      "ingredient.miso_paste": ["miso", "miso paste"],
+      "ingredient.gochujang": [
+        "gochujang",
+        "korean chili paste",
+        "korean chilli paste"
+      ],
+      "ingredient.chili_crisp": ["chili crisp", "chilli crisp", "lao gan ma"],
+      "ingredient.sriracha": ["sriracha"],
+      "ingredient.ginger": ["ginger", "fresh ginger"],
+      "ingredient.garlic": ["garlic", "fresh garlic"],
+      "ingredient.scallions": ["scallions", "green onions", "spring onions"],
+      "ingredient.bok_choy": ["bok choy", "pak choi"],
+      "ingredient.napa_cabbage": ["napa cabbage", "chinese cabbage"]
+    },
+    "dishAliases": {
+      "asian_fusion.teriyaki_chicken_rice_bowl": [
+        "teriyaki bowl",
+        "chicken teriyaki bowl"
+      ],
+      "asian_fusion.sesame_ginger_noodles": [
+        "sesame noodles",
+        "cold sesame noodles"
+      ],
+      "asian_fusion.stir_fry_vegetables_and_protein": [
+        "stir fry",
+        "stir-fry",
+        "veggie stir fry"
+      ],
+      "asian_fusion.thai_inspired_coconut_curry": [
+        "coconut curry",
+        "thai curry"
+      ],
+      "asian_fusion.fried_rice": ["fried rice", "house fried rice"],
+      "asian_fusion.miso_ginger_soup": ["miso soup", "miso ginger soup"],
+      "asian_fusion.quick_pickled_cucumbers": [
+        "quick pickles",
+        "pickled cucumbers"
+      ],
+      "asian_fusion.dumpling_bowl_soup": ["dumpling soup", "wonton soup"]
+    },
+    "equipmentAliases": {
+      "equipment.wok": ["wok"],
+      "equipment.skillet": ["skillet", "frying pan", "pan"],
+      "equipment.sheet_pan": ["sheet pan", "baking sheet"],
+      "equipment.oven": ["oven"],
+      "equipment.rice_cooker": ["rice cooker"],
+      "equipment.pot": ["pot", "sauce pot"],
+      "equipment.saucepan": ["saucepan"],
+      "equipment.dutch_oven": ["dutch oven"]
+    },
+    "methodAliases": {
+      "method.stir_fry": ["stir fry", "stir-fry"],
+      "method.pan_sear": ["pan sear", "sear"],
+      "method.simmer": ["simmer"],
+      "method.boil": ["boil"],
+      "method.roast": ["roast", "bake"],
+      "method.broil": ["broil"],
+      "method.quick_pickle": ["quick pickle", "quick-pickle"],
+      "method.marinade": ["marinate", "marinade"],
+      "method.reduce": ["reduce"],
+      "method.whisk": ["whisk"]
+    }
+  },
+  "globals": {
+    "plannerSignals": {
+      "overlayCuisine": true,
+      "weeknightBiasDefault": "high",
+      "batchBiasDefault": "medium"
+    }
+  },
+  "rules": [
+    {
+      "id": "asian_fusion.base_tags",
+      "enabled": true,
+      "priority": 1000,
+      "title": "Base cuisine tags for Asian Fusion",
+      "description": "Adds canonical cuisine tags when cuisineId matches.",
+      "tags": ["tagging", "base"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.cuisineId",
+        "value": "cuisines.asian_fusion"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.asian_fusion" },
+          { "type": "addTag", "value": "overlay.cuisine" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.score_umami_builders",
+      "enabled": true,
+      "priority": 950,
+      "title": "Boost umami builders",
+      "description": "Boost recipes/dishes that include signature Asian Fusion umami builders.",
+      "tags": ["scoring", "umami"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredientsCore",
+        "values": [
+          "ingredient.soy_sauce",
+          "ingredient.tamari",
+          "ingredient.miso_paste",
+          "ingredient.fish_sauce",
+          "ingredient.oyster_sauce"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 1.25 },
+          { "type": "addTag", "value": "flavor.umami_forward" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.score_garlic_ginger_combo",
+      "enabled": true,
+      "priority": 940,
+      "title": "Boost garlic + ginger aromatic base",
+      "description": "Boost if both garlic and ginger appear in core ingredients.",
+      "tags": ["scoring", "aromatics"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ingredient.garlic"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ingredient.ginger"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.75 },
+          { "type": "addTag", "value": "aromatics.garlic_ginger" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.weeknight_total_time_lte_35",
+      "enabled": true,
+      "priority": 930,
+      "title": "Weeknight boost for fast total time",
+      "description": "Boost candidates with total time <= 35 minutes. (Value encoded as string to avoid oneOf integer/number ambiguity.)",
+      "tags": ["scoring", "weeknight"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": { "type": "lte", "path": "$.time.totalMins", "value": "35" },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.9 },
+          { "type": "addTag", "value": "planner.weeknight" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.tag_stir_fry_pattern",
+      "enabled": true,
+      "priority": 900,
+      "title": "Tag stir fry pattern",
+      "description": "Tag candidates that use stir fry technique.",
+      "tags": ["tagging", "method"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.techniques",
+        "values": ["method.stir_fry"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "pattern.stir_fry" },
+          { "type": "addTag", "value": "method.stir_fry" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.tag_spicy_if_heat_gte_3",
+      "enabled": true,
+      "priority": 880,
+      "title": "Tag spicy dishes",
+      "description": "If heatTypical >= 3, tag as spicy and slightly boost. (Value encoded as string to avoid oneOf integer/number ambiguity.)",
+      "tags": ["tagging", "heat"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": { "type": "gte", "path": "$.heatTypical", "value": "3" },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "flavor.spicy" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.adapt_gluten_free_suggest_tamari",
+      "enabled": true,
+      "priority": 820,
+      "title": "Gluten free suggests tamari",
+      "description": "When diet.gluten_free is present and soy sauce is used, suggest tamari.",
+      "tags": ["adaptation", "diet", "gluten_free"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "diet.gluten_free" },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ingredient.soy_sauce"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe_adapter.suggest_swap",
+              "payload": {
+                "scope": "cuisine.asian_fusion",
+                "from": "ingredient.soy_sauce",
+                "to": "ingredient.tamari",
+                "reason": "diet.gluten_free",
+                "confidence": 0.9
+              }
+            }
+          },
+          { "type": "addTag", "value": "adapt.gluten_free" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.adapt_low_sodium_strategy",
+      "enabled": true,
+      "priority": 780,
+      "title": "Low sodium strategy guidance",
+      "description": "When diet.low_sodium is present and salty umami builders exist, emit a strategy hint event.",
+      "tags": ["adaptation", "diet", "low_sodium"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "diet.low_sodium" },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": [
+              "ingredient.soy_sauce",
+              "ingredient.tamari",
+              "ingredient.fish_sauce",
+              "ingredient.oyster_sauce"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe_adapter.suggest_strategy",
+              "payload": {
+                "scope": "cuisine.asian_fusion",
+                "strategy": "low_sodium_balance",
+                "suggestions": [
+                  {
+                    "type": "swap",
+                    "from": "ingredient.soy_sauce",
+                    "to": "ingredient.low_sodium_soy_sauce",
+                    "reason": "diet.low_sodium",
+                    "confidence": 0.75
+                  },
+                  {
+                    "type": "increase",
+                    "ingredient": "ingredient.garlic",
+                    "reason": "flavor_compensation",
+                    "confidence": 0.6
+                  },
+                  {
+                    "type": "increase",
+                    "ingredient": "ingredient.ginger",
+                    "reason": "flavor_compensation",
+                    "confidence": 0.6
+                  },
+                  {
+                    "type": "add",
+                    "ingredient": "ingredient.rice_vinegar",
+                    "reason": "flavor_compensation",
+                    "confidence": 0.5
+                  }
+                ],
+                "notes": "Balance lower sodium with aromatics and acid; finish with citrus if available."
+              }
+            }
+          },
+          { "type": "addTag", "value": "adapt.low_sodium" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.adapt_peanut_allergy_suggest_tahini",
+      "enabled": true,
+      "priority": 770,
+      "title": "Peanut allergy suggests tahini",
+      "description": "If allergen.peanuts is present and peanut butter is used, suggest tahini.",
+      "tags": ["adaptation", "allergen", "peanuts"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "allergen.peanuts" },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ingredient.peanut_butter"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe_adapter.suggest_swap",
+              "payload": {
+                "scope": "cuisine.asian_fusion",
+                "from": "ingredient.peanut_butter",
+                "to": "ingredient.tahini",
+                "reason": "allergen.peanuts",
+                "confidence": 0.85,
+                "notes": "Tahini + sesame oil + tamari/soy + rice vinegar can mimic creamy sesame noodle sauces."
+              }
+            }
+          },
+          { "type": "addTag", "value": "adapt.nut_free" }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.method_fallback_no_wok",
+      "enabled": true,
+      "priority": 720,
+      "title": "No wok fallback for stir fry",
+      "description": "If stir fry and the kitchen context does NOT include a wok, emit a method fallback hint.",
+      "tags": ["adaptation", "equipment", "stir_fry"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.techniques",
+            "values": ["method.stir_fry"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ctx.kitchen.equipmentIds",
+                "values": ["equipment.wok"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe_adapter.method_fallback",
+              "payload": {
+                "scope": "cuisine.asian_fusion",
+                "from_method": "method.stir_fry",
+                "fallback_method": "method.pan_sear",
+                "preferred_equipment": "equipment.skillet",
+                "notes": "Use high heat skillet; cook in small batches to avoid steaming; reduce sauce to glaze."
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.planner_suggest_quick_pickles_for_umami_mains",
+      "enabled": true,
+      "priority": 650,
+      "title": "Suggest quick pickles as contrast for umami-forward mains",
+      "description": "When a main is umami-forward, suggest quick pickled cucumbers for contrast.",
+      "tags": ["planner", "pairing"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.category", "value": "main" },
+          { "type": "hasTag", "value": "flavor.umami_forward" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.planner.suggest_side",
+              "payload": {
+                "scope": "cuisine.asian_fusion",
+                "dish_id": "asian_fusion.quick_pickled_cucumbers",
+                "reason": "contrast_for_umami_rich_mains",
+                "confidence": 0.7
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "asian_fusion.planner_suggest_miso_addon_for_bowls",
+      "enabled": true,
+      "priority": 640,
+      "title": "Suggest miso soup add-on for bowls",
+      "description": "If meal archetype indicates bowls/noodle bowls, suggest a quick miso soup add-on.",
+      "tags": ["planner", "pairing"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.mealArchetypes",
+        "values": ["archetype.bowl", "archetype.noodle_bowl"]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.planner.suggest_addon",
+              "payload": {
+                "scope": "cuisine.asian_fusion",
+                "dish_id": "asian_fusion.miso_ginger_soup",
+                "reason": "quick_addon_soup",
+                "confidence": 0.6
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

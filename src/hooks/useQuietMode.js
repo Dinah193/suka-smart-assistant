@@ -15,12 +15,16 @@ const isBrowser = typeof window !== "undefined";
 
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch {}
 
 let pausePolicies = {
-  constants: { REASON_USER: "user", REASON_SAFETY: "safety", REASON_SABBATH: "sabbath" },
+  constants: {
+    REASON_USER: "user",
+    REASON_SAFETY: "safety",
+    REASON_SABBATH: "sabbath",
+  },
   shouldFreeze: () => false,
   canContinue: () => true,
 };
@@ -36,7 +40,8 @@ let useSettingsStore = () => ({
 });
 try {
   const mod = require("@/stores/settingsStore");
-  useSettingsStore = (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
+  useSettingsStore =
+    (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
 } catch {}
 
 let calendarSync = { addEvents: async () => ({ ok: true }) };
@@ -56,12 +61,19 @@ const schedKey = (domain) => `${domain || "session"}:schedules`;
 const localSchedAPI = (domain) => ({
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(schedKey(domain)) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(schedKey(domain)) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (s) => {
     if (!isBrowser) return { ok: false };
     const all = localSchedAPI(domain).list();
-    const next = [...all.filter((x) => x.id !== s.id), { ...s, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((x) => x.id !== s.id),
+      { ...s, updatedAt: Date.now() },
+    ];
     localStorage.setItem(schedKey(domain), JSON.stringify(next));
     return { ok: true };
   },
@@ -72,11 +84,17 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const now = () => new Date();
 
 const DAY_TO_IDX = {
-  sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6,
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
 };
 function parseHHMM(s = "00:00") {
   const [h, m] = (s || "").split(":").map((x) => parseInt(x, 10));
-  return [(isNaN(h) ? 0 : h), (isNaN(m) ? 0 : m)];
+  return [isNaN(h) ? 0 : h, isNaN(m) ? 0 : m];
 }
 function setTime(date, h, m) {
   const d = new Date(date);
@@ -93,7 +111,10 @@ function parseDayTime(str) {
   return { day, h, m };
 }
 function isWithinRange(nowDate, startDate, endDate) {
-  return nowDate.getTime() >= startDate.getTime() && nowDate.getTime() <= endDate.getTime();
+  return (
+    nowDate.getTime() >= startDate.getTime() &&
+    nowDate.getTime() <= endDate.getTime()
+  );
 }
 function nextWeekday(date, weekdayIndex) {
   const d = new Date(date);
@@ -115,23 +136,31 @@ function computeQuietWindow(nowDate, quiet) {
 
   if (sh < eh || (sh === eh && sm < em)) {
     // Same-day window
-    if (isWithinRange(nowDate, start, end)) return { start, end, reason: "quietHours" };
+    if (isWithinRange(nowDate, start, end))
+      return { start, end, reason: "quietHours" };
     // Next window times:
-    const nextStart = start > nowDate ? start : new Date(start.getTime() + 24 * 3600 * 1000);
+    const nextStart =
+      start > nowDate ? start : new Date(start.getTime() + 24 * 3600 * 1000);
     const nextEnd = setTime(nextStart, eh, em);
     return { start: nextStart, end: nextEnd, reason: "quietHours" };
   } else {
     // Overnight window
-    const endNext = end <= start ? new Date(end.getTime() + 24 * 3600 * 1000) : end;
+    const endNext =
+      end <= start ? new Date(end.getTime() + 24 * 3600 * 1000) : end;
     const inNow = nowDate >= start || nowDate <= end; // crosses midnight
     if (inNow) {
       const realEnd = nowDate >= start ? endNext : end;
-      const realStart = nowDate >= start ? start : new Date(start.getTime() - 24 * 3600 * 1000);
+      const realStart =
+        nowDate >= start ? start : new Date(start.getTime() - 24 * 3600 * 1000);
       return { start: realStart, end: realEnd, reason: "quietHours" };
     }
     // Next occurrence
-    const nextStart = start > nowDate ? start : new Date(start.getTime() + 24 * 3600 * 1000);
-    const nextEnd = new Date(nextStart.getTime() + ((endNext - start + 24 * 3600 * 1000) % (24 * 3600 * 1000)));
+    const nextStart =
+      start > nowDate ? start : new Date(start.getTime() + 24 * 3600 * 1000);
+    const nextEnd = new Date(
+      nextStart.getTime() +
+        ((endNext - start + 24 * 3600 * 1000) % (24 * 3600 * 1000))
+    );
     return { start: nextStart, end: nextEnd, reason: "quietHours" };
   }
 }
@@ -170,9 +199,11 @@ function computeSabbathWindow(nowDate, sabbath) {
 
 function nextChange(nowDate, activeWin) {
   if (!activeWin) return null;
-  return nowDate <= activeWin.start ? activeWin.start
-       : nowDate < activeWin.end ? activeWin.end
-       : activeWin.start; // already past; fallback
+  return nowDate <= activeWin.start
+    ? activeWin.start
+    : nowDate < activeWin.end
+    ? activeWin.end
+    : activeWin.start; // already past; fallback
 }
 
 /* ---------------------------------- Hook ----------------------------------- */
@@ -217,9 +248,12 @@ export function useQuietMode({ domain = "system" } = {}) {
           if (
             prev.isQuietNow !== next.isQuietNow ||
             prev.reason !== next.reason ||
-            (prev.window?.from?.getTime?.() || 0) !== (next.window?.from?.getTime?.() || 0) ||
-            (prev.window?.to?.getTime?.() || 0) !== (next.window?.to?.getTime?.() || 0) ||
-            (prev.nextChangeAt?.getTime?.() || 0) !== (next.nextChangeAt?.getTime?.() || 0)
+            (prev.window?.from?.getTime?.() || 0) !==
+              (next.window?.from?.getTime?.() || 0) ||
+            (prev.window?.to?.getTime?.() || 0) !==
+              (next.window?.to?.getTime?.() || 0) ||
+            (prev.nextChangeAt?.getTime?.() || 0) !==
+              (next.nextChangeAt?.getTime?.() || 0)
           ) {
             return next;
           }
@@ -242,7 +276,9 @@ export function useQuietMode({ domain = "system" } = {}) {
         rhythms,
         now: new Date(),
       });
-    } catch { return state.isQuietNow; }
+    } catch {
+      return state.isQuietNow;
+    }
   }, [domain, quietHours, sabbath, rhythms, state.isQuietNow]);
 
   const canResume = useCallback(() => {
@@ -253,7 +289,9 @@ export function useQuietMode({ domain = "system" } = {}) {
         sabbath,
         now: new Date(),
       });
-    } catch { return !state.isQuietNow; }
+    } catch {
+      return !state.isQuietNow;
+    }
   }, [domain, quietHours, sabbath, state.isQuietNow]);
 
   const guardBadge = useMemo(() => {
@@ -270,7 +308,12 @@ export function useQuietMode({ domain = "system" } = {}) {
         state.reason === "sabbath"
           ? "Paused by household guard (Sabbath/Quiet Hours)."
           : "Paused by quiet hours.";
-      eventBus.emit("guard:block", { domain, action: actionName, reason, at: new Date().toISOString() });
+      eventBus.emit("guard:block", {
+        domain,
+        action: actionName,
+        reason,
+        at: new Date().toISOString(),
+      });
       return { blocked: true, reason };
     },
     [domain, shouldFreeze, state.reason]
@@ -278,7 +321,13 @@ export function useQuietMode({ domain = "system" } = {}) {
 
   // Wrap any function; if guard is active, emit a pause and no-op
   const guardify = useCallback(
-    (fn, { sessionId, reason = pausePolicies.constants?.REASON_SABBATH || "guard" } = {}) =>
+    (
+        fn,
+        {
+          sessionId,
+          reason = pausePolicies.constants?.REASON_SABBATH || "guard",
+        } = {}
+      ) =>
       (...args) => {
         const frozen = shouldFreeze();
         if (frozen) {
@@ -314,13 +363,25 @@ export function useQuietMode({ domain = "system" } = {}) {
 
   /* ---------------- Save user's schedules outside quiet hours (with RRULE) ---------------- */
   const saveScheduleOutsideQuietHours = useCallback(
-    async ({ domain: dmn = domain, title = "Session Schedule", templateId, steps = [], rrule = "FREQ=WEEKLY;BYDAY=MO", firstRunAt }) => {
+    async ({
+      domain: dmn = domain,
+      title = "Session Schedule",
+      templateId,
+      steps = [],
+      rrule = "FREQ=WEEKLY;BYDAY=MO",
+      firstRunAt,
+    }) => {
       const schedHook = (() => {
-        try { const h = useSchedules(); if (h && typeof h.list === "function") return h; } catch {}
+        try {
+          const h = useSchedules();
+          if (h && typeof h.list === "function") return h;
+        } catch {}
         return localSchedAPI(dmn);
       })();
 
-      const base = firstRunAt ? new Date(firstRunAt) : nextAllowedAt( rhythms?.preferMorning ? 8 : new Date().getHours() + 1 );
+      const base = firstRunAt
+        ? new Date(firstRunAt)
+        : nextAllowedAt(rhythms?.preferMorning ? 8 : new Date().getHours() + 1);
       const sched = {
         id: `sched-${uid()}`,
         domain: dmn,
@@ -330,7 +391,8 @@ export function useQuietMode({ domain = "system" } = {}) {
         firstRunAt: base.toISOString(),
       };
 
-      const res = await (schedHook.save?.(sched) || Promise.resolve({ ok: false }));
+      const res = await (schedHook.save?.(sched) ||
+        Promise.resolve({ ok: false }));
       if (res?.ok) {
         eventBus.emit("schedules:changed", { domain: dmn });
         try {

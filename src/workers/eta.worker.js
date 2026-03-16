@@ -25,10 +25,10 @@
  *  - Defensive: tolerates missing fields & eventBus failures.
  */
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import featureFlags from "../config/featureFlags";
-import HubPacketFormatter from "../hub/HubPacketFormatter";
-import FamilyFundConnector from "../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // ------------------------------
 // Constants & helpers
@@ -70,7 +70,11 @@ function clamp(n, min, max) {
 const models = {
   default(input) {
     const estimate = toMs(input.estimateMs);
-    const elapsed = clamp(toMs(input.elapsedMs), 0, estimate * 10 || 86_400_000);
+    const elapsed = clamp(
+      toMs(input.elapsedMs),
+      0,
+      estimate * 10 || 86_400_000
+    );
     const overrun = Math.max(0, toMs(input.overrunMs));
     const buffer = Math.max(0, toMs(input.bufferMs));
     const baseRemaining = Math.max(0, estimate - elapsed);
@@ -83,14 +87,20 @@ const models = {
   // Example: preservation domain tends to have cooling/resting buffers → keep buffer
   preservation(input) {
     const out = models.default(input);
-    return { remainingMs: Math.round(out.remainingMs * 1.1), confidence: clamp(out.confidence - 0.05, 0, 1) };
+    return {
+      remainingMs: Math.round(out.remainingMs * 1.1),
+      confidence: clamp(out.confidence - 0.05, 0, 1),
+    };
   },
   // Example: animals/butchery may be labor-bound → scale by active_persons
   animals(input) {
     const out = models.default(input);
     const people = Math.max(1, Number(input.activePersons || 1));
     const factor = 1 / clamp(people, 1, 4); // more people -> faster
-    return { remainingMs: Math.round(out.remainingMs * factor), confidence: out.confidence };
+    return {
+      remainingMs: Math.round(out.remainingMs * factor),
+      confidence: out.confidence,
+    };
   },
 };
 
@@ -119,7 +129,9 @@ function onSessionStart(d) {
   if (!id) return;
   const startTs = d.startTs ? new Date(d.startTs).getTime() : now();
   const estimateMs = toMs(d.estimateMs, toMs(d.estimateMin, 0) * 60_000);
-  const plannedEndTs = d.plannedEndTs ? new Date(d.plannedEndTs).getTime() : startTs + estimateMs;
+  const plannedEndTs = d.plannedEndTs
+    ? new Date(d.plannedEndTs).getTime()
+    : startTs + estimateMs;
 
   const prev = sessions.get(id) || {};
   sessions.set(id, {
@@ -182,7 +194,9 @@ function onPlanRecomputed(e) {
     const id = x.sessionId || x.id;
     if (!id || !sessions.has(id)) continue;
     const s = sessions.get(id);
-    const plannedEndTs = x.plannedEndTs ? new Date(x.plannedEndTs).getTime() : s.plannedEndTs;
+    const plannedEndTs = x.plannedEndTs
+      ? new Date(x.plannedEndTs).getTime()
+      : s.plannedEndTs;
     sessions.set(id, { ...s, plannedEndTs });
   }
 }
@@ -314,7 +328,9 @@ function wireEvents() {
     eventBus.on("session.task.completed", (e) => onProgress(e?.data || e)),
     eventBus.on("session.completed", (e) => onSessionDone(e?.data || e)),
     eventBus.on("schedule.overrun.detected", (e) => onOverrun(e?.data || e)),
-    eventBus.on("schedule.plan.recomputed", (e) => onPlanRecomputed(e?.data || e))
+    eventBus.on("schedule.plan.recomputed", (e) =>
+      onPlanRecomputed(e?.data || e)
+    )
   );
 }
 
@@ -351,14 +367,12 @@ function safeEmit(payload) {
 // Utilities
 // ------------------------------
 function normalizeTasks(list) {
-  return list
-    .filter(Boolean)
-    .map((t) => ({
-      id: t.id || t.taskId || String(Math.random()).slice(2),
-      estimateMs: toMs(t.estimateMs, toMs(t.estimateMin, 0) * 60_000),
-      elapsedMs: toMs(t.elapsedMs),
-      status: t.status || "planned",
-    }));
+  return list.filter(Boolean).map((t) => ({
+    id: t.id || t.taskId || String(Math.random()).slice(2),
+    estimateMs: toMs(t.estimateMs, toMs(t.estimateMin, 0) * 60_000),
+    elapsedMs: toMs(t.elapsedMs),
+    status: t.status || "planned",
+  }));
 }
 
 // ------------------------------
@@ -369,7 +383,10 @@ function normalizeTasks(list) {
  *   postMessage({ cmd: 'start'|'stop'|'prime', sessions?: [...] })
  */
 try {
-  if (typeof self !== "undefined" && typeof self.addEventListener === "function") {
+  if (
+    typeof self !== "undefined" &&
+    typeof self.addEventListener === "function"
+  ) {
     self.addEventListener("message", (ev) => {
       const msg = ev?.data || {};
       switch (msg.cmd) {

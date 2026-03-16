@@ -1,0 +1,437 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic.recipes.garlic_mashed_potatoes",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Garlic Mashed Potatoes",
+    "subtitle": "Creamy mash with mellow garlic, butter, and fresh herbs (Herb & Garlic style)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Canonical SSA Herb & Garlic baseline mashed potatoes.",
+        "Built for deterministic planning + adaptation (dairy-free option included)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Herb & Garlic",
+    "subprofiles": ["cuisines.herb_garlic"],
+    "category": "side",
+    "mealArchetypes": ["archetype.mashed_potatoes", "archetype.side_dish"],
+    "servingStyles": ["family_style", "plated"],
+    "plannerTags": [
+      "herb_garlic",
+      "garlic_forward",
+      "herb_forward",
+      "comfort_side",
+      "weeknight",
+      "batch_friendly",
+      "leftovers_good"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a side (about 3/4 cup each)."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": 2,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "makeAhead": {
+      "holdWarmMinutes": 60,
+      "reheatFriendly": true
+    }
+  },
+
+  "tasteProfile": {
+    "dominant": ["garlic", "butter", "savory"],
+    "supporting": ["fresh_herbs", "black_pepper"],
+    "heat": 0,
+    "salt": "medium"
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equip.stock_pot",
+        "label": "Large pot",
+        "required": true
+      },
+      {
+        "id": "equip.colander",
+        "label": "Colander",
+        "required": true
+      },
+      {
+        "id": "equip.potato_masher_or_ricer",
+        "label": "Potato masher or ricer",
+        "required": true,
+        "notes": "A ricer gives the smoothest mash. A masher is classic and still great."
+      },
+      {
+        "id": "equip.knife",
+        "label": "Chef’s knife",
+        "required": true
+      },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.small_saucepan",
+        "label": "Small saucepan",
+        "required": false,
+        "notes": "Nice for warming milk/cream and melting butter together."
+      },
+      {
+        "id": "equip.hand_mixer",
+        "label": "Hand mixer (optional)",
+        "required": false,
+        "notes": "Use carefully on low. Overmixing can make potatoes gluey."
+      }
+    ],
+    "minimum": [
+      "equip.stock_pot",
+      "equip.colander",
+      "equip.potato_masher_or_ricer"
+    ],
+    "recommended": ["equip.small_saucepan"]
+  },
+
+  "dietFlags": ["diet.gluten_free", "diet.vegetarian"],
+  "allergens": ["allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "ing.potatoes_yukon_gold",
+      "label": "Yukon Gold potatoes, peeled and cut into 1.5-inch chunks",
+      "role": "starch",
+      "amount": { "value": 3, "unit": "lb" },
+      "notes": [
+        "Yukon Golds give a naturally buttery texture.",
+        "Russets also work: expect fluffier, slightly drier mash."
+      ]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "clove" },
+      "notes": [
+        "Boiling garlic with potatoes mellows the bite.",
+        "For stronger garlic: add 1–2 cloves grated into the finished mash (optional)."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt (for water + seasoning)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": [
+        "Salt the water generously for best flavor. Adjust final salt to taste."
+      ]
+    },
+    {
+      "id": "ing.butter_unsalted",
+      "label": "Unsalted butter",
+      "role": "fat",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": ["Add more for richer mash if desired."]
+    },
+    {
+      "id": "ing.milk_or_cream",
+      "label": "Whole milk (or half-and-half/cream)",
+      "role": "liquid",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "Warm before adding for the smoothest mash.",
+        "Start with 1/2 cup and add more to reach your preferred texture."
+      ]
+    },
+    {
+      "id": "ing.sour_cream",
+      "label": "Sour cream (optional)",
+      "role": "body",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": ["Adds tang and extra creaminess. Greek yogurt also works."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.parsley",
+      "label": "Fresh parsley, finely chopped",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.chives",
+      "label": "Chives, finely sliced",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": ["Optional but excellent for garlic mash."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Extra-virgin olive oil (optional finish)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": ["Optional Herb & Garlic flourish: drizzle on top with herbs."]
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "grp.base",
+      "label": "Base",
+      "items": ["ing.potatoes_yukon_gold", "ing.garlic", "ing.salt_kosher"]
+    },
+    {
+      "id": "grp.creamy_finish",
+      "label": "Creamy Finish",
+      "items": [
+        "ing.butter_unsalted",
+        "ing.milk_or_cream",
+        "ing.sour_cream",
+        "ing.black_pepper"
+      ]
+    },
+    {
+      "id": "grp.herb_finish_optional",
+      "label": "Herb Finish (Optional)",
+      "items": ["ing.parsley", "ing.chives", "ing.olive_oil"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.boil_potatoes_garlic",
+      "title": "Boil potatoes and garlic",
+      "activeMins": 8,
+      "handsOffMins": 18,
+      "instructions": [
+        "Add potatoes and whole garlic cloves to a large pot. Cover with cold water by about 1 inch.",
+        "Add about 1 tsp of the salt to the water.",
+        "Bring to a boil, then reduce to a steady simmer until potatoes are fork-tender (about 15–18 minutes)."
+      ],
+      "timers": [{ "label": "Simmer potatoes", "minutes": 18 }],
+      "checks": [
+        "Potatoes are fork-tender (knife slides in easily)",
+        "Garlic cloves are soft"
+      ]
+    },
+    {
+      "id": "step.warm_dairy_melt_butter",
+      "title": "Warm milk and melt butter",
+      "activeMins": 5,
+      "handsOffMins": 5,
+      "instructions": [
+        "While potatoes cook, warm the milk (or cream) until just hot (not boiling).",
+        "Melt butter into the warm milk if you like (optional but helps incorporation)."
+      ],
+      "timers": [{ "label": "Warm dairy", "minutes": 5 }]
+    },
+    {
+      "id": "step.drain_and_dry",
+      "title": "Drain and dry the potatoes",
+      "activeMins": 4,
+      "handsOffMins": 2,
+      "instructions": [
+        "Drain potatoes and garlic well in a colander.",
+        "Return them to the hot pot and set over low heat for 1–2 minutes, shaking occasionally, to evaporate excess water."
+      ],
+      "timers": [{ "label": "Dry potatoes in pot", "minutes": 2 }],
+      "checks": ["Steam rises and excess moisture evaporates"]
+    },
+    {
+      "id": "step.mash_and_enrich",
+      "title": "Mash, then enrich",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Mash potatoes and garlic until mostly smooth (or pass through a ricer for very smooth mash).",
+        "Add butter and warm milk gradually, stirring gently until creamy.",
+        "Optional: fold in sour cream for extra tang/creaminess.",
+        "Season with remaining salt (to taste) and black pepper."
+      ],
+      "checks": [
+        "Texture is creamy (not watery)",
+        "Seasoning balanced (salt/pepper)"
+      ]
+    },
+    {
+      "id": "step.finish_with_herbs",
+      "title": "Finish with herbs (optional) and serve",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Stir in parsley and/or chives if using.",
+        "Optional: drizzle a little olive oil on top and add a pinch of herbs for a Herb & Garlic finish.",
+        "Serve hot."
+      ]
+    }
+  ],
+
+  "methods": ["technique.boil", "technique.mash"],
+
+  "pairings": {
+    "mains": [
+      "cuisines.herb_garlic.recipes.garlic_herb_roast_chicken",
+      "herb_garlic.garlic_herb_salmon",
+      "herb_garlic.sheet_pan_lemon_garlic_chicken_veg"
+    ],
+    "vegetables": [
+      "herb_garlic.lemon_garlic_green_beans",
+      "herb_garlic.garlic_herb_mushroom_saute"
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Cool quickly and refrigerate in an airtight container. Reheat gently with a splash of milk.",
+      "maxDays": 4
+    },
+    "freezer": {
+      "guidance": "Freezing is possible but texture may change. Freeze in portions; reheat with extra milk and butter.",
+      "maxMonths": 2
+    },
+    "reheat": {
+      "best": [
+        "Stovetop on low with a splash of milk, stirring often",
+        "Microwave in short bursts, stirring, with milk added"
+      ],
+      "avoid": ["High heat without added liquid (can scorch or dry out)"]
+    }
+  },
+
+  "planner": {
+    "dishId": "herb_garlic.garlic_mashed_potatoes",
+    "course": "side",
+    "batchNotes": [
+      "Great for meal prep: make ahead and reheat with milk/butter.",
+      "Hold warm (covered) up to 60 minutes; stir occasionally and add milk if thickening."
+    ],
+    "leftovers": [
+      "Make potato cakes (pan-sear with a little oil/butter)",
+      "Use as shepherd’s pie topping",
+      "Thicken soups/stews"
+    ]
+  },
+
+  "summary": "Creamy garlic mashed potatoes with mellow boiled garlic, butter, and optional fresh herbs—an Herb & Garlic side that pairs with roasts, fish, and stews.",
+
+  "keywords": [
+    "garlic mashed potatoes",
+    "mashed potatoes",
+    "herb and garlic",
+    "buttery",
+    "creamy",
+    "comfort food",
+    "side dish"
+  ],
+
+  "tags": [
+    "cuisine.herb_garlic",
+    "herb_garlic",
+    "garlic_forward",
+    "herb_forward",
+    "side",
+    "comfort_side",
+    "weeknight",
+    "batch_friendly",
+    "leftovers_good",
+    "gluten_free",
+    "vegetarian"
+  ],
+
+  "safety": {
+    "handling": [
+      "Cool leftovers within 2 hours and refrigerate promptly.",
+      "Reheat until steaming hot; add milk as needed to restore texture."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.roasted_garlic",
+      "label": "Roasted garlic mash (sweeter, deeper garlic)",
+      "when": { "wantsDeeperGarlic": true },
+      "adapt": {
+        "notes": [
+          "Roast 1 head of garlic at 400°F for ~35–45 minutes until soft.",
+          "Squeeze cloves into the mash and reduce boiled garlic (or omit)."
+        ]
+      }
+    },
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free (olive oil + broth)",
+      "when": { "avoidAllergen": "allergen.dairy" },
+      "adapt": {
+        "notes": [
+          "Replace butter with 3 tbsp olive oil.",
+          "Replace milk with warm chicken/vegetable broth (start with 1/2 cup and add as needed).",
+          "Finish with herbs and extra olive oil drizzle."
+        ],
+        "allergens": ["allergen.none"]
+      }
+    },
+    {
+      "id": "var.extra_herby",
+      "label": "Extra herby",
+      "when": { "prefersHerbs": "high" },
+      "adapt": {
+        "notes": [
+          "Add 1 tbsp chopped parsley + 1 tbsp chives + 1 tsp thyme leaves.",
+          "Finish with lemon zest (small pinch) for a brighter Herb & Garlic profile."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.herb_garlic.recipes.garlic_mashed_potatoes",
+    "aliases": [
+      "garlic mash",
+      "garlic mashed potatoes",
+      "herb garlic mashed potatoes"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.boil", "technique.mash"],
+      "coreIngredients": [
+        "ing.potatoes_yukon_gold",
+        "ing.garlic",
+        "ing.butter_unsalted",
+        "ing.milk_or_cream"
+      ]
+    }
+  }
+}

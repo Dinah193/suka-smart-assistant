@@ -1,0 +1,539 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean.recipes.kimchi_jjigae",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Kimchi Jjigae (Korean Kimchi Stew)",
+    "subtitle": "Spicy, savory stew built on well-fermented kimchi, aromatic pork (optional), and tofu.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": "Canonical SSA kimchi jjigae with optional pork, tuna, and vegetarian variations; includes consistency checks and safety notes."
+    }
+  },
+
+  "classification": {
+    "cuisine": "korean",
+    "category": "stew",
+    "mealArchetypes": ["korean.meal.stew_and_rice", "korean.meal.jjigae"],
+    "servingStyles": ["one_pot", "bowls", "family_style"],
+    "plannerTags": [
+      "korean",
+      "kimchi_jjigae",
+      "jjigae",
+      "stew",
+      "spicy",
+      "comfort_food",
+      "weeknight",
+      "leftovers_good",
+      "batch_friendly"
+    ],
+    "subprofiles": ["korean.home_style"]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 430, "unit": "g" },
+    "notes": "Makes ~6 cups (1.4 L). Serve with steamed rice and banchan."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightFriendly": true,
+    "batchFriendly": "medium",
+    "leftoversGood": true,
+    "freezerFriendly": "low",
+    "onePot": true
+  },
+
+  "tasteProfile": {
+    "sweet": 1,
+    "salty": 3,
+    "umami": 5,
+    "sour": 3,
+    "heat": 3,
+    "aromatics": ["garlic", "scallion", "onion"],
+    "notes": ["funky", "tangy", "deep porky (if used)", "rich chili"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.pot_or_dutch_oven",
+        "label": "Medium pot or Dutch oven",
+        "required": true
+      },
+      { "id": "equipment.knife", "label": "Chef’s knife", "required": true },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      },
+      {
+        "id": "equipment.wooden_spoon",
+        "label": "Wooden spoon or spatula",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.ladle",
+      "equipment.korean_earthenware_ttjigae_pot"
+    ],
+    "optional": [
+      {
+        "id": "equipment.ttukbaegi",
+        "label": "Ttukbaegi (Korean earthenware stew pot)",
+        "required": false,
+        "notes": "Classic serving vessel; holds heat well."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.omnivore"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.fish"],
+    "mayContain": [],
+    "notes": [
+      "Kimchi often contains fish sauce/shrimp paste; choose vegan kimchi if needed.",
+      "Use gluten-free gochujang/soy sauce if sensitive to wheat."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.kimchi_well_fermented",
+      "label": "Well-fermented kimchi, chopped",
+      "role": "stew_base",
+      "amount": { "value": 420, "unit": "g" },
+      "notes": "About 3 cups. Older/sour kimchi makes better jjigae."
+    },
+    {
+      "id": "ingredient.kimchi_juice",
+      "label": "Kimchi juice",
+      "role": "umami",
+      "amount": { "value": 60, "unit": "ml" },
+      "optional": true,
+      "notes": "Add for extra depth; reduce if kimchi is extremely salty."
+    },
+
+    {
+      "id": "ingredient.pork_shoulder_or_belly",
+      "label": "Pork shoulder or pork belly, bite-size",
+      "role": "protein",
+      "amount": { "value": 300, "unit": "g" },
+      "optional": true,
+      "notes": "Classic. Substitute tuna (see variations) or omit for vegetarian."
+    },
+
+    {
+      "id": "ingredient.tofu_firm",
+      "label": "Firm tofu, sliced",
+      "role": "protein",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 1 block."
+    },
+
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, sliced",
+      "role": "aromatic",
+      "amount": { "value": 150, "unit": "g" }
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions (green onions), chopped",
+      "role": "aromatic",
+      "amount": { "value": 40, "unit": "g" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 4 cloves."
+    },
+    {
+      "id": "ingredient.gochugaru",
+      "label": "Gochugaru (Korean chili flakes)",
+      "role": "spice",
+      "amount": { "value": 8, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 tbsp depending on heat preference."
+    },
+    {
+      "id": "ingredient.gochujang",
+      "label": "Gochujang (Korean chili paste)",
+      "role": "spice",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Optional but common: adds body and sweetness."
+    },
+
+    {
+      "id": "ingredient.sesame_oil",
+      "label": "Toasted sesame oil",
+      "role": "fat",
+      "amount": { "value": 5, "unit": "ml" },
+      "optional": true,
+      "notes": "A few drops at the end is traditional."
+    },
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 15, "unit": "ml" }
+    },
+
+    {
+      "id": "ingredient.stock_anchovy_kelp_or_chicken",
+      "label": "Anchovy-kelp stock (or chicken stock / water)",
+      "role": "liquid",
+      "amount": { "value": 1100, "unit": "ml" },
+      "notes": "Traditional is anchovy-kelp (dashima + anchovy). Chicken stock works; water is acceptable with seasoning."
+    },
+
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true,
+      "notes": "Adjust at end; kimchi varies in saltiness."
+    },
+    {
+      "id": "ingredient.doenjang",
+      "label": "Doenjang (Korean soybean paste)",
+      "role": "umami",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "Optional: small amount rounds out funk and depth."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true,
+      "notes": "Only if needed after tasting."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.rice_cooked",
+      "label": "Steamed rice (for serving)",
+      "role": "side",
+      "amount": { "value": 4, "unit": "servings" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Kimchi Base",
+      "items": [
+        "ingredient.kimchi_well_fermented",
+        "ingredient.kimchi_juice",
+        "ingredient.stock_anchovy_kelp_or_chicken"
+      ]
+    },
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics + Heat",
+      "items": [
+        "ingredient.onion",
+        "ingredient.scallions",
+        "ingredient.garlic",
+        "ingredient.gochugaru",
+        "ingredient.gochujang"
+      ]
+    },
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": ["ingredient.pork_shoulder_or_belly", "ingredient.tofu_firm"]
+    },
+    {
+      "id": "group.seasoning",
+      "label": "Seasoning & Finish",
+      "items": [
+        "ingredient.soy_sauce",
+        "ingredient.doenjang",
+        "ingredient.sesame_oil",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ]
+    }
+  ],
+
+  "methods": ["method.sauté", "method.simmer", "method.stew"],
+
+  "safety": {
+    "notes": [
+      "If using pork, cook until fully done (no pink).",
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Reheat to a steady simmer before serving."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Flavor improves on day 2. Store in sealed container."
+    },
+    "freezer": {
+      "maxDays": 0,
+      "notes": "Not recommended; tofu texture changes after freezing."
+    },
+    "reheat": {
+      "notes": [
+        "Reheat on stove to simmer 5–8 minutes, adding a splash of water/stock if thickened."
+      ]
+    }
+  },
+
+  "pairings": {
+    "with": [
+      "dish.steamed_rice",
+      "dish.kimchi",
+      "dish.gim",
+      "dish.pickled_radish"
+    ],
+    "banchan": [
+      "dish.kongnamul_muchim",
+      "dish.spinach_namul",
+      "dish.cucumber_kimchi"
+    ],
+    "drinks": ["drink.barley_tea", "drink.water"]
+  },
+
+  "planner": {
+    "roles": {
+      "stew_base": ["ingredient.kimchi_well_fermented"],
+      "protein": ["ingredient.pork_shoulder_or_belly", "ingredient.tofu_firm"],
+      "aromatic": [
+        "ingredient.onion",
+        "ingredient.scallions",
+        "ingredient.garlic"
+      ],
+      "spice": ["ingredient.gochugaru", "ingredient.gochujang"],
+      "side": ["ingredient.rice_cooked"]
+    },
+    "signals": {
+      "primaryMeal": true,
+      "pairsWithRice": true,
+      "greatForColdWeather": true
+    }
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.tuna_jjigae",
+      "label": "Tuna kimchi jjigae",
+      "when": { "available": ["ingredient.canned_tuna"] },
+      "changes": {
+        "notes": [
+          "Replace pork with 1–2 cans tuna (drained). Add tuna in the last 5–7 minutes of simmering to avoid drying it out."
+        ]
+      }
+    },
+    {
+      "id": "adapt.vegetarian",
+      "label": "Vegetarian/vegan (with vegan kimchi)",
+      "when": { "diet": ["vegetarian", "vegan"] },
+      "changes": {
+        "notes": [
+          "Use vegan kimchi and water/vegetable stock.",
+          "Add mushrooms (shiitake/king oyster) for body, and consider a bit more doenjang for umami (if diet allows)."
+        ],
+        "swap": [
+          {
+            "from": "ingredient.pork_shoulder_or_belly",
+            "to": "ingredient.mushrooms",
+            "notes": "Add 250–300 g mushrooms; sauté until browned before adding stock."
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapt.low_heat",
+      "label": "Lower heat",
+      "when": { "preference": ["low_spice"] },
+      "changes": {
+        "notes": [
+          "Omit gochugaru and reduce gochujang to 1 tsp (or omit). Let the kimchi provide the flavor."
+        ]
+      }
+    },
+    {
+      "id": "adapt.extra_rich",
+      "label": "Extra rich",
+      "when": { "preference": ["rich_broth"] },
+      "changes": {
+        "notes": [
+          "Brown pork well and sauté kimchi longer (5–7 minutes) before adding stock.",
+          "Use anchovy-kelp stock for classic depth."
+        ]
+      }
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.add_rice_cakes",
+      "label": "Add tteok (rice cakes)",
+      "notes": [
+        "Add sliced rice cakes during the last 8–10 minutes of simmering until tender."
+      ]
+    },
+    {
+      "id": "var.add_enoki",
+      "label": "Add enoki mushrooms",
+      "notes": [
+        "Add enoki in the last 3 minutes to keep them delicate and springy."
+      ]
+    },
+    {
+      "id": "var.add_cheese",
+      "label": "Add cheese (modern comfort style)",
+      "notes": [
+        "Top with a slice of mozzarella/cheddar in the last minute to melt. Not traditional, but popular."
+      ]
+    }
+  ],
+
+  "notes": [
+    "The key is sour, well-fermented kimchi—fresh kimchi makes a flatter stew.",
+    "Kimchi saltiness varies widely; season at the end after simmering.",
+    "If you want a deeper broth without anchovy stock, a small spoon of doenjang helps."
+  ],
+
+  "steps": [
+    {
+      "id": "step.01_prep",
+      "title": "Prep ingredients",
+      "instructions": [
+        "Chop kimchi into bite-size pieces and reserve kimchi juice if using.",
+        "Slice onion and chop scallions (separate whites and greens if you want a cleaner finish).",
+        "Mince garlic.",
+        "Slice tofu into 1–2 cm slabs."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": ["All ingredients are ready before cooking starts."]
+    },
+    {
+      "id": "step.02_brown_pork_optional",
+      "title": "Brown pork (optional, recommended)",
+      "instructions": [
+        "Heat neutral oil in a pot over medium-high.",
+        "If using pork, add it in a single layer and cook until lightly browned on most sides (3–5 minutes).",
+        "Add onion and cook 1–2 minutes until slightly softened."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Brown pork", "minutes": 4 }],
+      "checks": ["Pork has browned edges (foundation for deeper broth)."]
+    },
+    {
+      "id": "step.03_saute_kimchi",
+      "title": "Sauté kimchi and aromatics",
+      "instructions": [
+        "Add chopped kimchi to the pot (with onion/pork if used).",
+        "Cook 3–5 minutes, stirring, until kimchi looks slightly softened and fragrant.",
+        "Add garlic and gochugaru (if using) and cook 30 seconds.",
+        "Stir in gochujang and/or doenjang (if using) until dissolved into the pot juices."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Sauté kimchi", "minutes": 4 },
+        { "label": "Bloom garlic/chili", "seconds": 30 }
+      ],
+      "checks": ["Kimchi is fragrant; chili paste is evenly mixed (no clumps)."]
+    },
+    {
+      "id": "step.04_add_stock_simmer",
+      "title": "Add stock and simmer",
+      "instructions": [
+        "Add stock (or water) and kimchi juice (if using).",
+        "Bring to a gentle boil, then reduce to a steady simmer.",
+        "Simmer 15–20 minutes to develop flavor."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 18,
+      "timers": [{ "label": "Simmer broth", "minutes": 18 }],
+      "checks": [
+        "Broth tastes developed: tangy, savory, and balanced (before final seasoning)."
+      ]
+    },
+    {
+      "id": "step.05_add_tofu_finish",
+      "title": "Add tofu and finish",
+      "instructions": [
+        "Gently add sliced tofu and simmer 5 minutes.",
+        "Add scallions and simmer 1–2 minutes.",
+        "Taste and adjust seasoning: a splash of soy sauce if needed; salt only if necessary.",
+        "Finish with a few drops of sesame oil (optional) and black pepper (optional)."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 5,
+      "timers": [
+        { "label": "Warm tofu", "minutes": 5 },
+        { "label": "Finish scallions", "minutes": 1.5 }
+      ],
+      "checks": [
+        "Tofu is heated through but not broken apart.",
+        "Seasoning is adjusted after simmering (not before)."
+      ]
+    },
+    {
+      "id": "step.06_serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve hot with steamed rice.",
+        "Offer extra kimchi, gim (roasted seaweed), or banchan on the side."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "checks": ["Stew is served piping hot; rice is ready alongside."]
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.korean",
+    "dishId": "dish.kimchi_jjigae",
+    "sourcePaths": ["src/catalogs/cuisines/korean/recipes/kimchi_jjigae.json"],
+    "search": {
+      "aliases": ["kimchi stew", "kimchi jjigae", "kimchi chigae"],
+      "keywords": [
+        "kimchi",
+        "jjigae",
+        "korean stew",
+        "spicy stew",
+        "tofu",
+        "pork",
+        "comfort food"
+      ]
+    }
+  }
+}

@@ -1,0 +1,450 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.stewed_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Stewed Chicken",
+    "subtitle": "Browned chicken in a rich onion-garlic gravy with thyme + Scotch bonnet",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from Jamaican/Trinidadian-style brown stew chicken patterns (everyday home cooking).",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": [
+      "jamaican",
+      "trini_tobago",
+      "guyanese",
+      "eastern_caribbean"
+    ],
+    "category": "main",
+    "mealArchetypes": ["brown_stew_plus_starch_plus_veg"],
+    "servingStyles": ["family_style", "plated_meals", "weeknight"],
+    "plannerTags": ["caribbean", "stew", "chicken", "brown_stew", "batch"]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "Scales well; ideal for Sunday dinner + leftovers."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "totalMins": 75,
+    "handsOffMins": 45
+  },
+
+  "difficulty": 2,
+
+  "nutritionHints": {
+    "proteinForward": true,
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "heatTypical": 2,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 2,
+    "sourness": 1,
+    "saltiness": 2,
+    "umami": 2,
+    "signature": [
+      "browning",
+      "thyme",
+      "garlic_onion",
+      "allspice",
+      "scotch_bonnet_aroma"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "heavy_pot_or_dutch_oven",
+      "tongs",
+      "cutting_board",
+      "chef_knife"
+    ],
+    "minimum": ["pot_with_lid", "stovetop"],
+    "optional": ["pressure_cooker", "thermometer"]
+  },
+
+  "dietFlags": ["gluten_free", "dairy_free"],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "chicken_legs_or_thighs_bone_in",
+      "label": "Chicken legs/thighs (bone-in)",
+      "amount": { "value": 3.5, "unit": "lb" },
+      "role": "protein",
+      "notes": "Leg quarters are classic. Boneless thighs work (reduce cook time)."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "acid",
+      "notes": "Often used for washing/seasoning chicken."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "seasoning",
+      "notes": "Start lighter if using salted stock."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "seasoning"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic (minced)",
+      "amount": { "value": 5, "unit": "clove" },
+      "role": "aromatic"
+    },
+    {
+      "id": "ginger",
+      "label": "Ginger (grated)",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "onion",
+      "label": "Onion (sliced)",
+      "amount": { "value": 1, "unit": "large" },
+      "role": "aromatic"
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (chopped)",
+      "amount": { "value": 4, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "thyme",
+      "label": "Thyme (fresh sprigs) or dried",
+      "amount": { "value": 6, "unit": "sprig" },
+      "role": "herb",
+      "notes": "If dried: 2 tsp."
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Bell pepper (sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "tomato",
+      "label": "Tomato (chopped) OR diced tomatoes",
+      "amount": { "value": 1, "unit": "cup" },
+      "role": "base",
+      "optional": true,
+      "notes": "Common in Jamaican-style versions."
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "base",
+      "optional": true
+    },
+    {
+      "id": "carrot",
+      "label": "Carrot (sliced)",
+      "amount": { "value": 2, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "fat"
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "sweetener",
+      "notes": "For caramelization/‘brown stew’ flavor."
+    },
+    {
+      "id": "browning_sauce",
+      "label": "Browning (Caribbean browning sauce)",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "seasoning",
+      "optional": true,
+      "notes": "If unavailable, make a quick dark caramel with brown sugar (see steps)."
+    },
+    {
+      "id": "allspice",
+      "label": "Allspice (ground) or berries",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "umami",
+      "optional": true,
+      "notes": "Adds savory depth; omit for soy-free."
+    },
+    {
+      "id": "stock_chicken_or_water",
+      "label": "Chicken stock or water",
+      "amount": { "value": 2.5, "unit": "cup" },
+      "role": "liquid",
+      "notes": "Start with 2 cups; add more if needed."
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (whole)",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "heat",
+      "notes": "Keep whole for aroma. Do not burst unless you want it much hotter."
+    },
+    {
+      "id": "vinegar",
+      "label": "Vinegar (white or apple cider)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "acid",
+      "optional": true,
+      "notes": "A small splash brightens the gravy at the end."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "season_chicken",
+      "title": "Season the chicken",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Pat chicken dry.",
+        "Toss with lime juice, salt, black pepper, garlic, scallion, thyme (and optional ginger/allspice/paprika).",
+        "Rest 15–30 minutes (or refrigerate up to overnight)."
+      ],
+      "timers": [{ "label": "Rest/Marinate", "mins": 20 }],
+      "inputs": {
+        "ingredients": [
+          "chicken_legs_or_thighs_bone_in",
+          "lime_juice",
+          "salt",
+          "black_pepper",
+          "garlic",
+          "scallion",
+          "thyme",
+          "ginger",
+          "allspice",
+          "paprika"
+        ],
+        "equipment": ["mixing_bowl"]
+      }
+    },
+    {
+      "id": "build_browning",
+      "title": "Build the brown stew base",
+      "domain": "cooking",
+      "activeMins": 5,
+      "instructions": [
+        "Heat pot over medium heat and add oil.",
+        "If using browning sauce, stir it into the oil briefly (10–15 seconds).",
+        "If NOT using browning sauce: sprinkle in the brown sugar and stir until it melts and turns deep amber (30–90 seconds). Do not burn.",
+        "Immediately proceed to browning the chicken."
+      ],
+      "inputs": {
+        "ingredients": ["neutral_oil", "browning_sauce", "brown_sugar"],
+        "equipment": ["pot_with_lid", "stovetop", "spoon"]
+      }
+    },
+    {
+      "id": "brown_chicken",
+      "title": "Brown the chicken",
+      "domain": "cooking",
+      "activeMins": 12,
+      "instructions": [
+        "Add chicken pieces to the pot in a single layer (work in batches if needed).",
+        "Brown 3–4 minutes per side to build color and fond; you are not cooking through yet.",
+        "Remove excess rendered fat if needed (leave ~1–2 tbsp in the pot)."
+      ],
+      "inputs": {
+        "ingredients": ["chicken_legs_or_thighs_bone_in"],
+        "equipment": ["tongs", "pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "sweat_aromatics",
+      "title": "Sweat aromatics + build gravy",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Add onion (and optional bell pepper and carrot). Stir 3–4 minutes until softened.",
+        "Add tomato paste (if using) and cook 30–60 seconds.",
+        "Add optional tomato and optional soy sauce; stir 1 minute.",
+        "Return chicken to the pot and stir to coat in the base."
+      ],
+      "inputs": {
+        "ingredients": [
+          "onion",
+          "bell_pepper",
+          "carrot",
+          "tomato_paste",
+          "tomato",
+          "soy_sauce"
+        ],
+        "equipment": ["pot_with_lid", "stovetop", "spoon"]
+      }
+    },
+    {
+      "id": "simmer",
+      "title": "Simmer until tender",
+      "domain": "cooking",
+      "activeMins": 3,
+      "handsOffMins": 40,
+      "instructions": [
+        "Add stock/water and the whole Scotch bonnet.",
+        "Bring to a gentle simmer, cover, and cook 30–45 minutes, stirring occasionally, until chicken is tender and gravy is glossy.",
+        "Uncover and simmer 5–10 minutes to thicken if needed.",
+        "Taste and adjust salt/pepper; optionally add a tiny splash of vinegar to brighten."
+      ],
+      "timers": [
+        { "label": "Covered simmer", "mins": 35 },
+        { "label": "Uncovered reduce (optional)", "mins": 8 }
+      ],
+      "inputs": {
+        "ingredients": ["stock_chicken_or_water", "scotch_bonnet", "vinegar"],
+        "equipment": ["pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "serve",
+      "title": "Serve",
+      "domain": "cooking",
+      "activeMins": 2,
+      "instructions": [
+        "Remove Scotch bonnet whole (unless you intentionally burst it).",
+        "Serve with rice and peas, white rice, dumplings, or boiled provisions; add a simple cabbage side or salad."
+      ],
+      "inputs": {
+        "equipment": ["ladle"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "caribbean.rice_and_peas",
+      "rice",
+      "dumplings",
+      "boiled_provisions"
+    ],
+    "vegSides": ["steamed_cabbage", "caribbean.callaloo", "salad"],
+    "condiments": ["pepper_sauce", "lime_juice"],
+    "drinks": ["caribbean.sorrel_drink", "ginger_beer"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.stewed_chicken.pressure",
+      "label": "Pressure Cooker Stewed Chicken",
+      "when": { "hasEquipmentAll": ["pressure_cooker"] },
+      "adapt": {
+        "method": "brown_then_pressure_then_reduce",
+        "notes": "Brown chicken + aromatics first. Pressure cook 10–12 min (bone-in). Quick release, then reduce gravy uncovered to desired thickness."
+      }
+    },
+    {
+      "id": "caribbean.stewed_chicken.weeknight_boneless",
+      "label": "Weeknight Boneless Shortcut",
+      "when": { "timeMaxTotalMins": 45 },
+      "adapt": {
+        "swapProtein": "chicken_thighs_boneless",
+        "notes": "Use boneless thighs and simmer 15–20 minutes after adding liquid. Reduce gravy briefly at the end."
+      }
+    },
+    {
+      "id": "caribbean.stewed_chicken.low_heat",
+      "label": "Lower Heat Version",
+      "when": { "tasteMaxHeat": 1 },
+      "adapt": {
+        "reduceHeat": true,
+        "notes": "Skip Scotch bonnet or keep whole but remove early. Use sweet bell pepper for aroma."
+      }
+    },
+    {
+      "id": "caribbean.stewed_chicken.no_browning_sauce",
+      "label": "No Browning Sauce",
+      "when": { "missingIngredientsAny": ["browning_sauce"] },
+      "adapt": {
+        "method": "brown_sugar_caramel",
+        "notes": "Use the brown sugar caramel step; watch closely and do not burn."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 4,
+      "notes": "Cool quickly; reheat to steaming hot."
+    },
+    "freezer": {
+      "safeMonths": 3,
+      "notes": "Freeze portions with gravy. Thaw overnight for best texture."
+    },
+    "reheat": {
+      "methods": ["stovetop_simmer", "microwave"],
+      "notes": "Add a splash of water/stock when reheating to loosen gravy."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": [
+        "Chop onion/pepper/carrot",
+        "Mince garlic",
+        "Measure seasonings",
+        "Portion chicken"
+      ],
+      "makeAhead": [
+        "Season chicken (up to overnight)",
+        "Pre-chop aromatics",
+        "Mix dry seasonings"
+      ]
+    }
+  }
+}

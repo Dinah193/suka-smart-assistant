@@ -46,13 +46,15 @@ function emitRouterEvent(type, data = {}) {
 // -----------------------------------------------------------------------------
 async function maybeExportImportEnvelope(envelope) {
   try {
-    const [{ default: HubPacketFormatter }, { exportToHubIfEnabled }] = await Promise.all([
-      import("../services/hub/HubPacketFormatter.js"),
-      import("../services/hub/FamilyFundConnector.js"),
-    ]);
+    const [{ default: HubPacketFormatter }, { exportToHubIfEnabled }] =
+      await Promise.all([
+        import("@/services/hub/HubPacketFormatter.js"),
+        import("@/services/hub/FamilyFundConnector.js"),
+      ]);
 
     const packet =
-      HubPacketFormatter && typeof HubPacketFormatter.formatImportEnvelope === "function"
+      HubPacketFormatter &&
+      typeof HubPacketFormatter.formatImportEnvelope === "function"
         ? HubPacketFormatter.formatImportEnvelope(envelope)
         : envelope;
 
@@ -67,7 +69,10 @@ async function maybeExportImportEnvelope(envelope) {
         import.meta.env.MODE === "development"
       ) {
         // eslint-disable-next-line no-console
-        console.warn("[ImportRouter] Hub export (import.parsed) failed silently:", err);
+        console.warn(
+          "[ImportRouter] Hub export (import.parsed) failed silently:",
+          err
+        );
       }
     } catch {
       // ignore meta/env errors
@@ -89,7 +94,12 @@ async function safeImportParser(primaryPath, fallbackPath) {
         const mod2 = await import(fallbackPath);
         return mod2.default || mod2;
       } catch (err2) {
-        console.warn("[ImportRouter] failed to import parser:", primaryPath, "and", fallbackPath);
+        console.warn(
+          "[ImportRouter] failed to import parser:",
+          primaryPath,
+          "and",
+          fallbackPath
+        );
         throw err2;
       }
     }
@@ -104,26 +114,47 @@ async function safeImportParser(primaryPath, fallbackPath) {
 const PARSER_REGISTRY = {
   async recipe() {
     // primary: lowercase; fallback: PascalCase
-    return safeImportParser("./parsers/recipeParser.js", "./parsers/RecipeParser.js");
+    return safeImportParser(
+      "./parsers/recipeParser.js",
+      "./parsers/RecipeParser.js"
+    );
   },
   async cleaning() {
-    return safeImportParser("./parsers/cleaningParser.js", "./parsers/CleaningParser.js");
+    return safeImportParser(
+      "./parsers/cleaningParser.js",
+      "./parsers/CleaningParser.js"
+    );
   },
   async garden() {
-    return safeImportParser("./parsers/gardenParser.js", "./parsers/GardenParser.js");
+    return safeImportParser(
+      "./parsers/gardenParser.js",
+      "./parsers/GardenParser.js"
+    );
   },
   async animal() {
-    return safeImportParser("./parsers/animalParser.js", "./parsers/AnimalParser.js");
+    return safeImportParser(
+      "./parsers/animalParser.js",
+      "./parsers/AnimalParser.js"
+    );
   },
   async storehouse() {
-    return safeImportParser("./parsers/storehouseParser.js", "./parsers/StorehouseParser.js");
+    return safeImportParser(
+      "./parsers/storehouseParser.js",
+      "./parsers/StorehouseParser.js"
+    );
   },
   async howto() {
     // in case you named it howToParser.js
-    return safeImportParser("./parsers/howtoParser.js", "./parsers/HowToParser.js");
+    return safeImportParser(
+      "./parsers/howtoParser.js",
+      "./parsers/HowToParser.js"
+    );
   },
   async preservation() {
-    return safeImportParser("./parsers/preservationParser.js", "./parsers/PreservationParser.js");
+    return safeImportParser(
+      "./parsers/preservationParser.js",
+      "./parsers/PreservationParser.js"
+    );
   },
 };
 
@@ -167,25 +198,47 @@ function sniffDomainFromRaw(raw) {
   if (!raw) return null;
   const asStr = typeof raw === "string" ? raw : JSON.stringify(raw);
 
-  if (/\bingredient\b|\bingredients\b|prep time|cook time|servings/i.test(asStr)) {
+  if (
+    /\bingredient\b|\bingredients\b|prep time|cook time|servings/i.test(asStr)
+  ) {
     return "recipe";
   }
-  if (/\bdeclutter\b|\bcleaning\b|\bzone\b|\bchore\b|\broom\b|\bkitchen day\b/i.test(asStr)) {
+  if (
+    /\bdeclutter\b|\bcleaning\b|\bzone\b|\bchore\b|\broom\b|\bkitchen day\b/i.test(
+      asStr
+    )
+  ) {
     return "cleaning";
   }
-  if (/\bseed\b|\bplanting\b|\bsow\b|\bspacing\b|\bfrost date\b|\bzone\s*\d+/i.test(asStr)) {
+  if (
+    /\bseed\b|\bplanting\b|\bsow\b|\bspacing\b|\bfrost date\b|\bzone\s*\d+/i.test(
+      asStr
+    )
+  ) {
     return "garden";
   }
-  if (/\bbutcher\b|\byield\b|\bcarcass\b|\bslaughter\b|\bgoat\b|\bsheep\b|\bduck\b/i.test(asStr)) {
+  if (
+    /\bbutcher\b|\byield\b|\bcarcass\b|\bslaughter\b|\bgoat\b|\bsheep\b|\bduck\b/i.test(
+      asStr
+    )
+  ) {
     return "animal";
   }
-  if (/\bstorehouse\b|\bpantry\b|\broot cellar\b|\binventory target\b/i.test(asStr)) {
+  if (
+    /\bstorehouse\b|\bpantry\b|\broot cellar\b|\binventory target\b/i.test(
+      asStr
+    )
+  ) {
     return "storehouse";
   }
   if (/\byoutube\.com\/watch|tiktok\.com\/@|facebook\.com\/reel/i.test(asStr)) {
     return "howto";
   }
-  if (/\bbrine\b|\bferment\b|\bdehydrate\b|\bpressure can\b|\bpasteurize\b/i.test(asStr)) {
+  if (
+    /\bbrine\b|\bferment\b|\bdehydrate\b|\bpressure can\b|\bpasteurize\b/i.test(
+      asStr
+    )
+  ) {
     return "preservation";
   }
 
@@ -251,7 +304,9 @@ async function routeImport({ domain, raw, meta = {} } = {}) {
   const possibleUrl =
     (typeof raw === "string" && raw.startsWith("http") && raw) ||
     meta.url ||
-    (typeof raw === "string" && /https?:\/\//.test(raw) ? raw.match(/https?:\/\/\S+/)?.[0] : null);
+    (typeof raw === "string" && /https?:\/\//.test(raw)
+      ? raw.match(/https?:\/\/\S+/)?.[0]
+      : null);
 
   if (possibleUrl) {
     const host = extractHost(possibleUrl);
@@ -264,7 +319,10 @@ async function routeImport({ domain, raw, meta = {} } = {}) {
         parser,
         reason: "matched-by-allowlist",
       };
-      emitRouterEvent("import.router.selected", { ...out, meta: { ...meta, host } });
+      emitRouterEvent("import.router.selected", {
+        ...out,
+        meta: { ...meta, host },
+      });
       return out;
     }
   }
@@ -325,7 +383,11 @@ function emitAutoPlanHints(domain, normalized, meta) {
       break;
     }
     case "cleaning": {
-      emitEvent("cleaning.session.generate.requested", "import.router", payload);
+      emitEvent(
+        "cleaning.session.generate.requested",
+        "import.router",
+        payload
+      );
       break;
     }
     case "garden": {
@@ -335,17 +397,33 @@ function emitAutoPlanHints(domain, normalized, meta) {
       break;
     }
     case "storehouse": {
-      emitEvent("storehouse.stockPlan.generate.requested", "import.router", payload);
+      emitEvent(
+        "storehouse.stockPlan.generate.requested",
+        "import.router",
+        payload
+      );
       break;
     }
     case "animal": {
       emitEvent("animals.plan.generate.requested", "import.router", payload);
-      emitEvent("animals.fromRecipes.generate.requested", "import.router", payload);
+      emitEvent(
+        "animals.fromRecipes.generate.requested",
+        "import.router",
+        payload
+      );
       break;
     }
     case "preservation": {
-      emitEvent("preservation.plan.generate.requested", "import.router", payload);
-      emitEvent("preservation.session.generate.requested", "import.router", payload);
+      emitEvent(
+        "preservation.plan.generate.requested",
+        "import.router",
+        payload
+      );
+      emitEvent(
+        "preservation.session.generate.requested",
+        "import.router",
+        payload
+      );
       break;
     }
     default: {

@@ -1,4 +1,4 @@
-// src/agents/shims/batchCookingAgent.js
+// src/agents/shims/batchCookingShim.js
 // -----------------------------------------------------------------------------
 // SSA Batch Cooking Shim
 // - Replaces the old "BatchCookingAgent" logic-heavy agent
@@ -9,10 +9,10 @@
 //   generateBatchCookingPlan, BatchCookingAgent class.
 // -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectCookingContext } from "@/reasoner/selectors";
@@ -25,8 +25,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildCookingPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -90,7 +90,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       }
     : base;
 
-  return buildShimResponse(false, mode, data, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    data,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -102,7 +108,9 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
  */
 function enforceBudget(req, debug) {
   const domainBudget =
-    (budget && (budget.cooking || budget.batchCooking || budget["cooking.batch"])) || {};
+    (budget &&
+      (budget.cooking || budget.batchCooking || budget["cooking.batch"])) ||
+    {};
   const maxChars = domainBudget.maxChars || 20000;
 
   const sizeEstimate = JSON.stringify(req.input || {}).length;
@@ -280,7 +288,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -596,7 +607,12 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 13. Optional Hub export when appropriate
     // -------------------------------------------------
-    await maybeExportToHub(sessions, normalized, { domain, intent, input, runtime }, debug);
+    await maybeExportToHub(
+      sessions,
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------------------------
     // 14. Final response
@@ -723,11 +739,14 @@ export async function generateBatchCookingPlan(options = {}, runtime = {}) {
       inventoryReport: { used: [], missing: [] },
       toolSchedule: {},
       cleanupPlan: [],
-      summaryNotes: ["Batch cooking plan unavailable (shim error or Reasoner blocked)."],
+      summaryNotes: [
+        "Batch cooking plan unavailable (shim error or Reasoner blocked).",
+      ],
     };
   }
 
-  const planner = res.data && res.data.planner ? res.data.planner : res.data || {};
+  const planner =
+    res.data && res.data.planner ? res.data.planner : res.data || {};
 
   return {
     timeline: planner.timeline || [],
@@ -771,13 +790,17 @@ export class BatchCookingAgent {
    * @returns {Promise<ShimResponse|Object>}
    */
   async handleCommand(command, payload = {}) {
-    const normalized = typeof payload?.payload === "object" && !Object.keys(payload).length
-      ? payload.payload
-      : payload;
+    const normalized =
+      typeof payload?.payload === "object" && !Object.keys(payload).length
+        ? payload.payload
+        : payload;
 
     // Keep same mapping as mapCommandToIntent
-    if (!command) return handleCommand("plan", normalized, this.opts.runtime || {});
-    const c = String(command || "").trim().toLowerCase();
+    if (!command)
+      return handleCommand("plan", normalized, this.opts.runtime || {});
+    const c = String(command || "")
+      .trim()
+      .toLowerCase();
 
     if (c === "plan") return plan(normalized, this.opts.runtime || {});
     if (c === "simulate") return simulate(normalized, this.opts.runtime || {});

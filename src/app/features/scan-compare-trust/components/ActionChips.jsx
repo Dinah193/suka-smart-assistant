@@ -40,7 +40,7 @@ import React, { useMemo, useState } from "react";
 /* ----------------------------- Optional Dependencies ----------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -66,14 +66,21 @@ try {
 
 /* -------------------------------- Unit helpers (light) ------------------------------- */
 const UNIT_MAP = {
-  mg: { kind: "weight", toBase: 0.001 }, g: { kind: "weight", toBase: 1 },
-  kg: { kind: "weight", toBase: 1000 }, oz: { kind: "weight", toBase: 28.3495 },
+  mg: { kind: "weight", toBase: 0.001 },
+  g: { kind: "weight", toBase: 1 },
+  kg: { kind: "weight", toBase: 1000 },
+  oz: { kind: "weight", toBase: 28.3495 },
   lb: { kind: "weight", toBase: 453.59237 },
-  ml: { kind: "volume", toBase: 1 }, l: { kind: "volume", toBase: 1000 },
-  floz: { kind: "volume", toBase: 29.5735 }, cup: { kind: "volume", toBase: 236.588 },
-  pint: { kind: "volume", toBase: 473.176 }, quart: { kind: "volume", toBase: 946.353 },
+  ml: { kind: "volume", toBase: 1 },
+  l: { kind: "volume", toBase: 1000 },
+  floz: { kind: "volume", toBase: 29.5735 },
+  cup: { kind: "volume", toBase: 236.588 },
+  pint: { kind: "volume", toBase: 473.176 },
+  quart: { kind: "volume", toBase: 946.353 },
   gal: { kind: "volume", toBase: 3785.41 },
-  ct: { kind: "count", toBase: 1 }, ea: { kind: "count", toBase: 1 }, count: { kind: "count", toBase: 1 },
+  ct: { kind: "count", toBase: 1 },
+  ea: { kind: "count", toBase: 1 },
+  count: { kind: "count", toBase: 1 },
 };
 function toBase(size) {
   if (!size || typeof size.value !== "number") return null;
@@ -125,12 +132,20 @@ export default function ActionChips({
   const [busy, setBusy] = useState(null); // 'inv'|'meal'|'plant'|'watch'|'favSession'|'favSchedule'
 
   const label = useMemo(
-    () => `${item.brand ? item.brand + " " : ""}${item.name || item.upc || ""}`.trim(),
+    () =>
+      `${item.brand ? item.brand + " " : ""}${
+        item.name || item.upc || ""
+      }`.trim(),
     [item]
   );
 
   const baseQty = useMemo(() => totalBaseQty(item), [item]);
-  const canPlant = Boolean(item?.meta?.seeds || String(item?.category || "").toLowerCase().includes("seed"));
+  const canPlant = Boolean(
+    item?.meta?.seeds ||
+      String(item?.category || "")
+        .toLowerCase()
+        .includes("seed")
+  );
   const edible = item?.meta?.edible ?? true;
 
   const favSessions = useFavoriteSessions ? useFavoriteSessions() : null;
@@ -143,20 +158,34 @@ export default function ActionChips({
     try {
       // Emit to your inventory pipeline
       eventBus.emit("inventory:item:add", {
-        upc: item.upc, name: item.name, brand: item.brand,
-        store: item.store, price: item.price, currency: item.currency || "USD",
+        upc: item.upc,
+        name: item.name,
+        brand: item.brand,
+        store: item.store,
+        price: item.price,
+        currency: item.currency || "USD",
         qty: 1,
         pack: item.pack || null,
         size: item.size || null,
         totalBaseQty: baseQty,
         source: context,
       });
-      analytics.track("inventory_item_add", { upc: item.upc, baseQty, context });
+      analytics.track("inventory_item_add", {
+        upc: item.upc,
+        baseQty,
+        context,
+      });
       // Toast
-      eventBus.emit("ui:toast", { type: "success", message: `Added to inventory: ${label}` });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: `Added to inventory: ${label}`,
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not add to inventory." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not add to inventory.",
+      });
     } finally {
       setBusy(null);
     }
@@ -174,7 +203,10 @@ export default function ActionChips({
         price: item.price,
         tags: item?.meta?.tags || [],
       };
-      eventBus.emit("mealplanner:ingredient:add", { ingredient, source: context });
+      eventBus.emit("mealplanner:ingredient:add", {
+        ingredient,
+        source: context,
+      });
       eventBus.emit("mealplanner:panel:open"); // open planner panel
       analytics.track("mealplanner_ingredient_add", { upc: item.upc, context });
     } catch (e) {
@@ -199,10 +231,16 @@ export default function ActionChips({
       eventBus.emit("garden:plan:fromSeed", { seed: payload, source: context });
       eventBus.emit("garden:panel:open");
       analytics.track("garden_plan_from_seed", { upc: item.upc, context });
-      eventBus.emit("ui:toast", { type: "success", message: `Added to garden plan: ${payload.name}` });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: `Added to garden plan: ${payload.name}`,
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not add to garden plan." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not add to garden plan.",
+      });
     } finally {
       setBusy(null);
     }
@@ -211,7 +249,9 @@ export default function ActionChips({
   const watchPrice = async () => {
     setBusy("watch");
     try {
-      const hint = priceCycle ? priceCycle.getHint({ upc: item.upc, store: item.store }) : null;
+      const hint = priceCycle
+        ? priceCycle.getHint({ upc: item.upc, store: item.store })
+        : null;
       const labelStr = `Watch price: ${label}`;
       const schedule = {
         label: labelStr,
@@ -225,11 +265,20 @@ export default function ActionChips({
       } else {
         eventBus.emit("favorites:schedule:add", schedule);
       }
-      analytics.track("pricing_watch_schedule_saved", { upc: item.upc, store: item.store });
-      eventBus.emit("ui:toast", { type: "success", message: "We’ll watch this price for you." });
+      analytics.track("pricing_watch_schedule_saved", {
+        upc: item.upc,
+        store: item.store,
+      });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "We’ll watch this price for you.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not create price watch." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not create price watch.",
+      });
     } finally {
       setBusy(null);
     }
@@ -248,11 +297,21 @@ export default function ActionChips({
       };
       if (favSessions?.add) await favSessions.add(payload);
       else eventBus.emit("favorites:session:add", payload);
-      analytics.track("favorite_session_saved", { type, count: items?.length || 1, context });
-      eventBus.emit("ui:toast", { type: "success", message: "Saved as a favorite session." });
+      analytics.track("favorite_session_saved", {
+        type,
+        count: items?.length || 1,
+        context,
+      });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Saved as a favorite session.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not save session." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not save session.",
+      });
     } finally {
       setBusy(null);
     }
@@ -319,7 +378,7 @@ export default function ActionChips({
         onClick={plantIt}
         disabled={busy === "plant"}
         size={size}
-    />
+      />
     );
   }
 

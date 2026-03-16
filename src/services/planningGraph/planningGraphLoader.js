@@ -44,8 +44,8 @@
  *   }
  */
 
-import eventBus from "@/services/eventBus";
-import featureFlags from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags";
 
 /**
  * @typedef {Object} PlanningGraphMeta
@@ -134,7 +134,9 @@ const GRAPH_SOURCES = new Map();
  */
 export function registerPlanningGraphSource(graphId, config) {
   if (!graphId || typeof graphId !== "string") {
-    throw new Error("[planningGraphLoader] graphId is required for registration");
+    throw new Error(
+      "[planningGraphLoader] graphId is required for registration"
+    );
   }
   if (!config || typeof config !== "object") {
     throw new Error("[planningGraphLoader] config object is required");
@@ -253,7 +255,10 @@ export async function loadPlanningGraph(graphId, options = {}) {
     data: json,
   };
 
-  handleVersionWarnings(graphId, meta, { requestedVersion: version, minVersion });
+  handleVersionWarnings(graphId, meta, {
+    requestedVersion: version,
+    minVersion,
+  });
 
   emitLoadSucceeded(graphId, meta);
 
@@ -298,7 +303,8 @@ function resolveVersionForLoad(sourceConfig, options) {
 
   // 3) If defaultVersion is set, use that as base.
   const base =
-    sourceConfig.defaultVersion && versions.includes(sourceConfig.defaultVersion)
+    sourceConfig.defaultVersion &&
+    versions.includes(sourceConfig.defaultVersion)
       ? sourceConfig.defaultVersion
       : latest;
 
@@ -330,8 +336,12 @@ function resolveVersionForLoad(sourceConfig, options) {
  */
 function compareSemver(a, b) {
   if (a === b) return 0;
-  const pa = String(a).split(".").map((n) => parseInt(n, 10) || 0);
-  const pb = String(b).split(".").map((n) => parseInt(n, 10) || 0);
+  const pa = String(a)
+    .split(".")
+    .map((n) => parseInt(n, 10) || 0);
+  const pb = String(b)
+    .split(".")
+    .map((n) => parseInt(n, 10) || 0);
   const len = Math.max(pa.length, pb.length);
   for (let i = 0; i < len; i += 1) {
     const na = pa[i] || 0;
@@ -383,26 +393,18 @@ function normalizeGraphMeta(
       sourceConfig.label ||
       graphId,
     version:
-      fromVersionConfig.version ||
-      (jsonMeta && jsonMeta.version) ||
-      version,
+      fromVersionConfig.version || (jsonMeta && jsonMeta.version) || version,
     domain:
       fromVersionConfig.domain ||
       (jsonMeta && jsonMeta.domain) ||
       sourceConfig.domain ||
       "multi",
     createdAt:
-      fromVersionConfig.createdAt ||
-      (jsonMeta && jsonMeta.createdAt) ||
-      now,
+      fromVersionConfig.createdAt || (jsonMeta && jsonMeta.createdAt) || now,
     updatedAt:
-      fromVersionConfig.updatedAt ||
-      (jsonMeta && jsonMeta.updatedAt) ||
-      now,
+      fromVersionConfig.updatedAt || (jsonMeta && jsonMeta.updatedAt) || now,
     description:
-      fromVersionConfig.description ||
-      (jsonMeta && jsonMeta.description) ||
-      "",
+      fromVersionConfig.description || (jsonMeta && jsonMeta.description) || "",
   };
 
   return meta;

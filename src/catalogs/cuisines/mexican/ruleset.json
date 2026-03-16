@@ -1,0 +1,862 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.mexican.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Mexican • Cuisine Ruleset",
+    "cuisineId": "cuisines.mexican",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Deterministic ruleset to guide planning, scoring, and recipe adaptation for Mexican cuisine.",
+        "Uses SSA JSONPath-like pointers; engines interpret these paths."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.mexican",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "and",
+        "or",
+        "the",
+        "of",
+        "to",
+        "with",
+        "style",
+        "mexican",
+        "mexico"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.corn_tortilla": [
+        "corn tortillas",
+        "tortillas de maiz",
+        "tortilla de maiz",
+        "maize tortilla"
+      ],
+      "ingredient.flour_tortilla": [
+        "flour tortillas",
+        "tortillas de harina",
+        "tortilla de harina"
+      ],
+      "ingredient.masa_harina": [
+        "masa harina",
+        "masa flour",
+        "harina de maiz",
+        "instant masa"
+      ],
+      "ingredient.tomato_tomatillo": [
+        "tomatillo",
+        "tomatillos",
+        "tomate verde",
+        "green tomato (tomatillo)"
+      ],
+      "ingredient.achiote_paste": [
+        "achiote",
+        "achiote paste",
+        "annatto paste",
+        "pasta de achiote"
+      ],
+      "ingredient.chipotle_in_adobo": [
+        "chipotle in adobo",
+        "chipotles in adobo",
+        "adobo chipotle"
+      ],
+      "ingredient.guajillo_chile": [
+        "guajillo",
+        "guajillo chile",
+        "guajillo pepper",
+        "chile guajillo"
+      ],
+      "ingredient.ancho_chile": [
+        "ancho",
+        "ancho chile",
+        "ancho pepper",
+        "chile ancho"
+      ],
+      "ingredient.pasilla_chile": ["pasilla", "pasilla chile", "chile pasilla"],
+      "ingredient.oregano_mexican": [
+        "mexican oregano",
+        "oregano mexicano",
+        "orégano mexicano"
+      ],
+      "ingredient.cotija_cheese": ["cotija", "cotija cheese", "queso cotija"],
+      "ingredient.oaxaca_cheese": [
+        "oaxaca",
+        "oaxaca cheese",
+        "queso oaxaca",
+        "quesillo"
+      ],
+      "ingredient.crema_mexicana": ["crema", "mexican crema", "crema mexicana"],
+      "ingredient.cilantro": ["cilantro", "coriander leaves"],
+      "ingredient.onion_white": ["white onion", "onion (white)", "cebolla"],
+      "ingredient.lime": ["lime", "limes", "limón", "limon"],
+      "ingredient.black_beans": ["black beans", "frijoles negros"],
+      "ingredient.pinto_beans": ["pinto beans", "frijoles pintos"],
+      "ingredient.hominy": ["hominy", "pozole corn", "maíz pozolero"]
+    },
+    "dishAliases": {
+      "mexican.tacos_al_pastor": [
+        "tacos al pastor",
+        "al pastor tacos",
+        "pastor tacos"
+      ],
+      "mexican.carne_asada_tacos": [
+        "carne asada tacos",
+        "steak tacos",
+        "tacos de asada"
+      ],
+      "mexican.carnitas": ["carnitas", "pork carnitas"],
+      "mexican.barbacoa": ["barbacoa", "beef barbacoa", "goat barbacoa"],
+      "mexican.chicken_tinga": ["chicken tinga", "tinga de pollo", "tinga"],
+      "mexican.birria": ["birria", "quesabirria", "birria de res"],
+      "mexican.enchiladas_rojas": ["enchiladas rojas", "red enchiladas"],
+      "mexican.enchiladas_verdes": ["enchiladas verdes", "green enchiladas"],
+      "mexican.chiles_rellenos": ["chiles rellenos", "stuffed poblanos"],
+      "mexican.tamales": ["tamales", "tamal"],
+      "mexican.pozole_rojo": ["pozole rojo", "red pozole"],
+      "mexican.pozole_verde": ["pozole verde", "green pozole"],
+      "mexican.menudo": ["menudo", "menudo rojo"],
+      "mexican.tortilla_soup": ["tortilla soup", "sopa de tortilla"],
+      "mexican.guacamole": ["guacamole", "guac"],
+      "mexican.pico_de_gallo": ["pico de gallo", "salsa fresca"],
+      "mexican.salsa_roja": ["salsa roja", "red salsa"],
+      "mexican.salsa_verde": ["salsa verde", "green salsa"],
+      "mexican.elote": ["elote", "mexican street corn", "street corn"],
+      "mexican.arroz_rojo": ["mexican rice", "arroz rojo", "spanish rice"],
+      "mexican.frijoles_refritos": ["refried beans", "frijoles refritos"],
+      "mexican.chilaquiles": [
+        "chilaquiles",
+        "chilaquiles rojos",
+        "chilaquiles verdes"
+      ],
+      "mexican.huevos_rancheros": ["huevos rancheros", "ranch eggs"],
+      "mexican.mole_poblano": ["mole poblano", "chicken mole", "mole"],
+      "mexican.cochinita_pibil": [
+        "cochinita pibil",
+        "achiote pork",
+        "yucatecan pork"
+      ],
+      "mexican.ceviche": ["ceviche", "ceviche mexicano"],
+      "mexican.flan": ["flan", "flan napolitano"],
+      "mexican.tres_leches_cake": [
+        "tres leches",
+        "tres leches cake",
+        "three milks cake"
+      ],
+      "mexican.horchata": ["horchata", "agua fresca de horchata"],
+      "mexican.agua_fresca_jamaica": [
+        "agua fresca de jamaica",
+        "jamaica",
+        "hibiscus agua fresca"
+      ]
+    },
+    "equipmentAliases": {
+      "equipment.comal": ["comal", "griddle", "flat griddle"],
+      "equipment.dutch_oven": ["dutch oven", "heavy pot"],
+      "equipment.blender": [
+        "blender",
+        "high speed blender",
+        "food processor (blend)"
+      ],
+      "equipment.pressure_cooker": [
+        "pressure cooker",
+        "instant pot",
+        "electric pressure cooker"
+      ],
+      "equipment.slow_cooker": ["slow cooker", "crockpot", "crock pot"],
+      "equipment.grill": ["grill", "charcoal grill", "gas grill"],
+      "equipment.sheet_pan": ["sheet pan", "baking sheet"],
+      "equipment.baking_dish": ["baking dish", "casserole dish"],
+      "equipment.stock_pot": ["stock pot", "stockpot", "large pot"],
+      "equipment.fine_strainer": ["fine strainer", "mesh strainer", "sieve"]
+    },
+    "methodAliases": {
+      "technique.toast_chiles": [
+        "toast chiles",
+        "toasting chiles",
+        "dry toast chiles"
+      ],
+      "technique.blend": ["blend", "puree", "purée", "process"],
+      "technique.braise": ["braise", "slow cook", "cook low and slow"],
+      "technique.simmer": ["simmer", "gentle simmer"],
+      "technique.grill": ["grill", "char", "griddle-sear"],
+      "technique.crisp": ["crisp", "broil to crisp", "pan-crisp"],
+      "technique.shred": ["shred", "pull", "pull apart"]
+    }
+  },
+  "globals": {
+    "plannerDefaults": {
+      "plateModel": {
+        "anchors": ["tortilla", "rice", "beans"],
+        "freshAddOns": ["lime", "cilantro", "onion", "radish", "cabbage"],
+        "sauces": ["salsa_roja", "salsa_verde", "pico_de_gallo"],
+        "crunch": ["tortilla_strips", "tostada", "chips"],
+        "heatScale": {
+          "0": "none",
+          "1": "mild",
+          "2": "medium",
+          "3": "medium_high",
+          "4": "hot",
+          "5": "very_hot"
+        }
+      },
+      "weeknightThresholdMins": 60
+    },
+    "signals": {
+      "prefersFreshGarnish": true,
+      "supportsBatchBraises": true,
+      "supportsSalsaPrep": true
+    }
+  },
+  "rules": [
+    {
+      "id": "mexican.score.weeknight_fast",
+      "enabled": true,
+      "priority": 10,
+      "title": "Boost weeknight candidates under 45 minutes",
+      "description": "If total time is <= 45 mins, boost score and tag as weeknight-friendly.",
+      "tags": ["planner", "score", "weeknight"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.dish.time.totalMins" },
+          { "type": "lte", "path": "$.dish.time.totalMins", "value": 45 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "planner.weeknight" },
+          { "type": "scoreAdjust", "scoreDelta": 0.35 }
+        ]
+      }
+    },
+    {
+      "id": "mexican.score.weeknight_under_60",
+      "enabled": true,
+      "priority": 20,
+      "title": "Slight boost for weeknight candidates under 60 minutes",
+      "description": "If total time is <= 60 mins, small score bump.",
+      "tags": ["planner", "score", "weeknight"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.dish.time.totalMins" },
+          { "type": "lte", "path": "$.dish.time.totalMins", "value": 60 }
+        ]
+      },
+      "then": {
+        "actions": [{ "type": "scoreAdjust", "scoreDelta": 0.15 }]
+      }
+    },
+    {
+      "id": "mexican.score.batch_friendly",
+      "enabled": true,
+      "priority": 30,
+      "title": "Boost batch-friendly dishes",
+      "description": "Batch-friendly dishes are preferred for household planning and freezer provisioning.",
+      "tags": ["planner", "score", "batch"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.dish.signals.batchFriendly",
+            "value": true
+          },
+          {
+            "type": "matches",
+            "path": "$.dish.signals.batchFriendly",
+            "regex": "true|yes|often|high"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "batch.friendly" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+    {
+      "id": "mexican.score.freezer_friendly",
+      "enabled": true,
+      "priority": 40,
+      "title": "Boost freezer-friendly dishes",
+      "description": "Freezer-friendly dishes are strong candidates for bulk cooking sessions.",
+      "tags": ["planner", "score", "freezer"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.dish.signals.freezerFriendly",
+            "value": true
+          },
+          {
+            "type": "matches",
+            "path": "$.dish.signals.freezerFriendly",
+            "regex": "true|yes|often|high|partial"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "freezer.friendly" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+    {
+      "id": "mexican.score.leftovers_good",
+      "enabled": true,
+      "priority": 50,
+      "title": "Boost good leftovers",
+      "description": "If leftoversGood is true, add small score boost and leftovers tag.",
+      "tags": ["planner", "score", "leftovers"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.dish.signals.leftoversGood",
+        "value": true
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "leftovers.good" },
+          { "type": "scoreAdjust", "scoreDelta": 0.1 }
+        ]
+      }
+    },
+    {
+      "id": "mexican.tag.taco_archetype",
+      "enabled": true,
+      "priority": 60,
+      "title": "Tag taco archetype dishes",
+      "description": "If meal archetypes include a taco archetype, tag it for browse and planning filters.",
+      "tags": ["planner", "tags", "browse"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.dish.mealArchetypes",
+        "values": ["archetype.taco"]
+      },
+      "then": { "actions": [{ "type": "addTag", "value": "tacos" }] }
+    },
+    {
+      "id": "mexican.tag.salsa_archetype",
+      "enabled": true,
+      "priority": 61,
+      "title": "Tag salsa archetype dishes",
+      "description": "If meal archetypes include a salsa archetype, tag for salsa prep sessions.",
+      "tags": ["planner", "tags", "prep"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.dish.mealArchetypes",
+        "values": ["archetype.salsa"]
+      },
+      "then": { "actions": [{ "type": "addTag", "value": "prep.salsa" }] }
+    },
+    {
+      "id": "mexican.tag.stew_soup",
+      "enabled": true,
+      "priority": 62,
+      "title": "Tag soups/stews",
+      "description": "If archetype indicates soup or stew, add soup/stew tags for seasonal planning.",
+      "tags": ["planner", "tags", "seasonal"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dish.mealArchetypes",
+            "values": ["archetype.soup"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.dish.mealArchetypes",
+            "values": ["archetype.stew"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "category.soup_stew" },
+          { "type": "scoreAdjust", "scoreDelta": 0.05 }
+        ]
+      }
+    },
+    {
+      "id": "mexican.score.high_effort_penalty",
+      "enabled": true,
+      "priority": 70,
+      "title": "Slight penalty for very high total time on non-batch dishes",
+      "description": "If a dish is long (> 120 mins) and not batch-friendly, reduce score to avoid weeknight picks.",
+      "tags": ["planner", "score", "effort"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.dish.time.totalMins" },
+          { "type": "gt", "path": "$.dish.time.totalMins", "value": 120 },
+          {
+            "type": "eq",
+            "path": "$.dish.signals.batchFriendly",
+            "value": false
+          }
+        ]
+      },
+      "then": {
+        "actions": [{ "type": "scoreAdjust", "scoreDelta": -0.15 }]
+      }
+    },
+    {
+      "id": "mexican.set.heat_bucket",
+      "enabled": true,
+      "priority": 80,
+      "title": "Derive heat bucket from heatTypical",
+      "description": "Sets a derived heat bucket for UI filtering.",
+      "tags": ["planner", "set", "heat"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$.dish.heatTypical" },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.derived.heatBucket",
+            "value": {
+              "mapping": {
+                "0": "none",
+                "1": "mild",
+                "2": "medium",
+                "3": "medium_high",
+                "4": "hot",
+                "5": "very_hot"
+              },
+              "fromPath": "$.dish.heatTypical"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.adapter.prefer_corn_tortilla_for_tacos",
+      "enabled": true,
+      "priority": 90,
+      "title": "Prefer corn tortillas for taco dishes",
+      "description": "If dish is a taco archetype and tortillas are used, prefer corn tortillas unless user overrides.",
+      "tags": ["adapter", "preference", "tortilla"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dish.mealArchetypes",
+            "values": ["archetype.taco"]
+          },
+          { "type": "exists", "path": "$.recipe.ingredients" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "recipe.adapter.preference",
+              "payload": {
+                "kind": "ingredient_preference",
+                "role": "starch.tortilla",
+                "preferred": "ingredient.corn_tortilla",
+                "fallbacks": ["ingredient.flour_tortilla"],
+                "reason": "Mexican tacos are most commonly served on corn tortillas."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.adapter.salsa_required_if_missing",
+      "enabled": true,
+      "priority": 100,
+      "title": "Suggest salsa if taco/burrito/bowl lacks sauce",
+      "description": "If dish suggests handheld/bowl archetypes and recipe context shows no salsa tags, emit suggestion event.",
+      "tags": ["adapter", "suggestion", "salsa"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.dish" },
+          {
+            "type": "intersects",
+            "path": "$.dish.servingStyles",
+            "values": ["tacos", "bowl", "tostadas", "handheld", "grab_and_go"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "planner.suggestion",
+              "payload": {
+                "kind": "add_component",
+                "component": "salsa",
+                "candidates": [
+                  "mexican.pico_de_gallo",
+                  "mexican.salsa_roja",
+                  "mexican.salsa_verde"
+                ],
+                "reason": "Mexican handheld and bowl meals typically benefit from a salsa component for moisture, acidity, and flavor."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.planner.add_lime_cilantro_onion_garnish",
+      "enabled": true,
+      "priority": 110,
+      "title": "Suggest fresh garnish pack for Mexican mains",
+      "description": "For Mexican mains, suggest lime/cilantro/onion garnish pack for shopping list completeness.",
+      "tags": ["planner", "shopping", "garnish"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.dish.plannerTags" },
+          {
+            "type": "intersects",
+            "path": "$.dish.plannerTags",
+            "values": ["course.main"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "shopping.supplement",
+              "payload": {
+                "kind": "garnish_pack",
+                "items": [
+                  "ingredient.lime",
+                  "ingredient.cilantro",
+                  "ingredient.onion_white"
+                ],
+                "reason": "Common Mexican garnish trio improves many dishes and helps reduce 'missing something' meals."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.planner.bulk_prep_salsa_session",
+      "enabled": true,
+      "priority": 120,
+      "title": "Encourage salsa batch prep when multiple Mexican meals planned",
+      "description": "If user meal plan contains multiple Mexican-tagged selections, nudge a salsa batch session.",
+      "tags": ["planner", "batch", "salsa"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "type": "gte",
+        "path": "$.context.planStats.tags.cuisine.mexican",
+        "value": 2
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.05 },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "session.suggest",
+              "payload": {
+                "kind": "batch_prep",
+                "sessionType": "salsa_prep",
+                "suggestedDishes": [
+                  "mexican.pico_de_gallo",
+                  "mexican.salsa_roja",
+                  "mexican.salsa_verde"
+                ],
+                "reason": "Two or more Mexican meals benefit from prepping one or two salsas ahead for speed and consistency."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.planner.avoid_dairy_if_lactose_intolerant",
+      "enabled": true,
+      "priority": 130,
+      "title": "Penalize dairy-heavy dishes when lactose intolerance flag is present",
+      "description": "If user diet flags include lactose intolerance, reduce score for dishes that commonly include dairy allergens.",
+      "tags": ["planner", "diet", "score"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.context.user.dietFlags",
+            "values": ["diet.lactose_intolerant"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.dish.allergens",
+            "values": ["allergen.dairy"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "diet.attention_dairy" },
+          { "type": "scoreAdjust", "scoreDelta": -0.3 }
+        ]
+      }
+    },
+    {
+      "id": "mexican.adapter.suggest_dairy_swap",
+      "enabled": true,
+      "priority": 140,
+      "title": "Suggest dairy swaps when dairy allergen present",
+      "description": "If dish includes dairy allergen and user wants dairy-free, emit substitution suggestions.",
+      "tags": ["adapter", "diet", "substitution"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.context.user.dietFlags",
+            "values": ["diet.dairy_free"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.dish.allergens",
+            "values": ["allergen.dairy"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "recipe.adapter.substitution",
+              "payload": {
+                "kind": "allergen_swap",
+                "allergen": "allergen.dairy",
+                "suggestions": [
+                  {
+                    "from": "ingredient.crema_mexicana",
+                    "to": "ingredient.crema_cashew"
+                  },
+                  {
+                    "from": "ingredient.sour_cream",
+                    "to": "ingredient.yogurt_coconut_unsweetened"
+                  },
+                  {
+                    "from": "ingredient.cotija_cheese",
+                    "to": "ingredient.vegan_feta_style"
+                  },
+                  {
+                    "from": "ingredient.oaxaca_cheese",
+                    "to": "ingredient.vegan_mozzarella_style"
+                  }
+                ],
+                "reason": "User preference indicates dairy-free; offer common swaps while keeping Mexican flavor intent."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.adapter.equipment_sub_pressure_to_dutch_oven",
+      "enabled": true,
+      "priority": 150,
+      "title": "If no pressure cooker, suggest dutch oven low-and-slow",
+      "description": "For braises/stews: if user lacks pressure cooker but has dutch oven, suggest time-based adaptation.",
+      "tags": ["adapter", "equipment", "fallback"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dish.techniques",
+            "values": ["technique.braise"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.context.kitchen.missingEquipment",
+            "values": ["equipment.pressure_cooker"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.context.kitchen.availableEquipment",
+            "values": ["equipment.dutch_oven"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "recipe.adapter.equipmentFallback",
+              "payload": {
+                "missing": "equipment.pressure_cooker",
+                "useInstead": "equipment.dutch_oven",
+                "adjustments": {
+                  "timeMultiplier": 2.0,
+                  "notes": "Cook covered at a gentle simmer/low oven until tender; then shred and optionally crisp."
+                },
+                "reason": "Maintain outcome via low-and-slow braise when pressure cooking is unavailable."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.adapter.method_sheetpan_pastor_if_no_grill",
+      "enabled": true,
+      "priority": 160,
+      "title": "Pastor adaptation: sheet-pan + broil if no grill",
+      "description": "When dish is tacos al pastor and grill is not available, emit a sheet-pan oven method suggestion.",
+      "tags": ["adapter", "method", "fallback"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.dish.id",
+            "value": "mexican.tacos_al_pastor"
+          },
+          {
+            "type": "intersects",
+            "path": "$.context.kitchen.missingEquipment",
+            "values": ["equipment.grill"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.context.kitchen.availableEquipment",
+            "values": ["equipment.oven", "equipment.sheet_pan"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "recipe.adapter.methodFallback",
+              "payload": {
+                "dishId": "mexican.tacos_al_pastor",
+                "fallbackMethod": "sheet_pan_roast_then_broil",
+                "reason": "Home ovens can approximate char and caramelization with roast + broil on a sheet pan."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mexican.emit.on_select_taco_night_bundle",
+      "enabled": true,
+      "priority": 200,
+      "title": "When Taco Night is selected, bundle rice + beans + salsa",
+      "description": "Emit an event to auto-suggest a taco-night bundle (side + salsa + drink) when a taco dish is selected.",
+      "tags": ["planner", "bundle", "event"],
+      "source": "SSA Mexican ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dish.mealArchetypes",
+            "values": ["archetype.taco"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.dish.servingStyles",
+            "values": ["tacos"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "planner.bundle.suggest",
+              "payload": {
+                "bundleId": "mexican.bundle.taco_night",
+                "includes": [
+                  { "type": "dish", "id": "mexican.arroz_rojo" },
+                  { "type": "dish", "id": "mexican.frijoles_refritos" },
+                  { "type": "dish", "id": "mexican.pico_de_gallo" }
+                ],
+                "optional": [
+                  { "type": "dish", "id": "mexican.guacamole" },
+                  { "type": "dish", "id": "mexican.agua_fresca_jamaica" }
+                ],
+                "reason": "Taco night is more satisfying with rice/beans and at least one fresh salsa."
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

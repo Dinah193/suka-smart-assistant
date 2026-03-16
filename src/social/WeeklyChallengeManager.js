@@ -46,16 +46,27 @@ function safeGetSocket() {
 let EVENTS = {};
 (async () => {
   try {
-    const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+    const ont = await safeImportMany([
+      "@/shared/ontology.js",
+      "@/shared/ontology",
+    ]);
     EVENTS = ont?.EVENTS || {};
   } catch {}
 })();
 
 // ---------- Settings loader (quiet hours / sabbath) ----------
 async function loadSettings() {
-  const Settings = await safeImportMany(["@/store/SettingsStore.js", "@/store/SettingsStore"]);
+  const Settings = await safeImportMany([
+    "@/store/SettingsStore.js",
+    "@/store/SettingsStore",
+  ]);
   const get = async (k, d) => {
-    try { const v = await Settings?.get?.(k); return v ?? d; } catch { return d; }
+    try {
+      const v = await Settings?.get?.(k);
+      return v ?? d;
+    } catch {
+      return d;
+    }
   };
   return {
     sabbathAvoid: await get("sabbath.avoidSaturday", true),
@@ -66,7 +77,10 @@ async function loadSettings() {
 // ---------- Sabbath helper (approx, can be overridden by ontology.sabbath) ----------
 async function isSabbathNow() {
   try {
-    const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+    const ont = await safeImportMany([
+      "@/shared/ontology.js",
+      "@/shared/ontology",
+    ]);
     const win = ont?.sabbath?.(new Date());
     if (win?.startISO && win?.endISO) {
       const now = new Date();
@@ -76,8 +90,24 @@ async function isSabbathNow() {
   // fallback Fri 18:00 → Sat 18:00
   const now = new Date();
   const day = now.getDay();
-  const fri18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((5 - day + 7) % 7), 18, 0, 0, 0);
-  const sat18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - day + 7) % 7), 18, 0, 0, 0);
+  const fri18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((5 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
+  const sat18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((6 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
   return now >= fri18 && now < sat18;
 }
 
@@ -87,24 +117,96 @@ const BASE_CATEGORIES = ["cleaning", "cooking", "gardening", "animal care"];
 // ---------- Default templates (weighted) ----------
 const DEFAULT_CHALLENGES = {
   cleaning: [
-    { title: "Deep clean a high-visibility zone", weight: 1.0, points: 40, tags: ["zone","deep"], sabbathSafe: true },
-    { title: "Disinfect 3 high-touch surfaces daily for 5 days", weight: 0.8, points: 60, tags: ["habit","sanitization"], sabbathSafe: true },
-    { title: "Organize and label one cleaning supply zone", weight: 0.9, points: 35, tags: ["organize","label"], sabbathSafe: true },
+    {
+      title: "Deep clean a high-visibility zone",
+      weight: 1.0,
+      points: 40,
+      tags: ["zone", "deep"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Disinfect 3 high-touch surfaces daily for 5 days",
+      weight: 0.8,
+      points: 60,
+      tags: ["habit", "sanitization"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Organize and label one cleaning supply zone",
+      weight: 0.9,
+      points: 35,
+      tags: ["organize", "label"],
+      sabbathSafe: true,
+    },
   ],
   cooking: [
-    { title: "Batch cook 3 freezer meals from pantry", weight: 0.95, points: 60, tags: ["batch","freezer","inventory"], sabbathSafe: true },
-    { title: "Try a new recipe and record audio steps", weight: 0.7, points: 45, tags: ["learning","record"], sabbathSafe: true },
-    { title: "Plan a full feast meal using in-house inventory only", weight: 0.8, points: 55, tags: ["planning","inventory-only"], sabbathSafe: true },
+    {
+      title: "Batch cook 3 freezer meals from pantry",
+      weight: 0.95,
+      points: 60,
+      tags: ["batch", "freezer", "inventory"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Try a new recipe and record audio steps",
+      weight: 0.7,
+      points: 45,
+      tags: ["learning", "record"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Plan a full feast meal using in-house inventory only",
+      weight: 0.8,
+      points: 55,
+      tags: ["planning", "inventory-only"],
+      sabbathSafe: true,
+    },
   ],
   gardening: [
-    { title: "Plant or transplant 5 seedlings", weight: 0.9, points: 35, tags: ["planting"], sabbathSafe: true },
-    { title: "Weed a garden zone and log it", weight: 1.0, points: 30, tags: ["weeding","logging"], sabbathSafe: true },
-    { title: "Harvest and preserve at least 1 crop", weight: 0.85, points: 55, tags: ["harvest","preserve"], sabbathSafe: true },
+    {
+      title: "Plant or transplant 5 seedlings",
+      weight: 0.9,
+      points: 35,
+      tags: ["planting"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Weed a garden zone and log it",
+      weight: 1.0,
+      points: 30,
+      tags: ["weeding", "logging"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Harvest and preserve at least 1 crop",
+      weight: 0.85,
+      points: 55,
+      tags: ["harvest", "preserve"],
+      sabbathSafe: true,
+    },
   ],
   "animal care": [
-    { title: "Track and log feeding for a full week", weight: 1.0, points: 45, tags: ["tracking","habit"], sabbathSafe: true },
-    { title: "Clean animal housing area and log the task", weight: 0.9, points: 40, tags: ["clean","log"], sabbathSafe: true },
-    { title: "Check water and feed levels daily for all animals", weight: 0.85, points: 35, tags: ["habit","care"], sabbathSafe: true },
+    {
+      title: "Track and log feeding for a full week",
+      weight: 1.0,
+      points: 45,
+      tags: ["tracking", "habit"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Clean animal housing area and log the task",
+      weight: 0.9,
+      points: 40,
+      tags: ["clean", "log"],
+      sabbathSafe: true,
+    },
+    {
+      title: "Check water and feed levels daily for all animals",
+      weight: 0.85,
+      points: 35,
+      tags: ["habit", "care"],
+      sabbathSafe: true,
+    },
   ],
 };
 
@@ -125,55 +227,70 @@ async function loadOverlays() {
 // ---------- Agent suggestions (best-effort) ----------
 async function agentSuggestions(profileKey) {
   const [cleaning, cooking, gardening, animals] = await Promise.all([
-    safeImportMany(["@/agents/cleaningAgent.js", "@/agents/cleaningAgent"]),
-    safeImportMany(["@/agents/cookingAgent.js", "@/agents/cookingAgent"]),
-    safeImportMany(["@/agents/gardeningAgent.js", "@/agents/gardeningAgent"]),
-    safeImportMany(["@/agents/animalAgent.js", "@/agents/animalAgent"]),
+    safeImportMany(["@/agents/cleaningShim.js", "@/agents/cleaningAgent"]),
+    safeImportMany(["@/agents/cookingShim.js", "@/agents/cookingAgent"]),
+    safeImportMany(["@/agents/gardeningShim.js", "@/agents/gardeningAgent"]),
+    safeImportMany(["@/agents/animalShim.js", "@/agents/animalAgent"]),
   ]);
 
   const out = {};
   try {
-    const res = await cleaning?.estimatePlan?.({}, { preset: "high-visibility-rooms" });
-    if (res?.suggestions?.length) out.cleaning = res.suggestions.map(s => ({
-      title: s.title || s.text || s,
-      weight: 0.8,
-      points: 35,
-      sabbathSafe: true,
-    }));
+    const res = await cleaning?.estimatePlan?.(
+      {},
+      { preset: "high-visibility-rooms" }
+    );
+    if (res?.suggestions?.length)
+      out.cleaning = res.suggestions.map((s) => ({
+        title: s.title || s.text || s,
+        weight: 0.8,
+        points: 35,
+        sabbathSafe: true,
+      }));
   } catch {}
   try {
-    const res = await cooking?.estimatePlan?.({}, { preset: profileKey === "agrarian-offgrid" ? "pantry-forward" : "standard" });
-    if (res?.suggestions?.length) out.cooking = res.suggestions.map(s => ({
-      title: s.title || s.text || s,
-      weight: 0.75,
-      points: 45,
-      sabbathSafe: true,
-    }));
+    const res = await cooking?.estimatePlan?.(
+      {},
+      {
+        preset:
+          profileKey === "agrarian-offgrid" ? "pantry-forward" : "standard",
+      }
+    );
+    if (res?.suggestions?.length)
+      out.cooking = res.suggestions.map((s) => ({
+        title: s.title || s.text || s,
+        weight: 0.75,
+        points: 45,
+        sabbathSafe: true,
+      }));
   } catch {}
   try {
     const res = await gardening?.estimatePlan?.({}, { window: "this-week" });
-    if (res?.suggestions?.length) out.gardening = res.suggestions.map(s => ({
-      title: s.title || s.text || s,
-      weight: 0.85,
-      points: 40,
-      sabbathSafe: true,
-    }));
+    if (res?.suggestions?.length)
+      out.gardening = res.suggestions.map((s) => ({
+        title: s.title || s.text || s,
+        weight: 0.85,
+        points: 40,
+        sabbathSafe: true,
+      }));
   } catch {}
   try {
     const res = await animals?.estimatePlan?.({}, { preset: "weekly" });
-    if (res?.suggestions?.length) out["animal care"] = res.suggestions.map(s => ({
-      title: s.title || s.text || s,
-      weight: 0.8,
-      points: 40,
-      sabbathSafe: true,
-    }));
+    if (res?.suggestions?.length)
+      out["animal care"] = res.suggestions.map((s) => ({
+        title: s.title || s.text || s,
+        weight: 0.8,
+        points: 40,
+        sabbathSafe: true,
+      }));
   } catch {}
 
   return out;
 }
 
 // ---------- Utils ----------
-function nowISO() { return new Date().toISOString(); }
+function nowISO() {
+  return new Date().toISOString();
+}
 function startOfWeek(date = new Date()) {
   const d = new Date(date);
   const day = d.getDay();
@@ -218,9 +335,20 @@ function normalizePool(pool) {
 
 // ---------- n8n helper (optional) ----------
 async function notifyN8n(event, payload) {
-  const n8n = await safeImportMany(["@/services/n8nClient.js", "@/services/n8nClient"]);
+  const n8n = await safeImportMany([
+    "@/services/n8nClient.js",
+    "@/services/n8nClient",
+  ]);
   try {
-    await n8n?.runWorkflowByName?.("Suka: Weekly Challenge Event", { event, payload }, { idempotencyKey: `${event}:${payload?.weekId || ""}:${payload?.challengeId || ""}` });
+    await n8n?.runWorkflowByName?.(
+      "Suka: Weekly Challenge Event",
+      { event, payload },
+      {
+        idempotencyKey: `${event}:${payload?.weekId || ""}:${
+          payload?.challengeId || ""
+        }`,
+      }
+    );
   } catch {}
 }
 
@@ -233,7 +361,9 @@ async function getDoc(weekId) {
     try {
       const raw = localStorage.getItem(`weeklyChallenges:${weekId}`);
       return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 }
 async function putDoc(doc) {
@@ -241,7 +371,12 @@ async function putDoc(doc) {
   try {
     await DexieDB.weeklyChallenges.put(doc);
   } catch {
-    try { localStorage.setItem(`weeklyChallenges:${doc.weekId}`, JSON.stringify(doc)); } catch {}
+    try {
+      localStorage.setItem(
+        `weeklyChallenges:${doc.weekId}`,
+        JSON.stringify(doc)
+      );
+    } catch {}
   }
   return doc;
 }
@@ -265,10 +400,9 @@ const WeeklyChallengeManager = {
       })(),
     ]);
 
-    const categories =
-      overlay?.categories?.length
-        ? overlay.categories
-        : BASE_CATEGORIES;
+    const categories = overlay?.categories?.length
+      ? overlay.categories
+      : BASE_CATEGORIES;
 
     const sabbathNow = await isSabbathNow();
     const sabbathAvoid = sett.sabbathAvoid !== false;
@@ -290,7 +424,11 @@ const WeeklyChallengeManager = {
       // fallback if all filtered out
       if (!options.length) options = pool(category);
 
-      const chosen = pickWeighted(options) || { title: "Complete a useful household task", points: 30, sabbathSafe: true };
+      const chosen = pickWeighted(options) || {
+        title: "Complete a useful household task",
+        points: 30,
+        sabbathSafe: true,
+      };
       return {
         id: uuidv4(),
         category,
@@ -321,12 +459,21 @@ const WeeklyChallengeManager = {
 
     // notify UI + socket + n8n
     try {
-      window.dispatchEvent?.(new CustomEvent("social:weeklyChallenges:generated", { detail: { weekId } }));
+      window.dispatchEvent?.(
+        new CustomEvent("social:weeklyChallenges:generated", {
+          detail: { weekId },
+        })
+      );
     } catch {}
     try {
-      safeGetSocket()?.emit?.("social/weeklyChallenges/generated", { weekId, count: challenges.length });
+      safeGetSocket()?.emit?.("social/weeklyChallenges/generated", {
+        weekId,
+        count: challenges.length,
+      });
     } catch {}
-    notifyN8n("generated", { weekId, count: challenges.length }).catch(() => {});
+    notifyN8n("generated", { weekId, count: challenges.length }).catch(
+      () => {}
+    );
 
     return challengeDoc;
   },
@@ -347,7 +494,11 @@ const WeeklyChallengeManager = {
    * Mark a user as having completed a challenge.
    * Emits progress events and optional n8n workflow.
    */
-  async markComplete({ weekId = getCurrentWeekId(), challengeId, userId = "localUser" }) {
+  async markComplete({
+    weekId = getCurrentWeekId(),
+    challengeId,
+    userId = "localUser",
+  }) {
     const doc = await getDoc(weekId);
     if (!doc) return null;
 
@@ -369,18 +520,27 @@ const WeeklyChallengeManager = {
     await putDoc(next);
 
     // analytics/progress ping
-    const completedCount = updated.filter((c) => c.completedBy.includes(userId)).length;
+    const completedCount = updated.filter((c) =>
+      c.completedBy.includes(userId)
+    ).length;
     const total = updated.length;
     const payload = { weekId, challengeId, userId, completedCount, total };
 
     try {
-      window.dispatchEvent?.(new CustomEvent("social:weeklyChallenges:completed", { detail: payload }));
+      window.dispatchEvent?.(
+        new CustomEvent("social:weeklyChallenges:completed", {
+          detail: payload,
+        })
+      );
     } catch {}
     try {
       const sock = safeGetSocket();
       sock?.emit?.("social/weeklyChallenges/completed", payload);
       // also hint orchestrator if present
-      sock?.emit?.(EVENTS?.SESSION?.FINISHED?.CLEANING || "SESSION.FINISHED.CLEANING", { at: nowISO(), reason: "challenge-completed" });
+      sock?.emit?.(
+        EVENTS?.SESSION?.FINISHED?.CLEANING || "SESSION.FINISHED.CLEANING",
+        { at: nowISO(), reason: "challenge-completed" }
+      );
     } catch {}
 
     notifyN8n("completed", payload).catch(() => {});
@@ -413,8 +573,12 @@ const WeeklyChallengeManager = {
   async regenerateThisWeek() {
     const weekId = getCurrentWeekId();
     // Delete then generate
-    try { await DexieDB.weeklyChallenges.delete(weekId); } catch {
-      try { localStorage.removeItem(`weeklyChallenges:${weekId}`); } catch {}
+    try {
+      await DexieDB.weeklyChallenges.delete(weekId);
+    } catch {
+      try {
+        localStorage.removeItem(`weeklyChallenges:${weekId}`);
+      } catch {}
     }
     return this.generateNewChallengesForWeek(weekId);
   },
@@ -427,24 +591,37 @@ const WeeklyChallengeManager = {
     if (!category || !titles?.length) return null;
     const now = new Date();
     const weekId = nextWeek
-      ? `week-${now.getFullYear()}-${getWeekNumber(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7))}`
+      ? `week-${now.getFullYear()}-${getWeekNumber(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7)
+        )}`
       : getCurrentWeekId();
 
-    const doc = (await getDoc(weekId)) || (await this.generateNewChallengesForWeek(weekId));
+    const doc =
+      (await getDoc(weekId)) ||
+      (await this.generateNewChallengesForWeek(weekId));
     const idx = doc.challenges.findIndex((c) => c.category === category);
     if (idx >= 0 && titles[0]) {
       doc.challenges[idx] = {
         ...doc.challenges[idx],
         title: titles[0],
         points: Math.max(35, Number(doc.challenges[idx].points || 0)),
-        tags: Array.from(new Set([...(doc.challenges[idx].tags || []), "adopted"])),
+        tags: Array.from(
+          new Set([...(doc.challenges[idx].tags || []), "adopted"])
+        ),
       };
       await putDoc(doc);
 
       try {
-        window.dispatchEvent?.(new CustomEvent("social:weeklyChallenges:adopted", { detail: { weekId, category } }));
+        window.dispatchEvent?.(
+          new CustomEvent("social:weeklyChallenges:adopted", {
+            detail: { weekId, category },
+          })
+        );
       } catch {}
-      safeGetSocket()?.emit?.("social/weeklyChallenges/adopted", { weekId, category });
+      safeGetSocket()?.emit?.("social/weeklyChallenges/adopted", {
+        weekId,
+        category,
+      });
       return doc;
     }
     return null;

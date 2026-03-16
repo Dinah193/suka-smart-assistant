@@ -1,0 +1,427 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.citrus_chili.recipes.lime_chili_shrimp",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Lime-Chili Shrimp",
+    "subtitle": "Fast skillet shrimp with bright lime, garlic, and adjustable chili heat",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Designed for Citrus-Chili cuisine overlay: bright citrus + clean chili warmth."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "citrus_chili",
+    "category": "main",
+    "mealArchetypes": [
+      "quick_protein",
+      "skillet_main",
+      "bowls",
+      "plates",
+      "tacos_optional"
+    ],
+    "servingStyles": ["plates", "bowls", "street_food"],
+    "plannerTags": [
+      "cuisine.citrus_chili",
+      "protein.shrimp",
+      "weeknight.friendly",
+      "15_min_meal",
+      "spice_adjustable",
+      "meal_prep_light",
+      "gluten_free"
+    ]
+  },
+  "summary": "Juicy shrimp seared quickly, then finished with lime zest/juice, garlic, and chili for a clean, punchy Citrus-Chili main. Perfect over chili-citrus rice, in bowls, or tucked into tortillas.",
+  "yield": {
+    "servings": 4,
+    "notes": "Based on ~1.5 lb shrimp. Scale up for bowls or meal prep."
+  },
+  "time": {
+    "activeMins": 12,
+    "handsOffMins": 8,
+    "totalMins": 20
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": "medium",
+    "leftoversGood": true,
+    "freezerFriendly": "low",
+    "spiceAdjustable": true,
+    "highProtein": true,
+    "quickCook": true
+  },
+  "tasteProfile": {
+    "heatLevel": 2,
+    "acidity": "lime-forward finish",
+    "salt": "medium",
+    "sweetness": "low",
+    "notes": [
+      "garlic",
+      "lime zest aroma",
+      "chili warmth",
+      "buttery gloss (optional)"
+    ]
+  },
+  "equipment": {
+    "minimum": [
+      "skillet",
+      "tongs",
+      "mixing_bowl",
+      "measuring_spoons",
+      "cutting_board",
+      "knife"
+    ],
+    "recommended": [
+      "microplane_or_grater",
+      "citrus_juicer",
+      "instant_read_thermometer_optional"
+    ],
+    "optional": [
+      {
+        "id": "cast_iron_skillet_optional",
+        "label": "Cast iron skillet",
+        "notes": "Gives an especially nice sear. Stainless works great too."
+      }
+    ]
+  },
+  "allergens": ["shellfish", "citrus"],
+  "dietFlags": ["gluten_free", "low_carb_optional"],
+  "keywords": [
+    "lime chili shrimp",
+    "chili lime shrimp",
+    "garlic lime shrimp",
+    "skillet shrimp",
+    "shrimp bowls"
+  ],
+  "tags": [
+    "cuisine.citrus_chili",
+    "protein.shrimp",
+    "weeknight.friendly",
+    "spice_adjustable",
+    "gluten_free"
+  ],
+  "methods": ["quick_marinade", "skillet_sear", "pan_sauce_finish"],
+  "ingredientGroups": [
+    {
+      "id": "shrimp",
+      "label": "Shrimp",
+      "items": ["shrimp", "salt", "black_pepper"]
+    },
+    {
+      "id": "lime_chili_marinade",
+      "label": "Lime-Chili Marinade",
+      "items": [
+        "lime_zest",
+        "lime_juice",
+        "garlic",
+        "chili",
+        "oil",
+        "paprika_optional",
+        "cumin_optional"
+      ]
+    },
+    {
+      "id": "finish",
+      "label": "Finish",
+      "items": [
+        "butter_optional",
+        "honey_optional",
+        "cilantro_optional",
+        "extra_lime_wedges"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "shrimp",
+      "label": "Large shrimp, peeled and deveined",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": "About 1.5 lb. Tail-on or off is fine. Pat very dry for best sear."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Plus more to taste at the end."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "lime_zest",
+      "label": "Lime zest",
+      "role": "citrus",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Zest before juicing; mostly the green part."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Fresh lime juice",
+      "role": "citrus",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 2 limes. Keep 1 extra lime for wedges if you like."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, finely minced (or grated)",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "chili",
+      "label": "Red pepper flakes (or chili powder)",
+      "role": "heat",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": "Use 1/2 tsp mild, 1 tsp spicy. For chili powder, start at 1 tsp."
+    },
+    {
+      "id": "oil",
+      "label": "Olive oil (or avocado oil)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "High-heat oil helps with sear."
+    },
+    {
+      "id": "paprika_optional",
+      "label": "Smoked paprika (optional)",
+      "role": "seasoning",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Adds gentle smoke and deeper color."
+    },
+    {
+      "id": "cumin_optional",
+      "label": "Ground cumin (optional)",
+      "role": "seasoning",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "butter_optional",
+      "label": "Butter (optional)",
+      "role": "finish_fat",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Adds gloss and rounds the acidity. Use vegan butter or omit."
+    },
+    {
+      "id": "honey_optional",
+      "label": "Honey (optional)",
+      "role": "balance",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Tiny amount balances lime if your limes are very tart."
+    },
+    {
+      "id": "cilantro_optional",
+      "label": "Cilantro, chopped (optional)",
+      "role": "herb_finish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "extra_lime_wedges",
+      "label": "Lime wedges (optional)",
+      "role": "serve",
+      "optional": true,
+      "amount": { "value": 1, "unit": "lime" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Dry the shrimp",
+      "instructions": [
+        "Pat shrimp dry with paper towels (this is key for browning).",
+        "Add shrimp to a mixing bowl."
+      ],
+      "activeMins": 2,
+      "checks": ["Shrimp surface looks dry (not wet/shiny)"]
+    },
+    {
+      "id": "step_02",
+      "title": "Quick marinade (8 minutes)",
+      "instructions": [
+        "Add salt, black pepper, lime zest, lime juice, garlic, chili, oil, and optional paprika/cumin to the bowl.",
+        "Toss well to coat.",
+        "Let sit 8 minutes while you heat the skillet."
+      ],
+      "handsOffMins": 8,
+      "timers": [{ "label": "Quick marinade", "minutes": 8 }],
+      "checks": ["Shrimp smells bright and garlicky; evenly coated"]
+    },
+    {
+      "id": "step_03",
+      "title": "Sear shrimp in batches",
+      "instructions": [
+        "Heat a skillet over medium-high until hot (a drop of water sizzles instantly).",
+        "Add shrimp in a single layer (work in 2 batches if needed to avoid crowding).",
+        "Sear 60–90 seconds per side until pink and just cooked through.",
+        "Transfer shrimp to a plate as each batch finishes."
+      ],
+      "activeMins": 6,
+      "timers": [
+        { "label": "Sear side 1", "seconds": 75 },
+        { "label": "Sear side 2", "seconds": 75 }
+      ],
+      "checks": [
+        "Shrimp are opaque and curled into a loose 'C' shape (not tightly curled 'O')",
+        "No watery liquid pooling from overcrowding"
+      ]
+    },
+    {
+      "id": "step_04",
+      "title": "Pan-finish with lime-chili gloss",
+      "instructions": [
+        "Reduce heat to medium-low.",
+        "If using, add butter and let it melt, scraping up any browned bits.",
+        "Add 1–2 tbsp of water if the pan looks dry.",
+        "Return shrimp to the skillet and toss for 20–30 seconds to coat.",
+        "Optional: stir in honey for balance, then turn off heat."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Toss to coat", "seconds": 30 }],
+      "checks": ["Shrimp are glossy and coated; lime is bright but not harsh"]
+    },
+    {
+      "id": "step_05",
+      "title": "Serve",
+      "instructions": [
+        "Taste and adjust with a pinch of salt or an extra squeeze of lime.",
+        "Top with cilantro (optional).",
+        "Serve with chili-citrus rice, lemon-chili vegetables, or in tortillas with slaw."
+      ],
+      "activeMins": 1
+    }
+  ],
+  "pairings": {
+    "starches": [
+      "chili_citrus_rice",
+      "flatbread_optional",
+      "tortillas_optional"
+    ],
+    "vegetables": [
+      "lemon_chili_vegetables",
+      "herb_roasted_vegetables",
+      "simple_slaw_optional"
+    ],
+    "sauces": [
+      "yogurt_lime_sauce_optional",
+      "garlic_aioli_optional",
+      "hot_sauce_optional"
+    ],
+    "salads": ["cucumber_citrus_salad_optional"]
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 3,
+      "notes": "Shrimp are best within 1–2 days; keep airtight."
+    },
+    "freezer": {
+      "ok": false,
+      "notes": "Cooked shrimp can be frozen, but texture softens; this recipe is best fresh."
+    },
+    "reheat": {
+      "methods": ["skillet", "microwave_low_power"],
+      "notes": "Reheat gently to avoid rubbery shrimp. Add a splash of water and warm just until hot."
+    }
+  },
+  "safety": {
+    "handling": [
+      "Keep raw shrimp cold until cooking.",
+      "Cook shrimp just until opaque; avoid overcooking.",
+      "Refrigerate leftovers promptly."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation_grilled",
+      "label": "Grilled lime-chili shrimp",
+      "notes": [
+        "Thread shrimp on skewers (double-skewer if possible).",
+        "Grill over medium-high 1–2 minutes per side.",
+        "Finish off-heat with zest + a squeeze of lime and a drizzle of oil or melted butter."
+      ]
+    },
+    {
+      "id": "variation_creamy_lime",
+      "label": "Creamy lime-chili shrimp (dairy optional)",
+      "notes": [
+        "After searing, reduce heat and add 2–3 tbsp coconut milk or a spoon of Greek yogurt (off heat) for a creamy coating.",
+        "Keep the lime bright; add more zest rather than more juice if needed."
+      ]
+    },
+    {
+      "id": "variation_taco_style",
+      "label": "Taco/bowl style",
+      "notes": [
+        "Serve in warm tortillas with cabbage slaw and a drizzle of yogurt-lime sauce.",
+        "Or serve over chili-citrus rice with avocado and quick pickled onions."
+      ]
+    }
+  ],
+  "planner": {
+    "cuisineId": "cuisines.citrus_chili",
+    "defaultCourse": "main",
+    "weeknightNotes": [
+      "Marinate while the pan heats—don’t exceed 15 minutes or lime can start to firm the shrimp.",
+      "Cook in batches for true sear and better texture."
+    ],
+    "shopping": {
+      "corePantry": ["salt", "black_pepper", "chili", "oil"],
+      "fresh": [
+        "shrimp",
+        "lime_zest",
+        "lime_juice",
+        "garlic",
+        "cilantro_optional"
+      ]
+    }
+  },
+  "compat": {
+    "cuisine": "citrus_chili",
+    "dishId": "lime_chili_shrimp",
+    "ingredientIds": [
+      "shrimp",
+      "salt",
+      "black_pepper",
+      "lime_zest",
+      "lime_juice",
+      "garlic",
+      "chili",
+      "oil",
+      "paprika_optional",
+      "cumin_optional",
+      "butter_optional",
+      "honey_optional",
+      "cilantro_optional",
+      "extra_lime_wedges"
+    ],
+    "equipmentIds": [
+      "skillet",
+      "tongs",
+      "mixing_bowl",
+      "measuring_spoons",
+      "cutting_board",
+      "knife",
+      "microplane_or_grater",
+      "citrus_juicer",
+      "instant_read_thermometer_optional",
+      "cast_iron_skillet_optional"
+    ],
+    "methodIds": ["quick_marinade", "skillet_sear", "pan_sauce_finish"]
+  }
+}

@@ -1,0 +1,310 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.bbq_ribs",
+    "type": "recipe",
+    "name": "BBQ Ribs (Low-and-Slow, Smoker or Oven Finish)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Classic BBQ ribs with a balanced dry rub and optional sauce set.",
+        "Written for SSA planners/adapters: clear equipment, timers, doneness cues, and method variations."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "main",
+    "mealArchetypes": ["dinner"],
+    "servingStyles": ["family_style", "bbq_plate"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "method.smoke",
+      "low_and_slow",
+      "protein.pork",
+      "crowd_friendly",
+      "leftovers_good"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "notes": "Assumes ~1 rack (baby back) feeds 2–3 people depending on sides. Spare ribs are meatier: plan accordingly."
+  },
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 330,
+    "totalMins": 365
+  },
+  "difficulty": "intermediate",
+  "equipment": {
+    "minimum": [
+      "equipment.smoker",
+      "equipment.oven",
+      "equipment.sheet_pan",
+      "equipment.foil"
+    ],
+    "recommended": [
+      "equipment.probe_thermometer",
+      "equipment.instant_read_thermometer",
+      "equipment.spray_bottle",
+      "equipment.tongs",
+      "equipment.basting_brush"
+    ],
+    "optional": ["equipment.rib_rack", "equipment.butchers_paper"]
+  },
+  "dietFlags": ["gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredients.pork_ribs",
+      "label": "Pork ribs (baby back or St. Louis spare ribs)",
+      "qty": 2,
+      "unit": "racks",
+      "notes": "Baby back cooks faster; spare ribs are richer and slightly longer cook. Remove membrane for best bite.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.yellow_mustard",
+      "label": "Yellow mustard (binder, optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Thin layer to help rub adhere; flavor cooks off.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt",
+      "qty": 2,
+      "unit": "tsp",
+      "notes": "Adjust if rub blend already contains salt. For spare ribs, you may increase slightly.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.brown_sugar",
+      "label": "Brown sugar (light or dark)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Helps bark and caramelization. For hot-and-fast ribs reduce sugar to avoid burning.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Paprika (sweet)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Base color + mild sweetness.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper (coarse ground)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Coarse grind helps bark.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.garlic_powder",
+      "label": "Garlic powder",
+      "qty": 2,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.onion_powder",
+      "label": "Onion powder",
+      "qty": 2,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.chili_powder",
+      "label": "Chili powder (mild)",
+      "qty": 2,
+      "unit": "tsp",
+      "notes": "Use more for a deeper chili backbone; keep mild for family-friendly.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.cayenne",
+      "label": "Cayenne pepper (optional)",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Optional heat. Increase gradually.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.ground_cumin",
+      "label": "Ground cumin (optional)",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Optional smoky-earthy note; not required for classic ribs.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.apple_juice",
+      "label": "Apple juice (spritz / wrap moisture)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "Use in a spray bottle or add a splash in the wrap. Can substitute apple cider vinegar + water.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar (spritz option)",
+      "qty": 0.25,
+      "unit": "cup",
+      "notes": "Mix 1:1 with water for spritz. Helps balance sweetness and keep surface moist.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.water",
+      "label": "Water (spritz option)",
+      "qty": 0.25,
+      "unit": "cup",
+      "optional": true
+    },
+    {
+      "id": "ingredients.butter",
+      "label": "Butter (wrap option, optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Classic 3-2-1 style uses butter in the wrap for richness; optional.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.honey",
+      "label": "Honey (wrap option, optional)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Optional sweetness in wrap; omit for less-sweet BBQ.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.bbq_sauce",
+      "label": "BBQ sauce (for glaze/set, optional)",
+      "qty": 0.75,
+      "unit": "cup",
+      "notes": "Use your preferred style (KC tomato-based, mild sweet heat, etc.). Thin with a splash of water if very thick.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.wood_smoke",
+      "label": "Smoking wood (oak/pecan/apple/cherry)",
+      "qty": 2,
+      "unit": "cups",
+      "notes": "Amount depends on smoker type. Fruit woods are excellent for ribs.",
+      "optional": false
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_remove_membrane",
+      "title": "Prep ribs and remove membrane",
+      "body": "Pat ribs dry. Flip bone-side up and remove the thin membrane (silver skin): slide a butter knife under it over a middle bone, lift, then grip with a paper towel and pull off. Trim any loose flap edges.",
+      "timers": [{ "label": "Prep time (estimate)", "mins": 10 }]
+    },
+    {
+      "id": "step.mix_rub",
+      "title": "Mix the dry rub",
+      "body": "Combine kosher salt, brown sugar, paprika, black pepper, garlic powder, onion powder, chili powder, and optional cayenne/cumin. Break up any brown sugar clumps so it distributes evenly.",
+      "timers": [{ "label": "Rub mix (estimate)", "mins": 5 }]
+    },
+    {
+      "id": "step.season",
+      "title": "Season ribs",
+      "body": "Optional: spread a very thin layer of yellow mustard over both sides of the ribs as a binder. Apply dry rub evenly on both sides, pressing to adhere. Let sit 15–30 minutes while the smoker heats (or refrigerate uncovered 2–12 hours for deeper seasoning and better bark).",
+      "timers": [{ "label": "Season + rest (minimum)", "mins": 20 }]
+    },
+    {
+      "id": "step.preheat_smoker",
+      "title": "Preheat smoker",
+      "body": "Preheat smoker to 225–250°F (107–121°C). Add your smoking wood and aim for clean smoke (thin blue). If your smoker uses a water pan, fill it for stability.",
+      "timers": [{ "label": "Preheat smoker (estimate)", "mins": 20 }]
+    },
+    {
+      "id": "step.smoke_phase_1",
+      "title": "Smoke to set bark",
+      "body": "Place ribs on the smoker bone-side down (or per your smoker’s airflow pattern). Smoke at 225–250°F for about 2.5–3 hours, until the rub is set and the surface is a deep red-brown. Optional: spritz lightly every 45–60 minutes after the first 90 minutes, once bark has set.",
+      "timers": [
+        { "label": "Smoke phase 1 (bark set)", "mins": 180 },
+        { "label": "Optional spritz interval", "mins": 60 }
+      ]
+    },
+    {
+      "id": "step.wrap_phase_2",
+      "title": "Wrap to tenderize (optional but common)",
+      "body": "For a classic tender rib: wrap racks tightly in foil (or butcher paper). Add a splash of apple juice and optional butter/honey before sealing. Return wrapped ribs to smoker and cook 1.5–2 hours until ribs are noticeably tender. If you prefer firmer ‘bite-through’ ribs, shorten this phase or skip wrapping and continue unwrapped.",
+      "timers": [{ "label": "Wrapped cook (tenderize)", "mins": 120 }]
+    },
+    {
+      "id": "step.unwrap_set_glaze",
+      "title": "Unwrap and set glaze (optional)",
+      "body": "Carefully unwrap (hot steam). Return ribs to smoker unwrapped. If using BBQ sauce, brush a thin layer on and let it set 15–30 minutes. Keep heat at 225–250°F. Apply a second light coat if desired. Avoid thick, sugary layers that can burn.",
+      "timers": [{ "label": "Sauce set / bark finish", "mins": 30 }]
+    },
+    {
+      "id": "step.doneness_check",
+      "title": "Check doneness (bend test + bone pullback)",
+      "body": "Ribs are done when they pass the bend test: lift from the middle with tongs—rack bends easily and the surface may crack slightly. Look for 1/4–1/2 inch bone pullback. Meat should be tender but not falling off the bone unless that’s your preference. Internal temp is less reliable for ribs; texture is key.",
+      "timers": [{ "label": "Final doneness window", "mins": 15 }]
+    },
+    {
+      "id": "step.rest_slice",
+      "title": "Rest, slice, and serve",
+      "body": "Rest ribs 10–15 minutes to let juices settle. Slice between bones with a sharp knife. Serve with classic BBQ sides (slaw, beans, potato salad, cornbread).",
+      "timers": [{ "label": "Rest (minimum)", "mins": 10 }]
+    },
+    {
+      "id": "step.storage",
+      "title": "Storage and reheating",
+      "body": "Cool leftovers quickly. Refrigerate tightly wrapped up to 4 days; freeze up to 3 months. Reheat covered in a 275°F oven with a splash of water/juice until warmed through; uncover briefly to re-set bark or glaze.",
+      "timers": []
+    }
+  ],
+  "pairings": {
+    "sides": [
+      { "id": "dishes.bbq.cole_slaw", "label": "Cole Slaw" },
+      { "id": "dishes.bbq.baked_beans", "label": "Baked Beans" },
+      { "id": "dishes.bbq.potato_salad", "label": "Potato Salad" },
+      { "id": "dishes.bbq.cornbread", "label": "Cornbread" }
+    ],
+    "sauces": [
+      {
+        "id": "dishes.bbq.tomato_based_bbq_sauce",
+        "label": "Tomato-Based BBQ Sauce"
+      },
+      {
+        "id": "dishes.bbq.vinegar_sauce_carolina",
+        "label": "Vinegar Sauce (optional)"
+      }
+    ]
+  },
+  "planner": {
+    "batchable": true,
+    "leftovers": {
+      "goodFor": ["rib_sandwiches", "rib_tacos", "loaded_baked_potatoes"],
+      "notes": "Plan ribs as a weekend cook. Pair with storehouse sides; schedule leftover use within 1–2 days."
+    }
+  },
+  "adaptations": [
+    {
+      "kind": "equipment",
+      "notes": [
+        "No smoker: bake wrapped ribs in oven at 275°F for ~2.5–3 hours, then sauce and broil briefly to set.",
+        "Pellet grill: maintain stable temp; keep sauce thin and set at the end to avoid scorching."
+      ]
+    },
+    {
+      "kind": "doneness",
+      "notes": [
+        "Aim for bend-test tenderness (bite-through) unless you intentionally want fall-off-the-bone.",
+        "Wrapping speeds tenderness but can soften bark; finish unwrapped to re-firm the surface."
+      ]
+    }
+  ]
+}

@@ -34,9 +34,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  */
 
 // ------------------------ Safe, lazy imports ------------------------
-let eventBus = { emit: (...a) => console.debug("[useOverlayStreamer:eventBus.emit]", ...a), on: () => () => {} };
+let eventBus = {
+  emit: (...a) => console.debug("[useOverlayStreamer:eventBus.emit]", ...a),
+  on: () => () => {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -47,15 +50,17 @@ try {
   //   await rtc.join(roomCode);
   //   rtc.send(type, payload)
   //   rtc.leave()
-  rtcClientFactory = require("@/services/realtime/rtcClient.js")?.default
-                  || require("@/services/realtime/rtcClient.js");
+  rtcClientFactory =
+    require("@/services/realtime/rtcClient.js")?.default ||
+    require("@/services/realtime/rtcClient.js");
 } catch {}
 
 let wsFallbackFactory = null;
 try {
   // Expected API mirrors rtcClient: join(room), send(type, payload), leave()
-  wsFallbackFactory = require("@/services/realtime/wsFallback.js")?.default
-                   || require("@/services/realtime/wsFallback.js");
+  wsFallbackFactory =
+    require("@/services/realtime/wsFallback.js")?.default ||
+    require("@/services/realtime/wsFallback.js");
 } catch {}
 
 let featureFlags = {};
@@ -74,7 +79,12 @@ try {
 const isoNow = () => new Date().toISOString();
 
 function emit(type, data) {
-  const payload = { type, ts: isoNow(), source: "hooks.useOverlayStreamer", data };
+  const payload = {
+    type,
+    ts: isoNow(),
+    source: "hooks.useOverlayStreamer",
+    data,
+  };
   try {
     eventBus.emit?.(type, payload);
   } catch {}
@@ -173,10 +183,20 @@ function applyStationFilter(snapshot, stationFilter) {
     timers,
     focus: {
       currentStep: currentStep
-        ? { id: currentStep.id, label: currentStep.label, station: currentStep.station, estMin: currentStep.estMin }
+        ? {
+            id: currentStep.id,
+            label: currentStep.label,
+            station: currentStep.station,
+            estMin: currentStep.estMin,
+          }
         : null,
       nextStep: nextStep
-        ? { id: nextStep.id, label: nextStep.label, station: nextStep.station, estMin: nextStep.estMin }
+        ? {
+            id: nextStep.id,
+            label: nextStep.label,
+            station: nextStep.station,
+            estMin: nextStep.estMin,
+          }
         : null,
     },
   };
@@ -195,7 +215,9 @@ export default function useOverlayStreamer({
   const bcRef = useRef(null);
   const rtcRef = useRef(null);
   const wsRef = useRef(null);
-  const [connected, setConnected] = useState(() => (typeof BroadcastChannel !== "undefined" ? "local" : "none"));
+  const [connected, setConnected] = useState(() =>
+    typeof BroadcastChannel !== "undefined" ? "local" : "none"
+  );
   const [streamerSafe, _setStreamerSafe] = useState(!!initialStreamerSafe);
   const [stationFilter, _setStationFilter] = useState(initialStationFilter);
   const roomRef = useRef(room);
@@ -213,7 +235,10 @@ export default function useOverlayStreamer({
       // no hub export (observability-only)
       void p;
     } catch (e) {
-      emit("overlay.channel.error", { channel, message: String(e?.message || e) });
+      emit("overlay.channel.error", {
+        channel,
+        message: String(e?.message || e),
+      });
       setConnected("none");
     }
     return () => {
@@ -250,11 +275,18 @@ export default function useOverlayStreamer({
       let rtc = null;
       if (rtcClientFactory) {
         try {
-          rtc = typeof rtcClientFactory === "function" ? rtcClientFactory() : rtcClientFactory;
+          rtc =
+            typeof rtcClientFactory === "function"
+              ? rtcClientFactory()
+              : rtcClientFactory;
           await rtc.join(roomCode);
           rtcRef.current = rtc;
           setConnected("room:connected");
-          emit("overlay.room.connected", { room: roomCode, transport: "rtc", domain });
+          emit("overlay.room.connected", {
+            room: roomCode,
+            transport: "rtc",
+            domain,
+          });
           return;
         } catch (e) {
           emit("overlay.room.error", {
@@ -268,11 +300,18 @@ export default function useOverlayStreamer({
 
       if (wsFallbackFactory) {
         try {
-          const ws = typeof wsFallbackFactory === "function" ? wsFallbackFactory() : wsFallbackFactory;
+          const ws =
+            typeof wsFallbackFactory === "function"
+              ? wsFallbackFactory()
+              : wsFallbackFactory;
           await ws.join(roomCode);
           wsRef.current = ws;
           setConnected("room:connected");
-          emit("overlay.room.connected", { room: roomCode, transport: "ws", domain });
+          emit("overlay.room.connected", {
+            room: roomCode,
+            transport: "ws",
+            domain,
+          });
           return;
         } catch (e) {
           emit("overlay.room.error", {
@@ -299,15 +338,24 @@ export default function useOverlayStreamer({
   }, [room]);
 
   // Setters exposed
-  const setStreamerSafe = useCallback((v) => {
-    _setStreamerSafe(!!v);
-    emit("overlay.streamerSafe.changed", { streamerSafe: !!v, domain });
-  }, [domain]);
+  const setStreamerSafe = useCallback(
+    (v) => {
+      _setStreamerSafe(!!v);
+      emit("overlay.streamerSafe.changed", { streamerSafe: !!v, domain });
+    },
+    [domain]
+  );
 
-  const setStationFilter = useCallback((key) => {
-    _setStationFilter(key || "all");
-    emit("overlay.stationFilter.changed", { stationFilter: key || "all", domain });
-  }, [domain]);
+  const setStationFilter = useCallback(
+    (key) => {
+      _setStationFilter(key || "all");
+      emit("overlay.stationFilter.changed", {
+        stationFilter: key || "all",
+        domain,
+      });
+    },
+    [domain]
+  );
 
   // Compose & send snapshot
   const pushSnapshot = useCallback(
@@ -335,15 +383,28 @@ export default function useOverlayStreamer({
       // 1) BroadcastChannel (same-device)
       try {
         bcRef.current?.postMessage(filtered);
-        emit("overlay.snapshot.local", { size: estimateSize(filtered), stationFilter, streamerSafe, domain });
+        emit("overlay.snapshot.local", {
+          size: estimateSize(filtered),
+          stationFilter,
+          streamerSafe,
+          domain,
+        });
       } catch (e) {
-        emit("overlay.snapshot.error", { stage: "local", message: String(e?.message || e) });
+        emit("overlay.snapshot.error", {
+          stage: "local",
+          message: String(e?.message || e),
+        });
       }
 
       // 2) Room transport if connected
       if (connected === "room:connected" && (rtcRef.current || wsRef.current)) {
         try {
-          const envelope = { type: "overlay.snapshot", ts: isoNow(), source: "hooks.useOverlayStreamer", data: filtered };
+          const envelope = {
+            type: "overlay.snapshot",
+            ts: isoNow(),
+            source: "hooks.useOverlayStreamer",
+            data: filtered,
+          };
           if (rtcRef.current) {
             rtcRef.current.send?.("overlay.snapshot", envelope);
           } else {
@@ -357,7 +418,10 @@ export default function useOverlayStreamer({
             domain,
           });
         } catch (e) {
-          emit("overlay.snapshot.error", { stage: "room", message: String(e?.message || e) });
+          emit("overlay.snapshot.error", {
+            stage: "room",
+            message: String(e?.message || e),
+          });
         }
       }
     },
@@ -384,6 +448,14 @@ export default function useOverlayStreamer({
       streamerSafe,
       setStationFilter,
     }),
-    [connected, pushSnapshot, joinRoom, leaveRoom, setStreamerSafe, streamerSafe, setStationFilter]
+    [
+      connected,
+      pushSnapshot,
+      joinRoom,
+      leaveRoom,
+      setStreamerSafe,
+      streamerSafe,
+      setStationFilter,
+    ]
   );
 }

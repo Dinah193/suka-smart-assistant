@@ -12,10 +12,10 @@ Planning Graph node id:
 
 The **Batch Yield Calculator** is the bridge between:
 
-- a **recipe / batch cooking idea**, and  
+- a **recipe / batch cooking idea**, and
 - **practical household planning**: how many meals you’ll get, how long it will take, and how it should flow into **sessions, preservation, freezer planning, and shopping**.
 
-It takes a *single batch plan* (recipe, scaling, portion targets, containers) and produces a **normalized yield model** that the rest of SSA can use:
+It takes a _single batch plan_ (recipe, scaling, portion targets, containers) and produces a **normalized yield model** that the rest of SSA can use:
 
 - How many **total portions** you’ll get
 - How those portions are split across **meal types** (breakfast / lunch / dinner / snacks)
@@ -170,11 +170,11 @@ Designed so any UI (not just this page) can reuse the same logic to launch sessi
 
 Typical sources:
 
-- **Recipe Vault / Scanner**  
+- **Recipe Vault / Scanner**
   - Provides `recipeDefinition` + base servings + time metadata.
-- **Macro / Nutrition calculators**  
+- **Macro / Nutrition calculators**
   - Provide per-person or per-household **portion targets**.
-- **Storehouse inventory**  
+- **Storehouse inventory**
   - Provides real-time ingredient stock, container catalogs, and location tags.
 
 The Planning Graph ensures these inputs can be wired directly into this node via `provides` / `consumes` fields in configs.
@@ -225,7 +225,7 @@ Once the calculator runs, the result object can feed:
 
 ### 4.1 Event bus
 
-The shim and hooks emit events via `src/services/eventBus.js`:
+The shim and hooks emit events via `src/services/events/eventBus.js`:
 
 - On invocation:
   - `calculator.batchYield.invoked`
@@ -359,3 +359,4 @@ Use HubPacketFormatter and FamilyFundConnector via the shared helpers.
 Only export when familyFundMode is enabled.
 
 This calculator is a key building block in SSA’s Storehouse & Meals planning loop. Treat it as the “bridge brain” between recipes, family needs, and real-world batch work.
+```

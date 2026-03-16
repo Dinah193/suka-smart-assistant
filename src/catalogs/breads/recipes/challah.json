@@ -1,0 +1,325 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.challah",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Classic Challah (Braided Egg Bread)",
+    "subtitle": "Soft, slightly sweet • braided loaf • great for sandwiches & French toast • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Everyday challah-style braided egg bread. Formulated for 1 large loaf or 2 smaller loaves. Includes fresh-milled guidance, honey option, and shaping notes."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "enriched bread",
+    "subprofiles": ["challah", "egg bread", "braided", "soft loaf"],
+    "mealArchetypes": ["bread", "holiday loaf", "sandwich bread", "breakfast"],
+    "servingStyles": ["braided loaf", "sliced"],
+    "plannerTags": [
+      "challah",
+      "braided",
+      "egg bread",
+      "soft",
+      "sandwich",
+      "french toast"
+    ]
+  },
+
+  "yield": {
+    "servings": 14,
+    "servingSize": { "value": 1, "unit": "slice" },
+    "notes": "Makes 1 large loaf (or 2 small loaves). Typically ~14 slices depending on thickness."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 190,
+    "totalMins": 235
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "baking sheet", "oven"],
+    "recommended": [
+      "scale",
+      "stand mixer (dough hook)",
+      "bench scraper",
+      "parchment paper",
+      "pastry brush"
+    ],
+    "optional": ["instant-read thermometer", "proofing box"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "egg"],
+
+  "signals": {
+    "enrichedDough": true,
+    "braided": true,
+    "freezerFriendly": true,
+    "frenchToastIdeal": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "low-to-moderate",
+    "saltiness": "moderate",
+    "richness": "medium",
+    "texture": "soft-fluffy",
+    "notes": "Tender crumb with a gentle sweetness and a glossy crust from egg wash."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "Flour (bread flour preferred; or all-purpose; or fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Bread flour improves structure and braid definition. All-purpose works for a softer loaf."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 3/4 teaspoons."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar",
+      "role": "sweetener",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "About 1/4 cup. Can substitute honey (see variation)."
+    },
+    {
+      "id": "yeast",
+      "label": "Instant yeast (or active dry yeast)",
+      "role": "leavening",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 2 1/4 teaspoons. If using active dry, bloom in warm water first (see steps)."
+    },
+    {
+      "id": "water",
+      "label": "Warm water (95–105°F / 35–40°C)",
+      "role": "hydration",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup. Hold back 20–30g and add only if dough is dry."
+    },
+    {
+      "id": "eggs",
+      "label": "Large eggs",
+      "role": "enrichment",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "About 100g total egg (without shells)."
+    },
+    {
+      "id": "oil",
+      "label": "Neutral oil (or light olive oil)",
+      "role": "fat",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 1/4 cup. Keeps crumb soft and helps bread stay tender."
+    },
+    {
+      "id": "egg_wash_egg",
+      "label": "Egg (for egg wash)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "For gloss and deeper color."
+    },
+    {
+      "id": "egg_wash_liquid",
+      "label": "Water (or milk) for egg wash",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "sesame_optional",
+      "label": "Sesame seeds (optional topping)",
+      "role": "finish",
+      "amount": { "value": 12, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "poppy_optional",
+      "label": "Poppy seeds (optional topping)",
+      "role": "finish",
+      "amount": { "value": 12, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Optional: bloom active dry yeast (if using)",
+      "instructions": [
+        "If using active dry yeast, stir yeast and a pinch of sugar into the warm water (use water from recipe total).",
+        "Rest 5–10 minutes until foamy. If using instant yeast, skip blooming."
+      ],
+      "handsOffMins": 8,
+      "timers": [{ "label": "Bloom yeast (optional)", "mins": 8 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Mix dough",
+      "instructions": [
+        "In a large bowl (or mixer bowl), combine flour, sugar, salt, and (if using instant) yeast.",
+        "Add eggs, oil, and most of the warm water (or the bloomed yeast-water). Hold back ~20–30g water.",
+        "Mix until a shaggy dough forms. Add a little more water only if dough is very stiff and dry."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step_03",
+      "title": "Knead until smooth and elastic",
+      "instructions": [
+        "Knead until dough is smooth, elastic, and slightly tacky.",
+        "Stand mixer: 6–8 minutes on low to medium-low with dough hook.",
+        "By hand: 10–12 minutes kneading.",
+        "Dough should pass a basic windowpane test (stretches thin without tearing quickly)."
+      ],
+      "activeMins": 12
+    },
+    {
+      "id": "step_04",
+      "title": "First rise (bulk)",
+      "instructions": [
+        "Place dough in a lightly oiled bowl, cover, and rise until doubled, 60–90 minutes depending on room temperature."
+      ],
+      "handsOffMins": 80,
+      "timers": [{ "label": "Bulk rise", "mins": 80 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Divide and pre-shape",
+      "instructions": [
+        "Turn dough out onto a lightly floured surface and gently deflate.",
+        "Choose braid style:",
+        "• 3-strand braid (easiest): divide into 3 equal pieces.",
+        "• 4-strand braid: divide into 4 equal pieces.",
+        "• 6-strand braid: divide into 6 equal pieces.",
+        "Roll each piece into a loose ball, cover, and rest 10 minutes to relax gluten."
+      ],
+      "handsOffMins": 10,
+      "timers": [{ "label": "Bench rest", "mins": 10 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Roll strands and braid",
+      "instructions": [
+        "Roll each piece into a strand ~14–18 inches (35–45 cm) long, tapered slightly at the ends.",
+        "Braid the loaf and pinch ends to seal; tuck ends under for a neat finish.",
+        "Place on a parchment-lined baking sheet."
+      ],
+      "activeMins": 15
+    },
+    {
+      "id": "step_07",
+      "title": "Final proof",
+      "instructions": [
+        "Cover loosely and proof until very puffy and the braid holds an indentation when gently pressed, 45–75 minutes.",
+        "Avoid over-proofing (loaf can flatten and lose definition)."
+      ],
+      "handsOffMins": 60,
+      "timers": [{ "label": "Final proof", "mins": 60 }]
+    },
+    {
+      "id": "step_08",
+      "title": "Egg wash and bake",
+      "instructions": [
+        "Heat oven to 350°F (175°C).",
+        "Optional: whisk egg wash (1 egg + water/milk) and brush gently over loaf; add sesame or poppy seeds if using.",
+        "Bake 28–38 minutes until deep golden brown.",
+        "Internal temp target: 190–200°F (88–93°C). If browning too quickly, tent loosely with foil for the last 10 minutes."
+      ],
+      "handsOffMins": 33,
+      "timers": [{ "label": "Bake", "mins": 33 }]
+    },
+    {
+      "id": "step_09",
+      "title": "Cool before slicing",
+      "instructions": [
+        "Cool on a rack at least 45 minutes before slicing so crumb sets.",
+        "Challah slices beautifully once fully cooled and is excellent toasted the next day."
+      ],
+      "handsOffMins": 45,
+      "timers": [{ "label": "Cool", "mins": 45 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour can make challah denser if used 100% unsifted. Blending and longer rest improve softness and braid definition.",
+    "guidelines": [
+      "Best texture for braids: use 70% fresh milled flour + 30% bread flour (same total flour weight).",
+      "If using 100% fresh milled (unsifted), consider sifting out some bran; expect slightly tighter crumb and slightly shorter strands.",
+      "Fresh milled flour may need +10–30g extra water. Add only if dough feels stiff after mixing and kneading begins.",
+      "An extra 10–15 minute rest after mixing (before kneading) can improve extensibility (autolyse-style rest)."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 30,
+      "rangeAddBackG": [0, 30]
+    }
+  },
+
+  "variations": [
+    {
+      "name": "Honey challah (classic sweetness)",
+      "change": "Replace sugar with 60g honey. Reduce water by ~15g (honey adds moisture).",
+      "notes": "Slightly sweeter and more aromatic."
+    },
+    {
+      "name": "Two smaller loaves",
+      "change": "After bulk rise, divide dough in half and braid two loaves. Bake 22–28 minutes.",
+      "notes": "More crust and easier portioning."
+    },
+    {
+      "name": "Raisin challah",
+      "change": "Add 120g raisins during the last minute of kneading (or fold in by hand).",
+      "notes": "Great for breakfast and toast."
+    },
+    {
+      "name": "Seeded crust",
+      "change": "After egg wash, apply sesame, poppy, or everything-seasoning blend.",
+      "notes": "Adds texture and savory aroma."
+    }
+  ],
+
+  "storage": {
+    "counter": "Store airtight up to 3 days. Keeps best wrapped well.",
+    "freezer": "Freeze whole loaf or slices up to 2 months. Thaw at room temp; toast slices to refresh.",
+    "reheat": "Toast slices or warm whole loaf briefly in a low oven (300°F / 150°C) wrapped in foil."
+  },
+
+  "notes": [
+    "For a taller, more defined braid: keep strands even in thickness and avoid over-proofing.",
+    "If strands shrink back while rolling: cover and rest 5–10 minutes, then continue.",
+    "Challah is excellent for French toast—use slices 1–2 days old for best soak without collapse."
+  ],
+
+  "pairings": {
+    "serveWith": ["butter", "honey", "jam", "fruit"],
+    "useFor": ["sandwiches", "French toast", "bread pudding"]
+  },
+
+  "links": {
+    "related": [
+      "breads/recipes/brioche",
+      "breads/recipes/french_toast",
+      "breads/recipes/sandwich_bread_white"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions."
+  }
+}

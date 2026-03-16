@@ -1,0 +1,608 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:18:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.lasagna",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Classic Lasagna (Meat Ragù + Béchamel)",
+    "subtitle": "Layered pasta bake with slow-simmered tomato-meat sauce and creamy béchamel",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical baseline Italian baked pasta for SSA catalogs.",
+        "Designed for deterministic planning: make-ahead friendly, batch-friendly, freezer-friendly.",
+        "Uses béchamel (classic in many regional styles). Ricotta swap provided as variation."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "category": "baked_pasta",
+    "mealArchetypes": ["plates", "plated_meals"],
+    "servingStyles": ["family_style", "plated_meals", "holiday_feasts"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.baked_pasta",
+      "method.bake",
+      "method.simmer",
+      "batch.friendly",
+      "freezer.friendly",
+      "leftovers.excellent",
+      "make_ahead",
+      "crowd.friendly",
+      "comfort_food"
+    ]
+  },
+
+  "yield": {
+    "servings": 10,
+    "servingSize": { "value": 360, "unit": "g" },
+    "notes": "One 9x13-inch (23x33 cm) pan. Serving size varies by sides."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 85,
+    "totalMins": 130
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "notes": [
+      "Best as a weekend cook or batch cook: sauce + béchamel can be made ahead.",
+      "Freezes well baked or unbaked; thaw overnight before baking when possible."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "umami": 4,
+    "sweetness": 1,
+    "sourness": 2,
+    "heat": 0,
+    "oilUse": 2,
+    "notes": [
+      "Balance tomato acidity with slow simmer; optional pinch of sugar if needed.",
+      "Nutmeg is classic in béchamel; keep subtle."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "tool.stockpot",
+      "tool.large_skillet",
+      "tool.saucepan",
+      "tool.whisk",
+      "tool.knife",
+      "tool.cutting_board",
+      "tool.baking_dish_9x13",
+      "tool.measuring_cups",
+      "tool.measuring_spoons"
+    ],
+    "recommended": [
+      "tool.microplane",
+      "tool.ladle",
+      "tool.tongs",
+      "tool.instant_read_thermometer",
+      "tool.foil"
+    ],
+    "optional": [
+      {
+        "id": "tool.food_processor",
+        "label": "Food processor (optional)",
+        "required": false,
+        "notes": "To finely chop onion/celery/carrot."
+      },
+      {
+        "id": "tool.dutch_oven",
+        "label": "Dutch oven (optional)",
+        "required": false,
+        "notes": "Nice for steady ragù simmer."
+      }
+    ]
+  },
+
+  "dietFlags": [],
+  "allergens": ["allergen.gluten", "allergen.dairy", "allergen.egg_optional"],
+
+  "ingredients": [
+    {
+      "id": "fat.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "aromatic.onion",
+      "label": "Yellow onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "aromatic.celery",
+      "label": "Celery, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 100, "unit": "g" }
+    },
+    {
+      "id": "aromatic.carrot",
+      "label": "Carrot, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 100, "unit": "g" }
+    },
+    {
+      "id": "aromatic.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "protein.beef.ground",
+      "label": "Ground beef (80–90% lean)",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": "About 1.5 lb."
+    },
+    {
+      "id": "protein.pork.ground",
+      "label": "Ground pork (or Italian sausage, casings removed)",
+      "role": "protein",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "About 0.75 lb. If using sausage, reduce added salt."
+    },
+    {
+      "id": "tomato.paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "wine.red",
+      "label": "Dry red wine (optional)",
+      "role": "deglaze",
+      "amount": { "value": 120, "unit": "ml" },
+      "optional": true,
+      "notes": "Use broth if avoiding wine."
+    },
+    {
+      "id": "tomato.crushed",
+      "label": "Crushed tomatoes (canned)",
+      "role": "sauce_base",
+      "amount": { "value": 1600, "unit": "g" },
+      "notes": "Two 28-oz cans."
+    },
+    {
+      "id": "tomato.passata",
+      "label": "Tomato passata (optional)",
+      "role": "sauce_base",
+      "amount": { "value": 700, "unit": "g" },
+      "optional": true,
+      "notes": "Use for a smoother ragù. If using, reduce crushed tomatoes by ~700 g."
+    },
+    {
+      "id": "herb.oregano.dried",
+      "label": "Dried oregano",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "herb.basil.dried",
+      "label": "Dried basil (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "leaf.bay",
+      "label": "Bay leaves",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": "Start with ~2 tsp and adjust. If sausage is salty, use less."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper, freshly ground",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" }
+    },
+    {
+      "id": "milk.whole",
+      "label": "Whole milk",
+      "role": "béchamel",
+      "amount": { "value": 1000, "unit": "ml" },
+      "notes": "About 4 cups. 2% works; whole is silkier."
+    },
+    {
+      "id": "fat.butter",
+      "label": "Unsalted butter",
+      "role": "béchamel",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 5–6 tbsp."
+    },
+    {
+      "id": "flour.all_purpose",
+      "label": "All-purpose flour",
+      "role": "béchamel",
+      "amount": { "value": 70, "unit": "g" },
+      "notes": "About 1/2 cup minus 1 tbsp (approx)."
+    },
+    {
+      "id": "spice.nutmeg",
+      "label": "Nutmeg, freshly grated (optional)",
+      "role": "béchamel",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true,
+      "notes": "A few microplane passes; keep subtle."
+    },
+    {
+      "id": "cheese.parmesan",
+      "label": "Parmesan, finely grated",
+      "role": "cheese",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "Split between béchamel and layering."
+    },
+    {
+      "id": "cheese.mozzarella",
+      "label": "Mozzarella, shredded",
+      "role": "cheese",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "About 3 cups shredded."
+    },
+    {
+      "id": "pasta.lasagna_noodles",
+      "label": "Lasagna noodles",
+      "role": "starch",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": [
+        "About 12–15 noodles depending on pan and brand.",
+        "No-boil noodles are fine; see variations."
+      ]
+    },
+    {
+      "id": "egg",
+      "label": "Egg (optional, for richer structure in ricotta variation)",
+      "role": "binder",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Only used if you choose ricotta variation."
+    },
+    {
+      "id": "cheese.ricotta",
+      "label": "Ricotta cheese (optional, for ricotta-style lasagna variation)",
+      "role": "cheese",
+      "amount": { "value": 425, "unit": "g" },
+      "optional": true,
+      "notes": "About 15 oz."
+    },
+    {
+      "id": "herb.parsley",
+      "label": "Parsley, chopped (optional)",
+      "role": "herb",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "Nice in ricotta mixture."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep aromatics and preheat",
+      "instructions": [
+        "Dice onion, celery, and carrot finely (soffritto). Mince garlic.",
+        "Preheat oven to 375°F (190°C).",
+        "Lightly oil a 9x13-inch baking dish."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "temperature": {
+        "type": "oven",
+        "value": 190,
+        "unit": "C",
+        "notes": "375°F"
+      }
+    },
+    {
+      "id": "step_02_soffritto",
+      "title": "Sweat soffritto",
+      "instructions": [
+        "Heat olive oil in a large pot or deep skillet over medium heat.",
+        "Add onion, celery, and carrot with a pinch of salt. Cook 6–8 minutes until softened and sweet.",
+        "Add garlic and cook 30–60 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Sweat soffritto", "minutes": 7 }]
+    },
+    {
+      "id": "step_03_brown_meat",
+      "title": "Brown the meat",
+      "instructions": [
+        "Add ground beef and pork. Cook, breaking it up, until browned and most liquid has evaporated.",
+        "Season with black pepper (go easy on salt if using sausage)."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Brown meat", "minutes": 8 }],
+      "checks": [
+        "Meat is browned (not gray/steamed).",
+        "Fond (brown bits) forming lightly on the pot is good."
+      ]
+    },
+    {
+      "id": "step_04_deglaze_build_ragu",
+      "title": "Deglaze, add tomato, and simmer ragù",
+      "instructions": [
+        "Stir in tomato paste and cook 1–2 minutes to bloom.",
+        "Add wine (or broth). Scrape up browned bits and simmer 1–2 minutes.",
+        "Add crushed tomatoes, oregano, bay leaves, and salt (start with half; adjust later).",
+        "Bring to a gentle simmer and cook 25–35 minutes, stirring occasionally, until slightly thickened."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 28,
+      "timers": [
+        { "label": "Bloom tomato paste", "seconds": 75 },
+        { "label": "Simmer ragù", "minutes": 30 }
+      ],
+      "checks": [
+        "Sauce tastes less raw and has body.",
+        "Salt adjusted after simmer to avoid over-salting."
+      ]
+    },
+    {
+      "id": "step_05_make_bechamel",
+      "title": "Make béchamel (white sauce)",
+      "instructions": [
+        "In a saucepan over medium heat, melt butter.",
+        "Whisk in flour to form a smooth roux. Cook 1–2 minutes (do not brown).",
+        "Gradually whisk in milk, a little at a time, until smooth.",
+        "Simmer gently 6–10 minutes, whisking often, until thick enough to coat a spoon.",
+        "Season with salt, black pepper, and nutmeg (optional). Stir in about 40 g of Parmesan (save the rest for layering)."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 6,
+      "timers": [{ "label": "Béchamel thickening", "minutes": 8 }],
+      "checks": [
+        "No floury taste (roux cooked briefly).",
+        "Sauce is smooth and coats spoon."
+      ]
+    },
+    {
+      "id": "step_06_noodles",
+      "title": "Prepare noodles",
+      "instructions": [
+        "If using regular lasagna noodles: cook in salted water until just pliable (a bit under al dente), then drain and lay flat to prevent sticking.",
+        "If using no-boil noodles: ensure your ragù is slightly looser (add 120–240 ml water/broth if needed) so noodles hydrate during baking."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "notes": "Exact noodle handling depends on brand. Avoid overcooking noodles; they continue baking in the oven."
+    },
+    {
+      "id": "step_07_assemble",
+      "title": "Assemble lasagna",
+      "instructions": [
+        "Spread a thin layer of ragù on the bottom of the baking dish.",
+        "Add a layer of noodles.",
+        "Add a layer of ragù, then drizzle/spread a layer of béchamel, then sprinkle mozzarella and a little Parmesan.",
+        "Repeat layers (noodles → ragù → béchamel → cheeses) until you reach the top (typically 3–4 noodle layers).",
+        "Finish with béchamel + mozzarella + Parmesan on top."
+      ],
+      "activeMins": 15,
+      "handsOffMins": 0,
+      "checks": [
+        "Top has enough béchamel/cheese to prevent drying.",
+        "Layers are even; noodles covered with sauce (especially for no-boil)."
+      ]
+    },
+    {
+      "id": "step_08_bake",
+      "title": "Bake",
+      "instructions": [
+        "Cover with foil (tent slightly if cheese might stick).",
+        "Bake 35 minutes covered, then uncover and bake 15–20 minutes until bubbling and browned on top.",
+        "If you want deeper browning, broil 1–3 minutes at the end (watch closely)."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 55,
+      "temperature": {
+        "type": "oven",
+        "value": 190,
+        "unit": "C",
+        "notes": "375°F"
+      },
+      "timers": [
+        { "label": "Bake covered", "minutes": 35 },
+        { "label": "Bake uncovered", "minutes": 18 }
+      ],
+      "checks": ["Edges bubbling; center hot.", "Top browned to preference."]
+    },
+    {
+      "id": "step_09_rest_slice",
+      "title": "Rest, slice, and serve",
+      "instructions": [
+        "Rest 20–30 minutes before slicing (crucial for clean layers).",
+        "Slice into squares and serve."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 25,
+      "timers": [{ "label": "Rest before slicing", "minutes": 25 }],
+      "checks": ["Slices hold together better after resting."]
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Cook ground meat thoroughly; sauce simmer plus bake should bring to safe temperature.",
+      "If using an internal thermometer, target at least 165°F (74°C) in the center.",
+      "Cool leftovers promptly; refrigerate within 2 hours."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": [
+        "Cool, cover, and refrigerate up to 4 days.",
+        "Reheat covered in oven at 350°F (175°C) until hot, or microwave portions with a splash of water."
+      ]
+    },
+    "freeze": {
+      "notes": [
+        "Freeze portions or whole pan (well-wrapped) up to 3 months.",
+        "Thaw overnight in fridge for best texture; reheat covered until hot."
+      ]
+    },
+    "makeAhead": {
+      "notes": [
+        "Ragù can be made 1–3 days ahead; béchamel best same-day (or 1 day ahead with gentle reheat).",
+        "Assemble unbaked lasagna up to 24 hours ahead; bake from cold with +10–15 minutes covered."
+      ]
+    }
+  },
+
+  "notes": [
+    "For a lighter lasagna, reduce béchamel and increase ragù slightly.",
+    "For a deeper flavor, simmer ragù longer (45–90 minutes) if time allows; add a splash of water if it gets too thick.",
+    "Mozzarella: low-moisture shred melts best; fresh mozzarella can weep (pat dry)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_ricotta_style",
+      "label": "Ricotta-style lasagna (swap béchamel layer)",
+      "when": { "preference": "ricotta" },
+      "adapt": {
+        "notes": [
+          "Replace béchamel with ricotta mixture for a common Italian-American style.",
+          "Mix ricotta + egg + parsley + a pinch of salt/pepper; layer dollops/spread thinly."
+        ],
+        "useIngredients": ["cheese.ricotta", "egg", "herb.parsley"],
+        "removeIngredients": [
+          "milk.whole",
+          "fat.butter",
+          "flour.all_purpose",
+          "spice.nutmeg"
+        ]
+      }
+    },
+    {
+      "id": "variation_no_boil_noodles",
+      "label": "No-boil noodles",
+      "when": { "noodles": "no_boil" },
+      "adapt": {
+        "notes": [
+          "Ensure ragù is looser than usual so noodles hydrate.",
+          "Add 120–240 ml water/broth to the ragù if it is thick."
+        ]
+      }
+    },
+    {
+      "id": "variation_vegetarian",
+      "label": "Vegetarian lasagna (mushroom + spinach)",
+      "when": { "diet": "vegetarian" },
+      "adapt": {
+        "notes": [
+          "Replace meat with sautéed mushrooms (cremini/portobello) and spinach.",
+          "Add extra umami with a little soy sauce or miso (if allowed) or extra Parmesan."
+        ],
+        "removeIngredients": ["protein.beef.ground", "protein.pork.ground"],
+        "addIngredients": [
+          {
+            "id": "veg.mushrooms",
+            "label": "Mushrooms, chopped",
+            "amount": { "value": 680, "unit": "g" }
+          },
+          {
+            "id": "greens.spinach",
+            "label": "Spinach",
+            "amount": { "value": 300, "unit": "g" },
+            "notes": "Fresh or frozen (thawed and squeezed dry)."
+          }
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "starch", "ids": ["pasta.lasagna_noodles"] },
+      { "role": "sauce", "ids": ["tomato.crushed", "tomato.paste"] },
+      {
+        "role": "protein",
+        "ids": ["protein.beef.ground", "protein.pork.ground"]
+      },
+      {
+        "role": "dairy",
+        "ids": [
+          "milk.whole",
+          "fat.butter",
+          "cheese.mozzarella",
+          "cheese.parmesan"
+        ]
+      }
+    ],
+    "pairWith": {
+      "vegSides": [
+        "veg.green_salad",
+        "veg.roasted_broccoli",
+        "veg.sauteed_greens"
+      ],
+      "breadSides": ["bread.garlic_bread", "bread.focaccia"]
+    },
+    "batch": {
+      "makes": ["leftovers.lasagna_portions"],
+      "freezerNotes": ["Freeze in single portions for fast reheat."]
+    }
+  },
+
+  "methods": [
+    "technique.saute",
+    "technique.simmer",
+    "technique.bake",
+    "technique.whisk"
+  ],
+
+  "compat": {
+    "aliases": [
+      "lasagne",
+      "lasagna al forno",
+      "baked lasagna",
+      "meat lasagna",
+      "lasagna with béchamel"
+    ],
+    "keywordBoost": [
+      "ragù",
+      "bolognese-style",
+      "béchamel",
+      "layered pasta",
+      "family dinner",
+      "freezer meal"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+  "meta": {
+    "id": "soul_food.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Soul Food • Dishes Catalog",
+    "cuisineId": "soul_food",
+    "status": "canonical",
+    "notes": [
+      "Canonical Soul Food dish IDs for SSA: mains, sides, breads, sauces/condiments, staples, drinks, and plate patterns used by meal planning, recipe tagging, shopping, and batch cooking.",
+      "tags: soul_food, southern, comfort_food, black_american, heritage",
+      "source.kind=curated; source.author=SSA Canonical Catalog; source.attribution=Curated set of common Soul Food dishes and plate patterns for planning/adaptation."
+    ]
+  },
+
+  "defaults": {
+    "cuisineId": "soul_food",
+    "countryRegionHints": ["United States • Southern"],
+    "spiceHeatTypical": 2,
+    "saltinessTypical": 4,
+    "sweetnessTypical": 3,
+    "umamiTypical": 4,
+    "servingStyles": [
+      "family_style",
+      "plate_lunch",
+      "sunday_dinner",
+      "holiday_feasts"
+    ],
+    "batchFriendlyBias": "high"
+  },
+
+  "groups": [
+    {
+      "id": "soul_food.plates",
+      "label": "Plate Patterns",
+      "items": [
+        {
+          "id": "soul_food.plate.protein_plus_starch_plus_green_plus_bread",
+          "label": "Protein + Starch + Greens + Bread",
+          "kind": "plate_template",
+          "roleTags": ["plate", "template"],
+          "components": [
+            {
+              "role": "protein",
+              "pick": "one",
+              "fromDishGroups": ["soul_food.mains"]
+            },
+            {
+              "role": "starch",
+              "pick": "one",
+              "fromDishGroups": ["soul_food.starches"]
+            },
+            {
+              "role": "greens",
+              "pick": "one",
+              "fromDishGroups": ["soul_food.greens"]
+            },
+            {
+              "role": "bread",
+              "pick": "optional",
+              "fromDishGroups": ["soul_food.breads"]
+            },
+            {
+              "role": "condiment",
+              "pick": "optional",
+              "fromDishGroups": ["soul_food.condiments"]
+            }
+          ],
+          "notes": "Classic Soul Food plate: fried/baked protein + mac & cheese/yams/rice + collards + cornbread; hot sauce optional."
+        },
+        {
+          "id": "soul_food.plate.fish_fry",
+          "label": "Fish Fry Plate",
+          "kind": "plate_template",
+          "roleTags": ["plate", "template"],
+          "components": [
+            {
+              "role": "protein",
+              "pick": "one",
+              "fromDishGroups": ["soul_food.mains_fish"]
+            },
+            {
+              "role": "side1",
+              "pick": "one",
+              "fromDishGroups": ["soul_food.sides"]
+            },
+            {
+              "role": "side2",
+              "pick": "optional",
+              "fromDishGroups": ["soul_food.sides", "soul_food.greens"]
+            },
+            {
+              "role": "bread",
+              "pick": "optional",
+              "fromDishGroups": ["soul_food.breads"]
+            },
+            {
+              "role": "condiment",
+              "pick": "optional",
+              "fromDishGroups": ["soul_food.condiments"]
+            }
+          ],
+          "notes": "Fish fry night: cornmeal fried fish + fries/slaw + hushpuppies; tartar/hot sauce optional."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.mains",
+      "label": "Mains",
+      "items": [
+        {
+          "id": "soul_food.fried_chicken",
+          "label": "Fried Chicken",
+          "kind": "main",
+          "roleTags": ["protein", "fried"],
+          "batchFriendly": "medium",
+          "notes": "Iconic but best fresh; can be oven-reheated."
+        },
+        {
+          "id": "soul_food.baked_chicken",
+          "label": "Baked Chicken",
+          "kind": "main",
+          "roleTags": ["protein", "baked"],
+          "batchFriendly": "high",
+          "notes": "Weeknight-friendly; gravy optional."
+        },
+        {
+          "id": "soul_food.smothered_chicken",
+          "label": "Smothered Chicken",
+          "kind": "main",
+          "roleTags": ["protein", "braised", "gravy"],
+          "batchFriendly": "high",
+          "notes": "Pan-browned then simmered in onion gravy."
+        },
+        {
+          "id": "soul_food.meatloaf",
+          "label": "Meatloaf",
+          "kind": "main",
+          "roleTags": ["protein", "baked"],
+          "batchFriendly": "high",
+          "notes": "Slices reheat well; glaze optional."
+        },
+        {
+          "id": "soul_food.bbq_ribs",
+          "label": "BBQ Ribs",
+          "kind": "main",
+          "roleTags": ["protein", "bbq"],
+          "batchFriendly": "high",
+          "notes": "Oven/slow-cooked then sauced."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.mains_fish",
+      "label": "Mains • Fish",
+      "items": [
+        {
+          "id": "soul_food.fried_catfish",
+          "label": "Fried Catfish",
+          "kind": "main",
+          "roleTags": ["protein", "fish", "fried"],
+          "batchFriendly": "low",
+          "notes": "Best fresh; classic fish fry centerpiece."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.greens",
+      "label": "Greens",
+      "items": [
+        {
+          "id": "soul_food.collard_greens",
+          "label": "Collard Greens",
+          "kind": "side",
+          "roleTags": ["greens", "veg", "stewed"],
+          "batchFriendly": "high",
+          "notes": "Slow-simmered greens; smoked meat optional."
+        },
+        {
+          "id": "soul_food.turnip_greens",
+          "label": "Turnip Greens",
+          "kind": "side",
+          "roleTags": ["greens", "veg", "stewed"],
+          "batchFriendly": "high",
+          "notes": "Peppery greens; often cooked like collards."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.starches",
+      "label": "Starches",
+      "items": [
+        {
+          "id": "soul_food.mac_and_cheese",
+          "label": "Mac and Cheese",
+          "kind": "starch",
+          "roleTags": ["starch", "pasta", "baked"],
+          "batchFriendly": "high",
+          "notes": "Baked casserole; reheats well."
+        },
+        {
+          "id": "soul_food.masher_potatoes_gravy",
+          "label": "Mashed Potatoes & Gravy",
+          "kind": "starch",
+          "roleTags": ["starch", "potato", "gravy"],
+          "batchFriendly": "high",
+          "notes": "Core comfort starch; gravy ties the plate together."
+        },
+        {
+          "id": "soul_food.candied_yams",
+          "label": "Candied Yams",
+          "kind": "starch",
+          "roleTags": ["starch", "sweet_potato", "sweet"],
+          "batchFriendly": "high",
+          "notes": "Holiday staple; baked in syrup/spices."
+        },
+        {
+          "id": "soul_food.rice",
+          "label": "Rice",
+          "kind": "starch",
+          "roleTags": ["starch", "rice"],
+          "batchFriendly": "high",
+          "notes": "Common base for gravies and stews."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.sides",
+      "label": "Sides",
+      "items": [
+        {
+          "id": "soul_food.cabbage",
+          "label": "Stewed Cabbage",
+          "kind": "side",
+          "roleTags": ["veg", "stewed"],
+          "batchFriendly": "high",
+          "notes": "Quick cabbage side; often with onion/pepper."
+        },
+        {
+          "id": "soul_food.black_eyed_peas",
+          "label": "Black-Eyed Peas",
+          "kind": "side",
+          "roleTags": ["beans", "side"],
+          "batchFriendly": "high",
+          "notes": "Simmered peas; New Year tradition."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.breads",
+      "label": "Breads",
+      "items": [
+        {
+          "id": "soul_food.cornbread",
+          "label": "Cornbread",
+          "kind": "bread",
+          "roleTags": ["bread", "baked"],
+          "batchFriendly": "high",
+          "notes": "Skillet cornbread; pairs with greens/beans."
+        },
+        {
+          "id": "soul_food.hushpuppies_optional",
+          "label": "Hushpuppies (Optional)",
+          "kind": "bread",
+          "roleTags": ["bread", "fried"],
+          "batchFriendly": "medium",
+          "notes": "Common with fish fry plates."
+        }
+      ]
+    },
+
+    {
+      "id": "soul_food.condiments",
+      "label": "Condiments",
+      "items": [
+        {
+          "id": "soul_food.hot_sauce",
+          "label": "Hot Sauce",
+          "kind": "condiment",
+          "roleTags": ["heat", "table"],
+          "batchFriendly": "high",
+          "notes": "Table heat control; classic with greens."
+        },
+        {
+          "id": "soul_food.bbq_sauce",
+          "label": "BBQ Sauce",
+          "kind": "condiment",
+          "roleTags": ["sauce", "bbq"],
+          "batchFriendly": "high",
+          "notes": "For ribs/chicken; sweet-tangy profile."
+        }
+      ]
+    }
+  ],
+
+  "index": {
+    "byId": {
+      "soul_food.fried_chicken": { "group": "soul_food.mains", "kind": "main" },
+      "soul_food.baked_chicken": { "group": "soul_food.mains", "kind": "main" },
+      "soul_food.smothered_chicken": {
+        "group": "soul_food.mains",
+        "kind": "main"
+      },
+      "soul_food.meatloaf": { "group": "soul_food.mains", "kind": "main" },
+      "soul_food.bbq_ribs": { "group": "soul_food.mains", "kind": "main" },
+      "soul_food.fried_catfish": {
+        "group": "soul_food.mains_fish",
+        "kind": "main"
+      },
+
+      "soul_food.collard_greens": {
+        "group": "soul_food.greens",
+        "kind": "side"
+      },
+      "soul_food.turnip_greens": {
+        "group": "soul_food.greens",
+        "kind": "side"
+      },
+
+      "soul_food.mac_and_cheese": {
+        "group": "soul_food.starches",
+        "kind": "starch"
+      },
+      "soul_food.masher_potatoes_gravy": {
+        "group": "soul_food.starches",
+        "kind": "starch"
+      },
+      "soul_food.candied_yams": {
+        "group": "soul_food.starches",
+        "kind": "starch"
+      },
+      "soul_food.rice": { "group": "soul_food.starches", "kind": "starch" },
+
+      "soul_food.cabbage": { "group": "soul_food.sides", "kind": "side" },
+      "soul_food.black_eyed_peas": {
+        "group": "soul_food.sides",
+        "kind": "side"
+      },
+
+      "soul_food.cornbread": { "group": "soul_food.breads", "kind": "bread" },
+      "soul_food.hushpuppies_optional": {
+        "group": "soul_food.breads",
+        "kind": "bread"
+      },
+
+      "soul_food.hot_sauce": {
+        "group": "soul_food.condiments",
+        "kind": "condiment"
+      },
+      "soul_food.bbq_sauce": {
+        "group": "soul_food.condiments",
+        "kind": "condiment"
+      }
+    }
+  }
+}

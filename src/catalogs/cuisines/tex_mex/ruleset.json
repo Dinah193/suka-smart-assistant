@@ -1,0 +1,296 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.tex_mex.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Tex-Mex • Deterministic Ruleset",
+    "cuisineId": "cuisines.tex_mex",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Cuisines",
+      "notes": [
+        "Deterministic tagging + scoring for Tex-Mex selection and adaptation.",
+        "Written to avoid oneOf ambiguity in ruleset.schema.json (LogicNode/Action)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.tex_mex",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "and",
+        "the",
+        "with",
+        "of",
+        "style",
+        "tex",
+        "mex",
+        "tex-mex",
+        "mexican"
+      ]
+    },
+    "dishAliases": {
+      "texmex.tacos.carne_asada": [
+        "asada tacos",
+        "steak tacos",
+        "carne asada taco"
+      ],
+      "texmex.burrito.beef_and_bean": [
+        "beef burrito",
+        "bean and beef burrito",
+        "beef & bean burrito"
+      ],
+      "texmex.fajitas.chicken_or_steak": [
+        "skillet fajitas",
+        "chicken fajitas",
+        "steak fajitas"
+      ],
+      "texmex.enchiladas.chicken": ["chicken enchiladas", "red enchiladas"],
+      "texmex.queso.cheese_dip": ["queso", "cheese dip", "chile con queso"],
+      "texmex.salsa.pico_de_gallo": ["pico", "fresh salsa", "salsa fresca"],
+      "texmex.rice.spanish_rice": ["mexican rice", "red rice", "spanish rice"],
+      "texmex.beans.refried": [
+        "refried beans",
+        "frijoles refritos",
+        "mashed beans"
+      ],
+      "texmex.nachos.loaded": ["nachos", "loaded nachos", "supreme nachos"],
+      "texmex.chili.texas_style": [
+        "texas chili",
+        "chili con carne",
+        "no-bean chili"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.chili_powder": ["chili powder", "chile powder"],
+      "ingredient.green_chiles": [
+        "green chiles",
+        "green chilies",
+        "roasted green chiles"
+      ],
+      "ingredient.jalapeno": ["jalapeño", "jalapenos", "jalapeños"],
+      "ingredient.cheese.monterey_jack": ["monterey jack", "jack cheese"],
+      "ingredient.cheese.cheddar": ["cheddar", "sharp cheddar"],
+      "ingredient.tortilla.corn": ["corn tortillas", "corn tortilla"],
+      "ingredient.tortilla.flour": ["flour tortillas", "flour tortilla"],
+      "ingredient.tortilla.flour_large": [
+        "large flour tortilla",
+        "burrito tortilla"
+      ],
+      "ingredient.beef.ground": ["ground beef", "minced beef"],
+      "ingredient.beans.pinto": ["pinto beans"],
+      "ingredient.beans.black": ["black beans"],
+      "ingredient.tomato.paste": ["tomato paste"],
+      "ingredient.onion.white": ["white onion"],
+      "ingredient.onion.green": ["green onion", "scallion", "scallions"],
+      "ingredient.cilantro": ["cilantro", "fresh cilantro"],
+      "ingredient.lime": ["lime", "lime wedges"],
+      "ingredient.sour_cream": ["sour cream"],
+      "ingredient.guacamole": ["guacamole", "guac"]
+    },
+    "equipmentAliases": {
+      "equipment.cast_iron_skillet": ["cast iron", "cast-iron skillet"],
+      "equipment.heavy_pot": ["heavy pot", "stock pot", "stockpot"],
+      "equipment.dutch_oven": ["dutch oven", "heavy dutch oven"],
+      "equipment.sheet_pan": ["sheet pan", "baking sheet"],
+      "equipment.baking_dish": ["casserole dish", "baking dish"]
+    },
+    "methodAliases": {
+      "method.sear": ["sear", "high-heat sear"],
+      "method.saute": ["saute", "sauté", "pan-fry"],
+      "method.simmer": ["simmer", "gentle simmer"],
+      "method.braise": ["braise", "slow-braise"],
+      "method.bake": ["bake", "oven-bake"],
+      "method.toast": ["toast", "dry-toast"]
+    }
+  },
+  "globals": {
+    "signals": {
+      "defaultHeatTypical": 2,
+      "flavorAxis": {
+        "cumin_forward": true,
+        "chile_forward": true,
+        "acid_bright": true
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "texmex.tag.cuisine",
+      "enabled": true,
+      "priority": 1000,
+      "title": "Tag Tex-Mex cuisine",
+      "description": "Adds core cuisine tag for downstream filtering.",
+      "tags": ["texmex", "tagging"],
+      "source": "ssa.catalog.cuisines.tex_mex",
+      "stopOnMatch": false,
+      "when": {
+        "type": "exists",
+        "path": "$"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.tex_mex" },
+          {
+            "type": "set",
+            "path": "$.classification.cuisine",
+            "value": "tex_mex"
+          }
+        ]
+      }
+    },
+    {
+      "id": "texmex.score.signature_terms",
+      "enabled": true,
+      "priority": 900,
+      "title": "Boost Tex-Mex signature terms in titles",
+      "description": "Boost candidates with Tex-Mex hallmark dish words in title/meta.name.",
+      "tags": ["texmex", "scoring", "keywords"],
+      "source": "ssa.catalog.cuisines.tex_mex",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(taco|tacos|burrito|burritos|fajita|fajitas|enchilada|enchiladas|queso|nacho|nachos|chili|salsa)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.meta.name",
+            "regex": "(?i)\\b(taco|tacos|burrito|burritos|fajita|fajitas|enchilada|enchiladas|queso|nacho|nachos|chili|salsa)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 1.0 },
+          { "type": "addTag", "value": "profile.texmex_signal" }
+        ]
+      }
+    },
+    {
+      "id": "texmex.score.signature_ingredients",
+      "enabled": true,
+      "priority": 850,
+      "title": "Boost Tex-Mex signature ingredients",
+      "description": "Boost candidates that intersect common Tex-Mex ingredient IDs.",
+      "tags": ["texmex", "scoring", "ingredients"],
+      "source": "ssa.catalog.cuisines.tex_mex",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.compat.ingredientIds",
+        "values": [
+          "ingredient.chili_powder",
+          "ingredient.cumin",
+          "ingredient.lime",
+          "ingredient.tortilla.corn",
+          "ingredient.tortilla.flour",
+          "ingredient.cheese.cheddar",
+          "ingredient.cheese.monterey_jack",
+          "ingredient.beans.pinto",
+          "ingredient.beans.black",
+          "ingredient.green_chiles",
+          "ingredient.jalapeno",
+          "ingredient.tomato.paste"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.85 },
+          { "type": "addTag", "value": "ingredient.texmex_core" }
+        ]
+      }
+    },
+    {
+      "id": "texmex.tag.family_tacos",
+      "enabled": true,
+      "priority": 800,
+      "title": "Tag taco-family dishes",
+      "description": "If the title indicates tacos, tag as tacos/street_food.",
+      "tags": ["texmex", "tacos", "tagging"],
+      "source": "ssa.catalog.cuisines.tex_mex",
+      "stopOnMatch": false,
+      "when": {
+        "type": "matches",
+        "path": "$.title",
+        "regex": "(?i)\\btacos?\\b"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "dish.tacos" },
+          { "type": "addTag", "value": "serving.street_food" },
+          { "type": "scoreAdjust", "scoreDelta": 0.5 }
+        ]
+      }
+    },
+    {
+      "id": "texmex.tag.family_burritos",
+      "enabled": true,
+      "priority": 790,
+      "title": "Tag burrito-family dishes",
+      "description": "If the title indicates burritos, tag as burritos/batch-friendly.",
+      "tags": ["texmex", "burritos", "tagging"],
+      "source": "ssa.catalog.cuisines.tex_mex",
+      "stopOnMatch": false,
+      "when": {
+        "type": "matches",
+        "path": "$.title",
+        "regex": "(?i)\\bburritos?\\b"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "dish.burritos" },
+          { "type": "addTag", "value": "batch.friendly" },
+          { "type": "scoreAdjust", "scoreDelta": 0.45 }
+        ]
+      }
+    },
+    {
+      "id": "texmex.emit.ruleset_hit",
+      "enabled": true,
+      "priority": 100,
+      "title": "Emit ruleset hit event",
+      "description": "Optional event emission for orchestration; safe if ignored by consumers.",
+      "tags": ["texmex", "events"],
+      "source": "ssa.catalog.cuisines.tex_mex",
+      "stopOnMatch": false,
+      "when": {
+        "type": "hasTag",
+        "value": "cuisine.tex_mex"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.cuisineRuleset.hit",
+              "payload": {
+                "cuisineId": "cuisines.tex_mex",
+                "rulesetId": "cuisines.tex_mex.ruleset"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

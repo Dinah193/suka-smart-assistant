@@ -1,0 +1,105 @@
+{
+  "id": "cajun_crawfish_etouffee",
+  "name": "Cajun Crawfish Etouffee",
+  "servings": 6,
+  "ingredients": [
+    { "item": "unsalted butter", "amount": 6, "unit": "tbsp" },
+    { "item": "all-purpose flour", "amount": 6, "unit": "tbsp" },
+
+    {
+      "item": "yellow onion",
+      "amount": 1,
+      "unit": "large",
+      "prep": "finely diced"
+    },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "medium",
+      "prep": "finely diced"
+    },
+    { "item": "celery", "amount": 2, "unit": "stalks", "prep": "finely diced" },
+    { "item": "garlic", "amount": 4, "unit": "cloves", "prep": "minced" },
+
+    { "item": "Cajun seasoning", "amount": 1.5, "unit": "tbsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "black pepper", "amount": 0.5, "unit": "tsp" },
+    { "item": "kosher salt", "amount": 0.75, "unit": "tsp" },
+
+    {
+      "item": "seafood stock",
+      "amount": 3,
+      "unit": "cups",
+      "prep": "or chicken stock if needed"
+    },
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, or to taste"
+    },
+
+    {
+      "item": "crawfish tails",
+      "amount": 1.5,
+      "unit": "lb",
+      "prep": "peeled; thawed if frozen"
+    },
+
+    { "item": "lemon juice", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (reserve a little for garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (reserve a little for garnish)"
+    },
+
+    { "item": "cooked white rice", "amount": 6, "unit": "servings" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep: Finely dice onion, bell pepper, and celery. Mince garlic. If using frozen crawfish tails, thaw and drain well; reserve any liquid for the sauce if desired."
+    },
+    {
+      "order": 2,
+      "text": "Make a blond roux: In a heavy skillet or Dutch oven over medium heat, melt butter. Sprinkle in flour and whisk until smooth. Cook, whisking frequently, until the roux turns blond/golden and smells nutty (do not let it get dark like gumbo roux)."
+    },
+    {
+      "order": 3,
+      "text": "Saute the trinity: Stir in onion, bell pepper, and celery. Cook until softened and the mixture looks glossy. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 4,
+      "text": "Season: Stir in Cajun seasoning, paprika, thyme, black pepper, and salt. Cook 30 seconds to bloom spices."
+    },
+    {
+      "order": 5,
+      "text": "Build the sauce: Add stock gradually while stirring to keep the sauce smooth. Add Worcestershire and optional hot sauce. Bring to a gentle simmer."
+    },
+    {
+      "order": 6,
+      "text": "Simmer to thicken: Reduce heat to low and simmer until the sauce thickens to a spoon-coating consistency. Stir occasionally to prevent sticking."
+    },
+    {
+      "order": 7,
+      "text": "Add crawfish gently: Stir in crawfish tails and simmer just until heated through (avoid hard boiling so the crawfish stays tender)."
+    },
+    {
+      "order": 8,
+      "text": "Finish bright: Stir in lemon juice, green onions, and parsley. Taste and adjust salt, Cajun seasoning, and hot sauce."
+    },
+    {
+      "order": 9,
+      "text": "Serve: Spoon etouffee over hot cooked rice. Garnish with reserved green onions and parsley."
+    }
+  ]
+}

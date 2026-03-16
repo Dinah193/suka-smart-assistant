@@ -118,3 +118,38 @@ export function getAvailableTools(tools = [], sessions = [], requiredTags = []) 
     return free && tagMatch;
   });
 }
+
+/**
+ * matchUserTools (template alias)
+ *
+ * Some templates import `matchUserTools` from toolUtils. We provide a
+ * tolerant wrapper that reuses the existing matching logic.
+ */
+export function matchUserTools(userTools = [], required = []) {
+  const requiredArr = Array.isArray(required) ? required : [];
+  const userArr = Array.isArray(userTools) ? userTools : [];
+  const requiredTags = requiredArr
+    .map((t) => (typeof t === "string" ? t : t?.tag || t?.id || t?.name))
+    .filter(Boolean);
+
+  // If there are no requirements, everything is "matched"
+  if (!requiredTags.length) return { matched: userArr, missing: [], score: 1 };
+
+  const userTags = new Set(
+    userArr
+      .map((t) => (typeof t === "string" ? t : t?.tag || t?.id || t?.name))
+      .filter(Boolean)
+  );
+
+  const missing = requiredTags.filter((tag) => !userTags.has(tag));
+  const matched = userArr.filter((t) => {
+    const tag = typeof t === "string" ? t : t?.tag || t?.id || t?.name;
+    return tag && userTags.has(tag) && !missing.includes(tag);
+  });
+
+  const score = requiredTags.length
+    ? (requiredTags.length - missing.length) / requiredTags.length
+    : 1;
+
+  return { matched, missing, score };
+}

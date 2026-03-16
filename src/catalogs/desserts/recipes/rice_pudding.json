@@ -1,0 +1,181 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.rice_pudding",
+    "slug": "rice_pudding",
+    "name": "Rice Pudding (Budget-Friendly, Global)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "dessert",
+      "rice-pudding",
+      "budget-friendly",
+      "global",
+      "comfort-food",
+      "stovetop",
+      "baked-variant",
+      "make-ahead",
+      "pantry"
+    ],
+    "allergens": ["dairy", "eggs"],
+    "description": "A budget-friendly, globally loved rice pudding baseline with both stovetop and baked variants. Creamy, cinnamon-vanilla profile with optional raisins. Note: This dessert is not flour-based; the 'fresh-milled or commercial flour' concept is not applicable here."
+  },
+  "equipment": [
+    { "id": "saucepan_heavy", "label": "Heavy-bottom saucepan" },
+    { "id": "wooden_spoon", "label": "Wooden spoon or heatproof spatula" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "fine_mesh_sieve", "label": "Fine-mesh sieve (optional)" },
+    {
+      "id": "baking_dish_2qt",
+      "label": "2-quart baking dish (for baked variant)",
+      "optional": true
+    },
+    { "id": "oven", "label": "Oven (for baked variant)", "optional": true }
+  ],
+  "ingredients": [
+    {
+      "id": "rice_short_or_medium_grain",
+      "label": "Short- or medium-grain rice",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 cup. Arborio works well for extra creaminess. Long-grain is acceptable but less creamy."
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "amount": { "value": 480, "unit": "ml" },
+      "notes": "About 2 cups (for initial simmer)."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+    {
+      "id": "milk_whole",
+      "label": "Whole milk",
+      "amount": { "value": 960, "unit": "ml" },
+      "notes": "About 4 cups."
+    },
+    {
+      "id": "cream_optional",
+      "label": "Heavy cream (optional)",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": "Optional: replace 1/2 cup milk with cream for a richer pudding.",
+      "optional": true
+    },
+    {
+      "id": "sugar",
+      "label": "Granulated sugar",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 1/2 cup to 2/3 cup; adjust to taste."
+    },
+    {
+      "id": "cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp, plus more for serving."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "butter_optional",
+      "label": "Unsalted butter (optional)",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": "About 1 tbsp; adds sheen and richness.",
+      "optional": true
+    },
+    {
+      "id": "raisins_optional",
+      "label": "Raisins (optional)",
+      "amount": { "value": 75, "unit": "g" },
+      "notes": "About 1/2 cup. Golden raisins are nice.",
+      "optional": true
+    },
+    {
+      "id": "egg_optional_baked",
+      "label": "Egg (optional, for baked custardy variant)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Only used if making the baked/custardy variant.",
+      "optional": true
+    },
+    {
+      "id": "nutmeg_optional",
+      "label": "Ground nutmeg (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "Pinch for a warmer flavor profile.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_rinse_optional",
+      "title": "Rinse rice (optional)",
+      "body": "Rinsing reduces starch and yields a slightly looser pudding. For a thicker, creamier pudding, skip rinsing. Either way works."
+    },
+    {
+      "id": "step_02_parcook_rice",
+      "title": "Par-cook rice",
+      "body": "In a heavy saucepan, combine rice, water, and salt. Bring to a simmer, then cover and cook on low 10 minutes. This jump-starts cooking without scorching milk."
+    },
+    {
+      "id": "step_03_add_milk_and_spices",
+      "title": "Add milk and simmer gently",
+      "body": "Stir in milk (and cream if using), sugar, and cinnamon. Bring to a gentle simmer over medium-low. Reduce heat to low and cook uncovered 25–45 minutes, stirring frequently (more often as it thickens) until rice is tender and pudding is creamy. Do not boil hard—gentle simmer prevents curdling and scorching."
+    },
+    {
+      "id": "step_04_add_raisins_optional",
+      "title": "Add raisins (optional)",
+      "body": "If using raisins, stir them in during the last 10 minutes so they plump without falling apart."
+    },
+    {
+      "id": "step_05_finish",
+      "title": "Finish with vanilla (and butter if using)",
+      "body": "Remove from heat. Stir in vanilla (and butter if using). Add nutmeg if desired. The pudding will thicken as it cools."
+    },
+    {
+      "id": "step_06_serve_or_chill",
+      "title": "Serve or chill",
+      "body": "Serve warm or chilled. For chilled pudding, press plastic wrap directly onto the surface to prevent a skin, then refrigerate at least 2 hours."
+    },
+    {
+      "id": "step_07_adjust_texture",
+      "title": "Adjust texture after chilling",
+      "body": "If pudding becomes too thick after chilling, stir in a splash of milk to loosen to your preferred consistency."
+    },
+
+    {
+      "id": "step_08_baked_variant_overview",
+      "title": "Baked variant (optional) — custardy rice pudding",
+      "body": "If you prefer a baked, custard-like rice pudding: preheat oven to 325°F (163°C). Transfer finished stovetop pudding (while warm) to a baking dish and bake 25–35 minutes until set around edges and gently wobbly in the center."
+    },
+    {
+      "id": "step_09_baked_variant_with_egg",
+      "title": "Baked variant with egg (optional richer set)",
+      "body": "For a more custardy baked set: whisk 1 egg in a bowl. Temper by whisking in 1 cup (240 ml) warm rice pudding, then stir that mixture back into the pot. Pour into a baking dish and bake at 325°F (163°C) for 25–35 minutes until just set (do not overbake)."
+    }
+  ],
+  "notes": [
+    "Stirring logic: Milk-based rice pudding can scorch; stir frequently and lower heat as it thickens.",
+    "Rice choice: Short/medium grain yields creamier pudding; long grain yields a lighter, less creamy texture.",
+    "Sugar timing: Adding sugar with milk is fine; if you notice slow thickening, extend simmer time—gentle simmer is key.",
+    "Flour note: Rice pudding is naturally flour-free; 'fresh-milled vs commercial flour' does not apply."
+  ],
+  "storage": {
+    "refrigerator": "Airtight: up to 5 days. Loosen with milk if needed.",
+    "freezer": "Not ideal (texture can become grainy), but can be frozen airtight up to 1 month; thaw in refrigerator and whisk well."
+  }
+}

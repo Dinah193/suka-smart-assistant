@@ -82,30 +82,30 @@ git commit -m "chore(inventory): notes scratch + animals/butchery + linked anima
   ☐ Tiles: “Animals in queue”, “Carcasses in chill”, “Packaging runs”, **“Reserved orders (by Animal)”**, “Next pickups”
 
 4) Agents & Services
-- src/agents/inventoryAgent.js (NEW)
+- src/agents/inventoryShim.js (NEW)
   ☐ applyDelta(delta, options) → {patchId}
   ☐ computeDeltaFromRecipes(recipes, pantry) → InventoryDelta
   ☐ buildUnifiedList({lowStock, planDelta, prefs}) → {list, grouped}
   ☐ suggestLocation(sku) → recommended zone/bin (include “Reserved/<BuyerId>”)
 
-- src/agents/labelAgent.js (extend)
+- src/agents/labelShim.js (extend)
   ☐ buildFoodLabels(items) → PDF (name/date/method/lot/expiry/reheat/handling)
   ☐ buildButcheryLabels(packages) → safe-handling + cut + weight + lot + pack date + “Keep Refrigerated/Frozen”
   ☐ **buildBuyerLabels(packages, buyer)** → buyer name/code + cut + weight + lot + **animal/cut-sheet identifiers**
 
-- src/agents/animalAgent.js (NEW)
+- src/agents/animalShim.js (NEW)
   ☐ registerAnimals(intake) → {animalIds}
   ☐ planProcessing(animals, calendar, hebrewCal) → events (slaughter, chill, break, package)
   ☐ computeLiveToCarcassToRetailYields(records) → {yields, savings}
 
-- src/agents/butcheryAgent.js (NEW/UPDATE)
+- src/agents/butcheryShim.js (NEW/UPDATE)
   ☐ parseCutSheet(fileOrRows, presets) → rows **with {cutSheetId, animalId} per row**
   ☐ mapCutsToSkus(rows, skuCatalog, options) → { delta.produce[], packages[], yields } (each package has {sourceAnimalId, cutSheetId, lotId})
   ☐ estimateYields(liveWeight, carcassWeight, trimPct, bonePct) → breakdown
   ☐ buildPackagingRun(packages) → labels payloads + location plan
   ☐ Emits: **butchery.completed({animalId, cutSheetId, packages, yields})**
 
-- **src/agents/animalShareAgent.js (NEW/UPDATE)**
+- **src/agents/animalShareShim.js (NEW/UPDATE)**
   ☐ priceQuote({model:'live'|'hanging'|'retail', liveLb, hangLb, retailTotalLb, rates}) → {estimate, breakdown}
   ☐ openOffer({species, shareType, qty, model, rate, deposit, eta, **animalIds**, **cutSheetIds**, allowPooling=false}) → {offerId}
   ☐ reserveShare({offerId, buyer, shareQty, depositPaid}) → {orderId, status}
@@ -385,7 +385,7 @@ function moveWhenChilled(item){
 
 15) VS Code Steps (you now)
 ☐ Add AnimalsButcheryPanel + subcomponents and route under /inventory
-☐ Scaffold animalAgent.js, butcheryAgent.js, animalShareAgent.js with methods above
+☐ Scaffold animalShim.js, butcheryShim.js, animalShareShim.js with methods above
 ☐ Extend labelAgent with buildButcheryLabels & buildBuyerLabels (adds animal/cut-sheet IDs)
 ☐ Wire CoolingTracker to temp logs; block moves until chilled
 ☐ Ensure applyDelta handles produce/consume/move (with meta) for packaging runs & reservations

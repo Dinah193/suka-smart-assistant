@@ -8,7 +8,8 @@ const BTN =
   "inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium shadow-sm transition active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2";
 const VAR = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
-  subtle: "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
+  subtle:
+    "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
   ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
 };
 const SIZE = {
@@ -22,7 +23,7 @@ const CHIP =
 /* ----------------------------- Defensive imports ---------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch (_) {}
 
@@ -40,7 +41,9 @@ try {
 
 let SaveSessionModalLazy = null;
 try {
-  SaveSessionModalLazy = React.lazy(() => import("@/components/sessions/SaveSessionModal.jsx"));
+  SaveSessionModalLazy = React.lazy(() =>
+    import("@/components/session/SaveSessionModal.jsx")
+  );
 } catch (_) {}
 
 /* ----------------------------------- Icons ---------------------------------- */
@@ -106,7 +109,10 @@ const riskIcon = (k) => {
 };
 
 const safeFile = (name = "session") =>
-  String(name).toLowerCase().replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-");
+  String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/-+/g, "-");
 
 /* ---------------------------------- Component --------------------------------- */
 /**
@@ -153,7 +159,9 @@ export default function SessionStartButton({
 
   /* ------------------------------ Session favorites ------------------------------ */
   const favApi = useFavoriteSessions ? useFavoriteSessions(domain) : null;
-  const [isFav, setIsFav] = useState(() => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false);
+  const [isFav, setIsFav] = useState(
+    () => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false
+  );
 
   useEffect(() => {
     if (favApi && sessionId) setIsFav(!!favApi.isFavorite?.(sessionId));
@@ -176,7 +184,11 @@ export default function SessionStartButton({
           source: "SessionStartButton",
         });
       }
-      toastSafe(isFav ? "Removed from favorite sessions." : "Added to favorite sessions.");
+      toastSafe(
+        isFav
+          ? "Removed from favorite sessions."
+          : "Added to favorite sessions."
+      );
     } catch (e) {
       console.warn("[SessionStartButton] favorite toggle failed", e);
       toastSafe("Could not update favorite sessions.", "error");
@@ -188,9 +200,10 @@ export default function SessionStartButton({
     // Let automation/runtime do a proper readiness check; fall back to OK
     try {
       setBusy(true);
-      const result =
-        (await automation?.preflight?.check?.({ domain, sessionId })) ||
-        { ok: true, guards: [] };
+      const result = (await automation?.preflight?.check?.({
+        domain,
+        sessionId,
+      })) || { ok: true, guards: [] };
       setPreflight(result);
       setBusy(false);
       return result;
@@ -252,13 +265,30 @@ export default function SessionStartButton({
   const scheduleAt = () => {
     const value = prompt("Start at (HH:MM, 24h)", "18:00");
     if (!value) return;
-    const [hh, mm] = String(value).split(":").map((n) => Number(n));
-    if (!Number.isFinite(hh) || !Number.isFinite(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) {
+    const [hh, mm] = String(value)
+      .split(":")
+      .map((n) => Number(n));
+    if (
+      !Number.isFinite(hh) ||
+      !Number.isFinite(mm) ||
+      hh < 0 ||
+      hh > 23 ||
+      mm < 0 ||
+      mm > 59
+    ) {
       toastSafe("Enter a valid time like 18:00.", "error");
       return;
     }
     const now = new Date();
-    const when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+    const when = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      hh,
+      mm,
+      0,
+      0
+    );
     if (when <= now) when.setDate(when.getDate() + 1); // tomorrow if time elapsed
     eventBus.emit?.("session.schedule.at.requested", {
       domain,
@@ -267,14 +297,23 @@ export default function SessionStartButton({
       title,
       source: "SessionStartButton",
     });
-    toastSafe(`Scheduled for ${when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`);
+    toastSafe(
+      `Scheduled for ${when.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}.`
+    );
     setMenuOpen(false);
   };
 
   /* -------------------------------- Save session ------------------------------- */
   const openSaveSession = () => {
     setSaveOpen(true);
-    eventBus.emit?.("session.save.modal.opened", { domain, sessionId: sessionId || "__pending__", source: "SessionStartButton" });
+    eventBus.emit?.("session.save.modal.opened", {
+      domain,
+      sessionId: sessionId || "__pending__",
+      source: "SessionStartButton",
+    });
   };
 
   /* ---------------------------------- Render ---------------------------------- */
@@ -322,22 +361,52 @@ export default function SessionStartButton({
           </summary>
 
           <div className="absolute right-0 z-50 mt-2 min-w-[16rem] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
-            <MenuItem onClick={doStartNow} icon={<I.Sparkles className="h-4 w-4" />} label="Start now" />
-            <MenuItem onClick={() => scheduleOffset("+5m")} icon={<I.AlarmPlus className="h-4 w-4" />} label="Start in +5m" />
-            <MenuItem onClick={() => scheduleOffset("+10m")} icon={<I.AlarmPlus className="h-4 w-4" />} label="Start in +10m" />
-            <MenuItem onClick={() => scheduleOffset("+30m")} icon={<I.AlarmPlus className="h-4 w-4" />} label="Start in +30m" />
-            <MenuItem onClick={scheduleAt} icon={<I.Calendar className="h-4 w-4" />} label="Start at…" />
+            <MenuItem
+              onClick={doStartNow}
+              icon={<I.Sparkles className="h-4 w-4" />}
+              label="Start now"
+            />
+            <MenuItem
+              onClick={() => scheduleOffset("+5m")}
+              icon={<I.AlarmPlus className="h-4 w-4" />}
+              label="Start in +5m"
+            />
+            <MenuItem
+              onClick={() => scheduleOffset("+10m")}
+              icon={<I.AlarmPlus className="h-4 w-4" />}
+              label="Start in +10m"
+            />
+            <MenuItem
+              onClick={() => scheduleOffset("+30m")}
+              icon={<I.AlarmPlus className="h-4 w-4" />}
+              label="Start in +30m"
+            />
+            <MenuItem
+              onClick={scheduleAt}
+              icon={<I.Calendar className="h-4 w-4" />}
+              label="Start at…"
+            />
             <div className="h-px bg-gray-100" />
 
             {showFavorite && (
               <MenuItem
                 onClick={toggleFavoriteSession}
-                icon={isFav ? <I.Star className="h-4 w-4 text-amber-500" /> : <I.StarOff className="h-4 w-4" />}
+                icon={
+                  isFav ? (
+                    <I.Star className="h-4 w-4 text-amber-500" />
+                  ) : (
+                    <I.StarOff className="h-4 w-4" />
+                  )
+                }
                 label={isFav ? "Unfavorite session" : "Favorite session"}
               />
             )}
             {showSave && (
-              <MenuItem onClick={openSaveSession} icon={<I.Save className="h-4 w-4" />} label="Save session…" />
+              <MenuItem
+                onClick={openSaveSession}
+                icon={<I.Save className="h-4 w-4" />}
+                label="Save session…"
+              />
             )}
           </div>
         </details>
@@ -354,8 +423,8 @@ export default function SessionStartButton({
       )}
 
       {/* Save session modal (lazy preferred) */}
-      {saveOpen && (
-        SaveSessionModalLazy ? (
+      {saveOpen &&
+        (SaveSessionModalLazy ? (
           <Suspense fallback={null}>
             <SaveSessionModalLazy
               isOpen={saveOpen}
@@ -364,7 +433,10 @@ export default function SessionStartButton({
               domain={domain}
               sessionId={sessionId || "__pending__"}
               onSaved={(saved) => {
-                eventBus.emit?.("session.saved", { from: "SessionStartButton", saved });
+                eventBus.emit?.("session.saved", {
+                  from: "SessionStartButton",
+                  saved,
+                });
                 toastSafe("Session saved.");
                 setSaveOpen(false);
               }}
@@ -377,13 +449,15 @@ export default function SessionStartButton({
             defaultTitle={title}
             onClose={() => setSaveOpen(false)}
             onSaved={(saved) => {
-              eventBus.emit?.("session.saved", { from: "SessionStartButton", saved });
+              eventBus.emit?.("session.saved", {
+                from: "SessionStartButton",
+                saved,
+              });
               toastSafe("Session saved.");
               setSaveOpen(false);
             }}
           />
-        )
-      )}
+        ))}
     </div>
   );
 }
@@ -412,17 +486,27 @@ function ConfirmPreflight({ title, preflight, onCancel, onStart }) {
       aria-modal="true"
       aria-label="Preflight confirmation"
       className="fixed inset-0 z-50 grid place-items-center bg-black/40"
-      onClick={(e) => { if (e.target === e.currentTarget) onCancel?.(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCancel?.();
+      }}
     >
       <div className="w-[96vw] max-w-lg overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 px-5 py-4">
           <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold text-gray-900">Ready to start “{title}”?</h3>
+            <h3 className="truncate text-base font-semibold text-gray-900">
+              Ready to start “{title}”?
+            </h3>
             <p className="mt-0.5 text-xs text-gray-600">
-              {ok ? "All checks passed." : "We found a few things to consider before starting."}
+              {ok
+                ? "All checks passed."
+                : "We found a few things to consider before starting."}
             </p>
           </div>
-          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onCancel} aria-label="Close">
+          <button
+            className={cx(BTN, VAR.ghost, "px-2")}
+            onClick={onCancel}
+            aria-label="Close"
+          >
             <I.X className="h-4 w-4" />
           </button>
         </div>
@@ -468,7 +552,13 @@ function ConfirmPreflight({ title, preflight, onCancel, onStart }) {
 }
 
 /* ------------------------------- Inline Save modal --------------------------- */
-function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }) {
+function InlineSaveSession({
+  domain,
+  sessionId,
+  defaultTitle,
+  onClose,
+  onSaved,
+}) {
   const [name, setName] = useState(defaultTitle || "");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -477,7 +567,10 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
     setBusy(true);
     try {
       const payload = { id: sessionId, domain, title: name, notes };
-      eventBus.emit?.("session.save.requested", { payload, source: "SessionStartButton" });
+      eventBus.emit?.("session.save.requested", {
+        payload,
+        source: "SessionStartButton",
+      });
       onSaved?.(payload);
     } finally {
       setBusy(false);
@@ -490,17 +583,27 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
       role="dialog"
       aria-modal="true"
       aria-label="Save session"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
     >
       <div className="w-[95vw] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900">Save Session</h3>
-          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose} aria-label="Close">
+          <h3 className="text-base font-semibold text-gray-900">
+            Save Session
+          </h3>
+          <button
+            className={cx(BTN, VAR.ghost, "px-2")}
+            onClick={onClose}
+            aria-label="Close"
+          >
             <I.X className="h-4 w-4" />
           </button>
         </div>
 
-        <label className="mt-4 block text-sm font-medium text-gray-700">Title</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Title
+        </label>
         <input
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={name}
@@ -508,7 +611,9 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
           placeholder="Session title"
         />
 
-        <label className="mt-4 block text-sm font-medium text-gray-700">Notes</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Notes
+        </label>
         <textarea
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           rows={3}
@@ -518,8 +623,14 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
         />
 
         <div className="mt-6 flex justify-end gap-2">
-          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>Cancel</button>
-          <button className={cx(BTN, VAR.primary)} onClick={submit} disabled={busy}>
+          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={cx(BTN, VAR.primary)}
+            onClick={submit}
+            disabled={busy}
+          >
             <I.Save className="h-4 w-4" />
             Save
           </button>

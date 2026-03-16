@@ -1,0 +1,317 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.naan_stovetop",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Stovetop Naan-Style Bread",
+    "subtitle": "Soft • blistered • butter-brushed • great with curries & stews • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "A stovetop naan-style flatbread using yogurt + optional yeast for flavor. Designed for skillet or cast-iron cooking with classic blistering and soft interior."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "flatbread",
+    "subprofiles": ["naan", "stovetop", "pan", "yogurt", "yeast-optional"],
+    "mealArchetypes": ["side bread", "dipper", "wrap", "meal component"],
+    "servingStyles": ["teardrops", "ovals", "rounds"],
+    "plannerTags": [
+      "naan",
+      "flatbread",
+      "stovetop",
+      "curry",
+      "stew",
+      "soft bread",
+      "butter-brushed"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "naan" },
+    "notes": "Makes 6 naan (~7–8 inches). Scale easily."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 75,
+    "totalMins": 105
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "skillet or cast-iron pan", "stove"],
+    "recommended": [
+      "scale",
+      "rolling pin",
+      "lid for skillet",
+      "brush for butter",
+      "bench scraper"
+    ],
+    "optional": [
+      "stand mixer (dough hook)",
+      "pizza stone (for oven rewarm)",
+      "instant-read thermometer"
+    ]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "milk"],
+
+  "signals": {
+    "stovetop": true,
+    "flatbread": true,
+    "wrapCapable": true,
+    "freezerFriendly": true,
+    "pairsWithStews": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "low",
+    "saltiness": "moderate",
+    "richness": "medium",
+    "texture": "soft-chewy",
+    "notes": "Tangy yogurt crumb, lightly sweetened dough, blistered exterior, butter/garlic finish."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "Flour (all-purpose or bread flour; or fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 420, "unit": "g" },
+      "notes": "All-purpose yields classic soft naan. Bread flour gives a slightly chewier bite."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 1/4 teaspoons."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar",
+      "role": "seasoning",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tablespoon. Helps browning and balances yogurt tang."
+    },
+    {
+      "id": "yeast",
+      "label": "Instant yeast (recommended) or active dry yeast",
+      "role": "leavening",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 1 1/4 teaspoons. If using active dry, bloom in warm water first (see steps)."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "role": "leavening",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 1/2 teaspoons. Adds extra puff for stovetop cooking."
+    },
+    {
+      "id": "yogurt",
+      "label": "Plain yogurt (whole milk preferred)",
+      "role": "tenderizer",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Greek yogurt works; thin with a little extra water if very thick."
+    },
+    {
+      "id": "water",
+      "label": "Warm water (about 95–105°F / 35–40°C)",
+      "role": "hydration",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Hold back 20–30g and add only if dough feels dry."
+    },
+    {
+      "id": "oil_in_dough",
+      "label": "Neutral oil or melted ghee (in dough)",
+      "role": "fat",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "About 1 1/2 tablespoons."
+    },
+    {
+      "id": "butter_finish",
+      "label": "Melted butter or ghee (for brushing)",
+      "role": "finish",
+      "amount": { "value": 28, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "garlic_optional",
+      "label": "Garlic, minced (optional, for garlic naan)",
+      "role": "finish",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 cloves."
+    },
+    {
+      "id": "cilantro_optional",
+      "label": "Cilantro, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "pan_oil",
+      "label": "Oil for pan (as needed)",
+      "role": "cook",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Usually a very light film; cast iron may need less."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Optional: bloom active dry yeast (if not using instant)",
+      "instructions": [
+        "If using active dry yeast, stir yeast and sugar into the warm water (use water from recipe total).",
+        "Rest 5–10 minutes until foamy. If using instant yeast, skip this step."
+      ],
+      "handsOffMins": 8,
+      "timers": [{ "label": "Bloom yeast (optional)", "mins": 8 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Mix dry ingredients",
+      "instructions": [
+        "In a bowl, whisk flour, salt, baking powder, and (if using instant yeast) the yeast."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_03",
+      "title": "Add wet ingredients and form dough",
+      "instructions": [
+        "Add yogurt, oil/ghee, and most of the warm water (or bloomed yeast-water). Hold back ~20–30g water.",
+        "Mix until a shaggy dough forms. Knead 6–8 minutes by hand (or 4–5 minutes in mixer on low) until smooth and elastic.",
+        "Add reserved water only if dough is dry and cracking. Dough should be soft and slightly tacky, not wet."
+      ],
+      "activeMins": 12
+    },
+    {
+      "id": "step_04",
+      "title": "First rise (bulk)",
+      "instructions": [
+        "Place dough in a lightly oiled bowl, cover, and rise until puffy and about doubled, 60–75 minutes."
+      ],
+      "handsOffMins": 70,
+      "timers": [{ "label": "Bulk rise", "mins": 70 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Divide and rest",
+      "instructions": [
+        "Turn dough out and divide into 6 equal pieces (~135g each).",
+        "Round into balls and cover. Rest 10 minutes so the dough relaxes for rolling."
+      ],
+      "handsOffMins": 10,
+      "timers": [{ "label": "Bench rest", "mins": 10 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Shape naan (teardrops or ovals)",
+      "instructions": [
+        "On a lightly floured surface, roll each ball into an oval/teardrop about 1/8–3/16 inch (3–5 mm) thick.",
+        "For classic naan texture, keep them slightly thicker than a tortilla."
+      ],
+      "activeMins": 10
+    },
+    {
+      "id": "step_07",
+      "title": "Cook on hot skillet (blisters + puff)",
+      "instructions": [
+        "Heat a skillet (cast iron preferred) over medium-high until very hot. Lightly oil the pan.",
+        "Place one naan in the skillet. Cook 60–90 seconds until bubbles form and the underside has deep brown spots.",
+        "Flip and cook 45–75 seconds more. For extra puff, cover the skillet briefly after flipping to trap steam.",
+        "Optional: for deeper char, briefly press thicker areas with a spatula or cook 10–15 seconds longer per side."
+      ],
+      "handsOffMins": 12,
+      "timers": [
+        { "label": "Side 1", "seconds": 75 },
+        { "label": "Side 2", "seconds": 60 }
+      ]
+    },
+    {
+      "id": "step_08",
+      "title": "Brush and finish (butter/garlic/herbs)",
+      "instructions": [
+        "Immediately brush hot naan with melted butter/ghee.",
+        "For garlic naan: stir minced garlic into melted butter and brush; sprinkle with cilantro if desired.",
+        "Stack naan in a towel to keep soft."
+      ],
+      "activeMins": 4
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour can be thirstier and less extensible. Blending and resting improves tenderness and roll-out.",
+    "guidelines": [
+      "Best everyday naan texture: use 70% fresh milled flour + 30% all-purpose flour (same total flour weight).",
+      "If using 100% fresh milled (unsifted), increase water by 15–35g as needed and extend the bench rest to 15–20 minutes.",
+      "If dough tears while rolling, rest 10 minutes and roll again; fresh milled dough often needs extra relaxation time.",
+      "Sifting/bolting fresh milled flour removes some bran and produces softer naan."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 30,
+      "rangeAddBackG": [0, 35]
+    }
+  },
+
+  "variations": [
+    {
+      "name": "No-yeast quick naan (still very good)",
+      "change": "Omit yeast. Increase baking powder to 10g. Rest dough 15–20 minutes instead of rising 60–75 minutes.",
+      "notes": "Less developed flavor but fast and soft."
+    },
+    {
+      "name": "Whole wheat naan (70/30 blend)",
+      "change": "Use 70% whole wheat flour + 30% all-purpose. Add 15–25g extra water if needed.",
+      "notes": "Softer than 100% whole wheat, still hearty."
+    },
+    {
+      "name": "Ghee-rich naan",
+      "change": "Replace oil in dough with melted ghee (20g) and brush with ghee after cooking.",
+      "notes": "Very aromatic, classic pairing for curries."
+    },
+    {
+      "name": "Nigella / sesame naan",
+      "change": "After shaping, lightly brush one side with water and sprinkle nigella or sesame; cook seed-side down first.",
+      "notes": "Great texture and fragrance."
+    }
+  ],
+
+  "storage": {
+    "counter": "Best same day. Keep wrapped in a towel then airtight up to 1 day.",
+    "fridge": "Up to 4 days airtight. Rewarm in a dry skillet 20–40 seconds per side or microwave briefly under a damp towel.",
+    "freezer": "Freeze stacked with parchment between naan up to 2 months. Rewarm from frozen in a skillet or toaster oven."
+  },
+
+  "notes": [
+    "Key for good naan on the stove: very hot pan + slightly thicker roll + steam trap (lid) after flipping.",
+    "If naan browns too quickly before puffing, reduce heat slightly. If pale and dry, increase heat.",
+    "Stacking in a towel keeps naan soft; leaving them uncovered will dry them quickly."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/flatbread_pan_quick",
+      "breads/recipes/no_knead_dutch_oven_bread"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Stovetop naan-style recipe optimized for soft texture and blistering. Includes instant/active dry yeast handling and a no-yeast speed option."
+  }
+}

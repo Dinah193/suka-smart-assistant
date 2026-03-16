@@ -1,0 +1,334 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "cuisine_profile",
+    "id": "cuisines.mediterranean",
+    "name": "Mediterranean",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "description": "Canonical Mediterranean cuisine profile for SSA meal planning, substitutions, pantry building, and technique-aware cooking sessions. Mediterranean here is treated as a broad, common household interpretation spanning Greek, Levantine, Turkish, Southern Italian, and North African coastal overlaps, emphasizing olive oil, herbs, legumes, grains, vegetables, seafood, yogurt, citrus, and simple high-heat/slow-braise techniques."
+  },
+  "identity": {
+    "region": [
+      "Mediterranean Basin",
+      "Southern Europe",
+      "Levant",
+      "North Africa (coastal)"
+    ],
+    "styleKeywords": [
+      "olive-oil-forward",
+      "herb-forward",
+      "citrus-bright",
+      "tomato-and-garlic",
+      "legume-and-grain-staples",
+      "fresh-vegetable-heavy",
+      "yogurt-and-cheese-accents",
+      "char-and-roast",
+      "braise-and-stew",
+      "meze-and-shared-plates"
+    ],
+    "signatureBalances": {
+      "fat": ["olive oil", "yogurt", "cheese", "nuts"],
+      "acid": ["lemon", "vinegar", "tomato", "sumac"],
+      "salt": ["brined cheeses", "olives", "capers"],
+      "heat": ["mild-to-moderate", "optional chili/harissa"],
+      "sweet": ["moderate", "honey/dried fruit accents in some dishes"]
+    }
+  },
+  "flavorMatrix": {
+    "primaryAromatics": [
+      { "id": "garlic", "label": "Garlic" },
+      { "id": "onion", "label": "Onion" },
+      { "id": "shallot", "label": "Shallot", "optional": true },
+      { "id": "lemon_zest", "label": "Lemon zest" },
+      { "id": "lemon_juice", "label": "Lemon juice" },
+      { "id": "tomato", "label": "Tomato" },
+      { "id": "parsley", "label": "Parsley" },
+      { "id": "oregano", "label": "Oregano" },
+      { "id": "basil", "label": "Basil", "optional": true },
+      { "id": "mint", "label": "Mint", "optional": true },
+      { "id": "dill", "label": "Dill", "optional": true }
+    ],
+    "spicesAndSeasonings": [
+      { "id": "black_pepper", "label": "Black pepper" },
+      { "id": "paprika", "label": "Paprika" },
+      { "id": "cumin", "label": "Cumin", "optional": true },
+      { "id": "coriander", "label": "Coriander", "optional": true },
+      { "id": "sumac", "label": "Sumac", "optional": true },
+      { "id": "zaatar", "label": "Za'atar", "optional": true },
+      { "id": "harissa", "label": "Harissa", "optional": true },
+      {
+        "id": "red_pepper_flakes",
+        "label": "Red pepper flakes",
+        "optional": true
+      },
+      { "id": "bay_leaf", "label": "Bay leaf", "optional": true },
+      {
+        "id": "cinnamon",
+        "label": "Cinnamon (select dishes)",
+        "optional": true
+      }
+    ],
+    "signatureFats": [
+      { "id": "olive_oil", "label": "Olive oil (extra virgin preferred)" },
+      {
+        "id": "butter",
+        "label": "Butter (limited/optional)",
+        "optional": true
+      },
+      { "id": "ghee", "label": "Ghee (select dishes)", "optional": true }
+    ],
+    "signatureAcids": [
+      { "id": "lemon", "label": "Lemon" },
+      { "id": "red_wine_vinegar", "label": "Red wine vinegar" },
+      {
+        "id": "white_wine_vinegar",
+        "label": "White wine vinegar",
+        "optional": true
+      },
+      {
+        "id": "balsamic",
+        "label": "Balsamic vinegar (select dishes)",
+        "optional": true
+      }
+    ],
+    "umamiAndSaltyAnchors": [
+      { "id": "olives", "label": "Olives" },
+      { "id": "capers", "label": "Capers", "optional": true },
+      { "id": "anchovy", "label": "Anchovy (optional)", "optional": true },
+      { "id": "feta", "label": "Feta" },
+      {
+        "id": "parmesan",
+        "label": "Hard cheese (Parm/Grana) (optional)",
+        "optional": true
+      }
+    ],
+    "freshComponents": [
+      { "id": "cucumber", "label": "Cucumber" },
+      { "id": "tomato_fresh", "label": "Fresh tomato" },
+      { "id": "leafy_greens", "label": "Leafy greens" },
+      { "id": "eggplant", "label": "Eggplant", "optional": true },
+      { "id": "zucchini", "label": "Zucchini", "optional": true },
+      { "id": "bell_pepper", "label": "Bell pepper", "optional": true },
+      { "id": "chickpeas", "label": "Chickpeas" },
+      { "id": "lentils", "label": "Lentils", "optional": true },
+      { "id": "white_beans", "label": "White beans", "optional": true }
+    ]
+  },
+  "staples": {
+    "pantry": [
+      { "id": "olive_oil", "label": "Olive oil" },
+      { "id": "canned_tomatoes", "label": "Canned tomatoes" },
+      { "id": "tomato_paste", "label": "Tomato paste" },
+      { "id": "garlic", "label": "Garlic" },
+      { "id": "onion", "label": "Onion" },
+      { "id": "rice", "label": "Rice (optional)", "optional": true },
+      { "id": "orzo", "label": "Orzo (optional)", "optional": true },
+      { "id": "pasta", "label": "Pasta" },
+      { "id": "couscous", "label": "Couscous (optional)", "optional": true },
+      { "id": "bulgur", "label": "Bulgur (optional)", "optional": true },
+      { "id": "chickpeas", "label": "Chickpeas (dry or canned)" },
+      { "id": "lentils", "label": "Lentils", "optional": true },
+      { "id": "red_wine_vinegar", "label": "Red wine vinegar" },
+      { "id": "lemon", "label": "Lemons" },
+      { "id": "olives", "label": "Olives" },
+      { "id": "capers", "label": "Capers", "optional": true },
+      { "id": "honey", "label": "Honey", "optional": true }
+    ],
+    "refrigerated": [
+      { "id": "yogurt_plain", "label": "Plain yogurt (Greek preferred)" },
+      { "id": "feta", "label": "Feta" },
+      {
+        "id": "mozzarella",
+        "label": "Mozzarella (for some dishes)",
+        "optional": true
+      },
+      { "id": "halloumi", "label": "Halloumi (optional)", "optional": true },
+      { "id": "lemons", "label": "Lemons" }
+    ],
+    "freezer": [
+      { "id": "fish", "label": "Fish/seafood (frozen)" },
+      {
+        "id": "chicken",
+        "label": "Chicken (frozen portions)",
+        "optional": true
+      },
+      {
+        "id": "spinach_frozen",
+        "label": "Frozen spinach (optional)",
+        "optional": true
+      }
+    ]
+  },
+  "proteins": {
+    "common": [
+      { "id": "chicken", "label": "Chicken" },
+      { "id": "lamb", "label": "Lamb", "optional": true },
+      { "id": "beef", "label": "Beef (select dishes)", "optional": true },
+      { "id": "fish", "label": "Fish" },
+      { "id": "shrimp", "label": "Shrimp", "optional": true },
+      { "id": "eggs", "label": "Eggs" },
+      { "id": "chickpeas", "label": "Chickpeas" },
+      { "id": "lentils", "label": "Lentils", "optional": true },
+      { "id": "white_beans", "label": "White beans", "optional": true }
+    ],
+    "typicalPrep": [
+      "lemon-garlic marinade",
+      "olive oil + herb rub",
+      "tomato braise",
+      "grill/roast with herb finish",
+      "yogurt-based sauce on the side"
+    ]
+  },
+  "carbsAndBases": {
+    "breads": [
+      { "id": "pita", "label": "Pita (common)" },
+      { "id": "flatbread", "label": "Flatbread (common)" },
+      {
+        "id": "country_bread",
+        "label": "Country bread (optional)",
+        "optional": true
+      }
+    ],
+    "grains": [
+      { "id": "rice", "label": "Rice (optional)", "optional": true },
+      { "id": "bulgur", "label": "Bulgur (optional)", "optional": true },
+      { "id": "couscous", "label": "Couscous (optional)", "optional": true },
+      { "id": "pasta", "label": "Pasta (common)" }
+    ],
+    "starches": [
+      { "id": "potatoes", "label": "Potatoes (roasted/boiled)" },
+      {
+        "id": "eggplant",
+        "label": "Eggplant (select dishes)",
+        "optional": true
+      }
+    ]
+  },
+  "techniques": {
+    "core": [
+      { "id": "roast", "label": "Roast" },
+      { "id": "grill", "label": "Grill/char" },
+      { "id": "saute", "label": "Sauté" },
+      { "id": "braise", "label": "Braise" },
+      { "id": "stew", "label": "Stew" },
+      { "id": "pan_sear", "label": "Pan sear" },
+      { "id": "fresh_salads", "label": "Fresh salads" },
+      { "id": "mezze", "label": "Mezze/small plates" }
+    ],
+    "signatureMethods": [
+      "lemon-herb finishing",
+      "olive-oil emulsified dressings",
+      "tomato-forward simmer sauces",
+      "yogurt-based sauces and marinades",
+      "legume purees (e.g., hummus-style)"
+    ]
+  },
+  "signatureDishes": {
+    "examples": [
+      "Greek salad",
+      "Hummus + pita",
+      "Roasted lemon-oregano chicken",
+      "Baked fish with herbs and olive oil",
+      "Lentil soup",
+      "Ratatouille-style vegetable stew",
+      "Pasta with tomato-garlic-olive oil sauce"
+    ],
+    "mealPatterns": [
+      "protein + salad + bread",
+      "stew/soup + bread",
+      "mezze platter + dips + vegetables",
+      "roast vegetables + grain + yogurt sauce"
+    ]
+  },
+  "pairings": {
+    "commonSides": [
+      { "id": "greek_salad", "label": "Greek-style salad" },
+      { "id": "roasted_vegetables", "label": "Roasted vegetables" },
+      {
+        "id": "rice_pilaf",
+        "label": "Rice pilaf (optional)",
+        "optional": true
+      },
+      { "id": "pita", "label": "Pita/flatbread" }
+    ],
+    "saucesAndCondiments": [
+      { "id": "tzatziki", "label": "Tzatziki-style yogurt sauce" },
+      {
+        "id": "chimichurri_like_herb_sauce",
+        "label": "Herb sauce (parsley/olive oil/lemon)"
+      },
+      { "id": "harissa", "label": "Harissa (optional)", "optional": true },
+      {
+        "id": "tahini_sauce",
+        "label": "Tahini sauce (optional)",
+        "optional": true
+      }
+    ]
+  },
+  "substitutions": {
+    "rules": [
+      {
+        "id": "sub_olive_oil_primary_fat",
+        "type": "ingredient_substitution",
+        "from": ["butter", "neutral_oil"],
+        "to": ["olive_oil"],
+        "notes": "Default to olive oil as the primary cooking fat where flavor profile allows."
+      },
+      {
+        "id": "sub_lemon_or_vinegar_acid",
+        "type": "ingredient_substitution",
+        "from": ["white_vinegar", "lime"],
+        "to": ["lemon", "red_wine_vinegar"],
+        "notes": "Prefer lemon or red wine vinegar for Mediterranean-style acidity."
+      },
+      {
+        "id": "sub_herb_swap",
+        "type": "ingredient_substitution",
+        "from": ["cilantro"],
+        "to": ["parsley", "mint"],
+        "notes": "Parsley/mint/dill are common; cilantro can be used but reads more non-Mediterranean in many dishes."
+      },
+      {
+        "id": "sub_legume_base",
+        "type": "ingredient_substitution",
+        "from": ["black_beans", "kidney_beans"],
+        "to": ["chickpeas", "white_beans", "lentils"],
+        "notes": "Chickpeas/white beans/lentils are typical Mediterranean pantry legumes."
+      }
+    ]
+  },
+  "nutritionBias": {
+    "general": [
+      "vegetable-forward",
+      "olive-oil as primary fat",
+      "legumes as protein",
+      "seafood and lean meats common",
+      "yogurt/cheese as accents rather than bulk"
+    ],
+    "defaultTargetsHints": {
+      "fiber": "high",
+      "addedSugar": "low",
+      "sodium": "moderate (watch brined items like olives/feta)",
+      "fatQuality": "monounsaturated-forward"
+    }
+  },
+  "compatibility": {
+    "mealPlanner": {
+      "defaultCadence": "flexible",
+      "rotationFriendly": true,
+      "batchCookingFriendly": true,
+      "leftoversFriendly": true
+    },
+    "kitchenCapabilityNotes": [
+      "Works well with basic stove + oven.",
+      "Grill is beneficial but not required (broiler can substitute).",
+      "Food processor helpful for dips/sauces but optional."
+    ]
+  }
+}

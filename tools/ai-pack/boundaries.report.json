@@ -11,23 +11,84 @@
     "@": "src"
   },
   "layers": [
-    { "id": "ui", "label": "UI / Pages", "glob": ["src/pages/**", "src/features/**/ui/**"] },
-    { "id": "features", "label": "Feature Shells", "glob": ["src/features/**", "!src/features/**/ui/**", "!src/features/**/services/**", "!src/features/**/managers/**", "!src/features/**/stores/**"] },
+    {
+      "id": "ui",
+      "label": "UI / Pages",
+      "glob": ["src/pages/**", "src/features/**/ui/**"]
+    },
+    {
+      "id": "features",
+      "label": "Feature Shells",
+      "glob": [
+        "src/features/**",
+        "!src/features/**/ui/**",
+        "!src/features/**/services/**",
+        "!src/features/**/managers/**",
+        "!src/features/**/stores/**"
+      ]
+    },
     { "id": "engines", "label": "Engines", "glob": ["src/engines/**"] },
-    { "id": "managers", "label": "Managers", "glob": ["src/managers/**", "src/features/**/managers/**"] },
-    { "id": "services", "label": "Domain Services", "glob": ["src/services/**", "src/features/**/services/**"] },
-    { "id": "stores", "label": "State Stores", "glob": ["src/stores/**", "src/features/**/stores/**"] },
-    { "id": "db", "label": "DB and Schemas", "glob": ["src/db/**", "schemas/**", "src/**/data/fixtures/**"] },
-    { "id": "automation", "label": "Automation & Orchestration", "glob": ["src/services/automation/**", "src/services/session/**", "src/services/schedule/**", "src/services/nba/**", "src/services/storage/**"] },
-    { "id": "identity", "label": "Identity & Entitlements", "glob": ["src/services/auth/**"] },
-    { "id": "external", "label": "External Adapters", "glob": ["src/features/**/services/**/providers/**", "src/features/**/services/**/store-integrations/**"] }
+    {
+      "id": "managers",
+      "label": "Managers",
+      "glob": ["src/managers/**", "src/features/**/managers/**"]
+    },
+    {
+      "id": "services",
+      "label": "Domain Services",
+      "glob": ["src/services/**", "src/features/**/services/**"]
+    },
+    {
+      "id": "stores",
+      "label": "State Stores",
+      "glob": ["src/stores/**", "src/features/**/stores/**"]
+    },
+    {
+      "id": "db",
+      "label": "DB and Schemas",
+      "glob": ["src/db/**", "schemas/**", "src/**/data/fixtures/**"]
+    },
+    {
+      "id": "automation",
+      "label": "Automation & Orchestration",
+      "glob": [
+        "src/services/automation/**",
+        "src/services/session/**",
+        "src/services/schedule/**",
+        "src/services/nba/**",
+        "src/services/storage/**"
+      ]
+    },
+    {
+      "id": "identity",
+      "label": "Identity & Entitlements",
+      "glob": ["src/services/auth/**"]
+    },
+    {
+      "id": "external",
+      "label": "External Adapters",
+      "glob": [
+        "src/features/**/services/**/providers/**",
+        "src/features/**/services/**/store-integrations/**"
+      ]
+    }
   ],
   "rules": [
     {
       "id": "layering.ui-downward",
       "description": "UI may depend only on features, managers, stores, services, engines, automation. UI cannot import db or schemas directly.",
       "scope": ["src/pages/**", "src/features/**/ui/**"],
-      "allowImportsFrom": ["src/features/**", "src/managers/**", "src/stores/**", "src/services/**", "src/engines/**", "src/services/automation/**", "src/services/session/**", "src/services/schedule/**", "src/services/nba/**"],
+      "allowImportsFrom": [
+        "src/features/**",
+        "src/managers/**",
+        "src/stores/**",
+        "src/services/**",
+        "src/engines/**",
+        "src/services/automation/**",
+        "src/services/session/**",
+        "src/services/schedule/**",
+        "src/services/nba/**"
+      ],
       "forbidImportsFrom": ["src/db/**", "schemas/**"],
       "severity": "error",
       "message": "UI must not touch DB or schemas directly. Use stores/services."
@@ -44,8 +105,17 @@
       "id": "layering.engines-pure",
       "description": "Engines must be UI-free and side-effect-light. They may call managers, services, and read/write via stores.",
       "scope": ["src/engines/**"],
-      "allowImportsFrom": ["src/managers/**", "src/services/**", "src/stores/**", "src/services/automation/**"],
-      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**", "src/db/**"],
+      "allowImportsFrom": [
+        "src/managers/**",
+        "src/services/**",
+        "src/stores/**",
+        "src/services/automation/**"
+      ],
+      "forbidImportsFrom": [
+        "src/pages/**",
+        "src/features/**/ui/**",
+        "src/db/**"
+      ],
       "severity": "error",
       "message": "Engines cannot import UI or DB."
     },
@@ -133,7 +203,10 @@
       "scope": ["src/**"],
       "forbidImportsFrom": ["src/hub/**", "src/svffh/**", "src/tiers/**"],
       "mustImportTogether": {
-        "src/services/auth/SVFFHAuthBridge.js": ["src/services/auth/SVFFHClaims.js", "src/stores/useEntitlementFlags.js"]
+        "src/services/auth/SVFFHAuthBridge.js": [
+          "src/services/auth/SVFFHClaims.js",
+          "src/stores/useEntitlementFlags.js"
+        ]
       },
       "severity": "error",
       "message": "Only SVFFHAuthBridge ➜ SVFFHClaims ➜ EntitlementFlags allowed."
@@ -141,7 +214,11 @@
     {
       "id": "entitlements.gate-coop",
       "description": "Co-op features must be gated by EntitlementFlags.",
-      "scope": ["src/features/coop/**", "src/engines/coop/**", "src/services/templates/**"],
+      "scope": [
+        "src/features/coop/**",
+        "src/engines/coop/**",
+        "src/services/templates/**"
+      ],
       "mustReadFromStores": ["src/stores/useEntitlementFlags.js"],
       "severity": "error",
       "message": "Co-op code must check EntitlementFlags."
@@ -156,7 +233,9 @@
         "src/features/scan-compare-trust/services/products/**",
         "src/features/scan-compare-trust/services/safety/**"
       ],
-      "mustImport": ["src/features/scan-compare-trust/services/workers/ocr.worker.js"],
+      "mustImport": [
+        "src/features/scan-compare-trust/services/workers/ocr.worker.js"
+      ],
       "severity": "error",
       "message": "UI must call OCR worker, not adapters directly."
     },
@@ -178,7 +257,11 @@
       "description": "InventorySync must be the only bi-directional sync point for Inventory ↔ Recipes/Plans.",
       "scope": ["src/**"],
       "forbidImportsFrom": ["src/stores/useInventory.js"],
-      "exceptions": ["src/managers/InventorySync.js", "src/features/**/stores/**", "src/pages/**"],
+      "exceptions": [
+        "src/managers/InventorySync.js",
+        "src/features/**/stores/**",
+        "src/pages/**"
+      ],
       "severity": "warning",
       "message": "Prefer InventorySync for cross-domain inventory updates."
     },
@@ -200,13 +283,17 @@
       "id": "workers.isolate",
       "description": "Web workers must not import UI or engines.",
       "scope": ["src/**/workers/**/*.worker.js"],
-      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**", "src/engines/**"],
+      "forbidImportsFrom": [
+        "src/pages/**",
+        "src/features/**/ui/**",
+        "src/engines/**"
+      ],
       "severity": "error",
       "message": "Workers must be isolated from UI and engines."
     },
     {
       "id": "exports.public-surface",
-      "description": "Each feature exposes only index.ts(x)/js as public surface.",
+      "description": "Each feature exposes only index.js(x)/js as public surface.",
       "scope": ["src/features/**"],
       "enforceBarrelIndex": true,
       "severity": "warning",
@@ -223,7 +310,11 @@
     {
       "id": "sabbath.quiet-hours",
       "description": "Automation must check Sabbath/Quiet Hours guards for scheduled actions.",
-      "scope": ["src/services/automation/**", "src/services/session/**", "src/engines/**"],
+      "scope": [
+        "src/services/automation/**",
+        "src/services/session/**",
+        "src/engines/**"
+      ],
       "mustImport": ["src/services/session/guards/**"],
       "severity": "error",
       "message": "Scheduled tasks must respect Guards."
@@ -249,7 +340,10 @@
       "description": "Stores must not import other stores directly except useEntitlementFlags and useUserProfile.",
       "scope": ["src/stores/**", "src/features/**/stores/**"],
       "forbidImportsFrom": ["src/stores/**", "src/features/**/stores/**"],
-      "exceptions": ["src/stores/useEntitlementFlags.js", "src/stores/useUserProfile.js"],
+      "exceptions": [
+        "src/stores/useEntitlementFlags.js",
+        "src/stores/useUserProfile.js"
+      ],
       "severity": "error",
       "message": "Avoid cross-store coupling."
     },
@@ -266,7 +360,7 @@
   "conventions": {
     "fileExtensions": ["js", "jsx", "ts", "tsx", "json", "mdx"],
     "testFolders": ["__tests__", "__specs__"],
-    "barrelIndexNames": ["index.js", "index.ts", "index.jsx", "index.tsx"]
+    "barrelIndexNames": ["index.js", "index.js", "index.jsx", "index.jsx"]
   },
   "qualityGates": {
     "minTestsPerFeature": 1,
@@ -279,7 +373,9 @@
       "description": "Temporary allowance for Scan UI to read pricebook insights for badges.",
       "expires": "2025-12-31",
       "scope": ["src/features/scan-compare-trust/ui/**"],
-      "allowImportsFrom": ["src/features/scan-compare-trust/managers/PricebookManager.js"],
+      "allowImportsFrom": [
+        "src/features/scan-compare-trust/managers/PricebookManager.js"
+      ],
       "severity": "warning"
     }
   ],

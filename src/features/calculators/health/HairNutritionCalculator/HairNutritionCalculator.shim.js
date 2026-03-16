@@ -14,8 +14,8 @@
  * invoked from background pipelines, SessionRunner flows, or on-demand calculator pages.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /** CONSTANTS & DEFAULTS *****************************************************/
@@ -179,12 +179,18 @@ function calculateProteinTarget(input) {
   const gramsPerKg =
     BASE_PROTEIN_PER_KG * HAIR_FOCUS_MULTIPLIER * (1 + activityBump);
   const rawGrams = gramsPerKg * weightKg;
-  const grams = clamp(rawGrams, MIN_DAILY_PROTEIN_GRAMS, MAX_DAILY_PROTEIN_GRAMS);
+  const grams = clamp(
+    rawGrams,
+    MIN_DAILY_PROTEIN_GRAMS,
+    MAX_DAILY_PROTEIN_GRAMS
+  );
 
   const rationale = [
     `Base ${BASE_PROTEIN_PER_KG.toFixed(2)} g/kg`,
     `hair focus x${HAIR_FOCUS_MULTIPLIER.toFixed(2)}`,
-    activityBump > 0 ? `activity bump +${(activityBump * 100).toFixed(0)}%` : null,
+    activityBump > 0
+      ? `activity bump +${(activityBump * 100).toFixed(0)}%`
+      : null,
   ]
     .filter(Boolean)
     .join(", ");
@@ -232,7 +238,10 @@ function calculateHealthyFatTargets(input) {
   if (typeof macroTargets.fatGrams === "number" && macroTargets.fatGrams > 0) {
     // Use macro planner output as the main anchor if available.
     totalFatGrams = macroTargets.fatGrams;
-  } else if (typeof macroTargets.calories === "number" && macroTargets.calories > 0) {
+  } else if (
+    typeof macroTargets.calories === "number" &&
+    macroTargets.calories > 0
+  ) {
     // Fallback: assume ~30% of calories from fat / 9 kcal per gram.
     totalFatGrams = (macroTargets.calories * 0.3) / 9;
   } else {
@@ -250,11 +259,14 @@ function calculateHealthyFatTargets(input) {
   let efaRatioHint = "";
   const ratio = omega6Grams / (omega3Grams || 1);
   if (ratio > 10) {
-    efaRatioHint = "Omega-6 is high relative to omega-3. Add more omega-3 rich foods.";
+    efaRatioHint =
+      "Omega-6 is high relative to omega-3. Add more omega-3 rich foods.";
   } else if (ratio < 4) {
-    efaRatioHint = "Balanced or omega-3 favored profile; maintain with steady intake.";
+    efaRatioHint =
+      "Balanced or omega-3 favored profile; maintain with steady intake.";
   } else {
-    efaRatioHint = "Reasonable omega-3 to omega-6 balance. Keep including omega-3 sources.";
+    efaRatioHint =
+      "Reasonable omega-3 to omega-6 balance. Keep including omega-3 sources.";
   }
 
   return {
@@ -310,8 +322,10 @@ function buildHairSupportFlags(outputPartial, input) {
   const { dailyHairProteinTarget } = outputPartial;
   const { micronutrientFocusFlags = {}, hydrationCupsCurrent = 0 } = input;
 
-  const proteinOnTrack = dailyHairProteinTarget.grams >= MIN_DAILY_PROTEIN_GRAMS;
-  const proteinLowRisk = proteinOnTrack && !micronutrientFocusFlags.generalMicronutrientConcern;
+  const proteinOnTrack =
+    dailyHairProteinTarget.grams >= MIN_DAILY_PROTEIN_GRAMS;
+  const proteinLowRisk =
+    proteinOnTrack && !micronutrientFocusFlags.generalMicronutrientConcern;
 
   const ironSupportNeeded = !!micronutrientFocusFlags.ironLowRisk;
   const vitaminDSupportNeeded = !!micronutrientFocusFlags.vitaminDLowRisk;
@@ -361,11 +375,15 @@ function buildBlackHairRiskFlags(input) {
 
   const denseCoily =
     hairTypeProfile.curlPattern &&
-    ["coily-4a", "coily-4b", "coily-4c", "locs"].includes(hairTypeProfile.curlPattern);
+    ["coily-4a", "coily-4b", "coily-4c", "locs"].includes(
+      hairTypeProfile.curlPattern
+    );
 
   const highChemicalHistory =
     Array.isArray(chemicalHistory) &&
-    chemicalHistory.some((c) => ["relaxer", "permanent-color", "bleach"].includes(c));
+    chemicalHistory.some((c) =>
+      ["relaxer", "permanent-color", "bleach"].includes(c)
+    );
 
   const drynessRisk =
     scalpCondition === "dry" ||
@@ -393,13 +411,24 @@ function buildBlackHairRiskFlags(input) {
   const postpartumRisk = !!growthGoalFlags.postpartumSupport;
 
   const notes = [];
-  if (breakageRisk) notes.push("Prioritize steady protein and gentle handling to reduce breakage.");
-  if (sheddingRisk) notes.push("Support iron and overall micronutrients to address shedding.");
-  if (drynessRisk) notes.push("Increase hydration and include healthy fats for moisture retention.");
+  if (breakageRisk)
+    notes.push(
+      "Prioritize steady protein and gentle handling to reduce breakage."
+    );
+  if (sheddingRisk)
+    notes.push("Support iron and overall micronutrients to address shedding.");
+  if (drynessRisk)
+    notes.push(
+      "Increase hydration and include healthy fats for moisture retention."
+    );
   if (protectiveStyleDamageRisk)
     notes.push("Reduce style tension or duration to protect edges and roots.");
-  if (scalpInflammationRisk) notes.push("Support anti-inflammatory fats and gentle scalp care.");
-  if (postpartumRisk) notes.push("Postpartum shedding is common; stay consistent with nutrition.");
+  if (scalpInflammationRisk)
+    notes.push("Support anti-inflammatory fats and gentle scalp care.");
+  if (postpartumRisk)
+    notes.push(
+      "Postpartum shedding is common; stay consistent with nutrition."
+    );
 
   return {
     breakageRisk,
@@ -464,22 +493,34 @@ export async function runHairNutritionCalculatorShim(rawInput, options = {}) {
 
   // Defensive input checks.
   if (!rawInput || typeof rawInput !== "object") {
-    const error = new Error("HairNutritionCalculator requires a non-null input object.");
-    emitCalculatorEvent("calculator.hairNutrition.error", { error: error.message });
+    const error = new Error(
+      "HairNutritionCalculator requires a non-null input object."
+    );
+    emitCalculatorEvent("calculator.hairNutrition.error", {
+      error: error.message,
+    });
     throw error;
   }
 
   const { unitSystem, bodyWeight } = rawInput;
 
   if (!unitSystem || (unitSystem !== "imperial" && unitSystem !== "metric")) {
-    const error = new Error('HairNutritionCalculator input.unitSystem must be "imperial" or "metric".');
-    emitCalculatorEvent("calculator.hairNutrition.error", { error: error.message });
+    const error = new Error(
+      'HairNutritionCalculator input.unitSystem must be "imperial" or "metric".'
+    );
+    emitCalculatorEvent("calculator.hairNutrition.error", {
+      error: error.message,
+    });
     throw error;
   }
 
   if (typeof bodyWeight !== "number" || bodyWeight <= 0) {
-    const error = new Error("HairNutritionCalculator input.bodyWeight must be a positive number.");
-    emitCalculatorEvent("calculator.hairNutrition.error", { error: error.message });
+    const error = new Error(
+      "HairNutritionCalculator input.bodyWeight must be a positive number."
+    );
+    emitCalculatorEvent("calculator.hairNutrition.error", {
+      error: error.message,
+    });
     throw error;
   }
 

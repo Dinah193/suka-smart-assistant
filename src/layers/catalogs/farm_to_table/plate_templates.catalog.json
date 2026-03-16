@@ -1,0 +1,835 @@
+{
+  "$schema": "../../schemas/farm_to_table/plate_templates.catalog.schema.json",
+  "catalogId": "farm_to_table.plate_templates",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T02:18:03Z",
+  "notes": [
+    "Plate Templates are deterministic composition rules used by SSA to propose meals that align with cuisine profiles, storehouse availability, garden/animal targets, and preservation plans.",
+    "Templates specify role ratios (by edible mass), eligible component groups, technique suggestions, and fallback behaviors.",
+    "Use with cuisine profiles: planner selects a template, then applies cuisine bias to choose concrete components."
+  ],
+  "enums": {
+    "mealTimes": ["breakfast", "brunch", "lunch", "dinner", "snack"],
+    "plateTypes": [
+      "everyday",
+      "feast",
+      "light",
+      "high_protein",
+      "plant_forward",
+      "comfort",
+      "budget",
+      "preservation_batch"
+    ],
+    "roles": [
+      "protein",
+      "starch",
+      "vegetable",
+      "legume",
+      "bread",
+      "sauce",
+      "salad",
+      "soup_stew",
+      "condiment",
+      "fruit",
+      "dessert",
+      "drink"
+    ],
+    "ratioMode": ["mass_edible", "volume_estimate"],
+    "prepDifficulty": ["easy", "moderate", "advanced"],
+    "cookMethods": [
+      "saute",
+      "stew",
+      "braise",
+      "roast",
+      "grill",
+      "fry",
+      "bake",
+      "steam",
+      "boil",
+      "pressure_cook",
+      "slow_cook",
+      "one_pot",
+      "raw",
+      "assemble"
+    ],
+    "sourcingPriority": ["garden", "animals", "storehouse", "purchase", "swap"]
+  },
+  "componentGroups": [
+    {
+      "id": "group.protein.poultry",
+      "label": "Poultry proteins",
+      "description": "Chicken and other poultry cuts (fresh/frozen/canned).",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["poultry"],
+        "categoryIds": ["proteins.meat"],
+        "substitutionGroupsAny": ["protein.poultry"]
+      }
+    },
+    {
+      "id": "group.protein.red_meat",
+      "label": "Red meat proteins",
+      "description": "Beef/lamb and similar red meats.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["beef", "lamb"],
+        "categoryIds": ["proteins.meat"],
+        "substitutionGroupsAny": ["protein.red_meat"]
+      }
+    },
+    {
+      "id": "group.protein.eggs",
+      "label": "Eggs",
+      "description": "Chicken eggs and egg-based options.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["eggs"],
+        "categoryIds": ["proteins.eggs"],
+        "substitutionGroupsAny": ["protein.eggs"]
+      }
+    },
+    {
+      "id": "group.legume.dry",
+      "label": "Dry legumes",
+      "description": "Dry beans/lentils for stews and sides.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["beans", "lentils", "legume"],
+        "categoryIds": ["staples.legumes"],
+        "substitutionGroupsAny": ["legume.dry_beans", "legume.lentils"]
+      }
+    },
+    {
+      "id": "group.starch.rice",
+      "label": "Rice staples",
+      "description": "White/brown rice options.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["rice"],
+        "categoryIds": ["staples.grains"],
+        "substitutionGroupsAny": ["grain.rice_white", "grain.rice_brown"]
+      }
+    },
+    {
+      "id": "group.starch.cornmeal_bread",
+      "label": "Cornmeal breads & sides",
+      "description": "Cornmeal for cornbread/grits/polenta style sides.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["corn", "cornbread", "grits"],
+        "categoryIds": ["staples.grains"],
+        "substitutionGroupsAny": ["grain.cornmeal"]
+      }
+    },
+    {
+      "id": "group.bread.flatbread",
+      "label": "Flatbreads",
+      "description": "Wheat flour based breads (naan/roti/pita style).",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["flour", "bread"],
+        "categoryIds": ["staples.grains"],
+        "substitutionGroupsAny": ["grain.flour", "grain.wheat_berries"]
+      }
+    },
+    {
+      "id": "group.starch.potato",
+      "label": "Potatoes",
+      "description": "Potato as a plate starch.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["root", "starch"],
+        "categoryIds": ["staples.grains"],
+        "substitutionGroupsAny": ["starch.potato"]
+      }
+    },
+    {
+      "id": "group.veg.crucifer",
+      "label": "Crucifer vegetables",
+      "description": "Cabbage and related crucifers; supports slaws/ferments.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["crucifer", "slaw", "ferment"],
+        "categoryIds": ["produce.vegetables"],
+        "substitutionGroupsAny": ["veg.cabbage"]
+      }
+    },
+    {
+      "id": "group.veg.aromatics",
+      "label": "Aromatics base",
+      "description": "Onion/garlic and similar foundational aromatics.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["aromatic", "allium"],
+        "categoryIds": ["produce.vegetables"],
+        "substitutionGroupsAny": ["veg.onion", "veg.garlic"]
+      }
+    },
+    {
+      "id": "group.veg.sauce_base",
+      "label": "Sauce base vegetables",
+      "description": "Tomato and base veg used for sauces and stews.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["sauce", "nightshade", "tomato"],
+        "categoryIds": ["produce.vegetables"],
+        "substitutionGroupsAny": ["veg.tomato"]
+      }
+    },
+    {
+      "id": "group.veg.gumbo_okra",
+      "label": "Okra",
+      "description": "Okra for gumbo and stews.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["okra", "gumbo"],
+        "categoryIds": ["produce.vegetables"],
+        "substitutionGroupsAny": ["veg.okra"]
+      }
+    },
+    {
+      "id": "group.sauce.tomato_concentrate",
+      "label": "Tomato concentrates",
+      "description": "Tomato paste and similar concentrates.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["tomato", "sauce"],
+        "categoryIds": ["pantry.condiments"],
+        "substitutionGroupsAny": ["pantry.tomato_concentrate"]
+      }
+    },
+    {
+      "id": "group.condiment.acid",
+      "label": "Acid condiments",
+      "description": "Vinegar and citrus acids used to finish plates.",
+      "match": {
+        "includesComponentIds": [],
+        "tagsAny": ["vinegar", "pickling", "acid"],
+        "categoryIds": ["pantry.condiments", "preservation.inputs"],
+        "substitutionGroupsAny": [
+          "pantry.vinegar",
+          "preserve_input.vinegar",
+          "preserve_input.acidifier"
+        ]
+      }
+    }
+  ],
+  "templates": [
+    {
+      "id": "plate.everyday_protein_starch_veg",
+      "label": "Everyday Plate: Protein + Starch + Vegetable",
+      "plateType": "everyday",
+      "mealTimes": ["lunch", "dinner"],
+      "ratioMode": "mass_edible",
+      "prepDifficulty": "easy",
+      "typicalMethods": ["roast", "stew", "saute", "grill", "one_pot"],
+      "roles": [
+        {
+          "role": "protein",
+          "ratio": 0.3,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.protein.poultry",
+            "group.protein.red_meat",
+            "group.protein.eggs",
+            "group.legume.dry"
+          ],
+          "unitHint": "g",
+          "notes": "Choose 1 protein; prefer animal sources if available."
+        },
+        {
+          "role": "starch",
+          "ratio": 0.35,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.starch.rice",
+            "group.starch.potato",
+            "group.starch.cornmeal_bread",
+            "group.bread.flatbread"
+          ],
+          "unitHint": "g",
+          "notes": "Choose 1 starch/bread."
+        },
+        {
+          "role": "vegetable",
+          "ratio": 0.3,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": ["group.veg.crucifer", "group.veg.sauce_base"],
+          "unitHint": "g",
+          "notes": "Choose 1–2 vegetables."
+        },
+        {
+          "role": "sauce",
+          "ratio": 0.05,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.sauce.tomato_concentrate",
+            "group.condiment.acid"
+          ],
+          "unitHint": "g",
+          "notes": "Optional sauce/finish."
+        }
+      ],
+      "cuisineOverrides": {
+        "cuisine.indian.north_masala": {
+          "typicalMethods": ["stew", "saute", "one_pot", "bake"],
+          "roleTweaks": {
+            "starch": {
+              "preferGroups": ["group.starch.rice", "group.bread.flatbread"]
+            },
+            "sauce": {
+              "notes": "Masala gravy counts as sauce; include aromatics and warm spices per cuisine profile."
+            }
+          }
+        },
+        "cuisine.aai.caribbean_stream": {
+          "typicalMethods": ["stew", "grill", "roast"],
+          "roleTweaks": {
+            "starch": {
+              "preferGroups": [
+                "group.starch.rice",
+                "group.starch.cornmeal_bread"
+              ]
+            },
+            "vegetable": {
+              "preferGroups": ["group.veg.crucifer"],
+              "notes": "Cabbage/slaw is a strong default side."
+            }
+          }
+        }
+      },
+      "fallbackPolicy": {
+        "ifMissing": [
+          {
+            "role": "protein",
+            "strategy": [
+              "use_legume_as_protein",
+              "use_eggs_as_protein",
+              "reduce_portion_and_increase_veg"
+            ],
+            "notes": "If no meat available, shift protein role to legumes/eggs and increase vegetables."
+          },
+          {
+            "role": "starch",
+            "strategy": ["swap_starch_group", "use_bread", "increase_legume"],
+            "notes": "If preferred starch is missing, choose a different starch group or use bread."
+          },
+          {
+            "role": "vegetable",
+            "strategy": [
+              "use_preserved_veg",
+              "use_slaw_or_ferment",
+              "increase_soup_stew_veg"
+            ],
+            "notes": "Vegetable can be fresh, frozen, canned, or fermented."
+          }
+        ],
+        "sourcingPriorityDefault": [
+          "garden",
+          "animals",
+          "storehouse",
+          "swap",
+          "purchase"
+        ]
+      },
+      "explain": {
+        "why": "General-purpose plate composition for most households.",
+        "howPlannerUses": [
+          "Pick concrete components from groups based on availability (garden/animals/storehouse) and cuisine bias.",
+          "Scale portions by household size and desired leftovers.",
+          "Emit provisioning demand for storehouse targets and garden/animal planning."
+        ]
+      }
+    },
+    {
+      "id": "plate.curry_and_two",
+      "label": "Curry Plate: Curry Main + Rice + Bread/Vegetable",
+      "plateType": "comfort",
+      "mealTimes": ["lunch", "dinner"],
+      "ratioMode": "mass_edible",
+      "prepDifficulty": "moderate",
+      "typicalMethods": ["stew", "one_pot", "saute", "bake"],
+      "roles": [
+        {
+          "role": "soup_stew",
+          "ratio": 0.45,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.protein.poultry",
+            "group.protein.red_meat",
+            "group.legume.dry",
+            "group.veg.sauce_base",
+            "group.sauce.tomato_concentrate"
+          ],
+          "unitHint": "g",
+          "notes": "Main curry/stew with protein + sauce base."
+        },
+        {
+          "role": "starch",
+          "ratio": 0.35,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": ["group.starch.rice"],
+          "unitHint": "g",
+          "notes": "Rice is primary."
+        },
+        {
+          "role": "bread",
+          "ratio": 0.15,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.bread.flatbread",
+            "group.starch.cornmeal_bread"
+          ],
+          "unitHint": "g",
+          "notes": "Cuisine decides bread: naan/roti vs cornbread/festival."
+        },
+        {
+          "role": "vegetable",
+          "ratio": 0.05,
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "componentGroups": ["group.veg.crucifer", "group.veg.gumbo_okra"],
+          "unitHint": "g",
+          "notes": "Optional veg side (slaw/okra)."
+        }
+      ],
+      "cuisineOverrides": {
+        "cuisine.indian.north_masala": {
+          "rolesOverride": [
+            {
+              "role": "soup_stew",
+              "ratio": 0.45,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": [
+                "group.protein.poultry",
+                "group.legume.dry",
+                "group.veg.sauce_base",
+                "group.veg.aromatics"
+              ],
+              "unitHint": "g",
+              "notes": "Masala gravy with aromatics; legumes OK for dal-style mains."
+            },
+            {
+              "role": "starch",
+              "ratio": 0.35,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": ["group.starch.rice"],
+              "unitHint": "g",
+              "notes": "Basmati-like rice preferred."
+            },
+            {
+              "role": "bread",
+              "ratio": 0.2,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": ["group.bread.flatbread"],
+              "unitHint": "g",
+              "notes": "Naan/roti preferred."
+            }
+          ],
+          "notes": "Favor turmeric+cumin+coriander+garam masala; finish with lemon and herbs."
+        },
+        "cuisine.aai.caribbean_stream": {
+          "rolesOverride": [
+            {
+              "role": "soup_stew",
+              "ratio": 0.45,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": [
+                "group.protein.poultry",
+                "group.protein.red_meat",
+                "group.veg.aromatics",
+                "group.veg.sauce_base"
+              ],
+              "unitHint": "g",
+              "notes": "Caribbean curry: allspice/thyme aromatics, optional hot pepper."
+            },
+            {
+              "role": "starch",
+              "ratio": 0.35,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": ["group.starch.rice"],
+              "unitHint": "g",
+              "notes": "Rice primary."
+            },
+            {
+              "role": "bread",
+              "ratio": 0.15,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": ["group.starch.cornmeal_bread"],
+              "unitHint": "g",
+              "notes": "Cornbread/festival-style bread preferred."
+            },
+            {
+              "role": "vegetable",
+              "ratio": 0.05,
+              "required": true,
+              "minItems": 1,
+              "maxItems": 2,
+              "componentGroups": ["group.veg.crucifer"],
+              "unitHint": "g",
+              "notes": "Cabbage side/slaw."
+            }
+          ],
+          "notes": "Favor allspice+thyme+curry powder; brighten with lime."
+        }
+      },
+      "fallbackPolicy": {
+        "ifMissing": [
+          {
+            "role": "protein",
+            "strategy": [
+              "use_legume_as_protein",
+              "use_eggs_as_protein",
+              "reduce_portion_and_increase_veg"
+            ],
+            "notes": "If no meat available, shift protein role to legumes/eggs and increase vegetables."
+          },
+          {
+            "role": "starch",
+            "strategy": ["swap_starch_group", "use_bread", "increase_legume"],
+            "notes": "If preferred starch is missing, choose a different starch group or use bread."
+          },
+          {
+            "role": "vegetable",
+            "strategy": [
+              "use_preserved_veg",
+              "use_slaw_or_ferment",
+              "increase_soup_stew_veg"
+            ],
+            "notes": "Vegetable can be fresh, frozen, canned, or fermented."
+          }
+        ],
+        "sourcingPriorityDefault": [
+          "garden",
+          "animals",
+          "storehouse",
+          "swap",
+          "purchase"
+        ]
+      },
+      "explain": {
+        "why": "Captures common 'curry with rice' meal flows across cuisines while staying deterministic.",
+        "howPlannerUses": [
+          "Detect curry intent from recipe tags or user selection; apply cuisine overrides.",
+          "If bread not possible, shift mass to rice + vegetable."
+        ]
+      }
+    },
+
+    {
+      "id": "plate.soup_and_bread",
+      "label": "Soup/Stew + Bread + Side",
+      "plateType": "budget",
+      "mealTimes": ["lunch", "dinner"],
+      "ratioMode": "mass_edible",
+      "prepDifficulty": "easy",
+      "typicalMethods": ["stew", "one_pot", "pressure_cook", "slow_cook"],
+      "roles": [
+        {
+          "role": "soup_stew",
+          "ratio": 0.65,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.legume.dry",
+            "group.protein.poultry",
+            "group.protein.red_meat",
+            "group.veg.sauce_base",
+            "group.veg.aromatics"
+          ],
+          "unitHint": "g",
+          "notes": "Big pot soup/stew. Legumes can be primary."
+        },
+        {
+          "role": "bread",
+          "ratio": 0.2,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.bread.flatbread",
+            "group.starch.cornmeal_bread"
+          ],
+          "unitHint": "g",
+          "notes": "Bread for satiety."
+        },
+        {
+          "role": "vegetable",
+          "ratio": 0.15,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": ["group.veg.crucifer"],
+          "unitHint": "g",
+          "notes": "Side veg or slaw/ferment."
+        }
+      ],
+      "fallbackPolicy": {
+        "ifMissing": [
+          {
+            "role": "protein",
+            "strategy": [
+              "use_legume_as_protein",
+              "use_eggs_as_protein",
+              "reduce_portion_and_increase_veg"
+            ],
+            "notes": "If no meat available, shift protein role to legumes/eggs and increase vegetables."
+          },
+          {
+            "role": "starch",
+            "strategy": ["swap_starch_group", "use_bread", "increase_legume"],
+            "notes": "If preferred starch is missing, choose a different starch group or use bread."
+          },
+          {
+            "role": "vegetable",
+            "strategy": [
+              "use_preserved_veg",
+              "use_slaw_or_ferment",
+              "increase_soup_stew_veg"
+            ],
+            "notes": "Vegetable can be fresh, frozen, canned, or fermented."
+          }
+        ],
+        "sourcingPriorityDefault": [
+          "garden",
+          "animals",
+          "storehouse",
+          "swap",
+          "purchase"
+        ]
+      },
+      "explain": {
+        "why": "Budget-friendly template that scales and produces leftovers; aligns with preservation (pressure can/freeze).",
+        "plannerHints": {
+          "leftoverIntent": "high",
+          "preserveAfter": "freeze_or_pressure_can",
+          "batchSizeMultiplierDefault": 1.5
+        }
+      }
+    },
+    {
+      "id": "plate.breakfast_eggs_and_starch",
+      "label": "Breakfast: Eggs + Starch + Fruit/Vegetable",
+      "plateType": "everyday",
+      "mealTimes": ["breakfast", "brunch"],
+      "ratioMode": "mass_edible",
+      "prepDifficulty": "easy",
+      "typicalMethods": ["saute", "boil", "bake", "assemble"],
+      "roles": [
+        {
+          "role": "protein",
+          "ratio": 0.35,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": ["group.protein.eggs"],
+          "unitHint": "g",
+          "notes": "Eggs as primary breakfast protein."
+        },
+        {
+          "role": "starch",
+          "ratio": 0.4,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.starch.potato",
+            "group.starch.cornmeal_bread",
+            "group.bread.flatbread",
+            "group.starch.rice"
+          ],
+          "unitHint": "g",
+          "notes": "Potatoes/bread/cornmeal as starch."
+        },
+        {
+          "role": "fruit",
+          "ratio": 0.2,
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "componentGroups": [],
+          "unitHint": "g",
+          "notes": "Fruit is flexible; planner may pull from produce catalog if available."
+        },
+        {
+          "role": "condiment",
+          "ratio": 0.05,
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "componentGroups": ["group.condiment.acid"],
+          "unitHint": "g",
+          "notes": "Optional vinegar/hot sauce style finish."
+        }
+      ],
+      "fallbackPolicy": {
+        "ifMissing": [
+          {
+            "role": "protein",
+            "strategy": [
+              "use_legume_as_protein",
+              "use_eggs_as_protein",
+              "reduce_portion_and_increase_veg"
+            ],
+            "notes": "If no meat available, shift protein role to legumes/eggs and increase vegetables."
+          },
+          {
+            "role": "starch",
+            "strategy": ["swap_starch_group", "use_bread", "increase_legume"],
+            "notes": "If preferred starch is missing, choose a different starch group or use bread."
+          },
+          {
+            "role": "vegetable",
+            "strategy": [
+              "use_preserved_veg",
+              "use_slaw_or_ferment",
+              "increase_soup_stew_veg"
+            ],
+            "notes": "Vegetable can be fresh, frozen, canned, or fermented."
+          }
+        ],
+        "sourcingPriorityDefault": [
+          "garden",
+          "animals",
+          "storehouse",
+          "swap",
+          "purchase"
+        ]
+      },
+      "explain": {
+        "why": "Matches your household preference for egg-based breakfasts and flexible starch choices.",
+        "howPlannerUses": [
+          "If eggs are scarce, swap protein role to legumes or leftover meats (if cataloged).",
+          "If fruit not available, increase vegetable or omit."
+        ]
+      }
+    },
+    {
+      "id": "plate.preservation_batch_pot",
+      "label": "Preservation Batch: Big Pot for Freezing/Canning",
+      "plateType": "preservation_batch",
+      "mealTimes": ["dinner"],
+      "ratioMode": "mass_edible",
+      "prepDifficulty": "moderate",
+      "typicalMethods": ["stew", "pressure_cook", "slow_cook", "one_pot"],
+      "roles": [
+        {
+          "role": "soup_stew",
+          "ratio": 0.8,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": [
+            "group.legume.dry",
+            "group.protein.red_meat",
+            "group.protein.poultry",
+            "group.veg.aromatics",
+            "group.veg.sauce_base"
+          ],
+          "unitHint": "g",
+          "notes": "Designed to produce extra portions for preservation."
+        },
+        {
+          "role": "starch",
+          "ratio": 0.15,
+          "required": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "componentGroups": ["group.starch.rice", "group.starch.potato"],
+          "unitHint": "g",
+          "notes": "Serve fresh; usually not preserved with stew."
+        },
+        {
+          "role": "condiment",
+          "ratio": 0.05,
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "componentGroups": ["group.condiment.acid"],
+          "unitHint": "g",
+          "notes": "Acid finish/serving condiment."
+        }
+      ],
+      "fallbackPolicy": {
+        "ifMissing": [
+          {
+            "role": "protein",
+            "strategy": [
+              "use_legume_as_protein",
+              "use_eggs_as_protein",
+              "reduce_portion_and_increase_veg"
+            ],
+            "notes": "If no meat available, shift protein role to legumes/eggs and increase vegetables."
+          },
+          {
+            "role": "starch",
+            "strategy": ["swap_starch_group", "use_bread", "increase_legume"],
+            "notes": "If preferred starch is missing, choose a different starch group or use bread."
+          },
+          {
+            "role": "vegetable",
+            "strategy": [
+              "use_preserved_veg",
+              "use_slaw_or_ferment",
+              "increase_soup_stew_veg"
+            ],
+            "notes": "Vegetable can be fresh, frozen, canned, or fermented."
+          }
+        ],
+        "sourcingPriorityDefault": [
+          "garden",
+          "animals",
+          "storehouse",
+          "swap",
+          "purchase"
+        ]
+      },
+      "explain": {
+        "why": "Feeds household now and fills freezer/jars later; supports farm-to-table provisioning.",
+        "plannerHints": {
+          "leftoverIntent": "very_high",
+          "preservationDefault": ["preserve.freeze", "preserve.pressure_can"],
+          "batchSizeMultiplierDefault": 2.0,
+          "portioning": {
+            "singleMealPortion_g_perAdult": 650,
+            "singleMealPortion_g_perChild": 450
+          }
+        }
+      }
+    }
+  ],
+  "indexes": {
+    "byMealTime": true,
+    "byPlateType": true,
+    "byCuisineOverride": true,
+    "byComponentGroup": true
+  }
+}

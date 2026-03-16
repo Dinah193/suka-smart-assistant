@@ -43,7 +43,7 @@
 // All events: { type, ts, source, data } with ISO timestamps.
 // -----------------------------------------------------------------------------
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import config from "../config";
 import * as schemaValidator from "../services/schemaValidator.js";
 
@@ -65,21 +65,31 @@ function emitImportEvent(type, data = {}) {
 async function exportToHubIfEnabled(payload) {
   try {
     const flags =
-      (config && (config.featureFlags || (typeof config === "function" ? config().featureFlags : {}))) ||
+      (config &&
+        (config.featureFlags ||
+          (typeof config === "function" ? config().featureFlags : {}))) ||
       config.featureFlags ||
       {};
-    const familyFundMode = flags.familyFundMode === true || flags.familyFundMode === "true";
+    const familyFundMode =
+      flags.familyFundMode === true || flags.familyFundMode === "true";
 
     if (!familyFundMode) return;
 
-    const { default: HubPacketFormatter } = await import("../services/HubPacketFormatter.js");
-    const { default: FamilyFundConnector } = await import("../services/FamilyFundConnector.js");
+    const { default: HubPacketFormatter } = await import(
+      "@/services/hub/HubPacketFormatter.js"
+    );
+    const { default: FamilyFundConnector } = await import(
+      "@/services/hub/FamilyFundConnector.js"
+    );
 
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // silent fail — SSA owns the data first
-    console.warn("[ImportNormalizer] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[ImportNormalizer] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -88,7 +98,10 @@ async function exportToHubIfEnabled(payload) {
 // -----------------------------------------------------------------------------
 function tryValidate(schemaName, data) {
   if (!schemaValidator || typeof schemaValidator.validate !== "function") {
-    return { ok: true, warnings: ["schemaValidator not available; skipping validation"] };
+    return {
+      ok: true,
+      warnings: ["schemaValidator not available; skipping validation"],
+    };
   }
   try {
     const res = schemaValidator.validate(schemaName, data);
@@ -97,10 +110,15 @@ function tryValidate(schemaName, data) {
     }
     return {
       ok: false,
-      warnings: Array.isArray(res?.errors) ? res.errors.map((e) => e.message || String(e)) : ["Schema invalid"],
+      warnings: Array.isArray(res?.errors)
+        ? res.errors.map((e) => e.message || String(e))
+        : ["Schema invalid"],
     };
   } catch (err) {
-    return { ok: false, warnings: ["Schema validation failed: " + (err?.message || err)] };
+    return {
+      ok: false,
+      warnings: ["Schema validation failed: " + (err?.message || err)],
+    };
   }
 }
 
@@ -122,15 +140,25 @@ function extractContextIntelligence(domain, normalized) {
 
   // Recipes: ingredients + methods + equipment
   if (domain === "recipe" && Array.isArray(normalized.ingredients)) {
-    ctx.ingredients = normalized.ingredients.map((ing) => ing.name || ing.ingredient || ing.title).filter(Boolean);
+    ctx.ingredients = normalized.ingredients
+      .map((ing) => ing.name || ing.ingredient || ing.title)
+      .filter(Boolean);
 
     if (Array.isArray(normalized.steps)) {
       normalized.steps.forEach((step) => {
         const s = typeof step === "string" ? step : step?.text || "";
-        if (/bake|roast|broil|grill|sear|simmer|boil|steam|pressure cook|ferment/i.test(s)) {
+        if (
+          /bake|roast|broil|grill|sear|simmer|boil|steam|pressure cook|ferment/i.test(
+            s
+          )
+        ) {
           ctx.methods.push(s);
         }
-        if (/dutch oven|instant pot|air fryer|smoker|dehydrator|pressure canner|fermentation crock/i.test(s)) {
+        if (
+          /dutch oven|instant pot|air fryer|smoker|dehydrator|pressure canner|fermentation crock/i.test(
+            s
+          )
+        ) {
           ctx.equipment.push(s);
         }
       });
@@ -141,7 +169,11 @@ function extractContextIntelligence(domain, normalized) {
   if (domain === "cleaning") {
     if (Array.isArray(normalized.zones)) {
       ctx.tags.push("zones");
-      ctx.tags.push(...normalized.zones.map((z) => "zone:" + (z.id || z.name || z.title || "unknown")));
+      ctx.tags.push(
+        ...normalized.zones.map(
+          (z) => "zone:" + (z.id || z.name || z.title || "unknown")
+        )
+      );
     }
     if (normalized.cadence) {
       ctx.tags.push("cadence:" + normalized.cadence);
@@ -165,21 +197,26 @@ function extractContextIntelligence(domain, normalized) {
   // Animal: species, yields
   if (domain === "animal") {
     if (normalized.species) ctx.tags.push("species:" + normalized.species);
-    if (normalized.yieldCurveId) ctx.tags.push("yieldCurve:" + normalized.yieldCurveId);
+    if (normalized.yieldCurveId)
+      ctx.tags.push("yieldCurve:" + normalized.yieldCurveId);
   }
 
   // Storehouse: categories, goals
   if (domain === "storehouse") {
     if (Array.isArray(normalized.items)) {
       ctx.tags.push("storehouse-items");
-      ctx.ingredients = normalized.items.map((it) => it.name || it.item || it.sku).filter(Boolean);
+      ctx.ingredients = normalized.items
+        .map((it) => it.name || it.item || it.sku)
+        .filter(Boolean);
     }
   }
 
   // How-to / video: topics
   if (domain === "howto") {
     if (Array.isArray(normalized.steps)) {
-      ctx.methods = normalized.steps.map((s) => (typeof s === "string" ? s : s.text)).filter(Boolean);
+      ctx.methods = normalized.steps
+        .map((s) => (typeof s === "string" ? s : s.text))
+        .filter(Boolean);
     }
     if (normalized.topic) ctx.tags.push("topic:" + normalized.topic);
   }
@@ -210,7 +247,10 @@ function normalizeRecipe({ parsed, raw, meta }) {
   // parsed is expected to look like what RecipeParser produced
   const base = {
     title: parsed?.title || meta?.title || "Imported recipe",
-    sourceUrl: parsed?.sourceUrl || meta?.url || (typeof raw === "string" && raw.startsWith("http") ? raw : undefined),
+    sourceUrl:
+      parsed?.sourceUrl ||
+      meta?.url ||
+      (typeof raw === "string" && raw.startsWith("http") ? raw : undefined),
     ingredients: Array.isArray(parsed?.ingredients) ? parsed.ingredients : [],
     steps: Array.isArray(parsed?.steps) ? parsed.steps : [],
     yields: parsed?.yields || parsed?.servings || null,
@@ -241,7 +281,9 @@ function normalizeRecipe({ parsed, raw, meta }) {
     sessions,
     inventoryChanges,
     storehouseChanges,
-    warnings: validation.ok ? validation.warnings : ["Recipe did not fully match schema", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["Recipe did not fully match schema", ...validation.warnings],
   };
 }
 
@@ -272,7 +314,9 @@ function normalizeCleaning({ parsed, raw, meta }) {
     sessions,
     inventoryChanges: [],
     storehouseChanges: [],
-    warnings: validation.ok ? validation.warnings : ["Cleaning import not fully valid", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["Cleaning import not fully valid", ...validation.warnings],
   };
 }
 
@@ -305,7 +349,9 @@ function normalizeGarden({ parsed, raw, meta }) {
     sessions,
     inventoryChanges,
     storehouseChanges,
-    warnings: validation.ok ? validation.warnings : ["Garden import not fully valid", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["Garden import not fully valid", ...validation.warnings],
   };
 }
 
@@ -328,8 +374,12 @@ function normalizeAnimal({ parsed, raw, meta }) {
   ];
 
   // animal/butchery can directly produce inventory changes (meat → storehouse)
-  const inventoryChanges = Array.isArray(parsed?.inventoryChanges) ? parsed.inventoryChanges : [];
-  const storehouseChanges = Array.isArray(parsed?.storehouseChanges) ? parsed.storehouseChanges : [];
+  const inventoryChanges = Array.isArray(parsed?.inventoryChanges)
+    ? parsed.inventoryChanges
+    : [];
+  const storehouseChanges = Array.isArray(parsed?.storehouseChanges)
+    ? parsed.storehouseChanges
+    : [];
 
   return {
     ok: true,
@@ -339,7 +389,9 @@ function normalizeAnimal({ parsed, raw, meta }) {
     sessions,
     inventoryChanges,
     storehouseChanges,
-    warnings: validation.ok ? validation.warnings : ["Animal import not fully valid", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["Animal import not fully valid", ...validation.warnings],
   };
 }
 
@@ -368,7 +420,9 @@ function normalizeStorehouse({ parsed, raw, meta }) {
     sessions: [],
     inventoryChanges: [],
     storehouseChanges,
-    warnings: validation.ok ? validation.warnings : ["Storehouse import not fully valid", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["Storehouse import not fully valid", ...validation.warnings],
   };
 }
 
@@ -398,7 +452,9 @@ function normalizeHowTo({ parsed, raw, meta }) {
     sessions,
     inventoryChanges: [],
     storehouseChanges: [],
-    warnings: validation.ok ? validation.warnings : ["How-to import not fully valid", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["How-to import not fully valid", ...validation.warnings],
   };
 }
 
@@ -422,7 +478,9 @@ function normalizePreservation({ parsed, raw, meta }) {
   ];
 
   // preservation can alter inventory (raw → preserved)
-  const inventoryChanges = Array.isArray(parsed?.inventoryChanges) ? parsed.inventoryChanges : [];
+  const inventoryChanges = Array.isArray(parsed?.inventoryChanges)
+    ? parsed.inventoryChanges
+    : [];
 
   return {
     ok: true,
@@ -432,7 +490,9 @@ function normalizePreservation({ parsed, raw, meta }) {
     sessions,
     inventoryChanges,
     storehouseChanges: [],
-    warnings: validation.ok ? validation.warnings : ["Preservation import not fully valid", ...validation.warnings],
+    warnings: validation.ok
+      ? validation.warnings
+      : ["Preservation import not fully valid", ...validation.warnings],
   };
 }
 
@@ -484,8 +544,12 @@ async function normalizeImport({ domain, parsed, raw, meta = {} } = {}) {
     preview: {
       title: result.normalized?.title,
       sessions: Array.isArray(result.sessions) ? result.sessions.length : 0,
-      inventoryChanges: Array.isArray(result.inventoryChanges) ? result.inventoryChanges.length : 0,
-      storehouseChanges: Array.isArray(result.storehouseChanges) ? result.storehouseChanges.length : 0,
+      inventoryChanges: Array.isArray(result.inventoryChanges)
+        ? result.inventoryChanges.length
+        : 0,
+      storehouseChanges: Array.isArray(result.storehouseChanges)
+        ? result.storehouseChanges.length
+        : 0,
     },
   });
 
@@ -498,8 +562,10 @@ async function normalizeImport({ domain, parsed, raw, meta = {} } = {}) {
 
   // If this normalization is already a data-changing import, ship to Hub
   const hasDataChanges =
-    (Array.isArray(result.inventoryChanges) && result.inventoryChanges.length > 0) ||
-    (Array.isArray(result.storehouseChanges) && result.storehouseChanges.length > 0) ||
+    (Array.isArray(result.inventoryChanges) &&
+      result.inventoryChanges.length > 0) ||
+    (Array.isArray(result.storehouseChanges) &&
+      result.storehouseChanges.length > 0) ||
     (Array.isArray(result.sessions) && result.sessions.length > 0);
 
   if (hasDataChanges) {

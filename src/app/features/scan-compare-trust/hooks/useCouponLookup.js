@@ -6,23 +6,31 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /* ------------------------------- Safe imports ------------------------------ */
-let eventBus = { emit(){}, on(){}, off(){} };
-try { 
-  const eb = require("@/services/eventBus");
-  eventBus = (eb?.default || eb?.eventBus || eb) || eventBus;
+let eventBus = { emit() {}, on() {}, off() {} };
+try {
+  const eb = require("@/services/events/eventBus");
+  eventBus = eb?.default || eb?.eventBus || eb || eventBus;
 } catch (_e) {}
 
 let DexieDB = null;
-try { DexieDB = require("@/db")?.default || require("@/db"); } catch (_e) {}
+try {
+  DexieDB = require("@/db")?.default || require("@/db");
+} catch (_e) {}
 
-let useQuietHours = () => ({ enabled:false });
-try { useQuietHours = require("@/hooks/useQuietHours")?.default || useQuietHours; } catch (_e) {}
+let useQuietHours = () => ({ enabled: false });
+try {
+  useQuietHours = require("@/hooks/useQuietHours")?.default || useQuietHours;
+} catch (_e) {}
 
 let useAuth = () => ({ user: null });
-try { useAuth = require("@/hooks/useAuth")?.default || useAuth; } catch (_e) {}
+try {
+  useAuth = require("@/hooks/useAuth")?.default || useAuth;
+} catch (_e) {}
 
 let toast = null;
-try { toast = (require("@/components/toast")?.toast) || null; } catch (_e) {}
+try {
+  toast = require("@/components/toast")?.toast || null;
+} catch (_e) {}
 
 /* --------------------------------- Utils ---------------------------------- */
 const nowISO = () => new Date().toISOString();
@@ -47,7 +55,11 @@ const normalizeCoupon = (raw) => {
   if (!raw) return null;
   // Minimal mapping with safe defaults:
   const c = {
-    id: raw.id || `${raw.source || "local"}:${raw.code || raw.url || raw.title || Math.random().toString(36).slice(2)}`,
+    id:
+      raw.id ||
+      `${raw.source || "local"}:${
+        raw.code || raw.url || raw.title || Math.random().toString(36).slice(2)
+      }`,
     title: raw.title || raw.headline || "",
     description: raw.description || raw.details || "",
     brand: raw.brand || raw.merchant || "",
@@ -106,14 +118,15 @@ function scoreCoupon(c, prefs) {
   score += timeFactor * 40;
 
   if (c.value?.kind === "percent") score += clamp(c.value.amount, 0, 60);
-  if (c.value?.kind === "amount")  score += clamp(c.value.amount / 2, 0, 60);
+  if (c.value?.kind === "amount") score += clamp(c.value.amount / 2, 0, 60);
 
   if (prefs?.preferredTypes?.includes(c.type)) score += 10;
   if (prefs?.preferredStores?.includes(c.storeCode)) score += 6;
   if (prefs?.preferredBrands?.includes(c.brand)) score += 6;
 
   if (c.stackable) score += 5;
-  if (c.membershipRequired && !prefs?.memberships?.includes(c.storeCode)) score -= 8;
+  if (c.membershipRequired && !prefs?.memberships?.includes(c.storeCode))
+    score -= 8;
 
   return Math.round(score);
 }
@@ -177,26 +190,50 @@ const memoryCache = new Map(); // key -> { when, data }
 
 async function idbGet(table, key) {
   if (!DexieDB?.kv) return null;
-  try { return await DexieDB.kv.get({ space: "coupon", key }); } catch { return null; }
+  try {
+    return await DexieDB.kv.get({ space: "coupon", key });
+  } catch {
+    return null;
+  }
 }
 async function idbSet(table, key, val) {
   if (!DexieDB?.kv) return;
-  try { await DexieDB.kv.put({ space: "coupon", key, value: val, updatedAt: Date.now() }); } catch {}
+  try {
+    await DexieDB.kv.put({
+      space: "coupon",
+      key,
+      value: val,
+      updatedAt: Date.now(),
+    });
+  } catch {}
 }
 
 function lsGet(key) {
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : null;
+  } catch {
+    return null;
+  }
 }
 function lsSet(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch {}
 }
 
 async function cacheGet(key) {
   if (memoryCache.has(key)) return memoryCache.get(key);
   const idbVal = await idbGet("coupon", key);
-  if (idbVal) { memoryCache.set(key, idbVal); return idbVal; }
+  if (idbVal) {
+    memoryCache.set(key, idbVal);
+    return idbVal;
+  }
   const lsVal = lsGet(key);
-  if (lsVal) { memoryCache.set(key, lsVal); return lsVal; }
+  if (lsVal) {
+    memoryCache.set(key, lsVal);
+    return lsVal;
+  }
   return null;
 }
 async function cacheSet(key, val) {
@@ -209,7 +246,9 @@ async function cacheSet(key, val) {
 // Store history of observed windows to predict cycles
 async function pushHistory(entry) {
   if (!DexieDB?.couponHistory) return; // optional table
-  try { await DexieDB.couponHistory.add(entry); } catch {}
+  try {
+    await DexieDB.couponHistory.add(entry);
+  } catch {}
 }
 
 async function readHistory({ store, brand }, limit = 24) {
@@ -222,7 +261,9 @@ async function readHistory({ store, brand }, limit = 24) {
       .limit(limit)
       .toArray();
     return rows || [];
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 /** Predict next likely window based on median cadence of past windows. */
@@ -230,29 +271,29 @@ function predictNextWindowFromHistory(history) {
   if (!history?.length) return null;
   // Use end dates to detect cadence
   const ends = history
-    .map(h => Date.parse(h.endISO))
+    .map((h) => Date.parse(h.endISO))
     .filter(Number.isFinite)
     .sort((a, b) => a - b);
   if (ends.length < 3) return null;
 
   const gaps = [];
-  for (let i = 1; i < ends.length; i++) gaps.push(ends[i] - ends[i-1]);
-  gaps.sort((a,b)=>a-b);
-  const median = gaps[Math.floor(gaps.length/2)];
+  for (let i = 1; i < ends.length; i++) gaps.push(ends[i] - ends[i - 1]);
+  gaps.sort((a, b) => a - b);
+  const median = gaps[Math.floor(gaps.length / 2)];
   const lastEnd = ends[ends.length - 1];
   const nextStart = new Date(lastEnd + median * 0.6); // allow pre-window
   const nextEnd = new Date(lastEnd + median * 1.1);
 
   // Confidence grows with consistency (IQR tightness)
-  const q1 = gaps[Math.floor(gaps.length*0.25)];
-  const q3 = gaps[Math.floor(gaps.length*0.75)];
+  const q1 = gaps[Math.floor(gaps.length * 0.25)];
+  const q3 = gaps[Math.floor(gaps.length * 0.75)];
   const spread = Math.max(1, q3 - q1);
   const conf = clamp(Math.round(90 - (spread / (median || 1)) * 50), 10, 95);
 
   return {
     expectedStartISO: nextStart.toISOString(),
     expectedEndISO: nextEnd.toISOString(),
-    cadenceDays: Math.round(median / (1000*60*60*24)),
+    cadenceDays: Math.round(median / (1000 * 60 * 60 * 24)),
     confidence: conf,
   };
 }
@@ -265,7 +306,9 @@ async function getFavorites(userId) {
       .where("[userId+type]")
       .equals([userId || "anon", "coupon"])
       .toArray();
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 async function addFavorite(userId, coupon) {
@@ -312,13 +355,16 @@ export default function useCouponLookup(query, opts = {}) {
   const { user } = useAuth();
   const { enabled: quietHours } = useQuietHours();
 
-  const stable = useMemo(() => ({
-    store: toStr(query?.store),
-    brand: toStr(query?.brand),
-    category: toStr(query?.category),
-    upc: toStr(query?.upc),
-    geohash: toStr(query?.geohash),
-  }), [query?.store, query?.brand, query?.category, query?.upc, query?.geohash]);
+  const stable = useMemo(
+    () => ({
+      store: toStr(query?.store),
+      brand: toStr(query?.brand),
+      category: toStr(query?.category),
+      upc: toStr(query?.upc),
+      geohash: toStr(query?.geohash),
+    }),
+    [query?.store, query?.brand, query?.category, query?.upc, query?.geohash]
+  );
 
   const key = useMemo(() => stableKey(stable), [stable]);
   const [status, setStatus] = useState("idle"); // idle | loading | success | empty | error
@@ -331,157 +377,196 @@ export default function useCouponLookup(query, opts = {}) {
 
   const loadFavorites = useCallback(async () => {
     const favs = await getFavorites(user?.id);
-    setFavorites(favs.map(f => f.payload));
+    setFavorites(favs.map((f) => f.payload));
   }, [user?.id]);
 
-  const bookmark = useCallback(async (coupon) => {
-    await addFavorite(user?.id, coupon);
-    setFavorites((prev) => {
-      const exists = prev.some(p => p.id === coupon.id);
-      return exists ? prev : [coupon, ...prev];
-    });
-    if (!quietHours && toast) toast("Saved to favorites.");
-  }, [user?.id, quietHours]);
+  const bookmark = useCallback(
+    async (coupon) => {
+      await addFavorite(user?.id, coupon);
+      setFavorites((prev) => {
+        const exists = prev.some((p) => p.id === coupon.id);
+        return exists ? prev : [coupon, ...prev];
+      });
+      if (!quietHours && toast) toast("Saved to favorites.");
+    },
+    [user?.id, quietHours]
+  );
 
-  const unbookmark = useCallback(async (couponId) => {
-    await removeFavorite(user?.id, couponId);
-    setFavorites((prev) => prev.filter(p => p.id !== couponId));
-    if (!quietHours && toast) toast("Removed from favorites.");
-  }, [user?.id, quietHours]);
+  const unbookmark = useCallback(
+    async (couponId) => {
+      await removeFavorite(user?.id, couponId);
+      setFavorites((prev) => prev.filter((p) => p.id !== couponId));
+      if (!quietHours && toast) toast("Removed from favorites.");
+    },
+    [user?.id, quietHours]
+  );
 
-  const fetchCoupons = useCallback(async (reason = "auto") => {
-    const cached = await cacheGet(key);
-    const freshEnough = cached && (Date.now() - (cached.updatedAt || 0) < ttlMs);
+  const fetchCoupons = useCallback(
+    async (reason = "auto") => {
+      const cached = await cacheGet(key);
+      const freshEnough =
+        cached && Date.now() - (cached.updatedAt || 0) < ttlMs;
 
-    if (freshEnough && !forceFresh) {
-      setCoupons(cached.data || []);
-      setStatus((cached.data?.length ? "success" : "empty"));
+      if (freshEnough && !forceFresh) {
+        setCoupons(cached.data || []);
+        setStatus(cached.data?.length ? "success" : "empty");
+        setError(null);
+        // predictions from cache (if any)
+        setPredicted(cached.predicted || null);
+        eventBus.emit("coupons:cache:hit", { key, query: stable, reason });
+        return;
+      }
+
+      // Dedupe concurrent fetches
+      if (inflight.has(key)) {
+        eventBus.emit("coupons:fetch:coalesced", { key, reason });
+        try {
+          const result = await inflight.get(key).promise;
+          setCoupons(result.data);
+          setPredicted(result.predicted || null);
+          setStatus(result.data.length ? "success" : "empty");
+          setError(null);
+        } catch (e) {
+          setStatus("error");
+          setError(e);
+        }
+        return;
+      }
+
+      setStatus("loading");
       setError(null);
-      // predictions from cache (if any)
-      setPredicted(cached.predicted || null);
-      eventBus.emit("coupons:cache:hit", { key, query: stable, reason });
-      return;
-    }
+      eventBus.emit("coupons:fetch:start", { key, query: stable, reason });
 
-    // Dedupe concurrent fetches
-    if (inflight.has(key)) {
-      eventBus.emit("coupons:fetch:coalesced", { key, reason });
+      const abortCtrl = new AbortController();
+      const p = (async () => {
+        try {
+          // Fan out to providers
+          const results = await Promise.allSettled(
+            PROVIDERS.map((fn) => fn(stable, abortCtrl.signal))
+          );
+          const raws = results.flatMap((r) =>
+            r.status === "fulfilled" ? r.value || [] : []
+          );
+          const normalized = raws.map(normalizeCoupon).filter(Boolean);
+
+          // De-dupe by id + (store+brand+type+value)
+          const seen = new Set();
+          const merged = [];
+          for (const c of normalized) {
+            const sig = `${c.id}::${c.storeCode}::${c.brand}::${c.type}::${
+              c.value?.kind || ""
+            }:${c.value?.amount || ""}`;
+            if (!seen.has(sig)) {
+              seen.add(sig);
+              merged.push(c);
+            }
+          }
+
+          // Score & sort
+          const prefs = await getUserCouponPrefs(user);
+          const scored = merged
+            .map((c) => ({ ...c, score: scoreCoupon(c, prefs) }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit);
+
+          // Write history windows for prediction
+          for (const c of scored) {
+            if (c.endISO) {
+              pushHistory({
+                store: c.storeCode || "",
+                brand: c.brand || "",
+                type: c.type || "",
+                endISO: c.endISO,
+                value: c.value,
+                ts: Date.now(),
+                source: c.source,
+              });
+            }
+          }
+
+          // Predict cycles
+          let predictedWindow = null;
+          if (includePredictions && (stable.store || stable.brand)) {
+            const hist = await readHistory({
+              store: stable.store,
+              brand: stable.brand,
+            });
+            predictedWindow = predictNextWindowFromHistory(hist);
+          }
+
+          const payload = {
+            updatedAt: Date.now(),
+            data: scored,
+            predicted: predictedWindow,
+          };
+
+          await cacheSet(key, payload);
+
+          // Events
+          eventBus.emit("coupons:fetch:success", {
+            key,
+            query: stable,
+            count: scored.length,
+            predicted: !!predictedWindow,
+          });
+
+          return payload;
+        } catch (e) {
+          eventBus.emit("coupons:fetch:error", {
+            key,
+            query: stable,
+            error: String(e),
+          });
+          throw e;
+        } finally {
+          inflight.delete(key);
+        }
+      })();
+
+      inflight.set(key, { abortCtrl, promise: p });
+
       try {
-        const result = await inflight.get(key).promise;
-        setCoupons(result.data);
-        setPredicted(result.predicted || null);
-        setStatus(result.data.length ? "success" : "empty");
+        const res = await p;
+        setCoupons(res.data);
+        setPredicted(res.predicted || null);
+        setStatus(res.data.length ? "success" : "empty");
         setError(null);
       } catch (e) {
-        setStatus("error"); setError(e);
+        setStatus("error");
+        setError(e);
       }
-      return;
-    }
-
-    setStatus("loading"); setError(null);
-    eventBus.emit("coupons:fetch:start", { key, query: stable, reason });
-
-    const abortCtrl = new AbortController();
-    const p = (async () => {
-      try {
-        // Fan out to providers
-        const results = await Promise.allSettled(
-          PROVIDERS.map(fn => fn(stable, abortCtrl.signal))
-        );
-        const raws = results.flatMap(r => r.status === "fulfilled" ? (r.value || []) : []);
-        const normalized = raws.map(normalizeCoupon).filter(Boolean);
-
-        // De-dupe by id + (store+brand+type+value)
-        const seen = new Set();
-        const merged = [];
-        for (const c of normalized) {
-          const sig = `${c.id}::${c.storeCode}::${c.brand}::${c.type}::${c.value?.kind || ""}:${c.value?.amount || ""}`;
-          if (!seen.has(sig)) { seen.add(sig); merged.push(c); }
-        }
-
-        // Score & sort
-        const prefs = await getUserCouponPrefs(user);
-        const scored = merged
-          .map(c => ({ ...c, score: scoreCoupon(c, prefs) }))
-          .sort((a,b) => b.score - a.score)
-          .slice(0, limit);
-
-        // Write history windows for prediction
-        for (const c of scored) {
-          if (c.endISO) {
-            pushHistory({
-              store: c.storeCode || "",
-              brand: c.brand || "",
-              type: c.type || "",
-              endISO: c.endISO,
-              value: c.value,
-              ts: Date.now(),
-              source: c.source,
-            });
-          }
-        }
-
-        // Predict cycles
-        let predictedWindow = null;
-        if (includePredictions && (stable.store || stable.brand)) {
-          const hist = await readHistory({ store: stable.store, brand: stable.brand });
-          predictedWindow = predictNextWindowFromHistory(hist);
-        }
-
-        const payload = {
-          updatedAt: Date.now(),
-          data: scored,
-          predicted: predictedWindow,
-        };
-
-        await cacheSet(key, payload);
-
-        // Events
-        eventBus.emit("coupons:fetch:success", {
-          key, query: stable, count: scored.length, predicted: !!predictedWindow
-        });
-
-        return payload;
-      } catch (e) {
-        eventBus.emit("coupons:fetch:error", { key, query: stable, error: String(e) });
-        throw e;
-      } finally {
-        inflight.delete(key);
-      }
-    })();
-
-    inflight.set(key, { abortCtrl, promise: p });
-
-    try {
-      const res = await p;
-      setCoupons(res.data);
-      setPredicted(res.predicted || null);
-      setStatus(res.data.length ? "success" : "empty");
-      setError(null);
-    } catch (e) {
-      setStatus("error");
-      setError(e);
-    }
-  }, [key, stable, ttlMs, limit, includePredictions, forceFresh, user]);
+    },
+    [key, stable, ttlMs, limit, includePredictions, forceFresh, user]
+  );
 
   // Debounced auto-fetch on query change
   useEffect(() => {
     if (debTimer.current) clearTimeout(debTimer.current);
-    debTimer.current = setTimeout(() => { fetchCoupons("debounced"); }, clamp(opts.debounceMs ?? 120, 0, 2000));
-    return () => { if (debTimer.current) clearTimeout(debTimer.current); };
+    debTimer.current = setTimeout(() => {
+      fetchCoupons("debounced");
+    }, clamp(opts.debounceMs ?? 120, 0, 2000));
+    return () => {
+      if (debTimer.current) clearTimeout(debTimer.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   // initial favorites
-  useEffect(() => { loadFavorites(); }, [loadFavorites]);
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
 
   const refresh = useCallback(() => fetchCoupons("manual"), [fetchCoupons]);
 
   return {
-    status, error, coupons, predicted,
+    status,
+    error,
+    coupons,
+    predicted,
     refresh,
     favorites,
-    bookmark, unbookmark,
+    bookmark,
+    unbookmark,
   };
 }
 
@@ -492,7 +577,11 @@ async function getUserCouponPrefs(user) {
     if (DexieDB?.profiles && user?.id) {
       const profile = await DexieDB.profiles.get(user.id);
       return {
-        preferredTypes: profile?.couponPrefs?.types || ["percent", "amount", "bogo"],
+        preferredTypes: profile?.couponPrefs?.types || [
+          "percent",
+          "amount",
+          "bogo",
+        ],
         preferredStores: profile?.couponPrefs?.stores || [],
         preferredBrands: profile?.couponPrefs?.brands || [],
         memberships: profile?.memberships || [], // e.g., ["sams", "costco"]
@@ -525,7 +614,7 @@ export async function queryCouponsOnce(query, options = {}) {
 
   const cached = await cacheGet(tempKey);
   const ttlMs = options.ttlMs ?? hours(6);
-  const freshEnough = cached && (Date.now() - (cached.updatedAt || 0) < ttlMs);
+  const freshEnough = cached && Date.now() - (cached.updatedAt || 0) < ttlMs;
   if (freshEnough && !options.forceFresh) return cached;
 
   if (inflight.has(tempKey)) return inflight.get(tempKey).promise;
@@ -534,16 +623,23 @@ export async function queryCouponsOnce(query, options = {}) {
   const promise = (async () => {
     try {
       const results = await Promise.allSettled(
-        PROVIDERS.map(fn => fn(query, abortCtrl.signal))
+        PROVIDERS.map((fn) => fn(query, abortCtrl.signal))
       );
-      const raws = results.flatMap(r => r.status === "fulfilled" ? (r.value || []) : []);
+      const raws = results.flatMap((r) =>
+        r.status === "fulfilled" ? r.value || [] : []
+      );
       const normalized = raws.map(normalizeCoupon).filter(Boolean);
 
       const seen = new Set();
       const merged = [];
       for (const c of normalized) {
-        const sig = `${c.id}::${c.storeCode}::${c.brand}::${c.type}::${c.value?.kind || ""}:${c.value?.amount || ""}`;
-        if (!seen.has(sig)) { seen.add(sig); merged.push(c); }
+        const sig = `${c.id}::${c.storeCode}::${c.brand}::${c.type}::${
+          c.value?.kind || ""
+        }:${c.value?.amount || ""}`;
+        if (!seen.has(sig)) {
+          seen.add(sig);
+          merged.push(c);
+        }
       }
       const payload = { updatedAt: Date.now(), data: merged };
       await cacheSet(tempKey, payload);

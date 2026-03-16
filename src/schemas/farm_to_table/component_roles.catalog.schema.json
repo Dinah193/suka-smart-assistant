@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/farm_to_table/component_roles.catalog.schema.json",
+  "title": "SSA • Farm-to-Table Component Roles Catalog Schema",
+  "description": "Schema for SSA farm-to-table component roles catalogs. Roles are deterministic slot/plate-model labels used by planners/resolvers (e.g., role.protein, role.vegetable, role.sauce). This schema is compatible with SSA's generic catalog schema (id + tags) while adding structured, optional role semantics and UI hints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "meta", "items"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$id": { "type": "string" },
+
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "scope": {
+      "description": "Optional scoping for planners/resolvers (e.g., module, locale).",
+      "type": ["string", "object"],
+      "additionalProperties": true
+    },
+
+    "defaults": {
+      "description": "Optional defaults used by planners (e.g., default slot counts, fallback role weights).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/RoleItem" }
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Meta": {
+      "type": "object",
+      "required": ["id", "type", "name"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "catalog" },
+        "domain": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "minLength": 2 },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "subtitle": { "$ref": "#/$defs/ShortText" },
+        "source": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "RoleSemantics": {
+      "description": "Optional structured semantics for a role (used by planners and UI).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "slotKind": {
+          "description": "High-level slot grouping used by plate templates.",
+          "type": "string",
+          "enum": [
+            "protein",
+            "vegetable",
+            "starch",
+            "fat",
+            "acid",
+            "sauce",
+            "garnish",
+            "fresh_element",
+            "crunch",
+            "carrier",
+            "side",
+            "main",
+            "drink",
+            "dessert",
+            "other"
+          ]
+        },
+        "defaultPortionHint": {
+          "description": "Optional human-facing portion guidance (non-nutritional).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "compatTags": {
+          "description": "Tags used to match components to this role deterministically.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "conflictsWith": {
+          "description": "Role IDs that typically conflict with this role in the same slot (rare; used by some planners).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+
+    "UiHints": {
+      "description": "Optional UI hints for rendering role chips/filters.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "icon": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "colorToken": {
+          "description": "Design token reference (do not hardcode colors here).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "sortOrder": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "chipLabel": { "$ref": "#/$defs/ShortText" }
+      },
+      "default": {}
+    },
+
+    "RoleItem": {
+      "description": "A single role definition. Minimum required is id + tags (SSA catalog compatibility).",
+      "type": "object",
+      "required": ["id", "tags"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "description": "Canonical role ID (recommend prefix 'role.'), e.g., role.protein.",
+          "allOf": [{ "$ref": "#/$defs/Id" }]
+        },
+        "tags": {
+          "description": "Search/filter tags (SSA convention).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "group": { "$ref": "#/$defs/ShortText" },
+        "rank": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "draft", "deprecated"]
+        },
+        "notes": { "$ref": "#/$defs/Text" },
+
+        "path": {
+          "description": "Optional relative path to a richer role definition.",
+          "type": "string"
+        },
+
+        "semantics": { "$ref": "#/$defs/RoleSemantics" },
+        "ui": { "$ref": "#/$defs/UiHints" },
+
+        "refs": {
+          "description": "Optional cross references: aliases, related roles, etc.",
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+
+      "allOf": [
+        {
+          "if": { "required": ["semantics"] },
+          "then": {
+            "properties": {
+              "semantics": { "$ref": "#/$defs/RoleSemantics" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

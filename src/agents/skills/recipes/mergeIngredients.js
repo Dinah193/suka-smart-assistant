@@ -55,14 +55,24 @@
  * - Falls back to per-unit aggregation (e.g., "tbsp" totals) if no grams/ml.
  */
 
-import { emit } from "@/services/eventBus"; // safe optional; guarded below
+import { emit } from "@/services/events/eventBus"; // safe optional; guarded below
 
 /* --------------------------- Registry / Preferences ------------------------ */
 
 /** name alias: "granulated sugar" -> "sugar" */
 const NAME_ALIASES = new Map();
 /** count units: "clove", "cloves", "egg", "eggs", "each", "" etc. */
-const COUNT_UNITS = new Set(["each", "item", "clove", "cloves", "egg", "eggs", "piece", "pieces", "pcs"]);
+const COUNT_UNITS = new Set([
+  "each",
+  "item",
+  "clove",
+  "cloves",
+  "egg",
+  "eggs",
+  "piece",
+  "pieces",
+  "pcs",
+]);
 
 /**
  * per-name preference:
@@ -169,22 +179,25 @@ export function mergeIngredients(ingredients = [], options = {}) {
     const unitRaw = norm(row.unit || "");
     const isCountUnit = COUNT_UNITS.has(unitRaw);
 
-    const grams = typeof row.grams === "number" && isFinite(row.grams) ? row.grams : null;
+    const grams =
+      typeof row.grams === "number" && isFinite(row.grams) ? row.grams : null;
     const ml = typeof row.ml === "number" && isFinite(row.ml) ? row.ml : null;
-    const qty = typeof row.qty === "number" && isFinite(row.qty) ? row.qty : null;
+    const qty =
+      typeof row.qty === "number" && isFinite(row.qty) ? row.qty : null;
     const group = row.group ? cleanSpace(row.group) : null;
     const notes = row.notes ? cleanSpace(row.notes) : "";
 
     // Determine aggregation key + numeric basis
-    const { key, numericValue, numericUnit, numericMode } = selectAggregationKey({
-      mode,
-      baseName,
-      grams,
-      ml,
-      qty,
-      unitRaw,
-      isCountUnit,
-    });
+    const { key, numericValue, numericUnit, numericMode } =
+      selectAggregationKey({
+        mode,
+        baseName,
+        grams,
+        ml,
+        qty,
+        unitRaw,
+        isCountUnit,
+      });
 
     if (!key || numericValue == null) {
       // can't aggregate meaningfully; bucket by name+unit as-is
@@ -218,7 +231,19 @@ export function mergeIngredients(ingredients = [], options = {}) {
   const result = [];
 
   for (const [, node] of bucket) {
-    const { baseName, total, mode, unit, grams, ml, sourceNames, sourceUnits, sourceLines, notes, groups } = node;
+    const {
+      baseName,
+      total,
+      mode,
+      unit,
+      grams,
+      ml,
+      sourceNames,
+      sourceUnits,
+      sourceLines,
+      notes,
+      groups,
+    } = node;
 
     // Choose display unit/value from canonical totals
     let qty = null;
@@ -333,7 +358,12 @@ export function projectMergedToUnits(merged = [], prefs = {}) {
 function normalizeIngredientName(name) {
   const base = cleanSpace(name).toLowerCase();
   const alias = NAME_ALIASES.get(norm(base));
-  const stripped = base.replace(/\b(finely|coarsely|minced|chopped|diced|sliced|softened|melted|room temperature|cold|warm)\b/gi, "").trim();
+  const stripped = base
+    .replace(
+      /\b(finely|coarsely|minced|chopped|diced|sliced|softened|melted|room temperature|cold|warm)\b/gi,
+      ""
+    )
+    .trim();
   const finalName = alias || stripped || base;
   return finalName.replace(/\s+/g, " ");
 }
@@ -347,7 +377,11 @@ function normalizeIngredientName(name) {
 function pickMode(prefMode, row, defaultMode) {
   if (prefMode) return prefMode;
 
-  if (defaultMode === "mass" || defaultMode === "volume" || defaultMode === "count") {
+  if (
+    defaultMode === "mass" ||
+    defaultMode === "volume" ||
+    defaultMode === "count"
+  ) {
     return defaultMode;
   }
 
@@ -370,7 +404,15 @@ function pickMode(prefMode, row, defaultMode) {
  * - numericUnit → canonical unit (g/ml/each/or original)
  * - numericMode → "mass"|"volume"|"count"|"none"
  */
-function selectAggregationKey({ mode, baseName, grams, ml, qty, unitRaw, isCountUnit }) {
+function selectAggregationKey({
+  mode,
+  baseName,
+  grams,
+  ml,
+  qty,
+  unitRaw,
+  isCountUnit,
+}) {
   let key = null;
   let numericValue = null;
   let numericUnit = null;
@@ -410,7 +452,12 @@ function selectAggregationKey({ mode, baseName, grams, ml, qty, unitRaw, isCount
   if (!key && mode === "none") {
     // group by name+unit as-is
     if (!Number.isFinite(qty)) {
-      return { key: null, numericValue: null, numericUnit: null, numericMode: "none" };
+      return {
+        key: null,
+        numericValue: null,
+        numericUnit: null,
+        numericMode: "none",
+      };
     }
     const unitKey = unitRaw || (isCountUnit ? "each" : "");
     numericValue = qty;
@@ -474,10 +521,14 @@ function mergeIntoBucket(bucket, key, payload) {
 /* --------------------------------- Utils ----------------------------------- */
 
 function norm(s) {
-  return String(s || "").toLowerCase().trim();
+  return String(s || "")
+    .toLowerCase()
+    .trim();
 }
 function cleanSpace(s) {
-  return String(s || "").replace(/\s+/g, " ").trim();
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 function toTitle(s) {
   const str = cleanSpace(s);

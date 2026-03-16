@@ -31,41 +31,99 @@
  *  - subscribe(fn) / unsubscribe(fn)
  */
 
-import DexieDB from "@/db";
 import { v4 as uuidv4 } from "uuid";
 
 // -------------------- Safe dynamic imports --------------------
 async function safeImportMany(paths = []) {
   for (const p of paths) {
     try {
-      // @vite-ignore
-      const mod = await import(p);
+      // Vite cannot analyze variable dynamic imports; ignore safely.
+      const mod = await import(/* @vite-ignore */ p);
       return mod?.default || mod;
     } catch {}
   }
   return null;
 }
-function safeNowISO() { return new Date().toISOString(); }
-function toISODate(d = new Date()) { const x = new Date(d); x.setHours(0,0,0,0); return x.toISOString(); }
+
+function safeNowISO() {
+  return new Date().toISOString();
+}
+
+function toISODate(d = new Date()) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x.toISOString();
+}
+
+// -------------------- Dexie DB (soft) --------------------
+let _dbCache = null;
+async function getDb() {
+  if (_dbCache) return _dbCache;
+  const mod = await safeImportMany([
+    "@/services/db",
+    "@/services/db.js",
+    "@/db/index.js",
+    "@/db",
+    "../db",
+    "../../db",
+  ]);
+  // Accept shapes: {db}, default export db, or direct db instance
+  const db = mod?.db || mod?.default?.db || mod?.default || mod;
+
+  _dbCache = db || null;
+  return _dbCache;
+}
 
 let EVENTS = {};
 (async () => {
-  const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+  const ont = await safeImportMany([
+    "@/shared/ontology.js",
+    "@/shared/ontology",
+  ]);
   EVENTS = ont?.EVENTS || {};
 })();
 
-function safeGetSocket() {
+// -------------------- Socket (browser-safe) --------------------
+let _socketCache = null;
+async function safeGetSocket() {
   try {
-    // eslint-disable-next-line import/no-unresolved
-    const sock = require("@/server/services/socket");
-    return sock?.socket || sock?.getSocket?.() || null;
-  } catch { return null; }
+    if (typeof window !== "undefined") {
+      const w = window;
+      if (w.__suka?.socket) return w.__suka.socket;
+      if (w.__SSA_SOCKET__) return w.__SSA_SOCKET__;
+      if (w.socket) return w.socket;
+    }
+  } catch {}
+
+  if (_socketCache) return _socketCache;
+
+  try {
+    const sockMod = await safeImportMany([
+      "@/server/services/socket",
+      "@/services/socket",
+      "@/services/socket.js",
+      "@/realtime/socket",
+      "@/realtime/socket.js",
+    ]);
+    const sock =
+      sockMod?.socket ||
+      sockMod?.getSocket?.() ||
+      sockMod?.default?.socket ||
+      null;
+    _socketCache = sock || null;
+    return _socketCache;
+  } catch {
+    return null;
+  }
 }
 
 // Sabbath helper (use ontology.sabbath if available)
 async function isSabbath(now = new Date()) {
   try {
-    const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+    const ont = await safeImportMany([
+      "@/shared/ontology.js",
+      "@/shared/ontology",
+    ]);
     const win = ont?.sabbath?.(now);
     if (win?.startISO && win?.endISO) {
       return now >= new Date(win.startISO) && now < new Date(win.endISO);
@@ -73,8 +131,24 @@ async function isSabbath(now = new Date()) {
   } catch {}
   // Fallback Fri 18:00 → Sat 18:00
   const day = now.getDay();
-  const fri18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((5 - day + 7) % 7), 18, 0, 0, 0);
-  const sat18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - day + 7) % 7), 18, 0, 0, 0);
+  const fri18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((5 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
+  const sat18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((6 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
   return now >= fri18 && now < sat18;
 }
 
@@ -82,16 +156,34 @@ async function isSabbath(now = new Date()) {
 const _subs = new Set();
 function emit(event, payload) {
   for (const fn of _subs) {
-    try { fn(event, payload); } catch {}
+    try {
+      fn(event, payload);
+    } catch {}
   }
   // Broadcast to window + socket if present
-  try { window.dispatchEvent?.(new CustomEvent(event, { detail: payload })); } catch {}
-  try { safeGetSocket()?.emit?.(event, payload); } catch {}
+  try {
+    window.dispatchEvent?.(new CustomEvent(event, { detail: payload }));
+  } catch {}
+  // emit on cached socket, otherwise resolve once non-blocking
+  try {
+    _socketCache?.emit?.(event, payload);
+  } catch {}
+  if (!_socketCache) {
+    safeGetSocket()
+      .then((s) => {
+        try {
+          s?.emit?.(event, payload);
+        } catch {}
+      })
+      .catch(() => {});
+  }
 }
 
 // -------------------- Internal helpers --------------------
 function parseTimeToToday(timeHHMM, base = new Date()) {
-  const [hh, mm] = String(timeHHMM || "07:00").split(":").map(Number);
+  const [hh, mm] = String(timeHHMM || "07:00")
+    .split(":")
+    .map(Number);
   const d = new Date(base);
   d.setHours(hh || 0, mm || 0, 0, 0);
   return d;
@@ -106,9 +198,16 @@ function qtyToString(q) {
 }
 
 // -------------------- Inventory sync (best-effort) --------------------
-async function syncInventoryReservations(needs = [], { reason = "animal-feed" } = {}) {
-  const inv = await safeImportMany(["@/agents/inventoryAgent.js", "@/agents/inventoryAgent"]);
-  if (!inv?.handleCommand) return { ok: false, error: "inventoryAgent not available" };
+async function syncInventoryReservations(
+  needs = [],
+  { reason = "animal-feed" } = {}
+) {
+  const inv = await safeImportMany([
+    "@/agents/inventoryShim.js",
+    "@/agents/inventoryAgent",
+  ]);
+  if (!inv?.handleCommand)
+    return { ok: false, error: "inventoryAgent not available" };
   try {
     await inv.handleCommand("reserveItems", {
       lines: needs
@@ -130,11 +229,20 @@ async function syncInventoryReservations(needs = [], { reason = "animal-feed" } 
 
 // -------------------- n8n notifier (optional) --------------------
 async function notifyN8n(event, payload) {
-  const n8n = await safeImportMany(["@/services/n8nClient.js", "@/services/n8nClient"]);
+  const n8n = await safeImportMany([
+    "@/services/n8nClient.js",
+    "@/services/n8nClient",
+  ]);
   try {
-    await n8n?.runWorkflowByName?.("Suka: Animal Event", { event, payload }, {
-      idempotencyKey: `${event}:${payload?.animalId || ""}:${payload?.atISO || ""}`,
-    });
+    await n8n?.runWorkflowByName?.(
+      "Suka: Animal Event",
+      { event, payload },
+      {
+        idempotencyKey: `${event}:${payload?.animalId || ""}:${
+          payload?.atISO || ""
+        }`,
+      }
+    );
   } catch {}
 }
 
@@ -148,19 +256,23 @@ const AnimalStore = {
 
   /* ---------- Query ---------- */
   async listAnimals({ active = true } = {}) {
+    const db = await getDb();
     try {
-      let all = await DexieDB.animals.toArray();
+      let all = (await db?.animals?.toArray?.()) || [];
       if (active != null) all = all.filter((a) => !!a.active === !!active);
       // sort by name asc
-      return all.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+      return all.sort((a, b) =>
+        String(a.name || "").localeCompare(String(b.name || ""))
+      );
     } catch {
       return [];
     }
   },
 
   async getAnimal(id) {
+    const db = await getDb();
     try {
-      return await DexieDB.animals.get(id);
+      return (await db?.animals?.get?.(id)) || null;
     } catch {
       return null;
     }
@@ -168,6 +280,7 @@ const AnimalStore = {
 
   /* ---------- Upsert / Archive ---------- */
   async upsertAnimal(data) {
+    const db = await getDb();
     const id = data.id || uuidv4();
     const base = {
       id,
@@ -183,9 +296,11 @@ const AnimalStore = {
     if (!data.id) base.createdAtISO = base.updatedAtISO;
 
     try {
-      await DexieDB.animals.put(base);
+      await db?.animals?.put?.(base);
       emit("animals:changed", { id, op: "upsert", item: base });
-      notifyN8n("animal.upsert", { animalId: id, species: base.species }).catch(() => {});
+      notifyN8n("animal.upsert", { animalId: id, species: base.species }).catch(
+        () => {}
+      );
       return base;
     } catch (e) {
       return null;
@@ -193,12 +308,13 @@ const AnimalStore = {
   },
 
   async archiveAnimal(id) {
+    const db = await getDb();
     try {
-      const a = await DexieDB.animals.get(id);
+      const a = await db?.animals?.get?.(id);
       if (!a) return false;
       a.active = false;
       a.updatedAtISO = safeNowISO();
-      await DexieDB.animals.put(a);
+      await db?.animals?.put?.(a);
       emit("animals:changed", { id, op: "archive" });
       notifyN8n("animal.archive", { animalId: id }).catch(() => {});
       return true;
@@ -209,8 +325,9 @@ const AnimalStore = {
 
   /* ---------- Feed Plans ---------- */
   async getFeedPlan(animalId) {
+    const db = await getDb();
     try {
-      return await DexieDB.feedPlans.get(animalId);
+      return (await db?.feedPlans?.get?.(animalId)) || null;
     } catch {
       return null;
     }
@@ -225,19 +342,26 @@ const AnimalStore = {
    * }
    */
   async setFeedPlan(animalId, plan = {}) {
+    const db = await getDb();
     const doc = {
       id: animalId,
       animalId,
-      schedule: plan.schedule || { times: ["07:00", "18:00"], qty: { value: 120, unit: "g" } },
+      schedule: plan.schedule || {
+        times: ["07:00", "18:00"],
+        qty: { value: 120, unit: "g" },
+      },
       feedKey: plan.feedKey || null,
       notes: plan.notes || "",
       active: plan.active !== false,
       updatedAtISO: safeNowISO(),
     };
     try {
-      await DexieDB.feedPlans.put(doc);
+      await db?.feedPlans?.put?.(doc);
       emit("animals:feedPlan:changed", { animalId, doc });
-      notifyN8n("animal.feedPlan.set", { animalId, schedule: doc.schedule }).catch(() => {});
+      notifyN8n("animal.feedPlan.set", {
+        animalId,
+        schedule: doc.schedule,
+      }).catch(() => {});
       return doc;
     } catch {
       return null;
@@ -245,7 +369,15 @@ const AnimalStore = {
   },
 
   /* ---------- Logs ---------- */
-  async recordLog({ animalId, type, qty = null, unit = null, notes = "", meta = {} }) {
+  async recordLog({
+    animalId,
+    type,
+    qty = null,
+    unit = null,
+    notes = "",
+    meta = {},
+  }) {
+    const db = await getDb();
     const log = {
       id: uuidv4(),
       animalId,
@@ -257,12 +389,22 @@ const AnimalStore = {
       meta,
     };
     try {
-      await DexieDB.animalLogs.put(log);
+      await db?.animalLogs?.put?.(log);
       emit("animals:log", log);
       notifyN8n("animal.log", log).catch(() => {});
       // Orchestrator hint for cleanliness/feeding milestones
       if (type === "clean") {
-        safeGetSocket()?.emit?.(EVENTS?.SESSION?.FINISHED?.CLEANING || "SESSION.FINISHED.CLEANING", { at: log.atISO, from: "animal-clean" });
+        safeGetSocket()
+          .then((s) => {
+            try {
+              s?.emit?.(
+                EVENTS?.SESSION?.FINISHED?.CLEANING ||
+                  "SESSION.FINISHED.CLEANING",
+                { at: log.atISO, from: "animal-clean" }
+              );
+            } catch {}
+          })
+          .catch(() => {});
       }
       return log;
     } catch {
@@ -271,16 +413,37 @@ const AnimalStore = {
   },
 
   async recordFeeding({ animalId, qty, unit = "g", notes = "" }) {
-    const log = await this.recordLog({ animalId, type: "feed", qty, unit, notes });
+    const log = await this.recordLog({
+      animalId,
+      type: "feed",
+      qty,
+      unit,
+      notes,
+    });
     // Optionally deduct from inventory immediately if feedKey known
     try {
       const plan = await this.getFeedPlan(animalId);
       if (plan?.feedKey && qty > 0) {
-        const inv = await safeImportMany(["@/agents/inventoryAgent.js", "@/agents/inventoryAgent"]);
+        const inv = await safeImportMany([
+          "@/agents/inventoryShim.js",
+          "@/agents/inventoryAgent",
+        ]);
         await inv?.handleCommand?.("deductItems", {
-          lines: [{ key: plan.feedKey, qty, unit, reason: "animal-feed", meta: { animalId } }],
+          lines: [
+            {
+              key: plan.feedKey,
+              qty,
+              unit,
+              reason: "animal-feed",
+              meta: { animalId },
+            },
+          ],
         });
-        emit("inventory:delta", { at: safeNowISO(), reason: "animal-feed", lines: [{ key: plan.feedKey, qty, unit }] });
+        emit("inventory:delta", {
+          at: safeNowISO(),
+          reason: "animal-feed",
+          lines: [{ key: plan.feedKey, qty, unit }],
+        });
       }
     } catch {}
     return log;
@@ -291,8 +454,11 @@ const AnimalStore = {
    * Compute daily feed needs for active animals (sum of plan qty * times).
    * Returns [{ animalId, need: {value,unit}, feedKey? }]
    */
-  async computeDailyFeedNeeds({ date = new Date(), includeInactive = false } = {}) {
-    let animals = await this.listAnimals({ active: !includeInactive });
+  async computeDailyFeedNeeds({
+    date = new Date(),
+    includeInactive = false,
+  } = {}) {
+    const animals = await this.listAnimals({ active: !includeInactive });
     const out = [];
     for (const a of animals) {
       const plan = await this.getFeedPlan(a.id);
@@ -300,7 +466,11 @@ const AnimalStore = {
       const times = plan.schedule?.times || [];
       const qty = plan.schedule?.qty || { value: 0, unit: "g" };
       const total = Number(qty.value || 0) * Math.max(1, times.length);
-      out.push({ animalId: a.id, need: { value: total, unit: qty.unit || "g" }, feedKey: plan.feedKey || null });
+      out.push({
+        animalId: a.id,
+        need: { value: total, unit: qty.unit || "g" },
+        feedKey: plan.feedKey || null,
+      });
     }
     return out;
   },
@@ -337,7 +507,6 @@ const AnimalStore = {
         });
       }
     }
-    // Sort by time
     reminders.sort((x, y) => new Date(x.atISO) - new Date(y.atISO));
     return reminders;
   },
@@ -353,12 +522,19 @@ const AnimalStore = {
     const sabbathTomorrow = await isSabbath(tomorrow);
     const needs = await this.computeDailyFeedNeeds({});
     const essentialNeeds = sabbathTomorrow ? needs : needs; // all feed is essential
-    return syncInventoryReservations(essentialNeeds, { reason: "animal-feed:tomorrow" });
+    return syncInventoryReservations(essentialNeeds, {
+      reason: "animal-feed:tomorrow",
+    });
   },
 
   /* ---------- Subscribe ---------- */
-  subscribe(fn) { _subs.add(fn); return () => _subs.delete(fn); },
-  unsubscribe(fn) { _subs.delete(fn); },
+  subscribe(fn) {
+    _subs.add(fn);
+    return () => _subs.delete(fn);
+  },
+  unsubscribe(fn) {
+    _subs.delete(fn);
+  },
 
   /* ---------- Utilities exposed ---------- */
   syncInventoryReservations,

@@ -18,9 +18,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /* --------------------------------- Imports -------------------------------- */
-let eventBus = { on(){}, off(){}, emit(){} };
+let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -43,7 +43,8 @@ const now = () => Date.now();
 const shallowEq = (a, b) => {
   if (a === b) return true;
   if (!a || !b) return false;
-  const ka = Object.keys(a), kb = Object.keys(b);
+  const ka = Object.keys(a),
+    kb = Object.keys(b);
   if (ka.length !== kb.length) return false;
   for (const k of ka) if (a[k] !== b[k]) return false;
   return true;
@@ -134,12 +135,24 @@ export default function useFavoritePlans(params = {}) {
 
   const refreshCore = useCallback(async () => {
     guardFP();
-    const { userId: uid, domain: d, only: o, tags: tg, search: q } = argsRef.current;
+    const {
+      userId: uid,
+      domain: d,
+      only: o,
+      tags: tg,
+      search: q,
+    } = argsRef.current;
     try {
       if (mountedRef.current) setPartial({ loading: true, error: null });
       await FavoritePlans.init?.();
       const [items, favorites, snap] = await Promise.all([
-        FavoritePlans.list({ userId: uid, domain: d, only: o, tags: tg, search: q }),
+        FavoritePlans.list({
+          userId: uid,
+          domain: d,
+          only: o,
+          tags: tg,
+          search: q,
+        }),
         FavoritePlans.listFavorites({ userId: uid, domain: d }),
         FavoritePlans.snapshot({ userId: uid, domain: d }),
       ]);
@@ -221,140 +234,219 @@ export default function useFavoritePlans(params = {}) {
   }, [refresh]);
 
   /* --------------------------- Exposed operations --------------------------- */
-  const list = useCallback(async (opts = {}) => {
-    guardFP();
-    const a = { ...argsRef.current, ...opts };
-    return FavoritePlans.list(a);
-  }, [guardFP]);
+  const list = useCallback(
+    async (opts = {}) => {
+      guardFP();
+      const a = { ...argsRef.current, ...opts };
+      return FavoritePlans.list(a);
+    },
+    [guardFP]
+  );
 
-  const listFavorites = useCallback(async (opts = {}) => {
-    guardFP();
-    const a = { ...argsRef.current, ...opts };
-    return FavoritePlans.listFavorites(a);
-  }, [guardFP]);
+  const listFavorites = useCallback(
+    async (opts = {}) => {
+      guardFP();
+      const a = { ...argsRef.current, ...opts };
+      return FavoritePlans.listFavorites(a);
+    },
+    [guardFP]
+  );
 
-  const get = useCallback(async ({ planId, domain: d }) => {
-    guardFP();
-    const a = argsRef.current;
-    return FavoritePlans.get({ userId: a.userId, domain: d || a.domain, planId });
-  }, [guardFP]);
+  const get = useCallback(
+    async ({ planId, domain: d }) => {
+      guardFP();
+      const a = argsRef.current;
+      return FavoritePlans.get({
+        userId: a.userId,
+        domain: d || a.domain,
+        planId,
+      });
+    },
+    [guardFP]
+  );
 
-  const saveUserPlan = useCallback(async (raw) => {
-    guardFP();
-    const a = argsRef.current;
-    const payload = { ...raw, userId: a.userId, domain: raw?.domain || a.domain };
-    // optimistic: add/update locally first
-    setPartial((s) => {
-      // lightweight optimistic merge
-      const items = (s.items || []).slice();
-      const idx = items.findIndex((p) => p.id === payload.id);
-      const np = {
-        id: payload.id || `tmp_${Math.random().toString(36).slice(2)}`,
-        domain: payload.domain,
-        title: payload.title || "Untitled Plan",
-        summary: payload.summary || "",
-        tags: payload.tags || [],
-        planBody: payload.planBody || {},
-        session: payload.session || {},
-        meta: { createdBy: a.userId, visibility: "private", source: "user", version: 1, ...(raw?.meta || {}) },
-        updatedAt: now(),
-        createdAt: now(),
-        isFavorite: false,
+  const saveUserPlan = useCallback(
+    async (raw) => {
+      guardFP();
+      const a = argsRef.current;
+      const payload = {
+        ...raw,
+        userId: a.userId,
+        domain: raw?.domain || a.domain,
       };
-      if (idx >= 0) items[idx] = { ...items[idx], ...np };
-      else items.unshift(np);
-      return { ...s, items };
-    });
-    try {
-      const saved = await FavoritePlans.saveUserPlan(payload);
-      // hydration refresh
-      refresh();
-      // Optional: automation signal for NBA
-      automation?.emit?.("nba.signal", { kind: "plan.saved", domain: payload.domain, userId: a.userId, planId: saved.id, ts: now() });
-      return saved;
-    } catch (err) {
-      // rollback by simply refreshing from source of truth
-      refresh();
-      throw err;
-    }
-  }, [guardFP, refresh, setPartial]);
+      // optimistic: add/update locally first
+      setPartial((s) => {
+        // lightweight optimistic merge
+        const items = (s.items || []).slice();
+        const idx = items.findIndex((p) => p.id === payload.id);
+        const np = {
+          id: payload.id || `tmp_${Math.random().toString(36).slice(2)}`,
+          domain: payload.domain,
+          title: payload.title || "Untitled Plan",
+          summary: payload.summary || "",
+          tags: payload.tags || [],
+          planBody: payload.planBody || {},
+          session: payload.session || {},
+          meta: {
+            createdBy: a.userId,
+            visibility: "private",
+            source: "user",
+            version: 1,
+            ...(raw?.meta || {}),
+          },
+          updatedAt: now(),
+          createdAt: now(),
+          isFavorite: false,
+        };
+        if (idx >= 0) items[idx] = { ...items[idx], ...np };
+        else items.unshift(np);
+        return { ...s, items };
+      });
+      try {
+        const saved = await FavoritePlans.saveUserPlan(payload);
+        // hydration refresh
+        refresh();
+        // Optional: automation signal for NBA
+        automation?.emit?.("nba.signal", {
+          kind: "plan.saved",
+          domain: payload.domain,
+          userId: a.userId,
+          planId: saved.id,
+          ts: now(),
+        });
+        return saved;
+      } catch (err) {
+        // rollback by simply refreshing from source of truth
+        refresh();
+        throw err;
+      }
+    },
+    [guardFP, refresh, setPartial]
+  );
 
-  const removeUserPlan = useCallback(async ({ planId, domain: d }) => {
-    guardFP();
-    const a = argsRef.current;
-    const domainUse = d || a.domain;
-    // optimistic removal
-    setPartial((s) => ({ ...s, items: (s.items || []).filter((p) => p.id !== planId) }));
-    try {
-      await FavoritePlans.removeUserPlan({ userId: a.userId, domain: domainUse, planId });
+  const removeUserPlan = useCallback(
+    async ({ planId, domain: d }) => {
+      guardFP();
+      const a = argsRef.current;
+      const domainUse = d || a.domain;
+      // optimistic removal
+      setPartial((s) => ({
+        ...s,
+        items: (s.items || []).filter((p) => p.id !== planId),
+      }));
+      try {
+        await FavoritePlans.removeUserPlan({
+          userId: a.userId,
+          domain: domainUse,
+          planId,
+        });
+        refresh();
+        return true;
+      } catch (err) {
+        refresh();
+        throw err;
+      }
+    },
+    [guardFP, refresh, setPartial]
+  );
+
+  const favorite = useCallback(
+    async ({ planId, domain: d }) => {
+      guardFP();
+      const a = argsRef.current;
+      const domainUse = d || a.domain;
+      // optimistic
+      setPartial((s) => ({
+        ...s,
+        items: (s.items || []).map((p) =>
+          p.id === planId ? { ...p, isFavorite: true } : p
+        ),
+      }));
+      try {
+        await FavoritePlans.favorite({
+          userId: a.userId,
+          domain: domainUse,
+          planId,
+        });
+        refresh();
+        return true;
+      } catch (err) {
+        refresh();
+        throw err;
+      }
+    },
+    [guardFP, refresh, setPartial]
+  );
+
+  const unfavorite = useCallback(
+    async ({ planId, domain: d }) => {
+      guardFP();
+      const a = argsRef.current;
+      const domainUse = d || a.domain;
+      setPartial((s) => ({
+        ...s,
+        items: (s.items || []).map((p) =>
+          p.id === planId ? { ...p, isFavorite: false } : p
+        ),
+      }));
+      try {
+        await FavoritePlans.unfavorite({
+          userId: a.userId,
+          domain: domainUse,
+          planId,
+        });
+        refresh();
+        return true;
+      } catch (err) {
+        refresh();
+        throw err;
+      }
+    },
+    [guardFP, refresh, setPartial]
+  );
+
+  const toggleFavorite = useCallback(
+    async ({ planId, domain: d }) => {
+      const item = (state.items || []).find((p) => p.id === planId);
+      if (item?.isFavorite) return unfavorite({ planId, domain: d });
+      return favorite({ planId, domain: d });
+    },
+    [favorite, unfavorite, state.items]
+  );
+
+  const adoptFeatured = useCallback(
+    async ({ planId, domain: d, favorite: fav = true }) => {
+      guardFP();
+      const a = argsRef.current;
+      const domainUse = d || a.domain;
+      const plan = await FavoritePlans.adoptFeatured({
+        userId: a.userId,
+        domain: domainUse,
+        planId,
+        favorite: fav,
+      });
+      refresh();
+      return plan;
+    },
+    [guardFP, refresh]
+  );
+
+  const attachTags = useCallback(
+    async ({ planId, tags: tg, domain: d }) => {
+      guardFP();
+      const a = argsRef.current;
+      const domainUse = d || a.domain;
+      await FavoritePlans.attachTags({
+        userId: a.userId,
+        domain: domainUse,
+        planId,
+        tags: tg,
+      });
       refresh();
       return true;
-    } catch (err) {
-      refresh();
-      throw err;
-    }
-  }, [guardFP, refresh, setPartial]);
-
-  const favorite = useCallback(async ({ planId, domain: d }) => {
-    guardFP();
-    const a = argsRef.current;
-    const domainUse = d || a.domain;
-    // optimistic
-    setPartial((s) => ({
-      ...s,
-      items: (s.items || []).map((p) => (p.id === planId ? { ...p, isFavorite: true } : p)),
-    }));
-    try {
-      await FavoritePlans.favorite({ userId: a.userId, domain: domainUse, planId });
-      refresh();
-      return true;
-    } catch (err) {
-      refresh();
-      throw err;
-    }
-  }, [guardFP, refresh, setPartial]);
-
-  const unfavorite = useCallback(async ({ planId, domain: d }) => {
-    guardFP();
-    const a = argsRef.current;
-    const domainUse = d || a.domain;
-    setPartial((s) => ({
-      ...s,
-      items: (s.items || []).map((p) => (p.id === planId ? { ...p, isFavorite: false } : p)),
-    }));
-    try {
-      await FavoritePlans.unfavorite({ userId: a.userId, domain: domainUse, planId });
-      refresh();
-      return true;
-    } catch (err) {
-      refresh();
-      throw err;
-    }
-  }, [guardFP, refresh, setPartial]);
-
-  const toggleFavorite = useCallback(async ({ planId, domain: d }) => {
-    const item = (state.items || []).find((p) => p.id === planId);
-    if (item?.isFavorite) return unfavorite({ planId, domain: d });
-    return favorite({ planId, domain: d });
-  }, [favorite, unfavorite, state.items]);
-
-  const adoptFeatured = useCallback(async ({ planId, domain: d, favorite: fav = true }) => {
-    guardFP();
-    const a = argsRef.current;
-    const domainUse = d || a.domain;
-    const plan = await FavoritePlans.adoptFeatured({ userId: a.userId, domain: domainUse, planId, favorite: fav });
-    refresh();
-    return plan;
-  }, [guardFP, refresh]);
-
-  const attachTags = useCallback(async ({ planId, tags: tg, domain: d }) => {
-    guardFP();
-    const a = argsRef.current;
-    const domainUse = d || a.domain;
-    await FavoritePlans.attachTags({ userId: a.userId, domain: domainUse, planId, tags: tg });
-    refresh();
-    return true;
-  }, [guardFP, refresh]);
+    },
+    [guardFP, refresh]
+  );
 
   const exportAll = useCallback(async () => {
     guardFP();
@@ -362,19 +454,29 @@ export default function useFavoritePlans(params = {}) {
     return FavoritePlans.exportAll({ userId: a.userId });
   }, [guardFP]);
 
-  const importAll = useCallback(async ({ blob, mergeMode = "merge" }) => {
-    guardFP();
-    const a = argsRef.current;
-    const ok = await FavoritePlans.importAll({ userId: a.userId, blob, mergeMode });
-    refresh();
-    return ok;
-  }, [guardFP, refresh]);
+  const importAll = useCallback(
+    async ({ blob, mergeMode = "merge" }) => {
+      guardFP();
+      const a = argsRef.current;
+      const ok = await FavoritePlans.importAll({
+        userId: a.userId,
+        blob,
+        mergeMode,
+      });
+      refresh();
+      return ok;
+    },
+    [guardFP, refresh]
+  );
 
-  const doSnapshot = useCallback(async (opts = {}) => {
-    guardFP();
-    const a = { ...argsRef.current, ...opts };
-    return FavoritePlans.snapshot({ userId: a.userId, domain: a.domain });
-  }, [guardFP]);
+  const doSnapshot = useCallback(
+    async (opts = {}) => {
+      guardFP();
+      const a = { ...argsRef.current, ...opts };
+      return FavoritePlans.snapshot({ userId: a.userId, domain: a.domain });
+    },
+    [guardFP]
+  );
 
   /* ------------------------------ Derived data ------------------------------ */
   const favoritesSet = useMemo(() => {

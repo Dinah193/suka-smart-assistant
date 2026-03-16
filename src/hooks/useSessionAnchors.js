@@ -29,12 +29,16 @@ const isBrowser = typeof window !== "undefined";
 
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch {}
 
 let pausePolicies = {
-  constants: { REASON_USER: "user", REASON_SAFETY: "safety", REASON_SABBATH: "sabbath" },
+  constants: {
+    REASON_USER: "user",
+    REASON_SAFETY: "safety",
+    REASON_SABBATH: "sabbath",
+  },
   shouldFreeze: () => false,
   canContinue: () => true,
   normalize: (p) => ({ ...p }),
@@ -51,19 +55,28 @@ let useSettingsStore = () => ({
 });
 try {
   const mod = require("@/stores/settingsStore");
-  useSettingsStore = (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
+  useSettingsStore =
+    (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
 } catch {}
 
-let calendarSync = { addEvents: async () => ({ ok: true }), writeSession: async () => ({ ok: true }) };
+let calendarSync = {
+  addEvents: async () => ({ ok: true }),
+  writeSession: async () => ({ ok: true }),
+};
 try {
   const mod = require("@/services/calendar/calendarSync");
   calendarSync = (mod && (mod.default || mod)) || calendarSync;
 } catch {}
 
-let useFavoriteSessions = () => ({ list: () => [], save: async () => ({ ok: true }), remove: async () => ({ ok: true }) });
+let useFavoriteSessions = () => ({
+  list: () => [],
+  save: async () => ({ ok: true }),
+  remove: async () => ({ ok: true }),
+});
 try {
   const mod = require("@/hooks/useFavoriteSessions");
-  useFavoriteSessions = (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
+  useFavoriteSessions =
+    (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
 } catch {}
 
 let useSchedules = () => ({ list: () => [], save: async () => ({ ok: true }) });
@@ -81,18 +94,27 @@ const schedKey = (domain) => `${domain || "session"}:schedules`;
 const localFavAPI = (domain) => ({
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(favKey(domain)) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(favKey(domain)) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (fav) => {
     if (!isBrowser) return { ok: false };
     const all = localFavAPI(domain).list();
-    const next = [...all.filter((f) => f.id !== fav.id), { ...fav, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((f) => f.id !== fav.id),
+      { ...fav, updatedAt: Date.now() },
+    ];
     localStorage.setItem(favKey(domain), JSON.stringify(next));
     return { ok: true };
   },
   remove: async (id) => {
     if (!isBrowser) return { ok: false };
-    const next = localFavAPI(domain).list().filter((f) => f.id !== id);
+    const next = localFavAPI(domain)
+      .list()
+      .filter((f) => f.id !== id);
     localStorage.setItem(favKey(domain), JSON.stringify(next));
     return { ok: true };
   },
@@ -101,12 +123,19 @@ const localFavAPI = (domain) => ({
 const localSchedAPI = (domain) => ({
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(schedKey(domain)) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(schedKey(domain)) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (s) => {
     if (!isBrowser) return { ok: false };
     const all = localSchedAPI(domain).list();
-    const next = [...all.filter((x) => x.id !== s.id), { ...s, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((x) => x.id !== s.id),
+      { ...s, updatedAt: Date.now() },
+    ];
     localStorage.setItem(schedKey(domain), JSON.stringify(next));
     return { ok: true };
   },
@@ -131,14 +160,21 @@ const rafBatch = (() => {
   const flush = () => {
     id = null;
     fns.forEach((fn) => {
-      try { fn(); } catch (e) { console.warn("rafBatch fn error:", e?.message || e); }
+      try {
+        fn();
+      } catch (e) {
+        console.warn("rafBatch fn error:", e?.message || e);
+      }
     });
     fns.clear();
   };
   return (fn) => {
     fns.add(fn);
     if (id) return;
-    id = (isBrowser && window.requestAnimationFrame) ? window.requestAnimationFrame(flush) : setTimeout(flush, 16);
+    id =
+      isBrowser && window.requestAnimationFrame
+        ? window.requestAnimationFrame(flush)
+        : setTimeout(flush, 16);
   };
 })();
 
@@ -148,8 +184,20 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 /* -----------------------------------------------------------------------------
    Public helper: emit anchor updates from anywhere (non-hook code)
 ----------------------------------------------------------------------------- */
-export function emitAnchorUpdate({ domain, sessionId, key, value, merge = true }) {
-  eventBus.emit("session:anchor:update", { domain, sessionId, key, value, merge });
+export function emitAnchorUpdate({
+  domain,
+  sessionId,
+  key,
+  value,
+  merge = true,
+}) {
+  eventBus.emit("session:anchor:update", {
+    domain,
+    sessionId,
+    key,
+    value,
+    merge,
+  });
 }
 
 /* -----------------------------------------------------------------------------
@@ -169,24 +217,33 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
 
   // Resolve persistence APIs
   const favHook = (() => {
-    try { const h = useFavoriteSessions(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useFavoriteSessions();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localFavAPI(domain);
   })();
   const schedHook = (() => {
-    try { const h = useSchedules(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useSchedules();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localSchedAPI(domain);
   })();
 
   const anchorRef = useRef(anchors);
-  useEffect(() => { anchorRef.current = anchors; }, [anchors]);
+  useEffect(() => {
+    anchorRef.current = anchors;
+  }, [anchors]);
 
   const setAnchor = useCallback((key, value, { merge = true } = {}) => {
     rafBatch(() => {
       setAnchors((prev) => {
         const prevVal = prev[key];
-        const nextVal = merge && typeof prevVal === "object" && prevVal
-          ? { ...prevVal, ...value }
-          : value;
+        const nextVal =
+          merge && typeof prevVal === "object" && prevVal
+            ? { ...prevVal, ...value }
+            : value;
         if (shallowEq(prevVal, nextVal)) return prev;
         return { ...prev, [key]: nextVal };
       });
@@ -216,16 +273,28 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
 
     const onCreated = (p) => {
       if (p?.domain !== domain || p?.sessionId !== sessionId) return;
-      setAnchor("banner", { title: p.title || "Session", subtitle: p.subtitle || "", paused: false, progressPct: 0 });
+      setAnchor("banner", {
+        title: p.title || "Session",
+        subtitle: p.subtitle || "",
+        paused: false,
+        progressPct: 0,
+      });
       setAnchor("timeline", { steps: p.steps || [], currentIndex: 0 });
-      setAnchor("progress", { pct: 0, total: (p.steps || []).length, index: 0 });
+      setAnchor("progress", {
+        pct: 0,
+        total: (p.steps || []).length,
+        index: 0,
+      });
     };
 
     const onStepChanged = (p) => {
       if (p?.domain !== domain || p?.sessionId !== sessionId) return;
       const idx = Math.max(0, parseInt(p.index ?? 0, 10));
       const total = (anchorRef.current.timeline?.steps || []).length || 1;
-      const pct = Math.max(0, Math.min(100, Math.round(((idx + 1) / total) * 100)));
+      const pct = Math.max(
+        0,
+        Math.min(100, Math.round(((idx + 1) / total) * 100))
+      );
       setAnchor("timeline", { currentIndex: idx });
       setAnchor("progress", { index: idx, total, pct });
       setAnchor("banner", { progressPct: pct });
@@ -233,11 +302,12 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
 
     const onPaused = (p) => {
       if (p?.domain !== domain || p?.sessionId !== sessionId) return;
-      const reason = p?.reason === pausePolicies.constants?.REASON_SABBATH
-        ? "Paused by household guard (Sabbath/Quiet Hours)."
-        : p?.reason === pausePolicies.constants?.REASON_SAFETY
-        ? "Paused for safety."
-        : "Paused by user.";
+      const reason =
+        p?.reason === pausePolicies.constants?.REASON_SABBATH
+          ? "Paused by household guard (Sabbath/Quiet Hours)."
+          : p?.reason === pausePolicies.constants?.REASON_SAFETY
+          ? "Paused for safety."
+          : "Paused by user.";
       setAnchor("pauseModal", { open: true, reason });
       setAnchor("banner", { paused: true });
     };
@@ -267,8 +337,14 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
     };
 
     // Favorites & schedules external changes
-    const onFavs = (p) => { if (p?.domain !== domain) return; setAnchor("favoritesChangedAt", nowISO()); };
-    const onScheds = (p) => { if (p?.domain !== domain) return; setAnchor("schedulesChangedAt", nowISO()); };
+    const onFavs = (p) => {
+      if (p?.domain !== domain) return;
+      setAnchor("favoritesChangedAt", nowISO());
+    };
+    const onScheds = (p) => {
+      if (p?.domain !== domain) return;
+      setAnchor("schedulesChangedAt", nowISO());
+    };
 
     eventBus.on?.("session:created", onCreated);
     eventBus.on?.("session:step:changed", onStepChanged);
@@ -299,9 +375,18 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
   ----------------------------------------------------------------------------- */
   useEffect(() => {
     try {
-      const shouldFreeze = pausePolicies.shouldFreeze?.({ domain, quietHours, sabbath, rhythms, now: new Date() });
+      const shouldFreeze = pausePolicies.shouldFreeze?.({
+        domain,
+        quietHours,
+        sabbath,
+        rhythms,
+        now: new Date(),
+      });
       if (shouldFreeze) {
-        setAnchor("pauseModal", { open: true, reason: "Paused by household guard (Sabbath/Quiet Hours)." });
+        setAnchor("pauseModal", {
+          open: true,
+          reason: "Paused by household guard (Sabbath/Quiet Hours).",
+        });
         setAnchor("banner", { paused: true });
       }
     } catch {}
@@ -332,7 +417,13 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
   );
 
   const saveSchedule = useCallback(
-    async ({ title = "Session Schedule", templateId, steps = [], rrule = "FREQ=WEEKLY;BYDAY=MO", firstRunAt }) => {
+    async ({
+      title = "Session Schedule",
+      templateId,
+      steps = [],
+      rrule = "FREQ=WEEKLY;BYDAY=MO",
+      firstRunAt,
+    }) => {
       if (!domain) return { ok: false, reason: "missing domain" };
       const base = new Date(firstRunAt || Date.now());
       // If user prefers morning and the time already passed, bump to tomorrow AM
@@ -348,7 +439,8 @@ export function useSessionAnchors({ domain, sessionId } = {}) {
         rrule,
         firstRunAt: base.toISOString(),
       };
-      const res = await (schedHook.save?.(sched) || Promise.resolve({ ok: false }));
+      const res = await (schedHook.save?.(sched) ||
+        Promise.resolve({ ok: false }));
       if (res?.ok) {
         eventBus.emit("schedules:changed", { domain });
         // Best effort: pre-write to calendar if available

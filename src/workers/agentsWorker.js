@@ -593,7 +593,7 @@ sendLog("info", "agentsWorker (reasoner-delegator) booted", {
 /* -----------------------------------------------------------------------------
    NOTE FOR MAIN THREAD
 
-   You can keep using your existing AgentsClient wrapper; it will still receive
+   You can keep using your existing shimsClient wrapper; it will still receive
    RESULT / ERROR / PROGRESS events.
 
    To actually hook up the Reasoner/Orchestrator/Shims, also listen for

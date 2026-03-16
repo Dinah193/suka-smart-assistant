@@ -46,7 +46,7 @@
   let eventBus = { emit() {}, on() {}, off() {} };
   try {
     // eslint-disable-next-line global-require
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {
     // no-op – browser build without alias or early init
@@ -76,7 +76,7 @@
   const DEFAULT_REVERSE_META = {
     shareTarget: "family-fund-hub",
     includeShare: true,
-    format: "json"
+    format: "json",
   };
 
   // central registry – can be hot-extended at runtime
@@ -104,15 +104,15 @@
         "video",
         "article",
         "scanCompareTrust",
-        "generic"
-      ]
+        "generic",
+      ],
     },
     schedule: {
-      required: ["id"]
+      required: ["id"],
     },
     event: {
-      required: ["type"]
-    }
+      required: ["type"],
+    },
   };
 
   // ------------------------------ Small utils --------------------------------
@@ -146,42 +146,61 @@
     if (!rule) {
       return {
         frequency: "once",
-        runAt: Date.now() + 2 * 60 * 1000
+        runAt: Date.now() + 2 * 60 * 1000,
       };
     }
     if (rule === "once+5min") {
       return {
         frequency: "once",
-        runAt: Date.now() + 5 * 60 * 1000
+        runAt: Date.now() + 5 * 60 * 1000,
       };
     }
     if (rule === "daily@9") {
       const d = new Date();
-      const runAt = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0, 0).getTime();
+      const runAt = new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate(),
+        9,
+        0,
+        0
+      ).getTime();
       return {
         frequency: "daily",
-        runAt
+        runAt,
       };
     }
     // fallback
     return {
       frequency: "once",
-      runAt: Date.now() + 2 * 60 * 1000
+      runAt: Date.now() + 2 * 60 * 1000,
     };
   }
 
   // tries to guess the import type from text/url/title – tuned for your multi-domain app
   function inferImportType(raw) {
-    const txt = (raw && (raw.title || raw.text || raw.url || raw.source || "") || "").toLowerCase();
+    const txt = (
+      (raw && (raw.title || raw.text || raw.url || raw.source || "")) ||
+      ""
+    ).toLowerCase();
 
     // pinterest → usually meal or garden
     if (txt.includes("pinterest.com")) return "mealPlan";
 
     // garden / seed / care / harvest
-    if (txt.includes("seed") || txt.includes("garden") || txt.includes("burpee") || txt.includes("nursery")) {
+    if (
+      txt.includes("seed") ||
+      txt.includes("garden") ||
+      txt.includes("burpee") ||
+      txt.includes("nursery")
+    ) {
       return "gardenPlan";
     }
-    if (txt.includes("prune") || txt.includes("watering") || txt.includes("mulch")) {
+    if (
+      txt.includes("prune") ||
+      txt.includes("watering") ||
+      txt.includes("mulch")
+    ) {
       return "gardenCare";
     }
     if (txt.includes("harvest") || txt.includes("pick at")) {
@@ -189,7 +208,12 @@
     }
 
     // preservation
-    if (txt.includes("canning") || txt.includes("dehydrate") || txt.includes("ferment") || txt.includes("preserve")) {
+    if (
+      txt.includes("canning") ||
+      txt.includes("dehydrate") ||
+      txt.includes("ferment") ||
+      txt.includes("preserve")
+    ) {
       return "preservationPlan";
     }
 
@@ -197,20 +221,36 @@
     if (txt.includes("storehouse") || txt.includes("pantry goal")) {
       return "storehouseGoal";
     }
-    if (txt.includes("grocery section") || txt.includes("restock") || txt.includes("stock up")) {
+    if (
+      txt.includes("grocery section") ||
+      txt.includes("restock") ||
+      txt.includes("stock up")
+    ) {
       return "storehouseStock";
     }
 
     // cleaning / declutter
-    if (txt.includes("cleaning") || txt.includes("declutter") || txt.includes("wash day")) {
+    if (
+      txt.includes("cleaning") ||
+      txt.includes("declutter") ||
+      txt.includes("wash day")
+    ) {
       return "cleaningPlan";
     }
 
     // animal / butchery
-    if (txt.includes("animal acquisition") || txt.includes("buy goats") || txt.includes("buy sheep")) {
+    if (
+      txt.includes("animal acquisition") ||
+      txt.includes("buy goats") ||
+      txt.includes("buy sheep")
+    ) {
       return "animalAcquisition";
     }
-    if (txt.includes("butchery") || txt.includes("slaughter") || txt.includes("cut sheet")) {
+    if (
+      txt.includes("butchery") ||
+      txt.includes("slaughter") ||
+      txt.includes("cut sheet")
+    ) {
       return "butcherySession";
     }
     if (txt.includes("animal") || txt.includes("breed")) {
@@ -218,17 +258,29 @@
     }
 
     // scan-ish (receipts, circulars, ads)
-    if (txt.includes("receipt") || txt.includes("circular") || txt.includes("scan")) {
+    if (
+      txt.includes("receipt") ||
+      txt.includes("circular") ||
+      txt.includes("scan")
+    ) {
       return "inventoryUpdate";
     }
 
     // video/how-to
-    if (txt.includes("youtube.com") || txt.includes("youtu.be") || txt.includes("m.youtube.com")) {
+    if (
+      txt.includes("youtube.com") ||
+      txt.includes("youtu.be") ||
+      txt.includes("m.youtube.com")
+    ) {
       return "video";
     }
 
     // meal planning
-    if (txt.includes("meal plan") || txt.includes("weekly menu") || txt.includes("batch cook")) {
+    if (
+      txt.includes("meal plan") ||
+      txt.includes("weekly menu") ||
+      txt.includes("batch cook")
+    ) {
       return "mealPlan";
     }
 
@@ -284,7 +336,7 @@
         cloned.__importType = inferImportType(cloned);
         errors.push({
           path: "__importType",
-          message: `missing __importType → auto-injected/inferred as '${cloned.__importType}'`
+          message: `missing __importType → auto-injected/inferred as '${cloned.__importType}'`,
         });
       }
 
@@ -297,7 +349,7 @@
       ) {
         errors.push({
           path: "__importType",
-          message: `unknown import type '${cloned.__importType}' – not in schemaRegistry.import.allowedTypes`
+          message: `unknown import type '${cloned.__importType}' – not in schemaRegistry.import.allowedTypes`,
         });
       }
 
@@ -308,13 +360,17 @@
         cloned.saveAsFavorite = true;
         errors.push({
           path: "saveAsFavorite",
-          message: "systemTemplate detected → converted to user-owned favorite (auto-injected)"
+          message:
+            "systemTemplate detected → converted to user-owned favorite (auto-injected)",
         });
-      } else if (typeof cloned.saveAsFavorite === "undefined" && opts.defaultSaveAsFavorite) {
+      } else if (
+        typeof cloned.saveAsFavorite === "undefined" &&
+        opts.defaultSaveAsFavorite
+      ) {
         cloned.saveAsFavorite = true;
         errors.push({
           path: "saveAsFavorite",
-          message: "saveAsFavorite missing → defaulted to true (auto-injected)"
+          message: "saveAsFavorite missing → defaulted to true (auto-injected)",
         });
       }
 
@@ -323,7 +379,8 @@
         cloned.reverseMeta = { ...DEFAULT_REVERSE_META };
         errors.push({
           path: "reverseMeta",
-          message: "reverseMeta was missing → auto-injected default (auto-injected)"
+          message:
+            "reverseMeta was missing → auto-injected default (auto-injected)",
         });
       } else {
         // ensure required keys
@@ -331,42 +388,47 @@
           cloned.reverseMeta.shareTarget = DEFAULT_REVERSE_META.shareTarget;
           errors.push({
             path: "reverseMeta.shareTarget",
-            message: "reverseMeta.shareTarget missing → set to default (auto-injected)"
+            message:
+              "reverseMeta.shareTarget missing → set to default (auto-injected)",
           });
         }
         if (typeof cloned.reverseMeta.includeShare === "undefined") {
           cloned.reverseMeta.includeShare = DEFAULT_REVERSE_META.includeShare;
           errors.push({
             path: "reverseMeta.includeShare",
-            message: "reverseMeta.includeShare missing → set to default (auto-injected)"
+            message:
+              "reverseMeta.includeShare missing → set to default (auto-injected)",
           });
         }
         if (!cloned.reverseMeta.format) {
           cloned.reverseMeta.format = DEFAULT_REVERSE_META.format;
           errors.push({
             path: "reverseMeta.format",
-            message: "reverseMeta.format missing → set to default (auto-injected)"
+            message:
+              "reverseMeta.format missing → set to default (auto-injected)",
           });
         }
       }
 
       // 5) schedule validation / normalization
       if (cloned.schedule) {
-        const { valid: schedValid, errors: schedErrors, normalized: schedNorm } = this.validateSchedule(
-          cloned.schedule
-        );
+        const {
+          valid: schedValid,
+          errors: schedErrors,
+          normalized: schedNorm,
+        } = this.validateSchedule(cloned.schedule);
         if (!schedValid) {
           errors.push({
             path: "schedule",
             message: "schedule is invalid",
-            details: schedErrors
+            details: schedErrors,
           });
         } else if (schedErrors && schedErrors.length) {
           // even if valid, carry over soft messages
           errors.push({
             path: "schedule",
             message: "schedule normalized with soft warnings",
-            details: schedErrors
+            details: schedErrors,
           });
         }
         cloned.schedule = schedNorm;
@@ -377,16 +439,21 @@
         cloned.coop = true;
         errors.push({
           path: "coop",
-          message: "collaborative plan → marked as coop for multi-household goal (auto-injected)"
+          message:
+            "collaborative plan → marked as coop for multi-household goal (auto-injected)",
         });
       }
 
       // 7) familyFundMode hint – SSA still owns the data
-      if (typeof cloned.familyFundMode === "undefined" && featureFlags.familyFundMode) {
+      if (
+        typeof cloned.familyFundMode === "undefined" &&
+        featureFlags.familyFundMode
+      ) {
         cloned.familyFundMode = true;
         errors.push({
           path: "familyFundMode",
-          message: "featureFlags.familyFundMode is true → hint added to payload (auto-injected)"
+          message:
+            "featureFlags.familyFundMode is true → hint added to payload (auto-injected)",
         });
       }
 
@@ -400,8 +467,8 @@
         data: {
           valid,
           errors,
-          payload: cloned
-        }
+          payload: cloned,
+        },
       });
 
       if (!valid) {
@@ -412,8 +479,8 @@
           source: "schemaValidator",
           data: {
             errors,
-            payload: cloned
-          }
+            payload: cloned,
+          },
         });
       }
 
@@ -438,14 +505,18 @@
         Object.assign(cloned, built);
         errors.push({
           path: "rule",
-          message: "rule detected → schedule normalized from rule (auto-injected)"
+          message:
+            "rule detected → schedule normalized from rule (auto-injected)",
         });
       }
 
       // id
       if (!cloned.id) {
         cloned.id = `sch-${Math.random().toString(36).slice(2)}`;
-        errors.push({ path: "id", message: "schedule.id missing → auto-generated (auto-injected)" });
+        errors.push({
+          path: "id",
+          message: "schedule.id missing → auto-generated (auto-injected)",
+        });
       }
 
       // frequency / runAt defaults
@@ -454,7 +525,8 @@
         cloned.runAt = Date.now() + 2 * 60 * 1000;
         errors.push({
           path: "frequency",
-          message: "frequency/rule missing → set to once in 2 minutes (auto-injected)"
+          message:
+            "frequency/rule missing → set to once in 2 minutes (auto-injected)",
         });
       }
 
@@ -467,14 +539,14 @@
         data: {
           valid,
           errors,
-          schedule: cloned
-        }
+          schedule: cloned,
+        },
       });
 
       return {
         valid,
         errors,
-        normalized: cloned
+        normalized: cloned,
       };
     },
 
@@ -488,7 +560,10 @@
 
       if (!cloned.type) {
         cloned.type = "unknown";
-        errors.push({ path: "type", message: "event.type missing → set to 'unknown' (auto-injected)" });
+        errors.push({
+          path: "type",
+          message: "event.type missing → set to 'unknown' (auto-injected)",
+        });
       }
 
       // recommended: must have payload
@@ -507,12 +582,12 @@
         "automation.schedule.request",
         "automation.schedule.updated",
         "import.pwa-share.received",
-        "schema.validation.completed" // allow validators to re-emit
+        "schema.validation.completed", // allow validators to re-emit
       ];
       if (!ok.includes(cloned.type)) {
         errors.push({
           path: "type",
-          message: "event.type not in shared orchestration list"
+          message: "event.type not in shared orchestration list",
         });
       }
 
@@ -525,14 +600,14 @@
         data: {
           valid,
           errors,
-          event: cloned
-        }
+          event: cloned,
+        },
       });
 
       return {
         valid,
         errors,
-        normalized: cloned
+        normalized: cloned,
       };
     },
 
@@ -546,7 +621,7 @@
         valid,
         errors,
         domain: normalized.__importType || "generic",
-        payload: normalized
+        payload: normalized,
       };
     },
 
@@ -560,7 +635,7 @@
      */
     _getRegistry() {
       return safeClone(schemaRegistry);
-    }
+    },
   };
 
   // ------------------------------ Export --------------------------------------
@@ -572,3 +647,60 @@
     window.schemaValidator = schemaValidator;
   }
 })();
+
+function getSchemaValidatorInstance() {
+  if (typeof window !== "undefined" && window.schemaValidator) {
+    return window.schemaValidator;
+  }
+  if (typeof module !== "undefined" && module.exports) {
+    return module.exports.schemaValidator || module.exports;
+  }
+  return null;
+}
+
+/**
+ * Compatibility API used by import normalizers.
+ */
+export function validate(schemaName, data) {
+  const validator = getSchemaValidatorInstance();
+  if (!validator) return { valid: true, errors: [] };
+
+  const key = String(schemaName || "").toLowerCase();
+
+  try {
+    if (key.includes("schedule") && typeof validator.validateSchedule === "function") {
+      return validator.validateSchedule(data);
+    }
+    if ((key.includes("event") || key.includes("envelope")) && typeof validator.validateEvent === "function") {
+      return validator.validateEvent(data);
+    }
+    if (typeof validator.validateImport === "function") {
+      return validator.validateImport(data, { schemaName });
+    }
+  } catch (err) {
+    return { valid: false, errors: [{ message: String(err?.message || err) }] };
+  }
+
+  return { valid: true, errors: [] };
+}
+
+export const schemaValidator = {
+  validate,
+  validateImport(payload, opts = {}) {
+    const validator = getSchemaValidatorInstance();
+    if (!validator?.validateImport) return { valid: true, errors: [], normalized: payload };
+    return validator.validateImport(payload, opts);
+  },
+  validateSchedule(schedule) {
+    const validator = getSchemaValidatorInstance();
+    if (!validator?.validateSchedule) return { valid: true, errors: [], normalized: schedule };
+    return validator.validateSchedule(schedule);
+  },
+  validateEvent(evt) {
+    const validator = getSchemaValidatorInstance();
+    if (!validator?.validateEvent) return { valid: true, errors: [], normalized: evt };
+    return validator.validateEvent(evt);
+  },
+};
+
+export default schemaValidator;

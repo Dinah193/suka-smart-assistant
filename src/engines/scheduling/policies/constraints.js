@@ -28,9 +28,11 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let featureFlags = {
   familyFundMode: false,
@@ -57,16 +59,22 @@ let featureFlags = {
 try {
   const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff || featureFlags;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let dataGateway;
-try { dataGateway = require("@/services/dataGateway"); } catch {}
+try {
+  dataGateway = require("@/services/dataGateway");
+} catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
 try {
   HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
   FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 /* ------------------------------ Public API --------------------------------- */
 module.exports = {
@@ -84,7 +92,12 @@ module.exports = {
     guardRange(start, end);
 
     const policies = await resolvePolicies();
-    const blocks = await buildAllBlocks(start, end, policies, opts.fetchAstronomy);
+    const blocks = await buildAllBlocks(
+      start,
+      end,
+      policies,
+      opts.fetchAstronomy
+    );
 
     eventBus.emit({
       type: "scheduling.constraints.blocks.generated",
@@ -97,7 +110,12 @@ module.exports = {
       },
     });
 
-    return { blocks, meta: { range: { startISO: start.toISOString(), endISO: end.toISOString() } } };
+    return {
+      blocks,
+      meta: {
+        range: { startISO: start.toISOString(), endISO: end.toISOString() },
+      },
+    };
   },
 
   /**
@@ -117,21 +135,36 @@ module.exports = {
     guardRange(start, end);
 
     const policies = await resolvePolicies();
-    const blocks = await buildAllBlocks(start, end, policies, window.fetchAstronomy);
+    const blocks = await buildAllBlocks(
+      start,
+      end,
+      policies,
+      window.fetchAstronomy
+    );
 
-    const intersects = blocks.filter(b => intersectsWindow({ start, end }, b));
-    const hardViolations = intersects.filter(b => b.level === "hard");
+    const intersects = blocks.filter((b) =>
+      intersectsWindow({ start, end }, b)
+    );
+    const hardViolations = intersects.filter((b) => b.level === "hard");
 
     // Domain safety strategies (may add hard/soft flags dynamically)
-    const { violations, recommendations } = await runDomainSafety(s, { window: { start, end }, policies });
+    const { violations, recommendations } = await runDomainSafety(s, {
+      window: { start, end },
+      policies,
+    });
 
-    const allowed = hardViolations.length === 0 && !violations.some(v => v.level === "hard");
+    const allowed =
+      hardViolations.length === 0 &&
+      !violations.some((v) => v.level === "hard");
 
     const data = {
       allowed,
       violations: [
-        ...hardViolations.map(b => ({ policy: b.policy, reason: b.reason || b.label || "blocked" })),
-        ...violations.map(v => ({ policy: v.policy, reason: v.reason })),
+        ...hardViolations.map((b) => ({
+          policy: b.policy,
+          reason: b.reason || b.label || "blocked",
+        })),
+        ...violations.map((v) => ({ policy: v.policy, reason: v.reason })),
       ],
       blockingWindows: intersects,
       recommendations,
@@ -173,19 +206,34 @@ module.exports = {
         type: "scheduling.constraints.policy.updated",
         ts,
         source,
-        data: { id, kind: toSave.kind, scope: toSave.scope, domain: toSave.domain || null },
+        data: {
+          id,
+          kind: toSave.kind,
+          scope: toSave.scope,
+          domain: toSave.domain || null,
+        },
       });
 
       await exportToHubIfEnabled({
         type: "policy.constraints.updated",
         ts,
         source,
-        data: { id, kind: toSave.kind, scope: toSave.scope, domain: toSave.domain || null },
+        data: {
+          id,
+          kind: toSave.kind,
+          scope: toSave.scope,
+          domain: toSave.domain || null,
+        },
       });
 
       return { id };
     } catch (err) {
-      eventBus.emit({ type: "scheduling.constraints.policy.error", ts, source, data: { op: "set", reason: err?.message || "unknown" } });
+      eventBus.emit({
+        type: "scheduling.constraints.policy.error",
+        ts,
+        source,
+        data: { op: "set", reason: err?.message || "unknown" },
+      });
       throw err;
     }
   },
@@ -202,12 +250,27 @@ module.exports = {
       guardDataGateway();
       const ok = await delById("policies.constraints", id);
       if (ok) {
-        eventBus.emit({ type: "scheduling.constraints.policy.removed", ts, source, data: { id } });
-        await exportToHubIfEnabled({ type: "policy.constraints.removed", ts, source, data: { id } });
+        eventBus.emit({
+          type: "scheduling.constraints.policy.removed",
+          ts,
+          source,
+          data: { id },
+        });
+        await exportToHubIfEnabled({
+          type: "policy.constraints.removed",
+          ts,
+          source,
+          data: { id },
+        });
       }
       return !!ok;
     } catch (err) {
-      eventBus.emit({ type: "scheduling.constraints.policy.error", ts, source, data: { op: "remove", reason: err?.message || "unknown" } });
+      eventBus.emit({
+        type: "scheduling.constraints.policy.error",
+        ts,
+        source,
+        data: { op: "remove", reason: err?.message || "unknown" },
+      });
       return false;
     }
   },
@@ -218,7 +281,9 @@ module.exports = {
   async listConstraintOverrides() {
     guardDataGateway();
     const rows = await readAll("policies.constraints");
-    return (rows || []).sort((a, b) => Number(b.enabled !== false) - Number(a.enabled !== false));
+    return (rows || []).sort(
+      (a, b) => Number(b.enabled !== false) - Number(a.enabled !== false)
+    );
   },
 
   /**
@@ -285,12 +350,20 @@ async function resolvePolicies() {
       // store domain-scoped payloads under base.safety/preferences with domain key
       if (row.kind === "safety") {
         base.safety = base.safety || {};
-        base.safety[row.domain] = mergePolicy(base.safety[row.domain], row.payload);
+        base.safety[row.domain] = mergePolicy(
+          base.safety[row.domain],
+          row.payload
+        );
       } else if (row.kind === "preferences") {
         base.preferences = base.preferences || {};
         // merge blocks with stability
-        const blk = Array.isArray(row.payload?.blocks) ? row.payload.blocks : [];
-        base.preferences.blocks = [...(base.preferences.blocks || []), ...blk.map(tagBlock(row.domain))];
+        const blk = Array.isArray(row.payload?.blocks)
+          ? row.payload.blocks
+          : [];
+        base.preferences.blocks = [
+          ...(base.preferences.blocks || []),
+          ...blk.map(tagBlock(row.domain)),
+        ];
       } else {
         base[row.kind] = mergePolicy(base[row.kind], row.payload);
       }
@@ -305,7 +378,9 @@ async function resolvePolicies() {
       if (key === "sabbathGuard") base.sabbathGuard = { enabled: false };
       if (key.startsWith("preferences")) {
         base.preferences = base.preferences || {};
-        base.preferences.blocks = (base.preferences.blocks || []).filter(b => `preferences:${b.label}` !== key);
+        base.preferences.blocks = (base.preferences.blocks || []).filter(
+          (b) => `preferences:${b.label}` !== key
+        );
       }
       if (key === "holyDays") base.holyDays = { enabled: false, datesISO: [] };
     } else {
@@ -317,46 +392,82 @@ async function resolvePolicies() {
 }
 
 function tagBlock(domain) {
-  return (b) => ({ ...b, label: domain ? `[${domain}] ${b.label || "preference"}` : b.label });
+  return (b) => ({
+    ...b,
+    label: domain ? `[${domain}] ${b.label || "preference"}` : b.label,
+  });
 }
 
 /* ----------------------------- Block Builders ------------------------------ */
 
 async function buildAllBlocks(rangeStart, rangeEnd, policies, fetchAstronomy) {
-  guardHorizon(rangeStart, rangeEnd, featureFlags?.constraints?.maxBlockHorizonDays ?? 60);
+  guardHorizon(
+    rangeStart,
+    rangeEnd,
+    featureFlags?.constraints?.maxBlockHorizonDays ?? 60
+  );
 
   const blocks = [];
 
   // Quiet hours (hard)
   if (policies.quietHours?.enabled) {
-    blocks.push(...buildQuietHourBlocks(rangeStart, rangeEnd, policies.quietHours.start, policies.quietHours.end)
-      .map(iv => toBlock("hard", "quietHours", "quiet hours", iv)));
+    blocks.push(
+      ...buildQuietHourBlocks(
+        rangeStart,
+        rangeEnd,
+        policies.quietHours.start,
+        policies.quietHours.end
+      ).map((iv) => toBlock("hard", "quietHours", "quiet hours", iv))
+    );
   }
 
   // Sabbath (hard)
   if (policies.sabbathGuard?.enabled) {
-    const sab = await buildSabbathBlocks(rangeStart, rangeEnd, fetchAstronomy, policies.sabbathGuard);
-    blocks.push(...sab.map(iv => toBlock("hard", "sabbath", "Sabbath guard", iv)));
+    const sab = await buildSabbathBlocks(
+      rangeStart,
+      rangeEnd,
+      fetchAstronomy,
+      policies.sabbathGuard
+    );
+    blocks.push(
+      ...sab.map((iv) => toBlock("hard", "sabbath", "Sabbath guard", iv))
+    );
   }
 
   // Holy days (hard)
   if (policies.holyDays?.enabled && Array.isArray(policies.holyDays.datesISO)) {
-    blocks.push(...buildHolyDayBlocks(rangeStart, rangeEnd, policies.holyDays.datesISO)
-      .map(iv => toBlock("hard", "holyDay", "holy day", iv)));
+    blocks.push(
+      ...buildHolyDayBlocks(
+        rangeStart,
+        rangeEnd,
+        policies.holyDays.datesISO
+      ).map((iv) => toBlock("hard", "holyDay", "holy day", iv))
+    );
   }
 
   // Preferences (may be hard or soft)
   if (policies.preferences?.blocks?.length) {
-    blocks.push(...buildPreferenceBlocks(rangeStart, rangeEnd, policies.preferences.blocks));
+    blocks.push(
+      ...buildPreferenceBlocks(
+        rangeStart,
+        rangeEnd,
+        policies.preferences.blocks
+      )
+    );
   }
 
   // Safety windows (domain-agnostic global hard blocks if any)
   // Most safety is domain-specific and checked in runDomainSafety
   // Example global: "no power-tools after 22:00"
   if (policies.safety?.global?.noPowerToolsAfterHour != null) {
-    blocks.push(...buildDailyHourBlocks(rangeStart, rangeEnd,
-      policies.safety.global.noPowerToolsAfterHour, (policies.safety.global.untilHour ?? 6))
-      .map(iv => toBlock("hard", "safety", "no power-tools", iv)));
+    blocks.push(
+      ...buildDailyHourBlocks(
+        rangeStart,
+        rangeEnd,
+        policies.safety.global.noPowerToolsAfterHour,
+        policies.safety.global.untilHour ?? 6
+      ).map((iv) => toBlock("hard", "safety", "no power-tools", iv))
+    );
   }
 
   // Normalize & merge overlaps
@@ -377,8 +488,11 @@ async function runDomainSafety(session, { window, policies }) {
       const res = await Promise.resolve(fn(session, { window, policies }));
       if (!res) continue;
       if (Array.isArray(res.violations)) violations.push(...res.violations);
-      if (Array.isArray(res.recommendations)) recommendations.push(...res.recommendations);
-    } catch { /* ignore */ }
+      if (Array.isArray(res.recommendations))
+        recommendations.push(...res.recommendations);
+    } catch {
+      /* ignore */
+    }
   }
 
   return { violations, recommendations };
@@ -395,9 +509,15 @@ function getDomainSafetyRegistry() {
         const cfg = policies?.safety?.cooking || {};
         if (Number.isFinite(cfg.noHighHeatAfterHour) && usesHighHeat(s)) {
           const winHours = [window.start.getHours(), window.end.getHours()];
-          if (winHours.some(h => isAfterHour(h, cfg.noHighHeatAfterHour))) {
+          if (winHours.some((h) => isAfterHour(h, cfg.noHighHeatAfterHour))) {
             return {
-              violations: [{ level: "hard", policy: "safety", reason: "no-high-heat-after-hour" }],
+              violations: [
+                {
+                  level: "hard",
+                  policy: "safety",
+                  reason: "no-high-heat-after-hour",
+                },
+              ],
               recommendations: ["schedule high-heat earlier"],
             };
           }
@@ -410,7 +530,13 @@ function getDomainSafetyRegistry() {
       (s, { window }) => {
         if (window.start.getHours() >= 22 || window.end.getHours() <= 6) {
           return {
-            violations: [{ level: "soft", policy: "safety", reason: "avoid-canning-overnight" }],
+            violations: [
+              {
+                level: "soft",
+                policy: "safety",
+                reason: "avoid-canning-overnight",
+              },
+            ],
             recommendations: ["prefer daylight for canning"],
           };
         }
@@ -420,7 +546,16 @@ function getDomainSafetyRegistry() {
     garden: [
       (s, { policies }) => {
         if (policies?.safety?.garden?.daylightPreferred) {
-          return { violations: [{ level: "soft", policy: "preference", reason: "daylight-preferred" }], recommendations: ["schedule during daylight"] };
+          return {
+            violations: [
+              {
+                level: "soft",
+                policy: "preference",
+                reason: "daylight-preferred",
+              },
+            ],
+            recommendations: ["schedule during daylight"],
+          };
         }
         return null;
       },
@@ -432,10 +567,14 @@ function getDomainSafetyRegistry() {
 }
 
 function usesHighHeat(session) {
-  const req = Array.isArray(session?.requiredResources) ? session.requiredResources : [];
+  const req = Array.isArray(session?.requiredResources)
+    ? session.requiredResources
+    : [];
   const prefs = session?.preferences || {};
   const declared = !!prefs?.cooking?.requiresHighHeat;
-  return declared || req.includes("range.top") || req.includes("outdoor.burner");
+  return (
+    declared || req.includes("range.top") || req.includes("outdoor.burner")
+  );
 }
 
 function isAfterHour(h, limit) {
@@ -453,7 +592,10 @@ function buildQuietHourBlocks(start, end, startHr, endHr) {
     if (startHr < endHr) {
       blocks.push({ start: setHour(day, startHr), end: setHour(day, endHr) });
     } else {
-      blocks.push({ start: setHour(day, startHr), end: setHour(addDays(day, 1), endHr) });
+      blocks.push({
+        start: setHour(day, startHr),
+        end: setHour(addDays(day, 1), endHr),
+      });
     }
     day = addDays(day, 1);
   }
@@ -465,15 +607,22 @@ async function buildSabbathBlocks(start, end, fetchAstronomy, sabbathCfg) {
   let day = startOfDay(start);
   const last = startOfDay(end);
   while (day <= last) {
-    if (day.getDay() === 5) { // Friday
+    if (day.getDay() === 5) {
+      // Friday
       const fri = new Date(day);
       const sat = addDays(fri, 1);
       let sISO, eISO;
       if (typeof fetchAstronomy === "function") {
         const aFri = await safeCall(() => fetchAstronomy(fri), {});
         const aSat = await safeCall(() => fetchAstronomy(sat), {});
-        sISO = aFri?.sunsetISO || aFri?.sundownISO || setHour(fri, sabbathCfg.dayStart ?? 18).toISOString();
-        eISO = aSat?.sundownISO || aSat?.sunsetISO || setHour(sat, sabbathCfg.dayEnd ?? 18).toISOString();
+        sISO =
+          aFri?.sunsetISO ||
+          aFri?.sundownISO ||
+          setHour(fri, sabbathCfg.dayStart ?? 18).toISOString();
+        eISO =
+          aSat?.sundownISO ||
+          aSat?.sunsetISO ||
+          setHour(sat, sabbathCfg.dayEnd ?? 18).toISOString();
       } else {
         sISO = setHour(fri, sabbathCfg.dayStart ?? 18).toISOString();
         eISO = setHour(sat, sabbathCfg.dayEnd ?? 18).toISOString();
@@ -503,7 +652,8 @@ function buildPreferenceBlocks(rangeStart, rangeEnd, blocks) {
   while (day <= last) {
     const dow = day.getDay();
     for (const b of blocks) {
-      const applies = !Array.isArray(b.daysOfWeek) || b.daysOfWeek.includes(dow);
+      const applies =
+        !Array.isArray(b.daysOfWeek) || b.daysOfWeek.includes(dow);
       if (!applies) continue;
       const s = setHour(day, toHour(b.startHour, 0));
       const e = setHour(day, toHour(b.endHour, 0));
@@ -513,8 +663,17 @@ function buildPreferenceBlocks(rangeStart, rangeEnd, blocks) {
     }
     day = addDays(day, 1);
   }
-  return mergeBlocks(trimBlocksToRange(out.map(b => ({ start: new Date(b.startISO), end: new Date(b.endISO), _b: b })), rangeStart, rangeEnd)
-    .map(x => x._b));
+  return mergeBlocks(
+    trimBlocksToRange(
+      out.map((b) => ({
+        start: new Date(b.startISO),
+        end: new Date(b.endISO),
+        _b: b,
+      })),
+      rangeStart,
+      rangeEnd
+    ).map((x) => x._b)
+  );
 }
 
 function buildDailyHourBlocks(start, end, fromHr, toHr) {
@@ -547,7 +706,14 @@ function mergeBlocks(blocks) {
   for (const b of blocks) {
     const k = `${b.level}::${b.policy}`;
     if (!grouped.has(k)) grouped.set(k, []);
-    grouped.get(k).push({ start: new Date(b.startISO), end: new Date(b.endISO), label: b.label, reason: b.reason });
+    grouped
+      .get(k)
+      .push({
+        start: new Date(b.startISO),
+        end: new Date(b.endISO),
+        label: b.label,
+        reason: b.reason,
+      });
   }
 
   const out = [];
@@ -569,27 +735,44 @@ function guardDataGateway() {
 }
 async function readAllSafe(table) {
   if (!dataGateway) return [];
-  if (typeof dataGateway.all === "function") return await dataGateway.all(table);
-  if (typeof dataGateway.scan === "function") return await dataGateway.scan(table, {});
+  if (typeof dataGateway.all === "function")
+    return await dataGateway.all(table);
+  if (typeof dataGateway.scan === "function")
+    return await dataGateway.scan(table, {});
   return [];
 }
 async function upsertMany(table, rows, keyFields) {
   guardDataGateway();
-  if (typeof dataGateway.upsertMany === "function") return dataGateway.upsertMany(table, rows, keyFields);
-  if (typeof dataGateway.writeMany === "function") return dataGateway.writeMany({ table, rows, keyFields, mode: "upsert" });
-  if (typeof dataGateway.putMany === "function") { await dataGateway.putMany(table, rows); return rows.length; }
-  if (typeof dataGateway.put === "function") { for (const r of rows) await dataGateway.put(table, r); return rows.length; }
+  if (typeof dataGateway.upsertMany === "function")
+    return dataGateway.upsertMany(table, rows, keyFields);
+  if (typeof dataGateway.writeMany === "function")
+    return dataGateway.writeMany({ table, rows, keyFields, mode: "upsert" });
+  if (typeof dataGateway.putMany === "function") {
+    await dataGateway.putMany(table, rows);
+    return rows.length;
+  }
+  if (typeof dataGateway.put === "function") {
+    for (const r of rows) await dataGateway.put(table, r);
+    return rows.length;
+  }
   throw new Error("No upsert-capable method on dataGateway");
 }
 async function delById(table, id) {
-  if (typeof dataGateway.delete === "function") return await dataGateway.delete(table, id);
-  if (typeof dataGateway.remove === "function") return await dataGateway.remove(table, { id });
-  if (typeof dataGateway.writeMany === "function") { await dataGateway.writeMany({ table, rows: [{ id }], mode: "delete" }); return true; }
+  if (typeof dataGateway.delete === "function")
+    return await dataGateway.delete(table, id);
+  if (typeof dataGateway.remove === "function")
+    return await dataGateway.remove(table, { id });
+  if (typeof dataGateway.writeMany === "function") {
+    await dataGateway.writeMany({ table, rows: [{ id }], mode: "delete" });
+    return true;
+  }
   return false;
 }
 async function readAll(table) {
-  if (typeof dataGateway.all === "function") return await dataGateway.all(table);
-  if (typeof dataGateway.scan === "function") return await dataGateway.scan(table, {});
+  if (typeof dataGateway.all === "function")
+    return await dataGateway.all(table);
+  if (typeof dataGateway.scan === "function")
+    return await dataGateway.scan(table, {});
   return [];
 }
 
@@ -610,7 +793,16 @@ function sanitizeSession(s) {
 function normalizeOverride(ovr) {
   if (!ovr || typeof ovr !== "object") throw new Error("invalid-override");
   const kind = String(ovr.kind || "").trim();
-  if (!["quietHours", "sabbathGuard", "holyDays", "preferences", "safety", "customBlock"].includes(kind)) {
+  if (
+    ![
+      "quietHours",
+      "sabbathGuard",
+      "holyDays",
+      "preferences",
+      "safety",
+      "customBlock",
+    ].includes(kind)
+  ) {
     throw new Error("invalid-kind");
   }
   const scope = (ovr.scope || "global").toLowerCase();
@@ -631,7 +823,9 @@ function makeId(row) {
     // Ensure unique
     return `constraints::custom::${Date.now()}`;
   }
-  return row.scope === "domain" ? `constraints::${row.kind}::${row.domain}` : `constraints::${row.kind}`;
+  return row.scope === "domain"
+    ? `constraints::${row.kind}::${row.domain}`
+    : `constraints::${row.kind}`;
 }
 
 function mergePolicy(base, payload) {
@@ -653,26 +847,46 @@ function guardHorizon(start, end, maxDays) {
 
 function parseISO(s, allowDateOnly = false) {
   if (!s) return null;
-  if (allowDateOnly && /^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(`${s}T00:00:00Z`);
+  if (allowDateOnly && /^\d{4}-\d{2}-\d{2}$/.test(s))
+    return new Date(`${s}T00:00:00Z`);
   const t = Date.parse(s);
   return Number.isNaN(t) ? null : new Date(t);
 }
 
-function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
-function setHour(d, hour) { const x = new Date(d); x.setHours(hour, 0, 0, 0); return x; }
-function addDays(d, n) { return new Date(d.getTime() + n * 864e5); }
-function toHour(val, def) { const n = Number(val); return Number.isFinite(n) && n >= 0 && n < 24 ? Math.floor(n) : def; }
+function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+function setHour(d, hour) {
+  const x = new Date(d);
+  x.setHours(hour, 0, 0, 0);
+  return x;
+}
+function addDays(d, n) {
+  return new Date(d.getTime() + n * 864e5);
+}
+function toHour(val, def) {
+  const n = Number(val);
+  return Number.isFinite(n) && n >= 0 && n < 24 ? Math.floor(n) : def;
+}
 
 function mergeIntervals(intervals) {
   const arr = intervals
-    .filter(iv => iv?.start instanceof Date && iv?.end instanceof Date && iv.end > iv.start)
+    .filter(
+      (iv) =>
+        iv?.start instanceof Date &&
+        iv?.end instanceof Date &&
+        iv.end > iv.start
+    )
     .sort((a, b) => a.start - b.start);
   const merged = [];
   for (const iv of arr) {
     if (!merged.length || iv.start > merged[merged.length - 1].end) {
       merged.push({ start: new Date(iv.start), end: new Date(iv.end) });
     } else {
-      if (iv.end > merged[merged.length - 1].end) merged[merged.length - 1].end = new Date(iv.end);
+      if (iv.end > merged[merged.length - 1].end)
+        merged[merged.length - 1].end = new Date(iv.end);
     }
   }
   return merged;
@@ -680,17 +894,35 @@ function mergeIntervals(intervals) {
 
 function trimBlocksToRange(blocks, start, end) {
   return blocks
-    .map(b => ({
+    .map((b) => ({
       start: b.start < start ? new Date(start) : b.start,
       end: b.end > end ? new Date(end) : b.end,
     }))
-    .filter(b => b.end > b.start);
+    .filter((b) => b.end > b.start);
 }
 
-function toNonNegInt(n) { const v = Math.floor(Number(n) || 0); return v < 0 ? 0 : v; }
-function deepMerge(a, b) { if (!a) return b; if (!b) return a; const o = { ...a }; for (const k of Object.keys(b)) o[k] = (isObj(a[k]) && isObj(b[k])) ? deepMerge(a[k], b[k]) : b[k]; return o; }
-function isObj(x) { return x && typeof x === "object" && !Array.isArray(x); }
-async function safeCall(fn, fb) { try { return await fn(); } catch { return fb; } }
+function toNonNegInt(n) {
+  const v = Math.floor(Number(n) || 0);
+  return v < 0 ? 0 : v;
+}
+function deepMerge(a, b) {
+  if (!a) return b;
+  if (!b) return a;
+  const o = { ...a };
+  for (const k of Object.keys(b))
+    o[k] = isObj(a[k]) && isObj(b[k]) ? deepMerge(a[k], b[k]) : b[k];
+  return o;
+}
+function isObj(x) {
+  return x && typeof x === "object" && !Array.isArray(x);
+}
+async function safeCall(fn, fb) {
+  try {
+    return await fn();
+  } catch {
+    return fb;
+  }
+}
 
 /* --------------------------- Optional Hub Export --------------------------- */
 /**
@@ -703,5 +935,7 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }

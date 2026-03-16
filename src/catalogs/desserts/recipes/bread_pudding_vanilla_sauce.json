@@ -1,0 +1,234 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.bread_pudding_vanilla_sauce",
+    "slug": "bread_pudding_vanilla_sauce",
+    "name": "Bread Pudding with Vanilla Sauce (Leftover Bread Model)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "dessert",
+      "bread-pudding",
+      "leftover-bread",
+      "baked",
+      "custard",
+      "vanilla-sauce",
+      "budget-friendly",
+      "bakery-pairing",
+      "make-ahead",
+      "comfort-food"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A classic bread pudding designed around leftover bread logic (stale bread + custard soak + bake) with a pourable vanilla sauce. Pairs naturally with bakery/bread catalogs (brioche, challah, French bread, sandwich bread). Flour note: bread choice may come from fresh-milled or commercial flour breads."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    {
+      "id": "baking_dish_9x13",
+      "label": "9x13-inch baking dish (or 2-quart dish)"
+    },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "saucepan", "label": "Small saucepan (for sauce)" },
+    {
+      "id": "fine_mesh_sieve",
+      "label": "Fine-mesh sieve (optional, for sauce)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "bread_stale",
+      "label": "Stale bread, cubed (see notes for bread types)",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 10–12 cups loosely packed. Ideal: brioche, challah, French bread. Works with sandwich bread too. Stale is best; if fresh, dry it (see steps)."
+    },
+    {
+      "id": "butter_for_dish",
+      "label": "Unsalted butter (for greasing dish)",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": "About 1 tbsp."
+    },
+
+    {
+      "id": "milk_whole",
+      "label": "Whole milk",
+      "amount": { "value": 720, "unit": "ml" },
+      "notes": "About 3 cups."
+    },
+    {
+      "id": "cream_heavy",
+      "label": "Heavy cream",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. For lighter pudding, replace with milk."
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 5, "unit": "each" }
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3/4 cup."
+    },
+    {
+      "id": "brown_sugar_light_optional",
+      "label": "Light brown sugar (optional)",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "Optional: adds caramel depth. If used, you can reduce granulated sugar by the same amount.",
+      "optional": true
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "nutmeg_optional",
+      "label": "Ground nutmeg (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/4 tsp.",
+      "optional": true
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 3/4 tsp."
+    },
+    {
+      "id": "raisins_optional",
+      "label": "Raisins (optional)",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 3/4 cup. Optional add-in.",
+      "optional": true
+    },
+    {
+      "id": "pecans_optional",
+      "label": "Chopped pecans or walnuts (optional)",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": "Optional topping/mix-in; toast for more flavor.",
+      "optional": true
+    },
+
+    {
+      "id": "sauce_butter",
+      "label": "Unsalted butter (for vanilla sauce)",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp."
+    },
+    {
+      "id": "sauce_sugar",
+      "label": "Granulated sugar (for vanilla sauce)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3/4 cup."
+    },
+    {
+      "id": "sauce_cream_or_milk",
+      "label": "Heavy cream or whole milk (for vanilla sauce)",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Cream = richer; milk = lighter."
+    },
+    {
+      "id": "sauce_vanilla",
+      "label": "Vanilla extract (for vanilla sauce)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "sauce_salt",
+      "label": "Pinch of salt (for vanilla sauce)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "Balances sweetness."
+    },
+    {
+      "id": "sauce_cornstarch_optional",
+      "label": "Cornstarch (optional, to thicken sauce)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp, whisked into 30 ml cold milk/cream first. Use if you want a thicker, more custardy sauce.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_heat_oven_prep_dish",
+      "title": "Heat oven and prep dish",
+      "body": "Heat oven to 350°F (175°C). Butter a 9x13-inch baking dish."
+    },
+    {
+      "id": "step_02_dry_bread_if_needed",
+      "title": "Dry the bread (leftover bread logic)",
+      "body": "If bread is not stale: spread cubes on a sheet pan and bake 8–12 minutes at 300°F (150°C) until dry on the outside but not browned. This helps the bread absorb custard without turning gummy."
+    },
+    {
+      "id": "step_03_load_dish",
+      "title": "Add bread to dish",
+      "body": "Add bread cubes to the buttered dish. Sprinkle in raisins and/or nuts if using (or reserve nuts for topping)."
+    },
+    {
+      "id": "step_04_make_custard",
+      "title": "Make the custard",
+      "body": "In a large bowl, whisk eggs, granulated sugar (and brown sugar if using), salt, cinnamon, nutmeg (if using), and vanilla. Whisk in milk and cream until smooth."
+    },
+    {
+      "id": "step_05_soak",
+      "title": "Pour and soak",
+      "body": "Pour custard evenly over bread. Press bread gently to help it absorb. Let soak 20–30 minutes at room temperature. For deeper soak and more uniform texture, cover and refrigerate 2–12 hours (recommended for very dense breads)."
+    },
+    {
+      "id": "step_06_bake",
+      "title": "Bake until set",
+      "body": "Bake 40–55 minutes until the center is set but still slightly wobbly and the top is golden. A knife inserted near center should come out mostly clean with moist crumbs (not liquid custard). If top browns too fast, tent loosely with foil."
+    },
+    {
+      "id": "step_07_rest",
+      "title": "Rest before serving",
+      "body": "Cool 15–20 minutes before serving so the custard sets for clean scoops."
+    },
+
+    {
+      "id": "step_08_make_sauce",
+      "title": "Make vanilla sauce (while pudding bakes or cools)",
+      "body": "In a saucepan over medium heat, melt butter. Add sugar and whisk briefly. Add cream/milk and bring to a gentle simmer. Simmer 2–4 minutes, whisking, until slightly thickened and glossy. Remove from heat and whisk in vanilla and a pinch of salt."
+    },
+    {
+      "id": "step_09_thicken_sauce_optional",
+      "title": "Optional: thicken sauce with cornstarch",
+      "body": "If you want a thicker sauce: whisk cornstarch into 30 ml cold milk/cream to make a slurry. While sauce simmers, whisk in slurry and simmer 30–60 seconds until thickened. Do not boil hard."
+    },
+    {
+      "id": "step_10_serve",
+      "title": "Serve",
+      "body": "Serve warm bread pudding with warm vanilla sauce poured over. Optional: top with toasted nuts or a dusting of cinnamon."
+    }
+  ],
+  "notes": [
+    "Leftover bread logic: Stale/dried bread absorbs custard and bakes into a custardy interior with structure. Fresh bread can turn gummy unless dried first.",
+    "Bread choices (pairs with bakery catalog): brioche/challah = richer and softer; French bread = classic chew; sandwich bread = budget-friendly, softer set. Any can be made from fresh-milled or commercial flour depending on your bakery/bread source.",
+    "Doneness signal: center should be set with a slight wobble (like cheesecake). Overbaking dries the pudding; underbaking leaves liquid custard.",
+    "Make-ahead: assemble and soak overnight, then bake the next day. Sauce can be made ahead and gently rewarmed."
+  ],
+  "storage": {
+    "refrigerator": "Cover and refrigerate up to 4 days. Rewarm portions in microwave or 300°F (150°C) oven.",
+    "freezer": "Freeze baked portions airtight up to 1 month. Thaw overnight in fridge and rewarm. Sauce freezes poorly; make fresh if possible."
+  }
+}

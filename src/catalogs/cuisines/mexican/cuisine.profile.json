@@ -1,0 +1,1261 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mexican",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Mexican",
+    "shortName": "Mexican",
+    "subtitle": "Chiles, tortillas, beans, masa, bright salsas, and layered aromatics.",
+    "description": "A broad SSA cuisine profile for Mexican cooking patterns—masa and tortillas, beans, rice, fresh salsas, chiles (fresh and dried), char/grill notes, and simmered stews. Designed for deterministic meal planning and household workflows (batch-friendly beans/salsas, freezer-friendly braises, and quick weeknight tacos/bowls).",
+    "originRegions": ["Mesoamerica", "Mexico"],
+    "regions": [
+      "Central Mexico",
+      "Northern Mexico",
+      "Coastal Mexico",
+      "Yucat\u00e1n Peninsula",
+      "Oaxaca",
+      "Puebla",
+      "Veracruz",
+      "Jalisco"
+    ],
+    "primaryCountriesAndIslands": ["Mexico"],
+    "tags": [
+      "cuisine.mexican",
+      "region.north_america",
+      "style.street_food",
+      "style.family_style",
+      "style.bowls",
+      "style.stew_and_starch",
+      "batch.friendly",
+      "weeknight.friendly"
+    ],
+    "icon": "icon.cuisine.mexican",
+    "colorHint": "palette.warm_chile",
+    "heritageNotes": [
+      "This profile is intentionally pan-Mexican for SSA baseline planning and search. Regional subprofiles capture distinct ingredient and technique emphases (e.g., Oaxaca, Yucatan, Northern).",
+      "Key structural building blocks include: tortillas/masa, beans, rice, chiles, tomato/tomatillo, onion/garlic, fresh herbs, citrus, and layered salsas."
+    ],
+    "version": "2026.01",
+    "author": "ssa.catalogs",
+    "createdAt": "2026-01-23",
+    "updatedAt": "2026-01-23T00:00:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA canonical baseline",
+      "maintainer": "ssa.catalogs",
+      "license": "internal",
+      "attribution": "General culinary knowledge; modeled for household planning patterns.",
+      "kind": "catalog",
+      "author": "ssa.catalogs",
+      "origin": "ssa.cuisines.mexican",
+      "type": "profile",
+      "notes": "This profile avoids brand-specific assumptions and focuses on technique + pantry patterns."
+    },
+    "family": {
+      "parent": "cuisines.latin_american",
+      "siblings": [
+        "cuisines.carribean",
+        "cuisines.central_american",
+        "cuisines.south_american"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.tex_mex",
+          "reason": "Ingredient overlap (tortillas, beans, chili, cheese) but distinct identity; Tex-Mex often heavier cheese/cumin profiles."
+        },
+        {
+          "id": "cuisines.southwestern",
+          "reason": "Shared chile and grilling patterns; Mexican retains broader salsa/masa/bean foundations and regional complexity."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.mexican.oaxaca",
+        "name": "Oaxacan",
+        "signatureNotes": "Moles, toasted chiles, chocolate notes, corn/masa, quesillo, herbs like hoja santa.",
+        "commonSauceBases": [
+          "base.mole",
+          "base.chile_sauce_roja",
+          "base.chile_sauce_negra"
+        ]
+      },
+      {
+        "id": "cuisines.mexican.yucatan",
+        "name": "Yucatecan",
+        "signatureNotes": "Achiote, citrus, slow-roasts, pickled onions, habanero heat; subtle Caribbean influences.",
+        "commonSauceBases": ["base.achiote_marinade", "base.pickled_red_onion"]
+      },
+      {
+        "id": "cuisines.mexican.northern",
+        "name": "Northern Mexico",
+        "signatureNotes": "Grilled meats, flour tortillas, beans, simple salsas; beef-forward patterns.",
+        "commonSauceBases": ["base.salsa_roja", "base.salsa_verde"]
+      },
+      {
+        "id": "cuisines.mexican.puebla",
+        "name": "Poblano / Puebla",
+        "signatureNotes": "Mole poblano, chiles en nogada influences, rich sauces and braises.",
+        "commonSauceBases": ["base.mole_poblano", "base.chile_sauce_roja"]
+      },
+      {
+        "id": "cuisines.mexican.veracruz",
+        "name": "Veracruz",
+        "signatureNotes": "Seafood, olives/capers in some dishes, tomato-based sauces, citrus brightness.",
+        "commonSauceBases": ["base.tomato_sauce", "base.salsa_roja"]
+      }
+    ],
+    "regionHints": [
+      "mexico",
+      "oaxaca",
+      "yucatan",
+      "puebla",
+      "veracruz",
+      "jalisco"
+    ],
+    "countryHints": ["mexico"]
+  },
+
+  "notes": [
+    "SSA Mexican profile is planner-first: it emphasizes meal templates (tacos, bowls, stews, soups) and batch pillars (beans, rice, salsas, braises).",
+    "Ingredient IDs use SSA-style dotted ids; ensure your ingredient catalog supports these ids or map via ruleset normalization later."
+  ],
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "street_food",
+      "family_style",
+      "bowls",
+      "stew_and_starch",
+      "plates"
+    ],
+    "weeknightBias": "high",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "batch.pinto_beans",
+        "batch.black_beans",
+        "batch.rice_mexican",
+        "batch.salsa_roja",
+        "batch.salsa_verde",
+        "batch.pickled_onion",
+        "batch.braised_meat"
+      ],
+      "notes": "Mexican meals remix extremely well: beans/rice/salsa + protein becomes tacos/bowls/quesadillas/soups."
+    },
+    "spiceHeatDefault": 2,
+    "saltinessDefault": 2,
+    "sournessDefault": 2,
+    "sweetnessDefault": 1,
+    "umamiDefault": 2,
+    "oilUseDefault": 2,
+    "preferredCookingFats": [
+      "ingredient.avocado_oil",
+      "ingredient.lard",
+      "ingredient.olive_oil",
+      "ingredient.neutral_oil"
+    ],
+    "primaryStarches": [
+      "ingredient.corn_tortillas",
+      "ingredient.flour_tortillas",
+      "ingredient.white_rice",
+      "ingredient.masa_harina"
+    ],
+    "primaryProteins": [
+      "ingredient.chicken",
+      "ingredient.beef",
+      "ingredient.pork",
+      "ingredient.goat",
+      "ingredient.fish",
+      "ingredient.shrimp",
+      "ingredient.eggs",
+      "ingredient.pinto_beans",
+      "ingredient.black_beans"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.tacos",
+      "archetype.burrito_bowl",
+      "archetype.stew_and_starch",
+      "archetype.soup",
+      "archetype.grill_and_sides"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate_template.tacos_plus_sides",
+      "plate_template.bowl_protein_starch_salsa",
+      "plate_template.stew_plus_tortillas",
+      "plate_template.grilled_protein_plus_rice_beans"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Layered chile flavor (fresh + dried), bright salsa acidity, toasted aromatics, corn/masa foundation, and balancing heat with lime, salt, and herbs.",
+      "Many dishes are built from a base (sofrito-like onion/garlic, toasted chiles, tomatoes/tomatillos) plus a finish (lime, cilantro, raw onion, crema/cheese optional)."
+    ],
+    "aromaticsCore": [
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.cilantro",
+      "ingredient.lime",
+      "ingredient.scallion"
+    ],
+    "spiceCore": [
+      "ingredient.cumin",
+      "ingredient.oregano_mexican",
+      "ingredient.black_pepper",
+      "ingredient.coriander_seed",
+      "ingredient.smoked_paprika"
+    ],
+    "umamiBuilders": [
+      "ingredient.tomatoes",
+      "ingredient.tomatillos",
+      "ingredient.chicken_stock",
+      "ingredient.beef_stock",
+      "ingredient.mushrooms",
+      "ingredient.cocoa_powder"
+    ],
+    "acidOptions": [
+      "ingredient.lime_juice",
+      "ingredient.lemon_juice",
+      "ingredient.vinegar_white",
+      "ingredient.vinegar_apple_cider"
+    ],
+    "sweetBalanceOptions": [
+      "ingredient.onion",
+      "ingredient.roasted_tomatoes",
+      "ingredient.honey",
+      "ingredient.brown_sugar"
+    ],
+    "heatOptions": [
+      "ingredient.jalapeno",
+      "ingredient.serrano",
+      "ingredient.habanero",
+      "ingredient.chipotle_in_adobo",
+      "ingredient.chile_arbol",
+      "ingredient.anchopowder",
+      "ingredient.guajillo",
+      "ingredient.pasilla"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum to assemble basic tacos/bowls and quick salsas.",
+      "items": [
+        "ingredient.corn_tortillas",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.lime",
+        "ingredient.cilantro",
+        "ingredient.tomatoes",
+        "ingredient.jalapeno",
+        "ingredient.kosher_salt",
+        "ingredient.neutral_oil",
+        "ingredient.black_beans",
+        "ingredient.white_rice"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry to cook common Mexican weeknight staples and batch bases.",
+      "items": [
+        "ingredient.tomatillos",
+        "ingredient.serrano",
+        "ingredient.cumin",
+        "ingredient.oregano_mexican",
+        "ingredient.corn_tortillas",
+        "ingredient.flour_tortillas",
+        "ingredient.masa_harina",
+        "ingredient.pinto_beans",
+        "ingredient.black_beans",
+        "ingredient.long_grain_rice",
+        "ingredient.chicken_stock",
+        "ingredient.vinegar_white",
+        "ingredient.avocado_oil"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional and deeper-flavor pantry: dried chiles, adobo, achiote, and mole-friendly items.",
+      "items": [
+        "ingredient.guajillo",
+        "ingredient.anchopowder",
+        "ingredient.pasilla",
+        "ingredient.chile_arbol",
+        "ingredient.chipotle_in_adobo",
+        "ingredient.achiote_paste",
+        "ingredient.epazote",
+        "ingredient.pumpkin_seeds",
+        "ingredient.sesame_seeds",
+        "ingredient.cocoa_powder",
+        "ingredient.cinnamon",
+        "ingredient.cloves"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty/regional items for advanced or specific regional dishes.",
+      "items": [
+        "ingredient.hoja_santa",
+        "ingredient.cactus_nopales",
+        "ingredient.mexican_crema",
+        "ingredient.queso_fresco",
+        "ingredient.oaxaca_cheese",
+        "ingredient.hominy",
+        "ingredient.dried_shrimp",
+        "ingredient.piloncillo"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.toast_chiles",
+      "method.blend_salsa",
+      "method.char_roast",
+      "method.braise",
+      "method.simmer",
+      "method.grill",
+      "method.pan_fry",
+      "method.stew"
+    ],
+    "common": [
+      "method.saute",
+      "method.reduce",
+      "method.marinade",
+      "method.pickling",
+      "method.press_tortillas",
+      "method.reheat_on_comal"
+    ],
+    "notes": [
+      "Toasting dried chiles and char-roasting tomatoes/tomatillos drive depth quickly.",
+      "Many weeknight meals can be built from: warmed tortillas + protein + salsa + quick pickles."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.tacos",
+      "label": "Tacos",
+      "description": "Warm tortillas + flavorful protein/veg + salsa + crunchy/acid finish. Fast weeknight assembly from batched components.",
+      "commonExamples": [
+        "Carne asada tacos",
+        "Chicken tinga tacos",
+        "Bean and cheese tacos",
+        "Fish tacos"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "ingredient.corn_tortillas",
+          "ingredient.flour_tortillas"
+        ],
+        "proteinOptions": [
+          "ingredient.chicken",
+          "ingredient.beef",
+          "ingredient.pork",
+          "ingredient.fish",
+          "ingredient.shrimp",
+          "ingredient.black_beans",
+          "ingredient.pinto_beans"
+        ],
+        "vegOptions": [
+          "ingredient.onion",
+          "ingredient.cabbage",
+          "ingredient.lettuce",
+          "ingredient.avocado"
+        ],
+        "sauceOptions": [
+          "dish.salsa_roja",
+          "dish.salsa_verde",
+          "dish.pico_de_gallo"
+        ],
+        "garnishOptions": [
+          "ingredient.cilantro",
+          "ingredient.lime",
+          "dish.pickled_red_onion"
+        ],
+        "pairings": ["dish.mexican_rice", "dish.refried_beans"]
+      }
+    },
+    {
+      "id": "archetype.burrito_bowl",
+      "label": "Burrito Bowl",
+      "description": "Rice + beans + protein + salsa + toppings in a bowl. Great for batch cooking, meal prep, and family customization.",
+      "commonExamples": [
+        "Chicken bowl",
+        "Carne asada bowl",
+        "Veggie bowl with fajita veg",
+        "Carnitas bowl"
+      ],
+      "defaults": {
+        "starchOptions": ["dish.mexican_rice", "ingredient.white_rice"],
+        "legumeOptions": [
+          "dish.black_beans_simmered",
+          "dish.pinto_beans_simmered",
+          "dish.refried_beans"
+        ],
+        "proteinOptions": [
+          "ingredient.chicken",
+          "ingredient.beef",
+          "ingredient.pork",
+          "ingredient.goat"
+        ],
+        "vegOptions": [
+          "dish.fajita_vegetables",
+          "ingredient.lettuce",
+          "ingredient.avocado"
+        ],
+        "sauceOptions": [
+          "dish.salsa_roja",
+          "dish.salsa_verde",
+          "dish.crema_lime"
+        ],
+        "garnishOptions": [
+          "ingredient.cilantro",
+          "ingredient.lime",
+          "ingredient.queso_fresco"
+        ],
+        "pairings": ["dish.chips_corn", "dish.pickled_jalapenos"]
+      }
+    },
+    {
+      "id": "archetype.stew_and_starch",
+      "label": "Stew + Starch",
+      "description": "Saucy braise/stew served with tortillas, rice, or beans. Freezer-friendly and great for large families.",
+      "commonExamples": [
+        "Pozole-style stew",
+        "Chile verde stew",
+        "Birria-style stew",
+        "Bean-heavy soup"
+      ],
+      "defaults": {
+        "stew_baseOptions": [
+          "dish.chile_rojo_stew_base",
+          "dish.chile_verde_stew_base",
+          "dish.bean_soup_base"
+        ],
+        "proteinOptions": [
+          "ingredient.beef",
+          "ingredient.pork",
+          "ingredient.chicken",
+          "ingredient.goat"
+        ],
+        "starchOptions": ["ingredient.corn_tortillas", "dish.mexican_rice"],
+        "garnishOptions": [
+          "ingredient.cilantro",
+          "ingredient.lime",
+          "ingredient.onion"
+        ],
+        "pairings": ["dish.salsa_roja", "dish.pickled_red_onion"]
+      }
+    },
+    {
+      "id": "archetype.soup",
+      "label": "Soup",
+      "description": "Brothy soups with chile-tomato bases or bean foundations; often finished with lime, cilantro, and crunchy toppings.",
+      "commonExamples": [
+        "Tortilla soup",
+        "Caldo de pollo",
+        "Bean soup",
+        "Pozole"
+      ],
+      "defaults": {
+        "stew_baseOptions": [
+          "dish.tomato_chile_broth",
+          "dish.chicken_broth_aromatic",
+          "dish.bean_soup_base"
+        ],
+        "proteinOptions": [
+          "ingredient.chicken",
+          "ingredient.beef",
+          "ingredient.pinto_beans",
+          "ingredient.black_beans"
+        ],
+        "garnishOptions": [
+          "ingredient.cilantro",
+          "ingredient.lime",
+          "dish.chips_corn"
+        ],
+        "pairings": ["dish.salsa_verde", "dish.pickled_jalapenos"]
+      }
+    },
+    {
+      "id": "archetype.grill_and_sides",
+      "label": "Grill + Sides",
+      "description": "Char-grilled protein served with tortillas, salsas, beans, rice, and fresh crunchy sides.",
+      "commonExamples": [
+        "Carne asada plate",
+        "Pollo asado",
+        "Grilled fish",
+        "Al pastor-style grilled meat"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "ingredient.beef",
+          "ingredient.chicken",
+          "ingredient.pork",
+          "ingredient.fish"
+        ],
+        "sideOptions": [
+          "dish.mexican_rice",
+          "dish.black_beans_simmered",
+          "dish.pico_de_gallo"
+        ],
+        "sauceOptions": ["dish.salsa_roja", "dish.salsa_verde"],
+        "garnishOptions": [
+          "ingredient.cilantro",
+          "ingredient.lime",
+          "ingredient.avocado"
+        ],
+        "pairings": ["ingredient.corn_tortillas", "dish.pickled_red_onion"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ingredient.corn_tortillas",
+      "ingredient.masa_harina",
+      "ingredient.black_beans",
+      "ingredient.pinto_beans",
+      "ingredient.long_grain_rice",
+      "ingredient.tomatoes",
+      "ingredient.tomatillos",
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.cilantro",
+      "ingredient.lime",
+      "ingredient.jalapeno",
+      "ingredient.serrano",
+      "ingredient.guajillo",
+      "ingredient.chipotle_in_adobo",
+      "ingredient.oregano_mexican"
+    ],
+    "optional_traditional": [
+      "ingredient.epazote",
+      "ingredient.achiote_paste",
+      "ingredient.hoja_santa",
+      "ingredient.nopales",
+      "ingredient.oaxaca_cheese",
+      "ingredient.queso_fresco",
+      "ingredient.mexican_crema"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "ingredient.sugar_white",
+        "label": "White sugar",
+        "reason": "Not a primary driver in savory Mexican bases; sweetness typically comes from onions, roasted tomatoes, or a small amount of piloncillo/honey in select sauces."
+      },
+      {
+        "id": "ingredient.heavy_cream",
+        "label": "Heavy cream",
+        "reason": "Not typical outside specific modern variations; crema is more common in certain contexts."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredient.pork",
+        "options": ["ingredient.chicken", "ingredient.beef", "ingredient.goat"],
+        "notes": "For braises/stews, goat can substitute well; adjust cook time and keep moisture higher."
+      },
+      {
+        "for": "ingredient.beef",
+        "options": ["ingredient.pork", "ingredient.goat"],
+        "notes": "Use similar cuts for braise; goat can be leaner—use more stock and gentler simmer."
+      },
+      {
+        "for": "ingredient.fish",
+        "options": ["ingredient.shrimp", "ingredient.chicken"],
+        "notes": "Shrimp keeps the seafood profile. Chicken changes identity; keep salsa/lime/herbs to retain Mexican flavor."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "dish.mexican_rice",
+        "options": ["ingredient.white_rice", "dish.cilantro_lime_rice"],
+        "notes": "Any rice base works if paired with salsa and beans."
+      },
+      {
+        "for": "dish.refried_beans",
+        "options": ["dish.black_beans_simmered", "dish.pinto_beans_simmered"],
+        "notes": "Simmered beans + mash partially to approximate refried texture."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ingredient.masa_harina",
+        "options": ["ingredient.cornmeal_fine", "ingredient.tortilla_corn"],
+        "notes": "Use finely ground cornmeal or crumble tortillas into simmering liquid to thicken soups (tortilla-soup style)."
+      }
+    ],
+    "notes": [
+      "When substituting chiles: match (1) fruitiness, (2) smokiness, (3) heat. E.g., guajillo \u2192 ancho (fruitier, less heat), chipotle \u2192 smoked paprika + jalape\u00f1o."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "meal_template.taco_night",
+      "label": "Taco Night (Build-Your-Own)",
+      "archetypeId": "archetype.tacos",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": [
+            "ingredient.corn_tortillas",
+            "ingredient.flour_tortillas"
+          ],
+          "chooseOne": true,
+          "notes": "Corn tortillas are default; flour tortillas are common in northern styles."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.chicken",
+            "ingredient.beef",
+            "ingredient.pork",
+            "ingredient.black_beans"
+          ],
+          "chooseOne": true,
+          "notes": "Pick one protein; add beans as stretch."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "dish.salsa_roja",
+            "dish.salsa_verde",
+            "dish.pico_de_gallo"
+          ],
+          "chooseOne": false,
+          "notes": "Offer at least one salsa; two is ideal (red + green)."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.cilantro",
+            "ingredient.lime",
+            "ingredient.onion"
+          ],
+          "chooseOne": false,
+          "notes": "Raw onion + cilantro + lime is the core finish."
+        },
+        {
+          "role": "side",
+          "ingredientIds": ["dish.mexican_rice", "dish.refried_beans"],
+          "chooseOne": false,
+          "notes": "Pick one or both based on appetite and inventory."
+        }
+      ],
+      "prepNotes": [
+        "Batch salsa earlier in the week for fast assembly.",
+        "Warm tortillas on a dry skillet/comal for best texture."
+      ]
+    },
+    {
+      "id": "meal_template.bowl_meal_prep",
+      "label": "Bowl Meal Prep (Rice + Beans + Protein + Salsa)",
+      "archetypeId": "archetype.burrito_bowl",
+      "components": [
+        {
+          "role": "starch",
+          "ingredientIds": ["dish.mexican_rice", "ingredient.white_rice"],
+          "chooseOne": true
+        },
+        {
+          "role": "legume",
+          "ingredientIds": [
+            "dish.black_beans_simmered",
+            "dish.pinto_beans_simmered"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.chicken",
+            "ingredient.beef",
+            "ingredient.goat"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": ["dish.salsa_roja", "dish.salsa_verde"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.lime",
+            "ingredient.cilantro",
+            "ingredient.avocado"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Cook rice and beans in bulk; portion and freeze extras.",
+        "Salsa keeps 4\u20137 days; freeze roasted salsa in small containers."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.chile_handling",
+      "label": "Chile handling",
+      "notes": [
+        "Wear gloves when handling hot chiles (especially habanero). Avoid touching eyes/face.",
+        "Ventilate when toasting dried chiles; avoid burning them (bitterness + irritating smoke)."
+      ]
+    },
+    {
+      "id": "safety.undercooked_masa",
+      "label": "Masa and thickened soups",
+      "notes": [
+        "When using masa to thicken soups/sauces, simmer long enough to cook out raw corn flavor and ensure proper thickening.",
+        "Store leftover masa-based foods promptly and reheat thoroughly."
+      ]
+    },
+    {
+      "id": "safety.cross_contamination",
+      "label": "Raw meat + salsa prep",
+      "notes": [
+        "Use separate cutting boards/knives for raw meat vs. ready-to-eat salsa ingredients.",
+        "Chill cooked meats promptly if meal prepping."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "tacos",
+      "tortillas",
+      "masa",
+      "beans",
+      "salsa",
+      "chile",
+      "tomatillo",
+      "cilantro",
+      "lime",
+      "mole",
+      "pozole",
+      "birria",
+      "carnitas",
+      "tinga"
+    ],
+    "commonAlternateNames": [
+      "Mexican cuisine",
+      "Comida mexicana",
+      "Taquer\u00eda style",
+      "Home-style Mexican"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.cilantro",
+      "ingredient.lime",
+      "ingredient.jalapeno",
+      "ingredient.tomatoes",
+      "ingredient.tomatillos"
+    ],
+    "proteinsCommon": [
+      "ingredient.chicken",
+      "ingredient.beef",
+      "ingredient.pork",
+      "ingredient.goat",
+      "ingredient.eggs",
+      "ingredient.black_beans",
+      "ingredient.pinto_beans"
+    ],
+    "produceCommon": [
+      "ingredient.avocado",
+      "ingredient.cabbage",
+      "ingredient.lettuce",
+      "ingredient.radish",
+      "ingredient.corn",
+      "ingredient.peppers_bell"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ingredient.tomatillos",
+        "fallbacks": [
+          "ingredient.tomatoes",
+          "ingredient.vinegar_white",
+          "ingredient.lime_juice"
+        ],
+        "note": "If tomatillos are unavailable, use roasted tomatoes plus extra lime/vinegar; flavor will differ but remains usable for salsa/verde-like brightness."
+      },
+      {
+        "ingredient": "ingredient.epazote",
+        "fallbacks": ["ingredient.cilantro", "ingredient.oregano_mexican"],
+        "note": "Epazote is optional and not widely available; use cilantro + Mexican oregano for a similar herbal lift."
+      }
+    ],
+    "staples": {
+      "grains_and_bases": [
+        "ingredient.corn_tortillas",
+        "ingredient.flour_tortillas",
+        "ingredient.masa_harina",
+        "ingredient.long_grain_rice"
+      ],
+      "beans_and_legumes": ["ingredient.black_beans", "ingredient.pinto_beans"],
+      "chiles_and_heat": [
+        "ingredient.jalapeno",
+        "ingredient.serrano",
+        "ingredient.chipotle_in_adobo",
+        "ingredient.guajillo",
+        "ingredient.anchopowder"
+      ],
+      "acids": [
+        "ingredient.lime_juice",
+        "ingredient.vinegar_white",
+        "ingredient.vinegar_apple_cider"
+      ],
+      "fats": [
+        "ingredient.lard",
+        "ingredient.avocado_oil",
+        "ingredient.neutral_oil"
+      ],
+      "salts_and_seasoning": [
+        "ingredient.kosher_salt",
+        "ingredient.black_pepper",
+        "ingredient.cumin",
+        "ingredient.oregano_mexican"
+      ]
+    },
+    "coreStaples": {
+      "always_on_hand": [
+        "ingredient.corn_tortillas",
+        "ingredient.black_beans",
+        "ingredient.long_grain_rice",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.lime",
+        "ingredient.kosher_salt"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "oaxacan": [
+        "ingredient.hoja_santa",
+        "ingredient.oaxaca_cheese",
+        "ingredient.pumpkin_seeds"
+      ],
+      "yucatecan": [
+        "ingredient.achiote_paste",
+        "ingredient.habanero",
+        "ingredient.vinegar_apple_cider"
+      ]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.toast_chiles",
+      "method.blend_salsa",
+      "method.char_roast",
+      "method.braise",
+      "method.simmer",
+      "method.grill",
+      "method.pan_fry",
+      "method.pickling"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.salsa_roja_roasted",
+        "name": "Roasted Salsa Roja",
+        "steps": ["method.char_roast", "method.blend_salsa", "method.season"],
+        "notes": "Roast tomatoes/chiles/onion/garlic, blend, then salt + lime; optionally simmer briefly to deepen."
+      },
+      {
+        "id": "process.salsa_verde",
+        "name": "Salsa Verde (Tomatillo)",
+        "steps": ["method.simmer", "method.blend_salsa", "method.season"],
+        "notes": "Simmer tomatillos and chiles, blend with cilantro, then salt + lime; adjust heat with serrano."
+      },
+      {
+        "id": "process.beans_pot",
+        "name": "Pot Beans (Batch)",
+        "steps": ["method.soak_optional", "method.simmer", "method.season"],
+        "notes": "Simmer beans with aromatics; portion for tacos/bowls/soups. Add epazote if available."
+      }
+    ],
+    "equipmentAffinity": {
+      "best_on": [
+        "equipment.comal",
+        "equipment.cast_iron_skillet",
+        "equipment.blender",
+        "equipment.press_tortilla"
+      ],
+      "works_without": ["equipment.press_tortilla", "equipment.comal"],
+      "notes": "A blender makes salsas fast; a skillet can replace a comal; tortillas can be warmed on a dry pan."
+    },
+    "core": [
+      {
+        "id": "method.toast_chiles",
+        "notes": "Toast quickly; avoid burning. Hydrate dried chiles for smooth sauces."
+      },
+      {
+        "id": "method.char_roast",
+        "notes": "Char on skillet/broiler/grill; peel if needed for smoother salsas."
+      },
+      {
+        "id": "method.press_tortillas",
+        "notes": "Masa + water to soft dough; press and cook on hot dry pan."
+      }
+    ],
+    "signatureMethods": [
+      "Toasting dried chiles for depth (guajillo/ancho/pasilla).",
+      "Char-roasting tomatoes/tomatillos for fast smoky flavor.",
+      "Balancing heat with lime, salt, and fresh herbs."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.blender",
+      "equipment.skillet",
+      "equipment.cast_iron_skillet",
+      "equipment.comal",
+      "equipment.tongs",
+      "equipment.chef_knife",
+      "equipment.cutting_board",
+      "equipment.large_pot",
+      "equipment.sheet_pan",
+      "equipment.citrus_juicer"
+    ],
+    "optionalButHelpful": [
+      "equipment.tortilla_press",
+      "equipment.food_processor",
+      "equipment.mortar_pestle",
+      "equipment.immersion_blender",
+      "equipment.grill"
+    ],
+    "notes": [
+      "A skillet substitutes for a comal for tortilla warming and charring veg.",
+      "Mortar & pestle is optional but great for rustic salsas and spice pastes."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.dairy",
+      "allergen.gluten",
+      "allergen.shellfish"
+    ],
+    "dietCompatibility": {
+      "diet.gluten_free": "Corn-tortilla and masa-forward meals are naturally gluten-free; watch flour tortillas and breaded items.",
+      "diet.dairy_free": "Many dishes are dairy-free; crema/cheese are optional toppings.",
+      "diet.vegetarian": "Beans, veg tacos, and rice/bean bowls are easy vegetarian defaults."
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.tacos",
+        "name": "Tacos (various)",
+        "subprofiles": ["cuisines.mexican.northern", "cuisines.mexican.oaxaca"],
+        "difficulty": 1,
+        "heatTypical": 2,
+        "notes": "Most flexible archetype for SSA: tacos become weeknight, batch, and family-friendly with a salsa pipeline."
+      },
+      {
+        "id": "dish.salsa_roja",
+        "name": "Salsa Roja",
+        "subprofiles": ["cuisines.mexican.northern"],
+        "difficulty": 1,
+        "heatTypical": 2,
+        "notes": "Core base/condiment; roasted version is most versatile."
+      },
+      {
+        "id": "dish.salsa_verde",
+        "name": "Salsa Verde",
+        "subprofiles": [
+          "cuisines.mexican.northern",
+          "cuisines.mexican.veracruz"
+        ],
+        "difficulty": 1,
+        "heatTypical": 2,
+        "notes": "Bright tomatillo + chile + cilantro; excellent on stews and bowls."
+      },
+      {
+        "id": "dish.beans_pot",
+        "name": "Pot Beans (Pinto/Black)",
+        "subprofiles": ["cuisines.mexican.northern"],
+        "difficulty": 1,
+        "heatTypical": 0,
+        "notes": "Batch pillar; becomes refried beans, soup base, taco filler."
+      },
+      {
+        "id": "dish.mole",
+        "name": "Mole (various)",
+        "subprofiles": ["cuisines.mexican.oaxaca", "cuisines.mexican.puebla"],
+        "difficulty": "advanced",
+        "heatTypical": 2,
+        "notes": "Complex sauce family; SSA treats as specialty (tier2+) but supports simplified weeknight approximations."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.arroz_con_leche",
+        "name": "Arroz con Leche",
+        "difficulty": 2,
+        "heatTypical": 0,
+        "notes": "Rice pudding; cinnamon-forward; pantry-friendly."
+      },
+      {
+        "id": "dish.horchata",
+        "name": "Horchata (rice-based)",
+        "difficulty": 1,
+        "heatTypical": 0,
+        "notes": "Cold drink; cinnamon + vanilla; easy batch."
+      }
+    ],
+    "examples": [
+      "Chicken tinga",
+      "Carnitas",
+      "Carne asada",
+      "Chile verde",
+      "Pozole-style stew",
+      "Tortilla soup",
+      "Fajita vegetables",
+      "Pico de gallo"
+    ],
+    "mealPatterns": [
+      "Tortillas + protein + salsa + lime/cilantro",
+      "Rice + beans + protein + salsa bowl",
+      "Stew/braise + tortillas + fresh garnish",
+      "Grilled protein + beans/rice + salsa"
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "ingredient.corn_tortillas",
+      "ingredient.flour_tortillas",
+      "dish.mexican_rice"
+    ],
+    "typicalVegSides": [
+      "dish.fajita_vegetables",
+      "dish.pickled_red_onion",
+      "dish.cabbage_slaw"
+    ],
+    "typicalCondiments": [
+      "dish.salsa_roja",
+      "dish.salsa_verde",
+      "dish.pico_de_gallo",
+      "dish.pickled_jalapenos",
+      "ingredient.lime"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "ingredient.beef",
+        "pair": [
+          "dish.salsa_roja",
+          "dish.pickled_red_onion",
+          "ingredient.lime"
+        ],
+        "note": "Beef likes smoky/roasted salsas and bright acid finishes."
+      },
+      {
+        "with": "ingredient.pork",
+        "pair": ["dish.salsa_verde", "ingredient.cilantro", "ingredient.lime"],
+        "note": "Pork pairs naturally with verde brightness and herb finish."
+      },
+      {
+        "with": "ingredient.black_beans",
+        "pair": ["dish.pico_de_gallo", "ingredient.avocado", "ingredient.lime"],
+        "note": "Beans benefit from fresh crunch and acid; avocado adds richness."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.too_sweet_salsa",
+        "avoid": ["ingredient.sugar_white"],
+        "note": "Avoid turning salsa into sweet sauce; balance acidity and savoriness first."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.chile_guajillo",
+        "whenMissing": ["ingredient.guajillo"],
+        "use": ["ingredient.anchopowder", "ingredient.pasilla"],
+        "ratio": 1,
+        "notes": "Guajillo is bright and fruity; ancho/pasilla are darker. Add a bit more lime if substituting."
+      },
+      {
+        "id": "sub.tomatillo",
+        "whenMissing": ["ingredient.tomatillos"],
+        "use": ["ingredient.tomatoes"],
+        "ratio": 1,
+        "notes": "Tomatoes are less tart. Increase lime/vinegar and consider adding a pinch of cumin for depth."
+      },
+      {
+        "id": "sub.cilantro",
+        "whenMissing": ["ingredient.cilantro"],
+        "use": ["ingredient.parsley", "ingredient.scallion"],
+        "ratio": 1,
+        "notes": "Not identical, but keeps freshness. Add more lime to compensate."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method_sub.char_without_grill",
+        "whenNoEquipment": ["equipment.grill"],
+        "adapt": "method.char_roast",
+        "notes": "Char on cast iron, under broiler, or over open flame (gas)."
+      },
+      {
+        "id": "method_sub.no_blender_salsa",
+        "whenNoEquipment": ["equipment.blender"],
+        "adapt": "method.mash_salsa",
+        "notes": "Chop finely and mash with a fork or mortar & pestle for rustic salsa."
+      }
+    ],
+    "rules": [
+      {
+        "type": "note",
+        "id": "subs.general",
+        "text": "For SSA planners: if no tortilla press, store-bought tortillas are acceptable. If no comal, use a dry skillet."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.salsa_roja",
+        "name": "Roasted Salsa Roja (batch)",
+        "makes": "dish.salsa_roja",
+        "freezerFriendly": true,
+        "notes": "Roast and blend; portion into small containers for weeknight tacos and stews."
+      },
+      {
+        "id": "batch.salsa_verde",
+        "name": "Salsa Verde (batch)",
+        "makes": "dish.salsa_verde",
+        "freezerFriendly": true,
+        "notes": "Simmer tomatillos/chiles, blend with cilantro; freezes well."
+      },
+      {
+        "id": "batch.beans_pot",
+        "name": "Pot beans (batch)",
+        "makes": "dish.beans_pot",
+        "freezerFriendly": true,
+        "notes": "Cook large pot; freeze 2-cup portions for bowls and soups."
+      },
+      {
+        "id": "batch.rice_mexican",
+        "name": "Mexican rice (batch)",
+        "makes": "dish.mexican_rice",
+        "freezerFriendly": true,
+        "notes": "Freeze in flat bags or containers; reheat with a splash of water."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use rotisserie or pre-cooked shredded chicken + salsa for instant tinga-like tacos.",
+      "Keep a jar of salsa (roja or verde) and a cooked bean portion ready; add tortillas and lime for a full meal.",
+      "Roast a tray of onions/peppers (fajita veg) and reuse in tacos, bowls, omelets."
+    ],
+    "seasonality": [
+      {
+        "season": "season.summer",
+        "focus": [
+          "ingredient.tomatoes",
+          "ingredient.cilantro",
+          "ingredient.lime",
+          "ingredient.peppers"
+        ]
+      },
+      {
+        "season": "season.winter",
+        "focus": [
+          "ingredient.dried_chiles",
+          "ingredient.beans",
+          "ingredient.rice",
+          "ingredient.braising_cuts"
+        ]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Build a Taco Night",
+        "items": [
+          "archetype.tacos",
+          "dish.salsa_roja",
+          "dish.salsa_verde",
+          "dish.refried_beans",
+          "dish.mexican_rice"
+        ]
+      },
+      {
+        "title": "Batch Basics for the Week",
+        "items": [
+          "batch.pinto_beans",
+          "batch.black_beans",
+          "batch.salsa_roja",
+          "batch.salsa_verde",
+          "batch.rice_mexican"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "tacos",
+      "salsa",
+      "tomatillo",
+      "guajillo",
+      "chipotle",
+      "masa",
+      "tortilla",
+      "beans",
+      "birria",
+      "pozole",
+      "carnitas",
+      "tinga"
+    ],
+    "colorHints": {
+      "primary": "palette.warm_chile",
+      "accent": "palette.lime_green",
+      "support": "palette.corn_gold"
+    },
+    "iconHints": [
+      "icon.chile",
+      "icon.tortilla",
+      "icon.salsa",
+      "icon.lime",
+      "icon.bean_pot"
+    ]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.mexican",
+      "style.street_food",
+      "batch.friendly",
+      "weeknight.friendly"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate_template.tacos_plus_sides",
+      "plate_template.bowl_protein_starch_salsa"
+    ],
+    "notes": [
+      "If your planners require dishIds/archetypeIds to exist, create matching entries in dishes.catalog.json for dish.* and archetype.* ids referenced here, or map them via cuisine ruleset normalization."
+    ]
+  }
+}

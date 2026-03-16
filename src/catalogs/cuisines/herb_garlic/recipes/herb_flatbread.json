@@ -1,0 +1,462 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic.recipes.herb_flatbread",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Herb Flatbread",
+    "subtitle": "Soft skillet flatbread with garlic, herbs, and olive oil (Herb & Garlic style)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Canonical SSA Herb & Garlic baseline flatbread.",
+        "Designed as a quick yeast flatbread with deterministic timing bands and a no-yeast fallback variation."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Herb & Garlic",
+    "subprofiles": ["cuisines.herb_garlic"],
+    "category": "bread",
+    "mealArchetypes": [
+      "archetype.flatbread",
+      "archetype.quick_bread",
+      "archetype.skillet_bread",
+      "archetype.dip_bread"
+    ],
+    "servingStyles": ["tear_and_share", "plated", "wrap"],
+    "plannerTags": [
+      "herb_garlic",
+      "herb_forward",
+      "garlic_forward",
+      "quick_bread",
+      "weeknight",
+      "batch_friendly",
+      "freezer_friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "notes": "Makes 6 medium flatbreads (about 7 inches)."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 35,
+    "totalMins": 60
+  },
+
+  "difficulty": 2,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "makeAhead": {
+      "doughRestMinutes": 20,
+      "holdCookedHours": 6
+    }
+  },
+
+  "tasteProfile": {
+    "dominant": ["herbs", "garlic", "olive_oil"],
+    "supporting": ["toasty", "salt"],
+    "heat": 0
+  },
+
+  "equipment": {
+    "required": [
+      { "id": "equip.mixing_bowl", "label": "Mixing bowl", "required": true },
+      {
+        "id": "equip.measuring_cups_spoons",
+        "label": "Measuring cups/spoons",
+        "required": true
+      },
+      {
+        "id": "equip.skillet_cast_iron_or_nonstick",
+        "label": "Large skillet (cast iron or nonstick)",
+        "required": true
+      },
+      {
+        "id": "equip.rolling_pin",
+        "label": "Rolling pin (or bottle)",
+        "required": true
+      },
+      { "id": "equip.knife", "label": "Knife", "required": true },
+      {
+        "id": "equip.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "optional": [
+      {
+        "id": "equip.kitchen_scale",
+        "label": "Kitchen scale",
+        "required": false,
+        "notes": "For consistent dough portions."
+      },
+      {
+        "id": "equip.dough_scraper",
+        "label": "Bench/dough scraper",
+        "required": false
+      }
+    ],
+    "minimum": [
+      "equip.mixing_bowl",
+      "equip.skillet_cast_iron_or_nonstick",
+      "equip.rolling_pin"
+    ],
+    "recommended": ["equip.kitchen_scale", "equip.dough_scraper"]
+  },
+
+  "dietFlags": ["diet.vegetarian"],
+  "allergens": ["allergen.gluten", "allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "ing.flour_all_purpose",
+      "label": "All-purpose flour",
+      "role": "flour",
+      "amount": { "value": 2.5, "unit": "cup" },
+      "notes": [
+        "Spoon-and-level for accuracy.",
+        "Add extra 1–3 tbsp as needed depending on humidity."
+      ]
+    },
+    {
+      "id": "ing.yeast_instant",
+      "label": "Instant yeast",
+      "role": "leavening",
+      "amount": { "value": 2.25, "unit": "tsp" },
+      "notes": ["1 packet (about 7 g)."]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Sugar (or honey)",
+      "role": "feed_yeast",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["Helps yeast wake up and improves browning."]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt (Greek or regular)",
+      "role": "tenderizer",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "Yogurt gives softness and slight tang.",
+        "Substitute: sour cream."
+      ]
+    },
+    {
+      "id": "ing.water_warm",
+      "label": "Warm water",
+      "role": "hydration",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": ["Warm, not hot (about 100–110°F)."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": ["Used in dough and for finishing."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, finely grated or minced",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "clove" },
+      "notes": [
+        "Reserve 1 clove for finishing oil if you want stronger garlic punch."
+      ]
+    },
+    {
+      "id": "ing.parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.chives",
+      "label": "Chives, sliced",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.thyme",
+      "label": "Fresh thyme leaves (or dried thyme)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Or 1/2 tsp dried."]
+    },
+    {
+      "id": "ing.butter_unsalted",
+      "label": "Unsalted butter, melted (optional finish)",
+      "role": "finish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "For a richer finish; omit for dairy-light. Use olive oil instead."
+      ]
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "grp.dough",
+      "label": "Dough",
+      "items": [
+        "ing.flour_all_purpose",
+        "ing.yeast_instant",
+        "ing.sugar",
+        "ing.salt_kosher",
+        "ing.yogurt_plain",
+        "ing.water_warm",
+        "ing.olive_oil"
+      ]
+    },
+    {
+      "id": "grp.herb_garlic",
+      "label": "Herb & Garlic Add-ins",
+      "items": ["ing.garlic", "ing.parsley", "ing.chives", "ing.thyme"]
+    },
+    {
+      "id": "grp.finish",
+      "label": "Finish (Optional)",
+      "items": ["ing.butter_unsalted", "ing.olive_oil"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.mix_dough",
+      "title": "Mix the dough",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a mixing bowl, whisk flour, yeast, sugar, and salt.",
+        "Add yogurt, warm water, olive oil, and minced/grated garlic.",
+        "Stir until a shaggy dough forms. If very sticky, add flour 1 tbsp at a time; if dry, add water 1 tbsp at a time."
+      ],
+      "checks": [
+        "Dough comes together into a soft ball",
+        "Not overly wet or crumbly"
+      ]
+    },
+    {
+      "id": "step.knead_rest",
+      "title": "Knead briefly and rest",
+      "activeMins": 6,
+      "handsOffMins": 20,
+      "instructions": [
+        "Turn dough onto a lightly floured surface and knead 2–3 minutes until smoother.",
+        "Place back in the bowl, cover, and let rest 20 minutes (this relaxes gluten and helps rolling).",
+        "If you have time, rest 30–45 minutes for slightly puffier flatbreads."
+      ],
+      "timers": [{ "label": "Dough rest", "minutes": 20 }]
+    },
+    {
+      "id": "step.divide_shape",
+      "title": "Divide and shape",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Divide dough into 6 equal pieces.",
+        "Roll each piece into a ball, then roll into a 6–7 inch round (about 1/4 inch thick).",
+        "Lightly flour as needed to prevent sticking."
+      ],
+      "checks": ["Rounds are even thickness for consistent cooking"]
+    },
+    {
+      "id": "step.cook_flatbreads",
+      "title": "Cook in a hot skillet",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat a skillet over medium-high heat until hot.",
+        "Cook one flatbread at a time: 60–90 seconds on the first side until bubbles form and brown spots appear.",
+        "Flip and cook 45–75 seconds more.",
+        "Remove to a plate and cover with a towel to keep soft while you cook the rest."
+      ],
+      "timers": [
+        { "label": "Cook side 1", "seconds": 90 },
+        { "label": "Cook side 2", "seconds": 75 }
+      ],
+      "checks": [
+        "Brown spots present",
+        "Flatbread is cooked through but still soft"
+      ]
+    },
+    {
+      "id": "step.finish_herb_oil",
+      "title": "Finish with herb-garlic oil (optional) and serve",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Optional finish: brush warm flatbreads with olive oil or melted butter.",
+        "Sprinkle with chopped herbs (parsley/chives/thyme) and a pinch of salt.",
+        "Serve warm with dips, soups, or as a wrap."
+      ]
+    }
+  ],
+
+  "methods": ["technique.quick_dough", "technique.skillet_bread"],
+
+  "pairings": {
+    "mains": [
+      "cuisines.herb_garlic.recipes.garlic_shrimp",
+      "cuisines.herb_garlic.recipes.garlic_herb_roast_chicken"
+    ],
+    "sides": [
+      "cuisines.herb_garlic.recipes.herb_roasted_vegetables",
+      "salad.simple_greens"
+    ],
+    "dips": ["dip.hummus", "dip.tzatziki", "dip.garlic_herb_yogurt"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "guidance": "Cool completely and store airtight. Reheat in a dry skillet 30–60 seconds per side.",
+      "maxDays": 3
+    },
+    "freezer": {
+      "guidance": "Freeze flatbreads with parchment between. Reheat from frozen in a skillet or toaster oven.",
+      "maxMonths": 2
+    },
+    "reheat": {
+      "best": [
+        "Dry skillet on medium 30–60 seconds per side",
+        "Toaster oven 350°F 3–5 minutes"
+      ],
+      "avoid": ["Microwave without covering (can turn chewy)."]
+    }
+  },
+
+  "planner": {
+    "dishId": "herb_garlic.herb_flatbread",
+    "course": "bread",
+    "batchNotes": [
+      "Cooked flatbreads hold well for a few hours wrapped in a clean towel.",
+      "If doubling, keep cooked breads warm in a low oven (200°F) loosely covered."
+    ],
+    "leftovers": [
+      "Cut into wedges and toast for croutons/chips",
+      "Use as quick pizza base (broil briefly with toppings)"
+    ]
+  },
+
+  "summary": "Soft skillet herb flatbread with garlic and olive oil—quick to make, tear-and-share friendly, and perfect with Herb & Garlic mains and dips.",
+
+  "keywords": [
+    "flatbread",
+    "skillet bread",
+    "garlic herb flatbread",
+    "quick bread",
+    "yogurt flatbread"
+  ],
+
+  "tags": [
+    "cuisine.herb_garlic",
+    "herb_garlic",
+    "garlic_forward",
+    "herb_forward",
+    "bread",
+    "skillet",
+    "weeknight",
+    "batch_friendly",
+    "freezer_friendly"
+  ],
+
+  "safety": {
+    "handling": [
+      "Cook flatbreads fully; avoid raw dough in the center.",
+      "Cool before sealing airtight to prevent condensation and sogginess."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.no_yeast_quick",
+      "label": "No-yeast quick flatbread",
+      "when": { "noYeast": true },
+      "adapt": {
+        "notes": [
+          "Replace yeast + sugar with 2 tsp baking powder.",
+          "Skip long rest; rest 10 minutes to hydrate flour, then roll and cook.",
+          "Texture becomes more like quick naan—still excellent."
+        ]
+      }
+    },
+    {
+      "id": "var.whole_wheat_blend",
+      "label": "Whole wheat blend",
+      "when": { "prefersWholeGrain": true },
+      "adapt": {
+        "notes": [
+          "Replace 1 cup all-purpose flour with 1 cup whole wheat flour.",
+          "Add 1–2 tbsp extra water if dough feels dry."
+        ]
+      }
+    },
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free",
+      "when": { "avoidAllergen": "allergen.dairy" },
+      "adapt": {
+        "notes": [
+          "Replace yogurt with unsweetened dairy-free yogurt OR 3/4 cup warm water + 1 tbsp lemon juice.",
+          "Omit butter finish; use olive oil."
+        ],
+        "allergens": ["allergen.gluten"]
+      }
+    },
+    {
+      "id": "var.herb_oil_dip_style",
+      "label": "Herb oil dip style",
+      "when": { "servingStyle": "dip" },
+      "adapt": {
+        "notes": [
+          "Serve with a plate of olive oil + lemon juice + salt + chopped herbs for dipping.",
+          "Add grated garlic to the oil for a stronger garlic finish."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "canonicalId": "cuisines.herb_garlic.recipes.herb_flatbread",
+    "aliases": [
+      "garlic herb flatbread",
+      "skillet flatbread",
+      "yogurt flatbread",
+      "naan-style flatbread"
+    ],
+    "indexHints": {
+      "primaryTechniques": ["technique.quick_dough", "technique.skillet_bread"],
+      "coreIngredients": [
+        "ing.flour_all_purpose",
+        "ing.garlic",
+        "ing.olive_oil",
+        "ing.parsley"
+      ]
+    }
+  }
+}

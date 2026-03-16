@@ -22,11 +22,12 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
-const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+const isBrowser =
+  typeof window !== "undefined" && typeof document !== "undefined";
 
 /* -------------------------------------------------------------------------- */
 /* Event helpers                                                              */
@@ -56,17 +57,43 @@ const WEB_ROUTES = {
   // /{domain}/play/:id
   // /{domain}/draft/:id
   // /{domain}/remote/:room
-  cooking: { play: "/cooking/play", draft: "/cooking/draft", remote: "/cooking/remote" },
-  cleaning: { play: "/cleaning/play", draft: "/cleaning/draft", remote: "/cleaning/remote" },
-  garden: { play: "/garden/play", draft: "/garden/draft", remote: "/garden/remote" },
-  animals: { play: "/animals/play", draft: "/animals/draft", remote: "/animals/remote" },
-  preservation: { play: "/preservation/play", draft: "/preservation/draft", remote: "/preservation/remote" },
-  storehouse: { play: "/storehouse/play", draft: "/storehouse/draft", remote: "/storehouse/remote" },
+  cooking: {
+    play: "/cooking/play",
+    draft: "/cooking/draft",
+    remote: "/cooking/remote",
+  },
+  cleaning: {
+    play: "/cleaning/play",
+    draft: "/cleaning/draft",
+    remote: "/cleaning/remote",
+  },
+  garden: {
+    play: "/garden/play",
+    draft: "/garden/draft",
+    remote: "/garden/remote",
+  },
+  animals: {
+    play: "/animals/play",
+    draft: "/animals/draft",
+    remote: "/animals/remote",
+  },
+  preservation: {
+    play: "/preservation/play",
+    draft: "/preservation/draft",
+    remote: "/preservation/remote",
+  },
+  storehouse: {
+    play: "/storehouse/play",
+    draft: "/storehouse/draft",
+    remote: "/storehouse/remote",
+  },
 };
 
 // Map singular "animal" → plural path key "animals"
 function normalizeDomain(domain) {
-  const d = String(domain || "").trim().toLowerCase();
+  const d = String(domain || "")
+    .trim()
+    .toLowerCase();
   if (!d) return null;
   if (!DOMAIN_KEYS.includes(d)) return null;
   return d === "animal" ? "animals" : d;
@@ -107,7 +134,10 @@ export function buildWebLink(opts = {}) {
   }
   const domain = normalizeDomain(opts.domain);
   if (!domain) {
-    emit("deeplink.error", { stage: "buildWebLink.domain", domain: opts.domain });
+    emit("deeplink.error", {
+      stage: "buildWebLink.domain",
+      domain: opts.domain,
+    });
     return null;
   }
   const routes = WEB_ROUTES[domain];
@@ -120,7 +150,11 @@ export function buildWebLink(opts = {}) {
   if (mode === "remote") {
     const room = normalizeId(opts.room);
     if (!room) {
-      emit("deeplink.error", { stage: "buildWebLink.room_missing", domain, mode });
+      emit("deeplink.error", {
+        stage: "buildWebLink.room_missing",
+        domain,
+        mode,
+      });
       return null;
     }
     const url = `${origin}${routes.remote}/${encodeURIComponent(room)}`;
@@ -153,7 +187,10 @@ export function buildCustomSchemeLink(opts = {}) {
   }
   const domain = normalizeDomain(opts.domain);
   if (!domain) {
-    emit("deeplink.error", { stage: "buildCustomSchemeLink.domain", domain: opts.domain });
+    emit("deeplink.error", {
+      stage: "buildCustomSchemeLink.domain",
+      domain: opts.domain,
+    });
     return null;
   }
 
@@ -163,14 +200,22 @@ export function buildCustomSchemeLink(opts = {}) {
   if (action === "remote") {
     const room = normalizeId(opts.room);
     if (!room) {
-      emit("deeplink.error", { stage: "buildCustomSchemeLink.room_missing", domain, action });
+      emit("deeplink.error", {
+        stage: "buildCustomSchemeLink.room_missing",
+        domain,
+        action,
+      });
       return null;
     }
     q.set("room", room);
   } else {
     const id = normalizeId(opts.id);
     if (!id) {
-      emit("deeplink.error", { stage: "buildCustomSchemeLink.id_missing", domain, action });
+      emit("deeplink.error", {
+        stage: "buildCustomSchemeLink.id_missing",
+        domain,
+        action,
+      });
       return null;
     }
     q.set("id", id);
@@ -189,9 +234,24 @@ export function buildCustomSchemeLink(opts = {}) {
  * Convenience bundle: returns both links for UI "Copy / Open" menus.
  * @returns {{web:string|null, scheme:string|null}}
  */
-export function buildDeepLinkBundle({ domain, id, room, mode = "play", baseUrl, title, source } = {}) {
+export function buildDeepLinkBundle({
+  domain,
+  id,
+  room,
+  mode = "play",
+  baseUrl,
+  title,
+  source,
+} = {}) {
   const web = buildWebLink({ domain, id, room, mode, baseUrl });
-  const scheme = buildCustomSchemeLink({ domain, id, room, mode, title, source });
+  const scheme = buildCustomSchemeLink({
+    domain,
+    id,
+    room,
+    mode,
+    title,
+    source,
+  });
   return { web, scheme };
 }
 
@@ -214,19 +274,27 @@ export function parseDeepLink(href = "") {
       const domain = normalizeDomain(qs.get("domain"));
       const id = normalizeId(qs.get("id"));
       const room = normalizeId(qs.get("room"));
-      const mode = ["play", "draft", "remote"].includes(action) ? action : "play";
+      const mode = ["play", "draft", "remote"].includes(action)
+        ? action
+        : "play";
       if (!domain) return { ok: false, error: "invalid_domain" };
-      if (mode === "remote" ? !room : !id) return { ok: false, error: "missing_identifier" };
+      if (mode === "remote" ? !room : !id)
+        return { ok: false, error: "missing_identifier" };
       return { ok: true, mode, domain, id, room, kind: "scheme" };
     }
 
     // Web path
-    const u = new URL(s, isBrowser ? window.location.origin : "http://localhost:5173");
+    const u = new URL(
+      s,
+      isBrowser ? window.location.origin : "http://localhost:5173"
+    );
     const segments = (u.pathname || "").split("/").filter(Boolean); // [domain, mode, id|room]
     // Expect: /{domain}/(play|draft|remote)/:idOrRoom
     if (segments.length >= 3) {
       const dom = normalizeDomain(segments[0]);
-      const mode = ["play", "draft", "remote"].includes(segments[1]) ? segments[1] : "play";
+      const mode = ["play", "draft", "remote"].includes(segments[1])
+        ? segments[1]
+        : "play";
       const ident = normalizeId(segments[2]);
       if (dom && ident) {
         return {
@@ -241,7 +309,10 @@ export function parseDeepLink(href = "") {
     }
     return { ok: false, error: "unrecognized_format" };
   } catch (err) {
-    emit("deeplink.error", { stage: "parseDeepLink", message: err?.message || String(err) });
+    emit("deeplink.error", {
+      stage: "parseDeepLink",
+      message: err?.message || String(err),
+    });
     return { ok: false, error: "parse_failed" };
   }
 }
@@ -256,7 +327,10 @@ export async function copyToClipboard(text) {
     emit("deeplink.copied", { textPreview: String(text || "").slice(0, 80) });
     return { ok: true };
   } catch (err) {
-    emit("deeplink.error", { stage: "copy", message: err?.message || String(err) });
+    emit("deeplink.error", {
+      stage: "copy",
+      message: err?.message || String(err),
+    });
     return { ok: false, error: "clipboard_failed" };
   }
 }
@@ -268,7 +342,10 @@ export function openInNewTab(url) {
     emit("deeplink.opened", { url, popupBlocked: !w });
     return { ok: !!w };
   } catch (err) {
-    emit("deeplink.error", { stage: "open", message: err?.message || String(err) });
+    emit("deeplink.error", {
+      stage: "open",
+      message: err?.message || String(err),
+    });
     return { ok: false, error: "open_failed" };
   }
 }
@@ -296,18 +373,40 @@ try {
   eventBus.on((evt) => {
     if (!evt || typeof evt !== "object") return;
 
-    if (evt.type === "session.draft.approved" && evt?.data?.id && evt?.data?.domain) {
+    if (
+      evt.type === "session.draft.approved" &&
+      evt?.data?.id &&
+      evt?.data?.domain
+    ) {
       const domain = evt.data.domain;
       const id = evt.data.id;
       const bundle = buildDeepLinkBundle({ domain, id, mode: "play" });
-      emit("deeplink.offer", { reason: "draft.approved", domain, id, ...bundle });
+      emit("deeplink.offer", {
+        reason: "draft.approved",
+        domain,
+        id,
+        ...bundle,
+      });
       return;
     }
 
-    if (evt.type === "session.scheduled" && evt?.data?.session && evt?.data?.offerDeepLink) {
+    if (
+      evt.type === "session.scheduled" &&
+      evt?.data?.session &&
+      evt?.data?.offerDeepLink
+    ) {
       const s = evt.data.session;
-      const bundle = buildDeepLinkBundle({ domain: s.domain, id: s.id, mode: "play" });
-      emit("deeplink.offer", { reason: "session.scheduled", domain: s.domain, id: s.id, ...bundle });
+      const bundle = buildDeepLinkBundle({
+        domain: s.domain,
+        id: s.id,
+        mode: "play",
+      });
+      emit("deeplink.offer", {
+        reason: "session.scheduled",
+        domain: s.domain,
+        id: s.id,
+        ...bundle,
+      });
       return;
     }
   });

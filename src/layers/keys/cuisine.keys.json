@@ -1,0 +1,1527 @@
+{
+  "$schema": "./cuisine.keys.schema.json",
+  "keysetId": "ssa.cuisine",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T03:49:51Z",
+  "notes": [
+    "Cuisine Keys define canonical identifiers and field names used across SSA for cuisine profiles and user preferences.",
+    "Use these keys to keep cuisines.catalog.json, plate_templates, substitutions, meal planning, and UI modules aligned.",
+    "Keys are stable: do not rename ids; deprecate with replacementId when needed."
+  ],
+  "enums": {
+    "domains": [
+      "catalogs",
+      "meal_planning",
+      "cooking",
+      "preferences",
+      "ui",
+      "analytics"
+    ],
+    "entities": [
+      "cuisine",
+      "profile",
+      "preference",
+      "override",
+      "matrix",
+      "rule"
+    ],
+    "valueTypes": [
+      "string",
+      "number",
+      "boolean",
+      "array",
+      "object",
+      "enum"
+    ],
+    "sensitivity": [
+      "public",
+      "internal",
+      "private"
+    ],
+    "lifecycle": [
+      "active",
+      "deprecated"
+    ],
+    "heatLevels": [
+      "none",
+      "mild",
+      "medium",
+      "hot",
+      "very_hot"
+    ],
+    "prepDifficulty": [
+      "easy",
+      "moderate",
+      "advanced",
+      "expert"
+    ],
+    "priority": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ]
+  },
+  "keys": [
+    {
+      "id": "cuisine.id",
+      "label": "Cuisine ID",
+      "domain": "catalogs",
+      "entity": "cuisine",
+      "valueType": "string",
+      "description": "Stable cuisine identifier (e.g., cuisine.indian.north, cuisine.caribbean.jamaican).",
+      "required": true,
+      "aliases": [
+        "id",
+        "cuisineId"
+      ],
+      "examples": [
+        "cuisine.indian.north"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.label",
+      "label": "Cuisine Label",
+      "domain": "catalogs",
+      "entity": "cuisine",
+      "valueType": "string",
+      "description": "Human-friendly cuisine name.",
+      "required": true,
+      "aliases": [
+        "name",
+        "title"
+      ],
+      "examples": [
+        "North Indian"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.description",
+      "label": "Cuisine Description",
+      "domain": "catalogs",
+      "entity": "cuisine",
+      "valueType": "string",
+      "description": "Short description for UI/help.",
+      "required": false,
+      "aliases": [
+        "desc"
+      ],
+      "examples": [
+        "Curry-forward cuisine with aromatic spice bases."
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.family",
+      "label": "Cuisine Family",
+      "domain": "catalogs",
+      "entity": "cuisine",
+      "valueType": "string",
+      "description": "Optional cuisine family/cluster label.",
+      "required": false,
+      "aliases": [
+        "cluster",
+        "group"
+      ],
+      "examples": [
+        "Indian"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.region",
+      "label": "Cuisine Region",
+      "domain": "catalogs",
+      "entity": "cuisine",
+      "valueType": "string",
+      "description": "Region tag (South Asia, Caribbean, West Africa).",
+      "required": false,
+      "aliases": [
+        "regionTag"
+      ],
+      "examples": [
+        "South Asia"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.tags",
+      "label": "Cuisine Tags",
+      "domain": "catalogs",
+      "entity": "cuisine",
+      "valueType": "array",
+      "description": "Tags for filtering/search and planner biases.",
+      "required": false,
+      "aliases": [
+        "tagIds"
+      ],
+      "examples": [
+        [
+          "curry",
+          "rice_based",
+          "spice_forward"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.signature_spices",
+      "label": "Signature Spices",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "List of signature spices.",
+      "required": false,
+      "aliases": [
+        "signatureSpices"
+      ],
+      "examples": [
+        [
+          "cumin",
+          "coriander",
+          "turmeric"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.signature_herbs",
+      "label": "Signature Herbs",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "List of signature herbs.",
+      "required": false,
+      "aliases": [
+        "signatureHerbs"
+      ],
+      "examples": [
+        [
+          "cilantro",
+          "mint"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.signature_aromatics",
+      "label": "Signature Aromatics",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Typical aromatics (onion, garlic, scallion, ginger).",
+      "required": false,
+      "aliases": [
+        "signatureAromatics"
+      ],
+      "examples": [
+        [
+          "onion",
+          "garlic",
+          "ginger"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.signature_acids",
+      "label": "Signature Acids",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Acid sources (lime, vinegar, tamarind).",
+      "required": false,
+      "aliases": [
+        "signatureAcids"
+      ],
+      "examples": [
+        [
+          "lime",
+          "tamarind"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.signature_fats",
+      "label": "Signature Fats",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Fats (ghee, coconut oil).",
+      "required": false,
+      "aliases": [
+        "signatureFats"
+      ],
+      "examples": [
+        [
+          "ghee",
+          "mustard oil"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.signature_sweeteners",
+      "label": "Signature Sweeteners",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Sweeteners used (brown sugar, jaggery, honey).",
+      "required": false,
+      "aliases": [
+        "signatureSweeteners"
+      ],
+      "examples": [
+        [
+          "jaggery"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.heat_level",
+      "label": "Heat Level",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "enum",
+      "description": "Overall heat level tag (none/mild/medium/hot/very_hot).",
+      "required": false,
+      "aliases": [
+        "heatLevel"
+      ],
+      "examples": [
+        "medium"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.saltiness",
+      "label": "Flavor Axis: saltiness",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Saltiness axis (0..1).",
+      "required": false,
+      "aliases": [
+        "saltiness"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.sourness",
+      "label": "Flavor Axis: sourness",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Sourness axis (0..1).",
+      "required": false,
+      "aliases": [
+        "sourness"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.sweetness",
+      "label": "Flavor Axis: sweetness",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Sweetness axis (0..1).",
+      "required": false,
+      "aliases": [
+        "sweetness"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.bitterness",
+      "label": "Flavor Axis: bitterness",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Bitterness axis (0..1).",
+      "required": false,
+      "aliases": [
+        "bitterness"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.umami",
+      "label": "Flavor Axis: umami",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Umami axis (0..1).",
+      "required": false,
+      "aliases": [
+        "umami"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.smokiness",
+      "label": "Flavor Axis: smokiness",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Smokiness axis (0..1).",
+      "required": false,
+      "aliases": [
+        "smokiness"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.axis.aroma_intensity",
+      "label": "Flavor Axis: aroma_intensity",
+      "domain": "catalogs",
+      "entity": "matrix",
+      "valueType": "number",
+      "description": "Aroma intensity axis (0..1).",
+      "required": false,
+      "aliases": [
+        "aroma_intensity"
+      ],
+      "examples": [
+        0.6
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.flavor.notes",
+      "label": "Flavor Notes",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Human notes about the cuisine's flavor profile.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        [
+          "Aromatic onion-ginger base."
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.preferred_methods",
+      "label": "Preferred Methods",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Preferred cooking methods (saute, simmer, roast, grill).",
+      "required": false,
+      "aliases": [
+        "preferredMethods"
+      ],
+      "examples": [
+        [
+          "saute",
+          "simmer"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.avoid_methods",
+      "label": "Avoid Methods",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Avoided methods due to cuisine profile.",
+      "required": false,
+      "aliases": [
+        "avoidMethods"
+      ],
+      "examples": [
+        [
+          "deep_fry"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.common_dishes",
+      "label": "Common Dishes",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Common dishes list (for learning/UI suggestions).",
+      "required": false,
+      "aliases": [
+        "commonDishes"
+      ],
+      "examples": [
+        [
+          "chicken curry",
+          "dal",
+          "naan"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.prep_difficulty",
+      "label": "Prep Difficulty",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "enum",
+      "description": "Overall prep difficulty (easy/moderate/advanced/expert).",
+      "required": false,
+      "aliases": [
+        "prepDifficulty"
+      ],
+      "examples": [
+        "moderate"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.max_active_steps_default",
+      "label": "Max Active Steps Default",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Default ceiling for active steps before planner flags complexity.",
+      "required": false,
+      "aliases": [
+        "maxActiveStepsDefault"
+      ],
+      "examples": [
+        20
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.max_concurrent_timers_default",
+      "label": "Max Concurrent Timers Default",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Default ceiling for concurrent timers.",
+      "required": false,
+      "aliases": [
+        "maxConcurrentTimersDefault"
+      ],
+      "examples": [
+        3
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.technique.notes",
+      "label": "Technique Notes",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Notes about typical techniques.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        [
+          "Temper spices in oil."
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.protein",
+      "label": "Plate Bias: Protein",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Protein ratio hint (0..1).",
+      "required": false,
+      "aliases": [
+        "protein"
+      ],
+      "examples": [
+        0.35
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.starch",
+      "label": "Plate Bias: Starch",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Starch ratio hint (0..1).",
+      "required": false,
+      "aliases": [
+        "starch"
+      ],
+      "examples": [
+        0.35
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.vegetable",
+      "label": "Plate Bias: Vegetable",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Vegetable ratio hint (0..1).",
+      "required": false,
+      "aliases": [
+        "vegetable"
+      ],
+      "examples": [
+        0.2
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.legume",
+      "label": "Plate Bias: Legume",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Legume ratio hint (0..1).",
+      "required": false,
+      "aliases": [
+        "legume"
+      ],
+      "examples": [
+        0.1
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.bread",
+      "label": "Plate Bias: Bread",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Bread ratio hint (0..1).",
+      "required": false,
+      "aliases": [
+        "bread"
+      ],
+      "examples": [
+        0.1
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.sauce",
+      "label": "Plate Bias: Sauce",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "number",
+      "description": "Sauce ratio hint (0..1).",
+      "required": false,
+      "aliases": [
+        "sauce"
+      ],
+      "examples": [
+        0.15
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.plate_bias.notes",
+      "label": "Plate Bias Notes",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Notes about plating/role balance.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        [
+          "Curry + rice + bread commonly co-exist."
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.protein_pairs",
+      "label": "Protein Pairings",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Suggested protein pairings (component ids, tags, or phrases).",
+      "required": false,
+      "aliases": [
+        "proteinPairs"
+      ],
+      "examples": [
+        [
+          "chicken",
+          "goat",
+          "lentils"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.starch_pairs",
+      "label": "Starch Pairings",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Suggested starch pairings.",
+      "required": false,
+      "aliases": [
+        "starchPairs"
+      ],
+      "examples": [
+        [
+          "rice",
+          "naan",
+          "roti"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.veg_pairs",
+      "label": "Vegetable Pairings",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Suggested vegetable pairings.",
+      "required": false,
+      "aliases": [
+        "vegPairs"
+      ],
+      "examples": [
+        [
+          "cabbage",
+          "okra",
+          "spinach"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.bread_pairs",
+      "label": "Bread Pairings",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Suggested bread pairings.",
+      "required": false,
+      "aliases": [
+        "breadPairs"
+      ],
+      "examples": [
+        [
+          "naan",
+          "flatbread"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.sauce_pairs",
+      "label": "Sauce Pairings",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Suggested sauce/condiment pairings.",
+      "required": false,
+      "aliases": [
+        "saucePairs"
+      ],
+      "examples": [
+        [
+          "chutney",
+          "pickle"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.do_not_pair",
+      "label": "Avoid Pairings",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Explicit avoid pairings.",
+      "required": false,
+      "aliases": [
+        "doNotPair"
+      ],
+      "examples": [
+        [
+          "dairy_with_fish"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.pairings.notes",
+      "label": "Pairing Notes",
+      "domain": "catalogs",
+      "entity": "profile",
+      "valueType": "array",
+      "description": "Notes about pairings.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        [
+          "Acid balances rich curry bases."
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.prefer_tags",
+      "label": "Prefer Tags",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Prefer components with these tags.",
+      "required": false,
+      "aliases": [
+        "preferTags"
+      ],
+      "examples": [
+        [
+          "curry_base",
+          "aromatic"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.avoid_tags",
+      "label": "Avoid Tags",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Avoid components with these tags.",
+      "required": false,
+      "aliases": [
+        "avoidTags"
+      ],
+      "examples": [
+        [
+          "pork"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.prefer_category_ids",
+      "label": "Prefer Category IDs",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Prefer these category ids.",
+      "required": false,
+      "aliases": [
+        "preferCategoryIds"
+      ],
+      "examples": [
+        [
+          "cat.spice",
+          "cat.grain.rice"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.avoid_category_ids",
+      "label": "Avoid Category IDs",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Avoid these category ids.",
+      "required": false,
+      "aliases": [
+        "avoidCategoryIds"
+      ],
+      "examples": [
+        [
+          "cat.pork"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.prefer_substitution_groups",
+      "label": "Prefer Substitution Groups",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Prefer these substitution groups.",
+      "required": false,
+      "aliases": [
+        "preferSubstitutionGroups"
+      ],
+      "examples": [
+        [
+          "subgroup.grain.rice"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.avoid_substitution_groups",
+      "label": "Avoid Substitution Groups",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Avoid these substitution groups.",
+      "required": false,
+      "aliases": [
+        "avoidSubstitutionGroups"
+      ],
+      "examples": [
+        [
+          "subgroup.pork"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.prefer_component_ids",
+      "label": "Prefer Component IDs",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Prefer these explicit component ids.",
+      "required": false,
+      "aliases": [
+        "preferComponentIds"
+      ],
+      "examples": [
+        [
+          "comp.chicken.thighs"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ingredient_bias.avoid_component_ids",
+      "label": "Avoid Component IDs",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Avoid these explicit component ids.",
+      "required": false,
+      "aliases": [
+        "avoidComponentIds"
+      ],
+      "examples": [
+        [
+          "comp.pork.bacon"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.constraints.diet_tags_allowed",
+      "label": "Diet Tags Allowed",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Diet tags allowed under cuisine context.",
+      "required": false,
+      "aliases": [
+        "dietTagsAllowed"
+      ],
+      "examples": [
+        [
+          "gluten_free"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.constraints.diet_tags_avoid",
+      "label": "Diet Tags Avoid",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Diet tags to avoid.",
+      "required": false,
+      "aliases": [
+        "dietTagsAvoid"
+      ],
+      "examples": [
+        [
+          "dairy_free"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.constraints.allergens_avoid",
+      "label": "Allergens Avoid",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Allergens to avoid within cuisine context.",
+      "required": false,
+      "aliases": [
+        "allergensAvoid"
+      ],
+      "examples": [
+        [
+          "peanut"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.constraints.no_pork",
+      "label": "No Pork",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "boolean",
+      "description": "Hard constraint: avoid pork.",
+      "required": false,
+      "aliases": [
+        "noPork"
+      ],
+      "examples": [
+        true
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.constraints.no_shellfish",
+      "label": "No Shellfish",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "boolean",
+      "description": "Hard constraint: avoid shellfish.",
+      "required": false,
+      "aliases": [
+        "noShellfish"
+      ],
+      "examples": [
+        true
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.seasonality.season_tags",
+      "label": "Season Tags",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Season tags where this cuisine is emphasized.",
+      "required": false,
+      "aliases": [
+        "seasonTags"
+      ],
+      "examples": [
+        [
+          "winter"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.seasonality.priority_in_season",
+      "label": "Priority In Season",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "boolean",
+      "description": "If true, planner prioritizes cuisine during its season tags.",
+      "required": false,
+      "aliases": [
+        "priorityInSeason"
+      ],
+      "examples": [
+        false
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.compatible_ids",
+      "label": "Compatible Cuisine IDs",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Cuisine ids compatible for fusion/rotation.",
+      "required": false,
+      "aliases": [
+        "compatibleCuisineIds"
+      ],
+      "examples": [
+        [
+          "cuisine.west_african",
+          "cuisine.mediterranean"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.incompatible_ids",
+      "label": "Incompatible Cuisine IDs",
+      "domain": "catalogs",
+      "entity": "rule",
+      "valueType": "array",
+      "description": "Cuisine ids that should not be combined.",
+      "required": false,
+      "aliases": [
+        "incompatibleCuisineIds"
+      ],
+      "examples": [
+        [
+          "cuisine.japanese.sushi_trad"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.links",
+      "label": "Cuisine Links",
+      "domain": "catalogs",
+      "entity": "ui",
+      "valueType": "array",
+      "description": "Links for learning/resources (label+url).",
+      "required": false,
+      "aliases": [
+        "links"
+      ],
+      "examples": [
+        [
+          {
+            "label": "Basics",
+            "url": "https://example.com"
+          }
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ui.icon",
+      "label": "Cuisine Icon",
+      "domain": "catalogs",
+      "entity": "ui",
+      "valueType": "string",
+      "description": "Icon identifier (lucide or custom).",
+      "required": false,
+      "aliases": [
+        "icon"
+      ],
+      "examples": [
+        "Utensils"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ui.color_hint",
+      "label": "Cuisine Color Hint",
+      "domain": "catalogs",
+      "entity": "ui",
+      "valueType": "string",
+      "description": "Color hint token for UI (no hard-coded colors).",
+      "required": false,
+      "aliases": [
+        "colorHint"
+      ],
+      "examples": [
+        "amber"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ui.sort_order",
+      "label": "Cuisine Sort Order",
+      "domain": "catalogs",
+      "entity": "ui",
+      "valueType": "number",
+      "description": "Sort order for list views.",
+      "required": false,
+      "aliases": [
+        "sortOrder"
+      ],
+      "examples": [
+        10
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "cuisine.ui.emoji",
+      "label": "Cuisine Emoji",
+      "domain": "catalogs",
+      "entity": "ui",
+      "valueType": "string",
+      "description": "Optional emoji for UI.",
+      "required": false,
+      "aliases": [
+        "emoji"
+      ],
+      "examples": [
+        "🍛"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.weight",
+      "label": "Cuisine Weight",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "number",
+      "description": "User/household preference weight for a cuisine (0..1 or 0..100).",
+      "required": false,
+      "aliases": [
+        "weight",
+        "preferenceWeight"
+      ],
+      "examples": [
+        0.8
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.frequency",
+      "label": "Cuisine Frequency",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "object",
+      "description": "Desired frequency settings (per week/month) for cuisine rotation.",
+      "required": false,
+      "aliases": [
+        "frequency"
+      ],
+      "examples": [
+        {
+          "perWeek": 2
+        }
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.avoid",
+      "label": "Avoid Cuisine",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "boolean",
+      "description": "If true, cuisine should be excluded from planner.",
+      "required": false,
+      "aliases": [
+        "avoid"
+      ],
+      "examples": [
+        false
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.heat_preference",
+      "label": "Heat Preference",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "enum",
+      "description": "Preferred heat level for this cuisine.",
+      "required": false,
+      "aliases": [
+        "heatPreference"
+      ],
+      "examples": [
+        "medium"
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.spice_blacklist",
+      "label": "Spice Blacklist",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "array",
+      "description": "Spices/herbs/aromatics user wants to avoid.",
+      "required": false,
+      "aliases": [
+        "blacklist"
+      ],
+      "examples": [
+        [
+          "cumin"
+        ]
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.spice_whitelist",
+      "label": "Spice Whitelist",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "array",
+      "description": "Spices/herbs/aromatics user wants to emphasize.",
+      "required": false,
+      "aliases": [
+        "whitelist"
+      ],
+      "examples": [
+        [
+          "turmeric"
+        ]
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.substitutions_enabled",
+      "label": "Substitutions Enabled",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "boolean",
+      "description": "Whether planner may apply substitution rules for this cuisine.",
+      "required": false,
+      "aliases": [
+        "subsEnabled"
+      ],
+      "examples": [
+        true
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "pref.cuisine.fusion_allowed",
+      "label": "Fusion Allowed",
+      "domain": "preferences",
+      "entity": "preference",
+      "valueType": "boolean",
+      "description": "Whether planner may blend this cuisine with compatible cuisines.",
+      "required": false,
+      "aliases": [
+        "fusionAllowed"
+      ],
+      "examples": [
+        true
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.cuisine.force_id",
+      "label": "Force Cuisine ID",
+      "domain": "meal_planning",
+      "entity": "override",
+      "valueType": "string",
+      "description": "Force a cuisine selection for a specific plan/meal slot.",
+      "required": false,
+      "aliases": [
+        "forceCuisineId"
+      ],
+      "examples": [
+        "cuisine.caribbean"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.cuisine.block_ids",
+      "label": "Block Cuisine IDs",
+      "domain": "meal_planning",
+      "entity": "override",
+      "valueType": "array",
+      "description": "Block cuisines for a specific plan/meal slot.",
+      "required": false,
+      "aliases": [
+        "blockCuisineIds"
+      ],
+      "examples": [
+        [
+          "cuisine.italian"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.cuisine.bias_tags",
+      "label": "Bias Tags",
+      "domain": "meal_planning",
+      "entity": "override",
+      "valueType": "array",
+      "description": "Temporary bias tags to influence selection.",
+      "required": false,
+      "aliases": [
+        "biasTags"
+      ],
+      "examples": [
+        [
+          "comfort_food"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    }
+  ]
+}

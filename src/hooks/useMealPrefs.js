@@ -224,8 +224,10 @@ export function useMealPrefs(opts = {}) {
   );
 
   const loadDefaults = useCallback((profileKey = null) => {
-    if (MealPrefsStore.loadDefaults) return MealPrefsStore.loadDefaults(profileKey);
-    if (MealPrefsStore.loadProfileDefaults) return MealPrefsStore.loadProfileDefaults(profileKey);
+    if (MealPrefsStore.loadDefaults)
+      return MealPrefsStore.loadDefaults(profileKey);
+    if (MealPrefsStore.loadProfileDefaults)
+      return MealPrefsStore.loadProfileDefaults(profileKey);
     return undefined;
   }, []);
 
@@ -235,13 +237,16 @@ export function useMealPrefs(opts = {}) {
     return undefined;
   }, []);
 
-  const applyTemplate = useCallback((templateId, overrides = {}) => {
-    if (MealPrefsStore.applyTemplate) {
-      return MealPrefsStore.applyTemplate(templateId, overrides);
-    }
-    // Fallback: naive patch with overrides—assumes templates already expanded elsewhere.
-    return merge(overrides);
-  }, [merge]);
+  const applyTemplate = useCallback(
+    (templateId, overrides = {}) => {
+      if (MealPrefsStore.applyTemplate) {
+        return MealPrefsStore.applyTemplate(templateId, overrides);
+      }
+      // Fallback: naive patch with overrides—assumes templates already expanded elsewhere.
+      return merge(overrides);
+    },
+    [merge]
+  );
 
   const validate = useCallback(() => {
     if (MealPrefsStore.validate) return MealPrefsStore.validate();
@@ -251,7 +256,9 @@ export function useMealPrefs(opts = {}) {
   // Non-React consumers (e.g., agents, workers) may want to subscribe directly.
   const subscribeExternal = useCallback((listener) => {
     if (!isFn(listener)) return () => {};
-    return MealPrefsStore.subscribe(() => listener(MealPrefsStore.getState()?.prefs ?? MealPrefsStore.getState()));
+    return MealPrefsStore.subscribe(() =>
+      listener(MealPrefsStore.getState()?.prefs ?? MealPrefsStore.getState())
+    );
   }, []);
 
   // --- convenience setters you already expose
@@ -371,19 +378,19 @@ export function useMealPrefs(opts = {}) {
     // base actions
     set: setPath,
     patch,
-    reset: resetSection,
+    reset: resetSection, // ✅ low-level (section) reset
 
     // higher-level API (matches .d.ts)
     setPrefs,
     merge,
-    reset, // kind: "soft" | "hard" | "factory"
+    resetKind: reset, // ✅ high-level kind reset (soft/hard/factory)
     loadDefaults,
     persistNow,
     subscribe: subscribeExternal,
     applyTemplate,
     validate,
 
-    // derived values for your modules
+    // derived values
     portions,
     sabbathAware,
     nextBatchSessionISO,
@@ -415,7 +422,10 @@ export function useMealPrefs(opts = {}) {
 export function useMealPrefsSelector(selector, deps = [], areEqual) {
   const sel = selector || ((s) => s);
   const subscribe = useCallback((cb) => MealPrefsStore.subscribe(cb), []);
-  const getSnapshot = useCallback(() => sel(MealPrefsStore.getState()), [sel, ...deps]);
+  const getSnapshot = useCallback(
+    () => sel(MealPrefsStore.getState()),
+    [sel, ...deps]
+  );
   const serverSnapshot = getSnapshot;
 
   const slice = useSyncExternalStore(subscribe, getSnapshot, serverSnapshot);

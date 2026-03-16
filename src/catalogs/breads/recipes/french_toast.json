@@ -1,0 +1,283 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.french_toast",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Classic French Toast",
+    "subtitle": "Custardy inside • crisp edges • best with day-old sandwich bread or brioche",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Everyday French toast optimized for sliced sandwich bread (white or whole wheat). Includes dairy/non-dairy paths and oven-warm holding method."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "breakfast",
+    "subprofiles": ["pan-fried", "custard", "sweet", "kid-friendly"],
+    "mealArchetypes": ["breakfast", "brunch"],
+    "servingStyles": ["slices"],
+    "plannerTags": [
+      "french toast",
+      "breakfast",
+      "brunch",
+      "quick",
+      "uses-stale-bread"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 2, "unit": "slices" },
+    "notes": "Makes ~8 slices depending on bread size and thickness."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 5,
+    "totalMins": 25
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "whisk", "skillet or griddle", "spatula"],
+    "recommended": ["cast iron skillet or griddle", "wire rack", "sheet pan"],
+    "optional": ["instant-read thermometer", "oven (to hold warm)"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "egg", "milk"],
+
+  "signals": {
+    "breakfast": true,
+    "quick": true,
+    "usesStaleBread": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "moderate",
+    "saltiness": "low",
+    "richness": "medium",
+    "texture": "custardy-center-crisp-edges",
+    "notes": "Warm cinnamon-vanilla aroma; balanced custard without being soggy."
+  },
+
+  "ingredients": [
+    {
+      "id": "bread",
+      "label": "Sliced bread (day-old preferred; sandwich bread, brioche, or challah)",
+      "role": "base",
+      "amount": { "value": 8, "unit": "slices" },
+      "notes": "Thicker slices (3/4–1 inch) work best. If bread is very fresh/soft, dry it briefly (see notes)."
+    },
+    {
+      "id": "eggs",
+      "label": "Large eggs",
+      "role": "custard",
+      "amount": { "value": 3, "unit": "each" },
+      "notes": "About 150g total egg if weighing."
+    },
+    {
+      "id": "milk",
+      "label": "Milk (whole milk preferred; or half-and-half)",
+      "role": "custard",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "1 cup. For richer custard, use half-and-half."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar",
+      "role": "sweetener",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "vanilla",
+      "label": "Vanilla extract",
+      "role": "flavor",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "cinnamon",
+      "label": "Ground cinnamon",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/4 teaspoon."
+    },
+    {
+      "id": "butter",
+      "label": "Butter (for cooking)",
+      "role": "cook",
+      "amount": { "value": 28, "unit": "g" },
+      "notes": "About 2 tablespoons total; use as needed per batch."
+    },
+    {
+      "id": "oil_optional",
+      "label": "Neutral oil (optional, prevents butter from burning)",
+      "role": "cook",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "Use a small amount alongside butter, especially on very hot griddles."
+    },
+    {
+      "id": "maple_syrup_optional",
+      "label": "Maple syrup (to serve)",
+      "role": "serve",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "powdered_sugar_optional",
+      "label": "Powdered sugar (to serve)",
+      "role": "serve",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "berries_optional",
+      "label": "Berries or sliced fruit (to serve)",
+      "role": "serve",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Optional: dry fresh bread for better soak",
+      "instructions": [
+        "If bread is very fresh and squishy, lay slices on a rack and air-dry 10 minutes, OR toast lightly, OR warm in a 300°F (150°C) oven for 6–8 minutes to dry the surface.",
+        "Day-old bread usually needs no drying."
+      ],
+      "handsOffMins": 10,
+      "timers": [
+        { "label": "Air-dry (optional)", "mins": 10 },
+        { "label": "Oven dry (optional)", "mins": 7 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Make the custard",
+      "instructions": [
+        "In a shallow bowl or baking dish, whisk eggs until smooth.",
+        "Whisk in milk, sugar, vanilla, cinnamon, and salt until fully combined."
+      ],
+      "activeMins": 4
+    },
+    {
+      "id": "step_03",
+      "title": "Heat the pan",
+      "instructions": [
+        "Heat a skillet or griddle over medium heat.",
+        "Add a small knob of butter (and a touch of oil if using). Pan should be hot enough that butter foams but doesn’t smoke heavily."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_04",
+      "title": "Soak bread briefly (don’t saturate)",
+      "instructions": [
+        "Dip each bread slice in the custard 5–10 seconds per side (thicker bread can go 10–15 seconds).",
+        "Lift and let excess drip off for a second so the surface isn’t dripping."
+      ],
+      "activeMins": 5,
+      "timers": [
+        { "label": "Dip per side (thin)", "seconds": 8 },
+        { "label": "Dip per side (thick)", "seconds": 12 }
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Cook until golden",
+      "instructions": [
+        "Place dipped slices on the hot pan. Cook 2–3 minutes per side until golden brown with crisp edges.",
+        "Work in batches; add more butter as needed between batches.",
+        "If browning too fast, reduce heat. If pale and drying out, increase heat slightly."
+      ],
+      "handsOffMins": 12,
+      "timers": [
+        { "label": "Cook side 1", "mins": 3 },
+        { "label": "Cook side 2", "mins": 2 }
+      ]
+    },
+    {
+      "id": "step_06",
+      "title": "Hold warm (optional) and serve",
+      "instructions": [
+        "For batch cooking: hold finished slices on a rack over a sheet pan in a 200°F (95°C) oven until ready to serve.",
+        "Serve with maple syrup, powdered sugar, fruit, or butter."
+      ],
+      "activeMins": 3
+    }
+  ],
+
+  "variations": [
+    {
+      "name": "Extra-rich custard French toast",
+      "change": "Replace 120g of the milk with 120g half-and-half (or add 30g melted butter to custard).",
+      "notes": "More custardy center; great for brioche/challah."
+    },
+    {
+      "name": "Cinnamon roll vibe",
+      "change": "Add 1g nutmeg and 2g extra cinnamon; serve with a simple glaze (powdered sugar + milk).",
+      "notes": "Kid-friendly and dessert-like."
+    },
+    {
+      "name": "Less sweet / more savory breakfast",
+      "change": "Reduce sugar to 10g and add a pinch more salt; top with butter and fruit (skip syrup).",
+      "notes": "Balances very sweet breads."
+    },
+    {
+      "name": "Dairy-free option",
+      "change": "Use unsweetened oat milk or almond milk and cook with oil instead of butter.",
+      "notes": "Allergens still include egg + wheat."
+    }
+  ],
+
+  "notes": [
+    "Day-old bread gives the best texture (absorbs custard without collapsing).",
+    "If you get soggy French toast: reduce soaking time, increase pan heat slightly, and ensure pan is fully preheated.",
+    "If you get dry French toast: soak 2–3 seconds longer per side and cook slightly lower/longer.",
+    "For even cooking, use medium heat and don’t overcrowd the pan."
+  ],
+
+  "pairings": {
+    "serveWith": ["sausage", "scrambled eggs", "fresh fruit", "yogurt"],
+    "drinkWith": ["coffee", "tea", "milk"]
+  },
+
+  "storage": {
+    "fridge": "Cool completely, store airtight up to 3 days.",
+    "freezer": "Freeze in a single layer then bag up to 2 months; reheat in toaster or oven.",
+    "reheat": "Toaster is best for crisp edges; oven at 350°F (175°C) for 6–10 minutes also works."
+  },
+
+  "links": {
+    "related": [
+      "breads/recipes/sandwich_bread_white",
+      "breads/recipes/whole_wheat_sandwich_bread",
+      "breads/recipes/banana_bread"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: top-level schemaVersion+meta; ingredient objects include id+label and amount; steps include id+title and instructions."
+  }
+}

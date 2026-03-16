@@ -25,7 +25,7 @@
  * - Unknown units are passed through unchanged; numeric portions still scaled.
  */
 
-import { emit } from "@/services/eventBus"; // Optional analytics; errors are swallowed if absent
+import { emit } from "@/services/events/eventBus"; // Optional analytics; errors are swallowed if absent
 
 /* --------------------------------- Types ---------------------------------- */
 /**
@@ -120,7 +120,7 @@ const DENSITIES = new Map([
   ["maple syrup", 1.32],
   ["olive oil", 0.91],
   ["all-purpose flour", 0.53], // sifted cup ~125g → 125/236.6 ≈ 0.53 g/ml
-  ["granulated sugar", 0.85],  // 200g/236ml ≈ 0.85
+  ["granulated sugar", 0.85], // 200g/236ml ≈ 0.85
   ["brown sugar (packed)", 1.1],
   ["cocoa powder", 0.5],
   ["salt (kosher)", 0.6],
@@ -163,11 +163,13 @@ function evalCurve(name, scale) {
 }
 
 /* Built-in curves */
-registerYieldCurve("time.batch", (s) => Math.pow(s, 0.30));     // stew/soup
-registerYieldCurve("time.bake", (s) => Math.pow(s, 0.20));      // loaf/cake interior set
+registerYieldCurve("time.batch", (s) => Math.pow(s, 0.3)); // stew/soup
+registerYieldCurve("time.bake", (s) => Math.pow(s, 0.2)); // loaf/cake interior set
 registerYieldCurve("seasoning.default", (s) => Math.pow(s, 0.85));
-registerYieldCurve("aromatics.default", (s) => Math.pow(s, 0.90));
-registerYieldCurve("leavener.default", (s) => clamp(Math.pow(s, 0.75), 0.5, 1.75));
+registerYieldCurve("aromatics.default", (s) => Math.pow(s, 0.9));
+registerYieldCurve("leavener.default", (s) =>
+  clamp(Math.pow(s, 0.75), 0.5, 1.75)
+);
 
 /* ---------------------------- Ingredient Rules ---------------------------- */
 /**
@@ -178,7 +180,11 @@ const ING_RULES = [];
 
 /** Public: add a rule */
 export function registerIngredientRule(rule) {
-  if (rule && typeof rule.match === "function" && typeof rule.apply === "function") {
+  if (
+    rule &&
+    typeof rule.match === "function" &&
+    typeof rule.apply === "function"
+  ) {
     ING_RULES.push(rule);
   }
 }
@@ -188,19 +194,29 @@ export function registerIngredientRule(rule) {
 const leavenerRx = /\b(baking\s*(powder|soda)|yeast|bicarbonate)\b/i;
 registerIngredientRule({
   match: (ing) => leavenerRx.test(ing.name),
-  apply: ({ qty, scale }) => ({ qty: qty * evalCurve("leavener.default", scale), notes: "Adjusted leavener for scale" }),
+  apply: ({ qty, scale }) => ({
+    qty: qty * evalCurve("leavener.default", scale),
+    notes: "Adjusted leavener for scale",
+  }),
 });
 
 const saltRx = /\b(salt|kosher salt|sea salt|table salt)\b/i;
 registerIngredientRule({
   match: (ing) => saltRx.test(ing.name),
-  apply: ({ qty, scale }) => ({ qty: qty * evalCurve("seasoning.default", scale), notes: "Seasoning scales sublinearly" }),
+  apply: ({ qty, scale }) => ({
+    qty: qty * evalCurve("seasoning.default", scale),
+    notes: "Seasoning scales sublinearly",
+  }),
 });
 
-const aromaticsRx = /\b(garlic|onion|shallot|scallion|ginger|chile|chili|pepper)\b/i;
+const aromaticsRx =
+  /\b(garlic|onion|shallot|scallion|ginger|chile|chili|pepper)\b/i;
 registerIngredientRule({
   match: (ing) => aromaticsRx.test(ing.name),
-  apply: ({ qty, scale }) => ({ qty: qty * evalCurve("aromatics.default", scale), notes: "Aromatics scale gently" }),
+  apply: ({ qty, scale }) => ({
+    qty: qty * evalCurve("aromatics.default", scale),
+    notes: "Aromatics scale gently",
+  }),
 });
 
 /* --------------------------- Pan Geometry Helpers ------------------------- */
@@ -213,8 +229,12 @@ function panArea(pan = {}) {
     const r = (pan.diameter * toCm) / 2;
     return Math.PI * r * r;
   }
-  if (pan.shape === "rect" && Number.isFinite(pan.width) && Number.isFinite(pan.length)) {
-    return (pan.width * toCm) * (pan.length * toCm);
+  if (
+    pan.shape === "rect" &&
+    Number.isFinite(pan.width) &&
+    Number.isFinite(pan.length)
+  ) {
+    return pan.width * toCm * (pan.length * toCm);
   }
   return NaN;
 }
@@ -290,8 +310,12 @@ function lookupDensity(name) {
   return k ? DENSITIES.get(k) : null;
 }
 
-function gToMl(g, dens) { return g / dens; }
-function mlToG(ml, dens) { return ml * dens; }
+function gToMl(g, dens) {
+  return g / dens;
+}
+function mlToG(ml, dens) {
+  return ml * dens;
+}
 
 /* --------------------------- Scale Factor Compute -------------------------- */
 
@@ -301,8 +325,14 @@ function mlToG(ml, dens) { return ml * dens; }
  */
 export function computeScaleFactor(recipe, options = {}) {
   const meta = recipe?.meta || {};
-  const fromServings = Number.isFinite(meta.servings) ? meta.servings : (Number.isFinite(options.fromServings) ? options.fromServings : NaN);
-  const toServings = Number.isFinite(options.toServings) ? options.toServings : NaN;
+  const fromServings = Number.isFinite(meta.servings)
+    ? meta.servings
+    : Number.isFinite(options.fromServings)
+    ? options.fromServings
+    : NaN;
+  const toServings = Number.isFinite(options.toServings)
+    ? options.toServings
+    : NaN;
 
   // Yield-based scaling
   if (options.toYield?.targetWeightG || options.toYield?.targetVolumeMl) {
@@ -364,7 +394,9 @@ export function scaleRecipe(recipe, options = {}) {
 
   // Instructions timing
   if (opts.adjustTiming && Array.isArray(out.instructions)) {
-    out.instructions = out.instructions.map((ins) => scaleInstruction(ins, factor, recipe));
+    out.instructions = out.instructions.map((ins) =>
+      scaleInstruction(ins, factor, recipe)
+    );
   }
 
   // Yield recompute
@@ -384,7 +416,7 @@ export function scaleRecipe(recipe, options = {}) {
       type: "recipe.scaled",
       ts: new Date().toISOString(),
       source: "cooking.scaleAndYield",
-      data: { id: recipe?.id, factor, method }
+      data: { id: recipe?.id, factor, method },
     });
   } catch {}
 
@@ -402,8 +434,12 @@ function scaleIngredient(ing, factor, ctx) {
   if (parsed.kind === "range") {
     const lo = applyRules(node, parsed.min, factor, ctx);
     const hi = applyRules(node, parsed.max, factor, ctx);
-    node.qty = `${fmt(lo.qty, ctx.limitDecimals)}–${fmt(hi.qty, ctx.limitDecimals)}`;
-    if (lo.notes || hi.notes) note = [lo.notes, hi.notes].filter(Boolean).join("; ");
+    node.qty = `${fmt(lo.qty, ctx.limitDecimals)}–${fmt(
+      hi.qty,
+      ctx.limitDecimals
+    )}`;
+    if (lo.notes || hi.notes)
+      note = [lo.notes, hi.notes].filter(Boolean).join("; ");
   } else if (parsed.kind === "numeric") {
     const res = applyRules(node, parsed.value, factor, ctx);
     node.qty = fmt(res.qty, ctx.limitDecimals);
@@ -435,7 +471,14 @@ function applyRules(ing, qty, factor, ctx) {
   if (ctx.adjustSeasoning) {
     for (const rule of ING_RULES) {
       if (safeCall(rule.match, ing)) {
-        const res = safeCall(rule.apply, { qty: scaledQty, unit: u, scale: factor, recipe: null, ingredient: ing }) || {};
+        const res =
+          safeCall(rule.apply, {
+            qty: scaledQty,
+            unit: u,
+            scale: factor,
+            recipe: null,
+            ingredient: ing,
+          }) || {};
         if (Number.isFinite(res.qty)) scaledQty = res.qty;
         if (res.notes) ruleNote = res.notes;
       }
@@ -464,14 +507,27 @@ function scaleInstruction(ins, factor, recipe) {
   if (!curve) {
     // Light touch: tiny batches scale almost linearly for short operations (mix, whisk)
     const adj = 0.05 * (factor - 1); // +/-5% per ×1.0
-    node.durationSec = clampInt(Math.round(node.durationSec * (1 + adj)), 5, 8 * 3600);
+    node.durationSec = clampInt(
+      Math.round(node.durationSec * (1 + adj)),
+      5,
+      8 * 3600
+    );
     return node;
   }
 
   const timeScale = evalCurve(curve, factor);
-  node.durationSec = clampInt(Math.round(node.durationSec * timeScale), 5, 8 * 3600);
+  node.durationSec = clampInt(
+    Math.round(node.durationSec * timeScale),
+    5,
+    8 * 3600
+  );
   node.meta = node.meta || {};
-  node.meta = { ...node.meta, scaledByCurve: curve, scaleFactor: factor, timeScale };
+  node.meta = {
+    ...node.meta,
+    scaledByCurve: curve,
+    scaleFactor: factor,
+    timeScale,
+  };
   return node;
 }
 
@@ -537,7 +593,8 @@ function normalizeQtyUnit(ing) {
 
 function parseQty(q) {
   if (q == null || q === "") return { kind: "none" };
-  if (typeof q === "number" && isFinite(q)) return { kind: "numeric", value: q };
+  if (typeof q === "number" && isFinite(q))
+    return { kind: "numeric", value: q };
   const s = String(q).trim();
 
   // range "1-2" or "1–2"
@@ -546,11 +603,19 @@ function parseQty(q) {
 
   // vulgar fraction "1 1/2"
   const f = s.match(/^(\d+)\s+(\d+)\/(\d+)$/);
-  if (f) return { kind: "numeric", value: parseInt(f[1], 10) + parseInt(f[2], 10) / parseInt(f[3], 10) };
+  if (f)
+    return {
+      kind: "numeric",
+      value: parseInt(f[1], 10) + parseInt(f[2], 10) / parseInt(f[3], 10),
+    };
 
   // simple fraction "3/4"
   const sf = s.match(/^(\d+)\/(\d+)$/);
-  if (sf) return { kind: "numeric", value: parseInt(sf[1], 10) / parseInt(sf[2], 10) };
+  if (sf)
+    return {
+      kind: "numeric",
+      value: parseInt(sf[1], 10) / parseInt(sf[2], 10),
+    };
 
   // numeric token
   const n = parseFloat(s);
@@ -585,7 +650,11 @@ function sanitize(obj) {
 }
 
 function clone(v) {
-  try { return structuredClone(v); } catch { return JSON.parse(JSON.stringify(v)); }
+  try {
+    return structuredClone(v);
+  } catch {
+    return JSON.parse(JSON.stringify(v));
+  }
 }
 
 /* --------------------------- Formatter Extension -------------------------- */

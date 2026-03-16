@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // C:\Users\larho\suka-smart-assistant\src\pages\knowledge\yield-curves.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * knowledge/yield-curves.jsx — Yield Curves Knowledge Page
@@ -37,7 +43,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // ----------------------------- Soft Imports ---------------------------------
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch {}
 
 let Config = { get: (_k, fallback) => fallback };
@@ -86,9 +94,12 @@ function nanoid(len = 12) {
 
 // Heuristic schema guard for yield curves. Keep permissive & extensible.
 function validateYieldCurve(obj) {
-  if (!obj || typeof obj !== "object") return { ok: false, reason: "not-an-object" };
-  if (!obj.id || typeof obj.id !== "string") return { ok: false, reason: "missing-id" };
-  if (!obj.name || typeof obj.name !== "string") return { ok: false, reason: "missing-name" };
+  if (!obj || typeof obj !== "object")
+    return { ok: false, reason: "not-an-object" };
+  if (!obj.id || typeof obj.id !== "string")
+    return { ok: false, reason: "missing-id" };
+  if (!obj.name || typeof obj.name !== "string")
+    return { ok: false, reason: "missing-name" };
   if (!obj.category || typeof obj.category !== "string")
     return { ok: false, reason: "missing-category" };
   // Optional: version, unit, notes, mappings, entries[]
@@ -108,14 +119,17 @@ function normalizeYieldCurve(obj) {
     entries: Array.isArray(obj.entries) ? obj.entries : [],
     meta: typeof obj.meta === "object" && obj.meta ? obj.meta : {},
     updatedAt: NOW_ISO(),
-    createdAt: obj.createdAt && isISO(obj.createdAt) ? obj.createdAt : NOW_ISO(),
+    createdAt:
+      obj.createdAt && isISO(obj.createdAt) ? obj.createdAt : NOW_ISO(),
   };
   return base;
 }
 
 function downloadJSON(filename, obj) {
   try {
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(obj, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -215,7 +229,10 @@ export default function KnowledgeYieldCurvesPage() {
         if (!alive) return;
         setItems(Array.isArray(all) ? all : []);
       } catch (e) {
-        setStatus({ kind: "warn", message: "Could not load yield curves (degraded mode)." });
+        setStatus({
+          kind: "warn",
+          message: "Could not load yield curves (degraded mode).",
+        });
       }
     })();
     return () => {
@@ -234,9 +251,9 @@ export default function KnowledgeYieldCurvesPage() {
     return items.filter((it) => {
       if (category !== "all" && it.category !== category) return false;
       if (!s) return true;
-      const hay = `${it.id} ${it.name} ${it.category} ${it.unit} ${it.notes} ${JSON.stringify(
-        it.entries ?? []
-      )}`.toLowerCase();
+      const hay = `${it.id} ${it.name} ${it.category} ${it.unit} ${
+        it.notes
+      } ${JSON.stringify(it.entries ?? [])}`.toLowerCase();
       return hay.includes(s);
     });
   }, [items, q, category]);
@@ -247,7 +264,9 @@ export default function KnowledgeYieldCurvesPage() {
       acc[it.category] = (acc[it.category] ?? 0) + 1;
       return acc;
     }, {});
-    const top = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const top = Object.entries(byCat)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6);
     return { total, top };
   }, [items]);
 
@@ -256,82 +275,84 @@ export default function KnowledgeYieldCurvesPage() {
     fileInputRef.current?.click();
   }, []);
 
-  const onFileChange = useCallback(async (e) => {
-    try {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const text = await file.text();
-      let json = null;
+  const onFileChange = useCallback(
+    async (e) => {
       try {
-        json = JSON.parse(text);
-      } catch {
-        setStatus({ kind: "error", message: "Invalid JSON file." });
-        return;
-      }
-
-      // Accept either a single curve or an array of curves
-      const toIngest = Array.isArray(json) ? json : [json];
-      let created = 0;
-      let updated = 0;
-
-      for (const raw of toIngest) {
-        const check = validateYieldCurve(raw);
-        if (!check.ok) {
-          console.warn("Skipped invalid curve:", check.reason, raw);
-          continue;
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        let json = null;
+        try {
+          json = JSON.parse(text);
+        } catch {
+          setStatus({ kind: "error", message: "Invalid JSON file." });
+          return;
         }
-        const normalized = normalizeYieldCurve(raw);
-        const exists = items.find((x) => x.id === normalized.id);
-        await upsertYieldCurve(normalized);
-        if (exists) {
-          emitEvent("yieldcurve.updated", "KnowledgeYieldCurves", {
-            id: normalized.id,
-            name: normalized.name,
-            category: normalized.category,
-            unit: normalized.unit,
-          });
-          updated++;
-        } else {
-          emitEvent("yieldcurve.created", "KnowledgeYieldCurves", {
-            id: normalized.id,
-            name: normalized.name,
-            category: normalized.category,
-            unit: normalized.unit,
-          });
-          created++;
+
+        // Accept either a single curve or an array of curves
+        const toIngest = Array.isArray(json) ? json : [json];
+        let created = 0;
+        let updated = 0;
+
+        for (const raw of toIngest) {
+          const check = validateYieldCurve(raw);
+          if (!check.ok) {
+            console.warn("Skipped invalid curve:", check.reason, raw);
+            continue;
+          }
+          const normalized = normalizeYieldCurve(raw);
+          const exists = items.find((x) => x.id === normalized.id);
+          await upsertYieldCurve(normalized);
+          if (exists) {
+            emitEvent("yieldcurve.updated", "KnowledgeYieldCurves", {
+              id: normalized.id,
+              name: normalized.name,
+              category: normalized.category,
+              unit: normalized.unit,
+            });
+            updated++;
+          } else {
+            emitEvent("yieldcurve.created", "KnowledgeYieldCurves", {
+              id: normalized.id,
+              name: normalized.name,
+              category: normalized.category,
+              unit: normalized.unit,
+            });
+            created++;
+          }
         }
-      }
 
-      // Refresh list
-      const refreshed = await listAllYieldCurves();
-      setItems(Array.isArray(refreshed) ? refreshed : []);
-
-      setStatus({
-        kind: "ok",
-        message: `Imported ${created + updated} curve(s) (${created} created, ${updated} updated).`,
-      });
-      e.target.value = ""; // reset
-    } catch (err) {
-      console.error(err);
-      setStatus({ kind: "error", message: "Import failed." });
-    }
-  }, [items]);
-
-  const onDelete = useCallback(
-    async (id) => {
-      if (!id) return;
-      if (!confirm("Delete this yield curve?")) return;
-      try {
-        await deleteYieldCurve(id);
-        emitEvent("yieldcurve.deleted", "KnowledgeYieldCurves", { id });
+        // Refresh list
         const refreshed = await listAllYieldCurves();
         setItems(Array.isArray(refreshed) ? refreshed : []);
-      } catch (e) {
-        setStatus({ kind: "error", message: "Delete failed." });
+
+        setStatus({
+          kind: "ok",
+          message: `Imported ${
+            created + updated
+          } curve(s) (${created} created, ${updated} updated).`,
+        });
+        e.target.value = ""; // reset
+      } catch (err) {
+        console.error(err);
+        setStatus({ kind: "error", message: "Import failed." });
       }
     },
-    []
+    [items]
   );
+
+  const onDelete = useCallback(async (id) => {
+    if (!id) return;
+    if (!confirm("Delete this yield curve?")) return;
+    try {
+      await deleteYieldCurve(id);
+      emitEvent("yieldcurve.deleted", "KnowledgeYieldCurves", { id });
+      const refreshed = await listAllYieldCurves();
+      setItems(Array.isArray(refreshed) ? refreshed : []);
+    } catch (e) {
+      setStatus({ kind: "error", message: "Delete failed." });
+    }
+  }, []);
 
   const onExportAll = useCallback(() => {
     downloadJSON(
@@ -344,7 +365,9 @@ export default function KnowledgeYieldCurvesPage() {
     // This is a signal to downstream engines to recompute projections that
     // depend on yield curves (e.g., cut yields → inventory projections,
     // preservation capacity → session planning).
-    emitEvent("yieldcurve.recalculated", "KnowledgeYieldCurves", { count: items.length });
+    emitEvent("yieldcurve.recalculated", "KnowledgeYieldCurves", {
+      count: items.length,
+    });
     setStatus({ kind: "ok", message: "Recalculation signal emitted." });
   }, [items.length]);
 
@@ -356,18 +379,28 @@ export default function KnowledgeYieldCurvesPage() {
           <div>
             <h1 className="text-xl md:text-2xl font-semibold">Yield Curves</h1>
             <p className="text-sm text-neutral-600">
-              Domain intelligence for meat cuts, preservation methods, substitutions, and produce.
-              Changes emit bus events and optionally export to the Hub.
+              Domain intelligence for meat cuts, preservation methods,
+              substitutions, and produce. Changes emit bus events and optionally
+              export to the Hub.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onRecalculate}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onRecalculate}
+            >
               Recalculate projections
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onExportAll}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onExportAll}
+            >
               Export JSON
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onClickImport}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onClickImport}
+            >
               Import JSON
             </button>
             <input
@@ -407,7 +440,9 @@ export default function KnowledgeYieldCurvesPage() {
         />
         <KpiCard
           label="Second category"
-          value={kpis.top.length > 1 ? `${kpis.top[1][0]} ×${kpis.top[1][1]}` : "—"}
+          value={
+            kpis.top.length > 1 ? `${kpis.top[1][0]} ×${kpis.top[1][1]}` : "—"
+          }
         />
       </section>
 
@@ -415,7 +450,9 @@ export default function KnowledgeYieldCurvesPage() {
       <section className="rounded-2xl border p-3 md:p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4">
           <div className="md:col-span-4">
-            <label className="block text-xs text-neutral-600 mb-1">Search</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Search
+            </label>
             <input
               className="w-full rounded-xl border px-3 py-2 text-sm"
               placeholder="Find by name, id, unit, notes, or entry text"
@@ -424,7 +461,9 @@ export default function KnowledgeYieldCurvesPage() {
             />
           </div>
           <div className="md:col-span-4">
-            <label className="block text-xs text-neutral-600 mb-1">Category</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Category
+            </label>
             <select
               className="w-full rounded-xl border px-3 py-2 text-sm bg-white"
               value={category}
@@ -444,7 +483,8 @@ export default function KnowledgeYieldCurvesPage() {
       <section>
         {filtered.length === 0 ? (
           <div className="text-sm text-neutral-600 border rounded-2xl p-6 text-center">
-            No yield curves found. Import some JSON or add via your YieldCurveService.
+            No yield curves found. Import some JSON or add via your
+            YieldCurveService.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
@@ -463,20 +503,24 @@ export default function KnowledgeYieldCurvesPage() {
           </summary>
           <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
             <li>
-              <strong>Imports →</strong> Scan seed packets, animal plans, or how-to guides; normalizers
-              map raw content into domain facts (methods, equipment, seasonality).
+              <strong>Imports →</strong> Scan seed packets, animal plans, or
+              how-to guides; normalizers map raw content into domain facts
+              (methods, equipment, seasonality).
             </li>
             <li>
-              <strong>Intelligence →</strong> Yield curves translate ingredients/inputs into expected
-              outputs (trim loss, jar/tray counts, dried ratios).
+              <strong>Intelligence →</strong> Yield curves translate
+              ingredients/inputs into expected outputs (trim loss, jar/tray
+              counts, dried ratios).
             </li>
             <li>
-              <strong>Automation →</strong> Session engines (Cooking, Cleaning, Garden, Animal,
-              Preservation) use curves to size tasks and detect shortages.
+              <strong>Automation →</strong> Session engines (Cooking, Cleaning,
+              Garden, Animal, Preservation) use curves to size tasks and detect
+              shortages.
             </li>
             <li>
-              <strong>Hub export (optional) →</strong> When enabled, created/updated curves are
-              formatted and forwarded to SVFFH so community planners can align supply with demand.
+              <strong>Hub export (optional) →</strong> When enabled,
+              created/updated curves are formatted and forwarded to SVFFH so
+              community planners can align supply with demand.
             </li>
           </ul>
         </details>
@@ -518,8 +562,12 @@ function CurveCard({ curve, onDelete }) {
           <div className="font-medium">{curve.name}</div>
           <div className="text-xs text-neutral-600">
             <span className="mr-2">#{curve.id}</span>
-            <span className="px-2 py-0.5 border rounded-full">{curve.category}</span>
-            {curve.unit ? <span className="ml-2 text-neutral-500">• {curve.unit}</span> : null}
+            <span className="px-2 py-0.5 border rounded-full">
+              {curve.category}
+            </span>
+            {curve.unit ? (
+              <span className="ml-2 text-neutral-500">• {curve.unit}</span>
+            ) : null}
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -529,7 +577,10 @@ function CurveCard({ curve, onDelete }) {
           >
             {open ? "Hide" : "View"}
           </button>
-          <button className="text-xs rounded-lg border px-2 py-1 hover:shadow" onClick={emitPreview}>
+          <button
+            className="text-xs rounded-lg border px-2 py-1 hover:shadow"
+            onClick={emitPreview}
+          >
             Signal
           </button>
           <button
@@ -550,7 +601,7 @@ function CurveCard({ curve, onDelete }) {
           <div className="text-xs text-neutral-600 mt-3 mb-1">Entries</div>
           {Array.isArray(curve.entries) && curve.entries.length ? (
             <pre className="text-xs bg-neutral-50 rounded-lg p-2 max-h-64 overflow-auto dark:bg-neutral-900">
-{JSON.stringify(curve.entries, null, 2)}
+              {JSON.stringify(curve.entries, null, 2)}
             </pre>
           ) : (
             <div className="text-sm text-neutral-500">No entries.</div>
@@ -560,13 +611,16 @@ function CurveCard({ curve, onDelete }) {
             <>
               <div className="text-xs text-neutral-600 mt-3 mb-1">Meta</div>
               <pre className="text-xs bg-neutral-50 rounded-lg p-2 max-h-64 overflow-auto dark:bg-neutral-900">
-{JSON.stringify(curve.meta, null, 2)}
+                {JSON.stringify(curve.meta, null, 2)}
               </pre>
             </>
           )}
 
           <div className="text-[11px] text-neutral-500 mt-2">
-            Updated {curve.updatedAt ? new Date(curve.updatedAt).toLocaleString() : "unknown"}
+            Updated{" "}
+            {curve.updatedAt
+              ? new Date(curve.updatedAt).toLocaleString()
+              : "unknown"}
           </div>
         </div>
       )}

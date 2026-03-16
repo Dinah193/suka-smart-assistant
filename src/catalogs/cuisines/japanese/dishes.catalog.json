@@ -1,0 +1,1933 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-22T00:00:00.000Z",
+  "notes": [
+    "Japanese dishes catalog (V2 dish entries) for SSA planners/search/browse.",
+    "IDs/tags are lowercase-safe; aliases/keywords are indexed for lookup."
+  ],
+
+  "meta": {
+    "id": "cuisines.japanese.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Japanese • Dishes Catalog",
+    "cuisineId": "cuisines.japanese",
+    "status": "canonical",
+    "description": "Canonical Japanese dish entries used by SSA meal planning, search, and browse UI.",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalogs",
+    "createdAt": "2026-01-22T00:00:00.000Z",
+    "updatedAt": "2026-01-22T00:00:00.000Z",
+    "notes": [
+      "Focuses on widely recognized Japanese home and restaurant staples.",
+      "Ingredient/equipment/technique IDs reference SSA global catalogs (or can be mapped via aliases)."
+    ]
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "cuisines.japanese.dish.miso_soup",
+      "label": "Miso Soup",
+      "aka": ["Misoshiru", "Miso Shiru"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "soup",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 8, "totalMins": 15, "handsOffMins": 7 },
+      "servingStyles": ["bowls", "one_pot", "weeknight"],
+      "mealArchetypes": ["archetype.soup_light", "archetype.broth_and_garnish"],
+      "signals": {
+        "batchFriendly": "small_batch",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": [
+            "ingredients.dashi",
+            "ingredients.kombu_dashi",
+            "ingredients.bonito_dashi"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "thickener",
+          "items": [
+            "ingredients.miso_paste_white",
+            "ingredients.miso_paste_red",
+            "ingredients.miso_paste_awase"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredients.scallion",
+            "ingredients.wakame",
+            "ingredients.tofu"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.simmer",
+        "techniques.whisk",
+        "techniques.rehydrate"
+      ],
+      "equipmentRecommended": [
+        "equipment.miso_strainer",
+        "equipment.fine_mesh_strainer"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.ladle",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": ["ingredients.miso_paste", "ingredients.dashi"],
+      "allergens": ["allergens.soy", "allergens.fish"],
+      "dietFlags": ["diet.pescatarian", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.onigiri",
+          "cuisines.japanese.dish.tamagoyaki",
+          "cuisines.japanese.dish.yakitori"
+        ],
+        "notes": "Classic side for rice, grilled fish, and breakfast sets."
+      },
+      "variations": [
+        {
+          "id": "cuisines.japanese.dish.miso_soup.variation.vegetarian",
+          "label": "Vegetarian Miso Soup (Kombu + Shiitake)",
+          "when": { "dietFlag": "diet.vegetarian" },
+          "adapt": {
+            "swap": [
+              {
+                "from": "ingredients.bonito_dashi",
+                "to": "ingredients.kombu_dashi"
+              },
+              { "from": "ingredients.dashi", "to": "ingredients.kombu_dashi" }
+            ],
+            "add": ["ingredients.shiitake_dried"]
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.soup",
+        "weeknight.fast",
+        "washoku",
+        "starter.light"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.ramen_shoyu",
+      "label": "Shoyu Ramen",
+      "aka": ["Soy Sauce Ramen", "Tokyo-Style Ramen"],
+      "subprofiles": ["cuisines.japanese.subprofile.ramen"],
+      "category": "noodles",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 60, "handsOffMins": 35 },
+      "servingStyles": ["bowls", "street_food"],
+      "mealArchetypes": ["archetype.noodle_bowl", "archetype.broth_noodles"],
+      "signals": {
+        "batchFriendly": "broth_batch",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "broth_only"
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": [
+            "ingredients.chicken_broth",
+            "ingredients.pork_broth",
+            "ingredients.dashi"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.shoyu_tare", "ingredients.soy_sauce"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": ["ingredients.ramen_noodles"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredients.chashu_pork",
+            "ingredients.chicken_thigh",
+            "ingredients.soft_boiled_egg"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredients.scallion",
+            "ingredients.nori",
+            "ingredients.bamboo_shoots",
+            "ingredients.sesame_seeds"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.simmer",
+        "techniques.boil",
+        "techniques.marinade"
+      ],
+      "equipmentRecommended": [
+        "equipment.ramen_bowl",
+        "equipment.slotted_spoon"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stove",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": ["ingredients.ramen_noodles", "ingredients.soy_sauce"],
+      "allergens": [
+        "allergens.wheat",
+        "allergens.soy",
+        "allergens.egg",
+        "allergens.fish"
+      ],
+      "dietFlags": ["diet.omnivore", "diet.pescatarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.gyoza",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Serve with gyoza or quick pickles."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.noodles",
+        "ramen",
+        "comfort.food",
+        "batch.broth"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.udon_kake",
+      "label": "Kake Udon",
+      "aka": ["Udon Noodle Soup"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "noodles",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 10 },
+      "servingStyles": ["bowls", "weeknight"],
+      "mealArchetypes": ["archetype.noodle_bowl", "archetype.broth_noodles"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "broth_only"
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredients.udon_broth", "ingredients.dashi"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": ["ingredients.udon_noodles"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredients.scallion",
+            "ingredients.tempura_bits",
+            "ingredients.nori"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.simmer", "techniques.boil"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stove",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": ["ingredients.udon_noodles", "ingredients.dashi"],
+      "allergens": ["allergens.wheat", "allergens.fish", "allergens.soy"],
+      "dietFlags": ["diet.pescatarian", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.tempura",
+          "cuisines.japanese.dish.onigiri"
+        ],
+        "notes": "Add tempura or onigiri for a fuller meal."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.noodles",
+        "washoku",
+        "weeknight.fast"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.soba_zaru",
+      "label": "Zaru Soba",
+      "aka": ["Cold Soba with Dipping Sauce"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "noodles",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 5 },
+      "servingStyles": ["plates", "snacks", "weeknight"],
+      "mealArchetypes": ["archetype.noodle_plate", "archetype.cold_noodles"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredients.soba_noodles"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.tsuyu_dipping_sauce"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredients.scallion",
+            "ingredients.wasabi",
+            "ingredients.nori"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.boil", "techniques.chill", "techniques.rinse"],
+      "equipmentRecommended": ["equipment.colander", "equipment.ice_bath"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.colander",
+        "equipment.plate"
+      ],
+      "ingredientsCore": [
+        "ingredients.soba_noodles",
+        "ingredients.tsuyu_dipping_sauce"
+      ],
+      "allergens": ["allergens.wheat", "allergens.soy", "allergens.fish"],
+      "dietFlags": ["diet.pescatarian", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.tsukemono",
+          "cuisines.japanese.dish.tamagoyaki"
+        ],
+        "notes": "Great with quick pickles and a light egg side."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.noodles",
+        "cold.noodles",
+        "summer.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.onigiri",
+      "label": "Onigiri",
+      "aka": ["Rice Ball", "Omusubi"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "rice",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 30, "handsOffMins": 10 },
+      "servingStyles": ["snacks", "street_food", "breakfast"],
+      "mealArchetypes": ["archetype.rice_snack", "archetype.portable_meal"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "some_fillings"
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredients.short_grain_rice"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredients.nori",
+            "ingredients.sesame_seeds",
+            "ingredients.furikake"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredients.salmon_flakes",
+            "ingredients.tuna_mayo",
+            "ingredients.umeboshi"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "techniques.steam",
+        "techniques.shape",
+        "techniques.season"
+      ],
+      "equipmentRecommended": ["equipment.rice_cooker"],
+      "equipmentMinimum": ["equipment.pot", "equipment.bowl"],
+      "ingredientsCore": ["ingredients.short_grain_rice", "ingredients.nori"],
+      "allergens": ["allergens.fish", "allergens.egg", "allergens.soy"],
+      "dietFlags": ["diet.pescatarian_option", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": ["cuisines.japanese.dish.miso_soup"],
+        "notes": "Classic pairing: onigiri + miso soup."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.rice",
+        "portable",
+        "batch.friendly",
+        "lunchbox"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.tamagoyaki",
+      "label": "Tamagoyaki",
+      "aka": ["Japanese Rolled Omelet"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "breakfast",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 18, "handsOffMins": 3 },
+      "servingStyles": ["plates", "breakfast", "snacks"],
+      "mealArchetypes": ["archetype.egg_side", "archetype.breakfast_plate"],
+      "signals": {
+        "batchFriendly": "small_batch",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ingredients.egg"], "chooseOne": true },
+        {
+          "role": "sweetener",
+          "items": ["ingredients.sugar", "ingredients.mirin"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.soy_sauce"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.pan_fry", "techniques.roll"],
+      "equipmentRecommended": ["equipment.tamagoyaki_pan"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.spatu_la"],
+      "ingredientsCore": ["ingredients.egg", "ingredients.soy_sauce"],
+      "allergens": ["allergens.egg", "allergens.soy"],
+      "dietFlags": ["diet.vegetarian"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.miso_soup",
+          "cuisines.japanese.dish.onigiri"
+        ],
+        "notes": "Common breakfast set item."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.egg",
+        "breakfast",
+        "bento.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.gyoza",
+      "label": "Gyoza",
+      "aka": ["Japanese Pan-Fried Dumplings"],
+      "subprofiles": ["cuisines.japanese.subprofile.izakaya"],
+      "category": "appetizer",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 35, "totalMins": 55, "handsOffMins": 20 },
+      "servingStyles": ["street_food", "snacks", "plates"],
+      "mealArchetypes": ["archetype.appetizer", "archetype.pan_fried"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "wrapper",
+          "items": [
+            "ingredients.gyoza_wrappers",
+            "ingredients.dumpling_wrappers"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredients.ground_pork",
+            "ingredients.ground_chicken",
+            "ingredients.tofu"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredients.cabbage",
+            "ingredients.scallion",
+            "ingredients.garlic",
+            "ingredients.ginger"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredients.gyoza_dipping_sauce",
+            "ingredients.soy_sauce",
+            "ingredients.rice_vinegar"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "techniques.mince",
+        "techniques.fold",
+        "techniques.pan_fry",
+        "techniques.steam"
+      ],
+      "equipmentRecommended": ["equipment.bamboo_steamer"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.lid",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredients.gyoza_wrappers",
+        "ingredients.cabbage",
+        "ingredients.soy_sauce"
+      ],
+      "allergens": ["allergens.wheat", "allergens.soy", "allergens.sesame"],
+      "dietFlags": ["diet.omnivore", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.ramen_shoyu",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Often paired with ramen and light pickles."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.dumplings",
+        "izakaya",
+        "freezer.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.karaage",
+      "label": "Chicken Karaage",
+      "aka": ["Japanese Fried Chicken"],
+      "subprofiles": ["cuisines.japanese.subprofile.izakaya"],
+      "category": "fried",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 50, "handsOffMins": 25 },
+      "servingStyles": ["plates", "street_food"],
+      "mealArchetypes": ["archetype.fried_protein", "archetype.izakaya_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "par_fry"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredients.chicken_thigh"],
+          "chooseOne": true
+        },
+        {
+          "role": "marinade",
+          "items": [
+            "ingredients.soy_sauce",
+            "ingredients.ginger",
+            "ingredients.garlic",
+            "ingredients.sake"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "thickener",
+          "items": ["ingredients.potato_starch", "ingredients.cornstarch"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredients.lemon", "ingredients.scallion"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.marinade",
+        "techniques.deep_fry",
+        "techniques.shallow_fry"
+      ],
+      "equipmentRecommended": [
+        "equipment.thermometer_instant_read",
+        "equipment.deep_pot"
+      ],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.tongs",
+        "equipment.paper_towels"
+      ],
+      "ingredientsCore": [
+        "ingredients.chicken_thigh",
+        "ingredients.soy_sauce",
+        "ingredients.potato_starch"
+      ],
+      "allergens": ["allergens.soy"],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.onigiri",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Great with rice balls and pickles."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.fried",
+        "izakaya",
+        "crowd.pleaser"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.tempura",
+      "label": "Tempura",
+      "aka": ["Shrimp Tempura", "Vegetable Tempura"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "fried",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 35, "totalMins": 45, "handsOffMins": 10 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.fried_mix", "archetype.crispy_sides"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": [
+            "ingredients.sweet_potato",
+            "ingredients.eggplant",
+            "ingredients.kabocha",
+            "ingredients.green_beans"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": ["ingredients.shrimp", "ingredients.white_fish"],
+          "chooseOne": false
+        },
+        {
+          "role": "batter",
+          "items": [
+            "ingredients.tempura_flour",
+            "ingredients.all_purpose_flour"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.tentsuyu", "ingredients.salt"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["techniques.batter", "techniques.deep_fry"],
+      "equipmentRecommended": [
+        "equipment.thermometer_instant_read",
+        "equipment.deep_pot",
+        "equipment.wire_rack"
+      ],
+      "equipmentMinimum": ["equipment.deep_pot", "equipment.tongs"],
+      "ingredientsCore": [
+        "ingredients.tempura_flour",
+        "ingredients.shrimp",
+        "ingredients.vegetable_assortment"
+      ],
+      "allergens": [
+        "allergens.wheat",
+        "allergens.shellfish",
+        "allergens.fish",
+        "allergens.egg",
+        "allergens.soy"
+      ],
+      "dietFlags": ["diet.pescatarian_option", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.udon_kake",
+          "cuisines.japanese.dish.soba_zaru"
+        ],
+        "notes": "Often served alongside udon or soba."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.fried",
+        "special.occasion",
+        "crispy"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.tonkatsu",
+      "label": "Tonkatsu",
+      "aka": ["Breaded Pork Cutlet"],
+      "subprofiles": ["cuisines.japanese.subprofile.yoshoku"],
+      "category": "fried",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 40, "handsOffMins": 15 },
+      "servingStyles": ["plates"],
+      "mealArchetypes": [
+        "archetype.fried_cutlet",
+        "archetype.protein_and_sides"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "breaded_raw"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredients.pork_cutlet"],
+          "chooseOne": true
+        },
+        {
+          "role": "thickener",
+          "items": ["ingredients.panko_breadcrumbs"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.tonkatsu_sauce"],
+          "chooseOne": true
+        },
+        {
+          "role": "side",
+          "items": ["ingredients.cabbage_shredded", "ingredients.rice"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.bread",
+        "techniques.deep_fry",
+        "techniques.shallow_fry"
+      ],
+      "equipmentRecommended": ["equipment.thermometer_instant_read"],
+      "equipmentMinimum": [
+        "equipment.skillet",
+        "equipment.tongs",
+        "equipment.plate"
+      ],
+      "ingredientsCore": [
+        "ingredients.pork_cutlet",
+        "ingredients.panko_breadcrumbs",
+        "ingredients.tonkatsu_sauce"
+      ],
+      "allergens": ["allergens.wheat", "allergens.egg", "allergens.soy"],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.miso_soup",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Serve with cabbage, rice, miso soup."
+      },
+      "variations": [],
+      "plannerTags": ["cuisine.japanese", "dish.fried", "yoshoku", "weeknight"]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.katsudon",
+      "label": "Katsudon",
+      "aka": ["Pork Cutlet Rice Bowl"],
+      "subprofiles": ["cuisines.japanese.subprofile.yoshoku"],
+      "category": "rice_bowl",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 15 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["archetype.rice_bowl", "archetype.protein_over_rice"],
+      "signals": {
+        "batchFriendly": "cutlet_prep",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ingredients.rice"], "chooseOne": true },
+        {
+          "role": "protein",
+          "items": ["ingredients.tonkatsu"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": [
+            "ingredients.dashi",
+            "ingredients.soy_sauce",
+            "ingredients.mirin"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein_extra",
+          "items": ["ingredients.egg"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.simmer", "techniques.pan_fry"],
+      "equipmentRecommended": ["equipment.rice_cooker"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.skillet",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredients.rice",
+        "ingredients.tonkatsu",
+        "ingredients.egg"
+      ],
+      "allergens": [
+        "allergens.wheat",
+        "allergens.egg",
+        "allergens.soy",
+        "allergens.fish"
+      ],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.miso_soup",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Pickles balance the richness."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.rice_bowl",
+        "yoshoku",
+        "comfort.food"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.oyakodon",
+      "label": "Oyakodon",
+      "aka": ["Chicken and Egg Rice Bowl"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "rice_bowl",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 18, "totalMins": 30, "handsOffMins": 12 },
+      "servingStyles": ["bowls", "one_pot", "weeknight"],
+      "mealArchetypes": ["archetype.rice_bowl", "archetype.one_pan_meal"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ingredients.rice"], "chooseOne": true },
+        {
+          "role": "protein",
+          "items": ["ingredients.chicken_thigh"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein_extra",
+          "items": ["ingredients.egg"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": [
+            "ingredients.dashi",
+            "ingredients.soy_sauce",
+            "ingredients.mirin",
+            "ingredients.onion"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.simmer", "techniques.pan_cook"],
+      "equipmentRecommended": ["equipment.rice_cooker"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.bowl"],
+      "ingredientsCore": [
+        "ingredients.rice",
+        "ingredients.chicken_thigh",
+        "ingredients.egg",
+        "ingredients.soy_sauce"
+      ],
+      "allergens": ["allergens.egg", "allergens.soy", "allergens.fish"],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": ["cuisines.japanese.dish.miso_soup"],
+        "notes": "Simple set meal pairing."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.rice_bowl",
+        "washoku",
+        "weeknight.fast"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.japanese_curry_rice",
+      "label": "Japanese Curry Rice",
+      "aka": ["Kare Raisu", "Curry Rice (Japanese)"],
+      "subprofiles": ["cuisines.japanese.subprofile.yoshoku"],
+      "category": "stew",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 55, "handsOffMins": 35 },
+      "servingStyles": ["plates", "one_pot", "family_style"],
+      "mealArchetypes": ["archetype.stew_over_rice", "archetype.one_pot_meal"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": [
+            "ingredients.japanese_curry_roux",
+            "ingredients.curry_powder"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredients.chicken",
+            "ingredients.beef",
+            "ingredients.pork",
+            "ingredients.tofu"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredients.onion",
+            "ingredients.carrot",
+            "ingredients.potato"
+          ],
+          "chooseOne": false
+        },
+        { "role": "starch", "items": ["ingredients.rice"], "chooseOne": true }
+      ],
+      "techniques": ["techniques.simmer", "techniques.saute"],
+      "equipmentRecommended": ["equipment.rice_cooker"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.spoon",
+        "equipment.plate"
+      ],
+      "ingredientsCore": [
+        "ingredients.japanese_curry_roux",
+        "ingredients.onion",
+        "ingredients.carrot",
+        "ingredients.potato",
+        "ingredients.rice"
+      ],
+      "allergens": ["allergens.wheat", "allergens.soy"],
+      "dietFlags": ["diet.omnivore", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": ["cuisines.japanese.dish.tsukemono"],
+        "notes": "Serve with pickles (fukujinzuke) or shredded cabbage."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.curry",
+        "yoshoku",
+        "batch.friendly",
+        "freezer.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.nikujaga",
+      "label": "Nikujaga",
+      "aka": ["Simmered Meat and Potatoes"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "simmered",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 55, "handsOffMins": 35 },
+      "servingStyles": ["family_style", "one_pot"],
+      "mealArchetypes": [
+        "archetype.simmered_stew",
+        "archetype.protein_and_veg"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredients.beef_sliced", "ingredients.pork_sliced"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredients.potato",
+            "ingredients.onion",
+            "ingredients.carrot"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "base",
+          "items": [
+            "ingredients.dashi",
+            "ingredients.soy_sauce",
+            "ingredients.mirin",
+            "ingredients.sugar"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.simmer", "techniques.saute"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredients.potato",
+        "ingredients.onion",
+        "ingredients.soy_sauce",
+        "ingredients.dashi"
+      ],
+      "allergens": ["allergens.soy", "allergens.fish"],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.miso_soup",
+          "cuisines.japanese.dish.rice_steamed"
+        ],
+        "notes": "Classic home-style washoku with rice."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.simmered",
+        "washoku",
+        "batch.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.teriyaki_chicken",
+      "label": "Chicken Teriyaki",
+      "aka": ["Teriyaki Chicken"],
+      "subprofiles": [
+        "cuisines.japanese.subprofile.washoku",
+        "cuisines.japanese.subprofile.yoshoku"
+      ],
+      "category": "grilled",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 15 },
+      "servingStyles": ["plates", "weeknight"],
+      "mealArchetypes": [
+        "archetype.grilled_protein",
+        "archetype.protein_and_sides"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "marinated_raw"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredients.chicken_thigh", "ingredients.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredients.teriyaki_sauce",
+            "ingredients.soy_sauce",
+            "ingredients.mirin",
+            "ingredients.sugar"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredients.scallion", "ingredients.sesame_seeds"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.pan_sear",
+        "techniques.glaze",
+        "techniques.simmer_reduce"
+      ],
+      "equipmentRecommended": ["equipment.cast_iron_skillet"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.tongs"],
+      "ingredientsCore": [
+        "ingredients.chicken_thigh",
+        "ingredients.soy_sauce",
+        "ingredients.mirin"
+      ],
+      "allergens": ["allergens.soy", "allergens.sesame"],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.rice_steamed",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Serve with rice + quick cucumber salad."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.teriyaki",
+        "weeknight",
+        "bento.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.yakitori",
+      "label": "Yakitori",
+      "aka": ["Chicken Skewers", "Yakitori Skewers"],
+      "subprofiles": ["cuisines.japanese.subprofile.izakaya"],
+      "category": "grilled",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 30, "totalMins": 50, "handsOffMins": 20 },
+      "servingStyles": ["street_food", "family_style"],
+      "mealArchetypes": [
+        "archetype.grilled_skewers",
+        "archetype.izakaya_plate"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "marinated_raw"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredients.chicken_thigh", "ingredients.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredients.scallion"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.yakitori_tare", "ingredients.salt"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "techniques.skewer",
+        "techniques.grill",
+        "techniques.glaze"
+      ],
+      "equipmentRecommended": [
+        "equipment.charcoal_grill",
+        "equipment.grill_pan"
+      ],
+      "equipmentMinimum": ["equipment.grill_pan", "equipment.skewers"],
+      "ingredientsCore": ["ingredients.chicken_thigh", "ingredients.soy_sauce"],
+      "allergens": ["allergens.soy"],
+      "dietFlags": ["diet.omnivore"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.edamame",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Classic izakaya set with beer-friendly sides."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.grilled",
+        "izakaya",
+        "crowd.pleaser"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.okonomiyaki",
+      "label": "Okonomiyaki",
+      "aka": ["Japanese Savory Pancake", "Osaka-Style Okonomiyaki"],
+      "subprofiles": ["cuisines.japanese.subprofile.street_food"],
+      "category": "street_food",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 35, "totalMins": 50, "handsOffMins": 15 },
+      "servingStyles": ["plates", "street_food"],
+      "mealArchetypes": ["archetype.savory_pancake", "archetype.griddle_meal"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": [
+            "ingredients.okonomiyaki_flour",
+            "ingredients.all_purpose_flour"
+          ],
+          "chooseOne": true
+        },
+        { "role": "veg", "items": ["ingredients.cabbage"], "chooseOne": true },
+        {
+          "role": "protein",
+          "items": [
+            "ingredients.pork_belly",
+            "ingredients.shrimp",
+            "ingredients.octopus"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredients.okonomiyaki_sauce",
+            "ingredients.japanese_mayo"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredients.aonori", "ingredients.katsuobushi"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.griddle",
+        "techniques.pan_fry",
+        "techniques.flip"
+      ],
+      "equipmentRecommended": ["equipment.griddle"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.spatu_la"],
+      "ingredientsCore": [
+        "ingredients.cabbage",
+        "ingredients.egg",
+        "ingredients.okonomiyaki_sauce"
+      ],
+      "allergens": [
+        "allergens.wheat",
+        "allergens.egg",
+        "allergens.soy",
+        "allergens.fish",
+        "allergens.shellfish"
+      ],
+      "dietFlags": ["diet.omnivore", "diet.vegetarian_option"],
+      "pairingHints": {
+        "pairsWith": ["cuisines.japanese.dish.tsukemono"],
+        "notes": "Serve hot; leftovers reheat well in a skillet."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.street_food",
+        "savory.pancake",
+        "special.occasion"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.takoyaki",
+      "label": "Takoyaki",
+      "aka": ["Octopus Balls"],
+      "subprofiles": ["cuisines.japanese.subprofile.street_food"],
+      "category": "street_food",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 40, "totalMins": 55, "handsOffMins": 15 },
+      "servingStyles": ["street_food", "snacks"],
+      "mealArchetypes": ["archetype.snack_bites", "archetype.griddle_meal"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredients.takoyaki_batter"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": ["ingredients.octopus"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredients.scallion", "ingredients.tempura_bits"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.takoyaki_sauce", "ingredients.japanese_mayo"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.griddle",
+        "techniques.turn",
+        "techniques.batter"
+      ],
+      "equipmentRecommended": ["equipment.takoyaki_pan"],
+      "equipmentMinimum": ["equipment.takoyaki_pan", "equipment.picks"],
+      "ingredientsCore": [
+        "ingredients.takoyaki_batter",
+        "ingredients.octopus",
+        "ingredients.takoyaki_sauce"
+      ],
+      "allergens": [
+        "allergens.wheat",
+        "allergens.egg",
+        "allergens.soy",
+        "allergens.fish"
+      ],
+      "dietFlags": ["diet.pescatarian"],
+      "pairingHints": {
+        "pairsWith": ["cuisines.japanese.dish.edamame"],
+        "notes": "Party/snack food; best served immediately."
+      },
+      "variations": [],
+      "plannerTags": ["cuisine.japanese", "dish.street_food", "party.food"]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.sushi_maki",
+      "label": "Sushi Rolls (Maki)",
+      "aka": ["Maki Sushi", "Norimaki"],
+      "subprofiles": ["cuisines.japanese.subprofile.sushi"],
+      "category": "sushi",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 45, "totalMins": 70, "handsOffMins": 25 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.sushi_set", "archetype.cold_plate"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredients.sushi_rice"],
+          "chooseOne": true
+        },
+        { "role": "wrapper", "items": ["ingredients.nori"], "chooseOne": true },
+        {
+          "role": "protein",
+          "items": [
+            "ingredients.raw_fish_sashimi_grade",
+            "ingredients.cooked_shrimp",
+            "ingredients.crab_imitation"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredients.cucumber",
+            "ingredients.avocado",
+            "ingredients.carrot"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "techniques.season_rice",
+        "techniques.roll",
+        "techniques.slice"
+      ],
+      "equipmentRecommended": ["equipment.bamboo_sushi_mat"],
+      "equipmentMinimum": [
+        "equipment.knife_sharp",
+        "equipment.bowl",
+        "equipment.plate"
+      ],
+      "ingredientsCore": [
+        "ingredients.sushi_rice",
+        "ingredients.nori",
+        "ingredients.rice_vinegar"
+      ],
+      "allergens": ["allergens.fish", "allergens.shellfish", "allergens.soy"],
+      "dietFlags": ["diet.pescatarian_option"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.miso_soup",
+          "cuisines.japanese.dish.tsukemono"
+        ],
+        "notes": "Serve with miso soup and pickled ginger."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.sushi",
+        "special.occasion",
+        "cold.plate"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.sashimi",
+      "label": "Sashimi",
+      "aka": ["Sashimi Platter"],
+      "subprofiles": ["cuisines.japanese.subprofile.sushi"],
+      "category": "sushi",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 20, "handsOffMins": 0 },
+      "servingStyles": ["plates", "family_style"],
+      "mealArchetypes": ["archetype.cold_plate", "archetype.seafood_plate"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredients.raw_fish_sashimi_grade"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredients.soy_sauce", "ingredients.ponzu"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredients.wasabi",
+            "ingredients.daikon_radish",
+            "ingredients.shiso_leaf"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.slice", "techniques.chill"],
+      "equipmentRecommended": ["equipment.knife_sharp"],
+      "equipmentMinimum": ["equipment.knife_sharp", "equipment.plate"],
+      "ingredientsCore": [
+        "ingredients.raw_fish_sashimi_grade",
+        "ingredients.soy_sauce",
+        "ingredients.wasabi"
+      ],
+      "allergens": ["allergens.fish", "allergens.soy"],
+      "dietFlags": ["diet.pescatarian", "diet.low_carb"],
+      "pairingHints": {
+        "pairsWith": ["cuisines.japanese.dish.miso_soup"],
+        "notes": "Pair with miso soup and rice if desired."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.sushi",
+        "raw",
+        "special.occasion"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.tsukemono",
+      "label": "Tsukemono (Japanese Pickles)",
+      "aka": ["Japanese Pickles"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 720, "handsOffMins": 710 },
+      "servingStyles": ["side", "family_style"],
+      "mealArchetypes": ["archetype.pickles", "archetype.palate_cleanser"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": [
+            "ingredients.cucumber",
+            "ingredients.daikon_radish",
+            "ingredients.cabbage"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "brine",
+          "items": [
+            "ingredients.salt",
+            "ingredients.rice_vinegar",
+            "ingredients.sugar"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["techniques.pickle_quick", "techniques.brine"],
+      "equipmentRecommended": ["equipment.jar"],
+      "equipmentMinimum": ["equipment.bowl", "equipment.container"],
+      "ingredientsCore": [
+        "ingredients.salt",
+        "ingredients.rice_vinegar",
+        "ingredients.cucumber"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.teriyaki_chicken",
+          "cuisines.japanese.dish.japanese_curry_rice"
+        ],
+        "notes": "Pairs with rich/fried dishes."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.pickle",
+        "side",
+        "batch.friendly"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.edamame",
+      "label": "Edamame",
+      "aka": ["Boiled Soybeans"],
+      "subprofiles": ["cuisines.japanese.subprofile.izakaya"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 8, "totalMins": 10, "handsOffMins": 2 },
+      "servingStyles": ["snacks", "side", "street_food"],
+      "mealArchetypes": ["archetype.snack_side", "archetype.simple_side"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredients.edamame"],
+          "chooseOne": true
+        },
+        {
+          "role": "seasoning",
+          "items": ["ingredients.salt", "ingredients.togarashi"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["techniques.boil", "techniques.steam"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.colander",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": ["ingredients.edamame", "ingredients.salt"],
+      "allergens": ["allergens.soy"],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.yakitori",
+          "cuisines.japanese.dish.karaage"
+        ],
+        "notes": "Izakaya staple."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.side",
+        "izakaya",
+        "weeknight.fast"
+      ]
+    },
+
+    {
+      "id": "cuisines.japanese.dish.rice_steamed",
+      "label": "Steamed Japanese Rice",
+      "aka": ["Gohan", "Steamed Rice"],
+      "subprofiles": ["cuisines.japanese.subprofile.washoku"],
+      "category": "rice",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 5, "totalMins": 35, "handsOffMins": 30 },
+      "servingStyles": ["side", "family_style"],
+      "mealArchetypes": ["archetype.starch_side", "archetype.rice_base"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredients.short_grain_rice"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["techniques.rinse", "techniques.steam"],
+      "equipmentRecommended": ["equipment.rice_cooker"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": ["ingredients.short_grain_rice", "ingredients.water"],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "pairsWith": [
+          "cuisines.japanese.dish.miso_soup",
+          "cuisines.japanese.dish.nikujaga",
+          "cuisines.japanese.dish.teriyaki_chicken"
+        ],
+        "notes": "Base starch for many Japanese meals."
+      },
+      "variations": [],
+      "plannerTags": [
+        "cuisine.japanese",
+        "dish.rice",
+        "batch.friendly",
+        "staple"
+      ]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.japanese": [
+        "cuisines.japanese.dish.miso_soup",
+        "cuisines.japanese.dish.ramen_shoyu",
+        "cuisines.japanese.dish.udon_kake",
+        "cuisines.japanese.dish.soba_zaru",
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.tamagoyaki",
+        "cuisines.japanese.dish.gyoza",
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.tempura",
+        "cuisines.japanese.dish.tonkatsu",
+        "cuisines.japanese.dish.katsudon",
+        "cuisines.japanese.dish.oyakodon",
+        "cuisines.japanese.dish.japanese_curry_rice",
+        "cuisines.japanese.dish.nikujaga",
+        "cuisines.japanese.dish.teriyaki_chicken",
+        "cuisines.japanese.dish.yakitori",
+        "cuisines.japanese.dish.okonomiyaki",
+        "cuisines.japanese.dish.takoyaki",
+        "cuisines.japanese.dish.sushi_maki",
+        "cuisines.japanese.dish.sashimi",
+        "cuisines.japanese.dish.tsukemono",
+        "cuisines.japanese.dish.edamame",
+        "cuisines.japanese.dish.rice_steamed"
+      ]
+    },
+
+    "byArchetype": {
+      "archetype.soup_light": ["cuisines.japanese.dish.miso_soup"],
+      "archetype.noodle_bowl": [
+        "cuisines.japanese.dish.ramen_shoyu",
+        "cuisines.japanese.dish.udon_kake"
+      ],
+      "archetype.cold_noodles": ["cuisines.japanese.dish.soba_zaru"],
+      "archetype.rice_snack": ["cuisines.japanese.dish.onigiri"],
+      "archetype.egg_side": ["cuisines.japanese.dish.tamagoyaki"],
+      "archetype.appetizer": ["cuisines.japanese.dish.gyoza"],
+      "archetype.fried_protein": [
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.tonkatsu"
+      ],
+      "archetype.fried_mix": ["cuisines.japanese.dish.tempura"],
+      "archetype.rice_bowl": [
+        "cuisines.japanese.dish.katsudon",
+        "cuisines.japanese.dish.oyakodon"
+      ],
+      "archetype.stew_over_rice": [
+        "cuisines.japanese.dish.japanese_curry_rice"
+      ],
+      "archetype.simmered_stew": ["cuisines.japanese.dish.nikujaga"],
+      "archetype.grilled_protein": ["cuisines.japanese.dish.teriyaki_chicken"],
+      "archetype.grilled_skewers": ["cuisines.japanese.dish.yakitori"],
+      "archetype.street_food": [
+        "cuisines.japanese.dish.okonomiyaki",
+        "cuisines.japanese.dish.takoyaki"
+      ],
+      "archetype.sushi_set": ["cuisines.japanese.dish.sushi_maki"],
+      "archetype.seafood_plate": ["cuisines.japanese.dish.sashimi"],
+      "archetype.pickles": ["cuisines.japanese.dish.tsukemono"],
+      "archetype.snack_side": ["cuisines.japanese.dish.edamame"],
+      "archetype.rice_base": ["cuisines.japanese.dish.rice_steamed"]
+    },
+
+    "aliasIndex": {
+      "miso soup": "cuisines.japanese.dish.miso_soup",
+      "misoshiru": "cuisines.japanese.dish.miso_soup",
+      "shoyu ramen": "cuisines.japanese.dish.ramen_shoyu",
+      "soy sauce ramen": "cuisines.japanese.dish.ramen_shoyu",
+      "kake udon": "cuisines.japanese.dish.udon_kake",
+      "udon noodle soup": "cuisines.japanese.dish.udon_kake",
+      "zaru soba": "cuisines.japanese.dish.soba_zaru",
+      "cold soba": "cuisines.japanese.dish.soba_zaru",
+      "onigiri": "cuisines.japanese.dish.onigiri",
+      "rice ball": "cuisines.japanese.dish.onigiri",
+      "omusubi": "cuisines.japanese.dish.onigiri",
+      "tamagoyaki": "cuisines.japanese.dish.tamagoyaki",
+      "rolled omelet": "cuisines.japanese.dish.tamagoyaki",
+      "gyoza": "cuisines.japanese.dish.gyoza",
+      "dumplings": "cuisines.japanese.dish.gyoza",
+      "karaage": "cuisines.japanese.dish.karaage",
+      "japanese fried chicken": "cuisines.japanese.dish.karaage",
+      "tempura": "cuisines.japanese.dish.tempura",
+      "tonkatsu": "cuisines.japanese.dish.tonkatsu",
+      "breaded pork cutlet": "cuisines.japanese.dish.tonkatsu",
+      "katsudon": "cuisines.japanese.dish.katsudon",
+      "oyakodon": "cuisines.japanese.dish.oyakodon",
+      "japanese curry": "cuisines.japanese.dish.japanese_curry_rice",
+      "kare raisu": "cuisines.japanese.dish.japanese_curry_rice",
+      "nikujaga": "cuisines.japanese.dish.nikujaga",
+      "teriyaki chicken": "cuisines.japanese.dish.teriyaki_chicken",
+      "yakitori": "cuisines.japanese.dish.yakitori",
+      "chicken skewers": "cuisines.japanese.dish.yakitori",
+      "okonomiyaki": "cuisines.japanese.dish.okonomiyaki",
+      "takoyaki": "cuisines.japanese.dish.takoyaki",
+      "sushi rolls": "cuisines.japanese.dish.sushi_maki",
+      "maki sushi": "cuisines.japanese.dish.sushi_maki",
+      "sashimi": "cuisines.japanese.dish.sashimi",
+      "tsukemono": "cuisines.japanese.dish.tsukemono",
+      "japanese pickles": "cuisines.japanese.dish.tsukemono",
+      "edamame": "cuisines.japanese.dish.edamame",
+      "gohan": "cuisines.japanese.dish.rice_steamed",
+      "steamed rice": "cuisines.japanese.dish.rice_steamed"
+    },
+
+    "keywordIndex": {
+      "ramen": ["cuisines.japanese.dish.ramen_shoyu"],
+      "udon": ["cuisines.japanese.dish.udon_kake"],
+      "soba": ["cuisines.japanese.dish.soba_zaru"],
+      "rice": [
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.katsudon",
+        "cuisines.japanese.dish.oyakodon",
+        "cuisines.japanese.dish.japanese_curry_rice",
+        "cuisines.japanese.dish.rice_steamed"
+      ],
+      "fried": [
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.tempura",
+        "cuisines.japanese.dish.tonkatsu"
+      ],
+      "sushi": [
+        "cuisines.japanese.dish.sushi_maki",
+        "cuisines.japanese.dish.sashimi"
+      ],
+      "pickles": ["cuisines.japanese.dish.tsukemono"],
+      "skewers": ["cuisines.japanese.dish.yakitori"],
+      "curry": ["cuisines.japanese.dish.japanese_curry_rice"],
+      "home style": [
+        "cuisines.japanese.dish.nikujaga",
+        "cuisines.japanese.dish.miso_soup"
+      ],
+      "bento": [
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.tamagoyaki",
+        "cuisines.japanese.dish.teriyaki_chicken"
+      ]
+    },
+
+    "tagIndex": {
+      "cuisine.japanese": [
+        "cuisines.japanese.dish.miso_soup",
+        "cuisines.japanese.dish.ramen_shoyu",
+        "cuisines.japanese.dish.udon_kake",
+        "cuisines.japanese.dish.soba_zaru",
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.tamagoyaki",
+        "cuisines.japanese.dish.gyoza",
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.tempura",
+        "cuisines.japanese.dish.tonkatsu",
+        "cuisines.japanese.dish.katsudon",
+        "cuisines.japanese.dish.oyakodon",
+        "cuisines.japanese.dish.japanese_curry_rice",
+        "cuisines.japanese.dish.nikujaga",
+        "cuisines.japanese.dish.teriyaki_chicken",
+        "cuisines.japanese.dish.yakitori",
+        "cuisines.japanese.dish.okonomiyaki",
+        "cuisines.japanese.dish.takoyaki",
+        "cuisines.japanese.dish.sushi_maki",
+        "cuisines.japanese.dish.sashimi",
+        "cuisines.japanese.dish.tsukemono",
+        "cuisines.japanese.dish.edamame",
+        "cuisines.japanese.dish.rice_steamed"
+      ],
+      "dish.soup": ["cuisines.japanese.dish.miso_soup"],
+      "dish.noodles": [
+        "cuisines.japanese.dish.ramen_shoyu",
+        "cuisines.japanese.dish.udon_kake",
+        "cuisines.japanese.dish.soba_zaru"
+      ],
+      "dish.rice": [
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.rice_steamed"
+      ],
+      "dish.rice_bowl": [
+        "cuisines.japanese.dish.katsudon",
+        "cuisines.japanese.dish.oyakodon"
+      ],
+      "dish.fried": [
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.tempura",
+        "cuisines.japanese.dish.tonkatsu"
+      ],
+      "dish.grilled": [
+        "cuisines.japanese.dish.teriyaki_chicken",
+        "cuisines.japanese.dish.yakitori"
+      ],
+      "dish.sushi": [
+        "cuisines.japanese.dish.sushi_maki",
+        "cuisines.japanese.dish.sashimi"
+      ],
+      "dish.pickle": ["cuisines.japanese.dish.tsukemono"],
+      "dish.side": [
+        "cuisines.japanese.dish.edamame",
+        "cuisines.japanese.dish.tsukemono"
+      ],
+      "weeknight": [
+        "cuisines.japanese.dish.miso_soup",
+        "cuisines.japanese.dish.udon_kake",
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.oyakodon",
+        "cuisines.japanese.dish.teriyaki_chicken",
+        "cuisines.japanese.dish.edamame"
+      ],
+      "batch.friendly": [
+        "cuisines.japanese.dish.miso_soup",
+        "cuisines.japanese.dish.udon_kake",
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.gyoza",
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.tonkatsu",
+        "cuisines.japanese.dish.japanese_curry_rice",
+        "cuisines.japanese.dish.nikujaga",
+        "cuisines.japanese.dish.rice_steamed"
+      ],
+      "izakaya": [
+        "cuisines.japanese.dish.gyoza",
+        "cuisines.japanese.dish.karaage",
+        "cuisines.japanese.dish.yakitori",
+        "cuisines.japanese.dish.edamame"
+      ],
+      "washoku": [
+        "cuisines.japanese.dish.miso_soup",
+        "cuisines.japanese.dish.udon_kake",
+        "cuisines.japanese.dish.soba_zaru",
+        "cuisines.japanese.dish.onigiri",
+        "cuisines.japanese.dish.nikujaga",
+        "cuisines.japanese.dish.oyakodon",
+        "cuisines.japanese.dish.rice_steamed"
+      ],
+      "yoshoku": [
+        "cuisines.japanese.dish.tonkatsu",
+        "cuisines.japanese.dish.katsudon",
+        "cuisines.japanese.dish.japanese_curry_rice",
+        "cuisines.japanese.dish.teriyaki_chicken"
+      ],
+      "street_food": [
+        "cuisines.japanese.dish.okonomiyaki",
+        "cuisines.japanese.dish.takoyaki",
+        "cuisines.japanese.dish.onigiri"
+      ]
+    }
+  }
+}

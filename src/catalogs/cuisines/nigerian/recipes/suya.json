@@ -1,0 +1,334 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.suya",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Suya",
+    "description": "Nigerian suya: thin-sliced beef (or chicken) skewers coated in yaji (peanut-spice blend) and grilled hot for smoky, spicy, nutty street-food flavor.",
+    "tags": [
+      "cuisine.nigerian",
+      "street_food",
+      "grilled",
+      "skewers",
+      "spicy",
+      "peanut_forward",
+      "weeknight.friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "Suka Smart Assistant",
+      "reference": "Classic suya technique with yaji spice blend; standardized for SSA catalog.",
+      "url": ""
+    }
+  },
+  "summary": "Classic Nigerian suya skewers: thin beef slices marinated lightly, coated generously with yaji (peanut-cayenne-ginger spice), then grilled hot and fast and served with sliced onions and tomatoes.",
+  "yields": {
+    "servings": 4,
+    "makes": "10–12 skewers"
+  },
+  "difficulty": "intermediate",
+  "time": {
+    "prepMinutes": 20,
+    "cookMinutes": 12,
+    "totalMinutes": 32
+  },
+  "diet": {
+    "suitableFor": ["gluten_free"],
+    "notes": ["Confirm bouillon and spice blends are gluten-free if needed."]
+  },
+  "allergens": ["peanut"],
+  "safety": {
+    "notes": [
+      "Soak wooden skewers at least 30 minutes to reduce burning on the grill.",
+      "Cook beef to your preferred doneness; for food safety with poultry, cook to 165°F (74°C)."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.meat",
+      "label": "Meat",
+      "ingredients": [
+        {
+          "id": "ingredient.beef_sirloin",
+          "label": "Beef (sirloin, top round, or flank), sliced thin against the grain",
+          "amount": {
+            "value": 680,
+            "unit": "g"
+          },
+          "notes": [
+            "Slice 1/8–1/4 inch thick. Freeze 15 minutes first for easier slicing."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "group.yaji",
+      "label": "Yaji (suya spice blend)",
+      "ingredients": [
+        {
+          "id": "ingredient.peanuts_roasted_unsalted",
+          "label": "Roasted peanuts (unsalted), ground fine",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          },
+          "notes": [
+            "Also called kuli-kuli powder when made from fried peanut cake; use finely ground roasted peanuts if unavailable."
+          ]
+        },
+        {
+          "id": "ingredient.paprika",
+          "label": "Paprika",
+          "amount": {
+            "value": 8,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.cayenne",
+          "label": "Cayenne pepper",
+          "amount": {
+            "value": 4,
+            "unit": "g"
+          },
+          "notes": ["Adjust heat to preference."]
+        },
+        {
+          "id": "ingredient.ginger_powder",
+          "label": "Ground ginger",
+          "amount": {
+            "value": 3,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.garlic_powder",
+          "label": "Garlic powder",
+          "amount": {
+            "value": 3,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.onion_powder",
+          "label": "Onion powder",
+          "amount": {
+            "value": 3,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.black_pepper",
+          "label": "Black pepper, ground",
+          "amount": {
+            "value": 2,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.clove_ground_optional",
+          "label": "Ground cloves (optional, traditional in small amounts)",
+          "amount": {
+            "value": 0.5,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.salt",
+          "label": "Salt",
+          "amount": {
+            "value": 5,
+            "unit": "g"
+          },
+          "notes": ["Start here; adjust after tasting yaji."]
+        },
+        {
+          "id": "ingredient.bouillon_powder",
+          "label": "Bouillon powder (optional)",
+          "amount": {
+            "value": 3,
+            "unit": "g"
+          },
+          "notes": ["Optional; boosts street-style savoriness."]
+        }
+      ]
+    },
+    {
+      "id": "group.bind_and_brush",
+      "label": "Binder and brushing oil",
+      "ingredients": [
+        {
+          "id": "ingredient.vegetable_oil",
+          "label": "Neutral oil (vegetable/canola)",
+          "amount": {
+            "value": 30,
+            "unit": "ml"
+          },
+          "notes": ["Used as binder + brushing; you may need a little more."]
+        },
+        {
+          "id": "ingredient.mustard_optional",
+          "label": "Mustard (optional binder)",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["Not traditional everywhere; helps yaji adhere if needed."]
+        }
+      ]
+    },
+    {
+      "id": "group.to_serve",
+      "label": "To serve (classic)",
+      "ingredients": [
+        {
+          "id": "ingredient.onion_red",
+          "label": "Red onion, thinly sliced",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.tomato",
+          "label": "Tomatoes, sliced",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.cucumber_optional",
+          "label": "Cucumber, sliced (optional)",
+          "amount": {
+            "value": 150,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.yaji_extra",
+          "label": "Extra yaji for dusting",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["Optional but classic."]
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.skewers_wooden",
+      "label": "Wooden skewers",
+      "amount": {
+        "value": 12,
+        "unit": "each"
+      },
+      "notes": ["Soak in water at least 30 minutes."]
+    }
+  ],
+  "methods": ["grill", "broil"],
+  "compat": {
+    "equipmentRequired": [
+      "knife.chef",
+      "cutting_board",
+      "bowl.mixing",
+      "skewers",
+      "tongs"
+    ],
+    "appliancesOptional": ["grill.outdoor", "broiler", "air_fryer"],
+    "notes": [
+      "Best: charcoal grill for smoky flavor. Indoor option: broil on a rack over a sheet pan.",
+      "If using air fryer, cook in a single layer; yaji may toast quickly—watch closely."
+    ]
+  },
+  "steps": [
+    {
+      "id": "step.soak_skewers",
+      "title": "Soak skewers (if wooden)",
+      "body": "Soak wooden skewers in water for at least 30 minutes to reduce burning. Drain before threading meat.",
+      "timers": [
+        {
+          "id": "timer.soak_skewers",
+          "label": "Soak skewers",
+          "minutes": 30
+        }
+      ]
+    },
+    {
+      "id": "step.slice_meat",
+      "title": "Slice the beef thin",
+      "body": "Pat beef dry. Slice thinly against the grain (about 1/8–1/4 inch). If the beef is hard to slice, chill in the freezer 10–15 minutes first."
+    },
+    {
+      "id": "step.make_yaji",
+      "title": "Make yaji (suya spice blend)",
+      "body": "Combine finely ground roasted peanuts with paprika, cayenne, ginger, garlic powder, onion powder, black pepper, optional clove, salt, and optional bouillon. Mix thoroughly. Taste a pinch and adjust salt/heat.",
+      "notes": [
+        "If peanuts are oily, pulse briefly; aim for a dry, sandy blend rather than peanut butter."
+      ]
+    },
+    {
+      "id": "step.coat_meat",
+      "title": "Coat and thread the meat",
+      "body": "Toss sliced beef with neutral oil (and optional mustard if needed). Sprinkle yaji over the beef and toss until well coated. Thread beef strips onto skewers in loose folds so heat can circulate."
+    },
+    {
+      "id": "step.preheat",
+      "title": "Preheat grill or broiler",
+      "body": "Preheat a charcoal or gas grill to high heat (very hot). If broiling, set oven rack near the broiler and preheat broiler. Lightly oil the grate or rack."
+    },
+    {
+      "id": "step.cook_suya",
+      "title": "Grill hot and fast",
+      "body": "Grill skewers 2–4 minutes per side, flipping once or twice, until browned and lightly charred at edges. Brush lightly with oil if the surface looks dry. Avoid prolonged cooking so the peanuts don’t burn.",
+      "timers": [
+        {
+          "id": "timer.grill_suya",
+          "label": "Grill suya (flip halfway)",
+          "minutes": 8
+        }
+      ]
+    },
+    {
+      "id": "step.finish_serve",
+      "title": "Finish and serve",
+      "body": "Rest skewers 2 minutes. Dust with extra yaji if desired. Serve with sliced onions and tomatoes (and cucumber optional)."
+    }
+  ],
+  "notes": [
+    "Signature profile: suya is defined by yaji—peanut-forward spice with cayenne/ginger/garlic and optional bouillon.",
+    "Texture key: slice beef thin and grill very hot and fast; thick slices turn chewy.",
+    "Avoid burning: peanuts toast quickly—keep cook time short and watch closely, especially under a broiler.",
+    "Serving: classic with raw sliced onions + tomatoes; extra yaji for dusting is common.",
+    "Make-ahead: yaji keeps 2–3 months in an airtight jar (cool, dark pantry)."
+  ],
+  "variations": [
+    {
+      "id": "variation.chicken_suya",
+      "label": "Chicken suya",
+      "notes": [
+        "Use 680 g boneless chicken thigh sliced thin. Cook until 165°F (74°C), typically 4–6 minutes per side depending on thickness."
+      ]
+    },
+    {
+      "id": "variation.kid_friendly",
+      "label": "Kid-friendly (mild)",
+      "notes": [
+        "Reduce cayenne by half and increase paprika. Serve yaji on the side for heat control."
+      ]
+    },
+    {
+      "id": "variation.oven_broil",
+      "label": "Oven broiler method",
+      "notes": [
+        "Place skewers on a wire rack over a foil-lined sheet pan. Broil 3–5 minutes per side, rotating pan once for even browning."
+      ]
+    }
+  ]
+}

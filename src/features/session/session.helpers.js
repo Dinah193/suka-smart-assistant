@@ -15,8 +15,8 @@
  *   checkpoints every 10s and on step transitions.
  *
  * Contracts & Assumptions
- * - eventBus:           src/services/eventBus.js
- * - featureFlags:       src/services/featureFlags.js  (boolean familyFundMode)
+ * - eventBus:           src/services/events/eventBus.js
+ * - featureFlags:       src/config/featureFlags.js  (boolean familyFundMode)
  * - HubPacketFormatter: src/services/hub/HubPacketFormatter.js
  * - FamilyFundConnector src/services/hub/FamilyFundConnector.js
  * - SessionsRepo:       src/data/SessionsRepo.js  (Dexie abstraction)
@@ -35,23 +35,41 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from '@/services/eventBus';
-import featureFlags from '@/services/featureFlags';
-import * as SessionsRepo from '@/data/SessionsRepo';
-import { SESSION_EVENTS, emitCheckpointWritten, emitWarning } from '@/features/session/session.events';
+import eventBus from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags";
+import * as SessionsRepo from "@/data/SessionsRepo";
+import {
+  SESSION_EVENTS,
+  emitCheckpointWritten,
+  emitWarning,
+} from "@/features/session/session.events";
 
 // Optional hub imports (wrapped in try/catch for graceful degradation)
 let HubPacketFormatter, FamilyFundConnector;
-try { HubPacketFormatter = require('@/services/hub/HubPacketFormatter'); } catch {}
-try { FamilyFundConnector = require('@/services/hub/FamilyFundConnector'); } catch {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch {}
 
 // Optional guard imports (each is expected to expose async isBlocked(session):boolean)
 let sabbathGuard, quietHoursGuard, weatherGuard, inventoryGuard, batteryGuard;
-try { sabbathGuard = require('@/guards/sabbathGuard'); } catch {}
-try { quietHoursGuard = require('@/guards/quietHoursGuard'); } catch {}
-try { weatherGuard = require('@/guards/weatherGuard'); } catch {}
-try { inventoryGuard = require('@/guards/inventoryGuard'); } catch {}
-try { batteryGuard = require('@/guards/batteryGuard'); } catch {}
+try {
+  sabbathGuard = require("@/guards/sabbathGuard");
+} catch {}
+try {
+  quietHoursGuard = require("@/guards/quietHoursGuard");
+} catch {}
+try {
+  weatherGuard = require("@/guards/weatherGuard");
+} catch {}
+try {
+  inventoryGuard = require("@/guards/inventoryGuard");
+} catch {}
+try {
+  batteryGuard = require("@/guards/batteryGuard");
+} catch {}
 
 /** @typedef {import('@/types').Session} Session */
 /** @typedef {import('@/types').SessionStep} SessionStep */
@@ -62,7 +80,9 @@ try { batteryGuard = require('@/guards/batteryGuard'); } catch {}
 // -----------------------------------------------------------------------------
 
 /** @returns {string} ISO string now */
-export function isoNow() { return new Date().toISOString(); }
+export function isoNow() {
+  return new Date().toISOString();
+}
 
 /** @param {number} seconds @returns {string} "H:MM:SS" or "M:SS" */
 export function formatHMS(seconds) {
@@ -70,13 +90,15 @@ export function formatHMS(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  const mm = m.toString().padStart(h ? 2 : 1, '0');
-  const ss = s.toString().padStart(2, '0');
+  const mm = m.toString().padStart(h ? 2 : 1, "0");
+  const ss = s.toString().padStart(2, "0");
   return h ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
 }
 
 /** Clamp helper */
-export function clamp(n, min, max) { return Math.min(Math.max(n, min), max); }
+export function clamp(n, min, max) {
+  return Math.min(Math.max(n, min), max);
+}
 
 // -----------------------------------------------------------------------------
 // Guard evaluation (pre-run / inter-step)
@@ -92,20 +114,37 @@ export async function evaluateGuards(session) {
   const reasons = [];
   const safeCheck = async (guard, code) => {
     if (!guard?.isBlocked) return false;
-    try { return !!(await guard.isBlocked(session)); }
-    catch (e) {
-      console.warn(`[session.helpers] Guard "${code}" errored; failing open`, e);
+    try {
+      return !!(await guard.isBlocked(session));
+    } catch (e) {
+      console.warn(
+        `[session.helpers] Guard "${code}" errored; failing open`,
+        e
+      );
       // non-fatal; we let it pass but warn the UI
-      emitWarning(session.id, { code: `guard.${code}.error`, message: 'Guard error, proceeding' });
+      emitWarning(session.id, {
+        code: `guard.${code}.error`,
+        message: "Guard error, proceeding",
+      });
       return false;
     }
   };
   const results = await Promise.all([
-    safeCheck(sabbathGuard, 'sabbath').then(v => v && reasons.push('sabbath')),
-    safeCheck(quietHoursGuard, 'quietHours').then(v => v && reasons.push('quietHours')),
-    safeCheck(weatherGuard, 'weather').then(v => v && reasons.push('weather')),
-    safeCheck(inventoryGuard, 'inventory').then(v => v && reasons.push('inventory')),
-    safeCheck(batteryGuard, 'battery').then(v => v && reasons.push('battery')),
+    safeCheck(sabbathGuard, "sabbath").then(
+      (v) => v && reasons.push("sabbath")
+    ),
+    safeCheck(quietHoursGuard, "quietHours").then(
+      (v) => v && reasons.push("quietHours")
+    ),
+    safeCheck(weatherGuard, "weather").then(
+      (v) => v && reasons.push("weather")
+    ),
+    safeCheck(inventoryGuard, "inventory").then(
+      (v) => v && reasons.push("inventory")
+    ),
+    safeCheck(batteryGuard, "battery").then(
+      (v) => v && reasons.push("battery")
+    ),
   ]);
   return { blocked: results.some(Boolean), reasons };
 }
@@ -118,7 +157,11 @@ export async function evaluateGuards(session) {
  */
 export function computeNextRunnableIndex(session) {
   const steps = Array.isArray(session?.steps) ? session.steps : [];
-  const startAt = clamp(Number(session?.progress?.currentStepIndex) || 0, 0, Math.max(steps.length - 1, 0));
+  const startAt = clamp(
+    Number(session?.progress?.currentStepIndex) || 0,
+    0,
+    Math.max(steps.length - 1, 0)
+  );
   // In this helper we simply return current index; the Runner can implement
   // richer logic (e.g., skip invalid/missing steps).
   return startAt;
@@ -133,13 +176,15 @@ let _wakeLockSentinel = null;
 /** Try to keep the screen awake; returns true if locked */
 export async function acquireWakeLock() {
   try {
-    if ('wakeLock' in navigator && navigator.wakeLock?.request) {
-      _wakeLockSentinel = await navigator.wakeLock.request('screen');
-      _wakeLockSentinel.addEventListener?.('release', () => { _wakeLockSentinel = null; });
+    if ("wakeLock" in navigator && navigator.wakeLock?.request) {
+      _wakeLockSentinel = await navigator.wakeLock.request("screen");
+      _wakeLockSentinel.addEventListener?.("release", () => {
+        _wakeLockSentinel = null;
+      });
       return true;
     }
   } catch (e) {
-    console.warn('[session.helpers] Wake Lock request failed', e);
+    console.warn("[session.helpers] Wake Lock request failed", e);
   }
   return false;
 }
@@ -161,11 +206,11 @@ export async function releaseWakeLock() {
 /** Ensure permission; returns 'granted'|'denied'|'default' */
 export async function ensureNotificationPermission() {
   try {
-    if (!('Notification' in window)) return 'denied';
-    if (Notification.permission === 'granted') return 'granted';
+    if (!("Notification" in window)) return "denied";
+    if (Notification.permission === "granted") return "granted";
     return await Notification.requestPermission();
   } catch {
-    return 'denied';
+    return "denied";
   }
 }
 
@@ -177,26 +222,29 @@ export async function ensureNotificationPermission() {
  * @returns {Notification|null}
  */
 export function showOngoingNotification(info) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return null;
+  if (!("Notification" in window) || Notification.permission !== "granted")
+    return null;
   try {
     const body = [
-      info.paused ? '⏸ Paused' : '▶ In progress',
+      info.paused ? "⏸ Paused" : "▶ In progress",
       `Step ${info.stepIndex + 1}/${info.totalSteps}`,
-      info.stepTitle ? `• ${info.stepTitle}` : '',
-    ].filter(Boolean).join('  ');
-    const n = new Notification(info.title || 'Session in progress', {
+      info.stepTitle ? `• ${info.stepTitle}` : "",
+    ]
+      .filter(Boolean)
+      .join("  ");
+    const n = new Notification(info.title || "Session in progress", {
       body,
       tag: `ssa-session-${info.sessionId}`, // ensures it updates in place
       requireInteraction: false,
       // icon: '/icons/ssa-192.png', // optional: supply your app icon
       actions: [
-        { action: 'pause', title: info.paused ? 'Resume' : 'Pause' },
-        { action: 'next',  title: 'Next' },
+        { action: "pause", title: info.paused ? "Resume" : "Pause" },
+        { action: "next", title: "Next" },
       ],
     });
     return n;
   } catch (e) {
-    console.warn('[session.helpers] Notification failed', e);
+    console.warn("[session.helpers] Notification failed", e);
     return null;
   }
 }
@@ -206,9 +254,10 @@ export function closeOngoingNotification(sessionId) {
   // There is no direct window-side API to close by tag; rely on SW or simply
   // create a final "completed" notification that replaces the existing one.
   try {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    new Notification('Session finished', {
-      body: 'Nice work! 🎉',
+    if (!("Notification" in window) || Notification.permission !== "granted")
+      return;
+    new Notification("Session finished", {
+      body: "Nice work! 🎉",
       tag: `ssa-session-${sessionId}`,
       requireInteraction: false,
     });
@@ -226,7 +275,7 @@ export function closeOngoingNotification(sessionId) {
  * @param {{ rate?:number, pitch?:number, volume?:number, voice?:SpeechSynthesisVoice }} [opts]
  */
 export function speak(text, opts = {}) {
-  if (!text || !('speechSynthesis' in window)) return () => {};
+  if (!text || !("speechSynthesis" in window)) return () => {};
   try {
     const u = new SpeechSynthesisUtterance(text);
     if (opts.voice) u.voice = opts.voice;
@@ -250,22 +299,28 @@ export function speak(text, opts = {}) {
  */
 export function attachMediaSession(h = {}) {
   try {
-    if (!('mediaSession' in navigator)) return () => {};
+    if (!("mediaSession" in navigator)) return () => {};
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: h.title || 'SSA Session',
-      artist: h.artist || 'Suka Smart Assistant',
-      album: h.album || 'Household',
+      title: h.title || "SSA Session",
+      artist: h.artist || "Suka Smart Assistant",
+      album: h.album || "Household",
     });
-    if (h.onPlay)  navigator.mediaSession.setActionHandler('play',  () => h.onPlay());
-    if (h.onPause) navigator.mediaSession.setActionHandler('pause', () => h.onPause());
-    if (h.onNext)  navigator.mediaSession.setActionHandler('nexttrack', () => h.onNext());
-    if (h.onPrev)  navigator.mediaSession.setActionHandler('previoustrack', () => h.onPrev());
+    if (h.onPlay)
+      navigator.mediaSession.setActionHandler("play", () => h.onPlay());
+    if (h.onPause)
+      navigator.mediaSession.setActionHandler("pause", () => h.onPause());
+    if (h.onNext)
+      navigator.mediaSession.setActionHandler("nexttrack", () => h.onNext());
+    if (h.onPrev)
+      navigator.mediaSession.setActionHandler("previoustrack", () =>
+        h.onPrev()
+      );
     return () => {
       try {
-        navigator.mediaSession.setActionHandler('play', null);
-        navigator.mediaSession.setActionHandler('pause', null);
-        navigator.mediaSession.setActionHandler('nexttrack', null);
-        navigator.mediaSession.setActionHandler('previoustrack', null);
+        navigator.mediaSession.setActionHandler("play", null);
+        navigator.mediaSession.setActionHandler("pause", null);
+        navigator.mediaSession.setActionHandler("nexttrack", null);
+        navigator.mediaSession.setActionHandler("previoustrack", null);
         navigator.mediaSession.metadata = null;
       } catch {}
     };
@@ -290,33 +345,36 @@ let _pipWindow = null;
 export async function openPiPHUD(opts = {}) {
   try {
     const api = /** @type {any} */ (document);
-    if (!api.pictureInPictureEnabled && !api.documentPictureInPicture) return null;
+    if (!api.pictureInPictureEnabled && !api.documentPictureInPicture)
+      return null;
 
     const dpi = api.documentPictureInPicture || api; // newer API is documentPictureInPicture
     const width = clamp(opts.width || 320, 240, 600);
     const height = clamp(opts.height || 120, 100, 400);
 
-    _pipWindow = await dpi.requestWindow?.({ width, height }) ||
-                 await api.requestPictureInPicture?.(); // older compat (video-only)
+    _pipWindow =
+      (await dpi.requestWindow?.({ width, height })) ||
+      (await api.requestPictureInPicture?.()); // older compat (video-only)
     if (!_pipWindow) return null;
 
     const doc = _pipWindow.document;
-    doc.body.style.margin = '0';
-    doc.body.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    doc.title = opts.title || 'SSA Session HUD';
+    doc.body.style.margin = "0";
+    doc.body.style.fontFamily =
+      "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    doc.title = opts.title || "SSA Session HUD";
 
     // base container + shadow root to avoid CSS bleed
-    const host = doc.createElement('div');
-    host.style.all = 'initial';
-    host.style.display = 'block';
-    host.style.width = '100%';
-    host.style.height = '100%';
+    const host = doc.createElement("div");
+    host.style.all = "initial";
+    host.style.display = "block";
+    host.style.width = "100%";
+    host.style.height = "100%";
     doc.body.appendChild(host);
-    const root = host.attachShadow({ mode: 'open' });
+    const root = host.attachShadow({ mode: "open" });
 
     // A very tiny default bar (caller may overwrite contents):
-    const wrap = doc.createElement('div');
-    wrap.setAttribute('part', 'wrap');
+    const wrap = doc.createElement("div");
+    wrap.setAttribute("part", "wrap");
     wrap.style.cssText = `
       box-sizing: border-box;
       width: 100%; height: 100%;
@@ -331,7 +389,7 @@ export async function openPiPHUD(opts = {}) {
       <button id="hud-next" part="btn">▶</button>
     `;
 
-    const style = doc.createElement('style');
+    const style = doc.createElement("style");
     style.textContent = `
       :host { all: initial; }
       [part="btn"] {
@@ -345,18 +403,27 @@ export async function openPiPHUD(opts = {}) {
     root.appendChild(style);
     root.appendChild(wrap);
 
-    const close = () => { try { _pipWindow?.close?.(); } catch {} _pipWindow = null; };
-    _pipWindow.addEventListener('pagehide', () => { _pipWindow = null; });
+    const close = () => {
+      try {
+        _pipWindow?.close?.();
+      } catch {}
+      _pipWindow = null;
+    };
+    _pipWindow.addEventListener("pagehide", () => {
+      _pipWindow = null;
+    });
 
     return { win: _pipWindow, root, close };
   } catch (e) {
-    console.warn('[session.helpers] PiP HUD failed', e);
+    console.warn("[session.helpers] PiP HUD failed", e);
     return null;
   }
 }
 
 export function closePiPHUD() {
-  try { _pipWindow?.close?.(); } catch {}
+  try {
+    _pipWindow?.close?.();
+  } catch {}
   _pipWindow = null;
 }
 
@@ -371,7 +438,9 @@ export function closePiPHUD() {
  * @returns {{ terminate: Function }}
  */
 export function createTickWorker(intervalMs, onTick) {
-  const blob = new Blob([`
+  const blob = new Blob(
+    [
+      `
     let seq = 0, timer = null;
     function start() {
       timer = setInterval(() => {
@@ -384,19 +453,26 @@ export function createTickWorker(intervalMs, onTick) {
       if (type === 'stop') { clearInterval(timer); close(); }
     });
     start();
-  `], { type: 'application/javascript' });
+  `,
+    ],
+    { type: "application/javascript" }
+  );
 
   const worker = new Worker(URL.createObjectURL(blob));
   const handler = (e) => {
-    if (e?.data?.type === 'tick') onTick?.(e.data);
+    if (e?.data?.type === "tick") onTick?.(e.data);
   };
-  worker.addEventListener('message', handler);
+  worker.addEventListener("message", handler);
 
   return {
     terminate() {
-      try { worker.postMessage({ type: 'stop' }); } catch {}
-      try { worker.terminate(); } catch {}
-    }
+      try {
+        worker.postMessage({ type: "stop" });
+      } catch {}
+      try {
+        worker.terminate();
+      } catch {}
+    },
   };
 }
 
@@ -413,19 +489,19 @@ export function createTickWorker(intervalMs, onTick) {
 export async function writeCheckpoint(sessionId, progress) {
   if (!sessionId || !progress) return;
   try {
-    if (typeof SessionsRepo.writeCheckpoint === 'function') {
+    if (typeof SessionsRepo.writeCheckpoint === "function") {
       await SessionsRepo.writeCheckpoint(sessionId, progress);
-    } else if (typeof SessionsRepo.updateProgress === 'function') {
+    } else if (typeof SessionsRepo.updateProgress === "function") {
       await SessionsRepo.updateProgress(sessionId, progress);
     }
     emitCheckpointWritten(sessionId, progress);
   } catch (e) {
-    console.warn('[session.helpers] writeCheckpoint failed', e);
+    console.warn("[session.helpers] writeCheckpoint failed", e);
     eventBus.emit({
       type: SESSION_EVENTS.ERROR,
       ts: isoNow(),
-      source: 'session.helpers',
-      data: { sessionId, code: 'checkpoint.write.failed', message: String(e) }
+      source: "session.helpers",
+      data: { sessionId, code: "checkpoint.write.failed", message: String(e) },
     });
   }
 }
@@ -437,7 +513,7 @@ export async function writeCheckpoint(sessionId, progress) {
  */
 export async function setSessionStatus(sessionId, status) {
   try {
-    if (typeof SessionsRepo.setStatus === 'function') {
+    if (typeof SessionsRepo.setStatus === "function") {
       await SessionsRepo.setStatus(sessionId, status);
     } else {
       // last-resort: shallow update via get->save style if your repo uses upsert
@@ -449,7 +525,7 @@ export async function setSessionStatus(sessionId, status) {
       }
     }
   } catch (e) {
-    console.warn('[session.helpers] setSessionStatus failed', e);
+    console.warn("[session.helpers] setSessionStatus failed", e);
   }
 }
 
@@ -467,7 +543,8 @@ export async function exportToHubIfEnabled(payload) {
   try {
     if (!featureFlags?.familyFundMode) return { ok: false };
     if (!payload?.session?.id) return { ok: false };
-    if (!HubPacketFormatter?.formatSessionPacket || !FamilyFundConnector?.send) return { ok: false };
+    if (!HubPacketFormatter?.formatSessionPacket || !FamilyFundConnector?.send)
+      return { ok: false };
 
     const envelope = HubPacketFormatter.formatSessionPacket(payload);
     const res = await FamilyFundConnector.send(envelope);
@@ -475,8 +552,12 @@ export async function exportToHubIfEnabled(payload) {
       eventBus.emit({
         type: SESSION_EVENTS.EXPORTED,
         ts: isoNow(),
-        source: 'session.helpers',
-        data: { sessionId: payload.session.id, hubMessageId: res.id, tookMs: res.tookMs }
+        source: "session.helpers",
+        data: {
+          sessionId: payload.session.id,
+          hubMessageId: res.id,
+          tookMs: res.tookMs,
+        },
       });
       return { ok: true, hubMessageId: res.id };
     }
@@ -496,16 +577,24 @@ export async function exportToHubIfEnabled(payload) {
  * @returns {SessionStep}
  */
 export function sanitizeStep(step) {
-  if (!step || typeof step !== 'object') {
-    return { id: 'MISSING', title: '(Missing step)', desc: '', durationSec: 0, blockers: [], metadata: {} };
+  if (!step || typeof step !== "object") {
+    return {
+      id: "MISSING",
+      title: "(Missing step)",
+      desc: "",
+      durationSec: 0,
+      blockers: [],
+      metadata: {},
+    };
   }
   return {
-    id: String(step.id || 'NO_ID'),
-    title: String(step.title || '(Untitled step)'),
-    desc: String(step.desc || ''),
+    id: String(step.id || "NO_ID"),
+    title: String(step.title || "(Untitled step)"),
+    desc: String(step.desc || ""),
     durationSec: Number.isFinite(step.durationSec) ? step.durationSec : 0,
     blockers: Array.isArray(step.blockers) ? step.blockers : [],
-    metadata: typeof step.metadata === 'object' && step.metadata ? step.metadata : {},
+    metadata:
+      typeof step.metadata === "object" && step.metadata ? step.metadata : {},
   };
 }
 
@@ -515,18 +604,27 @@ export function sanitizeStep(step) {
  * @returns {Session|null}
  */
 export function sanitizeSession(s) {
-  if (!s || typeof s !== 'object') return null;
+  if (!s || typeof s !== "object") return null;
   if (!s.id || !s.domain) return null;
   const steps = Array.isArray(s.steps) ? s.steps.map(sanitizeStep) : [];
   return {
     id: String(s.id),
     domain: String(s.domain),
-    title: s.title ? String(s.title) : '',
-    source: s.source || { type: 'manual', refId: null },
+    title: s.title ? String(s.title) : "",
+    source: s.source || { type: "manual", refId: null },
     steps,
-    prefs: s.prefs || { voiceGuidance: false, haptic: true, autoAdvance: false },
-    status: s.status || 'pending',
-    progress: s.progress || { currentStepIndex: 0, elapsedSec: 0, startedAt: null, pausedAt: null },
+    prefs: s.prefs || {
+      voiceGuidance: false,
+      haptic: true,
+      autoAdvance: false,
+    },
+    status: s.status || "pending",
+    progress: s.progress || {
+      currentStepIndex: 0,
+      elapsedSec: 0,
+      startedAt: null,
+      pausedAt: null,
+    },
     analytics: s.analytics || { skippedSteps: [], adjustments: [] },
     createdAt: s.createdAt || isoNow(),
     updatedAt: s.updatedAt || s.createdAt || isoNow(),
@@ -555,7 +653,13 @@ export function elapsedSince(iso, fallbackSec = 0) {
  * @param {number} dtSec
  */
 export function addElapsed(progress, dtSec) {
-  const p = { ...(progress || {}), elapsedSec: Math.max(0, Math.floor((progress?.elapsedSec || 0) + (dtSec || 0))) };
+  const p = {
+    ...(progress || {}),
+    elapsedSec: Math.max(
+      0,
+      Math.floor((progress?.elapsedSec || 0) + (dtSec || 0))
+    ),
+  };
   return p;
 }
 
@@ -566,13 +670,23 @@ export function addElapsed(progress, dtSec) {
 /** Install global keyboard shortcuts for Runner */
 export function installRunnerHotkeys({ onPauseToggle, onNext, onPrev }) {
   const handler = (e) => {
-    if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-    if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); onPauseToggle?.(); }
-    if (e.key.toLowerCase() === 'n') { e.preventDefault(); onNext?.(); }
-    if (e.key.toLowerCase() === 'p') { e.preventDefault(); onPrev?.(); }
+    if (e.target && ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName))
+      return;
+    if (e.key === " " || e.code === "Space") {
+      e.preventDefault();
+      onPauseToggle?.();
+    }
+    if (e.key.toLowerCase() === "n") {
+      e.preventDefault();
+      onNext?.();
+    }
+    if (e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      onPrev?.();
+    }
   };
-  window.addEventListener('keydown', handler);
-  return () => window.removeEventListener('keydown', handler);
+  window.addEventListener("keydown", handler);
+  return () => window.removeEventListener("keydown", handler);
 }
 
 // -----------------------------------------------------------------------------
@@ -587,10 +701,11 @@ export function installRunnerHotkeys({ onPauseToggle, onNext, onPrev }) {
 export function cueLine(step) {
   const m = step?.metadata || {};
   const parts = [];
-  if (Number.isFinite(m.tempTargetF) && m.tempTargetF > 0) parts.push(`→ ${m.tempTargetF}°F`);
+  if (Number.isFinite(m.tempTargetF) && m.tempTargetF > 0)
+    parts.push(`→ ${m.tempTargetF}°F`);
   if (m.donenessCue) parts.push(String(m.donenessCue));
   if (m.cueNotes) parts.push(String(m.cueNotes));
-  return parts.join(' • ');
+  return parts.join(" • ");
 }
 
 // -----------------------------------------------------------------------------
@@ -603,16 +718,29 @@ export function cueLine(step) {
  * @returns {() => void} cleanup
  */
 export function trapFocus(root) {
-  const selectable = () => Array.from(root.querySelectorAll('a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])'))
-    .filter(/** @param {HTMLElement} n */ (n) => !n.hasAttribute('disabled') && !n.getAttribute('aria-hidden'));
+  const selectable = () =>
+    Array.from(
+      root.querySelectorAll(
+        'a,button,input,textarea,select,[tabindex]:not([tabindex="-1"])'
+      )
+    ).filter(
+      /** @param {HTMLElement} n */ (n) =>
+        !n.hasAttribute("disabled") && !n.getAttribute("aria-hidden")
+    );
   const onKey = (e) => {
-    if (e.key !== 'Tab') return;
+    if (e.key !== "Tab") return;
     const items = selectable();
     if (!items.length) return;
-    const first = items[0], last = items[items.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    const first = items[0],
+      last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   };
-  root.addEventListener('keydown', onKey);
-  return () => root.removeEventListener('keydown', onKey);
+  root.addEventListener("keydown", onKey);
+  return () => root.removeEventListener("keydown", onKey);
 }

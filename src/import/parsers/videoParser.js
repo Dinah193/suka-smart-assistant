@@ -53,7 +53,7 @@
 //    Those are handled AFTER normalization in domain engines.
 // -----------------------------------------------------------------------------
 
-import eventBus from "../../services/eventBus";
+import eventBus from "../../services/events/eventBus";
 import scraperService from "../../services/scraperService.js";
 
 /**
@@ -99,7 +99,10 @@ function emitParserEvent(success, detail = {}) {
  */
 async function getHtmlFromRaw(raw) {
   // clearly HTML string
-  if (typeof raw === "string" && /<\/html>|<body|<article|<section|<head/i.test(raw)) {
+  if (
+    typeof raw === "string" &&
+    /<\/html>|<body|<article|<section|<head/i.test(raw)
+  ) {
     return raw;
   }
 
@@ -134,7 +137,8 @@ function inferPlatformFromUrl(url) {
   if (u.includes("youtube.com") || u.includes("youtu.be")) return "youtube";
   if (u.includes("tiktok.com")) return "tiktok";
   if (u.includes("facebook.com") || u.includes("fb.watch")) return "facebook";
-  if (u.includes("instagram.com") || u.includes("instagr.am")) return "instagram";
+  if (u.includes("instagram.com") || u.includes("instagr.am"))
+    return "instagram";
   return "other";
 }
 
@@ -182,19 +186,33 @@ function sniffTargetDomain(text) {
   if (/\brecipe\b|\bhow to cook\b|\bbake\b|\broast\b|\bstew\b/.test(lower)) {
     return "cooking";
   }
-  if (/\bclean\b|\bdeclutter\b|\bdeep clean\b|\bchore\b|\breset\b/.test(lower)) {
+  if (
+    /\bclean\b|\bdeclutter\b|\bdeep clean\b|\bchore\b|\breset\b/.test(lower)
+  ) {
     return "cleaning";
   }
-  if (/\bgarden\b|\bseed\b|\bplant\b|\bsow\b|\bbed\b|\braised bed\b/.test(lower)) {
+  if (
+    /\bgarden\b|\bseed\b|\bplant\b|\bsow\b|\bbed\b|\braised bed\b/.test(lower)
+  ) {
     return "garden";
   }
-  if (/\bgoat\b|\bsheep\b|\bchicken\b|\bduck\b|\bcattle\b|\bbutcher\b|\bcarcass\b/.test(lower)) {
+  if (
+    /\bgoat\b|\bsheep\b|\bchicken\b|\bduck\b|\bcattle\b|\bbutcher\b|\bcarcass\b/.test(
+      lower
+    )
+  ) {
     return "animals";
   }
-  if (/\bcan\b|\bpressure can\b|\bferment\b|\bdehydrate\b|\bfreeze dry\b|\bsmoke\b/.test(lower)) {
+  if (
+    /\bcan\b|\bpressure can\b|\bferment\b|\bdehydrate\b|\bfreeze dry\b|\bsmoke\b/.test(
+      lower
+    )
+  ) {
     return "preservation";
   }
-  if (/\bpantry\b|\broot cellar\b|\bstorehouse\b|\bfood storage\b/.test(lower)) {
+  if (
+    /\bpantry\b|\broot cellar\b|\bstorehouse\b|\bfood storage\b/.test(lower)
+  ) {
     return "storehouse";
   }
 
@@ -247,7 +265,8 @@ function extractVideoMetaFromHtml(html) {
   }
 
   // thumbnails: og:image
-  const thumbRe = /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi;
+  const thumbRe =
+    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi;
   let tm;
   while ((tm = thumbRe.exec(html)) !== null) {
     const url = tm[1].trim();
@@ -379,9 +398,7 @@ function normalizeStructuredVideoObject(raw, meta = {}) {
 
   const transcriptPreview =
     raw.transcriptPreview ||
-    (typeof raw.transcript === "string"
-      ? raw.transcript.slice(0, 200)
-      : null);
+    (typeof raw.transcript === "string" ? raw.transcript.slice(0, 200) : null);
 
   const targetDomainHint =
     raw.targetDomainHint ||
@@ -507,9 +524,7 @@ async function parse(raw, meta = {}) {
 
     const targetDomainHint =
       meta.targetDomainHint ||
-      sniffTargetDomain(
-        [title, description].filter(Boolean).join(" ")
-      ) ||
+      sniffTargetDomain([title, description].filter(Boolean).join(" ")) ||
       null;
 
     const shaped = {
@@ -575,8 +590,7 @@ async function parse(raw, meta = {}) {
     thumbnails: [],
     steps: [],
     transcriptPreview: null,
-    targetDomainHint:
-      sniffTargetDomain(meta.title || "") || null,
+    targetDomainHint: sniffTargetDomain(meta.title || "") || null,
     warning:
       "Parser could not identify video structure — returned minimal structure.",
   };

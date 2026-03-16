@@ -49,9 +49,9 @@ function emitTimerEvent(type, data = {}) {
 
 // Placeholder for future Hub export when timers start writing household data
 // (e.g., logging preservation batches, cleaning sessions, etc.).
-// import featureFlags from "../../services/featureFlags";
-// import HubPacketFormatter from "../../services/hub/HubPacketFormatter";
-// import FamilyFundConnector from "../../services/hub/FamilyFundConnector";
+// import featureFlags from "../../config/featureFlags";
+// import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+// import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 // function exportToHubIfEnabled(payload) {
 //   try {
 //     if (!featureFlags?.familyFundMode) return;

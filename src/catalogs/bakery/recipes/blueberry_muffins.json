@@ -1,0 +1,245 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.blueberry_muffins",
+    "slug": "blueberry_muffins",
+    "name": "Blueberry Muffins (Grab-and-Go Bakery Item)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "bakery",
+      "muffins",
+      "blueberry",
+      "breakfast",
+      "grab-and-go",
+      "kid-friendly",
+      "freezer-friendly",
+      "quick-bake"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "Classic high-domed blueberry muffins with tender crumb and optional crunchy streusel. Includes both all-purpose flour and fresh-milled flour guidance (choose one). Designed as a grab-and-go breakfast bakery baseline with reliable mixing logic (do not overmix)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "muffin_tin_12", "label": "12-cup muffin tin" },
+    { "id": "paper_liners", "label": "Paper liners (optional)" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    {
+      "id": "ice_cream_scoop",
+      "label": "Scoop (for even portions)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "flour_ap_option",
+      "label": "All-purpose flour (Option A — use this OR the fresh-milled option)",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 2 1/2 cups. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — use this OR the AP option)",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "Fresh-milled can absorb more; sift out the largest bran for a softer crumb. Batter may need 15–30 ml extra milk if thick."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "sugar",
+      "label": "Granulated sugar",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 cup."
+    },
+
+    {
+      "id": "eggs",
+      "label": "Large eggs",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "butter_melted",
+      "label": "Unsalted butter, melted and cooled slightly",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp."
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil (canola/avocado/grapeseed)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup; keeps muffins moist."
+    },
+    {
+      "id": "buttermilk_or_yogurt",
+      "label": "Buttermilk (or plain yogurt thinned with milk)",
+      "amount": { "value": 300, "unit": "ml" },
+      "notes": "About 1 1/4 cups. If using yogurt, use 240 g yogurt + 60 ml milk."
+    },
+    {
+      "id": "milk_adjustment_optional",
+      "label": "Extra milk (only if needed for fresh-milled flour batter)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is too thick; up to ~45 ml total depending on flour.",
+      "optional": true
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "lemon_zest_optional",
+      "label": "Lemon zest (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp; brightens blueberry flavor.",
+      "optional": true
+    },
+
+    {
+      "id": "blueberries",
+      "label": "Blueberries (fresh or frozen)",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 2 cups. If frozen, do not thaw."
+    },
+    {
+      "id": "blueberries_coat_flour_optional",
+      "label": "Flour (from your chosen flour) for tossing blueberries",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 tbsp. Helps reduce sinking/bleeding.",
+      "optional": true
+    },
+
+    {
+      "id": "streusel_optional_note",
+      "label": "Optional streusel topping (recommended for bakery style)",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "streusel_flour_optional",
+      "label": "Flour (from your chosen flour) for streusel",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 1/2 cup.",
+      "optional": true
+    },
+    {
+      "id": "streusel_brown_sugar_optional",
+      "label": "Brown sugar (for streusel)",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 1/3 cup packed.",
+      "optional": true
+    },
+    {
+      "id": "streusel_cinnamon_optional",
+      "label": "Cinnamon (for streusel)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "streusel_butter_optional",
+      "label": "Butter, cold, cubed (for streusel)",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": "About 3 tbsp.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_oven_prep",
+      "title": "Prep oven and pan",
+      "body": "Heat oven to 425°F (220°C). Line a 12-cup muffin tin with liners or grease well. High initial heat helps create tall muffin tops."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the all-purpose flour OR the fresh-milled flour (not both). For fresh-milled flour, fine-mill and sift out the largest bran for best tenderness."
+    },
+    {
+      "id": "step_03_make_streusel_optional",
+      "title": "Optional: make streusel topping",
+      "body": "If using streusel, combine streusel flour, brown sugar, cinnamon, and cold butter. Rub together until clumpy. Chill while making batter."
+    },
+    {
+      "id": "step_04_mix_dry",
+      "title": "Mix dry ingredients",
+      "body": "In a large bowl, whisk chosen flour, baking powder, baking soda, salt, and sugar."
+    },
+    {
+      "id": "step_05_mix_wet",
+      "title": "Mix wet ingredients",
+      "body": "In a medium bowl, whisk eggs, melted butter, oil, buttermilk (or yogurt mixture), vanilla, and lemon zest if using."
+    },
+    {
+      "id": "step_06_combine_minimal",
+      "title": "Combine (do not overmix)",
+      "body": "Pour wet into dry and fold with a spatula until just combined. Batter should be thick and lumpy; a few flour streaks are okay (they will hydrate during rest). Overmixing makes tough muffins."
+    },
+    {
+      "id": "step_07_adjust_freshmilled",
+      "title": "Adjust batter for fresh-milled flour (if needed)",
+      "body": "If using fresh-milled flour and batter is overly thick (dry-looking), add extra milk 15 ml at a time until batter is thick but scoopable. Rest 5–10 minutes to hydrate, then fold once gently."
+    },
+    {
+      "id": "step_08_add_blueberries",
+      "title": "Fold in blueberries",
+      "body": "Optional: toss blueberries with 1 tbsp flour (from your chosen flour) to help distribute. Gently fold blueberries into batter. If using frozen, fold quickly to limit color bleed."
+    },
+    {
+      "id": "step_09_portion",
+      "title": "Portion batter",
+      "body": "Divide batter evenly among 12 cups (they should be quite full for tall tops). Top with streusel if using."
+    },
+    {
+      "id": "step_10_bake_hot_then_lower",
+      "title": "Bake (hot start, then lower)",
+      "body": "Bake 6 minutes at 425°F (220°C), then reduce oven to 350°F (175°C) without opening the door. Bake 12–18 minutes more until tops are golden and a toothpick comes out clean or with a few moist crumbs."
+    },
+    {
+      "id": "step_11_cool",
+      "title": "Cool",
+      "body": "Cool in pan 5 minutes, then transfer to a rack. Muffins are best slightly warm but set fully as they cool."
+    }
+  ],
+  "notes": [
+    "Grab-and-go logic: Oil + butter keeps muffins tender across a few days; freeze well for quick breakfasts.",
+    "Dome logic: High initial oven heat creates rapid rise; lowering temp finishes baking without burning.",
+    "Fresh-milled flour: For best results, sift coarse bran and allow a short rest after mixing to hydrate. You may need a small milk adjustment.",
+    "Frozen blueberries: Do not thaw; fold gently and bake promptly to reduce bleeding."
+  ],
+  "storage": {
+    "roomTemp": "Airtight: 2–3 days.",
+    "refrigerator": "Airtight: up to 5 days (rewarm for best texture).",
+    "freezer": "Freeze airtight up to 2 months. Thaw at room temp or rewarm briefly."
+  }
+}

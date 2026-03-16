@@ -18,7 +18,10 @@ import { Recipes } from "@/store/RecipeStore";
 import { BatchDrafts } from "@/store/BatchDraftStore";
 import { logger } from "@/utils/logger";
 import { formatISO } from "@/utils/dates";
-import { mealPlanExports, primeRecipeCache } from "@/services/mealplanning/mealPlanExports";
+import {
+  mealPlanExports,
+  primeRecipeCache,
+} from "@/services/mealplanning/mealPlanExports";
 
 // ----------------------------------------------------------------------------
 // Config & helpers
@@ -31,15 +34,17 @@ const DEFAULT_THEME = {
   card: "#121735",
   text: "#f6f7fb",
   sub: "#cdd3f5",
-  blue: "#3b82f6",     // blue
-  purple: "#7c3aed",   // purple
-  scarlet: "#dc2626",  // scarlet
-  gold: "#d4af37"      // gold
+  blue: "#3b82f6", // blue
+  purple: "#7c3aed", // purple
+  scarlet: "#dc2626", // scarlet
+  gold: "#d4af37", // gold
 };
 
 function b64url(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
 }
 function strToBuf(s) {
   return new TextEncoder().encode(s);
@@ -47,7 +52,13 @@ function strToBuf(s) {
 async function hmac(key, data) {
   // Browser Web Crypto
   if (globalThis.crypto?.subtle) {
-    const k = await crypto.subtle.importKey("raw", strToBuf(key), { name: "HMAC", hash: ALG }, false, ["sign"]);
+    const k = await crypto.subtle.importKey(
+      "raw",
+      strToBuf(key),
+      { name: "HMAC", hash: ALG },
+      false,
+      ["sign"]
+    );
     const sig = await crypto.subtle.sign("HMAC", k, strToBuf(data));
     return b64url(sig);
   }
@@ -68,15 +79,21 @@ function getBaseURL() {
   return process.env.PUBLIC_BASE_URL || "http://localhost:5173";
 }
 
-function nowISO() { return new Date().toISOString(); }
+function nowISO() {
+  return new Date().toISOString();
+}
 function addDaysISO(startISO, days) {
-  const d = new Date(startISO); d.setDate(d.getDate() + days); return d.toISOString();
+  const d = new Date(startISO);
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
 }
 function expiresFrom(days = DEFAULT_EXP_DAYS) {
   return addDaysISO(nowISO(), days);
 }
 
-function pick(obj, keys) { return Object.fromEntries(keys.map(k => [k, obj?.[k]])); }
+function pick(obj, keys) {
+  return Object.fromEntries(keys.map((k) => [k, obj?.[k]]));
+}
 
 // ----------------------------------------------------------------------------
 // Public API
@@ -100,13 +117,15 @@ export const mealPlanSharing = {
       createdAt: nowISO(),
       expiresAt: expiresFrom(options.expiresInDays),
       visibility: options.visibility || "unlisted",
-      data: snapshot
+      data: snapshot,
     };
 
     const secret = await resolveShareSecret();
     const body = JSON.stringify(payload);
     const sig = await hmac(secret, body);
-    const token = `${b64url(strToBuf("suka.share.v1"))}.${b64url(strToBuf(body))}.${sig}`;
+    const token = `${b64url(strToBuf("suka.share.v1"))}.${b64url(
+      strToBuf(body)
+    )}.${sig}`;
 
     // Persist
     const share = { token, payload };
@@ -123,7 +142,8 @@ export const mealPlanSharing = {
     const rec = await ShareStore.get(token);
     if (!rec) throw new Error("Share not found");
     await verifyToken(rec.token, rec.payload);
-    if (new Date(rec.payload.expiresAt) < new Date()) throw new Error("Share link expired");
+    if (new Date(rec.payload.expiresAt) < new Date())
+      throw new Error("Share link expired");
     return rec.payload;
   },
 
@@ -138,7 +158,7 @@ export const mealPlanSharing = {
    * Usage: const html = await mealPlanSharing.renderHTML(token)
    */
   async renderHTML(token) {
-    const { payload } = await ShareStore.get(token) || {};
+    const { payload } = (await ShareStore.get(token)) || {};
     if (!payload) throw new Error("Share not found");
     await verifyToken(token, payload);
     return renderPublicHTML(payload, DEFAULT_THEME);
@@ -163,7 +183,9 @@ export const mealPlanSharing = {
    */
   shareTo(target, token) {
     const url = encodeURIComponent(buildShareURL(token));
-    const text = encodeURIComponent("Our weekly meal plan via Suka Smart Assistant");
+    const text = encodeURIComponent(
+      "Our weekly meal plan via Suka Smart Assistant"
+    );
     switch (target) {
       case "twitter":
         return `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
@@ -174,7 +196,7 @@ export const mealPlanSharing = {
       default:
         return buildShareURL(token);
     }
-  }
+  },
 };
 
 export default mealPlanSharing;
@@ -188,10 +210,15 @@ async function buildPublicSnapshot(plan, prefs, opts) {
 
   // Minimal recipe cache (title, tags only) to render public view
   const allRecipes = await Recipes.all().catch(() => []);
-  const rmap = Object.fromEntries(allRecipes.map(r => [r.id, { id: r.id, title: r.title, tags: r.tags || [] }]));
+  const rmap = Object.fromEntries(
+    allRecipes.map((r) => [
+      r.id,
+      { id: r.id, title: r.title, tags: r.tags || [] },
+    ])
+  );
 
   // Sanitize days/meals → keep only recipeId, tags, servings
-  const days = plan.days.map(d => ({
+  const days = plan.days.map((d) => ({
     dateISO: d.dateISO,
     meals: {
       breakfast: keepPublic(d.meals.breakfast),
@@ -205,8 +232,9 @@ async function buildPublicSnapshot(plan, prefs, opts) {
   let grocery = null;
   if (opts.includeGrocery) {
     try {
-      const csv = await mealPlanExports.exportPlan({ plan, format: "csv:shopping" })
-        .then(r => r?.filePath ? null : null) // browser path already downloads; we just regenerate
+      const csv = await mealPlanExports
+        .exportPlan({ plan, format: "csv:shopping" })
+        .then((r) => (r?.filePath ? null : null)) // browser path already downloads; we just regenerate
         .catch(() => null);
       // Instead of reading a file, rebuild a plain list here from recipes
       grocery = computePublicGrocery(plan, allRecipes, passoverMode);
@@ -226,7 +254,7 @@ async function buildPublicSnapshot(plan, prefs, opts) {
     createdAt: plan?.meta?.createdAt || formatISO(new Date()),
     sabbath: sab ? pick(sab, ["from", "to"]) : null,
     passoverMode,
-    theme: pickThemeTokens(prefs)
+    theme: pickThemeTokens(prefs),
   };
 
   return { meta, days, grocery, batch, recipes: rmap };
@@ -237,12 +265,12 @@ function keepPublic(slot) {
   return {
     recipeId: slot.recipeId,
     servings: slot.servings || 1,
-    tags: (slot.tags || []).slice(0, 8)
+    tags: (slot.tags || []).slice(0, 8),
   };
 }
 
 function computePublicGrocery(plan, recipes, passoverMode) {
-  const rmap = Object.fromEntries(recipes.map(r => [r.id, r]));
+  const rmap = Object.fromEntries(recipes.map((r) => [r.id, r]));
   const restricted = new Set(["chametz", "leaven", "leavening-agent"]);
   const list = [];
 
@@ -254,7 +282,7 @@ function computePublicGrocery(plan, recipes, passoverMode) {
       if (!r?.ingredients) continue;
 
       for (const ing of r.ingredients) {
-        const isChametz = (ing.tags || []).some(t => restricted.has(t));
+        const isChametz = (ing.tags || []).some((t) => restricted.has(t));
         if (passoverMode && isChametz) continue;
 
         list.push({
@@ -263,7 +291,7 @@ function computePublicGrocery(plan, recipes, passoverMode) {
           item: ing.name || "",
           qty: (ing.qty || 0) * (slot.servings || 1),
           aisle: ing.aisle || null,
-          note: isChametz ? "Restricted during Passover" : (ing.note || null)
+          note: isChametz ? "Restricted during Passover" : ing.note || null,
         });
       }
     }
@@ -271,7 +299,7 @@ function computePublicGrocery(plan, recipes, passoverMode) {
 
   // Group by aisle for nicer display
   const byAisle = {};
-  list.forEach(it => {
+  list.forEach((it) => {
     const k = it.aisle || "Other";
     (byAisle[k] ||= []).push(it);
   });
@@ -284,7 +312,7 @@ async function inferBatchAppendix(plan, rmap) {
   for (const d of plan.days) {
     const dow = new Date(d.dateISO).getDay();
     if (dow === 6 || dow === 0) {
-      ["dinner", "lunch"].forEach(mk => {
+      ["dinner", "lunch"].forEach((mk) => {
         const id = d.meals[mk]?.recipeId;
         if (id) pick.push(id);
       });
@@ -294,7 +322,7 @@ async function inferBatchAppendix(plan, rmap) {
   if (!uniq.length) return null;
 
   // If a BatchDraft already exists, we could reference it; here we just summarize.
-  const steps = uniq.map(id => ({
+  const steps = uniq.map((id) => ({
     recipeId: id,
     title: rmap[id]?.title || "Recipe",
   }));
@@ -307,7 +335,7 @@ function pickThemeTokens(prefs) {
     primary: DEFAULT_THEME.blue,
     accent: DEFAULT_THEME.purple,
     warn: DEFAULT_THEME.scarlet,
-    highlight: DEFAULT_THEME.gold
+    highlight: DEFAULT_THEME.gold,
   };
 }
 
@@ -321,10 +349,15 @@ async function resolveShareSecret() {
   }
   // Dev fallback (DO NOT use in prod): stable local secret persisted in localStorage
   const k = "__SUKA_SHARE_SECRET";
-  const existing = typeof localStorage !== "undefined" ? localStorage.getItem(k) : null;
+  const existing =
+    typeof localStorage !== "undefined" ? localStorage.getItem(k) : null;
   if (existing) return existing;
   const gen = `local-${Math.random().toString(36).slice(2)}-${Date.now()}`;
-  try { localStorage.setItem(k, gen); } catch { /* ignore */ }
+  try {
+    localStorage.setItem(k, gen);
+  } catch {
+    /* ignore */
+  }
   return gen;
 }
 
@@ -332,7 +365,8 @@ async function verifyToken(token, payload) {
   const parts = token.split(".");
   if (parts.length !== 3) throw new Error("Invalid token");
   const header = atob(parts[0].replace(/-/g, "+").replace(/_/g, "/"));
-  if (!header.startsWith("suka.share.v1")) throw new Error("Unsupported token ver");
+  if (!header.startsWith("suka.share.v1"))
+    throw new Error("Unsupported token ver");
   const body = atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"));
   const expected = await hmac(await resolveShareSecret(), body);
   if (expected !== parts[2]) throw new Error("Signature mismatch");
@@ -386,31 +420,47 @@ function renderPublicHTML(payload, THEME = DEFAULT_THEME) {
     .subtle{color:#aeb7e9}
   `;
 
-  const sabNote = meta?.sabbath ? `
+  const sabNote = meta?.sabbath
+    ? `
     <div class="note">
-      ⛔ <b>Sabbath window</b> from <span class="subtle">${new Date(meta.sabbath.from).toLocaleString()}</span>
-      to <span class="subtle">${new Date(meta.sabbath.to).toLocaleString()}</span>. Favor leftovers / low-touch.
-    </div>` : "";
+      ⛔ <b>Sabbath window</b> from <span class="subtle">${new Date(
+        meta.sabbath.from
+      ).toLocaleString()}</span>
+      to <span class="subtle">${new Date(
+        meta.sabbath.to
+      ).toLocaleString()}</span>. Favor leftovers / low-touch.
+    </div>`
+    : "";
 
-  const passoverNote = meta?.passoverMode ? `
+  const passoverNote = meta?.passoverMode
+    ? `
     <div class="note">
       ✡️ <b>Passover mode is ON</b> — chametz filtered from grocery & picks.
-    </div>` : "";
+    </div>`
+    : "";
 
-  const dayCards = days.map(d => {
-    const mealRow = (k, slot) => {
-      if (!slot) return "";
-      const title = recipes?.[slot.recipeId]?.title || "";
-      const tags = (slot.tags || []).slice(0, 6).map(t => `<span class="tag">${t}</span>`).join("");
-      return `
+  const dayCards = days
+    .map((d) => {
+      const mealRow = (k, slot) => {
+        if (!slot) return "";
+        const title = recipes?.[slot.recipeId]?.title || "";
+        const tags = (slot.tags || [])
+          .slice(0, 6)
+          .map((t) => `<span class="tag">${t}</span>`)
+          .join("");
+        return `
         <div class="k">${k}</div>
         <div class="v">
-          ${title ? `<a target="_blank" rel="noopener">${escapeHtml(title)}</a>` : `<span class="subtle">–</span>`}
+          ${
+            title
+              ? `<a target="_blank" rel="noopener">${escapeHtml(title)}</a>`
+              : `<span class="subtle">–</span>`
+          }
           <div>${tags}</div>
         </div>`;
-    };
+      };
 
-    return `
+      return `
       <div class="card day">
         <div class="date">${escapeHtml(d.dateISO)}</div>
         <div class="meals">
@@ -420,7 +470,8 @@ function renderPublicHTML(payload, THEME = DEFAULT_THEME) {
           ${mealRow("snack", d.meals.snack)}
         </div>
       </div>`;
-  }).join("");
+    })
+    .join("");
 
   const grocerySection = grocery ? renderGrocery(grocery) : "";
   const batchSection = batch ? renderBatch(batch, recipes) : "";
@@ -446,7 +497,9 @@ function renderPublicHTML(payload, THEME = DEFAULT_THEME) {
           <span style="width:10px;height:10px;border-radius:999px;background:var(--gold);display:inline-block"></span>
           Suka Smart Assistant
         </div>
-        <h1 style="margin:10px 0 8px 0;font-size:28px">Weekly Meal Plan <span class="accent">(${escapeHtml(meta?.weekStartISO || "")})</span></h1>
+        <h1 style="margin:10px 0 8px 0;font-size:28px">Weekly Meal Plan <span class="accent">(${escapeHtml(
+          meta?.weekStartISO || ""
+        )})</span></h1>
         <div class="subtle">West-African forward • Street/Food-Truck friendly • Fusion capable</div>
       </div>
       <div style="text-align:right">
@@ -479,14 +532,23 @@ function renderPublicHTML(payload, THEME = DEFAULT_THEME) {
 
 function renderGrocery(grocery) {
   const aisles = Object.keys(grocery.byAisle || {}).sort();
-  const cols = aisles.map(a => {
-    const items = grocery.byAisle[a].map(it => `<li>${escapeHtml(it.item)} <span class="subtle">×${it.qty}</span></li>`).join("");
-    return `
+  const cols = aisles
+    .map((a) => {
+      const items = grocery.byAisle[a]
+        .map(
+          (it) =>
+            `<li>${escapeHtml(it.item)} <span class="subtle">×${
+              it.qty
+            }</span></li>`
+        )
+        .join("");
+      return `
       <div class="card">
         <h3 style="margin:0 0 6px 0">${escapeHtml(a)}</h3>
         <ul style="margin:0;padding-left:16px">${items}</ul>
       </div>`;
-  }).join("");
+    })
+    .join("");
   return `
     <section>
       <h2 class="sectionTitle">Grocery</h2>
@@ -497,10 +559,12 @@ function renderGrocery(grocery) {
 }
 
 function renderBatch(batch, recipes) {
-  const items = (batch.steps || []).map(s => {
-    const t = recipes?.[s.recipeId]?.title || "Recipe";
-    return `<li>${escapeHtml(t)}</li>`;
-  }).join("");
+  const items = (batch.steps || [])
+    .map((s) => {
+      const t = recipes?.[s.recipeId]?.title || "Recipe";
+      return `<li>${escapeHtml(t)}</li>`;
+    })
+    .join("");
   return `
     <section>
       <h2 class="sectionTitle">Weekend Batch</h2>
@@ -512,7 +576,10 @@ function renderBatch(batch, recipes) {
 }
 
 function escapeHtml(s = "") {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 // ----------------------------------------------------------------------------
@@ -535,11 +602,12 @@ const ShareStore = {
     delete all[token];
     writeLocal(all);
     return true;
-  }
+  },
 };
 
 function readLocal() {
-  if (typeof localStorage === "undefined") return globalThis.__SUKA_SHARE_MEM || {};
+  if (typeof localStorage === "undefined")
+    return globalThis.__SUKA_SHARE_MEM || {};
   try {
     return JSON.parse(localStorage.getItem(LOCAL_NS) || "{}");
   } catch {
@@ -547,6 +615,13 @@ function readLocal() {
   }
 }
 function writeLocal(obj) {
-  if (typeof localStorage === "undefined") { globalThis.__SUKA_SHARE_MEM = obj; return; }
-  try { localStorage.setItem(LOCAL_NS, JSON.stringify(obj)); } catch (e) { logger.warn("ShareStore write failed", e); }
+  if (typeof localStorage === "undefined") {
+    globalThis.__SUKA_SHARE_MEM = obj;
+    return;
+  }
+  try {
+    localStorage.setItem(LOCAL_NS, JSON.stringify(obj));
+  } catch (e) {
+    logger.warn("ShareStore write failed", e);
+  }
 }

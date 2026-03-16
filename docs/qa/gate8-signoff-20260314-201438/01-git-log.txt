@@ -1,0 +1,10 @@
+88765eb docs: record Gate 4 blocker and Gate 8 no-go signoff
+f813a62 docs: resolve Gate 6 with alerting ownership matrix
+b04fe91 docs: add Gate 6/7 evidence template pack
+2a98aab docs: finalize Gate 4 evidence and complete Gate 5 retention
+f94e893 docs: capture Gate 3 evidence and initialize Gate 4 evidence
+22ea5f1 docs: add Gate 3 staging runbook and release checklist pointer
+34e4f1b ci: enable real Gate 1 lint and typecheck checks
+2ff6727 docs: add MongoDB Phase 2 integration gate checklist
+22f5509 test/docs: close nutrition adapter audit expectations
+9984150 feat(nutrition): add Mongo adapter and focused contract test

@@ -28,14 +28,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
 const nowISO = () => new Date().toISOString();
 function emit(type, data = {}) {
   try {
-    eventBus.emit({ type, ts: nowISO(), source: "contracts.validators.control", data });
+    eventBus.emit({
+      type,
+      ts: nowISO(),
+      source: "contracts.validators.control",
+      data,
+    });
   } catch {}
 }
 
@@ -46,7 +51,10 @@ let CONTRACT_SCHEMA = null;
 try {
   CONTRACT_SCHEMA = require("@/contracts/control.message.contract.json");
 } catch (err) {
-  console.error("[validateControlMessage] failed to load control contract schema:", err?.message || err);
+  console.error(
+    "[validateControlMessage] failed to load control contract schema:",
+    err?.message || err
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -63,7 +71,8 @@ try {
 /* Pretty error formatter                                                     */
 /* -------------------------------------------------------------------------- */
 function toPointer(instancePath, dataPath /* Ajv v6 */) {
-  if (typeof instancePath === "string" && instancePath.length) return instancePath;
+  if (typeof instancePath === "string" && instancePath.length)
+    return instancePath;
   if (typeof dataPath === "string" && dataPath.length) return dataPath;
   return "";
 }
@@ -76,13 +85,17 @@ function formatAjvErrors(errors = []) {
     const msg = e.message || "invalid";
     const params = e.params ? JSON.stringify(e.params) : "";
     const schema = e.schemaPath ? `schema: ${e.schemaPath}` : "";
-    return `${kw} ${ptr} ${msg}${params ? " " + params : ""}${schema ? " — " + schema : ""}`;
+    return `${kw} ${ptr} ${msg}${params ? " " + params : ""}${
+      schema ? " — " + schema : ""
+    }`;
   });
 }
 
 function preview(obj, max = 220) {
   try {
-    const s = JSON.stringify(obj, (k, v) => (typeof v === "string" && v.length > 140 ? v.slice(0, 140) + "…" : v));
+    const s = JSON.stringify(obj, (k, v) =>
+      typeof v === "string" && v.length > 140 ? v.slice(0, 140) + "…" : v
+    );
     return s.length > max ? s.slice(0, max) + "…" : s;
   } catch {
     return String(obj);
@@ -120,30 +133,50 @@ function minimalEnvelopeCheck(p) {
   if (typeof p.type !== "string" || !ALLOWED_TYPES.has(p.type)) {
     errs.push("Missing or invalid 'type' (one of control.*).");
   }
-  if (typeof p.ts !== "string") errs.push("Missing or invalid 'ts' (ISO string).");
-  if (typeof p.source !== "string" || !p.source) errs.push("Missing or invalid 'source' (non-empty string).");
-  if (!p.data || typeof p.data !== "object") errs.push("Missing or invalid 'data' (object).");
+  if (typeof p.ts !== "string")
+    errs.push("Missing or invalid 'ts' (ISO string).");
+  if (typeof p.source !== "string" || !p.source)
+    errs.push("Missing or invalid 'source' (non-empty string).");
+  if (!p.data || typeof p.data !== "object")
+    errs.push("Missing or invalid 'data' (object).");
 
   // Common fields are expected in every control message's data
   if (p.data && typeof p.data === "object") {
     if (typeof p.data.domain !== "string")
-      errs.push("data.domain is required (cooking|cleaning|garden|animals|preservation|storehouse).");
-    if (typeof p.data.sessionId !== "string" || !p.data.sessionId) errs.push("data.sessionId is required (string).");
+      errs.push(
+        "data.domain is required (cooking|cleaning|garden|animals|preservation|storehouse)."
+      );
+    if (typeof p.data.sessionId !== "string" || !p.data.sessionId)
+      errs.push("data.sessionId is required (string).");
 
     // Type-specific minimal sanity (very light; Ajv handles full logic)
-    if (p.type === "control.step.go" && !(Number.isInteger(p.data.stepIndex) && p.data.stepIndex >= 0)) {
+    if (
+      p.type === "control.step.go" &&
+      !(Number.isInteger(p.data.stepIndex) && p.data.stepIndex >= 0)
+    ) {
       errs.push("control.step.go requires integer data.stepIndex ≥ 0.");
     }
     if (p.type === "control.timer.start") {
-      if (typeof p.data.timerId !== "string" || !p.data.timerId) errs.push("control.timer.start requires data.timerId.");
+      if (typeof p.data.timerId !== "string" || !p.data.timerId)
+        errs.push("control.timer.start requires data.timerId.");
       if (!(Number.isInteger(p.data.durationMs) && p.data.durationMs >= 0))
         errs.push("control.timer.start requires integer data.durationMs ≥ 0.");
     }
     if (p.type === "control.timer.toggle") {
-      const actionOk = ["start", "pause", "resume", "cancel"].includes(p.data.action);
-      if (!actionOk) errs.push("control.timer.toggle requires data.action in {start,pause,resume,cancel}.");
-      if ((p.data.action === "start") && !(Number.isInteger(p.data.durationMs) && p.data.durationMs >= 0)) {
-        errs.push("control.timer.toggle with action=start requires integer data.durationMs ≥ 0.");
+      const actionOk = ["start", "pause", "resume", "cancel"].includes(
+        p.data.action
+      );
+      if (!actionOk)
+        errs.push(
+          "control.timer.toggle requires data.action in {start,pause,resume,cancel}."
+        );
+      if (
+        p.data.action === "start" &&
+        !(Number.isInteger(p.data.durationMs) && p.data.durationMs >= 0)
+      ) {
+        errs.push(
+          "control.timer.toggle with action=start requires integer data.durationMs ≥ 0."
+        );
       }
       if (typeof p.data.timerId !== "string" || !p.data.timerId)
         errs.push("control.timer.toggle requires data.timerId (string).");
@@ -151,13 +184,22 @@ function minimalEnvelopeCheck(p) {
     if (p.type === "control.keepAwake" && typeof p.data.on !== "boolean") {
       errs.push("control.keepAwake requires boolean data.on.");
     }
-    if (p.type === "control.speech.say" && (typeof p.data.text !== "string" || !p.data.text)) {
+    if (
+      p.type === "control.speech.say" &&
+      (typeof p.data.text !== "string" || !p.data.text)
+    ) {
       errs.push("control.speech.say requires non-empty data.text (string).");
     }
-    if (p.type === "control.speech.toggle" && typeof p.data.enabled !== "boolean") {
+    if (
+      p.type === "control.speech.toggle" &&
+      typeof p.data.enabled !== "boolean"
+    ) {
       errs.push("control.speech.toggle requires boolean data.enabled.");
     }
-    if (p.type === "control.overlay.toggle" && typeof p.data.enabled !== "boolean") {
+    if (
+      p.type === "control.overlay.toggle" &&
+      typeof p.data.enabled !== "boolean"
+    ) {
       errs.push("control.overlay.toggle requires boolean data.enabled.");
     }
   }
@@ -188,10 +230,12 @@ function buildAjvValidator() {
     const compiled = ajv.compile(CONTRACT_SCHEMA);
     return (data) => {
       const ok = compiled(data) === true;
-      return { ok, errors: ok ? [] : (compiled.errors || []) };
+      return { ok, errors: ok ? [] : compiled.errors || [] };
     };
   } catch (err) {
-    ajvWarnings.push(`[validateControlMessage] Ajv compile failed: ${err?.message || err}`);
+    ajvWarnings.push(
+      `[validateControlMessage] Ajv compile failed: ${err?.message || err}`
+    );
     return null;
   }
 }
@@ -216,7 +260,9 @@ function validateControlMessage(payload, opts = {}) {
   const warnings = [...ajvWarnings];
 
   if (!CONTRACT_SCHEMA) {
-    warnings.push("Control contract schema not loaded. Ensure @/contracts/control.message.contract.json exists.");
+    warnings.push(
+      "Control contract schema not loaded. Ensure @/contracts/control.message.contract.json exists."
+    );
   }
 
   if (validateFn) {
@@ -232,7 +278,9 @@ function validateControlMessage(payload, opts = {}) {
       preview: preview(payload),
     });
     if (strict && throwOnError) {
-      const err = new Error(buildHelpfulMessage("control.*", friendly, payload));
+      const err = new Error(
+        buildHelpfulMessage("control.*", friendly, payload)
+      );
       err.name = "ControlContractError";
       throw err;
     }
@@ -240,12 +288,20 @@ function validateControlMessage(payload, opts = {}) {
   }
 
   // Fallback — minimal checks only
-  warnings.push("Ajv not found; using minimal envelope checks (dev). Install 'ajv' for full validation.");
+  warnings.push(
+    "Ajv not found; using minimal envelope checks (dev). Install 'ajv' for full validation."
+  );
   const basicErrors = minimalEnvelopeCheck(payload);
   if (basicErrors.length) {
-    emit("dev.validate.control.fail", { count: basicErrors.length, errors: basicErrors, preview: preview(payload) });
+    emit("dev.validate.control.fail", {
+      count: basicErrors.length,
+      errors: basicErrors,
+      preview: preview(payload),
+    });
     if (strict && throwOnError) {
-      const err = new Error(buildHelpfulMessage("control.*", basicErrors, payload));
+      const err = new Error(
+        buildHelpfulMessage("control.*", basicErrors, payload)
+      );
       err.name = "ControlContractError";
       throw err;
     }

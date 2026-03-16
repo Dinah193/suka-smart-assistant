@@ -32,8 +32,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useCallback } from "react";
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * Emit a “play the next runnable session now” request for animal planning.
@@ -65,7 +65,10 @@ function requestNextSession(domainHints, focusArea) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[AnimalPlannerView] Failed to emit session.requestNext", err);
+    console.error(
+      "[AnimalPlannerView] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -92,7 +95,15 @@ function StatPill({ label, value, hint }) {
 /**
  * Reusable planning card section.
  */
-function PlanningCard({ title, subtitle, description, bullets, onNow, nowLabel, children }) {
+function PlanningCard({
+  title,
+  subtitle,
+  description,
+  bullets,
+  onNow,
+  nowLabel,
+  children,
+}) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 md:p-5 shadow-lg shadow-slate-950/40 flex flex-col gap-3">
       <div>
@@ -153,7 +164,8 @@ function AnimalPlannerView({ summary }) {
   const safeSummary = summary || {};
   const meatPipeline = safeSummary.meatPipeline || "No pipeline mapped yet";
   const eggsDairy = safeSummary.eggsDairy || "No steady egg/dairy plan yet";
-  const fiberLabor = safeSummary.fiberLabor || "No fiber or work animals planned";
+  const fiberLabor =
+    safeSummary.fiberLabor || "No fiber or work animals planned";
   const focusNote =
     safeSummary.focusNote ||
     "Use this planner to map animals to real uses: meals, milk, eggs, fiber, and work.";
@@ -166,10 +178,7 @@ function AnimalPlannerView({ summary }) {
   }, []);
 
   const handleNowBreeding = useCallback(() => {
-    requestNextSession(
-      ["animals", "storehouse"],
-      "animal-breeding-calendar"
-    );
+    requestNextSession(["animals", "storehouse"], "animal-breeding-calendar");
   }, []);
 
   const handleNowUsage = useCallback(() => {
@@ -195,10 +204,10 @@ function AnimalPlannerView({ summary }) {
             Animal Planner – Acquisition, Breeding, & Usage
           </h1>
           <p className="text-[11px] md:text-[12px] text-slate-400 max-w-xl">
-            Map how animals enter, move through, and leave your household:
-            from chicks and lambs to breeding adults and finally to meals,
-            milk, eggs, fiber, or work power—connected to your storehouse and
-            garden goals.
+            Map how animals enter, move through, and leave your household: from
+            chicks and lambs to breeding adults and finally to meals, milk,
+            eggs, fiber, or work power—connected to your storehouse and garden
+            goals.
           </p>
         </div>
 
@@ -470,9 +479,9 @@ function AnimalPlannerView({ summary }) {
               </button>
             </div>
             <p className="text-[10px] text-slate-500">
-              Tip: Once you finish a session, the analytics layer can later
-              show you patterns like how many meat animals per year actually
-              reached the freezer vs. what you planned.
+              Tip: Once you finish a session, the analytics layer can later show
+              you patterns like how many meat animals per year actually reached
+              the freezer vs. what you planned.
             </p>
           </div>
         </div>

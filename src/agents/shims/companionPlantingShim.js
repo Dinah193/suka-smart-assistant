@@ -28,10 +28,10 @@
 // wrapper is provided at the bottom, as well as a default export object.
 // -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectGardenContext } from "@/reasoner/selectors";
@@ -44,8 +44,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildGardenPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -110,7 +110,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       : {}),
   };
 
-  return buildShimResponse(false, mode, payload, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    payload,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -122,7 +128,9 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
  */
 function enforceBudget(reqLike, debug) {
   const domainBudget =
-    (budget && (budget.companionPlanting || budget.garden || budget.household)) || {};
+    (budget &&
+      (budget.companionPlanting || budget.garden || budget.household)) ||
+    {};
 
   const maxChars = domainBudget.maxChars || 25000;
   const serializedInput = JSON.stringify(reqLike.input || {});
@@ -159,7 +167,9 @@ function resolveShimMode(req, context) {
       context,
       runtime: req.runtime || {},
       source: SHIM_SOURCE,
-    }) || req.intent || "garden.companion.planLayout"
+    }) ||
+    req.intent ||
+    "garden.companion.planLayout"
   );
 }
 
@@ -339,7 +349,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -627,7 +640,11 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 11. Compose sessions (optional)
     // -------------------------------------------------
-    const sessions = await maybeComposeSessions(normalized, { domain, intent, input, runtime }, debug);
+    const sessions = await maybeComposeSessions(
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // Session lifecycle events (session.started / step.changed / etc.)
     // are handled by the SessionRunner when those sessions execute.
@@ -651,7 +668,12 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 13. Optional Hub export
     // -------------------------------------------------
-    await maybeExportToHub(sessions, normalized, { domain, intent, input, runtime }, debug);
+    await maybeExportToHub(
+      sessions,
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------------------------
     // 14. Final response
@@ -786,7 +808,11 @@ export async function syncWithGardenAgent(payload = {}, runtime = {}) {
  * @param {Object} [runtime]
  * @returns {Promise<ShimResponse>}
  */
-export async function handleCompanionCommand(command, payload = {}, runtime = {}) {
+export async function handleCompanionCommand(
+  command,
+  payload = {},
+  runtime = {}
+) {
   switch (command) {
     case "suggestCompanions":
       return suggestCompanions(payload, runtime);

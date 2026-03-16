@@ -26,10 +26,10 @@
 // - This planner is where you define the STOREHOUSE view of the home (deeper than inventory).
 //
 // ASSUMPTIONS / SOFT IMPORTS
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatStorehousePlanForHub
-// - src/services/FamilyFundConnector.js
+// - src/services/hub/HubPacketFormatter.js → formatStorehousePlanForHub
+// - src/services/hub/FamilyFundConnector.js
 // - src/services/storehouse/StorehousePlanStore.js → loadLatest / save
 // - src/services/inventory/InventorySessionEngine.js → can be asked to generate restock sessions
 //
@@ -42,10 +42,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatStorehousePlanForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatStorehousePlanForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let StorehousePlanStore = null;
 let InventorySessionEngine = null;
@@ -59,7 +59,8 @@ try {
 
 try {
   // eslint-disable-next-line global-require
-  InventorySessionEngine = require("../inventory/InventorySessionEngine.js").default
+  InventorySessionEngine = require("../inventory/InventorySessionEngine.js")
+    .default
     ? require("../inventory/InventorySessionEngine.js").default
     : require("../inventory/InventorySessionEngine.js");
 } catch (e) {
@@ -121,9 +122,15 @@ function StorehousePlanner() {
     // inventory.updated → update currentQty for goals that match
     const offInv = eventBus?.on?.("inventory.updated", handleInventoryUpdated);
     // garden.harvest.logged → may feed storehouse
-    const offGarden = eventBus?.on?.("garden.harvest.logged", handleGardenHarvest);
+    const offGarden = eventBus?.on?.(
+      "garden.harvest.logged",
+      handleGardenHarvest
+    );
     // preservation.completed → may feed storehouse
-    const offPres = eventBus?.on?.("preservation.completed", handlePreservationCompleted);
+    const offPres = eventBus?.on?.(
+      "preservation.completed",
+      handlePreservationCompleted
+    );
     // animal.executed → may feed storehouse (fat, bones, hides)
     const offAnimal = eventBus?.on?.("animal.executed", handleAnimalExecuted);
 
@@ -144,8 +151,13 @@ function StorehousePlanner() {
 
   const filteredGoals = useMemo(() => {
     return (goals || []).filter((g) => {
-      if (activeZone !== "all" && (g.zone || "Unassigned") !== activeZone) return false;
-      if (search && !(g.name || "").toLowerCase().includes(search.toLowerCase())) return false;
+      if (activeZone !== "all" && (g.zone || "Unassigned") !== activeZone)
+        return false;
+      if (
+        search &&
+        !(g.name || "").toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
       return true;
     });
   }, [goals, activeZone, search]);
@@ -168,7 +180,9 @@ function StorehousePlanner() {
     // for each delta, if we have a goal with same name → update currentQty
     setGoals((prev) => {
       const next = prev.map((g) => {
-        const matched = deltas.find((d) => normalizeName(d.item) === normalizeName(g.name));
+        const matched = deltas.find(
+          (d) => normalizeName(d.item) === normalizeName(g.name)
+        );
         if (!matched) return g;
         const direction = matched.direction === "decrement" ? -1 : 1;
         const qty = Number(matched.qty) || 0;
@@ -179,7 +193,9 @@ function StorehousePlanner() {
         };
       });
       // also: if after update, some are below min → emit storehouse.low
-      const lows = next.filter((g) => (Number(g.currentQty) || 0) < (Number(g.minQty) || 0));
+      const lows = next.filter(
+        (g) => (Number(g.currentQty) || 0) < (Number(g.minQty) || 0)
+      );
       if (lows.length) {
         const evt = emitEvent("storehouse.low", {
           items: lows.map((lg) => ({
@@ -203,7 +219,9 @@ function StorehousePlanner() {
     // we should bump currentQty for that goal.
     setGoals((prev) =>
       prev.map((g) => {
-        const match = items.find((it) => normalizeName(it.crop) === normalizeName(g.name));
+        const match = items.find(
+          (it) => normalizeName(it.crop) === normalizeName(g.name)
+        );
         if (!match) return g;
         const inc = Number(match.qty) || 0;
         return {
@@ -219,7 +237,9 @@ function StorehousePlanner() {
     if (!Array.isArray(items) || !items.length) return;
     setGoals((prev) =>
       prev.map((g) => {
-        const match = items.find((it) => normalizeName(it.name) === normalizeName(g.name));
+        const match = items.find(
+          (it) => normalizeName(it.name) === normalizeName(g.name)
+        );
         if (!match) return g;
         const inc = Number(match.qty) || 0;
         return {
@@ -235,7 +255,9 @@ function StorehousePlanner() {
     if (!Array.isArray(byproducts) || !byproducts.length) return;
     setGoals((prev) =>
       prev.map((g) => {
-        const match = byproducts.find((bp) => normalizeName(bp.name) === normalizeName(g.name));
+        const match = byproducts.find(
+          (bp) => normalizeName(bp.name) === normalizeName(g.name)
+        );
         if (!match) return g;
         const inc = Number(match.qty) || 0;
         return {
@@ -352,7 +374,10 @@ function StorehousePlanner() {
   async function handleGenerateRestock() {
     // Use InventorySessionEngine (if present) to create a restock session from current LOW goals
     if (!lowGoals.length) return;
-    if (!InventorySessionEngine || typeof InventorySessionEngine.generateRestockSession !== "function") {
+    if (
+      !InventorySessionEngine ||
+      typeof InventorySessionEngine.generateRestockSession !== "function"
+    ) {
       console.warn("[StorehousePlanner] InventorySessionEngine not available");
       return;
     }
@@ -419,7 +444,10 @@ function StorehousePlanner() {
 
   function renderQuickAdd() {
     return (
-      <form className="flex flex-wrap gap-2 mb-4 items-center" onSubmit={handleQuickAdd}>
+      <form
+        className="flex flex-wrap gap-2 mb-4 items-center"
+        onSubmit={handleQuickAdd}
+      >
         <input
           type="text"
           className="border rounded px-2 py-1 text-sm"
@@ -476,7 +504,11 @@ function StorehousePlanner() {
         <h3 className="font-semibold mb-2">Favorite storehouse plans</h3>
         <div className="flex gap-2 flex-wrap">
           {favorites.map((f) => (
-            <button key={f.id} className="btn-secondary btn-sm" onClick={() => handleApplyFavorite(f)}>
+            <button
+              key={f.id}
+              className="btn-secondary btn-sm"
+              onClick={() => handleApplyFavorite(f)}
+            >
               {f.label}
             </button>
           ))}
@@ -491,8 +523,8 @@ function StorehousePlanner() {
       <div className="border rounded p-3 bg-amber-50 mb-4">
         <h3 className="font-semibold mb-2">Low storehouse sections</h3>
         <p className="text-xs text-gray-600 mb-2">
-          SSA will emit <code>storehouse.low</code> so inventory, meal, garden, animal, and preservation modules
-          can react.
+          SSA will emit <code>storehouse.low</code> so inventory, meal, garden,
+          animal, and preservation modules can react.
         </p>
         <div className="flex flex-wrap gap-2">
           {lowGoals.map((g) => (
@@ -508,7 +540,8 @@ function StorehousePlanner() {
                     items: [
                       {
                         name: g.name,
-                        qty: (Number(g.minQty) || 1) - (Number(g.currentQty) || 0),
+                        qty:
+                          (Number(g.minQty) || 1) - (Number(g.currentQty) || 0),
                         unit: g.unit,
                       },
                     ],
@@ -526,12 +559,19 @@ function StorehousePlanner() {
 
   function renderGoalsGrid() {
     if (!filteredGoals.length) {
-      return <p className="text-xs text-gray-500">No storehouse goals match your filters.</p>;
+      return (
+        <p className="text-xs text-gray-500">
+          No storehouse goals match your filters.
+        </p>
+      );
     }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {filteredGoals.map((g) => (
-          <div key={g.id} className="border rounded p-2 bg-white flex justify-between gap-2">
+          <div
+            key={g.id}
+            className="border rounded p-2 bg-white flex justify-between gap-2"
+          >
             <div>
               <div className="font-medium">{g.name}</div>
               <div className="text-xs text-gray-500">
@@ -543,10 +583,16 @@ function StorehousePlanner() {
               <ProgressBar current={g.currentQty} target={g.targetQty} />
             </div>
             <div className="flex flex-col gap-1 items-end">
-              <button className="btn-xs" onClick={() => handleAdjustCurrent(g.id, +1)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleAdjustCurrent(g.id, +1)}
+              >
                 +1
               </button>
-              <button className="btn-xs" onClick={() => handleAdjustCurrent(g.id, -1)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleAdjustCurrent(g.id, -1)}
+              >
                 -1
               </button>
             </div>
@@ -585,10 +631,16 @@ function StorehousePlanner() {
 // -----------------------------------------------------------------------------
 
 function ProgressBar({ current = 0, target = 1 }) {
-  const pct = Math.min(100, Math.round(((Number(current) || 0) / (Number(target) || 1)) * 100));
+  const pct = Math.min(
+    100,
+    Math.round(((Number(current) || 0) / (Number(target) || 1)) * 100)
+  );
   return (
     <div className="w-full bg-gray-200 rounded h-2 mt-1">
-      <div className="bg-emerald-500 h-2 rounded" style={{ width: pct + "%" }}></div>
+      <div
+        className="bg-emerald-500 h-2 rounded"
+        style={{ width: pct + "%" }}
+      ></div>
     </div>
   );
 }
@@ -598,12 +650,18 @@ function ProgressBar({ current = 0, target = 1 }) {
 // -----------------------------------------------------------------------------
 
 async function safeLoadLatestStorehousePlan() {
-  if (StorehousePlanStore && typeof StorehousePlanStore.loadLatest === "function") {
+  if (
+    StorehousePlanStore &&
+    typeof StorehousePlanStore.loadLatest === "function"
+  ) {
     try {
       const plan = await StorehousePlanStore.loadLatest();
       return plan;
     } catch (e) {
-      console.warn("[StorehousePlanner] safeLoadLatestStorehousePlan failed", e);
+      console.warn(
+        "[StorehousePlanner] safeLoadLatestStorehousePlan failed",
+        e
+      );
       return null;
     }
   }
@@ -627,8 +685,14 @@ function normalizeName(name) {
 
 function guessCategoryFromName(name) {
   const low = (name || "").toLowerCase();
-  if (low.includes("flour") || low.includes("rice") || low.includes("beans")) return "dry-goods";
-  if (low.includes("soap") || low.includes("bleach") || low.includes("detergent")) return "cleaning";
+  if (low.includes("flour") || low.includes("rice") || low.includes("beans"))
+    return "dry-goods";
+  if (
+    low.includes("soap") ||
+    low.includes("bleach") ||
+    low.includes("detergent")
+  )
+    return "cleaning";
   if (low.includes("feed")) return "animal-feed";
   return "general";
 }

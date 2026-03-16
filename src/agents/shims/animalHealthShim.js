@@ -6,10 +6,10 @@
 // - No UI, no timers, no direct DB writes
 // -------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectAnimalContext } from "@/reasoner/selectors";
@@ -22,9 +22,9 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildAnimalPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
 
-import { composeSessionsFromAnimalPlan } from "@/skills/sessions/compose";
+import { composeSessionsFromAnimalPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -89,7 +89,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       }
     : base;
 
-  return buildShimResponse(false, mode, data, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    data,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -284,7 +290,10 @@ export async function invokeShim(req) {
     // -------------------------------
     // 2. Budget + gating
     // -------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -599,7 +608,12 @@ export async function invokeShim(req) {
     // -------------------------------
     // 13. Optional Hub export (Family Fund)
     // -------------------------------
-    await maybeExportToHub(sessions, normalized, { domain, intent, input, runtime }, debug);
+    await maybeExportToHub(
+      sessions,
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------
     // 14. Final response

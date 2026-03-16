@@ -19,8 +19,8 @@
  * - UI is handled by BiblicalOfferingCalculator.view.jsx.
  */
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
@@ -101,62 +101,62 @@ const CANONICAL_SUMMARY_BY_TYPE = {
     label: "Burnt Offering (Olah)",
     coreScriptures: ["Leviticus 1", "Leviticus 6:8–13"],
     briefExplanation:
-      "Whole offering that ascends in smoke; emphasizes total devotion and atonement, with the entire animal given to YHWH."
+      "Whole offering that ascends in smoke; emphasizes total devotion and atonement, with the entire animal given to YHWH.",
   },
   peace: {
     label: "Peace/Fellowship Offering (Zevach Shelamim)",
     coreScriptures: ["Leviticus 3", "Leviticus 7:11–34"],
     briefExplanation:
-      "Shared meal offering emphasizing thanksgiving, fellowship, and wholeness between YHWH and His people."
+      "Shared meal offering emphasizing thanksgiving, fellowship, and wholeness between YHWH and His people.",
   },
   sin: {
     label: "Sin Offering (Chatat)",
     coreScriptures: ["Leviticus 4", "Leviticus 6:24–30"],
     briefExplanation:
-      "Offering dealing with specific sins and purification from uncleanness, especially for leaders and community."
+      "Offering dealing with specific sins and purification from uncleanness, especially for leaders and community.",
   },
   guilt: {
     label: "Guilt/Trespass Offering (Asham)",
     coreScriptures: ["Leviticus 5:14–19", "Leviticus 7:1–10"],
     briefExplanation:
-      "Offering tied to guilt, restitution, and breach of trust; highlights paying back plus a fifth."
+      "Offering tied to guilt, restitution, and breach of trust; highlights paying back plus a fifth.",
   },
   grain: {
     label: "Grain/Meal Offering (Minchah)",
     coreScriptures: ["Leviticus 2", "Leviticus 6:14–23"],
     briefExplanation:
-      "Offering of fine flour, oil, and frankincense; often accompanies other offerings and highlights daily provision."
+      "Offering of fine flour, oil, and frankincense; often accompanies other offerings and highlights daily provision.",
   },
   drink: {
     label: "Drink Offering",
     coreScriptures: ["Numbers 15:1–10", "Exodus 29:40–41"],
     briefExplanation:
-      "Wine poured out before YHWH, usually alongside burnt and grain offerings; visually symbolizes poured-out devotion."
+      "Wine poured out before YHWH, usually alongside burnt and grain offerings; visually symbolizes poured-out devotion.",
   },
   votive: {
     label: "Votive / Vow Offering",
     coreScriptures: ["Leviticus 7:16", "Numbers 6"],
     briefExplanation:
-      "Offering associated with vows and promises made to YHWH; emphasizes integrity and fulfilling one’s word."
+      "Offering associated with vows and promises made to YHWH; emphasizes integrity and fulfilling one’s word.",
   },
   freewill: {
     label: "Freewill Offering",
     coreScriptures: ["Leviticus 7:16", "Leviticus 22:17–25"],
     briefExplanation:
-      "Voluntary offering given out of gratitude and generosity; not commanded but invited."
+      "Voluntary offering given out of gratitude and generosity; not commanded but invited.",
   },
   purification: {
     label: "Purification / Cleansing Offering",
     coreScriptures: ["Leviticus 12", "Leviticus 14–15"],
     briefExplanation:
-      "Offerings associated with purification after childbirth, skin issues, and other ritual uncleanness."
+      "Offerings associated with purification after childbirth, skin issues, and other ritual uncleanness.",
   },
   ordination: {
     label: "Ordination / Consecration Offering",
     coreScriptures: ["Exodus 29", "Leviticus 8–9"],
     briefExplanation:
-      "Offerings focusing on setting apart priests and their service; emphasizes the seriousness of approaching YHWH."
-  }
+      "Offerings focusing on setting apart priests and their service; emphasizes the seriousness of approaching YHWH.",
+  },
 };
 
 /** @type {Record<string, BiblicalOfferingAnimalPattern[]>} */
@@ -166,105 +166,108 @@ const ANIMAL_PATTERNS_BY_TYPE = {
       species: "bull",
       agePattern: "young bull",
       sexPattern: "male-only",
-      defectRule: "Without blemish; whole animal burned on the altar."
+      defectRule: "Without blemish; whole animal burned on the altar.",
     },
     {
       species: "ram",
       agePattern: "adult ram",
       sexPattern: "male-only",
-      defectRule: "Without blemish; whole animal burned on the altar."
+      defectRule: "Without blemish; whole animal burned on the altar.",
     },
     {
       species: "goat",
       agePattern: "adult or young goat",
       sexPattern: "either",
-      defectRule: "Without blemish; scaled by the worshiper’s means."
+      defectRule: "Without blemish; scaled by the worshiper’s means.",
     },
     {
       species: "lamb",
       agePattern: "one year old",
       sexPattern: "male-only",
-      defectRule: "Without blemish; often used for daily offerings."
+      defectRule: "Without blemish; often used for daily offerings.",
     },
     {
       species: "turtledove",
       agePattern: "mature turtledove",
       sexPattern: "not-specified",
-      defectRule: "For those who cannot afford larger animals."
+      defectRule: "For those who cannot afford larger animals.",
     },
     {
       species: "pigeon",
       agePattern: "young pigeon",
       sexPattern: "not-specified",
-      defectRule: "For those who cannot afford larger animals."
-    }
+      defectRule: "For those who cannot afford larger animals.",
+    },
   ],
   peace: [
     {
       species: "bull",
       agePattern: "mature bull",
       sexPattern: "either",
-      defectRule: "Without blemish; fat and certain organs burned, rest shared as meal."
+      defectRule:
+        "Without blemish; fat and certain organs burned, rest shared as meal.",
     },
     {
       species: "ram",
       agePattern: "mature ram",
       sexPattern: "either",
-      defectRule: "Without blemish; portions for altar, priest, and worshiper."
+      defectRule: "Without blemish; portions for altar, priest, and worshiper.",
     },
     {
       species: "goat",
       agePattern: "mature goat",
       sexPattern: "either",
-      defectRule: "Without blemish; shared meal emphasizing fellowship."
-    }
+      defectRule: "Without blemish; shared meal emphasizing fellowship.",
+    },
   ],
   sin: [
     {
       species: "bull",
       agePattern: "young bull",
       sexPattern: "male-only",
-      defectRule: "For priest or whole community sin; blood used inside sanctuary as specified."
+      defectRule:
+        "For priest or whole community sin; blood used inside sanctuary as specified.",
     },
     {
       species: "goat",
       agePattern: "female goat",
       sexPattern: "female-only",
-      defectRule: "Common for leader or individual; defect-free."
+      defectRule: "Common for leader or individual; defect-free.",
     },
     {
       species: "lamb",
       agePattern: "female lamb",
       sexPattern: "female-only",
-      defectRule: "Alternative to goat; defect-free."
+      defectRule: "Alternative to goat; defect-free.",
     },
     {
       species: "turtledove",
       agePattern: "mature turtledove",
       sexPattern: "not-specified",
-      defectRule: "For those of lesser means."
+      defectRule: "For those of lesser means.",
     },
     {
       species: "pigeon",
       agePattern: "young pigeon",
       sexPattern: "not-specified",
-      defectRule: "For those of lesser means."
-    }
+      defectRule: "For those of lesser means.",
+    },
   ],
   guilt: [
     {
       species: "ram",
       agePattern: "mature ram",
       sexPattern: "male-only",
-      defectRule: "Without blemish; associated with restitution and added fifth."
-    }
+      defectRule:
+        "Without blemish; associated with restitution and added fifth.",
+    },
   ],
   grain: [],
   drink: [],
   votive: [],
   freewill: [],
   purification: [],
-  ordination: []
+  ordination: [],
 };
 
 /** @type {Record<string, BiblicalOfferingGrainDrinkPattern[]>} */
@@ -272,45 +275,49 @@ const GRAIN_DRINK_PATTERNS_BY_TYPE = {
   burnt: [
     {
       elementType: "grain",
-      details: "Fine flour mixed with oil, often accompanying the burnt offering."
+      details:
+        "Fine flour mixed with oil, often accompanying the burnt offering.",
     },
     {
       elementType: "wine",
-      details: "Drink offerings of wine poured out beside the altar (Numbers 15:1–10)."
-    }
+      details:
+        "Drink offerings of wine poured out beside the altar (Numbers 15:1–10).",
+    },
   ],
   peace: [
     {
       elementType: "grain",
-      details: "Unleavened cakes and wafers with oil; also leavened bread in some peace offerings."
-    }
+      details:
+        "Unleavened cakes and wafers with oil; also leavened bread in some peace offerings.",
+    },
   ],
   sin: [],
   guilt: [],
   grain: [
     {
       elementType: "grain",
-      details: "Fine flour, sometimes baked, sometimes presented raw; a memorial portion burned on the altar."
+      details:
+        "Fine flour, sometimes baked, sometimes presented raw; a memorial portion burned on the altar.",
     },
     {
       elementType: "oil",
-      details: "Mixed into the flour or applied to baked portions."
+      details: "Mixed into the flour or applied to baked portions.",
     },
     {
       elementType: "frankincense",
-      details: "Placed on top; memorial portion burned with the grain."
+      details: "Placed on top; memorial portion burned with the grain.",
     },
     {
       elementType: "salt",
-      details: "Covenant of salt; all offerings seasoned with salt."
-    }
+      details: "Covenant of salt; all offerings seasoned with salt.",
+    },
   ],
   drink: [
     {
       elementType: "wine",
       details:
-        "Wine poured out to YHWH; quantities scaled with the size of the accompanying animal."
-    }
+        "Wine poured out to YHWH; quantities scaled with the size of the accompanying animal.",
+    },
   ],
   votive: [],
   freewill: [],
@@ -318,9 +325,10 @@ const GRAIN_DRINK_PATTERNS_BY_TYPE = {
   ordination: [
     {
       elementType: "grain",
-      details: "Ordination offerings include unleavened cakes, wafers, and oil with the animals."
-    }
-  ]
+      details:
+        "Ordination offerings include unleavened cakes, wafers, and oil with the animals.",
+    },
+  ],
 };
 
 /** @type {Record<string, BiblicalOfferingStudyPrompt[]>} */
@@ -329,87 +337,87 @@ const STUDY_PROMPTS_BY_TYPE = {
     {
       question:
         "What does a whole burnt offering teach about total devotion and holding nothing back from YHWH?",
-      focus: "holiness"
+      focus: "holiness",
     },
     {
       question:
         "How does smoke 'ascending' connect with the idea of prayer and a life lifted up?",
-      focus: "covenant"
-    }
+      focus: "covenant",
+    },
   ],
   peace: [
     {
       question:
         "How does sharing a meal in the peace offering picture fellowship with YHWH and with one another?",
-      focus: "fellowship"
+      focus: "fellowship",
     },
     {
       question:
         "In what ways can our homes mirror the gratitude of a peace offering today?",
-      focus: "thanksgiving"
-    }
+      focus: "thanksgiving",
+    },
   ],
   sin: [
     {
       question:
         "Why are different animals specified for priest, leader, and common people in sin offerings?",
-      focus: "atonement"
+      focus: "atonement",
     },
     {
       question:
         "How do sin offerings highlight both personal responsibility and YHWH’s mercy?",
-      focus: "holiness"
-    }
+      focus: "holiness",
+    },
   ],
   guilt: [
     {
       question:
         "What does adding a fifth to restitution teach about repairing relationships and breaches of trust?",
-      focus: "atonement"
-    }
+      focus: "atonement",
+    },
   ],
   grain: [
     {
       question:
         "How does bringing grain, oil, and frankincense reflect daily labor and dependence on YHWH’s provision?",
-      focus: "thanksgiving"
-    }
+      focus: "thanksgiving",
+    },
   ],
   drink: [
     {
       question:
         "How might a poured-out drink offering foreshadow a life poured out in service?",
-      focus: "priesthood"
-    }
+      focus: "priesthood",
+    },
   ],
   votive: [
     {
       question:
         "What warnings and encouragements do we see in Scripture about making and keeping vows?",
-      focus: "covenant"
-    }
+      focus: "covenant",
+    },
   ],
   freewill: [
     {
       question:
         "How do freewill offerings reveal the heart behind obedience, beyond commandment alone?",
-      focus: "thanksgiving"
-    }
+      focus: "thanksgiving",
+    },
   ],
   purification: [
     {
       question:
         "What do purification offerings teach about the difference between moral guilt and ritual uncleanness?",
-      focus: "holiness"
-    }
+      focus: "holiness",
+    },
   ],
   ordination: [
     {
       question:
         "Why is the priestly ordination process so detailed and costly, and what does that say about drawing near to YHWH?",
-      focus: "priesthood"
-    }
-  ]
+      focus: "priesthood",
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------
@@ -434,7 +442,10 @@ export async function runBiblicalOfferingCalculatorShim(request) {
   }
   const input = request.input;
   if (!input || typeof input !== "object") {
-    return { ok: false, error: "Missing or invalid input for BiblicalOfferingCalculator." };
+    return {
+      ok: false,
+      error: "Missing or invalid input for BiblicalOfferingCalculator.",
+    };
   }
 
   const {
@@ -442,11 +453,14 @@ export async function runBiblicalOfferingCalculatorShim(request) {
     scriptureRefs = [],
     includeAnimals = true,
     includeGrainDrink = true,
-    householdContext = "study-only"
+    householdContext = "study-only",
   } = input;
 
   if (!offeringType || typeof offeringType !== "string") {
-    return { ok: false, error: "offeringType is required and must be a string." };
+    return {
+      ok: false,
+      error: "offeringType is required and must be a string.",
+    };
   }
 
   const lowerType = offeringType.toLowerCase();
@@ -456,7 +470,7 @@ export async function runBiblicalOfferingCalculatorShim(request) {
     label: `Offering: ${offeringType}`,
     coreScriptures: [],
     briefExplanation:
-      "Offering type not in the primary template set. Use scripture references for detailed study."
+      "Offering type not in the primary template set. Use scripture references for detailed study.",
   };
 
   /** @type {BiblicalOfferingCanonicalSummary} */
@@ -466,18 +480,20 @@ export async function runBiblicalOfferingCalculatorShim(request) {
       scriptureRefs && scriptureRefs.length > 0
         ? scriptureRefs
         : summaryTemplate.coreScriptures,
-    briefExplanation: summaryTemplate.briefExplanation
+    briefExplanation: summaryTemplate.briefExplanation,
   };
 
   // Build animal patterns
-  const animalTemplates = includeAnimals ? ANIMAL_PATTERNS_BY_TYPE[lowerType] || [] : [];
+  const animalTemplates = includeAnimals
+    ? ANIMAL_PATTERNS_BY_TYPE[lowerType] || []
+    : [];
 
   /** @type {BiblicalOfferingAnimalPattern[]} */
   const animalPatterns = animalTemplates.map((a) => ({
     species: a.species,
     agePattern: a.agePattern,
     sexPattern: a.sexPattern,
-    defectRule: a.defectRule
+    defectRule: a.defectRule,
   }));
 
   // Build grain/drink patterns
@@ -488,7 +504,7 @@ export async function runBiblicalOfferingCalculatorShim(request) {
   /** @type {BiblicalOfferingGrainDrinkPattern[]} */
   const grainDrinkPatterns = grainTemplates.map((g) => ({
     elementType: g.elementType,
-    details: g.details
+    details: g.details,
   }));
 
   // Build study prompts and adapt slightly to household context
@@ -497,7 +513,7 @@ export async function runBiblicalOfferingCalculatorShim(request) {
   /** @type {BiblicalOfferingStudyPrompt[]} */
   const studyPrompts = basePrompts.map((p) => ({
     question: adaptPromptForContext(p.question, householdContext),
-    focus: p.focus
+    focus: p.focus,
   }));
 
   /** @type {BiblicalOfferingCalculatorOutput} */
@@ -505,7 +521,7 @@ export async function runBiblicalOfferingCalculatorShim(request) {
     canonicalSummary,
     animalPatterns,
     grainDrinkPatterns,
-    studyPrompts
+    studyPrompts,
   };
 
   const response = {
@@ -513,8 +529,8 @@ export async function runBiblicalOfferingCalculatorShim(request) {
     output,
     meta: {
       nodeKey: safeNodeKey,
-      calculatorId: request.calculatorId
-    }
+      calculatorId: request.calculatorId,
+    },
   };
 
   // Emit calculator event into SSA event bus
@@ -522,7 +538,7 @@ export async function runBiblicalOfferingCalculatorShim(request) {
     nodeKey: safeNodeKey,
     calculatorId: request.calculatorId,
     input,
-    output
+    output,
   });
 
   // Optional Hub export
@@ -531,7 +547,7 @@ export async function runBiblicalOfferingCalculatorShim(request) {
     calculatorId: request.calculatorId,
     input,
     output,
-    context: request.context || {}
+    context: request.context || {},
   });
 
   return response;
@@ -582,8 +598,8 @@ function emitCalculatorEvent(payload) {
         nodeKey: payload.nodeKey,
         calculatorId: payload.calculatorId,
         input: payload.input,
-        output: payload.output
-      }
+        output: payload.output,
+      },
     });
   } catch (err) {
     // Fail silently but noisily in dev
@@ -619,7 +635,7 @@ async function exportToHubIfEnabled(payload) {
             kind: "calculator-node",
             input: payload.input,
             output: payload.output,
-            context: payload.context
+            context: payload.context,
           })
         : {
             kind: "calculator-node",
@@ -628,7 +644,7 @@ async function exportToHubIfEnabled(payload) {
             input: payload.input,
             output: payload.output,
             context: payload.context,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
           };
 
     if (typeof FamilyFundConnector?.enqueue === "function") {
@@ -643,8 +659,8 @@ async function exportToHubIfEnabled(payload) {
         nodeKey: payload.nodeKey,
         calculatorId: payload.calculatorId,
         transport: "hub",
-        status: "queued"
-      }
+        status: "queued",
+      },
     });
   } catch (err) {
     // Hub export is explicitly allowed to fail silently

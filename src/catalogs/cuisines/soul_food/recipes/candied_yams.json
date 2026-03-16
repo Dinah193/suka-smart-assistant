@@ -1,0 +1,169 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.candied_yams.v1",
+    "name": "Soul Food Candied Yams",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Baked sweet potatoes in a buttery brown-sugar syrup with warm spices. Marshmallow topping is optional."
+    },
+    "tags": [
+      "soul_food",
+      "candied_yams",
+      "sweet_potatoes",
+      "holiday",
+      "thanksgiving",
+      "baked",
+      "comfort_food"
+    ],
+    "allergens": ["milk"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": true,
+      "dairy_free": false
+    },
+    "summary": "Tender baked sweet potatoes coated in a glossy brown-sugar butter syrup with cinnamon and warm spice—classic holiday soul food.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 10,
+      "unit": "servings"
+    },
+    "yield": "1 (9x13-inch) dish",
+    "timing": {
+      "prepMinutes": 20,
+      "inactiveMinutes": 0,
+      "cookMinutes": 60,
+      "totalMinutes": 80
+    },
+    "equipment": [
+      {
+        "id": "baking_dish_9x13",
+        "label": "9x13-inch baking dish",
+        "required": true
+      },
+      { "id": "saucepan", "label": "Saucepan (for syrup)", "required": false },
+      { "id": "cutting_board", "label": "Cutting board", "required": true },
+      { "id": "chef_knife", "label": "Chef's knife", "required": true },
+      { "id": "foil", "label": "Aluminum foil", "required": false }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 190,
+      "notes": [
+        "Sweet potatoes are done when very tender; internal temps often exceed 200°F.",
+        "Avoid scorching sugars by baking covered first, then uncovering to glaze."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "sweet_potatoes",
+      "label": "Sweet potatoes (often called yams), peeled and sliced 1/2-inch thick",
+      "amount": { "value": 4, "unit": "lb" }
+    },
+    {
+      "id": "unsalted_butter",
+      "label": "Unsalted butter",
+      "amount": { "value": 8, "unit": "tbsp" }
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar (light or dark)",
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "granulated_sugar",
+      "label": "Sugar",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "water_or_juice",
+      "label": "Water or orange juice",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ground_cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ground_nutmeg",
+      "label": "Ground nutmeg",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ground_ginger",
+      "label": "Ground ginger (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Lemon juice (optional, brightens sweetness)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "mini_marshmallows",
+      "label": "Mini marshmallows (optional topping)",
+      "amount": { "value": 2, "unit": "cup" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven and prep dish",
+      "body": "Preheat oven to 350°F. Lightly butter a 9x13-inch baking dish."
+    },
+    {
+      "id": "step_02_prep_potatoes",
+      "title": "Slice sweet potatoes",
+      "body": "Peel sweet potatoes and slice into 1/2-inch rounds. Arrange in the baking dish in overlapping layers."
+    },
+    {
+      "id": "step_03_make_syrup",
+      "title": "Make the candied syrup",
+      "body": "In a saucepan over medium heat, melt butter. Stir in brown sugar, granulated sugar, water (or orange juice), cinnamon, nutmeg, ginger (optional), and salt. Bring to a gentle simmer 2–3 minutes until glossy. Remove from heat and stir in vanilla (and lemon juice if using)."
+    },
+    {
+      "id": "step_04_pour_cover",
+      "title": "Pour syrup and cover",
+      "body": "Pour syrup evenly over sweet potatoes. Cover tightly with foil and bake 35–45 minutes, until potatoes begin to soften."
+    },
+    {
+      "id": "step_05_uncover_baste",
+      "title": "Uncover and baste",
+      "body": "Remove foil. Spoon/baste syrup over potatoes. Continue baking 15–25 minutes uncovered, basting once or twice, until potatoes are very tender and syrup thickens into a glaze."
+    },
+    {
+      "id": "step_06_optional_marshmallows",
+      "title": "Optional: add marshmallows",
+      "body": "If using marshmallows, sprinkle on top during the final 8–10 minutes of baking, until melted and lightly browned."
+    },
+    {
+      "id": "step_07_rest_serve",
+      "title": "Rest and serve",
+      "body": "Rest 10 minutes so glaze thickens further. Serve warm with the syrup spooned over each portion."
+    }
+  ]
+}

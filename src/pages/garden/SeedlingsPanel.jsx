@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // src/pages/garden/SeedlingsPanel.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * SeedlingsPanel — seed starting, trays & schedules
@@ -24,11 +30,16 @@ function createLocalBus() {
     on(evt, cb) {
       listeners[evt] = listeners[evt] || [];
       listeners[evt].push(cb);
-      return () => (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
+      return () =>
+        (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
     },
     emit(evt, payload) {
       (listeners[evt] || []).forEach((cb) => {
-        try { cb(payload); } catch (e) { console.warn("eventBus listener error:", e); }
+        try {
+          cb(payload);
+        } catch (e) {
+          console.warn("eventBus listener error:", e);
+        }
       });
     },
   };
@@ -39,12 +50,16 @@ function useSafeEventBus() {
     let on = true;
     (async () => {
       try {
-        const mod = await import(/* webpackIgnore: true */ "../../services/eventBus.js").catch(() => null);
+        const mod = await import(
+          /* webpackIgnore: true */ "../../services/events/eventBus.js"
+        ).catch(() => null);
         if (on && mod?.eventBus) setBus(mod.eventBus);
       } catch {}
       if (on && !bus) setBus(createLocalBus());
     })();
-    return () => { on = false; };
+    return () => {
+      on = false;
+    };
   }, []);
   return bus ?? createLocalBus();
 }
@@ -54,31 +69,47 @@ function useSafeNBA() {
     let on = true;
     (async () => {
       try {
-        const mod = await import(/* webpackIgnore: true */ "../../services/nbaOrchestrator.js").catch(() => null);
+        const mod = await import(
+          /* webpackIgnore: true */ "../../services/nbaOrchestrator.js"
+        ).catch(() => null);
         if (on && mod?.invokeNBA) setInvoke(() => mod.invokeNBA);
       } catch {}
     })();
-    return () => { on = false; };
+    return () => {
+      on = false;
+    };
   }, []);
   return invoke;
 }
 async function safeScheduleHelpers() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../engines/scheduling/scheduleHelpers.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../engines/scheduling/scheduleHelpers.js"
+    ).catch(() => null);
     return mod || {};
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 async function safeLabelEngine() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../engines/labels/labelEngine.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../engines/labels/labelEngine.js"
+    ).catch(() => null);
     return mod || {};
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 async function safeAutomation() {
   try {
-    const mod = await import(/* webpackIgnore: true */ "@/services/automation/runtime").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "@/services/automation/runtime"
+    ).catch(() => null);
     return mod?.automation || { runTemplate: async () => ({}), emit: () => {} };
-  } catch { return { runTemplate: async () => ({}), emit: () => {} }; }
+  } catch {
+    return { runTemplate: async () => ({}), emit: () => {} };
+  }
 }
 
 // ------------------ Local utils ------------------
@@ -111,7 +142,13 @@ function parseBulk(text) {
     .map((line) => {
       const parts = line.split(",").map((s) => s.trim());
       if (parts.length >= 4) {
-        const [variety, cells, perCell, start, cultivar] = [parts[0], parts[1], parts[2], parts[3], parts[4]];
+        const [variety, cells, perCell, start, cultivar] = [
+          parts[0],
+          parts[1],
+          parts[2],
+          parts[3],
+          parts[4],
+        ];
         return seedRow({
           variety: variety || "",
           cultivar: cultivar || "",
@@ -207,7 +244,9 @@ function Field({ label, hint, children }) {
     <label className="block mb-3">
       <div className="text-xs uppercase tracking-wide mb-1 flex items-center gap-2">
         <span>{label}</span>
-        {hint ? <span className="text-[10px] text-gray-500">• {hint}</span> : null}
+        {hint ? (
+          <span className="text-[10px] text-gray-500">• {hint}</span>
+        ) : null}
       </div>
       {children}
     </label>
@@ -218,7 +257,13 @@ function Chip({ children, onRemove }) {
     <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
       {children}
       {onRemove ? (
-        <button type="button" onClick={onRemove} className="opacity-70 hover:opacity-100">×</button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="opacity-70 hover:opacity-100"
+        >
+          ×
+        </button>
       ) : null}
     </span>
   );
@@ -232,9 +277,20 @@ function Toast({ toast, onUndo, onClose }) {
         <span className="opacity-90">{toast.message}</span>
       </div>
       {toast.canUndo ? (
-        <button className="underline text-sm mr-2" onClick={() => onUndo?.(toast)}>Undo</button>
+        <button
+          className="underline text-sm mr-2"
+          onClick={() => onUndo?.(toast)}
+        >
+          Undo
+        </button>
       ) : null}
-      <button className="opacity-80 hover:opacity-100" aria-label="close" onClick={onClose}>×</button>
+      <button
+        className="opacity-80 hover:opacity-100"
+        aria-label="close"
+        onClick={onClose}
+      >
+        ×
+      </button>
     </div>
   );
 }
@@ -248,7 +304,9 @@ export default function SeedlingsPanel() {
     try {
       const cached = localStorage.getItem(LS_KEY);
       return cached ? JSON.parse(cached) : [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   });
   const [tab, setTab] = useState("collect"); // collect | plan | schedule | labels | preview
   const [bulk, setBulk] = useState("");
@@ -258,17 +316,20 @@ export default function SeedlingsPanel() {
 
   // Autosave
   useEffect(() => {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(rows)); } catch {}
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(rows));
+    } catch {}
   }, [rows]);
 
   // Derived filtered rows
   const filtered = useMemo(() => {
     if (!q) return rows;
     const f = q.toLowerCase();
-    return rows.filter(r =>
-      (r.variety || "").toLowerCase().includes(f) ||
-      (r.cultivar || "").toLowerCase().includes(f) ||
-      (r.tray || "").toLowerCase().includes(f)
+    return rows.filter(
+      (r) =>
+        (r.variety || "").toLowerCase().includes(f) ||
+        (r.cultivar || "").toLowerCase().includes(f) ||
+        (r.tray || "").toLowerCase().includes(f)
     );
   }, [rows, q]);
 
@@ -279,7 +340,11 @@ export default function SeedlingsPanel() {
     const parsed = parseBulk(bulk);
     setRows((s) => [...parsed, ...s]);
     setBulk("");
-    raiseToast("Bulk import complete", `${parsed.length} seed lines added.`, false);
+    raiseToast(
+      "Bulk import complete",
+      `${parsed.length} seed lines added.`,
+      false
+    );
   };
   const removeRow = (id) => {
     setRows((s) => {
@@ -298,7 +363,8 @@ export default function SeedlingsPanel() {
     lastRemovedRef.current = null;
     dismissToast();
   };
-  const updateRow = (id, patch) => setRows((s) => s.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  const updateRow = (id, patch) =>
+    setRows((s) => s.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   const clearAll = () => {
     if (!confirm("Clear all seed lines? This cannot be undone.")) return;
     setRows([]);
@@ -315,7 +381,11 @@ export default function SeedlingsPanel() {
         return next;
       })
     );
-    raiseToast("Normalized", "Default cells/per-cell applied where missing.", false);
+    raiseToast(
+      "Normalized",
+      "Default cells/per-cell applied where missing.",
+      false
+    );
   };
 
   // Export
@@ -330,29 +400,53 @@ export default function SeedlingsPanel() {
       at: Date.now(),
     });
     raiseToast("Sent", `Exported to ${target}.`, false);
-    try { invokeNBA?.({ reason: "seedlings_export", context: { target, count: rows.length } }); } catch {}
+    try {
+      invokeNBA?.({
+        reason: "seedlings_export",
+        context: { target, count: rows.length },
+      });
+    } catch {}
   };
 
   // Automation templates (optional)
   const planWithAI = async () => {
     const automation = await safeAutomation();
     try {
-      const res = await automation.runTemplate("garden.seedlings.plan", { rows });
+      const res = await automation.runTemplate("garden.seedlings.plan", {
+        rows,
+      });
       if (Array.isArray(res?.rows)) setRows(res.rows);
       raiseToast("AI plan applied", "Dates/fields updated.", false);
     } catch (e) {
-      automation.emit?.("event", { type: "garden/seedlings_plan_request", payload: { rows } });
+      automation.emit?.("event", {
+        type: "garden/seedlings_plan_request",
+        payload: { rows },
+      });
       raiseToast("Queued", "Requested plan via automation.", false);
     }
   };
   const syncQueue = async () => {
     const automation = await safeAutomation();
     try {
-      const res = await automation.runTemplate("garden.seedlings.queue.sync", { rows });
-      eventBus.emit("export.requested", { kind: "seedlings", target: "Task Board", rows, tasks: res?.tasks || [] });
-      raiseToast("Tasks created", `${(res?.tasks || []).length} tasks sent to Task Board.`, false);
+      const res = await automation.runTemplate("garden.seedlings.queue.sync", {
+        rows,
+      });
+      eventBus.emit("export.requested", {
+        kind: "seedlings",
+        target: "Task Board",
+        rows,
+        tasks: res?.tasks || [],
+      });
+      raiseToast(
+        "Tasks created",
+        `${(res?.tasks || []).length} tasks sent to Task Board.`,
+        false
+      );
     } catch {
-      automation.emit?.("event", { type: "garden/seedlings_queue_sync_request", payload: { rows } });
+      automation.emit?.("event", {
+        type: "garden/seedlings_queue_sync_request",
+        payload: { rows },
+      });
       raiseToast("Queued", "Requested task sync via automation.", false);
     }
   };
@@ -371,7 +465,8 @@ export default function SeedlingsPanel() {
     }
   };
 
-  const raiseToast = (title, message, canUndo) => setToast({ id: uid("t"), title, message, canUndo });
+  const raiseToast = (title, message, canUndo) =>
+    setToast({ id: uid("t"), title, message, canUndo });
   const dismissToast = () => setToast(null);
 
   // ------------------ Render ------------------
@@ -379,15 +474,52 @@ export default function SeedlingsPanel() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <header className="mb-4 md:mb-6">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-xl md:text-2xl font-semibold">🌱 Seedlings — Start • Schedule • Label</h1>
+          <h1 className="text-xl md:text-2xl font-semibold">
+            🌱 Seedlings — Start • Schedule • Label
+          </h1>
           <div className="flex items-center gap-2">
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={normalizeAll}>Normalize</button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Task Board")}>Send → Task Board</button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Calendar")}>Send → Calendar</button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Inventory")}>Send → Inventory</button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Garden Map")}>Send → Garden Map</button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={printLabels}>Print Labels</button>
-            <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-red-50 text-red-600" onClick={clearAll}>Clear</button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={normalizeAll}
+            >
+              Normalize
+            </button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Task Board")}
+            >
+              Send → Task Board
+            </button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Calendar")}
+            >
+              Send → Calendar
+            </button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Inventory")}
+            >
+              Send → Inventory
+            </button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Garden Map")}
+            >
+              Send → Garden Map
+            </button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={printLabels}
+            >
+              Print Labels
+            </button>
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-red-50 text-red-600"
+              onClick={clearAll}
+            >
+              Clear
+            </button>
           </div>
         </div>
         <nav className="mt-4 flex gap-2">
@@ -401,7 +533,11 @@ export default function SeedlingsPanel() {
             <button
               key={x.k}
               onClick={() => setTab(x.k)}
-              className={`px-3 py-1.5 rounded-lg text-sm border ${tab === x.k ? "bg-black text-white border-black" : "hover:bg-gray-50"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm border ${
+                tab === x.k
+                  ? "bg-black text-white border-black"
+                  : "hover:bg-gray-50"
+              }`}
             >
               {x.t}
             </button>
@@ -422,18 +558,36 @@ export default function SeedlingsPanel() {
         <div className="grid md:grid-cols-2 gap-4">
           <SectionCard
             title="Quick Add"
-            actions={<button onClick={addQuick} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">+ Row</button>}
+            actions={
+              <button
+                onClick={addQuick}
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              >
+                + Row
+              </button>
+            }
           >
             {rows.length === 0 ? (
               <EmptyState onAdd={addQuick} />
             ) : (
-              <SeedlingsTable rows={filtered} updateRow={updateRow} removeRow={removeRow} />
+              <SeedlingsTable
+                rows={filtered}
+                updateRow={updateRow}
+                removeRow={removeRow}
+              />
             )}
           </SectionCard>
 
           <SectionCard
             title="Bulk Paste / Import"
-            actions={<button onClick={addBulk} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">Parse & Add</button>}
+            actions={
+              <button
+                onClick={addBulk}
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              >
+                Parse & Add
+              </button>
+            }
           >
             <Field
               label="Paste CSV or simple lines"
@@ -447,7 +601,9 @@ export default function SeedlingsPanel() {
                 className="w-full rounded-xl border p-2 text-sm"
               />
             </Field>
-            <div className="text-xs text-gray-600">Defaults apply for missing fields; edit details in Plan tab.</div>
+            <div className="text-xs text-gray-600">
+              Defaults apply for missing fields; edit details in Plan tab.
+            </div>
           </SectionCard>
         </div>
       )}
@@ -458,17 +614,28 @@ export default function SeedlingsPanel() {
           title="Plan Details & Loss Modeling"
           actions={
             <>
-              <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={planWithAI}>
+              <button
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                onClick={planWithAI}
+              >
                 AI Plan
               </button>
-              <button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={syncQueue}>
+              <button
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                onClick={syncQueue}
+              >
                 Create Tasks
               </button>
             </>
           }
         >
           {rows.length === 0 ? (
-            <EmptyState onAdd={() => setTab("collect")} label="No seed lines" sub="Add rows in Collect." btn="Go to Collect" />
+            <EmptyState
+              onAdd={() => setTab("collect")}
+              label="No seed lines"
+              sub="Add rows in Collect."
+              btn="Go to Collect"
+            />
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
               {filtered.map((r) => {
@@ -479,11 +646,16 @@ export default function SeedlingsPanel() {
                     <div className="flex items-center justify-between mb-2">
                       <input
                         value={r.variety}
-                        onChange={(e) => updateRow(r.id, { variety: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { variety: e.target.value })
+                        }
                         placeholder="Variety (e.g., Roma Tomato)"
                         className="font-semibold w-64 border rounded-md px-2 py-1"
                       />
-                      <button onClick={() => removeRow(r.id)} className="text-red-600 text-xs rounded-lg border px-2 py-1 hover:bg-red-50">
+                      <button
+                        onClick={() => removeRow(r.id)}
+                        className="text-red-600 text-xs rounded-lg border px-2 py-1 hover:bg-red-50"
+                      >
                         Remove
                       </button>
                     </div>
@@ -492,7 +664,9 @@ export default function SeedlingsPanel() {
                       <Field label="Cultivar / Notes">
                         <input
                           value={r.cultivar}
-                          onChange={(e) => updateRow(r.id, { cultivar: e.target.value })}
+                          onChange={(e) =>
+                            updateRow(r.id, { cultivar: e.target.value })
+                          }
                           placeholder="e.g., San Marzano"
                           className="w-full border rounded-md px-2 py-1"
                         />
@@ -500,7 +674,9 @@ export default function SeedlingsPanel() {
                       <Field label="Tray / Location">
                         <input
                           value={r.tray}
-                          onChange={(e) => updateRow(r.id, { tray: e.target.value })}
+                          onChange={(e) =>
+                            updateRow(r.id, { tray: e.target.value })
+                          }
                           placeholder="e.g., Tray A"
                           className="w-full border rounded-md px-2 py-1"
                         />
@@ -511,7 +687,11 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="1"
                           value={r.cells}
-                          onChange={(e) => updateRow(r.id, { cells: numOr(e.target.value, r.cells) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              cells: numOr(e.target.value, r.cells),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -520,7 +700,11 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="1"
                           value={r.perCell}
-                          onChange={(e) => updateRow(r.id, { perCell: numOr(e.target.value, r.perCell) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              perCell: numOr(e.target.value, r.perCell),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -528,7 +712,9 @@ export default function SeedlingsPanel() {
                       <Field label="Start date (YYYY-MM-DD)">
                         <input
                           value={r.start}
-                          onChange={(e) => updateRow(r.id, { start: e.target.value })}
+                          onChange={(e) =>
+                            updateRow(r.id, { start: e.target.value })
+                          }
                           placeholder="2025-03-05"
                           className="w-full border rounded-md px-2 py-1"
                         />
@@ -538,7 +724,11 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.germDays}
-                          onChange={(e) => updateRow(r.id, { germDays: numOr(e.target.value, r.germDays) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              germDays: numOr(e.target.value, r.germDays),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -548,7 +738,11 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.upPotDays}
-                          onChange={(e) => updateRow(r.id, { upPotDays: numOr(e.target.value, r.upPotDays) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              upPotDays: numOr(e.target.value, r.upPotDays),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -557,7 +751,14 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.transplantDays}
-                          onChange={(e) => updateRow(r.id, { transplantDays: numOr(e.target.value, r.transplantDays) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              transplantDays: numOr(
+                                e.target.value,
+                                r.transplantDays
+                              ),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -567,7 +768,11 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.hardenDays}
-                          onChange={(e) => updateRow(r.id, { hardenDays: numOr(e.target.value, r.hardenDays) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              hardenDays: numOr(e.target.value, r.hardenDays),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -576,7 +781,11 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.lightHours}
-                          onChange={(e) => updateRow(r.id, { lightHours: numOr(e.target.value, r.lightHours) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              lightHours: numOr(e.target.value, r.lightHours),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -586,7 +795,9 @@ export default function SeedlingsPanel() {
                           <input
                             type="checkbox"
                             checked={!!r.heatMat}
-                            onChange={(e) => updateRow(r.id, { heatMat: e.target.checked })}
+                            onChange={(e) =>
+                              updateRow(r.id, { heatMat: e.target.checked })
+                            }
                           />
                           <span className="text-sm">On</span>
                         </label>
@@ -596,7 +807,14 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="1"
                           value={r.waterEveryDays}
-                          onChange={(e) => updateRow(r.id, { waterEveryDays: numOr(e.target.value, r.waterEveryDays) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              waterEveryDays: numOr(
+                                e.target.value,
+                                r.waterEveryDays
+                              ),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -606,7 +824,14 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.germinationPct}
-                          onChange={(e) => updateRow(r.id, { germinationPct: numOr(e.target.value, r.germinationPct) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              germinationPct: numOr(
+                                e.target.value,
+                                r.germinationPct
+                              ),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -615,7 +840,14 @@ export default function SeedlingsPanel() {
                           type="number"
                           min="0"
                           value={r.attritionPct}
-                          onChange={(e) => updateRow(r.id, { attritionPct: numOr(e.target.value, r.attritionPct) })}
+                          onChange={(e) =>
+                            updateRow(r.id, {
+                              attritionPct: numOr(
+                                e.target.value,
+                                r.attritionPct
+                              ),
+                            })
+                          }
                           className="w-full border rounded-md px-2 py-1"
                         />
                       </Field>
@@ -626,7 +858,14 @@ export default function SeedlingsPanel() {
                             type="number"
                             min="0"
                             value={r.successions?.repeats ?? 0}
-                            onChange={(e) => updateRow(r.id, { successions: { ...(r.successions || {}), repeats: numOr(e.target.value, 0) } })}
+                            onChange={(e) =>
+                              updateRow(r.id, {
+                                successions: {
+                                  ...(r.successions || {}),
+                                  repeats: numOr(e.target.value, 0),
+                                },
+                              })
+                            }
                             className="w-full border rounded-md px-2 py-1"
                             placeholder="repeats"
                           />
@@ -634,7 +873,14 @@ export default function SeedlingsPanel() {
                             type="number"
                             min="1"
                             value={r.successions?.everyDays ?? 14}
-                            onChange={(e) => updateRow(r.id, { successions: { ...(r.successions || {}), everyDays: numOr(e.target.value, 14) } })}
+                            onChange={(e) =>
+                              updateRow(r.id, {
+                                successions: {
+                                  ...(r.successions || {}),
+                                  everyDays: numOr(e.target.value, 14),
+                                },
+                              })
+                            }
                             className="w-full border rounded-md px-2 py-1"
                             placeholder="every days"
                           />
@@ -645,7 +891,9 @@ export default function SeedlingsPanel() {
                     <Field label="Notes">
                       <input
                         value={r.notes}
-                        onChange={(e) => updateRow(r.id, { notes: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { notes: e.target.value })
+                        }
                         placeholder="e.g., pre-soak seeds, vermiculite dusting"
                         className="w-full border rounded-md px-2 py-1"
                       />
@@ -654,15 +902,29 @@ export default function SeedlingsPanel() {
                     <div className="mt-2 rounded-lg border p-3 text-sm bg-gray-50">
                       <div className="font-medium mb-1">Timeline</div>
                       <div className="grid grid-cols-2 gap-2">
-                        <div>Germ: <strong>{tl.germ || "—"}</strong></div>
-                        <div>Up-pot: <strong>{tl.upPot || "—"}</strong></div>
-                        <div>Harden start: <strong>{tl.hardenStart || "—"}</strong></div>
-                        <div>Transplant: <strong>{tl.transplant || "—"}</strong></div>
+                        <div>
+                          Germ: <strong>{tl.germ || "—"}</strong>
+                        </div>
+                        <div>
+                          Up-pot: <strong>{tl.upPot || "—"}</strong>
+                        </div>
+                        <div>
+                          Harden start: <strong>{tl.hardenStart || "—"}</strong>
+                        </div>
+                        <div>
+                          Transplant: <strong>{tl.transplant || "—"}</strong>
+                        </div>
                       </div>
                       <div className="mt-2 grid grid-cols-3 gap-2">
-                        <div>Sown: <strong>{stats.sown}</strong></div>
-                        <div>Germinated≈ <strong>{stats.germinated}</strong></div>
-                        <div>Expected usable≈ <strong>{stats.expected}</strong></div>
+                        <div>
+                          Sown: <strong>{stats.sown}</strong>
+                        </div>
+                        <div>
+                          Germinated≈ <strong>{stats.germinated}</strong>
+                        </div>
+                        <div>
+                          Expected usable≈ <strong>{stats.expected}</strong>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -677,10 +939,22 @@ export default function SeedlingsPanel() {
       {tab === "schedule" && (
         <SectionCard
           title="Schedule Preview"
-          actions={<button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={syncQueue}>Create Tasks</button>}
+          actions={
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={syncQueue}
+            >
+              Create Tasks
+            </button>
+          }
         >
           {rows.length === 0 ? (
-            <EmptyState onAdd={() => setTab("collect")} label="No seed lines" sub="Add rows in Collect." btn="Go to Collect" />
+            <EmptyState
+              onAdd={() => setTab("collect")}
+              label="No seed lines"
+              sub="Add rows in Collect."
+              btn="Go to Collect"
+            />
           ) : (
             <SchedulePreview rows={filtered} />
           )}
@@ -689,9 +963,24 @@ export default function SeedlingsPanel() {
 
       {/* LABELS */}
       {tab === "labels" && (
-        <SectionCard title="Labels" actions={<button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={printLabels}>Print</button>}>
+        <SectionCard
+          title="Labels"
+          actions={
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={printLabels}
+            >
+              Print
+            </button>
+          }
+        >
           {rows.length === 0 ? (
-            <EmptyState onAdd={() => setTab("collect")} label="No labels to print" sub="Add rows in Collect." btn="Go to Collect" />
+            <EmptyState
+              onAdd={() => setTab("collect")}
+              label="No labels to print"
+              sub="Add rows in Collect."
+              btn="Go to Collect"
+            />
           ) : (
             <LabelsPreview rows={filtered} />
           )}
@@ -702,7 +991,14 @@ export default function SeedlingsPanel() {
       {tab === "preview" && (
         <SectionCard
           title="Summary"
-          actions={<button className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50" onClick={() => sendTo("Task Board")}>Send → Task Board</button>}
+          actions={
+            <button
+              className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+              onClick={() => sendTo("Task Board")}
+            >
+              Send → Task Board
+            </button>
+          }
         >
           <SummaryCard rows={filtered} />
         </SectionCard>
@@ -721,8 +1017,19 @@ function SeedlingsTable({ rows, updateRow, removeRow }) {
       <table className="min-w-full text-sm">
         <thead>
           <tr className="text-left border-b">
-            {["Variety", "Tray", "Cells", "Seeds/cell", "Start", "Germ %", "Attrition %", ""].map((h) => (
-              <th key={h} className="py-2 pr-3 font-semibold">{h}</th>
+            {[
+              "Variety",
+              "Tray",
+              "Cells",
+              "Seeds/cell",
+              "Start",
+              "Germ %",
+              "Attrition %",
+              "",
+            ].map((h) => (
+              <th key={h} className="py-2 pr-3 font-semibold">
+                {h}
+              </th>
             ))}
           </tr>
         </thead>
@@ -750,7 +1057,9 @@ function SeedlingsTable({ rows, updateRow, removeRow }) {
                   type="number"
                   min="1"
                   value={r.cells}
-                  onChange={(e) => updateRow(r.id, { cells: numOr(e.target.value, r.cells) })}
+                  onChange={(e) =>
+                    updateRow(r.id, { cells: numOr(e.target.value, r.cells) })
+                  }
                   className="w-20 border rounded-md px-2 py-1"
                 />
               </td>
@@ -759,7 +1068,11 @@ function SeedlingsTable({ rows, updateRow, removeRow }) {
                   type="number"
                   min="1"
                   value={r.perCell}
-                  onChange={(e) => updateRow(r.id, { perCell: numOr(e.target.value, r.perCell) })}
+                  onChange={(e) =>
+                    updateRow(r.id, {
+                      perCell: numOr(e.target.value, r.perCell),
+                    })
+                  }
                   className="w-24 border rounded-md px-2 py-1"
                 />
               </td>
@@ -776,7 +1089,11 @@ function SeedlingsTable({ rows, updateRow, removeRow }) {
                   type="number"
                   min="0"
                   value={r.germinationPct}
-                  onChange={(e) => updateRow(r.id, { germinationPct: numOr(e.target.value, r.germinationPct) })}
+                  onChange={(e) =>
+                    updateRow(r.id, {
+                      germinationPct: numOr(e.target.value, r.germinationPct),
+                    })
+                  }
                   className="w-24 border rounded-md px-2 py-1"
                 />
               </td>
@@ -785,12 +1102,19 @@ function SeedlingsTable({ rows, updateRow, removeRow }) {
                   type="number"
                   min="0"
                   value={r.attritionPct}
-                  onChange={(e) => updateRow(r.id, { attritionPct: numOr(e.target.value, r.attritionPct) })}
+                  onChange={(e) =>
+                    updateRow(r.id, {
+                      attritionPct: numOr(e.target.value, r.attritionPct),
+                    })
+                  }
                   className="w-24 border rounded-md px-2 py-1"
                 />
               </td>
               <td className="py-2 pr-3 text-right">
-                <button onClick={() => removeRow(r.id)} className="text-red-600 text-xs rounded-lg border px-2 py-1 hover:bg-red-50">
+                <button
+                  onClick={() => removeRow(r.id)}
+                  className="text-red-600 text-xs rounded-lg border px-2 py-1 hover:bg-red-50"
+                >
                   Remove
                 </button>
               </td>
@@ -811,13 +1135,18 @@ function SchedulePreview({ rows }) {
     })();
   }, [rows]);
 
-  if (!sched.length) return <div className="text-sm text-stone-500">No scheduled items yet.</div>;
+  if (!sched.length)
+    return (
+      <div className="text-sm text-stone-500">No scheduled items yet.</div>
+    );
   return (
     <div className="grid md:grid-cols-2 gap-4">
       {sched.map((s) => (
         <div key={s.id} className="rounded-xl border p-4">
           <div className="font-semibold">{s.title}</div>
-          <div className="text-xs text-gray-600">{s.date} • {s.kind}</div>
+          <div className="text-xs text-gray-600">
+            {s.date} • {s.kind}
+          </div>
           <div className="text-sm mt-1">{s.notes}</div>
         </div>
       ))}
@@ -827,7 +1156,8 @@ function SchedulePreview({ rows }) {
 
 function LabelsPreview({ rows }) {
   const labels = useMemo(() => buildLabels(rows), [rows]);
-  if (!labels.length) return <div className="text-sm text-stone-500">Nothing to print.</div>;
+  if (!labels.length)
+    return <div className="text-sm text-stone-500">Nothing to print.</div>;
   return (
     <div className="grid md:grid-cols-3 gap-3">
       {labels.map((l) => (
@@ -836,7 +1166,9 @@ function LabelsPreview({ rows }) {
           <div className="text-xs text-gray-600">{l.cultivar || "—"}</div>
           <div className="text-xs">Tray: {l.tray || "—"}</div>
           <div className="text-xs">Start: {l.start || "—"}</div>
-          <div className="text-[11px] mt-1 opacity-70">Cells: {l.cells} • Seeds/cell: {l.perCell}</div>
+          <div className="text-[11px] mt-1 opacity-70">
+            Cells: {l.cells} • Seeds/cell: {l.perCell}
+          </div>
         </div>
       ))}
     </div>
@@ -857,21 +1189,42 @@ function SummaryCard({ rows }) {
   return (
     <div className="rounded-xl border p-4 text-sm">
       <div className="grid grid-cols-3 gap-3">
-        <div><div className="text-xs text-gray-600">Trays</div><div className="text-lg font-semibold">{totals.trays}</div></div>
-        <div><div className="text-xs text-gray-600">Seeds sown</div><div className="text-lg font-semibold">{totals.sown}</div></div>
-        <div><div className="text-xs text-gray-600">Expected usable</div><div className="text-lg font-semibold">{totals.expected}</div></div>
+        <div>
+          <div className="text-xs text-gray-600">Trays</div>
+          <div className="text-lg font-semibold">{totals.trays}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-600">Seeds sown</div>
+          <div className="text-lg font-semibold">{totals.sown}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-600">Expected usable</div>
+          <div className="text-lg font-semibold">{totals.expected}</div>
+        </div>
       </div>
-      <div className="mt-3 text-xs text-stone-600">Expected counts account for germination and attrition loss.</div>
+      <div className="mt-3 text-xs text-stone-600">
+        Expected counts account for germination and attrition loss.
+      </div>
     </div>
   );
 }
 
-function EmptyState({ onAdd, label = "No seedlings yet", sub = "Start with a quick row or paste CSV.", btn = "Add a blank row" }) {
+function EmptyState({
+  onAdd,
+  label = "No seedlings yet",
+  sub = "Start with a quick row or paste CSV.",
+  btn = "Add a blank row",
+}) {
   return (
     <div className="border-2 border-dashed rounded-2xl p-8 text-center">
       <h4 className="font-semibold mb-1">{label}</h4>
       <p className="text-sm text-gray-600 mb-4">{sub}</p>
-      <button onClick={onAdd} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">{btn}</button>
+      <button
+        onClick={onAdd}
+        className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+      >
+        {btn}
+      </button>
     </div>
   );
 }
@@ -883,11 +1236,38 @@ function buildSchedule(rows, helpers) {
     const tl = predictTimeline(r);
     const stats = expectedStarts(r);
     const baseItems = [
-      { kind: "start", date: r.start, title: `Start: ${r.variety}`, notes: `Tray ${r.tray || "-"} • ${r.cells} cells • ${r.perCell}/cell • Light ${r.lightHours}h • Heat ${r.heatMat ? "ON" : "OFF"}` },
-      { kind: "germ", date: tl.germ, title: `Germ check: ${r.variety}`, notes: `Expect ~${stats.germinated} emerged.` },
-      { kind: "up-pot", date: tl.upPot, title: `Up-pot: ${r.variety}`, notes: `Prepare pots; expected ${stats.expected} keepers.` },
-      { kind: "harden", date: tl.hardenStart, title: `Harden-off start: ${r.variety}`, notes: `Daily exposure over ${r.hardenDays} days.` },
-      { kind: "transplant", date: tl.transplant, title: `Transplant: ${r.variety}`, notes: `Target ~${stats.expected} plants.` },
+      {
+        kind: "start",
+        date: r.start,
+        title: `Start: ${r.variety}`,
+        notes: `Tray ${r.tray || "-"} • ${r.cells} cells • ${
+          r.perCell
+        }/cell • Light ${r.lightHours}h • Heat ${r.heatMat ? "ON" : "OFF"}`,
+      },
+      {
+        kind: "germ",
+        date: tl.germ,
+        title: `Germ check: ${r.variety}`,
+        notes: `Expect ~${stats.germinated} emerged.`,
+      },
+      {
+        kind: "up-pot",
+        date: tl.upPot,
+        title: `Up-pot: ${r.variety}`,
+        notes: `Prepare pots; expected ${stats.expected} keepers.`,
+      },
+      {
+        kind: "harden",
+        date: tl.hardenStart,
+        title: `Harden-off start: ${r.variety}`,
+        notes: `Daily exposure over ${r.hardenDays} days.`,
+      },
+      {
+        kind: "transplant",
+        date: tl.transplant,
+        title: `Transplant: ${r.variety}`,
+        notes: `Target ~${stats.expected} plants.`,
+      },
     ];
     baseItems.forEach((i) => {
       if (!i.date) return;
@@ -898,10 +1278,20 @@ function buildSchedule(rows, helpers) {
     if (r.start && r.waterEveryDays > 0 && tl.transplant) {
       const start = new Date(r.start);
       const end = new Date(tl.transplant);
-      for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + r.waterEveryDays)) {
+      for (
+        let d = new Date(start);
+        d <= end;
+        d.setUTCDate(d.getUTCDate() + r.waterEveryDays)
+      ) {
         const iso = d.toISOString().slice(0, 10);
         if (helpers?.isRestDay?.(iso)) continue; // optional Sabbath-like guard
-        out.push({ id: uid("sched"), kind: "water", date: iso, title: `Water: ${r.variety}`, notes: `Cadence ${r.waterEveryDays}d` });
+        out.push({
+          id: uid("sched"),
+          kind: "water",
+          date: iso,
+          title: `Water: ${r.variety}`,
+          notes: `Cadence ${r.waterEveryDays}d`,
+        });
       }
     }
 

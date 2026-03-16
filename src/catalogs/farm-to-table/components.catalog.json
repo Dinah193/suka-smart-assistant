@@ -1,0 +1,1338 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "farm_to_table.components",
+    "type": "catalog",
+    "domain": "farm-to-table",
+    "locale": "en-US",
+    "name": "Farm-to-Table • Components Catalog",
+    "label": "Farm-to-Table Components",
+    "subtitle": "Canonical components (staples, produce, proteins, preserves, utilities) used by planners, inventory linking, and recipe adaptation.",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/farm-to-table/components.catalog.json",
+      "notes": [
+        "Component IDs are canonical SSA IDs and should remain stable.",
+        "Tags are used by search, planners, substitutions, and inventory mapping.",
+        "Paths are relative to src/catalogs/farm-to-table (kept for optional explicit linking)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "module": "farm-to-table",
+    "locale": "en-US"
+  },
+  "defaults": {
+    "tagNamespaceHints": [
+      "component.*",
+      "group.*",
+      "role.*",
+      "protein.*",
+      "produce.*",
+      "grain.*",
+      "dairy.*",
+      "fat.*",
+      "spice.*",
+      "herb.*",
+      "preserve.*",
+      "pantry.*",
+      "storage.*",
+      "season.*",
+      "diet.*",
+      "allergen.*"
+    ],
+    "groups": [
+      "Staples",
+      "Grains & Flours",
+      "Legumes",
+      "Proteins",
+      "Dairy & Eggs",
+      "Fats & Oils",
+      "Produce",
+      "Herbs & Spices",
+      "Sweeteners",
+      "Preserves & Ferments",
+      "Broths & Bases",
+      "Baking Essentials",
+      "Kitchen Utilities"
+    ],
+    "statusDefault": "active"
+  },
+  "items": [
+    {
+      "id": "component.water",
+      "label": "Water",
+      "group": "Kitchen Utilities",
+      "rank": 1,
+      "status": "active",
+      "tags": [
+        "component.utility",
+        "role.base",
+        "pantry.utility",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.salt_kosher",
+      "label": "Kosher Salt",
+      "group": "Staples",
+      "rank": 2,
+      "status": "active",
+      "tags": [
+        "component.staple",
+        "role.seasoning",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.black_pepper",
+      "label": "Black Pepper",
+      "group": "Herbs & Spices",
+      "rank": 3,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.black_pepper",
+        "role.seasoning",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.garlic",
+      "label": "Garlic",
+      "group": "Produce",
+      "rank": 4,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.allium",
+        "produce.garlic",
+        "role.aromatic",
+        "season.all",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.onion_yellow",
+      "label": "Yellow Onion",
+      "group": "Produce",
+      "rank": 5,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.allium",
+        "produce.onion",
+        "role.aromatic",
+        "season.all",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.olive_oil",
+      "label": "Olive Oil",
+      "group": "Fats & Oils",
+      "rank": 6,
+      "status": "active",
+      "tags": [
+        "component.fat",
+        "fat.oil",
+        "fat.olive_oil",
+        "role.fat",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.butter",
+      "label": "Butter",
+      "group": "Fats & Oils",
+      "rank": 7,
+      "status": "active",
+      "tags": [
+        "component.fat",
+        "fat.butter",
+        "role.fat",
+        "dairy.butter",
+        "allergen.dairy",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.flour_all_purpose",
+      "label": "All-Purpose Flour",
+      "group": "Grains & Flours",
+      "rank": 8,
+      "status": "active",
+      "tags": [
+        "component.grain",
+        "grain.flour",
+        "grain.wheat",
+        "baking.flour",
+        "role.structure",
+        "allergen.gluten",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.flour_bread",
+      "label": "Bread Flour",
+      "group": "Grains & Flours",
+      "rank": 9,
+      "status": "active",
+      "tags": [
+        "component.grain",
+        "grain.flour",
+        "grain.wheat",
+        "baking.flour",
+        "baking.bread",
+        "role.structure",
+        "allergen.gluten",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.flour_whole_wheat",
+      "label": "Whole Wheat Flour",
+      "group": "Grains & Flours",
+      "rank": 10,
+      "status": "active",
+      "tags": [
+        "component.grain",
+        "grain.flour",
+        "grain.wheat",
+        "baking.flour",
+        "role.structure",
+        "allergen.gluten",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.cornmeal",
+      "label": "Cornmeal",
+      "group": "Grains & Flours",
+      "rank": 11,
+      "status": "active",
+      "tags": [
+        "component.grain",
+        "grain.corn",
+        "grain.cornmeal",
+        "baking.staple",
+        "role.structure",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.rice_long_grain",
+      "label": "Long-Grain Rice",
+      "group": "Grains & Flours",
+      "rank": 12,
+      "status": "active",
+      "tags": [
+        "component.grain",
+        "grain.rice",
+        "role.starch",
+        "pantry.staple",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.oats_rolled",
+      "label": "Rolled Oats",
+      "group": "Grains & Flours",
+      "rank": 13,
+      "status": "active",
+      "tags": [
+        "component.grain",
+        "grain.oats",
+        "role.starch",
+        "baking.oats",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.sugar_granulated",
+      "label": "Granulated Sugar",
+      "group": "Sweeteners",
+      "rank": 14,
+      "status": "active",
+      "tags": [
+        "component.sweetener",
+        "sweetener.sugar",
+        "role.sweetener",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.brown_sugar",
+      "label": "Brown Sugar",
+      "group": "Sweeteners",
+      "rank": 15,
+      "status": "active",
+      "tags": [
+        "component.sweetener",
+        "sweetener.brown_sugar",
+        "role.sweetener",
+        "baking.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.honey",
+      "label": "Honey",
+      "group": "Sweeteners",
+      "rank": 16,
+      "status": "active",
+      "tags": [
+        "component.sweetener",
+        "sweetener.honey",
+        "role.sweetener",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.molasses",
+      "label": "Molasses",
+      "group": "Sweeteners",
+      "rank": 17,
+      "status": "active",
+      "tags": [
+        "component.sweetener",
+        "sweetener.molasses",
+        "role.sweetener",
+        "baking.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.eggs",
+      "label": "Eggs",
+      "group": "Dairy & Eggs",
+      "rank": 18,
+      "status": "active",
+      "tags": [
+        "component.egg",
+        "protein.egg",
+        "role.binder",
+        "allergen.egg",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.milk_whole",
+      "label": "Whole Milk",
+      "group": "Dairy & Eggs",
+      "rank": 19,
+      "status": "active",
+      "tags": [
+        "component.dairy",
+        "dairy.milk",
+        "role.liquid",
+        "allergen.dairy",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.yogurt_plain",
+      "label": "Plain Yogurt",
+      "group": "Dairy & Eggs",
+      "rank": 20,
+      "status": "active",
+      "tags": [
+        "component.dairy",
+        "dairy.yogurt",
+        "role.tenderizer",
+        "allergen.dairy",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.cheddar",
+      "label": "Cheddar Cheese",
+      "group": "Dairy & Eggs",
+      "rank": 21,
+      "status": "active",
+      "tags": [
+        "component.dairy",
+        "dairy.cheese",
+        "dairy.cheddar",
+        "role.flavor",
+        "allergen.dairy",
+        "storage.fridge"
+      ]
+    },
+
+    {
+      "id": "component.chicken_whole",
+      "label": "Whole Chicken",
+      "group": "Proteins",
+      "rank": 30,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.poultry",
+        "protein.chicken",
+        "role.protein",
+        "storage.fridge",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.chicken_thighs",
+      "label": "Chicken Thighs",
+      "group": "Proteins",
+      "rank": 31,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.poultry",
+        "protein.chicken",
+        "cut.thighs",
+        "role.protein",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.beef_ground",
+      "label": "Ground Beef",
+      "group": "Proteins",
+      "rank": 32,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.beef",
+        "cut.ground",
+        "role.protein",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.lamb",
+      "label": "Lamb",
+      "group": "Proteins",
+      "rank": 33,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.lamb",
+        "role.protein",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.goat",
+      "label": "Goat",
+      "group": "Proteins",
+      "rank": 34,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.goat",
+        "role.protein",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.fish_white",
+      "label": "White Fish",
+      "group": "Proteins",
+      "rank": 35,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.fish",
+        "role.protein",
+        "allergen.fish",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.shrimp",
+      "label": "Shrimp",
+      "group": "Proteins",
+      "rank": 36,
+      "status": "active",
+      "tags": [
+        "component.protein",
+        "protein.shellfish",
+        "role.protein",
+        "allergen.shellfish",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.beans_black",
+      "label": "Black Beans",
+      "group": "Legumes",
+      "rank": 40,
+      "status": "active",
+      "tags": [
+        "component.legume",
+        "legume.beans",
+        "legume.black_beans",
+        "role.protein",
+        "diet.vegan",
+        "diet.vegetarian",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.beans_pinto",
+      "label": "Pinto Beans",
+      "group": "Legumes",
+      "rank": 41,
+      "status": "active",
+      "tags": [
+        "component.legume",
+        "legume.beans",
+        "legume.pinto_beans",
+        "role.protein",
+        "diet.vegan",
+        "diet.vegetarian",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.beans_kidney",
+      "label": "Kidney Beans",
+      "group": "Legumes",
+      "rank": 42,
+      "status": "active",
+      "tags": [
+        "component.legume",
+        "legume.beans",
+        "legume.kidney_beans",
+        "role.protein",
+        "diet.vegan",
+        "diet.vegetarian",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.lentils",
+      "label": "Lentils",
+      "group": "Legumes",
+      "rank": 43,
+      "status": "active",
+      "tags": [
+        "component.legume",
+        "legume.lentils",
+        "role.protein",
+        "diet.vegan",
+        "diet.vegetarian",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.chickpeas",
+      "label": "Chickpeas",
+      "group": "Legumes",
+      "rank": 44,
+      "status": "active",
+      "tags": [
+        "component.legume",
+        "legume.chickpeas",
+        "role.protein",
+        "diet.vegan",
+        "diet.vegetarian",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.tomato_canned_diced",
+      "label": "Canned Diced Tomatoes",
+      "group": "Staples",
+      "rank": 60,
+      "status": "active",
+      "tags": [
+        "component.pantry",
+        "pantry.canned",
+        "produce.tomato",
+        "role.base",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.tomato_paste",
+      "label": "Tomato Paste",
+      "group": "Staples",
+      "rank": 61,
+      "status": "active",
+      "tags": [
+        "component.pantry",
+        "pantry.canned",
+        "produce.tomato",
+        "role.base",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.stock_chicken",
+      "label": "Chicken Stock",
+      "group": "Broths & Bases",
+      "rank": 62,
+      "status": "active",
+      "tags": [
+        "component.base",
+        "broth.chicken",
+        "role.base",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.stock_vegetable",
+      "label": "Vegetable Stock",
+      "group": "Broths & Bases",
+      "rank": 63,
+      "status": "active",
+      "tags": [
+        "component.base",
+        "broth.vegetable",
+        "role.base",
+        "diet.vegan",
+        "diet.vegetarian",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.lemon",
+      "label": "Lemon",
+      "group": "Produce",
+      "rank": 70,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.citrus",
+        "produce.lemon",
+        "role.acid",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.lime",
+      "label": "Lime",
+      "group": "Produce",
+      "rank": 71,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.citrus",
+        "produce.lime",
+        "role.acid",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.vinegar_apple_cider",
+      "label": "Apple Cider Vinegar",
+      "group": "Staples",
+      "rank": 72,
+      "status": "active",
+      "tags": [
+        "component.staple",
+        "role.acid",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.carrots",
+      "label": "Carrots",
+      "group": "Produce",
+      "rank": 80,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.root",
+        "produce.carrot",
+        "role.vegetable",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.celery",
+      "label": "Celery",
+      "group": "Produce",
+      "rank": 81,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.celery",
+        "role.aromatic",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.bell_pepper",
+      "label": "Bell Pepper",
+      "group": "Produce",
+      "rank": 82,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.pepper",
+        "role.aromatic",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.potatoes",
+      "label": "Potatoes",
+      "group": "Produce",
+      "rank": 83,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.tuber",
+        "produce.potato",
+        "role.starch",
+        "season.all",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.sweet_potatoes",
+      "label": "Sweet Potatoes",
+      "group": "Produce",
+      "rank": 84,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.tuber",
+        "produce.sweet_potato",
+        "role.starch",
+        "season.fall",
+        "season.winter",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.okra",
+      "label": "Okra",
+      "group": "Produce",
+      "rank": 85,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.okra",
+        "role.thickener",
+        "season.summer",
+        "storage.fridge",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.corn",
+      "label": "Sweet Corn",
+      "group": "Produce",
+      "rank": 86,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.corn",
+        "role.vegetable",
+        "season.summer",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.greens_collard",
+      "label": "Collard Greens",
+      "group": "Produce",
+      "rank": 87,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.greens",
+        "produce.collard_greens",
+        "role.vegetable",
+        "season.fall",
+        "season.winter",
+        "storage.fridge",
+        "freezer.friendly"
+      ]
+    },
+    {
+      "id": "component.cabbage",
+      "label": "Cabbage",
+      "group": "Produce",
+      "rank": 88,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.brassica",
+        "produce.cabbage",
+        "role.vegetable",
+        "season.fall",
+        "season.winter",
+        "storage.fridge"
+      ]
+    },
+
+    {
+      "id": "component.herb_parsley",
+      "label": "Parsley",
+      "group": "Herbs & Spices",
+      "rank": 100,
+      "status": "active",
+      "tags": [
+        "component.herb",
+        "herb.parsley",
+        "role.herb",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.herb_cilantro",
+      "label": "Cilantro",
+      "group": "Herbs & Spices",
+      "rank": 101,
+      "status": "active",
+      "tags": [
+        "component.herb",
+        "herb.cilantro",
+        "role.herb",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.herb_thyme",
+      "label": "Thyme",
+      "group": "Herbs & Spices",
+      "rank": 102,
+      "status": "active",
+      "tags": [
+        "component.herb",
+        "herb.thyme",
+        "role.herb",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.herb_rosemary",
+      "label": "Rosemary",
+      "group": "Herbs & Spices",
+      "rank": 103,
+      "status": "active",
+      "tags": [
+        "component.herb",
+        "herb.rosemary",
+        "role.herb",
+        "season.all",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.spice_cumin",
+      "label": "Ground Cumin",
+      "group": "Herbs & Spices",
+      "rank": 104,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.cumin",
+        "role.seasoning",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.spice_paprika",
+      "label": "Paprika",
+      "group": "Herbs & Spices",
+      "rank": 105,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.paprika",
+        "role.seasoning",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.spice_cayenne",
+      "label": "Cayenne Pepper",
+      "group": "Herbs & Spices",
+      "rank": 106,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.cayenne",
+        "role.heat",
+        "heat.medium",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.spice_cinnamon",
+      "label": "Cinnamon",
+      "group": "Herbs & Spices",
+      "rank": 107,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.cinnamon",
+        "role.warm_spice",
+        "baking.spice",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.spice_nutmeg",
+      "label": "Nutmeg",
+      "group": "Herbs & Spices",
+      "rank": 108,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.nutmeg",
+        "role.warm_spice",
+        "baking.spice",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.vanilla_extract",
+      "label": "Vanilla Extract",
+      "group": "Baking Essentials",
+      "rank": 109,
+      "status": "active",
+      "tags": [
+        "component.baking",
+        "baking.vanilla",
+        "role.flavor",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.yeast_active_dry",
+      "label": "Active Dry Yeast",
+      "group": "Baking Essentials",
+      "rank": 120,
+      "status": "active",
+      "tags": [
+        "component.baking",
+        "baking.yeast",
+        "role.leavening",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.baking_powder",
+      "label": "Baking Powder",
+      "group": "Baking Essentials",
+      "rank": 121,
+      "status": "active",
+      "tags": [
+        "component.baking",
+        "baking.leavening",
+        "role.leavening",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.baking_soda",
+      "label": "Baking Soda",
+      "group": "Baking Essentials",
+      "rank": 122,
+      "status": "active",
+      "tags": [
+        "component.baking",
+        "baking.leavening",
+        "role.leavening",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.cocoa_powder",
+      "label": "Cocoa Powder",
+      "group": "Baking Essentials",
+      "rank": 123,
+      "status": "active",
+      "tags": [
+        "component.baking",
+        "baking.cocoa",
+        "role.flavor",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.chocolate_chips",
+      "label": "Chocolate Chips",
+      "group": "Baking Essentials",
+      "rank": 124,
+      "status": "active",
+      "tags": [
+        "component.baking",
+        "baking.chocolate",
+        "role.mix_in",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.ferment_sourdough_starter",
+      "label": "Sourdough Starter",
+      "group": "Preserves & Ferments",
+      "rank": 140,
+      "status": "active",
+      "tags": [
+        "component.ferment",
+        "ferment.sourdough",
+        "role.leavening",
+        "baking.bread",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.ferment_kimchi",
+      "label": "Kimchi",
+      "group": "Preserves & Ferments",
+      "rank": 141,
+      "status": "active",
+      "tags": [
+        "component.ferment",
+        "ferment.kimchi",
+        "role.condiment",
+        "storage.fridge",
+        "spice.heat"
+      ]
+    },
+    {
+      "id": "component.ferment_sauerkraut",
+      "label": "Sauerkraut",
+      "group": "Preserves & Ferments",
+      "rank": 142,
+      "status": "active",
+      "tags": [
+        "component.ferment",
+        "ferment.sauerkraut",
+        "role.condiment",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.preserve_jam",
+      "label": "Fruit Jam/Preserves",
+      "group": "Preserves & Ferments",
+      "rank": 143,
+      "status": "active",
+      "tags": [
+        "component.preserve",
+        "preserve.jam",
+        "role.spread",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.preserve_pickles",
+      "label": "Pickles",
+      "group": "Preserves & Ferments",
+      "rank": 144,
+      "status": "active",
+      "tags": [
+        "component.preserve",
+        "preserve.pickles",
+        "role.condiment",
+        "storage.fridge"
+      ]
+    },
+
+    {
+      "id": "component.stock_bone",
+      "label": "Bone Broth",
+      "group": "Broths & Bases",
+      "rank": 160,
+      "status": "active",
+      "tags": ["component.base", "broth.bone", "role.base", "storage.room_temp"]
+    },
+    {
+      "id": "component.base_mirepoix",
+      "label": "Mirepoix Base (Onion/Carrot/Celery)",
+      "group": "Broths & Bases",
+      "rank": 161,
+      "status": "active",
+      "tags": [
+        "component.base",
+        "base.mirepoix",
+        "role.aromatic",
+        "prep.base",
+        "storage.fridge"
+      ]
+    },
+
+    {
+      "id": "component.oil_avocado",
+      "label": "Avocado Oil",
+      "group": "Fats & Oils",
+      "rank": 180,
+      "status": "active",
+      "tags": [
+        "component.fat",
+        "fat.oil",
+        "fat.avocado_oil",
+        "role.fat",
+        "pantry.staple",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.ghee",
+      "label": "Ghee",
+      "group": "Fats & Oils",
+      "rank": 181,
+      "status": "active",
+      "tags": [
+        "component.fat",
+        "fat.ghee",
+        "role.fat",
+        "allergen.dairy",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.nuts_pecans",
+      "label": "Pecans",
+      "group": "Baking Essentials",
+      "rank": 200,
+      "status": "active",
+      "tags": [
+        "component.nut",
+        "nut.pecan",
+        "role.mix_in",
+        "allergen.tree_nut",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.nuts_walnuts",
+      "label": "Walnuts",
+      "group": "Baking Essentials",
+      "rank": 201,
+      "status": "active",
+      "tags": [
+        "component.nut",
+        "nut.walnut",
+        "role.mix_in",
+        "allergen.tree_nut",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.peanut_butter",
+      "label": "Peanut Butter",
+      "group": "Staples",
+      "rank": 202,
+      "status": "active",
+      "tags": [
+        "component.pantry",
+        "pantry.spread",
+        "role.spread",
+        "allergen.peanut",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.rice_vinegar",
+      "label": "Rice Vinegar",
+      "group": "Staples",
+      "rank": 220,
+      "status": "active",
+      "tags": [
+        "component.staple",
+        "role.acid",
+        "vinegar.rice",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.soy_sauce",
+      "label": "Soy Sauce",
+      "group": "Staples",
+      "rank": 221,
+      "status": "active",
+      "tags": [
+        "component.pantry",
+        "pantry.sauce",
+        "role.salt_umami",
+        "allergen.soy",
+        "allergen.gluten",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.tamari",
+      "label": "Tamari",
+      "group": "Staples",
+      "rank": 222,
+      "status": "active",
+      "tags": [
+        "component.pantry",
+        "pantry.sauce",
+        "role.salt_umami",
+        "allergen.soy",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.tortillas_flour",
+      "label": "Flour Tortillas",
+      "group": "Staples",
+      "rank": 240,
+      "status": "active",
+      "tags": [
+        "component.staple",
+        "staple.tortilla",
+        "grain.wheat",
+        "allergen.gluten",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.tortillas_corn",
+      "label": "Corn Tortillas",
+      "group": "Staples",
+      "rank": 241,
+      "status": "active",
+      "tags": [
+        "component.staple",
+        "staple.tortilla",
+        "grain.corn",
+        "diet.gluten_free",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.pasta_dry",
+      "label": "Dry Pasta",
+      "group": "Staples",
+      "rank": 260,
+      "status": "active",
+      "tags": [
+        "component.staple",
+        "grain.wheat",
+        "role.starch",
+        "allergen.gluten",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.spice_bay_leaf",
+      "label": "Bay Leaf",
+      "group": "Herbs & Spices",
+      "rank": 280,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.bay_leaf",
+        "role.aromatic",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.spice_oregano",
+      "label": "Oregano",
+      "group": "Herbs & Spices",
+      "rank": 281,
+      "status": "active",
+      "tags": [
+        "component.herb",
+        "herb.oregano",
+        "role.herb",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.spice_chili_powder",
+      "label": "Chili Powder",
+      "group": "Herbs & Spices",
+      "rank": 282,
+      "status": "active",
+      "tags": [
+        "component.spice",
+        "spice.chili_powder",
+        "role.heat",
+        "heat.medium",
+        "storage.room_temp"
+      ]
+    },
+
+    {
+      "id": "component.fruit_bananas",
+      "label": "Bananas",
+      "group": "Produce",
+      "rank": 300,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.fruit",
+        "produce.banana",
+        "role.fruit",
+        "season.all",
+        "storage.room_temp"
+      ]
+    },
+    {
+      "id": "component.fruit_apples",
+      "label": "Apples",
+      "group": "Produce",
+      "rank": 301,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.fruit",
+        "produce.apple",
+        "role.fruit",
+        "season.fall",
+        "storage.fridge"
+      ]
+    },
+    {
+      "id": "component.fruit_berries_mixed",
+      "label": "Mixed Berries",
+      "group": "Produce",
+      "rank": 302,
+      "status": "active",
+      "tags": [
+        "component.produce",
+        "produce.fruit",
+        "produce.berries",
+        "role.fruit",
+        "season.spring",
+        "season.summer",
+        "storage.fridge",
+        "freezer.friendly"
+      ]
+    }
+  ]
+}

@@ -19,44 +19,68 @@
 
 //// Soft/defensive dynamic import /////////////////////////////////////////////
 
-async function softImport(path) { try { return await import(path); } catch { return null; } }
+async function softImport(path) {
+  try {
+    return await import(path);
+  } catch {
+    return null;
+  }
+}
 
 //// Dependencies //////////////////////////////////////////////////////////////
 
-let eventBus;                        // required
+let eventBus; // required
 let featureFlags = { familyFundMode: false };
 
-let InventoryService;                // optional (snapshot, shortages/surplus, lot metadata)
-let PreservationPlaybook;            // optional (method rules, time estimates, safety specs)
-let HouseholdPrefs;                  // optional (diet, appliances, quiet hours, sabbath)
-let FoodSafetyService;               // optional (acidification, tested recipes, canning tables)
-let CalendarService;                 // optional (availability windows)
-let WeatherService;                  // optional (prefer indoor if heatwave)
-let SessionStore;                    // optional (dedupe)
-let HubPacketFormatter;              // optional
-let FamilyFundConnector;             // optional
+let InventoryService; // optional (snapshot, shortages/surplus, lot metadata)
+let PreservationPlaybook; // optional (method rules, time estimates, safety specs)
+let HouseholdPrefs; // optional (diet, appliances, quiet hours, sabbath)
+let FoodSafetyService; // optional (acidification, tested recipes, canning tables)
+let CalendarService; // optional (availability windows)
+let WeatherService; // optional (prefer indoor if heatwave)
+let SessionStore; // optional (dedupe)
+let HubPacketFormatter; // optional
+let FamilyFundConnector; // optional
 
 //// Utilities /////////////////////////////////////////////////////////////////
 
 const nowISO = () => new Date().toISOString();
 
 function safeId(prefix = "preserve") {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+  if (typeof crypto !== "undefined" && crypto.randomUUID)
+    return `${prefix}_${crypto.randomUUID()}`;
   return `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
 }
 
-function emit(type, source, data) { if (!eventBus?.emit) return; eventBus.emit({ type, ts: nowISO(), source, data }); }
-function sanitize(x) { try { return JSON.parse(JSON.stringify(x)); } catch { return undefined; } }
-function safeError(err) { return { name: err?.name || "Error", message: err?.message || String(err) }; }
-function clamp01(x) { return Math.max(0, Math.min(1, Number(x) || 0)); }
+function emit(type, source, data) {
+  if (!eventBus?.emit) return;
+  eventBus.emit({ type, ts: nowISO(), source, data });
+}
+function sanitize(x) {
+  try {
+    return JSON.parse(JSON.stringify(x));
+  } catch {
+    return undefined;
+  }
+}
+function safeError(err) {
+  return { name: err?.name || "Error", message: err?.message || String(err) };
+}
+function clamp01(x) {
+  return Math.max(0, Math.min(1, Number(x) || 0));
+}
 
 async function exportToHubIfEnabled(payload) {
   try {
     if (!featureFlags?.familyFundMode) return;
-    const pkt = HubPacketFormatter?.format?.(payload, { stream: "preservationScheduler" });
+    const pkt = HubPacketFormatter?.format?.(payload, {
+      stream: "preservationScheduler",
+    });
     if (!pkt) return;
     await FamilyFundConnector?.send?.(pkt);
-  } catch { /* silent by design */ }
+  } catch {
+    /* silent by design */
+  }
 }
 
 //// Engine state //////////////////////////////////////////////////////////////
@@ -67,16 +91,17 @@ const state = {
   queue: [],
   config: {
     // Triggers
-    perishHoursSoft: 48,          // items expiring within this window are prioritized
-    surplusThreshold: 1.5,        // >150% of preferred stock = surplus
-    batchMinQty: 0.5,             // don't schedule batches smaller than this (units are item-specific)
+    perishHoursSoft: 48, // items expiring within this window are prioritized
+    surplusThreshold: 1.5, // >150% of preferred stock = surplus
+    batchMinQty: 0.5, // don't schedule batches smaller than this (units are item-specific)
     preferLowNoiseAtNight: true,
     // Scheduling
     lookaheadHours: 48,
     defaultDurationMin: 45,
-    perBatchCapMinutes: 120,      // split into multiple sessions if > 2 hours
+    perBatchCapMinutes: 120, // split into multiple sessions if > 2 hours
     // Dedupe
-    dedupeKey: (s) => `${s.meta?.method}:${s.meta?.itemKey}:${s.meta?.lotId || "n/a"}`,
+    dedupeKey: (s) =>
+      `${s.meta?.method}:${s.meta?.itemKey}:${s.meta?.lotId || "n/a"}`,
   },
 };
 
@@ -97,22 +122,41 @@ function buildWindowFromCalendar(minutes = 60) {
 function deriveGuards(prefs, method, noisy = false, hot = false) {
   const hints = [];
   if (prefs?.guards?.sabbath) hints.push({ type: "sabbath", policy: "avoid" });
-  if (prefs?.guards?.quietHours && (noisy || /blend|vacuum|grind/i.test(method))) {
+  if (
+    prefs?.guards?.quietHours &&
+    (noisy || /blend|vacuum|grind/i.test(method))
+  ) {
     hints.push({ type: "quiet-hours", policy: "avoid" });
   }
-  if (prefs?.guards?.weather && hot) hints.push({ type: "weather", policy: "prefer-indoor" });
+  if (prefs?.guards?.weather && hot)
+    hints.push({ type: "weather", policy: "prefer-indoor" });
   return hints;
 }
 
 function canUseMethod(method, item, prefs) {
   // Appliance guard & dietary guard (extendable)
   const appl = prefs?.appliances || [];
-  if (method === "pressure-can" && !appl.includes("pressure-canner")) return false;
-  if (method === "water-bath" && !appl.includes("stockpot") && !appl.includes("canner")) return false;
-  if (method === "dehydrate" && !appl.includes("dehydrator") && !appl.includes("oven")) return false;
-  if (method === "ferment" && (prefs?.diet === "no-ferments")) return false;
+  if (method === "pressure-can" && !appl.includes("pressure-canner"))
+    return false;
+  if (
+    method === "water-bath" &&
+    !appl.includes("stockpot") &&
+    !appl.includes("canner")
+  )
+    return false;
+  if (
+    method === "dehydrate" &&
+    !appl.includes("dehydrator") &&
+    !appl.includes("oven")
+  )
+    return false;
+  if (method === "ferment" && prefs?.diet === "no-ferments") return false;
   // Example allergen: skip nut-butters if peanut allergy
-  if ((item?.tags || []).includes("peanut") && (prefs?.allergies || []).includes("peanut")) return false;
+  if (
+    (item?.tags || []).includes("peanut") &&
+    (prefs?.allergies || []).includes("peanut")
+  )
+    return false;
   return true;
 }
 
@@ -126,14 +170,18 @@ function chooseMethod(item, prefs, weather) {
     try {
       const m = PreservationPlaybook.choose(item, { prefs, weather });
       if (m && canUseMethod(m, item, prefs)) return m;
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }
 
   // 2) Safety-driven defaults
   //    - Low-acid vegetables/meat: pressure can or freeze
   //    - High-acid fruit/tomato (with acidification): water bath, freeze, dehydrate
   const acid = (item?.safety?.acid || item?.acid) ?? null;
-  const protein = (item?.tags || []).includes("meat") || (item?.tags || []).includes("poultry");
+  const protein =
+    (item?.tags || []).includes("meat") ||
+    (item?.tags || []).includes("poultry");
 
   if (protein || acid === "low") {
     if (canUseMethod("freeze", item, prefs)) return "freeze";
@@ -145,7 +193,8 @@ function chooseMethod(item, prefs, weather) {
   }
 
   // 3) Weather preference
-  if (preferIndoor(weather) && canUseMethod("freeze", item, prefs)) return "freeze";
+  if (preferIndoor(weather) && canUseMethod("freeze", item, prefs))
+    return "freeze";
 
   // 4) Fallback
   return canUseMethod("freeze", item, prefs) ? "freeze" : null;
@@ -154,10 +203,24 @@ function chooseMethod(item, prefs, weather) {
 function estimateDurationMinutes(item, method) {
   // Ask playbook first
   if (PreservationPlaybook?.estimateMinutes) {
-    try { return Math.max(10, Number(PreservationPlaybook.estimateMinutes(item, method))); } catch { /* noop */ }
+    try {
+      return Math.max(
+        10,
+        Number(PreservationPlaybook.estimateMinutes(item, method))
+      );
+    } catch {
+      /* noop */
+    }
   }
   // heuristic
-  const base = { "freeze": 25, "dehydrate": 90, "water-bath": 75, "pressure-can": 120, "ferment": 30, "cure": 60 };
+  const base = {
+    freeze: 25,
+    dehydrate: 90,
+    "water-bath": 75,
+    "pressure-can": 120,
+    ferment: 30,
+    cure: 60,
+  };
   return base[method] || state.config.defaultDurationMin;
 }
 
@@ -181,7 +244,9 @@ function buildSession(item, method, prefs, weather) {
     createdAt: nowISO(),
     schedule: {
       suggestedAt: nowISO(),
-      window: buildWindowFromCalendar(Math.min(duration + 15, state.config.perBatchCapMinutes)),
+      window: buildWindowFromCalendar(
+        Math.min(duration + 15, state.config.perBatchCapMinutes)
+      ),
       guards: deriveGuards(prefs, method, noisy, hot || preferIndoor(weather)),
     },
     meta: {
@@ -198,13 +263,64 @@ function buildSession(item, method, prefs, weather) {
     session: {
       anchors: [{ type: "task", label: method, weight: 0.9 }],
       tasks: [
-        { id: safeId("task"), type: "prep", title: "Sort/Trim/Wash", estimatedMinutes: 10 },
-        ...(method === "water-bath" ? [{ id: safeId("task"), type: "prep", title: "Sterilize jars/lids", estimatedMinutes: 15 }] : []),
-        ...(method === "pressure-can" ? [{ id: safeId("task"), type: "prep", title: "Load pressure canner, vent, bring to pressure", estimatedMinutes: 20 }] : []),
-        ...(method === "dehydrate" ? [{ id: safeId("task"), type: "prep", title: "Slice to uniform thickness", estimatedMinutes: 10 }] : []),
-        ...(method === "ferment" ? [{ id: safeId("task"), type: "prep", title: "Salt/Brine/Veg prep", estimatedMinutes: 15 }] : []),
-        { id: safeId("task"), type: "preserve", title: methodLabel(method), estimatedMinutes: duration },
-        { id: safeId("task"), type: "store", title: "Label & log to storehouse", estimatedMinutes: 5 },
+        {
+          id: safeId("task"),
+          type: "prep",
+          title: "Sort/Trim/Wash",
+          estimatedMinutes: 10,
+        },
+        ...(method === "water-bath"
+          ? [
+              {
+                id: safeId("task"),
+                type: "prep",
+                title: "Sterilize jars/lids",
+                estimatedMinutes: 15,
+              },
+            ]
+          : []),
+        ...(method === "pressure-can"
+          ? [
+              {
+                id: safeId("task"),
+                type: "prep",
+                title: "Load pressure canner, vent, bring to pressure",
+                estimatedMinutes: 20,
+              },
+            ]
+          : []),
+        ...(method === "dehydrate"
+          ? [
+              {
+                id: safeId("task"),
+                type: "prep",
+                title: "Slice to uniform thickness",
+                estimatedMinutes: 10,
+              },
+            ]
+          : []),
+        ...(method === "ferment"
+          ? [
+              {
+                id: safeId("task"),
+                type: "prep",
+                title: "Salt/Brine/Veg prep",
+                estimatedMinutes: 15,
+              },
+            ]
+          : []),
+        {
+          id: safeId("task"),
+          type: "preserve",
+          title: methodLabel(method),
+          estimatedMinutes: duration,
+        },
+        {
+          id: safeId("task"),
+          type: "store",
+          title: "Label & log to storehouse",
+          estimatedMinutes: 5,
+        },
       ],
     },
   };
@@ -214,13 +330,20 @@ function buildSession(item, method, prefs, weather) {
 
 function methodLabel(m) {
   switch (m) {
-    case "freeze": return "Freeze Batch";
-    case "dehydrate": return "Dehydrate Batch";
-    case "water-bath": return "Water-Bath Can";
-    case "pressure-can": return "Pressure Can";
-    case "ferment": return "Ferment";
-    case "cure": return "Cure";
-    default: return "Preserve";
+    case "freeze":
+      return "Freeze Batch";
+    case "dehydrate":
+      return "Dehydrate Batch";
+    case "water-bath":
+      return "Water-Bath Can";
+    case "pressure-can":
+      return "Pressure Can";
+    case "ferment":
+      return "Ferment";
+    case "cure":
+      return "Cure";
+    default:
+      return "Preserve";
   }
 }
 
@@ -229,11 +352,17 @@ function isCandidate(item) {
   const qty = Number(item?.qty || 0);
   if (!qty || qty < state.config.batchMinQty) return false;
   // Perish window or explicit surplus flag
-  if (item?.perishBy && hoursFromNow(item.perishBy) <= state.config.perishHoursSoft) return true;
+  if (
+    item?.perishBy &&
+    hoursFromNow(item.perishBy) <= state.config.perishHoursSoft
+  )
+    return true;
   if (item?.surplus === true) return true;
   // If we have preferred vs current stock info
   if (typeof item?.preferred === "number" && typeof item?.onHand === "number") {
-    return (item.onHand / Math.max(1, item.preferred)) >= state.config.surplusThreshold;
+    return (
+      item.onHand / Math.max(1, item.preferred) >= state.config.surplusThreshold
+    );
   }
   return false;
 }
@@ -243,13 +372,19 @@ async function enrichSafety(item) {
   if (item?.safety) return item;
   let safety = null;
   if (FoodSafetyService?.classify) {
-    try { safety = await FoodSafetyService.classify(item.name || item.itemKey); } catch { /* noop */ }
+    try {
+      safety = await FoodSafetyService.classify(item.name || item.itemKey);
+    } catch {
+      /* noop */
+    }
   }
   if (!safety) {
     // heuristics
     const s = (item.name || item.itemKey || "").toLowerCase();
-    if (/\b(tomato|berries|stone fruit|apple|cucumber|pickl)/.test(s)) safety = { acid: "high" };
-    else if (/\b(chicken|beef|pork|goat|lamb|duck)/.test(s)) safety = { acid: "low", protein: true };
+    if (/\b(tomato|berries|stone fruit|apple|cucumber|pickl)/.test(s))
+      safety = { acid: "high" };
+    else if (/\b(chicken|beef|pork|goat|lamb|duck)/.test(s))
+      safety = { acid: "low", protein: true };
     else safety = { acid: "low" };
   }
   return { ...item, safety };
@@ -308,14 +443,21 @@ function candidatesFromHarvest(evtData) {
   }));
 }
 
-function addHours(iso, h) { const d = new Date(iso); d.setHours(d.getHours() + h); return d.toISOString(); }
+function addHours(iso, h) {
+  const d = new Date(iso);
+  d.setHours(d.getHours() + h);
+  return d.toISOString();
+}
 
 //// Core processing ////////////////////////////////////////////////////////////
 
 async function processTrigger(trigger) {
   // trigger: { source: "harvest"|"inventory"|"import", payload }
-  const prefs = (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
-  const weather = (WeatherService?.getSnapshot ? await WeatherService.getSnapshot().catch(() => null) : null);
+  const prefs =
+    (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
+  const weather = WeatherService?.getSnapshot
+    ? await WeatherService.getSnapshot().catch(() => null)
+    : null;
 
   let candidates = [];
 
@@ -326,7 +468,11 @@ async function processTrigger(trigger) {
   }
 
   if (trigger?.source === "inventory") {
-    const snapshot = trigger.payload || (InventoryService?.snapshot ? await InventoryService.snapshot().catch(() => null) : null);
+    const snapshot =
+      trigger.payload ||
+      (InventoryService?.snapshot
+        ? await InventoryService.snapshot().catch(() => null)
+        : null);
     if (snapshot) candidates = await discoverCandidatesFromInventory(snapshot);
   }
 
@@ -346,7 +492,9 @@ async function processTrigger(trigger) {
   }
 
   if (!candidates.length) {
-    emit("preservation.suggestion.none", "engines/preservationScheduler", { reason: "no_candidates" });
+    emit("preservation.suggestion.none", "engines/preservationScheduler", {
+      reason: "no_candidates",
+    });
     return;
   }
 
@@ -355,7 +503,9 @@ async function processTrigger(trigger) {
   for (const item of candidates) {
     const method = chooseMethod(item, prefs, weather);
     if (!method) {
-      emit("preservation.method.none", "engines/preservationScheduler", { item: sanitize(item) });
+      emit("preservation.method.none", "engines/preservationScheduler", {
+        item: sanitize(item),
+      });
       continue;
     }
     const session = buildSession(item, method, prefs, weather);
@@ -377,13 +527,17 @@ async function processTrigger(trigger) {
   }
 
   if (!sessions.length) {
-    emit("preservation.suggestion.none", "engines/preservationScheduler", { reason: "deduped_or_no_method" });
+    emit("preservation.suggestion.none", "engines/preservationScheduler", {
+      reason: "deduped_or_no_method",
+    });
     return;
   }
 
   // Emit creation + schedule requests
   for (const s of sessions) {
-    emit("preservation.session.created", "engines/preservationScheduler", { session: sanitize(s) });
+    emit("preservation.session.created", "engines/preservationScheduler", {
+      session: sanitize(s),
+    });
     emit("automation.schedule.request", "engines/preservationScheduler", {
       domain: "preservation",
       reason: "perish_or_surplus",
@@ -399,8 +553,8 @@ async function processTrigger(trigger) {
     action: "sessions_created",
     payload: {
       count: sessions.length,
-      methods: sessions.map(s => s.meta?.method),
-      items: sessions.map(s => s.meta?.itemKey),
+      methods: sessions.map((s) => s.meta?.method),
+      items: sessions.map((s) => s.meta?.itemKey),
     },
   });
 }
@@ -462,8 +616,8 @@ export async function start(config = {}) {
     hubFmt,
     hubConn,
   ] = await Promise.all([
-    softImport("../services/eventBus.js"),
-    softImport("../config/featureFlags.js"),
+    softImport("../services/events/eventBus.js"),
+    softImport("@/config/featureFlags.json"),
     softImport("../domain/inventory/InventoryService.js"),
     softImport("../domain/preservation/PreservationPlaybook.js"),
     softImport("../services/HouseholdPrefs.js"),
@@ -471,24 +625,26 @@ export async function start(config = {}) {
     softImport("../services/CalendarService.js"),
     softImport("../services/WeatherService.js"),
     softImport("../stores/SessionStore.js"),
-    softImport("../hub/HubPacketFormatter.js"),
-    softImport("../hub/FamilyFundConnector.js"),
+    softImport("@/services/hub/HubPacketFormatter.js"),
+    softImport("@/services/hub/FamilyFundConnector.js"),
   ]);
 
-  eventBus             = evb?.default || evb || eventBus;
-  featureFlags         = ff?.default || ff || featureFlags;
-  InventoryService     = inv?.default || inv || InventoryService;
+  eventBus = evb?.default || evb || eventBus;
+  featureFlags = ff?.default || ff || featureFlags;
+  InventoryService = inv?.default || inv || InventoryService;
   PreservationPlaybook = playbook?.default || playbook || PreservationPlaybook;
-  HouseholdPrefs       = prefs?.default || prefs || HouseholdPrefs;
-  FoodSafetyService    = safety?.default || safety || FoodSafetyService;
-  CalendarService      = cal?.default || cal || CalendarService;
-  WeatherService       = weather?.default || weather || WeatherService;
-  SessionStore         = sess?.default || sess || SessionStore;
-  HubPacketFormatter   = hubFmt?.default || hubFmt || HubPacketFormatter;
-  FamilyFundConnector  = hubConn?.default || hubConn || FamilyFundConnector;
+  HouseholdPrefs = prefs?.default || prefs || HouseholdPrefs;
+  FoodSafetyService = safety?.default || safety || FoodSafetyService;
+  CalendarService = cal?.default || cal || CalendarService;
+  WeatherService = weather?.default || weather || WeatherService;
+  SessionStore = sess?.default || sess || SessionStore;
+  HubPacketFormatter = hubFmt?.default || hubFmt || HubPacketFormatter;
+  FamilyFundConnector = hubConn?.default || hubConn || FamilyFundConnector;
 
   if (!eventBus?.on || !eventBus?.emit) {
-    throw new Error("preservationScheduler requires a functional eventBus with on/emit.");
+    throw new Error(
+      "preservationScheduler requires a functional eventBus with on/emit."
+    );
   }
 
   // Harvest inflow → immediate candidates
@@ -502,7 +658,11 @@ export async function start(config = {}) {
   eventBus.on("inventory.updated", (evt) => {
     // if reason suggests inflow or nearing expiry, enqueue a scan
     const reason = evt?.data?.reason || "";
-    if (/harvest|purchase|butchery|adjust|reservation_release|expiry/i.test(reason)) {
+    if (
+      /harvest|purchase|butchery|adjust|reservation_release|expiry/i.test(
+        reason
+      )
+    ) {
       enqueue({ source: "inventory", payload: null }); // snapshot taken inside
     }
   });

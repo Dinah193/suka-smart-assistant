@@ -11,7 +11,8 @@ const BTN =
   "inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 active:translate-y-px";
 const VAR = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
-  subtle: "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
+  subtle:
+    "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
   ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
   danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600",
 };
@@ -21,7 +22,7 @@ const CHIP =
 /* ----------------------------- Defensive imports ---------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch (_) {}
 
@@ -40,7 +41,9 @@ try {
 /* Optional: prefer your SavePlan modal if it exists */
 let SavePlanModalLazy = null;
 try {
-  SavePlanModalLazy = React.lazy(() => import("@/components/plans/SavePlanModal.jsx"));
+  SavePlanModalLazy = React.lazy(() =>
+    import("@/components/plans/SavePlanModal.jsx")
+  );
 } catch (_) {}
 
 /* Optional: SystemCTA (to surface plan CTAs inside articles) */
@@ -93,7 +96,10 @@ try {
 
 /* ---------------------------------- Utils ---------------------------------- */
 const safeFile = (s = "article") =>
-  String(s).toLowerCase().replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-");
+  String(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/-+/g, "-");
 
 const fmt = (d) => {
   try {
@@ -147,14 +153,23 @@ function ArticleJsonLD({ data }) {
       description: description,
       datePublished: date,
       dateModified: updated || date,
-      author: author?.name ? { "@type": "Person", name: author.name } : undefined,
+      author: author?.name
+        ? { "@type": "Person", name: author.name }
+        : undefined,
       image: cover ? [cover] : undefined,
       keywords: tags.join(", "),
-      mainEntityOfPage: canonical ? { "@type": "WebPage", "@id": canonical } : undefined,
+      mainEntityOfPage: canonical
+        ? { "@type": "WebPage", "@id": canonical }
+        : undefined,
     };
     return JSON.stringify(base, null, 2);
   }, [data]);
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: json }}
+    />
+  );
 }
 
 /* -------------------------------- Component --------------------------------- */
@@ -201,7 +216,10 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
   const isFavInit = !!favApi?.isFavorite?.(articleId);
   const [isFav, setIsFav] = useState(isFavInit);
 
-  useEffect(() => setIsFav(!!favApi?.isFavorite?.(articleId)), [favApi, articleId]);
+  useEffect(
+    () => setIsFav(!!favApi?.isFavorite?.(articleId)),
+    [favApi, articleId]
+  );
 
   const toggleFavorite = async () => {
     try {
@@ -211,7 +229,11 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
       } else {
         const next = !isFav;
         setIsFav(next);
-        eventBus.emit("article.favorite.toggled", { id: articleId, next, source: "ArticleLayout" });
+        eventBus.emit("article.favorite.toggled", {
+          id: articleId,
+          next,
+          source: "ArticleLayout",
+        });
       }
       toastSafe(isFav ? "Removed from favorites." : "Added to favorites.");
     } catch (e) {
@@ -236,7 +258,7 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
     if (!el) return;
     const onScroll = () => {
       const rect = el.getBoundingClientRect();
-      const total = el.offsetHeight - (window.innerHeight * 0.2);
+      const total = el.offsetHeight - window.innerHeight * 0.2;
       const read = Math.min(Math.max(-rect.top + 80, 0), total);
       setProgress(total > 0 ? Math.round((read / total) * 100) : 0);
     };
@@ -260,7 +282,11 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
     }));
     // ensure ids exist
     hs.forEach((h) => {
-      const node = el.querySelector(h.level === "h2" ? `h2:contains("${h.text}")` : `h3:contains("${h.text}")`);
+      const node = el.querySelector(
+        h.level === "h2"
+          ? `h2:contains("${h.text}")`
+          : `h3:contains("${h.text}")`
+      );
       if (node && !node.id) node.id = h.id;
     });
     setToc(hs);
@@ -279,13 +305,21 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
       });
     } catch (_) {}
     // track viewed
-    eventBus.emit?.("article.viewed", { id: articleId, title, slug, tags, source: "ArticleLayout" });
+    eventBus.emit?.("article.viewed", {
+      id: articleId,
+      title,
+      slug,
+      tags,
+      source: "ArticleLayout",
+    });
   }, [title, description, canonical, cover, articleId, slug, tags]);
 
   /* ----------------------------- Share / export UI ---------------------------- */
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(window?.location?.href || canonical || "");
+      await navigator.clipboard.writeText(
+        window?.location?.href || canonical || ""
+      );
       toastSafe("Link copied.");
     } catch {
       toastSafe("Could not copy link.", "error");
@@ -295,8 +329,15 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
   const shareNative = async () => {
     if (navigator?.share) {
       try {
-        await navigator.share({ title, text: description, url: window?.location?.href || canonical });
-        eventBus.emit?.("article.share.requested", { id: articleId, channel: "native" });
+        await navigator.share({
+          title,
+          text: description,
+          url: window?.location?.href || canonical,
+        });
+        eventBus.emit?.("article.share.requested", {
+          id: articleId,
+          channel: "native",
+        });
         return;
       } catch (_) {}
     }
@@ -306,14 +347,19 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
   const printPDF = () => {
     try {
       window.print();
-      eventBus.emit?.("article.export.requested", { id: articleId, format: "print" });
+      eventBus.emit?.("article.export.requested", {
+        id: articleId,
+        format: "print",
+      });
     } catch (_) {}
   };
 
   const downloadJson = () => {
     try {
       const data = { frontmatter, slug, contentType: "article" };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `${safeFile(title || slug)}.json`;
@@ -329,14 +375,24 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
   /* ------------------------ Optional "Save as Plan" glue ----------------------- */
   const [saveOpen, setSaveOpen] = useState(false);
   const planFromArticle =
-    plan && (typeof plan === "object" ? plan : { id: String(plan), title, domain: domain === "articles" ? "meals" : domain });
+    plan &&
+    (typeof plan === "object"
+      ? plan
+      : {
+          id: String(plan),
+          title,
+          domain: domain === "articles" ? "meals" : domain,
+        });
   const openSavePlan = () => {
     if (!planFromArticle) {
       toastSafe("No plan data in this article.", "error");
       return;
     }
     setSaveOpen(true);
-    eventBus.emit?.("plan.save.modal.opened", { from: "ArticleLayout", plan: planFromArticle });
+    eventBus.emit?.("plan.save.modal.opened", {
+      from: "ArticleLayout",
+      plan: planFromArticle,
+    });
   };
 
   /* ------------------------------ NBA (optional) ------------------------------ */
@@ -346,7 +402,8 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
     (async () => {
       try {
         const hint = await automation?.nba?.suggest?.({
-          domain: domain === "articles" ? planFromArticle?.domain || "meals" : domain,
+          domain:
+            domain === "articles" ? planFromArticle?.domain || "meals" : domain,
           plan: planFromArticle || null,
           context: { articleId, tags },
         });
@@ -429,8 +486,14 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
             </div>
           ) : (
             <div className="p-6 sm:p-8">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight">{title}</h1>
-              {description && <p className="mt-3 max-w-3xl text-lg text-gray-600">{description}</p>}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight">
+                {title}
+              </h1>
+              {description && (
+                <p className="mt-3 max-w-3xl text-lg text-gray-600">
+                  {description}
+                </p>
+              )}
               <div className="mt-4">
                 <MetaRow
                   date={date}
@@ -445,8 +508,16 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
 
           {/* Utility bar */}
           <div className="flex flex-wrap items-center gap-2 border-t border-gray-200 bg-white/60 px-4 py-3">
-            <button className={cx(BTN, VAR.subtle)} onClick={toggleFavorite} aria-pressed={isFav}>
-              {isFav ? <I.Heart className="h-4 w-4 text-rose-600" /> : <I.HeartOff className="h-4 w-4" />}
+            <button
+              className={cx(BTN, VAR.subtle)}
+              onClick={toggleFavorite}
+              aria-pressed={isFav}
+            >
+              {isFav ? (
+                <I.Heart className="h-4 w-4 text-rose-600" />
+              ) : (
+                <I.HeartOff className="h-4 w-4" />
+              )}
               <span>{isFav ? "Favorited" : "Favorite"}</span>
             </button>
 
@@ -471,7 +542,12 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
             </button>
 
             {editUrl ? (
-              <a href={editUrl} target="_blank" rel="noreferrer" className={cx(BTN, VAR.ghost)}>
+              <a
+                href={editUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={cx(BTN, VAR.ghost)}
+              >
                 <I.ExternalLink className="h-4 w-4" />
                 <span>Edit on GitHub</span>
               </a>
@@ -479,7 +555,10 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
 
             {/* Optional “Save as Plan” if frontmatter.plan is provided */}
             {planFromArticle ? (
-              <button className={cx(BTN, VAR.primary, "ml-auto")} onClick={openSavePlan}>
+              <button
+                className={cx(BTN, VAR.primary, "ml-auto")}
+                onClick={openSavePlan}
+              >
                 <I.BookmarkPlus className="h-4 w-4" />
                 <span>Save as Plan</span>
               </button>
@@ -491,7 +570,12 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
       </header>
 
       {/* Main layout */}
-      <main className={cx(WRAP, "grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10 pb-16")}>
+      <main
+        className={cx(
+          WRAP,
+          "grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10 pb-16"
+        )}
+      >
         {/* Article body */}
         <article id="article" ref={articleRef} className="min-w-0">
           <div className={cx(PROSE)}>{children}</div>
@@ -502,9 +586,14 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
               <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-4 sm:p-6">
                 <div className="mb-3 flex items-center gap-2 text-indigo-800">
                   <I.Sparkles className="h-4 w-4" />
-                  <span className="text-sm font-medium">Do something with this guide</span>
+                  <span className="text-sm font-medium">
+                    Do something with this guide
+                  </span>
                 </div>
-                <SystemCTA domain={planFromArticle.domain || "meals"} plan={planFromArticle} />
+                <SystemCTA
+                  domain={planFromArticle.domain || "meals"}
+                  plan={planFromArticle}
+                />
               </div>
             </div>
           )}
@@ -512,7 +601,9 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
           {/* Related */}
           {related?.length > 0 && (
             <section className="mt-12">
-              <h2 className="text-lg font-semibold text-gray-900">Related articles</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Related articles
+              </h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((r, idx) => (
                   <a
@@ -522,11 +613,18 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
                   >
                     {r.cover ? (
                       <div className="relative h-36 w-full">
-                        <img src={r.cover} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                        <img
+                          src={r.cover}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                          loading="lazy"
+                        />
                       </div>
                     ) : null}
                     <div className="p-4">
-                      <h3 className="font-medium text-gray-900 group-hover:underline">{r.title}</h3>
+                      <h3 className="font-medium text-gray-900 group-hover:underline">
+                        {r.title}
+                      </h3>
                     </div>
                   </a>
                 ))}
@@ -539,12 +637,25 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
         <aside className="lg:sticky lg:top-20 h-max">
           <div className="rounded-3xl border border-gray-200 bg-white p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900">On this page</h3>
-              <button className={cx(BTN, VAR.ghost, "px-2 py-1")} onClick={() => setOpenTOC((v) => !v)}>
-                <I.ChevronRight className={cx("h-4 w-4 transition", openTOC ? "rotate-90" : "")} />
+              <h3 className="text-sm font-semibold text-gray-900">
+                On this page
+              </h3>
+              <button
+                className={cx(BTN, VAR.ghost, "px-2 py-1")}
+                onClick={() => setOpenTOC((v) => !v)}
+              >
+                <I.ChevronRight
+                  className={cx(
+                    "h-4 w-4 transition",
+                    openTOC ? "rotate-90" : ""
+                  )}
+                />
               </button>
             </div>
-            <nav className={cx("mt-3 space-y-1", !openTOC && "hidden lg:block")} aria-label="Table of contents">
+            <nav
+              className={cx("mt-3 space-y-1", !openTOC && "hidden lg:block")}
+              aria-label="Table of contents"
+            >
               {toc.length === 0 ? (
                 <p className="text-xs text-gray-500">No headings yet.</p>
               ) : (
@@ -570,13 +681,21 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
               <div className="flex items-start gap-2">
                 <I.Star className="mt-0.5 h-4 w-4 text-indigo-700" />
                 <div>
-                  <p className="text-sm font-medium text-indigo-900">Next best action</p>
+                  <p className="text-sm font-medium text-indigo-900">
+                    Next best action
+                  </p>
                   <p className="text-sm text-indigo-800/90">{nbaHint}</p>
                 </div>
               </div>
               <button
                 className={cx(BTN, VAR.primary, "mt-3 w-full justify-center")}
-                onClick={() => eventBus.emit?.("nba.requested", { source: "ArticleLayout", articleId, domain })}
+                onClick={() =>
+                  eventBus.emit?.("nba.requested", {
+                    source: "ArticleLayout",
+                    articleId,
+                    domain,
+                  })
+                }
               >
                 Do it
               </button>
@@ -586,9 +705,12 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
       </main>
 
       {/* Save as Plan modal (lazy preferred) */}
-      {saveOpen && planFromArticle && (
-        SavePlanModalLazy ? (
-          <Suspense fallback={<InlineSaveFallback onClose={() => setSaveOpen(false)} />}>
+      {saveOpen &&
+        planFromArticle &&
+        (SavePlanModalLazy ? (
+          <Suspense
+            fallback={<InlineSaveFallback onClose={() => setSaveOpen(false)} />}
+          >
             <SavePlanModalLazy
               isOpen={saveOpen}
               onClose={() => setSaveOpen(false)}
@@ -612,8 +734,7 @@ export default function ArticleLayout({ children, frontmatter = {} }) {
               setSaveOpen(false);
             }}
           />
-        )
-      )}
+        ))}
 
       {/* JSON-LD for SEO */}
       <ArticleJsonLD data={frontmatter} />
@@ -632,8 +753,26 @@ function MetaRow({ date, updated, readingMins, author, tags, dark = false }) {
             alt={author?.name || "Author"}
             className="h-6 w-6 rounded-full ring-2 ring-white/80"
           />
-          {author?.name && <span className={cx("text-sm", dark ? "text-white/90" : "text-gray-700")}>{author.name}</span>}
-          {author?.byline && <span className={cx("text-xs", dark ? "text-white/70" : "text-gray-500")}>{author.byline}</span>}
+          {author?.name && (
+            <span
+              className={cx(
+                "text-sm",
+                dark ? "text-white/90" : "text-gray-700"
+              )}
+            >
+              {author.name}
+            </span>
+          )}
+          {author?.byline && (
+            <span
+              className={cx(
+                "text-xs",
+                dark ? "text-white/70" : "text-gray-500"
+              )}
+            >
+              {author.byline}
+            </span>
+          )}
         </span>
       ) : null}
 
@@ -656,9 +795,13 @@ function MetaRow({ date, updated, readingMins, author, tags, dark = false }) {
         <span>{readingMins || 5} min read</span>
       </span>
 
-      {asArray(tags).slice(0, 5).map((t, i) => (
-        <span key={i} className={CHIP}>#{t}</span>
-      ))}
+      {asArray(tags)
+        .slice(0, 5)
+        .map((t, i) => (
+          <span key={i} className={CHIP}>
+            #{t}
+          </span>
+        ))}
     </div>
   );
 }
@@ -673,7 +816,9 @@ function InlineSaveFallback({ onClose }) {
           <div className="h-10 rounded bg-gray-100" />
         </div>
         <div className="mt-6 flex justify-end">
-          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>Close</button>
+          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -690,7 +835,10 @@ function InlineSaveAsPlan({ plan, onCancel, onSaved }) {
     setBusy(true);
     try {
       const payload = { ...plan, title: name, description: desc, domain };
-      eventBus.emit?.("plan.save.requested", { payload, source: "ArticleLayout" });
+      eventBus.emit?.("plan.save.requested", {
+        payload,
+        source: "ArticleLayout",
+      });
       onSaved?.(payload);
     } finally {
       setBusy(false);
@@ -701,15 +849,21 @@ function InlineSaveAsPlan({ plan, onCancel, onSaved }) {
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/30">
       <div className="w-[95vw] max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h3 className="text-lg font-semibold">Save as Plan</h3>
-        <p className="mt-1 text-sm text-gray-600">Save the embedded plan from this article to your library.</p>
-        <label className="mt-4 block text-sm font-medium text-gray-700">Title</label>
+        <p className="mt-1 text-sm text-gray-600">
+          Save the embedded plan from this article to your library.
+        </p>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Title
+        </label>
         <input
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Plan title"
         />
-        <label className="mt-4 block text-sm font-medium text-gray-700">Description</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Description
+        </label>
         <textarea
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           rows={3}
@@ -718,8 +872,14 @@ function InlineSaveAsPlan({ plan, onCancel, onSaved }) {
           placeholder="What is this plan about?"
         />
         <div className="mt-6 flex justify-end gap-2">
-          <button className={cx(BTN, VAR.ghost)} onClick={onCancel}>Cancel</button>
-          <button className={cx(BTN, VAR.primary)} onClick={submit} disabled={busy}>
+          <button className={cx(BTN, VAR.ghost)} onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            className={cx(BTN, VAR.primary)}
+            onClick={submit}
+            disabled={busy}
+          >
             <I.BookOpen className="h-4 w-4" />
             Save Plan
           </button>

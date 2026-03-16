@@ -28,25 +28,25 @@ const DEFAULTS = {
 
   ui: {
     theme: {
-      mode: "system",          // light | dark | system
-      accent: "hsl(8 79% 54%)",// primary brand accent
+      mode: "system", // light | dark | system
+      accent: "hsl(8 79% 54%)", // primary brand accent
       vars: {
         "--radius": "12px",
         "--surface": "0 0% 100%",
         "--base": "0 0% 96%",
       },
-      density: "comfy",        // comfy | compact
+      density: "comfy", // comfy | compact
       reducedMotion: false,
       tooltips: true,
     },
     locale: "en-US",
     timezone: "America/New_York",
-    dateFormat: "auto",        // auto | MDY | DMY | YMD
-    timeFormat: "auto",        // auto | 12h | 24h
+    dateFormat: "auto", // auto | MDY | DMY | YMD
+    timeFormat: "auto", // auto | 12h | 24h
   },
 
   nutrition: {
-    units: "kcal",             // kcal | kJ
+    units: "kcal", // kcal | kJ
     decimalPlaces: 0,
     showMacroRing: true,
     dailyGoals: { calories: 2000, protein: 120, carbs: 220, fat: 70 }, // source of truth
@@ -58,8 +58,8 @@ const DEFAULTS = {
 
   cooking: {
     defaultMealTags: ["Breakfast", "Lunch", "Dinner", "Snack"],
-    batchMode: "balanced",     // balanced | cook_once_eat_twice | freezer_fill
-    environment: "auto",       // auto | indoor | outdoor
+    batchMode: "balanced", // balanced | cook_once_eat_twice | freezer_fill
+    environment: "auto", // auto | indoor | outdoor
     pantryFirst: true,
     seasonalOnly: false,
     sabbathAware: false,
@@ -75,7 +75,7 @@ const DEFAULTS = {
   inventory: {
     preferPantryFirst: true,
     lowStockDays: 5,
-    measurement: "imperial",   // imperial | metric
+    measurement: "imperial", // imperial | metric
   },
 
   notifications: {
@@ -86,19 +86,19 @@ const DEFAULTS = {
   },
 
   voice: {
-    ttsVoice: "auto",          // auto | name
-    speed: 1.0,                // 0.8–1.3
-    wakeWord: "Suka",          // wake word used by the assistant
+    ttsVoice: "auto", // auto | name
+    speed: 1.0, // 0.8–1.3
+    wakeWord: "Suka", // wake word used by the assistant
   },
 
   privacy: {
     telemetry: false,
     personalization: true,
-    dataRetentionDays: 180,    // scrub old activity after N days (UI/cron can enforce)
+    dataRetentionDays: 180, // scrub old activity after N days (UI/cron can enforce)
   },
 
   experiments: {
-    nbaToolbar: true,          // Next-Best-Action UI hints
+    nbaToolbar: true, // Next-Best-Action UI hints
     foodTruckMode: true,
     westAfricanSuggest: true,
   },
@@ -113,7 +113,7 @@ const DEFAULTS = {
 
   a11y: {
     highContrast: false,
-    textScale: 1,              // 0.85–1.4 supported
+    textScale: 1, // 0.85–1.4 supported
   },
 
   onboarding: {
@@ -139,7 +139,9 @@ function migrate(raw) {
     next.nutrition = {
       ...DEFAULTS.nutrition,
       ...(next.nutrition || {}),
-      decimalPlaces: Number(next.nutrition?.decimalPlaces ?? DEFAULTS.nutrition.decimalPlaces),
+      decimalPlaces: Number(
+        next.nutrition?.decimalPlaces ?? DEFAULTS.nutrition.decimalPlaces
+      ),
     };
   }
 
@@ -158,7 +160,10 @@ function migrate(raw) {
         accent: next.ui?.theme?.accent || DEFAULTS.ui.theme.accent,
       },
     };
-    next.notifications = { ...DEFAULTS.notifications, ...(next.notifications || {}) };
+    next.notifications = {
+      ...DEFAULTS.notifications,
+      ...(next.notifications || {}),
+    };
     next.voice = { ...DEFAULTS.voice, ...(next.voice || {}) };
     next.privacy = { ...DEFAULTS.privacy, ...(next.privacy || {}) };
     next.experiments = { ...DEFAULTS.experiments, ...(next.experiments || {}) };
@@ -188,7 +193,9 @@ function readFromStorage() {
 }
 
 function writeToStorage(state) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch {}
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch {}
 }
 
 /* ----------------------------------------------------------------------------
@@ -196,8 +203,16 @@ function writeToStorage(state) {
  * ---------------------------------------------------------------------------- */
 
 const BUS = {
-  emit: (type, data) => { try { automation.emit?.(type, data); } catch {} },
-  toast: (payload) => { try { automation.emit?.("ui.toast", payload); } catch {} },
+  emit: (type, data) => {
+    try {
+      automation.emit?.(type, data);
+    } catch {}
+  },
+  toast: (payload) => {
+    try {
+      automation.emit?.("ui.toast", payload);
+    } catch {}
+  },
 };
 
 function nextBest(route, label) {
@@ -269,12 +284,19 @@ function applyTheme(state) {
   // Respect theme mode: set data-theme on <html>
   const root = document.documentElement;
   const mode = theme?.mode || "system";
-  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  const prefersDark = window.matchMedia?.(
+    "(prefers-color-scheme: dark)"
+  ).matches;
   const finalMode = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
 
-  try { root.setAttribute("data-theme", finalMode); } catch {}
+  try {
+    root.setAttribute("data-theme", finalMode);
+  } catch {}
   // Accent injection
-  const merged = { "--accent": theme?.accent || DEFAULTS.ui.theme.accent, ...vars };
+  const merged = {
+    "--accent": theme?.accent || DEFAULTS.ui.theme.accent,
+    ...vars,
+  };
   applyThemeVars(merged);
 
   BUS.emit("preferences.theme.changed", {
@@ -286,13 +308,17 @@ function applyTheme(state) {
 }
 
 /* Apply theme on first import */
-try { applyTheme(core.getState()); } catch {}
+try {
+  applyTheme(core.getState());
+} catch {}
 
 /* ----------------------------------------------------------------------------
  * Internal helpers
  * ---------------------------------------------------------------------------- */
 
-function deepClone(x) { return JSON.parse(JSON.stringify(x)); }
+function deepClone(x) {
+  return JSON.parse(JSON.stringify(x));
+}
 
 function patch(path, patcher, { silent = false } = {}) {
   // Simple deep patcher (1–2 levels)
@@ -305,7 +331,9 @@ function patch(path, patcher, { silent = false } = {}) {
   for (let i = 0; i < segs.length - 1; i++) ref = ref[segs[i]] ||= {};
   ref[segs.at(-1)] = {
     ...(ref[segs.at(-1)] || {}),
-    ...(typeof patcher === "function" ? patcher(ref[segs.at(-1)] || {}) : patcher),
+    ...(typeof patcher === "function"
+      ? patcher(ref[segs.at(-1)] || {})
+      : patcher),
   };
 
   core.pushUndo(before);
@@ -332,7 +360,10 @@ function syncFoodTargets(state) {
 
 /* UI / Theme */
 function setThemeVars(vars) {
-  const next = patch("ui.theme", (t) => ({ ...t, vars: { ...(t.vars || {}), ...(vars || {}) } }));
+  const next = patch("ui.theme", (t) => ({
+    ...t,
+    vars: { ...(t.vars || {}), ...(vars || {}) },
+  }));
   applyTheme(next);
   toastSuccess("Theme updated.", nextBest("/settings/appearance", "Customize"));
   return next;
@@ -366,17 +397,27 @@ function setTooltips(on) {
 
 /* Locale/Time */
 function setLocale(locale) {
-  const next = patch("ui", (u) => ({ ...u, locale: locale || DEFAULTS.ui.locale }));
+  const next = patch("ui", (u) => ({
+    ...u,
+    locale: locale || DEFAULTS.ui.locale,
+  }));
   BUS.emit("preferences.locale.changed", { locale: next.ui.locale });
   return next;
 }
 function setTimezone(timezone) {
-  const next = patch("ui", (u) => ({ ...u, timezone: timezone || DEFAULTS.ui.timezone }));
+  const next = patch("ui", (u) => ({
+    ...u,
+    timezone: timezone || DEFAULTS.ui.timezone,
+  }));
   BUS.emit("preferences.tz.changed", { timezone: next.ui.timezone });
   return next;
 }
 function setDateTimeFormats({ dateFormat, timeFormat }) {
-  const next = patch("ui", (u) => ({ ...u, ...(dateFormat ? { dateFormat } : {}), ...(timeFormat ? { timeFormat } : {}) }));
+  const next = patch("ui", (u) => ({
+    ...u,
+    ...(dateFormat ? { dateFormat } : {}),
+    ...(timeFormat ? { timeFormat } : {}),
+  }));
   return next;
 }
 
@@ -388,7 +429,10 @@ function setNutritionUnits(units /* kcal|kJ */) {
   return next;
 }
 function setDailyGoals(goals /* {calories,protein,carbs,fat} */) {
-  const next = patch("nutrition", (n) => ({ ...n, dailyGoals: { ...n.dailyGoals, ...goals } }));
+  const next = patch("nutrition", (n) => ({
+    ...n,
+    dailyGoals: { ...n.dailyGoals, ...goals },
+  }));
   // keep alias in sync
   core.setState(syncFoodTargets(core.getState()));
   BUS.emit("preferences.nutrition.changed", core.getState());
@@ -427,7 +471,10 @@ function setCalendarPrefs(p) {
   const next = patch("calendar", (c) => ({ ...c, ...p }));
   BUS.emit("preferences.calendar.changed", next);
   if (p?.autoSync === true) {
-    toastSuccess("Calendar auto-sync enabled.", nextBest("/calendar", "Open Calendar"));
+    toastSuccess(
+      "Calendar auto-sync enabled.",
+      nextBest("/calendar", "Open Calendar")
+    );
   }
   return next;
 }
@@ -460,7 +507,13 @@ function setPrivacy(prefs) {
   const safe = {
     telemetry: !!prefs?.telemetry,
     personalization: !!prefs?.personalization,
-    dataRetentionDays: Math.max(30, Math.min(3650, Number(prefs?.dataRetentionDays ?? DEFAULTS.privacy.dataRetentionDays))),
+    dataRetentionDays: Math.max(
+      30,
+      Math.min(
+        3650,
+        Number(prefs?.dataRetentionDays ?? DEFAULTS.privacy.dataRetentionDays)
+      )
+    ),
   };
   const next = patch("privacy", (p) => ({ ...p, ...safe }));
   BUS.emit("preferences.privacy.changed", next);

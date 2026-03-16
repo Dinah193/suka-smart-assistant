@@ -19,13 +19,33 @@ let CleaningPlanManager = null;
 let materializeCleaningPacks = null;
 
 (async () => {
-  try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-  try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-  try { ({ usePreferencesStore: PreferencesStore } = await import("@/stores/preferences")); } catch {}
-  try { ({ useInventoryStore: InventoryStore } = await import("@/stores/inventory")); } catch {}
-  try { ({ useCalendarStore: CalendarStore } = await import("@/stores/calendar")); } catch {}
+  try {
+    ({ eventBus } = await import("@/services/events/eventBus"));
+  } catch {}
+  try {
+    ({ automation } = await import("@/services/automation/runtime"));
+  } catch {}
+  try {
+    ({ usePreferencesStore: PreferencesStore } = await import(
+      "@/store/PreferencesStore"
+    ));
+  } catch {}
+  try {
+    ({ useInventoryStore: InventoryStore } = await import(
+      "@/store/InventoryStore"
+    ));
+  } catch {}
+  try {
+    ({ useCalendarStore: CalendarStore } = await import(
+      "@/store/CalendarStore"
+    ));
+  } catch {}
 
-  try { ({ default: CleaningPlanManager } = await import("@/managers/CleaningPlanManager")); } catch {}
+  try {
+    ({ default: CleaningPlanManager } = await import(
+      "@/managers/CleaningPlanManager"
+    ));
+  } catch {}
   try {
     const t = await import("@/data/cleaningTemplates");
     materializeCleaningPacks = t?.materializePacks;
@@ -39,14 +59,25 @@ const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 const toBool = (x, d = false) => (typeof x === "boolean" ? x : d);
 
 const fmt = {
-  id: (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+  id: (s) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, ""),
   title: (s) => s,
 };
 
-const isSabbath = (d = __now(), tz = "America/New_York", sabbathAware = true) => {
+const isSabbath = (
+  d = __now(),
+  tz = "America/New_York",
+  sabbathAware = true
+) => {
   if (!sabbathAware) return false;
   // Friday sunset to Saturday sunset. We approximate by day-of-week here; a later phase can use astronomical sunset.
-  const dow = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: tz }).format(d);
+  const dow = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: tz,
+  }).format(d);
   return dow === "Sat";
 };
 
@@ -68,24 +99,41 @@ const rr = {
 
 const deepCleanCadenceToRRULE = (cadence) => {
   switch ((cadence || "").toLowerCase()) {
-    case "monthly": return rr.monthly();
-    case "quarterly": return rr.quarterly();
+    case "monthly":
+      return rr.monthly();
+    case "quarterly":
+      return rr.quarterly();
     case "bi-annual":
-    case "biannual": return rr.biannual();
-    case "annual": return rr.annual();
-    default: return rr.annual();
+    case "biannual":
+      return rr.biannual();
+    case "annual":
+      return rr.annual();
+    default:
+      return rr.annual();
   }
 };
 
 const prefer = {
   profile: () => {
-    try { return PreferencesStore?.getState?.()?.profile || {}; } catch { return {}; }
+    try {
+      return PreferencesStore?.getState?.()?.profile || {};
+    } catch {
+      return {};
+    }
   },
   tz: () => {
-    try { return PreferencesStore?.getState?.()?.timezone || "America/New_York"; } catch { return "America/New_York"; }
+    try {
+      return PreferencesStore?.getState?.()?.timezone || "America/New_York";
+    } catch {
+      return "America/New_York";
+    }
   },
   sabbathAware: () => {
-    try { return toBool(PreferencesStore?.getState?.()?.sabbathAware, true); } catch { return true; }
+    try {
+      return toBool(PreferencesStore?.getState?.()?.sabbathAware, true);
+    } catch {
+      return true;
+    }
   },
 };
 
@@ -116,7 +164,9 @@ REGISTRY.set("daily-reset", {
   tags: ["daily", "reset", "routines", "intuitive", "low-effort"],
   areas: ["kitchen", "entry", "living", "bath", "bedrooms"],
   generator: (ctx = {}) => {
-    const zones = ctx.zones?.length ? ctx.zones : ["entry", "kitchen", "living", "bath"];
+    const zones = ctx.zones?.length
+      ? ctx.zones
+      : ["entry", "kitchen", "living", "bath"];
     const est = (z) => (z === "kitchen" ? 15 : 8);
     const tasks = zones.map((z, i) => ({
       id: `daily-${z}-${i}`,
@@ -128,7 +178,13 @@ REGISTRY.set("daily-reset", {
       cadence: "daily",
       kpis: { streakEligible: true },
     }));
-    return { tasks, links: { tips: ["Use a laundry basket as a catch-all, then sort at hub."], ui: { progressBar: true } } };
+    return {
+      tasks,
+      links: {
+        tips: ["Use a laundry basket as a catch-all, then sort at hub."],
+        ui: { progressBar: true },
+      },
+    };
   },
   schedule: (ctx = {}) => {
     const tz = prefer.tz();
@@ -141,11 +197,14 @@ REGISTRY.set("daily-reset", {
   },
   smartSuggest: (ctx = {}) => {
     const household = prefer.profile();
-    const hasKids = !!household?.members?.some?.(m => (m.age || 0) < 12);
+    const hasKids = !!household?.members?.some?.((m) => (m.age || 0) < 12);
     return 70 + (hasKids ? 20 : 0);
   },
   onMaterialized: (payload) => {
-    eventBus.emit("organizing:materialized", { strategyId: "daily-reset", ...payload });
+    eventBus.emit("organizing:materialized", {
+      strategyId: "daily-reset",
+      ...payload,
+    });
   },
 });
 
@@ -160,15 +219,50 @@ REGISTRY.set("paper-inbox-zero", {
   areas: ["office"],
   generator: () => {
     const tasks = [
-      { id: "paper-collect", title: "Collect & sort inbox (bills, forms, notes)", area: "office", estMinutes: 15, priority: 2, cadence: "weekly" },
-      { id: "paper-digitize", title: "Scan/photograph and name files", area: "office", estMinutes: 20, priority: 2, cadence: "weekly" },
-      { id: "paper-file", title: "File essentials; shred junk", area: "office", estMinutes: 10, priority: 3, cadence: "weekly" },
+      {
+        id: "paper-collect",
+        title: "Collect & sort inbox (bills, forms, notes)",
+        area: "office",
+        estMinutes: 15,
+        priority: 2,
+        cadence: "weekly",
+      },
+      {
+        id: "paper-digitize",
+        title: "Scan/photograph and name files",
+        area: "office",
+        estMinutes: 20,
+        priority: 2,
+        cadence: "weekly",
+      },
+      {
+        id: "paper-file",
+        title: "File essentials; shred junk",
+        area: "office",
+        estMinutes: 10,
+        priority: 3,
+        cadence: "weekly",
+      },
     ];
-    return { tasks, links: { tools: ["CamScanner or phone notes scanner"], ui: { checklist: true } } };
+    return {
+      tasks,
+      links: {
+        tools: ["CamScanner or phone notes scanner"],
+        ui: { checklist: true },
+      },
+    };
   },
-  schedule: (ctx = {}) => ({ rrule: rr.weekly(17, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() }),
+  schedule: (ctx = {}) => ({
+    rrule: rr.weekly(17, 0, 0),
+    tz: prefer.tz(),
+    disabledOnSabbath: prefer.sabbathAware(),
+  }),
   smartSuggest: () => 65,
-  onMaterialized: (payload) => eventBus.emit("organizing:materialized", { strategyId: "paper-inbox-zero", ...payload }),
+  onMaterialized: (payload) =>
+    eventBus.emit("organizing:materialized", {
+      strategyId: "paper-inbox-zero",
+      ...payload,
+    }),
 });
 
 // 3) Laundry Flow (daily/bi-daily)
@@ -182,16 +276,53 @@ REGISTRY.set("laundry-flow", {
   areas: ["laundry", "bedrooms"],
   generator: (ctx = {}) => {
     const loadsPerDay = clamp(ctx?.loadsPerDay ?? 1, 1, 4);
-    const tasks = Array.from({ length: loadsPerDay }).flatMap((_, i) => ([
-      { id: `laundry-wash-${i}`, title: `Start Load #${i + 1}`, area: "laundry", estMinutes: 5, priority: 2, cadence: "daily" },
-      { id: `laundry-dry-${i}`, title: `Move Load #${i + 1} to dry`, area: "laundry", estMinutes: 5, priority: 2, cadence: "daily", dependsOn: [`laundry-wash-${i}`] },
-      { id: `laundry-fold-${i}`, title: `Fold & put away #${i + 1}`, area: "bedrooms", estMinutes: 15, priority: 2, cadence: "daily", dependsOn: [`laundry-dry-${i}`] },
-    ]));
-    return { tasks, links: { tips: ["Set phone timers at each handoff."], ui: { timeline: true } } };
+    const tasks = Array.from({ length: loadsPerDay }).flatMap((_, i) => [
+      {
+        id: `laundry-wash-${i}`,
+        title: `Start Load #${i + 1}`,
+        area: "laundry",
+        estMinutes: 5,
+        priority: 2,
+        cadence: "daily",
+      },
+      {
+        id: `laundry-dry-${i}`,
+        title: `Move Load #${i + 1} to dry`,
+        area: "laundry",
+        estMinutes: 5,
+        priority: 2,
+        cadence: "daily",
+        dependsOn: [`laundry-wash-${i}`],
+      },
+      {
+        id: `laundry-fold-${i}`,
+        title: `Fold & put away #${i + 1}`,
+        area: "bedrooms",
+        estMinutes: 15,
+        priority: 2,
+        cadence: "daily",
+        dependsOn: [`laundry-dry-${i}`],
+      },
+    ]);
+    return {
+      tasks,
+      links: {
+        tips: ["Set phone timers at each handoff."],
+        ui: { timeline: true },
+      },
+    };
   },
-  schedule: () => ({ rrule: rr.daily(8, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() }),
+  schedule: () => ({
+    rrule: rr.daily(8, 0, 0),
+    tz: prefer.tz(),
+    disabledOnSabbath: prefer.sabbathAware(),
+  }),
   smartSuggest: () => 75,
-  onMaterialized: (payload) => eventBus.emit("organizing:materialized", { strategyId: "laundry-flow", ...payload }),
+  onMaterialized: (payload) =>
+    eventBus.emit("organizing:materialized", {
+      strategyId: "laundry-flow",
+      ...payload,
+    }),
 });
 
 // 4) Storehouse Rotation (FIFO) – Inventory integration
@@ -205,9 +336,18 @@ REGISTRY.set("storehouse-fifo", {
   areas: ["storehouse", "kitchen"],
   generator: (ctx = {}) => {
     const inv = InventoryStore?.getState?.()?.items || [];
-    const nearing = inv.filter(i => (i?.daysToExpire ?? 999) <= 30).slice(0, 12);
+    const nearing = inv
+      .filter((i) => (i?.daysToExpire ?? 999) <= 30)
+      .slice(0, 12);
     const tasks = [
-      { id: "fifo-audit", title: "Quick shelf audit (near-expiry first)", area: "storehouse", estMinutes: 15, priority: 2, cadence: "weekly" },
+      {
+        id: "fifo-audit",
+        title: "Quick shelf audit (near-expiry first)",
+        area: "storehouse",
+        estMinutes: 15,
+        priority: 2,
+        cadence: "weekly",
+      },
       ...nearing.map((i, idx) => ({
         id: `fifo-move-${i.id || idx}`,
         title: `Move ${i.name} to front / add to meal plan`,
@@ -216,15 +356,34 @@ REGISTRY.set("storehouse-fifo", {
         priority: 2,
         cadence: "weekly",
       })),
-      { id: "fifo-label", title: "Label new items with date; update map", area: "storehouse", estMinutes: 10, priority: 2, cadence: "weekly" },
+      {
+        id: "fifo-label",
+        title: "Label new items with date; update map",
+        area: "storehouse",
+        estMinutes: 10,
+        priority: 2,
+        cadence: "weekly",
+      },
     ];
-    return { tasks, links: { ui: { inventoryPeek: true }, tips: ["Group by category; oldest to front."] } };
+    return {
+      tasks,
+      links: {
+        ui: { inventoryPeek: true },
+        tips: ["Group by category; oldest to front."],
+      },
+    };
   },
-  schedule: () => ({ rrule: rr.weekly(10, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() }),
+  schedule: () => ({
+    rrule: rr.weekly(10, 0, 0),
+    tz: prefer.tz(),
+    disabledOnSabbath: prefer.sabbathAware(),
+  }),
   smartSuggest: () => 80,
   onMaterialized: (payload) => {
     eventBus.emit("inventory:rotation:materialized", payload);
-    automation.queue?.("MealPlanner:AddNearExpiryToSuggestions", { source: "storehouse-fifo" });
+    automation.queue?.("MealPlanner:AddNearExpiryToSuggestions", {
+      source: "storehouse-fifo",
+    });
   },
 });
 
@@ -240,10 +399,38 @@ REGISTRY.set("garden-to-pantry", {
   generator: (ctx = {}) => {
     const harvests = ctx?.harvests || []; // or GardenStore?.getState()?.recentHarvests
     const tasks = [
-      { id: "harvest-wash", title: "Wash & inspect harvest", area: "kitchen", estMinutes: 15, priority: 2, cadence: "weekly" },
-      { id: "harvest-portion", title: "Portion for fresh use vs preserve", area: "kitchen", estMinutes: 10, priority: 2, cadence: "weekly" },
-      { id: "harvest-preserve", title: "Can/Dry/Freeze as planned", area: "kitchen", estMinutes: 30, priority: 2, cadence: "weekly" },
-      { id: "harvest-inventory", title: "Update Storehouse inventory & labels", area: "storehouse", estMinutes: 10, priority: 2, cadence: "weekly" },
+      {
+        id: "harvest-wash",
+        title: "Wash & inspect harvest",
+        area: "kitchen",
+        estMinutes: 15,
+        priority: 2,
+        cadence: "weekly",
+      },
+      {
+        id: "harvest-portion",
+        title: "Portion for fresh use vs preserve",
+        area: "kitchen",
+        estMinutes: 10,
+        priority: 2,
+        cadence: "weekly",
+      },
+      {
+        id: "harvest-preserve",
+        title: "Can/Dry/Freeze as planned",
+        area: "kitchen",
+        estMinutes: 30,
+        priority: 2,
+        cadence: "weekly",
+      },
+      {
+        id: "harvest-inventory",
+        title: "Update Storehouse inventory & labels",
+        area: "storehouse",
+        estMinutes: 10,
+        priority: 2,
+        cadence: "weekly",
+      },
     ].concat(
       harvests.slice(0, 8).map((h, idx) => ({
         id: `harvest-item-${idx}`,
@@ -256,7 +443,11 @@ REGISTRY.set("garden-to-pantry", {
     );
     return { tasks, links: { ui: { gardenPeek: true, inventoryPeek: true } } };
   },
-  schedule: () => ({ rrule: rr.weekly(16, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() }),
+  schedule: () => ({
+    rrule: rr.weekly(16, 0, 0),
+    tz: prefer.tz(),
+    disabledOnSabbath: prefer.sabbathAware(),
+  }),
   smartSuggest: () => 60,
   onMaterialized: (payload) => {
     eventBus.emit("garden:handoff:materialized", payload);
@@ -275,19 +466,63 @@ REGISTRY.set("bug-shield-perimeter", {
   areas: ["kitchen", "entry", "exterior"],
   generator: (ctx = {}) => {
     const tasks = [
-      { id: "bug-entry", title: "Check & seal entry points (doors/vents/gaps)", area: "entry", estMinutes: 15, priority: 3, cadence: "monthly" },
-      { id: "bug-crumbs", title: "Crumb-line wipe & behind appliances", area: "kitchen", estMinutes: 15, priority: 3, cadence: "monthly" },
-      { id: "bug-bowls", title: "Pet bowls/feeding mats deep clean", area: "kitchen", estMinutes: 10, priority: 2, cadence: "monthly" },
-      { id: "bug-trash", title: "Trash cans wash/bleach, lids seal check", area: "kitchen", estMinutes: 10, priority: 3, cadence: "monthly" },
-      { id: "bug-traps", title: "Refresh traps & monitoring cards", area: "entry", estMinutes: 5, priority: 2, cadence: "monthly" },
+      {
+        id: "bug-entry",
+        title: "Check & seal entry points (doors/vents/gaps)",
+        area: "entry",
+        estMinutes: 15,
+        priority: 3,
+        cadence: "monthly",
+      },
+      {
+        id: "bug-crumbs",
+        title: "Crumb-line wipe & behind appliances",
+        area: "kitchen",
+        estMinutes: 15,
+        priority: 3,
+        cadence: "monthly",
+      },
+      {
+        id: "bug-bowls",
+        title: "Pet bowls/feeding mats deep clean",
+        area: "kitchen",
+        estMinutes: 10,
+        priority: 2,
+        cadence: "monthly",
+      },
+      {
+        id: "bug-trash",
+        title: "Trash cans wash/bleach, lids seal check",
+        area: "kitchen",
+        estMinutes: 10,
+        priority: 3,
+        cadence: "monthly",
+      },
+      {
+        id: "bug-traps",
+        title: "Refresh traps & monitoring cards",
+        area: "entry",
+        estMinutes: 5,
+        priority: 2,
+        cadence: "monthly",
+      },
     ];
-    return { tasks, links: { packs: { canUseCleaningPack: !!materializeCleaningPacks } } };
+    return {
+      tasks,
+      links: { packs: { canUseCleaningPack: !!materializeCleaningPacks } },
+    };
   },
-  schedule: () => ({ rrule: rr.monthly(11, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() }),
+  schedule: () => ({
+    rrule: rr.monthly(11, 0, 0),
+    tz: prefer.tz(),
+    disabledOnSabbath: prefer.sabbathAware(),
+  }),
   smartSuggest: () => 55,
   onMaterialized: (payload) => {
     if (materializeCleaningPacks) {
-      try { materializeCleaningPacks?.(["bugShieldBasics"]); } catch {}
+      try {
+        materializeCleaningPacks?.(["bugShieldBasics"]);
+      } catch {}
     }
     eventBus.emit("cleaning:bugshield:materialized", payload);
   },
@@ -304,17 +539,57 @@ REGISTRY.set("appliance-care", {
   areas: ["kitchen", "laundry"],
   generator: () => {
     const tasks = [
-      { id: "appl-fridge", title: "Vacuum fridge coils / check seals", area: "kitchen", estMinutes: 10, priority: 3, cadence: "quarterly" },
-      { id: "appl-dw", title: "Clean dishwasher filter & run clean cycle", area: "kitchen", estMinutes: 10, priority: 3, cadence: "quarterly" },
-      { id: "appl-washer", title: "Washer tub clean cycle", area: "laundry", estMinutes: 5, priority: 2, cadence: "quarterly" },
-      { id: "appl-dryer", title: "Dryer vent check & lint trap deep clean", area: "laundry", estMinutes: 10, priority: 3, cadence: "quarterly" },
-      { id: "appl-oven", title: "Oven self-clean review / grease filter", area: "kitchen", estMinutes: 5, priority: 2, cadence: "quarterly" },
+      {
+        id: "appl-fridge",
+        title: "Vacuum fridge coils / check seals",
+        area: "kitchen",
+        estMinutes: 10,
+        priority: 3,
+        cadence: "quarterly",
+      },
+      {
+        id: "appl-dw",
+        title: "Clean dishwasher filter & run clean cycle",
+        area: "kitchen",
+        estMinutes: 10,
+        priority: 3,
+        cadence: "quarterly",
+      },
+      {
+        id: "appl-washer",
+        title: "Washer tub clean cycle",
+        area: "laundry",
+        estMinutes: 5,
+        priority: 2,
+        cadence: "quarterly",
+      },
+      {
+        id: "appl-dryer",
+        title: "Dryer vent check & lint trap deep clean",
+        area: "laundry",
+        estMinutes: 10,
+        priority: 3,
+        cadence: "quarterly",
+      },
+      {
+        id: "appl-oven",
+        title: "Oven self-clean review / grease filter",
+        area: "kitchen",
+        estMinutes: 5,
+        priority: 2,
+        cadence: "quarterly",
+      },
     ];
     return { tasks, links: { ui: { checklist: true } } };
   },
-  schedule: () => ({ rrule: rr.quarterly(14, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() }),
+  schedule: () => ({
+    rrule: rr.quarterly(14, 0, 0),
+    tz: prefer.tz(),
+    disabledOnSabbath: prefer.sabbathAware(),
+  }),
   smartSuggest: () => 58,
-  onMaterialized: (payload) => eventBus.emit("maintenance:appliance:materialized", payload),
+  onMaterialized: (payload) =>
+    eventBus.emit("maintenance:appliance:materialized", payload),
 });
 
 // 8) Deep Clean Focus (per-task cadences; monthly/quarterly/bi-annual/annual)
@@ -329,14 +604,51 @@ REGISTRY.set("deep-clean-focus", {
   generator: (ctx = {}) => {
     // Users can pass: ctx.tasks = [{ title, area, cadence, estMinutes, priority }]
     const defaults = [
-      { title: "Baseboards & door frames", area: "living", cadence: "quarterly", estMinutes: 25, priority: 2 },
-      { title: "Inside fridge & seals", area: "kitchen", cadence: "monthly", estMinutes: 30, priority: 3 },
-      { title: "Windows & tracks", area: "bedrooms", cadence: "bi-annual", estMinutes: 40, priority: 2 },
-      { title: "Tile grout scrub & reseal check", area: "bath", cadence: "bi-annual", estMinutes: 35, priority: 3 },
-      { title: "Mattress rotate & vacuum", area: "bedrooms", cadence: "quarterly", estMinutes: 20, priority: 2 },
-      { title: "Entry closet reset", area: "entry", cadence: "annual", estMinutes: 30, priority: 2 },
+      {
+        title: "Baseboards & door frames",
+        area: "living",
+        cadence: "quarterly",
+        estMinutes: 25,
+        priority: 2,
+      },
+      {
+        title: "Inside fridge & seals",
+        area: "kitchen",
+        cadence: "monthly",
+        estMinutes: 30,
+        priority: 3,
+      },
+      {
+        title: "Windows & tracks",
+        area: "bedrooms",
+        cadence: "bi-annual",
+        estMinutes: 40,
+        priority: 2,
+      },
+      {
+        title: "Tile grout scrub & reseal check",
+        area: "bath",
+        cadence: "bi-annual",
+        estMinutes: 35,
+        priority: 3,
+      },
+      {
+        title: "Mattress rotate & vacuum",
+        area: "bedrooms",
+        cadence: "quarterly",
+        estMinutes: 20,
+        priority: 2,
+      },
+      {
+        title: "Entry closet reset",
+        area: "entry",
+        cadence: "annual",
+        estMinutes: 30,
+        priority: 2,
+      },
     ];
-    const input = Array.isArray(ctx.tasks) && ctx.tasks.length ? ctx.tasks : defaults;
+    const input =
+      Array.isArray(ctx.tasks) && ctx.tasks.length ? ctx.tasks : defaults;
     const tasks = input.map((t, i) => ({
       id: `dcf-${fmt.id(t.title)}-${i}`,
       title: t.title,
@@ -349,7 +661,11 @@ REGISTRY.set("deep-clean-focus", {
   },
   schedule: (ctx = {}) => {
     // This is the *default* for the *set*, but each task can be scheduled separately via materializer.
-    return { rrule: rr.monthly(9, 0, 0), tz: prefer.tz(), disabledOnSabbath: prefer.sabbathAware() };
+    return {
+      rrule: rr.monthly(9, 0, 0),
+      tz: prefer.tz(),
+      disabledOnSabbath: prefer.sabbathAware(),
+    };
   },
   smartSuggest: () => 85,
   onMaterialized: ({ tasks }, ctx) => {
@@ -364,7 +680,9 @@ REGISTRY.set("deep-clean-focus", {
         meta: { source: "deep-clean-focus" },
       });
     });
-    eventBus.emit("cleaning:deepfocus:materialized", { count: tasks?.length || 0 });
+    eventBus.emit("cleaning:deepfocus:materialized", {
+      count: tasks?.length || 0,
+    });
   },
 });
 
@@ -384,9 +702,9 @@ function suggestStrategies(context = {}) {
   // Score each via smartSuggest and return sorted
   const scored = listStrategies().map((s) => ({
     strategy: s,
-    score: clamp((s.smartSuggest?.(context) ?? 50), 0, 100),
+    score: clamp(s.smartSuggest?.(context) ?? 50, 0, 100),
   }));
-  return scored.sort((a, b) => b.score - a.score).map(x => x.strategy);
+  return scored.sort((a, b) => b.score - a.score).map((x) => x.strategy);
 }
 
 async function materializeStrategy(id, context = {}) {
@@ -394,7 +712,10 @@ async function materializeStrategy(id, context = {}) {
   if (!strat) throw new Error(`Unknown strategy: ${id}`);
 
   const sabbathAware = prefer.sabbathAware();
-  if (isSabbath(__now(), prefer.tz(), sabbathAware) && toBool(context.blockOnSabbath, true)) {
+  if (
+    isSabbath(__now(), prefer.tz(), sabbathAware) &&
+    toBool(context.blockOnSabbath, true)
+  ) {
     return {
       id,
       skipped: true,
@@ -408,27 +729,38 @@ async function materializeStrategy(id, context = {}) {
   const { tasks = [], links = {} } = strat.generator?.(context) || {};
 
   // Optionally push to CleaningPlan if present (for cleaning-type strategies).
-  if (CleaningPlanManager && tasks.some(t => (t.area || "").length)) {
+  if (CleaningPlanManager && tasks.some((t) => (t.area || "").length)) {
     try {
       const plan = CleaningPlanManager.createAdhocPlan?.({
         title: strat.name,
         tasks,
         meta: { strategyId: id, createdAt: new Date().toISOString() },
       });
-      eventBus.emit("cleaning:plan:created", { planId: plan?.id, strategyId: id });
+      eventBus.emit("cleaning:plan:created", {
+        planId: plan?.id,
+        strategyId: id,
+      });
     } catch {}
   }
 
   const schedule = strat.schedule?.(context) || null;
 
   // Fire post-materialization hooks
-  try { strat.onMaterialized?.({ tasks, schedule, links }, context); } catch {}
+  try {
+    strat.onMaterialized?.({ tasks, schedule, links }, context);
+  } catch {}
 
   // Cross-app nudges
   if (id === "storehouse-fifo") {
     automation.queue?.("UI:Nudge", {
       message: "We found near-expiry items. Add them to your Meal Plan?",
-      actions: [{ label: "Open Meal Planner", event: "ui:navigate", to: "/tier2/household/meals" }],
+      actions: [
+        {
+          label: "Open Meal Planner",
+          event: "ui:navigate",
+          to: "/tier2/household/meals",
+        },
+      ],
       tone: "friendly",
     });
   }

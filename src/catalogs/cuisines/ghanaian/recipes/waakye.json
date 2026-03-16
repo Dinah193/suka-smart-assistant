@@ -1,0 +1,394 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipe.ghanaian.waakye",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Waakye",
+    "subtitle": "Ghanaian rice and beans cooked with waakye leaves (or safe substitutes)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Canonical SSA waakye base recipe: rice + black-eyed peas (or cowpeas) cooked with dried waakye leaves (sorghum leaves) for color and aroma.",
+        "Includes safe substitution guidance for hard-to-find waakye leaves and optional traditional sides (stew, gari, shito, eggs, fish)."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.ghanaian",
+    "category": "category.main",
+    "mealArchetypes": [
+      "archetype.rice_dish",
+      "archetype.legume",
+      "archetype.one_pot"
+    ],
+    "servingStyles": ["one_pot", "family_style", "street_food", "plates"],
+    "plannerTags": [
+      "cuisine.ghanaian",
+      "dish.waakye",
+      "rice_and_beans",
+      "one_pot",
+      "stew_and_starch",
+      "street_food",
+      "batch_friendly",
+      "dairy_free",
+      "gluten_free",
+      "vegan_base"
+    ]
+  },
+  "summary": "Hearty Ghanaian rice-and-beans staple traditionally tinted by dried waakye leaves—served with stew, gari, shito, and add-ons like egg or fish.",
+  "yield": {
+    "servings": 8,
+    "notes": "Base waakye (rice + beans). Add-ons can stretch servings further."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 55,
+    "totalMins": 75
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "batchFriendly": "high",
+    "freezerFriendly": "medium",
+    "makeAhead": "Cook waakye base 1–3 days ahead; reheat well with a splash of water/steam.",
+    "proteinOptional": true
+  },
+  "tasteProfile": {
+    "signatureNotes": [
+      "earthy beans",
+      "savory rice",
+      "subtle leaf aroma",
+      "comforting, neutral base for spicy stews"
+    ],
+    "heat": 0,
+    "salt": 2,
+    "sweet": 1,
+    "acid": 0,
+    "umami": 1
+  },
+  "equipment": {
+    "minimum": [
+      "tool.pot",
+      "tool.lid",
+      "tool.strainer",
+      "tool.spoon",
+      "tool.measuring_cups"
+    ],
+    "recommended": [
+      "tool.rice_washer",
+      "tool.thermometer_instant",
+      "tool.kettle"
+    ]
+  },
+  "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.vegan"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.black_eyed_peas_dry",
+      "label": "Dried black-eyed peas (cowpeas)",
+      "role": "legume",
+      "amount": { "value": 1.5, "unit": "cups" },
+      "notes": [
+        "Traditional waakye is commonly made with cowpeas/black-eyed peas.",
+        "Substitute: small red beans or black beans (cook time may increase)."
+      ]
+    },
+    {
+      "id": "ingredient.waakye_leaves_dried",
+      "label": "Dried waakye leaves (sorghum leaves)",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "oz" },
+      "optional": true,
+      "notes": [
+        "These provide the characteristic reddish-brown tint and subtle aroma.",
+        "If unavailable, use the substitution options below."
+      ]
+    },
+    {
+      "id": "ingredient.baking_soda",
+      "label": "Baking soda (optional helper for color/softening)",
+      "role": "helper",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional and small. Too much can make beans mushy and taste soapy.",
+        "Use only if beans are older/tough or if using substitutions for leaves."
+      ]
+    },
+    {
+      "id": "ingredient.rice_long_grain",
+      "label": "Long-grain rice (parboiled or jasmine)",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "cups" },
+      "notes": [
+        "Parboiled rice holds up well and stays separate.",
+        "Rinse rice well to reduce starchiness."
+      ]
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, halved",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "medium" },
+      "optional": true,
+      "notes": "Adds gentle flavor. Can be removed before serving."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Start here; adjust based on toppings (stew/shito can be salty)."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water",
+      "role": "liquid",
+      "amount": { "value": 8, "unit": "cups" },
+      "notes": [
+        "Used in stages. You may not use it all; depends on bean age and simmer rate."
+      ]
+    },
+
+    {
+      "id": "ingredient.gari",
+      "label": "Gari (toasted cassava granules), for serving",
+      "role": "garnish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Common waakye topping for texture."
+    },
+    {
+      "id": "ingredient.shito",
+      "label": "Shito (Ghanaian black pepper sauce), for serving",
+      "role": "condiment",
+      "amount": { "value": 0.33, "unit": "cup" },
+      "optional": true,
+      "notes": "Traditional spicy condiment; serve on the side."
+    },
+    {
+      "id": "ingredient.tomato_stew",
+      "label": "Ghana-style tomato stew, for serving",
+      "role": "sauce",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true,
+      "notes": "Often served with stew and/or protein."
+    },
+    {
+      "id": "ingredient.egg",
+      "label": "Hard-boiled eggs, for serving",
+      "role": "protein",
+      "amount": { "value": 4, "unit": "large" },
+      "optional": true,
+      "notes": "Common add-on in waakye bowls/plates."
+    },
+    {
+      "id": "ingredient.fish_smoked_or_fried",
+      "label": "Smoked or fried fish, for serving",
+      "role": "protein",
+      "amount": { "value": 12, "unit": "oz" },
+      "optional": true,
+      "notes": "Optional but traditional; serve alongside waakye with stew/shito."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.wk_01_sort_rinse_beans",
+      "title": "Sort and rinse the beans",
+      "instructions": [
+        "Pick through dried black-eyed peas to remove any debris or damaged beans.",
+        "Rinse thoroughly under cool water until the water runs mostly clear."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Beans are clean and debris-free."]
+    },
+    {
+      "id": "step.wk_02_start_beans_with_leaves",
+      "title": "Start cooking the beans (with waakye leaves if available)",
+      "instructions": [
+        "Add rinsed beans to a pot with 6 cups of water.",
+        "If using dried waakye leaves: rinse the leaves quickly, then add them to the pot (tie in clean kitchen twine or place in a tea infuser bag if you want easy removal).",
+        "Add halved onion (optional).",
+        "Bring to a boil, then reduce to a steady simmer."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": ["Pot reaches a steady simmer without boiling over."]
+    },
+    {
+      "id": "step.wk_03_simmer_beans_until_tender",
+      "title": "Simmer beans until mostly tender",
+      "instructions": [
+        "Simmer beans partially covered until they are mostly tender (typically 30–45 minutes, depending on bean age).",
+        "If water drops below the bean level, add hot water as needed (use the remaining 2 cups).",
+        "Optional: If beans are very old/tough, add baking soda (1/4 tsp) after 20 minutes to help soften (do not exceed 1/2 tsp total)."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 35,
+      "timers": [
+        { "label": "Initial simmer (check tenderness)", "minutes": 30 },
+        { "label": "Extend simmer if needed", "minutes": 15 }
+      ],
+      "checks": [
+        "Beans are mostly tender but not falling apart.",
+        "Cooking liquid has taken on a light reddish-brown tint if using leaves."
+      ]
+    },
+    {
+      "id": "step.wk_04_remove_leaves_and_onion",
+      "title": "Remove leaves/onion (optional) and season the pot",
+      "instructions": [
+        "If used, remove waakye leaves and discard (or remove the tea bag/infuser).",
+        "Remove onion halves if you prefer a cleaner base (or chop and leave in).",
+        "Stir in salt."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Seasoning is added; beans remain intact."]
+    },
+    {
+      "id": "step.wk_05_rinse_rice_and_add",
+      "title": "Rinse rice and add to the beans",
+      "instructions": [
+        "Rinse rice in several changes of water until it runs clearer (reduces stickiness).",
+        "Add rinsed rice to the pot with the beans.",
+        "Add enough water so the liquid level sits about 3/4 inch above the rice-and-beans mixture (usually 2.5–3 cups of liquid total in the pot at this stage).",
+        "Bring to a gentle boil, then reduce to very low heat and cover tightly."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "checks": ["Rice is rinsed; pot is covered and at low heat to steam."]
+    },
+    {
+      "id": "step.wk_06_steam_until_rice_done",
+      "title": "Steam until rice is tender",
+      "instructions": [
+        "Cook on very low heat until rice is tender and liquid is absorbed (about 18–22 minutes).",
+        "Avoid stirring while the rice cooks (prevents gumminess).",
+        "If the pot seems dry before rice is tender, add 2–4 tablespoons water, cover, and continue steaming."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 20,
+      "timers": [{ "label": "Steam rice", "minutes": 20 }],
+      "checks": ["Rice is tender; no pooled liquid remains at the bottom."]
+    },
+    {
+      "id": "step.wk_07_rest_and_fluff",
+      "title": "Rest and fluff",
+      "instructions": [
+        "Turn off heat and let the pot rest covered for 8–10 minutes.",
+        "Fluff gently with a fork or spoon, lifting from the bottom to mix beans and rice evenly."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Rest before fluffing", "minutes": 10 }],
+      "checks": ["Waakye is fluffy, not mushy; beans are evenly distributed."]
+    },
+    {
+      "id": "step.wk_08_serve_with_traditional_sides",
+      "title": "Serve with traditional toppings (optional but classic)",
+      "instructions": [
+        "Serve waakye hot as a base on plates/bowls.",
+        "Top or side with tomato stew, shito, and a sprinkle of gari if using.",
+        "Add hard-boiled egg and/or fish if desired."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Seasoning is balanced and toppings are added to preference."]
+    }
+  ],
+  "adaptations": [
+    {
+      "id": "adaptation.waakye_leaf_subs",
+      "title": "If waakye leaves are not available",
+      "notes": [
+        "Waakye leaves primarily contribute color and a subtle earthy aroma.",
+        "Choose ONE substitution path below for a similar look (flavor will differ)."
+      ],
+      "options": [
+        {
+          "id": "sub.black_tea",
+          "label": "Black tea color method (visual substitute)",
+          "how": "Steep 2 black tea bags in 2 cups boiling water for 5 minutes. Use this tea as part of the cooking liquid for beans. Remove bags before adding rice."
+        },
+        {
+          "id": "sub.hibiscus",
+          "label": "Dried hibiscus (sobolo/zobo) tint (lightly fruity)",
+          "how": "Add 1–2 tbsp dried hibiscus during bean simmer for 10 minutes, then remove. Use lightly—can add tang."
+        },
+        {
+          "id": "sub.red_sorghum_or_brown_rice_blend",
+          "label": "Color via grain blend (more traditional-ish look)",
+          "how": "Replace 1/2 cup of the white rice with brown rice or red rice; expect longer cook time or par-cook brown rice first."
+        }
+      ]
+    }
+  ],
+  "storage": {
+    "fridge": {
+      "durationDays": 4,
+      "notes": "Cool quickly, store covered. Reheat with a splash of water and steam."
+    },
+    "freezer": {
+      "durationDays": 60,
+      "notes": "Freeze in flat portions. Thaw overnight and steam to reheat."
+    },
+    "reheat": {
+      "notes": "Best reheated by steaming: add 1–2 tbsp water, cover, low heat 6–10 minutes, fluff."
+    }
+  },
+  "safety": {
+    "notes": [
+      "Cool rice/beans promptly for food safety (do not leave at room temp for long periods).",
+      "Reheat to steaming hot; refrigerate leftovers within 2 hours."
+    ]
+  },
+  "notes": [
+    "Bean age matters. If beans are taking too long, soak 6–8 hours or overnight next time (drain and cook in fresh water).",
+    "If using parboiled rice, waakye stays fluffy and holds well for leftovers.",
+    "Salt early enough to season the rice, but consider salty toppings like shito/stew."
+  ],
+  "variations": [
+    {
+      "id": "variation.pressure_cooker",
+      "label": "Pressure cooker / Instant Pot method (faster beans)",
+      "when": { "equipment": "pressure_cooker" },
+      "adapt": {
+        "notes": "Pressure-cook beans (with leaves if using) ~10–12 minutes with natural release, then add rice and cook on low pressure 4 minutes with 10-minute natural release. Liquid amounts must be adjusted to your cooker’s minimums."
+      }
+    },
+    {
+      "id": "variation.brown_rice",
+      "label": "Brown rice waakye (higher fiber)",
+      "when": { "diet": "high_fiber" },
+      "adapt": {
+        "notes": "Use brown rice; par-cook beans fully, then cook brown rice separately or extend the steaming time substantially. Keep beans from overcooking by combining near the end."
+      }
+    }
+  ],
+  "methods": ["method.simmer", "method.steam"],
+  "compat": {
+    "cuisineId": "cuisines.ghanaian",
+    "dishId": "dish.ghanaian.waakye",
+    "search": {
+      "aliases": ["waakye", "wakye", "rice and beans ghana", "ghana waakye"],
+      "keywords": [
+        "cowpeas",
+        "black eyed peas",
+        "rice",
+        "waakye leaves",
+        "street food",
+        "gari",
+        "shito",
+        "tomato stew"
+      ]
+    }
+  }
+}

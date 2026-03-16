@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
 import "./cooking.css";
 
@@ -80,7 +81,7 @@ try {
 } catch {
   try {
     // eslint-disable-next-line global-require
-    featureFlags = require("../../config/featureFlags.json") || featureFlags;
+    featureFlags = require("@/config/featureFlags.json") || featureFlags;
   } catch {}
 }
 
@@ -931,6 +932,20 @@ export default function Play() {
       },
     });
 
+    emitCanonicalSignal({
+      type: "taskStarted",
+      sourceModule: "executor.cooking.play",
+      urgency: "normal",
+      completionPct: 0,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: safeSession.sessionId,
+        name: safeSession.title,
+        domain: "cooking",
+        action: "session.started",
+      },
+    });
+
     scheduleCheckpoint({
       status: "running",
       progress: { startedAt: nowIso() },
@@ -1019,6 +1034,21 @@ export default function Play() {
       percent: 100,
     });
 
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.cooking.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: safeSession.sessionId,
+        name: safeSession.title,
+        domain: "cooking",
+        action: "session.completed",
+        completedSteps: progress.total,
+      },
+    });
+
     await saveCheckpoint(safeSession.sessionId, "cooking", {
       status: "completed",
       currentStepIndex: Math.max(0, progress.total - 1),
@@ -1047,7 +1077,24 @@ export default function Play() {
       if (prev.includes(currentStep.id)) return prev;
       return [...prev, currentStep.id];
     });
-  }, [currentStep]);
+
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.cooking.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: `${safeSession?.sessionId || "session"}:${currentStep.id}`,
+        sessionId: safeSession?.sessionId,
+        stepId: currentStep.id,
+        stepIndex: currentStepIndex,
+        name: currentStep.title || currentStep.id,
+        domain: "cooking",
+        action: "step.completed",
+      },
+    });
+  }, [currentStep, currentStepIndex, safeSession?.sessionId]);
 
   const goPrev = useCallback(() => {
     if (!safeSession) return;

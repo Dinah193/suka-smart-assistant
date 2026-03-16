@@ -68,8 +68,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "../../../services/eventBus";
-import { featureFlags } from "../../../services/featureFlags";
+import eventBus from "../../../services/events/eventBus";
+import { featureFlags } from "../../../config/featureFlags";
 
 /**
  * @typedef {Object} SessionStep
@@ -177,7 +177,9 @@ export async function evaluateInventoryGuard(session, stepIndex, ctx = {}) {
   // Validate repo
   if (!ctx.inventoryRepo || typeof ctx.inventoryRepo.getQty !== "function") {
     if (!settings.failClosed) {
-      safeEmitDebug("guard.inventory.repo.missing", { sessionId: safeId(session) });
+      safeEmitDebug("guard.inventory.repo.missing", {
+        sessionId: safeId(session),
+      });
       return { allowed: true, guard: "inventory" };
     }
     return {
@@ -199,8 +201,10 @@ export async function evaluateInventoryGuard(session, stepIndex, ctx = {}) {
 
   for (const req of requirements) {
     // 1) Try primary key, else alternatives if allowed.
-    const keysToCheck = [req.key, ...(settings.allowAlternatives ? (req.alternatives || []) : [])]
-      .filter(Boolean);
+    const keysToCheck = [
+      req.key,
+      ...(settings.allowAlternatives ? req.alternatives || [] : []),
+    ].filter(Boolean);
 
     let satisfied = false;
     let usedAlt = null;
@@ -271,7 +275,10 @@ function isGuardEnabled(settings) {
   if (typeof fromSettings === "boolean") return fromSettings;
 
   try {
-    if (featureFlags && Object.prototype.hasOwnProperty.call(featureFlags, "inventoryGuard")) {
+    if (
+      featureFlags &&
+      Object.prototype.hasOwnProperty.call(featureFlags, "inventoryGuard")
+    ) {
       return !!featureFlags.inventoryGuard;
     }
   } catch {
@@ -301,12 +308,15 @@ function withDefaults(s) {
  */
 function buildShortageMessage(shortages, repo) {
   const lines = shortages.map((sh) => {
-    const label = typeof repo?.label === "function" ? repo.label(sh.key) : sh.key;
+    const label =
+      typeof repo?.label === "function" ? repo.label(sh.key) : sh.key;
     const needed = qtyFmt(sh.needQty, sh.needUnit);
     const have = qtyFmt(sh.haveQty, sh.haveUnit);
     return `• ${label}: need ${needed}, have ${have}`;
   });
-  return `Not enough inventory:\n${lines.join("\n")}\nAdd items or choose substitutions, then try again.`;
+  return `Not enough inventory:\n${lines.join(
+    "\n"
+  )}\nAdd items or choose substitutions, then try again.`;
 }
 
 function qtyFmt(qty, unit) {
@@ -326,12 +336,18 @@ function stripTrailingZeros(n) {
  * @returns {SessionStep|null}
  */
 function resolveStep(session, stepIndex) {
-  if (!session || !Array.isArray(session.steps) || session.steps.length === 0) return null;
-  if (typeof stepIndex === "number" && stepIndex >= 0 && stepIndex < session.steps.length) {
+  if (!session || !Array.isArray(session.steps) || session.steps.length === 0)
+    return null;
+  if (
+    typeof stepIndex === "number" &&
+    stepIndex >= 0 &&
+    stepIndex < session.steps.length
+  ) {
     return session.steps[stepIndex];
   }
   const idx =
-    Number.isFinite(session?.progress?.currentStepIndex) && session.progress.currentStepIndex >= 0
+    Number.isFinite(session?.progress?.currentStepIndex) &&
+    session.progress.currentStepIndex >= 0
       ? session.progress.currentStepIndex
       : 0;
   return session.steps[idx] || null;
@@ -358,7 +374,9 @@ function normalizeRequirements(step, session, ctx) {
   const out = [];
 
   // 1) Preferred: requiredInventory
-  const explicit = Array.isArray(step?.metadata?.requiredInventory) ? step.metadata.requiredInventory : [];
+  const explicit = Array.isArray(step?.metadata?.requiredInventory)
+    ? step.metadata.requiredInventory
+    : [];
   for (const item of explicit) {
     const key = typeof item?.key === "string" ? item.key.trim() : "";
     if (!key) continue;
@@ -367,7 +385,9 @@ function normalizeRequirements(step, session, ctx) {
       qty: toNumberOr(item.qty, 1),
       unit: item.unit ?? null,
       note: item.note,
-      alternatives: Array.isArray(item.alternatives) ? item.alternatives.filter(Boolean) : [],
+      alternatives: Array.isArray(item.alternatives)
+        ? item.alternatives.filter(Boolean)
+        : [],
     });
   }
 
@@ -424,7 +444,11 @@ function coalesceRequirements(list, unitConverter) {
         map[sig].qty += toNumberOr(it.qty, 0);
       } else if (unitConverter && it.unit && map[sig].unit) {
         // Try convert incoming to existing unit.
-        const conv = unitConverter.convert(toNumberOr(it.qty, 0), it.unit, map[sig].unit);
+        const conv = unitConverter.convert(
+          toNumberOr(it.qty, 0),
+          it.unit,
+          map[sig].unit
+        );
         if (conv) {
           map[sig].qty += conv.qty;
         } else {
@@ -451,7 +475,14 @@ function coalesceRequirements(list, unitConverter) {
  * @param {UnitConverter} unitConverter
  * @param {number} minFraction
  */
-function compareQty(haveQty, haveUnit, needQty, needUnit, unitConverter, minFraction) {
+function compareQty(
+  haveQty,
+  haveUnit,
+  needQty,
+  needUnit,
+  unitConverter,
+  minFraction
+) {
   const need = toNumberOr(needQty, 1);
   const have = toNumberOr(haveQty, 0);
 
@@ -485,21 +516,29 @@ function normUnit(u) {
   const s = String(u).trim().toLowerCase();
   // Minimal aliases (extend via real converter)
   switch (s) {
-    case "grams": return "g";
-    case "kilograms": return "kg";
-    case "milliliters": return "ml";
-    case "liters": return "l";
+    case "grams":
+      return "g";
+    case "kilograms":
+      return "kg";
+    case "milliliters":
+      return "ml";
+    case "liters":
+      return "l";
     case "ounce":
-    case "ounces": return "oz";
+    case "ounces":
+      return "oz";
     case "pounds":
     case "lb":
-    case "lbs": return "lb";
+    case "lbs":
+      return "lb";
     case "piece":
     case "pieces":
     case "count":
     case "ea":
-    case "each": return "pcs";
-    default: return s;
+    case "each":
+      return "pcs";
+    default:
+      return s;
   }
 }
 
@@ -516,7 +555,10 @@ function tryNameToKey(name, fn) {
     if (k) return k;
   }
   // Fallback: normalized name
-  return s.toLowerCase().replace(/\s+/g, ".").replace(/[^a-z0-9._-]/g, "");
+  return s
+    .toLowerCase()
+    .replace(/\s+/g, ".")
+    .replace(/[^a-z0-9._-]/g, "");
 }
 
 function safeId(session) {
@@ -526,7 +568,12 @@ function safeId(session) {
 function safeEmitDebug(type, data) {
   try {
     if (eventBus && typeof eventBus.emit === "function") {
-      eventBus.emit({ type, ts: new Date().toISOString(), source: "inventoryGuard", data });
+      eventBus.emit({
+        type,
+        ts: new Date().toISOString(),
+        source: "inventoryGuard",
+        data,
+      });
     }
   } catch {
     // no-op

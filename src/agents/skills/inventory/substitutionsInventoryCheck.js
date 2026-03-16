@@ -21,7 +21,7 @@
  *   - inventory.substitution.check.performed
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import InventoryLookup from "@/agents/skills/inventory/lookup";
 
 /**
@@ -146,8 +146,10 @@ export async function verifySubstitutions(
     }
 
     if (v.coverageRatio === best.coverageRatio) {
-      const fCur = typeof v.candidate.factor === "number" ? v.candidate.factor : 1;
-      const fBest = typeof best.candidate.factor === "number" ? best.candidate.factor : 1;
+      const fCur =
+        typeof v.candidate.factor === "number" ? v.candidate.factor : 1;
+      const fBest =
+        typeof best.candidate.factor === "number" ? best.candidate.factor : 1;
       if (Math.abs(fCur - 1) < Math.abs(fBest - 1)) {
         best = v;
       }
@@ -193,7 +195,11 @@ export async function verifyBestSubstitution(
   candidates,
   options = {}
 ) {
-  const res = await verifySubstitutions(originalIngredient, candidates, options);
+  const res = await verifySubstitutions(
+    originalIngredient,
+    candidates,
+    options
+  );
   return res.best;
 }
 
@@ -224,7 +230,13 @@ function normalizeIngredient(ing) {
  * @param {{domain:string, minCoverageThreshold:number, limitPerCandidate:number}} ctx
  * @returns {Promise<VerifiedCandidate>}
  */
-async function verifySingleCandidate(original, candidate, desiredQty, unit, ctx) {
+async function verifySingleCandidate(
+  original,
+  candidate,
+  desiredQty,
+  unit,
+  ctx
+) {
   const factor =
     typeof candidate.factor === "number" && candidate.factor > 0
       ? candidate.factor
@@ -288,7 +300,9 @@ function emitCheckEvent(type, data) {
 /* --------------------------------- Utils ----------------------------------- */
 
 function cleanSpace(s) {
-  return String(s || "").replace(/\s+/g, " ").trim();
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function clamp(v, min, max) {

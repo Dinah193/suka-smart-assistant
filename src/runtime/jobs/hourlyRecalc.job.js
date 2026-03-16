@@ -23,39 +23,59 @@
 
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 // Optional subsystems (defensive requires)
 let SessionStore = null; // expected: listAdmittedInWindow, listCandidatesByDeadline, detectConflicts, placeSession
-try { SessionStore = require("@/engines/scheduling/SessionStore"); } catch (_) { try { SessionStore = require("@/engines/scheduling/sessionStore"); } catch (_) {} }
+try {
+  SessionStore = require("@/engines/scheduling/SessionStore");
+} catch (_) {
+  try {
+    SessionStore = require("@/engines/scheduling/sessionStore");
+  } catch (_) {}
+}
 
 let prioritiesPolicy = null; // expected: scoreSessions(sessions, ctx)
-try { prioritiesPolicy = require("@/engines/scheduling/policies/priorities"); } catch (_) {}
+try {
+  prioritiesPolicy = require("@/engines/scheduling/policies/priorities");
+} catch (_) {}
 
 let constraintsPolicy = null; // expected: filterSessions(sessions, ctx) or filterSessionsWithWindow
-try { constraintsPolicy = require("@/engines/scheduling/policies/constraints"); } catch (_) {}
+try {
+  constraintsPolicy = require("@/engines/scheduling/policies/constraints");
+} catch (_) {}
 
 let buffersPolicy = null; // expected: getRecommendedBuffer(domain, kind) optional
-try { buffersPolicy = require("@/engines/scheduling/policies/buffers"); } catch (_) {}
+try {
+  buffersPolicy = require("@/engines/scheduling/policies/buffers");
+} catch (_) {}
 
 let feasibility = null; // expected: canPlace(session, ctx) or checkWindow(session, ctx)
-try { feasibility = require("@/engines/scheduling/admission/feasibility"); } catch (_) {}
+try {
+  feasibility = require("@/engines/scheduling/admission/feasibility");
+} catch (_) {}
 
 let optionsEngine = null; // expected: suggestGaps({...}) optional
-try { optionsEngine = require("@/engines/scheduling/admission/options"); } catch (_) {}
+try {
+  optionsEngine = require("@/engines/scheduling/admission/options");
+} catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 // Public API
 module.exports = {
@@ -81,27 +101,47 @@ module.exports = {
 
     const store = resolveSessionStore();
     if (!store) {
-      emit("planning.hourlyRecalc.skipped", { reason: "missing-session-store" });
+      emit("planning.hourlyRecalc.skipped", {
+        reason: "missing-session-store",
+      });
       return { ok: false, placed: 0, considered: 0 };
     }
 
     // 1) Pull admitted sessions in-window to respect current plan
-    const admitted = await safeCall(store.listAdmittedInWindow, store, windowStart, windowEnd);
+    const admitted = await safeCall(
+      store.listAdmittedInWindow,
+      store,
+      windowStart,
+      windowEnd
+    );
 
     // 2) Pull candidate sessions with deadlines within window (or overdue)
-    const candidates = await safeCall(store.listCandidatesByDeadline, store, now, windowEnd);
+    const candidates = await safeCall(
+      store.listCandidatesByDeadline,
+      store,
+      now,
+      windowEnd
+    );
 
     // Merge & dedupe
     const base = dedupeById([].concat(candidates || []));
 
     // 3) Score candidates using priorities (EDF + rules), then apply constraints
     const scored = await applyPriorities(base, { now, timezone });
-    const filtered = await applyConstraints(scored, { windowStart, windowEnd, timezone });
+    const filtered = await applyConstraints(scored, {
+      windowStart,
+      windowEnd,
+      timezone,
+    });
 
     // 4) Try to place up to maxPlacements, respecting feasibility and overlaps with admitted
     const placed = [];
     const considered = Math.min(filtered.length, maxPlacements * 3); // small guard: inspect only top slice
-    for (let i = 0; i < filtered.length && placed.length < maxPlacements && i < considered; i++) {
+    for (
+      let i = 0;
+      i < filtered.length && placed.length < maxPlacements && i < considered;
+      i++
+    ) {
       const sess = filtered[i];
 
       const estMin = Number(sess.estimatedMinutes || 0);
@@ -115,7 +155,11 @@ module.exports = {
       const startFloor = ceilTo5(windowStart);
       let scheduled = null;
 
-      for (let t = startFloor.getTime(); t + durMs + padMs <= windowEnd.getTime(); t += stepMs) {
+      for (
+        let t = startFloor.getTime();
+        t + durMs + padMs <= windowEnd.getTime();
+        t += stepMs
+      ) {
         const startISO = new Date(t + padMs / 2).toISOString(); // center pad half before/after
         const endISO = new Date(t + padMs / 2 + durMs).toISOString();
         const ctx = {
@@ -123,22 +167,34 @@ module.exports = {
           windowEndISO: windowEnd.toISOString(),
           admitted: admitted || [],
           timezone,
-          nowISO: now.toISOString()
+          nowISO: now.toISOString(),
         };
         const ok = await isFeasible(sess, startISO, endISO, ctx, store);
-        if (ok) { scheduled = { startISO, endISO }; break; }
+        if (ok) {
+          scheduled = { startISO, endISO };
+          break;
+        }
       }
 
       if (scheduled) {
-        const placedOk = await commitPlacement(store, sess, scheduled.startISO, scheduled.endISO);
+        const placedOk = await commitPlacement(
+          store,
+          sess,
+          scheduled.startISO,
+          scheduled.endISO
+        );
         if (placedOk) {
-          placed.push({ id: sess.id || sess.sessionId, startISO: scheduled.startISO, endISO: scheduled.endISO });
+          placed.push({
+            id: sess.id || sess.sessionId,
+            startISO: scheduled.startISO,
+            endISO: scheduled.endISO,
+          });
           // Update admitted set in-memory to avoid overlapping subsequent trials
           admitted.push({
             id: sess.id || sess.sessionId,
             plannedStartISO: scheduled.startISO,
             plannedEndISO: scheduled.endISO,
-            estimatedMinutes: estMin
+            estimatedMinutes: estMin,
           });
         }
       }
@@ -153,9 +209,14 @@ module.exports = {
           windowEndISO: windowEnd.toISOString(),
           existing: admitted || [],
           timezone,
-          limit: Math.max(0, maxPlacements - placed.length)
+          limit: Math.max(0, maxPlacements - placed.length),
         });
-        suggestions = Array.isArray(res) ? res.map(x => ({ ...x, meta: { ...(x.meta || {}), kind: "suggested" } })) : [];
+        suggestions = Array.isArray(res)
+          ? res.map((x) => ({
+              ...x,
+              meta: { ...(x.meta || {}), kind: "suggested" },
+            }))
+          : [];
       } catch (_) {}
     }
 
@@ -169,10 +230,10 @@ module.exports = {
         candidates: (candidates || []).length,
         considered,
         placed: placed.length,
-        suggestions: suggestions.length
+        suggestions: suggestions.length,
       },
       placed,
-      suggestions: suggestions.map(projectSuggestion)
+      suggestions: suggestions.map(projectSuggestion),
     };
 
     emit("planning.hourlyRecalc.completed", { rollup });
@@ -184,19 +245,23 @@ module.exports = {
         type: "planning.hourlyRecalc.completed",
         ts: new Date().toISOString(),
         source: "runtime.jobs.hourlyRecalc",
-        data: rollup
+        data: rollup,
       });
     }
 
     return { ok: true, placed: placed.length, considered };
-  }
+  },
 };
 
 // ----------------------------- helpers -----------------------------
 
 function normalizeArgs(args) {
-  const horizonMinutes = Number((args && args.horizonMinutes) != null ? args.horizonMinutes : 180);
-  const maxPlacements = Number((args && args.maxPlacements) != null ? args.maxPlacements : 3);
+  const horizonMinutes = Number(
+    (args && args.horizonMinutes) != null ? args.horizonMinutes : 180
+  );
+  const maxPlacements = Number(
+    (args && args.maxPlacements) != null ? args.maxPlacements : 3
+  );
   const timezone = (args && args.timezone) || "America/Chicago";
   if (!isFinite(horizonMinutes) || horizonMinutes <= 0) return null;
   if (!isFinite(maxPlacements) || maxPlacements < 0) return null;
@@ -205,15 +270,21 @@ function normalizeArgs(args) {
 
 function resolveSessionStore() {
   if (!SessionStore) return null;
-  if (typeof SessionStore.listAdmittedInWindow === "function") return SessionStore;
-  if (SessionStore && typeof SessionStore.getInstance === "function") return SessionStore.getInstance();
-  if (SessionStore && typeof SessionStore.default === "object") return SessionStore.default;
+  if (typeof SessionStore.listAdmittedInWindow === "function")
+    return SessionStore;
+  if (SessionStore && typeof SessionStore.getInstance === "function")
+    return SessionStore.getInstance();
+  if (SessionStore && typeof SessionStore.default === "object")
+    return SessionStore.default;
   return SessionStore;
 }
 
 async function applyPriorities(sessions, ctx) {
   if (!Array.isArray(sessions) || !sessions.length) return [];
-  if (!prioritiesPolicy || typeof prioritiesPolicy.scoreSessions !== "function") {
+  if (
+    !prioritiesPolicy ||
+    typeof prioritiesPolicy.scoreSessions !== "function"
+  ) {
     // Fallback: EDF, then hard-before-soft, then duration asc
     return sessions.slice().sort((a, b) => {
       const da = toTime(a.deadlineISO);
@@ -236,7 +307,9 @@ async function applyConstraints(sessions, ctx) {
   if (!Array.isArray(sessions) || !sessions.length) return [];
   if (!constraintsPolicy) return sessions;
   try {
-    const res = await (constraintsPolicy.filterSessions ? constraintsPolicy.filterSessions(sessions, ctx) : sessions);
+    const res = await (constraintsPolicy.filterSessions
+      ? constraintsPolicy.filterSessions(sessions, ctx)
+      : sessions);
     return Array.isArray(res) ? res : sessions;
   } catch (_) {
     return sessions;
@@ -245,8 +318,15 @@ async function applyConstraints(sessions, ctx) {
 
 function recommendPadMs(session) {
   try {
-    if (!buffersPolicy || typeof buffersPolicy.getRecommendedBuffer !== "function") return 0;
-    const rec = buffersPolicy.getRecommendedBuffer(session.domain || "general", session.meta && session.meta.kind);
+    if (
+      !buffersPolicy ||
+      typeof buffersPolicy.getRecommendedBuffer !== "function"
+    )
+      return 0;
+    const rec = buffersPolicy.getRecommendedBuffer(
+      session.domain || "general",
+      session.meta && session.meta.kind
+    );
     const minMs = Number((rec && rec.minMs) || 0);
     const beforeMs = Number((rec && rec.beforeMs) || 0);
     const afterMs = Number((rec && rec.afterMs) || 0);
@@ -268,7 +348,7 @@ async function isFeasible(session, startISO, endISO, ctx, store) {
         windowStartISO: ctx.windowStartISO,
         windowEndISO: ctx.windowEndISO,
         admitted: ctx.admitted,
-        nowISO: ctx.nowISO
+        nowISO: ctx.nowISO,
       });
       if (!ok) return false;
     } catch (_) {
@@ -278,7 +358,11 @@ async function isFeasible(session, startISO, endISO, ctx, store) {
   // Conflict check against store calendar
   try {
     if (typeof store.detectConflicts === "function") {
-      const conflicts = await store.detectConflicts({ startISO, endISO, excludeIds: [session.id || session.sessionId] });
+      const conflicts = await store.detectConflicts({
+        startISO,
+        endISO,
+        excludeIds: [session.id || session.sessionId],
+      });
       if (Array.isArray(conflicts) && conflicts.length) return false;
     }
   } catch (_) {}
@@ -292,7 +376,7 @@ async function commitPlacement(store, session, startISO, endISO) {
       id: session.id || session.sessionId,
       startISO,
       endISO,
-      reason: "hourlyRecalc"
+      reason: "hourlyRecalc",
     });
     return !!res;
   } catch (_) {
@@ -308,13 +392,18 @@ function projectSuggestion(s) {
     estimatedMinutes: Number(s.estimatedMinutes || 0),
     suggestedStartISO: s.suggestedStartISO || null,
     suggestedEndISO: s.suggestedEndISO || null,
-    meta: s.meta || {}
+    meta: s.meta || {},
   };
 }
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type: type, ts: new Date().toISOString(), source: "runtime.jobs.hourlyRecalc", data: data });
+    eventBus.emit({
+      type: type,
+      ts: new Date().toISOString(),
+      source: "runtime.jobs.hourlyRecalc",
+      data: data,
+    });
   } catch (_) {}
 }
 
@@ -322,7 +411,9 @@ async function exportToHubIfEnabled(payload) {
   if (!featureFlags || !featureFlags.familyFundMode) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
-    const packet = await (HubPacketFormatter.format ? HubPacketFormatter.format(payload) : payload);
+    const packet = await (HubPacketFormatter.format
+      ? HubPacketFormatter.format(payload)
+      : payload);
     if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
       await FamilyFundConnector.send(packet);
     }

@@ -5,43 +5,98 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 let automation = { invoke: async () => {} };
 let eventBus = { emit: () => {}, on: () => () => {} };
 let emitEvent = (..._) => {};
-try { automation = require("@/services/automation/runtime").automation; } catch {}
-try { eventBus = require("@/services/events/eventBus").eventBus; } catch {}
-try { emitEvent = require("@/contracts/events").emitEvent; } catch {}
+try {
+  automation = require("@/services/automation/runtime").automation;
+} catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus;
+} catch {}
+try {
+  emitEvent = require("@/contracts/events").emitEvent;
+} catch {}
 
 let useNutritionStore = () => ({
-  goals: null,            // { calories, protein_g, carbs_g, fat_g, ... }
+  goals: null, // { calories, protein_g, carbs_g, fat_g, ... }
   setGoals: async () => {},
-  constraints: {          // dietary filters for cooking/planning
-    includeTags: [], excludeTags: [], denyIngredients: [], allowIngredients: [], cookingMethodsPrefer: []
+  constraints: {
+    // dietary filters for cooking/planning
+    includeTags: [],
+    excludeTags: [],
+    denyIngredients: [],
+    allowIngredients: [],
+    cookingMethodsPrefer: [],
   },
   setConstraints: async () => {},
   refresh: async () => {},
   templates: {
-    balanced: { calories: 2000, protein_g: 100, carbs_g: 250, fat_g: 67, fiber_g: 30, sugar_g: 50, sodium_mg: 2000, satfat_g: 18 },
-    highProtein: { calories: 2100, protein_g: 150, carbs_g: 200, fat_g: 70, fiber_g: 30, sugar_g: 45, sodium_mg: 2000, satfat_g: 18 },
-    vegan: { calories: 2000, protein_g: 85, carbs_g: 300, fat_g: 60, fiber_g: 35, sugar_g: 60, sodium_mg: 1900, satfat_g: 14 },
+    balanced: {
+      calories: 2000,
+      protein_g: 100,
+      carbs_g: 250,
+      fat_g: 67,
+      fiber_g: 30,
+      sugar_g: 50,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
+    highProtein: {
+      calories: 2100,
+      protein_g: 150,
+      carbs_g: 200,
+      fat_g: 70,
+      fiber_g: 30,
+      sugar_g: 45,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
+    vegan: {
+      calories: 2000,
+      protein_g: 85,
+      carbs_g: 300,
+      fat_g: 60,
+      fiber_g: 35,
+      sugar_g: 60,
+      sodium_mg: 1900,
+      satfat_g: 14,
+    },
   },
 });
-let usePreferencesStore = () => ({ sabbathAware: true, unitSystem: "imperial" });
+let usePreferencesStore = () => ({
+  sabbathAware: true,
+  unitSystem: "imperial",
+});
 let useMealPlanStore = () => ({ getActiveDraft: () => null });
 let useCookingSessionStore = () => ({
-  getActiveSession: () => null,                 // current cooking session
+  getActiveSession: () => null, // current cooking session
   setSessionNutritionOverrides: async () => {}, // write per-session overrides
   clearSessionNutritionOverrides: async () => {},
 });
-try { useNutritionStore = require("@/store/NutritionStore").useNutritionStore; } catch {}
-try { usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore; } catch {}
-try { useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore; } catch {}
-try { useCookingSessionStore = require("@/store/CookingSessionStore").useCookingSessionStore; } catch {}
+try {
+  useNutritionStore = require("@/store/NutritionStore").useNutritionStore;
+} catch {}
+try {
+  usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore;
+} catch {}
+try {
+  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore;
+} catch {}
+try {
+  useCookingSessionStore =
+    require("@/store/CookingSessionStore").useCookingSessionStore;
+} catch {}
 
 // Optional central registry to stay in sync with Meal templates (Daniel Fast, etc.)
 let MEAL_PLAN_TEMPLATES;
-try { MEAL_PLAN_TEMPLATES = require("@/services/mealplanning/MealPlanTemplates").MEAL_PLAN_TEMPLATES; } catch {}
+try {
+  MEAL_PLAN_TEMPLATES =
+    require("@/services/mealplanning/MealPlanTemplates").MEAL_PLAN_TEMPLATES;
+} catch {}
 
 // Macro rings
 let MacroRingsGroup = () => null;
-try { MacroRingsGroup = require("@/pages/nutrition/MacroRing.jsx").MacroRingsGroup; } catch {}
+try {
+  MacroRingsGroup = require("@/pages/nutrition/MacroRing.jsx").MacroRingsGroup;
+} catch {}
 
 /* ---------------- UI (shadcn) ---------------- */
 import { Button } from "@/components/ui/button";
@@ -51,7 +106,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -64,15 +125,27 @@ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
 /* USDA-ish baseline for reset */
 const USDA_DEFAULTS = Object.freeze({
-  calories: 2000, protein_g: 50, carbs_g: 275, fat_g: 70, fiber_g: 28, sugar_g: 50, sodium_mg: 2300, satfat_g: 20,
+  calories: 2000,
+  protein_g: 50,
+  carbs_g: 275,
+  fat_g: 70,
+  fiber_g: 28,
+  sugar_g: 50,
+  sodium_mg: 2300,
+  satfat_g: 20,
 });
 
 /* ---------------- Component ---------------- */
 export default function NutritionSettingPanel({ className }) {
-  const { goals, setGoals, constraints, setConstraints, templates, refresh } = useNutritionStore();
+  const { goals, setGoals, constraints, setConstraints, templates, refresh } =
+    useNutritionStore();
   const { sabbathAware } = usePreferencesStore();
   const { getActiveDraft } = useMealPlanStore();
-  const { getActiveSession, setSessionNutritionOverrides, clearSessionNutritionOverrides } = useCookingSessionStore();
+  const {
+    getActiveSession,
+    setSessionNutritionOverrides,
+    clearSessionNutritionOverrides,
+  } = useCookingSessionStore();
 
   const session = getActiveSession?.() || null;
 
@@ -92,7 +165,9 @@ export default function NutritionSettingPanel({ className }) {
   const [excl, setExcl] = useState(constraints?.excludeTags || []);
   const [deny, setDeny] = useState(constraints?.denyIngredients || []);
   const [allow, setAllow] = useState(constraints?.allowIngredients || []);
-  const [methods, setMethods] = useState(constraints?.cookingMethodsPrefer || []);
+  const [methods, setMethods] = useState(
+    constraints?.cookingMethodsPrefer || []
+  );
   const [notes, setNotes] = useState("");
 
   const prevGoalsRef = useRef(goals || USDA_DEFAULTS);
@@ -112,23 +187,46 @@ export default function NutritionSettingPanel({ className }) {
     };
   }, [pPct, cPct, fPct, calories]);
 
-  const targets = mode === "percent"
-    ? targetFromPct
-    : { calories: Math.round((pG * 4 + cG * 4 + fG * 9)), protein_g: pG, carbs_g: cG, fat_g: fG };
+  const targets =
+    mode === "percent"
+      ? targetFromPct
+      : {
+          calories: Math.round(pG * 4 + cG * 4 + fG * 9),
+          protein_g: pG,
+          carbs_g: cG,
+          fat_g: fG,
+        };
 
   // ring totals (we only show targets here; live totals come from Cooking session’s selections elsewhere)
-  const totalsForRings = useMemo(() => ({
-    protein_g: 0, carbs_g: 0, fat_g: 0, calories: 0,
-  }), []);
+  const totalsForRings = useMemo(
+    () => ({
+      protein_g: 0,
+      carbs_g: 0,
+      fat_g: 0,
+      calories: 0,
+    }),
+    []
+  );
 
   // merged templates (include Daniel Fast & friends)
   const availablePresets = useMemo(() => {
     const base = { ...(templates || {}) };
-    if (MEAL_PLAN_TEMPLATES?.danielFast?.nutritionTemplate) base.danielFast = MEAL_PLAN_TEMPLATES.danielFast.nutritionTemplate;
-    if (MEAL_PLAN_TEMPLATES?.balanced?.nutritionTemplate && !base.balanced) base.balanced = MEAL_PLAN_TEMPLATES.balanced.nutritionTemplate;
-    if (MEAL_PLAN_TEMPLATES?.mediterranean?.nutritionTemplate && !base.mediterranean) base.mediterranean = MEAL_PLAN_TEMPLATES.mediterranean.nutritionTemplate;
-    if (MEAL_PLAN_TEMPLATES?.highProtein?.nutritionTemplate && !base.highProtein) base.highProtein = MEAL_PLAN_TEMPLATES.highProtein.nutritionTemplate;
-    if (MEAL_PLAN_TEMPLATES?.vegan?.nutritionTemplate && !base.vegan) base.vegan = MEAL_PLAN_TEMPLATES.vegan.nutritionTemplate;
+    if (MEAL_PLAN_TEMPLATES?.danielFast?.nutritionTemplate)
+      base.danielFast = MEAL_PLAN_TEMPLATES.danielFast.nutritionTemplate;
+    if (MEAL_PLAN_TEMPLATES?.balanced?.nutritionTemplate && !base.balanced)
+      base.balanced = MEAL_PLAN_TEMPLATES.balanced.nutritionTemplate;
+    if (
+      MEAL_PLAN_TEMPLATES?.mediterranean?.nutritionTemplate &&
+      !base.mediterranean
+    )
+      base.mediterranean = MEAL_PLAN_TEMPLATES.mediterranean.nutritionTemplate;
+    if (
+      MEAL_PLAN_TEMPLATES?.highProtein?.nutritionTemplate &&
+      !base.highProtein
+    )
+      base.highProtein = MEAL_PLAN_TEMPLATES.highProtein.nutritionTemplate;
+    if (MEAL_PLAN_TEMPLATES?.vegan?.nutritionTemplate && !base.vegan)
+      base.vegan = MEAL_PLAN_TEMPLATES.vegan.nutritionTemplate;
     return base;
   }, [templates]);
 
@@ -167,7 +265,9 @@ export default function NutritionSettingPanel({ className }) {
     setFG(g.fat_g ?? fG);
     if (g.calories) {
       const cals = g.calories;
-      const p = g.protein_g || 0, c = g.carbs_g || 0, f = g.fat_g || 0;
+      const p = g.protein_g || 0,
+        c = g.carbs_g || 0,
+        f = g.fat_g || 0;
       const pPctNew = c ? ((p * KCAL_PER_G.protein) / cals) * 100 : 30;
       const cPctNew = ((c * KCAL_PER_G.carbs) / cals) * 100;
       const fPctNew = ((f * KCAL_PER_G.fat) / cals) * 100;
@@ -200,14 +300,21 @@ export default function NutritionSettingPanel({ className }) {
         ),
       });
     } catch {
-      toast({ title: "Save failed", description: "Could not save your defaults." });
+      toast({
+        title: "Save failed",
+        description: "Could not save your defaults.",
+      });
     }
   };
 
   const applyToSession = async () => {
     try {
       await setSessionNutritionOverrides?.(session?.id, targets, {
-        includeTags: incl, excludeTags: excl, denyIngredients: deny, allowIngredients: allow, cookingMethodsPrefer: methods,
+        includeTags: incl,
+        excludeTags: excl,
+        denyIngredients: deny,
+        allowIngredients: allow,
+        cookingMethodsPrefer: methods,
       });
       toast({
         title: "Applied to session",
@@ -226,7 +333,10 @@ export default function NutritionSettingPanel({ className }) {
         ),
       });
     } catch {
-      toast({ title: "Apply failed", description: "Could not apply to the session." });
+      toast({
+        title: "Apply failed",
+        description: "Could not apply to the session.",
+      });
     }
   };
 
@@ -239,7 +349,14 @@ export default function NutritionSettingPanel({ className }) {
       title: "Preset applied",
       description: name === "danielFast" ? "Daniel Fast" : name,
       action: (
-        <Button size="sm" variant="outline" onClick={() => { applyGoals(prev); toast({ title: "Reverted" }); }}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            applyGoals(prev);
+            toast({ title: "Reverted" });
+          }}
+        >
           Undo
         </Button>
       ),
@@ -250,7 +367,11 @@ export default function NutritionSettingPanel({ className }) {
     prevConstraintsRef.current = constraints;
     try {
       await setConstraints?.({
-        includeTags: incl, excludeTags: excl, denyIngredients: deny, allowIngredients: allow, cookingMethodsPrefer: methods,
+        includeTags: incl,
+        excludeTags: excl,
+        denyIngredients: deny,
+        allowIngredients: allow,
+        cookingMethodsPrefer: methods,
       });
       emitEvent?.("preferences.changed", { keys: ["nutrition.constraints"] });
       toast({
@@ -262,7 +383,9 @@ export default function NutritionSettingPanel({ className }) {
             variant="outline"
             onClick={async () => {
               await setConstraints?.(prevConstraintsRef.current);
-              emitEvent?.("preferences.changed", { keys: ["nutrition.constraints"] });
+              emitEvent?.("preferences.changed", {
+                keys: ["nutrition.constraints"],
+              });
               toast({ title: "Reverted" });
             }}
           >
@@ -279,7 +402,10 @@ export default function NutritionSettingPanel({ className }) {
     const draft = getActiveDraft?.();
     const t = draft?.meta?.nutritionTemplate;
     if (!t) {
-      toast({ title: "No template attached", description: "Open a plan template to import its targets here." });
+      toast({
+        title: "No template attached",
+        description: "Open a plan template to import its targets here.",
+      });
       return;
     }
     applyGoals(t);
@@ -292,11 +418,24 @@ export default function NutritionSettingPanel({ className }) {
     toast({
       title: "Reset",
       description: "Reverted to USDA-style defaults.",
-      action: <Button size="sm" variant="outline" onClick={() => { applyGoals(prev); toast({ title: "Reverted" }); }}>Undo</Button>,
+      action: (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            applyGoals(prev);
+            toast({ title: "Reverted" });
+          }}
+        >
+          Undo
+        </Button>
+      ),
     });
   };
 
-  const sabbathTag = sabbathAware ? <Badge variant="secondary">Sabbath-aware</Badge> : null;
+  const sabbathTag = sabbathAware ? (
+    <Badge variant="secondary">Sabbath-aware</Badge>
+  ) : null;
 
   /* ---------------- Render ---------------- */
   return (
@@ -307,18 +446,29 @@ export default function NutritionSettingPanel({ className }) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 Nutrition Settings
-                {session?.id ? <Badge variant="outline">Session</Badge> : <Badge variant="outline">Global</Badge>}
+                {session?.id ? (
+                  <Badge variant="outline">Session</Badge>
+                ) : (
+                  <Badge variant="outline">Global</Badge>
+                )}
                 {sabbathTag}
               </CardTitle>
               <div className="text-xs text-muted-foreground mt-1">
-                Set macro targets & diet filters to guide cooking suggestions, swaps, and timers.
+                Set macro targets & diet filters to guide cooking suggestions,
+                swaps, and timers.
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => eventBus.emit("ui.open", { id: "GoalsEditor" })}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => eventBus.emit("ui.open", { id: "GoalsEditor" })}
+              >
                 Open Goals Editor
               </Button>
-              <Button size="sm" onClick={saveAsDefaults}>Save Defaults</Button>
+              <Button size="sm" onClick={saveAsDefaults}>
+                Save Defaults
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -346,7 +496,9 @@ export default function NutritionSettingPanel({ className }) {
               </div>
 
               <div className="grid gap-1">
-                <Label className="text-xs text-muted-foreground">Apply Preset</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Apply Preset
+                </Label>
                 <Select onValueChange={applyPreset}>
                   <SelectTrigger className="h-9 w-[220px]">
                     <SelectValue placeholder="Choose a preset…" />
@@ -354,11 +506,17 @@ export default function NutritionSettingPanel({ className }) {
                   <SelectContent>
                     {Object.keys(availablePresets).map((k) => (
                       <SelectItem key={k} value={k}>
-                        {k === "danielFast" ? "Daniel Fast" :
-                         k === "highProtein" ? "High-Protein" :
-                         k === "balanced" ? "Balanced" :
-                         k === "mediterranean" ? "Mediterranean" :
-                         k === "vegan" ? "Vegan" : k}
+                        {k === "danielFast"
+                          ? "Daniel Fast"
+                          : k === "highProtein"
+                          ? "High-Protein"
+                          : k === "balanced"
+                          ? "Balanced"
+                          : k === "mediterranean"
+                          ? "Mediterranean"
+                          : k === "vegan"
+                          ? "Vegan"
+                          : k}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -368,13 +526,21 @@ export default function NutritionSettingPanel({ className }) {
               <div className="grid gap-1">
                 <Label className="text-xs text-muted-foreground">Import</Label>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={importFromPlan}>From Plan</Button>
-                  <Button size="sm" variant="ghost" onClick={resetUSDA}>Reset USDA</Button>
+                  <Button size="sm" variant="outline" onClick={importFromPlan}>
+                    From Plan
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={resetUSDA}>
+                    Reset USDA
+                  </Button>
                 </div>
               </div>
 
               <div className="ml-auto">
-                <Button size="sm" onClick={applyToSession} disabled={!session?.id}>
+                <Button
+                  size="sm"
+                  onClick={applyToSession}
+                  disabled={!session?.id}
+                >
                   Apply to Session
                 </Button>
               </div>
@@ -386,15 +552,36 @@ export default function NutritionSettingPanel({ className }) {
               <div className="grid gap-3 md:grid-cols-4">
                 <div>
                   <Label className="text-sm">Protein (g)</Label>
-                  <Input className="h-9" type="number" value={pG} onChange={(e) => setPG(clamp(safeNum(e.target.value, 0), 0, 999))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={pG}
+                    onChange={(e) =>
+                      setPG(clamp(safeNum(e.target.value, 0), 0, 999))
+                    }
+                  />
                 </div>
                 <div>
                   <Label className="text-sm">Carbs (g)</Label>
-                  <Input className="h-9" type="number" value={cG} onChange={(e) => setCG(clamp(safeNum(e.target.value, 0), 0, 999))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={cG}
+                    onChange={(e) =>
+                      setCG(clamp(safeNum(e.target.value, 0), 0, 999))
+                    }
+                  />
                 </div>
                 <div>
                   <Label className="text-sm">Fat (g)</Label>
-                  <Input className="h-9" type="number" value={fG} onChange={(e) => setFG(clamp(safeNum(e.target.value, 0), 0, 999))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={fG}
+                    onChange={(e) =>
+                      setFG(clamp(safeNum(e.target.value, 0), 0, 999))
+                    }
+                  />
                 </div>
                 <div>
                   <Label className="text-sm">Target kcal</Label>
@@ -410,27 +597,63 @@ export default function NutritionSettingPanel({ className }) {
               <div className="grid gap-3 md:grid-cols-4">
                 <div>
                   <Label className="text-sm">Calories/day</Label>
-                  <Input className="h-9" type="number" value={calories} onChange={(e) => setCalories(clamp(safeNum(e.target.value, 0), 0, 6000))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={calories}
+                    onChange={(e) =>
+                      setCalories(clamp(safeNum(e.target.value, 0), 0, 6000))
+                    }
+                  />
                 </div>
                 <div>
                   <Label className="text-sm">Protein %</Label>
-                  <Input className="h-9" type="number" value={pPct} onChange={(e) => setPPct(clamp(safeNum(e.target.value, 0), 0, 90))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={pPct}
+                    onChange={(e) =>
+                      setPPct(clamp(safeNum(e.target.value, 0), 0, 90))
+                    }
+                  />
                 </div>
                 <div>
                   <Label className="text-sm">Carbs %</Label>
-                  <Input className="h-9" type="number" value={cPct} onChange={(e) => setCPct(clamp(safeNum(e.target.value, 0), 0, 90))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={cPct}
+                    onChange={(e) =>
+                      setCPct(clamp(safeNum(e.target.value, 0), 0, 90))
+                    }
+                  />
                 </div>
                 <div>
                   <Label className="text-sm">Fat %</Label>
-                  <Input className="h-9" type="number" value={fPct} onChange={(e) => setFPct(clamp(safeNum(e.target.value, 0), 0, 90))} />
+                  <Input
+                    className="h-9"
+                    type="number"
+                    value={fPct}
+                    onChange={(e) =>
+                      setFPct(clamp(safeNum(e.target.value, 0), 0, 90))
+                    }
+                  />
                 </div>
 
                 <div className="md:col-span-4 rounded-md border p-3 text-sm">
                   <div className="grid grid-cols-4 gap-2">
-                    <div>Target kcal: <b>{toFixed(targets.calories, 0)}</b></div>
-                    <div>Protein: <b>{targets.protein_g} g</b></div>
-                    <div>Carbs: <b>{targets.carbs_g} g</b></div>
-                    <div>Fat: <b>{targets.fat_g} g</b></div>
+                    <div>
+                      Target kcal: <b>{toFixed(targets.calories, 0)}</b>
+                    </div>
+                    <div>
+                      Protein: <b>{targets.protein_g} g</b>
+                    </div>
+                    <div>
+                      Carbs: <b>{targets.carbs_g} g</b>
+                    </div>
+                    <div>
+                      Fat: <b>{targets.fat_g} g</b>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -465,7 +688,12 @@ export default function NutritionSettingPanel({ className }) {
                     emitEvent?.("nutrition.suggestSwap", {
                       scope: { type: "session", id: session?.id || null },
                       targets,
-                      gaps: { protein_g: targets.protein_g, carbs_g: targets.carbs_g, fat_g: targets.fat_g, calories: targets.calories },
+                      gaps: {
+                        protein_g: targets.protein_g,
+                        carbs_g: targets.carbs_g,
+                        fat_g: targets.fat_g,
+                        calories: targets.calories,
+                      },
                     });
                     toast({ title: "Suggestions queued" });
                   }}
@@ -475,7 +703,9 @@ export default function NutritionSettingPanel({ className }) {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => eventBus.emit("ui.open", { id: "RecipeVault" })}
+                  onClick={() =>
+                    eventBus.emit("ui.open", { id: "RecipeVault" })
+                  }
                 >
                   Explore Recipes
                 </Button>
@@ -488,7 +718,9 @@ export default function NutritionSettingPanel({ className }) {
       {/* Filters */}
       <Card className="mt-3">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Dietary Filters for Cooking</CardTitle>
+          <CardTitle className="text-base">
+            Dietary Filters for Cooking
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Tabs defaultValue="tags">
@@ -549,14 +781,19 @@ export default function NutritionSettingPanel({ className }) {
           </Tabs>
 
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={saveConstraints}>Save Filters</Button>
+            <Button size="sm" onClick={saveConstraints}>
+              Save Filters
+            </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => {
                 // Daniel Fast quick toggle for filters
                 const df = MEAL_PLAN_TEMPLATES?.danielFast?.constraints;
-                if (!df) { toast({ title: "Daniel Fast template not found" }); return; }
+                if (!df) {
+                  toast({ title: "Daniel Fast template not found" });
+                  return;
+                }
                 const prev = { incl, excl, deny, allow, methods };
                 setIncl(df.includeTags || []);
                 setExcl(df.excludeTags || []);
@@ -565,10 +802,22 @@ export default function NutritionSettingPanel({ className }) {
                 setMethods(df.cookingMethodsPrefer || []);
                 toast({
                   title: "Daniel Fast filters applied",
-                  action: <Button size="sm" variant="outline" onClick={() => {
-                    setIncl(prev.incl); setExcl(prev.excl); setDeny(prev.deny); setAllow(prev.allow); setMethods(prev.methods);
-                    toast({ title: "Reverted" });
-                  }}>Undo</Button>,
+                  action: (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setIncl(prev.incl);
+                        setExcl(prev.excl);
+                        setDeny(prev.deny);
+                        setAllow(prev.allow);
+                        setMethods(prev.methods);
+                        toast({ title: "Reverted" });
+                      }}
+                    >
+                      Undo
+                    </Button>
+                  ),
                 });
               }}
             >
@@ -578,7 +827,9 @@ export default function NutritionSettingPanel({ className }) {
               size="sm"
               variant="ghost"
               onClick={() => {
-                emitEvent?.("preferences.changed", { keys: ["nutrition.constraints", "nutrition.goals"] });
+                emitEvent?.("preferences.changed", {
+                  keys: ["nutrition.constraints", "nutrition.goals"],
+                });
                 eventBus.emit("ui.open", { id: "BatchSessionPlanner" });
               }}
             >
@@ -592,14 +843,17 @@ export default function NutritionSettingPanel({ className }) {
       <Card className="mt-3">
         <CardContent className="py-3 flex flex-wrap items-center gap-3">
           <div className="text-xs text-muted-foreground">
-            Changes influence the Cooking assistant, meal suggestions, and timers. Sabbath-aware logic prefers hands-off steps.
+            Changes influence the Cooking assistant, meal suggestions, and
+            timers. Sabbath-aware logic prefers hands-off steps.
           </div>
           <div className="ml-auto flex items-center gap-3">
             <Checkbox
               id="applyNow"
               onCheckedChange={(v) => v && applyToSession()}
             />
-            <Label htmlFor="applyNow" className="text-xs">Apply to current session now</Label>
+            <Label htmlFor="applyNow" className="text-xs">
+              Apply to current session now
+            </Label>
           </div>
         </CardContent>
       </Card>
@@ -613,7 +867,10 @@ function TagEditor({ label, value = [], onChange, placeholder }) {
   const add = () => {
     const v = (input || "").trim();
     if (!v) return;
-    const parts = v.split(",").map((s) => s.trim()).filter(Boolean);
+    const parts = v
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     const next = Array.from(new Set([...(value || []), ...parts]));
     onChange(next);
     setInput("");
@@ -629,18 +886,35 @@ function TagEditor({ label, value = [], onChange, placeholder }) {
           placeholder={placeholder}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
         />
-        <Button size="sm" onClick={add}>Add</Button>
+        <Button size="sm" onClick={add}>
+          Add
+        </Button>
       </div>
       <div className="flex flex-wrap gap-2">
         {(value || []).map((t, i) => (
-          <span key={`${t}-${i}`} className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+          <span
+            key={`${t}-${i}`}
+            className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs"
+          >
             {t}
-            <button className="text-muted-foreground hover:text-rose-600" onClick={() => remove(i)}>✕</button>
+            <button
+              className="text-muted-foreground hover:text-rose-600"
+              onClick={() => remove(i)}
+            >
+              ✕
+            </button>
           </span>
         ))}
-        {(!value || value.length === 0) && <span className="text-xs text-muted-foreground">None</span>}
+        {(!value || value.length === 0) && (
+          <span className="text-xs text-muted-foreground">None</span>
+        )}
       </div>
     </div>
   );

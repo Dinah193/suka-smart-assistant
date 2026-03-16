@@ -33,11 +33,17 @@
 // - All direct CookingPrefsStore manipulation is now a Reasoner responsibility.
 //
 // -----------------------------------------------------------------------------
+// ✅ Added (buildChecklist):
+// - Some UI components (TechniqueFeedbackBar) expect buildChecklist() to exist.
+// - This implementation is deterministic (no Reasoner call), browser-safe,
+//   and tries to derive a useful checklist from common plan shapes.
+//
+// -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectCookingContext } from "@/reasoner/selectors";
@@ -50,8 +56,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildCookingPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -116,7 +122,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       : {}),
   };
 
-  return buildShimResponse(false, mode, payload, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    payload,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -128,7 +140,8 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
  */
 function enforceBudget(reqLike, debug) {
   const domainBudget =
-    (budget && (budget.cookingStyles || budget.cooking || budget.household)) || {};
+    (budget && (budget.cookingStyles || budget.cooking || budget.household)) ||
+    {};
 
   const maxChars = domainBudget.maxChars || 20000;
   const serializedInput = JSON.stringify(reqLike.input || {});
@@ -165,7 +178,9 @@ function resolveShimMode(req, context) {
       context,
       runtime: req.runtime || {},
       source: SHIM_SOURCE,
-    }) || req.intent || "cooking.style.generate"
+    }) ||
+    req.intent ||
+    "cooking.style.generate"
   );
 }
 
@@ -328,7 +343,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -619,10 +637,11 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 11. Compose sessions (optional)
     // -------------------------------------------------
-    const sessions = await maybeComposeSessions(normalized, { domain, intent, input, runtime }, debug);
-
-    // Session start/step/complete events are emitted by SessionRunner,
-    // not this shim.
+    const sessions = await maybeComposeSessions(
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------------------------
     // 12. Cache store
@@ -643,7 +662,12 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 13. Optional Hub export (for familyFundMode)
     // -------------------------------------------------
-    await maybeExportToHub(sessions, normalized, { domain, intent, input, runtime }, debug);
+    await maybeExportToHub(
+      sessions,
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------------------------
     // 14. Final response
@@ -668,6 +692,215 @@ export async function invokeShim(req) {
       },
     ]);
   }
+}
+
+/* ------------------------------------------------------------------
+ * ✅ Deterministic checklist builder (UI helper)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Normalize checklist item into a consistent shape.
+ * @param {any} item
+ * @param {number} idx
+ */
+function normalizeChecklistItem(item, idx) {
+  if (item == null) {
+    return {
+      id: `chk_${idx}`,
+      label: "",
+      ok: false,
+      weight: 1,
+      category: "general",
+      tips: [],
+    };
+  }
+
+  if (typeof item === "string") {
+    return {
+      id: `chk_${idx}`,
+      label: item,
+      ok: false,
+      weight: 1,
+      category: "general",
+      tips: [],
+    };
+  }
+
+  const label = String(item.label || item.title || item.name || "").trim();
+  const ok =
+    typeof item.ok === "boolean"
+      ? item.ok
+      : typeof item.done === "boolean"
+      ? item.done
+      : typeof item.checked === "boolean"
+      ? item.checked
+      : false;
+
+  const weight =
+    typeof item.weight === "number" && Number.isFinite(item.weight)
+      ? item.weight
+      : 1;
+
+  const category = String(
+    item.category || item.group || item.section || "general"
+  ).trim();
+
+  const tipsRaw = item.tips || item.hints || item.notes || [];
+  const tips = Array.isArray(tipsRaw)
+    ? tipsRaw.map((t) => String(t)).filter(Boolean)
+    : tipsRaw
+    ? [String(tipsRaw)]
+    : [];
+
+  return {
+    id: String(item.id || item.key || `chk_${idx}`),
+    label,
+    ok,
+    weight,
+    category: category || "general",
+    tips,
+  };
+}
+
+/**
+ * Attempt to extract checklist candidates from common plan shapes:
+ * - payload.checklist (array)
+ * - payload.style?.checklist / stylePlan?.checklist
+ * - payload.style?.techniqueChecklist / techniqueChecklist
+ * - payload.plan?.steps / stylePlan?.steps => infer "prep/heat/season/finish" checks
+ */
+function deriveChecklistCandidates(payload) {
+  if (!payload || typeof payload !== "object") return [];
+
+  const direct =
+    payload.checklist ||
+    payload.items ||
+    payload.techniqueChecklist ||
+    payload.style?.checklist ||
+    payload.stylePlan?.checklist ||
+    payload.style?.techniqueChecklist ||
+    payload.stylePlan?.techniqueChecklist;
+
+  if (Array.isArray(direct)) return direct;
+
+  const steps =
+    payload.steps ||
+    payload.plan?.steps ||
+    payload.style?.steps ||
+    payload.stylePlan?.steps ||
+    payload.style?.stylePlan?.steps ||
+    payload.stylePlan?.stylePlan?.steps;
+
+  if (!Array.isArray(steps) || !steps.length) return [];
+
+  // Lightweight inference: look for common step keywords.
+  const text = steps
+    .map((s) => (typeof s === "string" ? s : s?.label || s?.title || s?.text))
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const inferred = [];
+
+  const add = (label, category, tips = []) => {
+    inferred.push({
+      label,
+      category,
+      tips,
+    });
+  };
+
+  add("Prep station ready (tools, pans, mise en place)", "prep", [
+    "Set out tools before heat goes on.",
+    "Measure salt/acid/fat early for consistency.",
+  ]);
+
+  if (/\bpreheat\b|\bheat\b|\bhot\b|\bsear\b/.test(text)) {
+    add("Heat management on track (preheat / steady temp)", "heat", [
+      "Preheat thoroughly before searing.",
+      "Adjust heat early to avoid overshooting.",
+    ]);
+  } else {
+    add("Heat plan chosen (low/medium/high) and monitored", "heat", [
+      "Decide target heat before starting.",
+      "Check pan response and adjust.",
+    ]);
+  }
+
+  if (/\bsalt\b|\bseason\b|\bspice\b|\bmarinad\b/.test(text)) {
+    add("Seasoning balanced (salt + aromatics + spice)", "seasoning", [
+      "Season in layers, not all at once.",
+      "Taste for salt/acid balance near the end.",
+    ]);
+  } else {
+    add("Flavor layers considered (salt/acid/fat/aromatics)", "seasoning", [
+      "Add aromatics early; adjust salt/acid late.",
+    ]);
+  }
+
+  if (/\brest\b|\bfinish\b|\bgarnish\b|\bserve\b/.test(text)) {
+    add("Finish is clean (rest, final taste, garnish)", "finish", [
+      "Rest proteins where applicable.",
+      "Final taste: salt/acid/heat.",
+    ]);
+  } else {
+    add("Final taste check (salt/acid/texture) before serving", "finish", [
+      "One last taste saves the dish.",
+    ]);
+  }
+
+  return inferred;
+}
+
+/**
+ * buildChecklist (exported)
+ * UI helper expected by TechniqueFeedbackBar.
+ *
+ * @param {Object} payload
+ * @param {Object} [runtime]
+ * @returns {{ ok: boolean, mode: string, data: { checklist: Array<Object>, score: number, categories: string[] } }}
+ */
+export function buildChecklist(payload = {}, runtime = {}) {
+  const candidates = deriveChecklistCandidates(payload);
+  const checklist = (Array.isArray(candidates) ? candidates : [])
+    .map((it, idx) => normalizeChecklistItem(it, idx))
+    .filter((it) => it.label);
+
+  // Score is a simple weighted completion ratio if items contain ok=true.
+  let wTotal = 0;
+  let wOk = 0;
+  for (const it of checklist) {
+    const w = Number(it.weight || 1);
+    wTotal += w;
+    if (it.ok) wOk += w;
+  }
+  const score = wTotal > 0 ? Math.round((wOk / wTotal) * 100) : 0;
+
+  const categories = Array.from(
+    new Set(checklist.map((c) => c.category).filter(Boolean))
+  );
+
+  // Optional event for analytics/debug (safe/no-op if unused)
+  emit({
+    type: "cooking.style.checklist.built",
+    ts: isoNow(),
+    source: SHIM_SOURCE,
+    data: {
+      score,
+      count: checklist.length,
+      categories,
+      runtime: {
+        userId: runtime?.userId || null,
+        requestId: runtime?.requestId || null,
+      },
+    },
+  });
+
+  return {
+    ok: true,
+    mode: "cooking.style.buildChecklist",
+    data: { checklist, score, categories },
+  };
 }
 
 /* ------------------------------------------------------------------
@@ -778,6 +1011,9 @@ export async function handleCommand(command, payload = {}, runtime = {}) {
       return markStepComplete(payload, runtime);
     case "learnFromFeedback":
       return learnFromFeedback(payload, runtime);
+    // ✅ allow older UI to call "buildChecklist" through command router if needed
+    case "buildChecklist":
+      return buildChecklist(payload, runtime);
     default:
       return buildShimResponse(
         false,
@@ -810,6 +1046,7 @@ const CookingStylesShim = {
   startPlanRun,
   markStepComplete,
   learnFromFeedback,
+  buildChecklist, // ✅ added
 };
 
 export default CookingStylesShim;

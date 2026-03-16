@@ -1,0 +1,762 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+
+  "meta": {
+    "id": "cuisines.peruvian.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Peruvian • Cuisine Ruleset",
+    "cuisineId": "cuisines.peruvian",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Catalogs",
+      "notes": [
+        "Deterministic cuisine rules used to score/boost Peruvian matches, normalize common imports, and guide substitutions.",
+        "Rules rely on SSA evaluation context conventions (candidate.* and request.* paths)."
+      ]
+    }
+  },
+
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.peruvian",
+    "locales": ["en-US", "es-PE", "es-419"]
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "and",
+        "or",
+        "the",
+        "with",
+        "de",
+        "del",
+        "la",
+        "el",
+        "con",
+        "y"
+      ]
+    },
+
+    "ingredientAliases": {
+      "ingredient.aji_amarillo_paste": [
+        "ají amarillo",
+        "aji amarillo",
+        "aji amarillo paste",
+        "aji amarillo puree",
+        "ají amarillo pasta",
+        "pasta de ají amarillo",
+        "ají amarillo molido"
+      ],
+      "ingredient.aji_panca_paste": [
+        "ají panca",
+        "aji panca",
+        "aji panca paste",
+        "aji panca puree",
+        "pasta de ají panca"
+      ],
+      "ingredient.rocoto_paste": [
+        "rocoto",
+        "rocoto paste",
+        "pasta de rocoto",
+        "rocoto molido"
+      ],
+      "ingredient.red_onion": [
+        "red onion",
+        "purple onion",
+        "cebolla morada",
+        "cebolla roja",
+        "onion (red)"
+      ],
+      "ingredient.lime_juice": [
+        "lime juice",
+        "jugo de lima",
+        "jugo de limón",
+        "limon juice",
+        "fresh lime juice"
+      ],
+      "ingredient.cilantro": [
+        "cilantro",
+        "coriander leaves",
+        "coriander",
+        "culantro (note: stronger)",
+        "hojas de cilantro"
+      ],
+      "ingredient.purple_corn": [
+        "purple corn",
+        "maíz morado",
+        "maiz morado",
+        "purple corn cobs",
+        "chicha morada corn"
+      ],
+      "ingredient.evaporated_milk": [
+        "evaporated milk",
+        "leche evaporada",
+        "evaporated milk can"
+      ],
+      "ingredient.feta_or_queso_fresco": [
+        "queso fresco",
+        "feta",
+        "fresh farmer cheese",
+        "queso andino",
+        "queso fresco (crumbled)"
+      ],
+      "ingredient.fish_white": [
+        "white fish",
+        "white fish fillet",
+        "corvina",
+        "sea bass",
+        "halibut",
+        "tilapia (fallback)",
+        "mahi mahi"
+      ],
+      "ingredient.soy_sauce": [
+        "soy sauce",
+        "soya sauce",
+        "salsa de soya",
+        "shoyu"
+      ],
+      "ingredient.vinegar_red_wine": [
+        "red wine vinegar",
+        "vinagre tinto",
+        "vinagre de vino tinto"
+      ],
+      "ingredient.beans_black": [
+        "black beans",
+        "frijoles negros",
+        "frejoles negros",
+        "black turtle beans"
+      ]
+    },
+
+    "dishAliases": {
+      "peruvian.ceviche_clasico": [
+        "ceviche",
+        "ceviche clásico",
+        "ceviche clasico",
+        "ceviche peruano"
+      ],
+      "peruvian.leche_de_tigre": [
+        "leche de tigre",
+        "tigers milk",
+        "tiger's milk"
+      ],
+      "peruvian.aji_verde": [
+        "ají verde",
+        "aji verde",
+        "peruvian green sauce",
+        "green sauce (peruvian)"
+      ],
+      "peruvian.huancaina_sauce": [
+        "huancaína",
+        "huancaina",
+        "salsa huancaína",
+        "salsa huancaina"
+      ],
+      "peruvian.lomo_saltado": [
+        "lomo saltado",
+        "peruvian beef stir fry",
+        "lomo saltado con papas"
+      ],
+      "peruvian.arroz_chaufa": [
+        "arroz chaufa",
+        "chaufa",
+        "peruvian fried rice",
+        "chifa fried rice"
+      ],
+      "peruvian.aji_de_gallina": [
+        "ají de gallina",
+        "aji de gallina",
+        "creamy aji chicken"
+      ],
+      "peruvian.causa_limena": [
+        "causa",
+        "causa limeña",
+        "causa limena",
+        "causa rellena"
+      ],
+      "peruvian.seco_de_pollo": [
+        "seco de pollo",
+        "cilantro chicken stew",
+        "seco"
+      ],
+      "peruvian.anticuchos": [
+        "anticuchos",
+        "anticuchos de corazón",
+        "anticuchos de corazon"
+      ],
+      "peruvian.tacu_tacu": ["tacu tacu", "tacu-tacu", "rice and beans cake"],
+      "peruvian.chicha_morada": [
+        "chicha morada",
+        "purple corn drink",
+        "maíz morado drink",
+        "maiz morado drink"
+      ]
+    },
+
+    "equipmentAliases": {
+      "equipment.wok_or_large_skillet": [
+        "wok",
+        "carbon steel wok",
+        "large skillet",
+        "large frying pan"
+      ],
+      "equipment.blender": [
+        "blender",
+        "immersion blender",
+        "food processor (fallback)"
+      ],
+      "equipment.grill_or_broiler": [
+        "grill",
+        "charcoal grill",
+        "gas grill",
+        "broiler",
+        "oven broiler"
+      ]
+    },
+
+    "methodAliases": {
+      "technique.stir_fry_wok": ["stir fry", "stir-fry", "wok fry", "saltear"],
+      "technique.ceviche_cure": [
+        "ceviche",
+        "cure in citrus",
+        "marinate in lime",
+        "curtido en cítrico"
+      ],
+      "technique.toast_paste_gently": [
+        "bloom paste",
+        "toast chile paste",
+        "sofrito paste",
+        "rehogar pasta"
+      ]
+    }
+  },
+
+  "globals": {
+    "cuisineId": "cuisines.peruvian",
+    "plannerBias": {
+      "signatureTokens": [
+        "ají",
+        "aji",
+        "amarillo",
+        "panca",
+        "rocoto",
+        "huancaína",
+        "huancaina",
+        "chifa",
+        "chaufa",
+        "saltado",
+        "leche de tigre",
+        "ceviche",
+        "causa",
+        "tacu tacu",
+        "maíz morado",
+        "maiz morado",
+        "chicha morada"
+      ],
+      "signatureIngredientIds": [
+        "ingredient.aji_amarillo_paste",
+        "ingredient.aji_panca_paste",
+        "ingredient.rocoto_paste",
+        "ingredient.purple_corn",
+        "ingredient.lime_juice",
+        "ingredient.cilantro",
+        "ingredient.red_onion"
+      ],
+      "signatureTechniqueIds": [
+        "technique.ceviche_cure",
+        "technique.stir_fry_wok",
+        "technique.toast_paste_gently"
+      ],
+      "signatureDishIds": [
+        "peruvian.ceviche_clasico",
+        "peruvian.lomo_saltado",
+        "peruvian.arroz_chaufa",
+        "peruvian.aji_de_gallina",
+        "peruvian.causa_limena"
+      ]
+    },
+    "adapterDefaults": {
+      "heatDefaults": {
+        "targetHeatTypical": 2,
+        "maxHeatForWeeknight": 3,
+        "preferFruitHeatOverBurn": true
+      },
+      "acidDefaults": {
+        "preferLimeOverLemon": true
+      },
+      "servingDefaults": {
+        "preferFamilyStyle": true
+      }
+    }
+  },
+
+  "rules": [
+    {
+      "id": "peru.boost.signature_tokens",
+      "enabled": true,
+      "priority": 100,
+      "title": "Boost Peruvian match when dish text contains signature tokens",
+      "description": "If candidate text/aliases/tags include Peruvian signature tokens, increase cuisine match score.",
+      "tags": ["score", "match", "tokens"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "matches",
+            "path": "candidate.text",
+            "regex": "(?i)\\b(ceviche|leche\\s+de\\s+tigre|aji\\s+amarillo|ají\\s+amarillo|aji\\s+panca|ají\\s+panca|rocoto|huancaina|huanca[ií]na|lomo\\s+saltado|arroz\\s+chaufa|chifa|tacu\\s*-?\\s*tacu|causa\\s+lime[nñ]a|chicha\\s+morada|ma[ií]z\\s+morad[oó])\\b"
+          },
+          {
+            "type": "intersects",
+            "path": "candidate.tags",
+            "values": [
+              "peruvian",
+              "cuisine.peruvian",
+              "influence.chifa",
+              "influence.nikkei",
+              "style.aji_forward",
+              "style.lime_forward"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "candidate.title",
+            "regex": "(?i)\\b(ceviche|saltado|chaufa|huanca[ií]na|aji|ají|anticuchos|tacu\\s*-?\\s*tacu|causa|chicha)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.peruvian" },
+          { "type": "scoreAdjust", "scoreDelta": 8 }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.boost.signature_ingredients",
+      "enabled": true,
+      "priority": 95,
+      "title": "Boost Peruvian match when signature ingredients appear",
+      "description": "If candidate ingredient IDs intersect key Peruvian pantry markers, boost score and add cuisine tag.",
+      "tags": ["score", "match", "ingredients"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "candidate.ingredientIds",
+        "values": [
+          "ingredient.aji_amarillo_paste",
+          "ingredient.aji_panca_paste",
+          "ingredient.rocoto_paste",
+          "ingredient.purple_corn",
+          "ingredient.lime_juice",
+          "ingredient.red_onion",
+          "ingredient.cilantro"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.peruvian" },
+          { "type": "scoreAdjust", "scoreDelta": 6 }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.tag.chifa_when_soy_and_wok",
+      "enabled": true,
+      "priority": 90,
+      "title": "Tag Chifa influence when soy sauce + wok stir-fry appear",
+      "description": "Peruvian-Chinese fusion (chifa) strongly correlates with soy sauce and wok/large-skillet stir-fry methods.",
+      "tags": ["tag", "chifa", "pattern"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": ["ingredient.soy_sauce", "ingredient.green_onion"]
+          },
+          {
+            "type": "intersects",
+            "path": "candidate.techniqueIds",
+            "values": ["technique.stir_fry_wok", "technique.sear_hot_fast"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "influence.chifa" },
+          { "type": "addTag", "value": "style.wok_forward" },
+          { "type": "scoreAdjust", "scoreDelta": 3 }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.tag.nikkei_when_lime_and_fish",
+      "enabled": true,
+      "priority": 88,
+      "title": "Tag Nikkei influence when lime + raw fish cure patterns appear",
+      "description": "Nikkei patterns often show as citrus-cured seafood + clean aromatics.",
+      "tags": ["tag", "nikkei", "pattern"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": ["ingredient.lime_juice"]
+          },
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": ["ingredient.fish_white"]
+          },
+          {
+            "type": "intersects",
+            "path": "candidate.techniqueIds",
+            "values": ["technique.ceviche_cure", "technique.adjust_acid_salt"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "influence.nikkei" },
+          { "type": "addTag", "value": "style.lime_forward" },
+          { "type": "scoreAdjust", "scoreDelta": 3 }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.guard.ceviche_no_leftovers",
+      "enabled": true,
+      "priority": 80,
+      "title": "Ceviche: discourage leftovers and freezer tags",
+      "description": "Ceviche is best fresh; discourage planning as leftovers/freezer item.",
+      "tags": ["safety", "quality", "planner"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "candidate.id",
+            "value": "peruvian.ceviche_clasico"
+          },
+          { "type": "hasTag", "value": "no_cook" },
+          {
+            "type": "matches",
+            "path": "candidate.title",
+            "regex": "(?i)\\bceviche\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "candidate.signals.leftoversGood",
+            "value": false
+          },
+          {
+            "type": "set",
+            "path": "candidate.signals.freezerFriendly",
+            "value": false
+          },
+          { "type": "addTag", "value": "quality.best_fresh" }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.preference.lime_over_lemon",
+      "enabled": true,
+      "priority": 70,
+      "title": "Prefer lime where acid is needed (Peruvian default)",
+      "description": "If acid role exists and lime is not present but lemon is, suggest/normalize toward lime for Peruvian profiles.",
+      "tags": ["normalization", "substitution", "acid"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": ["ingredient.lemon_juice"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "candidate.ingredientIds",
+                "values": ["ingredient.lime_juice"]
+              }
+            ]
+          },
+          { "type": "hasTag", "value": "style.lime_forward" }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "suggest.use_lime" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "adapter.suggestion",
+              "payload": {
+                "kind": "ingredient_preference",
+                "cuisineId": "cuisines.peruvian",
+                "prefer": "ingredient.lime_juice",
+                "over": "ingredient.lemon_juice",
+                "note": "Peruvian flavor balance often expects lime; lemon is acceptable but less typical."
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.preference.aji_amarillo_heat",
+      "enabled": true,
+      "priority": 68,
+      "title": "Prefer ají amarillo as default fruity heat",
+      "description": "If recipe uses generic chili heat and Peruvian signature is detected, suggest ají amarillo as primary heat option.",
+      "tags": ["substitution", "heat", "aji"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.peruvian" },
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": [
+              "ingredient.jalapeno",
+              "ingredient.chili_flakes",
+              "ingredient.chili_powder"
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "candidate.ingredientIds",
+                "values": [
+                  "ingredient.aji_amarillo_paste",
+                  "ingredient.rocoto_paste",
+                  "ingredient.aji_panca_paste"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "suggest.aji_amarillo" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "adapter.suggestion",
+              "payload": {
+                "kind": "ingredient_substitution",
+                "cuisineId": "cuisines.peruvian",
+                "for": "ingredient.generic_chili_heat",
+                "options": [
+                  "ingredient.aji_amarillo_paste",
+                  "ingredient.rocoto_paste",
+                  "ingredient.aji_panca_paste"
+                ],
+                "note": "Ají amarillo brings the classic fruity Peruvian heat; rocoto is hotter; ají panca is smokier/deeper."
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.sauce.aji_verde_for_grilled_or_roasted_protein",
+      "enabled": true,
+      "priority": 60,
+      "title": "Suggest ají verde for grilled/roasted proteins",
+      "description": "If grilling/roasting is present and Peruvian match exists, suggest ají verde as a default condiment.",
+      "tags": ["pairing", "condiment", "planner"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.peruvian" },
+          {
+            "type": "intersects",
+            "path": "candidate.techniqueIds",
+            "values": [
+              "technique.grill",
+              "technique.roast",
+              "technique.sear_hot_fast"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "suggest.condiment_aji_verde" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "planner.pairing_suggestion",
+              "payload": {
+                "cuisineId": "cuisines.peruvian",
+                "suggestDishId": "peruvian.aji_verde",
+                "note": "Ají verde is a common Peruvian condiment for grilled meats, chicken, fries, and bowls."
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.weeknight.bias_quick_chifa",
+      "enabled": true,
+      "priority": 55,
+      "title": "Weeknight boost for quick chifa patterns",
+      "description": "If total minutes are short and chifa tags are present, boost score to surface as weeknight-friendly.",
+      "tags": ["weeknight", "score"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "influence.chifa" },
+          { "type": "lte", "path": "candidate.time.totalMins", "value": 30 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "weeknight" },
+          { "type": "scoreAdjust", "scoreDelta": 2 }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.batch.bias_braises_and_stews",
+      "enabled": true,
+      "priority": 50,
+      "title": "Batch-cooking boost for braises and stews",
+      "description": "If stew/braise methods appear, mark batch/freezer friendly and boost for batch planning.",
+      "tags": ["batch", "freezer", "planner"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "candidate.techniqueIds",
+            "values": ["technique.braise", "technique.simmer", "technique.stew"]
+          },
+          {
+            "type": "matches",
+            "path": "candidate.title",
+            "regex": "(?i)\\b(seco|estofad|stew|brais)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "batch_friendly" },
+          { "type": "addTag", "value": "freezer_friendly" },
+          {
+            "type": "set",
+            "path": "candidate.signals.batchFriendly",
+            "value": true
+          },
+          {
+            "type": "set",
+            "path": "candidate.signals.freezerFriendly",
+            "value": true
+          },
+          { "type": "scoreAdjust", "scoreDelta": 2 }
+        ]
+      }
+    },
+
+    {
+      "id": "peru.safety.raw_fish_prompt_chill",
+      "enabled": true,
+      "priority": 40,
+      "title": "Raw fish + citrus cure: emit chill/safety prompt",
+      "description": "If raw fish + citrus cure is detected, emit a safety prompt event for UI helpers.",
+      "tags": ["safety", "seafood"],
+      "source": "SSA Catalogs • Peruvian ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": ["ingredient.fish_white"]
+          },
+          {
+            "type": "intersects",
+            "path": "candidate.ingredientIds",
+            "values": ["ingredient.lime_juice"]
+          },
+          {
+            "type": "intersects",
+            "path": "candidate.techniqueIds",
+            "values": ["technique.ceviche_cure"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "safety.prompt",
+              "payload": {
+                "kind": "food_safety",
+                "topic": "raw_fish_citrus_cure",
+                "cuisineId": "cuisines.peruvian",
+                "note": "Keep fish very cold; use sushi-grade or very fresh fish; cure just before serving; avoid long holds."
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "notes": [
+    "Canonical Korean dishes catalog for SSA",
+    "Uses DishV2 exclusively for deterministic planning"
+  ],
+
+  "meta": {
+    "id": "cuisines.korean.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Korean Dishes",
+    "cuisineId": "cuisines.korean",
+    "status": "canonical",
+    "description": "Core Korean dishes used by SSA planners, meal builders, and search.",
+    "version": "1.0.0",
+    "author": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "updatedAt": "2026-01-21T00:00:00.000Z"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "dish.kimchi",
+      "label": "Kimchi",
+      "aka": ["Baechu Kimchi"],
+      "subprofiles": ["korean.banchan"],
+      "category": "banchan",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 40, "totalMins": 2880, "handsOffMins": 2800 },
+      "servingStyles": ["family_style"],
+      "mealArchetypes": ["korean.meal.rice_soup_banchan"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": ["ingredient.napa_cabbage"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.ferment"],
+      "equipmentRecommended": ["equipment.fermentation_jar"],
+      "equipmentMinimum": ["equipment.mixing_bowl"],
+      "ingredientsCore": [
+        "ingredient.napa_cabbage",
+        "ingredient.gochugaru",
+        "ingredient.garlic",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.shellfish"],
+      "dietFlags": ["diet.vegetarian_optional"],
+      "plannerTags": ["banchan", "fermented", "make_ahead"]
+    },
+
+    {
+      "id": "dish.bulgogi",
+      "label": "Bulgogi",
+      "aka": ["Korean Marinated Beef"],
+      "subprofiles": ["korean.bbq"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 60, "handsOffMins": 30 },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["korean.meal.bbq_ssam"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.marinate", "method.grill", "method.sear"],
+      "equipmentRecommended": [
+        "equipment.cast_iron_skillet",
+        "equipment.grill_pan"
+      ],
+      "equipmentMinimum": ["equipment.skillet"],
+      "ingredientsCore": [
+        "ingredient.beef",
+        "ingredient.ganjang",
+        "ingredient.garlic",
+        "ingredient.sugar",
+        "ingredient.sesame_oil"
+      ],
+      "allergens": ["allergen.soy", "allergen.sesame"],
+      "dietFlags": [],
+      "plannerTags": ["bbq", "protein", "weeknight"]
+    },
+
+    {
+      "id": "dish.kimchi_jjigae",
+      "label": "Kimchi Jjigae",
+      "aka": ["Kimchi Stew"],
+      "subprofiles": ["korean.soups_stews"],
+      "category": "stew",
+      "difficulty": 2,
+      "heatTypical": 3,
+      "time": { "activeMins": 20, "totalMins": 45, "handsOffMins": 25 },
+      "servingStyles": ["bowls"],
+      "mealArchetypes": ["korean.meal.stew_set"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "stew_base",
+          "items": ["dish.kimchi"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer"],
+      "equipmentRecommended": ["equipment.lidded_pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.kimchi",
+        "ingredient.gochujang",
+        "ingredient.tofu"
+      ],
+      "allergens": ["allergen.soy", "allergen.shellfish"],
+      "dietFlags": ["diet.vegetarian_optional"],
+      "plannerTags": ["stew", "comfort", "fermented"]
+    },
+
+    {
+      "id": "dish.bibimbap",
+      "label": "Bibimbap",
+      "aka": ["Mixed Rice Bowl"],
+      "subprofiles": ["korean.home_cooking"],
+      "category": "rice_bowl",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 40, "handsOffMins": 10 },
+      "servingStyles": ["bowls"],
+      "mealArchetypes": ["korean.meal.rice_soup_banchan"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.korean_rice"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.assemble"],
+      "equipmentRecommended": ["equipment.rice_cooker"],
+      "equipmentMinimum": ["equipment.bowl"],
+      "ingredientsCore": [
+        "ingredient.korean_rice",
+        "ingredient.gochujang",
+        "ingredient.vegetables_mixed",
+        "ingredient.eggs"
+      ],
+      "allergens": ["allergen.soy", "allergen.egg"],
+      "dietFlags": ["diet.vegetarian_optional"],
+      "plannerTags": ["rice_bowl", "banchan_remix", "fresh"]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.korean": [
+        "dish.kimchi",
+        "dish.bulgogi",
+        "dish.kimchi_jjigae",
+        "dish.bibimbap"
+      ]
+    },
+    "byArchetype": {
+      "korean.meal.rice_soup_banchan": ["dish.kimchi", "dish.bibimbap"],
+      "korean.meal.bbq_ssam": ["dish.bulgogi"],
+      "korean.meal.stew_set": ["dish.kimchi_jjigae"]
+    },
+    "aliasIndex": {
+      "baechu kimchi": "dish.kimchi",
+      "korean marinated beef": "dish.bulgogi",
+      "kimchi stew": "dish.kimchi_jjigae",
+      "mixed rice bowl": "dish.bibimbap"
+    },
+    "keywordIndex": {
+      "kimchi": ["dish.kimchi", "dish.kimchi_jjigae"],
+      "bbq": ["dish.bulgogi"],
+      "rice bowl": ["dish.bibimbap"]
+    },
+    "tagIndex": {
+      "banchan": ["dish.kimchi"],
+      "bbq": ["dish.bulgogi"],
+      "stew": ["dish.kimchi_jjigae"],
+      "rice_bowl": ["dish.bibimbap"]
+    },
+    "bySubprofile": {
+      "korean.banchan": ["dish.kimchi"],
+      "korean.bbq": ["dish.bulgogi"],
+      "korean.soups_stews": ["dish.kimchi_jjigae"],
+      "korean.home_cooking": ["dish.bibimbap"]
+    },
+    "byCategory": {
+      "banchan": ["dish.kimchi"],
+      "main": ["dish.bulgogi"],
+      "stew": ["dish.kimchi_jjigae"],
+      "rice_bowl": ["dish.bibimbap"]
+    }
+  }
+}

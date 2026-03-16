@@ -1,12 +1,18 @@
 // File: C:\Users\larho\suka-smart-assistant\src\ui\components\scheduling\PlanBreadcrumbs.jsx
-import React, { useEffect, useMemo, useReducer, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useCallback,
+} from "react";
 import PropTypes from "prop-types";
 
 // 🔌 Shared services (assumed to exist per SSA conventions)
-import eventBus from "../../../services/eventBus";
+import eventBus from "../../../services/events/eventBus";
 import featureFlags from "../../../config/featureFlags";
-import HubPacketFormatter from "../../../hub/HubPacketFormatter";
-import FamilyFundConnector from "../../../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * PlanBreadcrumbs
@@ -84,7 +90,9 @@ function reducer(state, action) {
       if (!item?.changeId) return state;
 
       // De-dupe by changeId (latest wins)
-      const existingIdx = state.items.findIndex((i) => i.changeId === item.changeId);
+      const existingIdx = state.items.findIndex(
+        (i) => i.changeId === item.changeId
+      );
       let next = [...state.items];
       if (existingIdx >= 0) {
         next[existingIdx] = { ...next[existingIdx], ...item };
@@ -105,14 +113,17 @@ function reducer(state, action) {
 // Component
 // ----------------------------------------------------------------------------------
 export default function PlanBreadcrumbs({
-  planId,          // optional; if omitted, show all for sessionId
-  sessionId,       // optional; if omitted, show all plan events encountered
+  planId, // optional; if omitted, show all for sessionId
+  sessionId, // optional; if omitted, show all plan events encountered
   domain = "general",
   maxItems = 25,
   compact = false,
   className = "",
 }) {
-  const [state, dispatch] = useReducer(reducer, { ...initialState, max: maxItems });
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    max: maxItems,
+  });
   const liveRef = useRef(null);
 
   // Subscribe to relevant change events
@@ -124,10 +135,18 @@ export default function PlanBreadcrumbs({
 
         // Filter for planId/sessionId if provided
         if (planId && normalized.planId && normalized.planId !== planId) return;
-        if (sessionId && normalized.sessionId && normalized.sessionId !== sessionId) return;
+        if (
+          sessionId &&
+          normalized.sessionId &&
+          normalized.sessionId !== sessionId
+        )
+          return;
 
         dispatch({ type: "PUSH", item: normalized });
-        announceLive(`${normalized.reason.code}: ${normalized.reason.message}`, liveRef);
+        announceLive(
+          `${normalized.reason.code}: ${normalized.reason.message}`,
+          liveRef
+        );
       })
     );
 
@@ -173,7 +192,10 @@ export default function PlanBreadcrumbs({
           planId: change.planId || planId,
           sessionId: change.sessionId || sessionId,
           domain: change.domain || domain,
-          reason: { code: "USER_REVERT", message: "Revert to state before changeId" },
+          reason: {
+            code: "USER_REVERT",
+            message: "Revert to state before changeId",
+          },
         },
         { exportToHub: true }
       );
@@ -215,7 +237,12 @@ export default function PlanBreadcrumbs({
   if (items.length === 0) {
     return (
       <div className={`text-xs text-slate-500 ${className}`}>
-        <span className="sr-only" ref={liveRef} aria-live="polite" aria-atomic="true" />
+        <span
+          className="sr-only"
+          ref={liveRef}
+          aria-live="polite"
+          aria-atomic="true"
+        />
         No changes yet.
       </div>
     );
@@ -223,7 +250,11 @@ export default function PlanBreadcrumbs({
 
   return (
     <div className={`print:hidden ${className}`}>
-      <div className={`flex items-center justify-between ${compact ? "mb-1" : "mb-2"}`}>
+      <div
+        className={`flex items-center justify-between ${
+          compact ? "mb-1" : "mb-2"
+        }`}
+      >
         <div className="flex items-center gap-2">
           <span className="inline-flex h-2 w-2 rounded-full bg-slate-400" />
           <h3 className="text-xs font-semibold text-slate-800">
@@ -250,7 +281,9 @@ export default function PlanBreadcrumbs({
             {/* Node dot */}
             <span
               aria-hidden="true"
-              className={`absolute -left-[7px] top-2 h-2 w-2 rounded-full ${severityDot(c.reason?.severity)}`}
+              className={`absolute -left-[7px] top-2 h-2 w-2 rounded-full ${severityDot(
+                c.reason?.severity
+              )}`}
             />
             <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-sm">
               <div className="flex items-start justify-between gap-2">
@@ -258,7 +291,11 @@ export default function PlanBreadcrumbs({
                   <div className="text-xs font-medium text-slate-900 truncate">
                     {labelForType(c.type)}{" "}
                     <span className="text-[10px] text-slate-500 font-normal">
-                      · {new Date(c.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      ·{" "}
+                      {new Date(c.ts).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
                   <div className="text-[11px] text-slate-700">
@@ -266,9 +303,7 @@ export default function PlanBreadcrumbs({
                   </div>
 
                   {/* Impact chips */}
-                  {hasImpact(c.impact) && (
-                    <ImpactChips impact={c.impact} />
-                  )}
+                  {hasImpact(c.impact) && <ImpactChips impact={c.impact} />}
 
                   {/* Links (optional) */}
                   {Array.isArray(c.links) && c.links.length > 0 && (
@@ -324,7 +359,12 @@ export default function PlanBreadcrumbs({
       </ol>
 
       {/* ARIA live region for brief announcements */}
-      <span className="sr-only" ref={liveRef} aria-live="polite" aria-atomic="true" />
+      <span
+        className="sr-only"
+        ref={liveRef}
+        aria-live="polite"
+        aria-atomic="true"
+      />
     </div>
   );
 }
@@ -345,10 +385,16 @@ function Reason({ reason }) {
   if (!reason) return <span>Unspecified reason.</span>;
   const sev = (reason.severity || "low").toLowerCase();
   const sevClass =
-    sev === "high" ? "text-red-700" : sev === "medium" ? "text-amber-700" : "text-emerald-700";
+    sev === "high"
+      ? "text-red-700"
+      : sev === "medium"
+      ? "text-amber-700"
+      : "text-emerald-700";
   return (
     <>
-      <span className={`font-semibold ${sevClass}`}>{reason.code || "REASON"}</span>
+      <span className={`font-semibold ${sevClass}`}>
+        {reason.code || "REASON"}
+      </span>
       {": "}
       <span>{reason.message || "No description provided."}</span>
       {reason.actor && (
@@ -434,7 +480,9 @@ function normalizeChangeEvent(type, evt) {
       data.itemId ||
       data.sessionId ||
       data.planId;
-    const changeId = upstreamId ? `${type}:${String(upstreamId)}` : `${type}:${ts}`;
+    const changeId = upstreamId
+      ? `${type}:${String(upstreamId)}`
+      : `${type}:${ts}`;
 
     const base = {
       changeId,
@@ -511,17 +559,22 @@ function buildImpact(type, d) {
     case "timer.overrun":
     case "schedule.overrun.detected":
       return {
-        minutesAdded: toMinutes(Math.max(0, (d?.deltaMs ?? 0))),
+        minutesAdded: toMinutes(Math.max(0, d?.deltaMs ?? 0)),
         note: "Overrun detected",
       };
     case "inventory.shortage.detected":
-      return { items: Array.isArray(d?.items) ? d.items : [], note: "Inventory shortage" };
+      return {
+        items: Array.isArray(d?.items) ? d.items : [],
+        note: "Inventory shortage",
+      };
     case "garden.harvest.logged":
       return { note: "Harvest logged" };
     case "meal.executed":
       return { note: "Meal completed" };
     case "schedule.resource.resolution":
-      return { note: `Resource resolution: ${d?.resolution?.strategy || "unknown"}` };
+      return {
+        note: `Resource resolution: ${d?.resolution?.strategy || "unknown"}`,
+      };
     default:
       return undefined;
   }
@@ -568,9 +621,13 @@ function messageFor(type, d) {
     case "schedule.autofit":
       return "Autofit applied to recover timeline.";
     case "schedule.resource.resolution":
-      return `Resolved resource overlap (${d?.resolution?.strategy || "strategy"}).`;
+      return `Resolved resource overlap (${
+        d?.resolution?.strategy || "strategy"
+      }).`;
     case "session.task.split":
-      return `Task split with ratio ${Number(d?.ratio || d?.resolution?.ratio || 0.5)}`;
+      return `Task split with ratio ${Number(
+        d?.ratio || d?.resolution?.ratio || 0.5
+      )}`;
     case "session.task.skip":
       return "Task skipped.";
     case "timer.overrun":

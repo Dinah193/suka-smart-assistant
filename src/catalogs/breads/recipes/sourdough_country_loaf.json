@@ -1,0 +1,307 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.sourdough_country_loaf",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Sourdough Country Loaf",
+    "subtitle": "Classic crusty boule/batard • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Canonical baseline for a classic sourdough country loaf with a strong crust and open, chewy crumb."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "sourdough",
+    "subprofiles": ["country-loaf", "boule", "batard"],
+    "mealArchetypes": ["bread", "table bread", "toast"],
+    "servingStyles": ["boule", "batard", "sliced"],
+    "plannerTags": [
+      "bread",
+      "sourdough",
+      "country loaf",
+      "boule",
+      "batard",
+      "crusty",
+      "fermented"
+    ]
+  },
+
+  "yield": {
+    "servings": 14,
+    "servingSize": { "value": 1, "unit": "slice" },
+    "notes": "1 medium loaf (~900g baked). Shape as a boule or batard."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 930,
+    "totalMins": 975
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "scale", "bench scraper", "oven"],
+    "recommended": [
+      "Dutch oven (or combo cooker)",
+      "lame or sharp razor",
+      "proofing basket (banneton) or bowl + towel",
+      "instant-read thermometer (optional)"
+    ],
+    "optional": [
+      "spray bottle",
+      "rice flour (for banneton)",
+      "pizza stone + steam pan (alt bake method)"
+    ]
+  },
+
+  "dietFlags": ["vegan"],
+  "allergens": ["wheat", "gluten"],
+
+  "signals": {
+    "bread": true,
+    "sourdough": true,
+    "crusty": true,
+    "artisanLoaf": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "none",
+    "saltiness": "moderate",
+    "richness": "low",
+    "crumb": "chewy/open",
+    "crust": "thick/crisp",
+    "notes": "Balanced tang (depending on fermentation), wheaty aroma, crackly crust."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour_bread",
+      "label": "Bread flour (or strong all-purpose)",
+      "role": "base",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "For fresh milled flour, see Fresh-Milled Notes (you may need higher hydration and/or a blend)."
+    },
+    {
+      "id": "flour_whole_wheat",
+      "label": "Whole wheat flour (fresh milled or commercial)",
+      "role": "flavor",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "Adds strength, flavor, and fermentation activity. You can increase to 100g for a more rustic loaf."
+    },
+    {
+      "id": "water",
+      "label": "Water (room temp to slightly warm, ~75–82°F / 24–28°C)",
+      "role": "hydration",
+      "amount": { "value": 375, "unit": "g" },
+      "notes": "This is 75% hydration based on total flour (500g). Hold back 25g and add during mixing if dough can take it."
+    },
+    {
+      "id": "starter",
+      "label": "Active sourdough starter (100% hydration, bubbly/at peak)",
+      "role": "leavening",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": "100g starter contributes ~50g flour + ~50g water to the dough."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" }
+    },
+    {
+      "id": "rice_flour",
+      "label": "Rice flour (for dusting banneton, optional)",
+      "role": "prep",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Build/refresh starter (if needed)",
+      "instructions": [
+        "Use starter at or near peak activity: doubled, bubbly, and elastic.",
+        "If your starter is sluggish, feed it 4–8 hours before mixing (timing depends on room temperature)."
+      ],
+      "handsOffMins": 360,
+      "timers": [{ "label": "Starter peak window (estimate)", "mins": 360 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Autolyse (flour + water rest)",
+      "instructions": [
+        "In a large bowl, mix bread flour + whole wheat flour with 350g of the water until no dry flour remains.",
+        "Cover and rest 30–60 minutes.",
+        "This improves gluten development and helps achieve a more open crumb."
+      ],
+      "handsOffMins": 45,
+      "timers": [{ "label": "Autolyse", "mins": 45 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Mix in starter + salt",
+      "instructions": [
+        "Add the active starter to the autolysed dough and pinch/fold until mostly incorporated.",
+        "Dissolve salt in the remaining 25g water (or part of it) and add to the dough.",
+        "Mix by hand (Rubaud method or folds) until the dough feels cohesive and slightly elastic."
+      ],
+      "activeMins": 10
+    },
+    {
+      "id": "step_04",
+      "title": "Bulk fermentation with stretch-and-folds",
+      "instructions": [
+        "Bulk ferment 3.5–5 hours at warm room temp (~75–80°F / 24–27°C).",
+        "During the first 2 hours, perform 3–4 sets of stretch-and-folds (or coil folds) every 30 minutes.",
+        "After folds, let the dough rise undisturbed until it looks puffy with visible bubbles and has risen ~30–60%."
+      ],
+      "handsOffMins": 270,
+      "timers": [
+        { "label": "Bulk fermentation (typical)", "mins": 240 },
+        { "label": "Fold interval", "mins": 30 }
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Pre-shape + bench rest",
+      "instructions": [
+        "Turn dough onto a lightly floured surface.",
+        "Pre-shape into a loose round (boule) or log (batard).",
+        "Rest 15–25 minutes uncovered to relax gluten."
+      ],
+      "handsOffMins": 20,
+      "activeMins": 5,
+      "timers": [{ "label": "Bench rest", "mins": 20 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Final shape + place in banneton",
+      "instructions": [
+        "Shape into a tight boule or batard, creating surface tension.",
+        "Place seam-side up in a floured banneton (rice flour helps prevent sticking) or a towel-lined bowl.",
+        "Cover."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step_07",
+      "title": "Cold proof (recommended) or room-temp proof",
+      "instructions": [
+        "Cold proof: refrigerate 8–16 hours for improved flavor and easier scoring.",
+        "Room-temp option: proof 60–120 minutes until slightly puffy and dough slowly springs back when gently pressed."
+      ],
+      "handsOffMins": 600,
+      "timers": [{ "label": "Cold proof (typical)", "mins": 720 }]
+    },
+    {
+      "id": "step_08",
+      "title": "Preheat oven + Dutch oven",
+      "instructions": [
+        "Place Dutch oven (with lid) in oven and preheat to 475°F (245°C) for 30–45 minutes.",
+        "A thoroughly preheated vessel is key to oven spring."
+      ],
+      "handsOffMins": 40,
+      "timers": [{ "label": "Preheat", "mins": 40 }],
+      "temperature": { "type": "oven", "value": 475, "unit": "F" }
+    },
+    {
+      "id": "step_09",
+      "title": "Score + bake (Dutch oven method)",
+      "instructions": [
+        "Turn the cold dough out onto parchment (seam-side down).",
+        "Score with a lame/razor: one bold slash for a batard, or a cross/curve for a boule.",
+        "Transfer dough (with parchment) into the hot Dutch oven, cover with lid.",
+        "Bake 20 minutes covered at 475°F (245°C).",
+        "Remove lid, reduce to 450°F (232°C), and bake 18–25 minutes uncovered until deep brown.",
+        "Optional doneness check: internal ~205–210°F (96–99°C)."
+      ],
+      "timers": [
+        { "label": "Covered bake", "mins": 20 },
+        { "label": "Uncovered bake (start checking)", "mins": 18 }
+      ],
+      "temperature": { "type": "oven", "value": 475, "unit": "F" }
+    },
+    {
+      "id": "step_10",
+      "title": "Cool completely",
+      "instructions": [
+        "Cool on a rack at least 2 hours before slicing.",
+        "Cutting too early can make the crumb gummy."
+      ],
+      "handsOffMins": 120,
+      "timers": [{ "label": "Cooling", "mins": 120 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour can ferment faster and absorb more water; bran can weaken gluten and reduce openness unless managed.",
+    "guidelines": [
+      "If using 100% fresh milled flour, consider a blend (e.g., 70–85% fresh milled + 15–30% strong bread flour) for better loft.",
+      "Increase hydration gradually (add 10–30g extra water) if dough feels stiff after mixing; stop once dough becomes slack and hard to shape.",
+      "Extend autolyse to 60 minutes for fresh milled flour.",
+      "If crumb is dense, shorten bulk slightly (avoid over-fermentation) and improve shaping tension."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 25,
+      "rangeAddBackG": [0, 35]
+    }
+  },
+
+  "storage": {
+    "counter": "Store cut-side down on a board or loosely wrapped 1–2 days for best crust. After that, bag it to prevent drying.",
+    "freezer": "Slice and freeze up to 2–3 months. Toast from frozen or thaw at room temperature.",
+    "refresh": "To re-crisp: spritz crust lightly with water and bake at 400°F (205°C) for 8–12 minutes."
+  },
+
+  "variations": [
+    {
+      "name": "More rustic (higher whole wheat)",
+      "change": "Use 400g bread flour + 100g whole wheat flour. Increase water to 385–400g as needed.",
+      "notes": "More wheaty flavor; slightly tighter crumb."
+    },
+    {
+      "name": "Higher hydration (more open crumb)",
+      "change": "Increase water to 390–410g total (78–82% hydration).",
+      "notes": "Requires stronger flour and good folding/shaping; can be stickier with fresh milled flour."
+    },
+    {
+      "name": "Same-day bake (no cold proof)",
+      "change": "After shaping, proof at room temp 60–120 minutes until dough slowly springs back, then bake.",
+      "notes": "Milder flavor; scoring is a bit trickier because dough is warmer/softer."
+    },
+    {
+      "name": "Steam-pan method (no Dutch oven)",
+      "change": "Bake on a preheated stone/steel at 475°F with a steam pan for 20 minutes, then remove steam and bake at 450°F until dark.",
+      "notes": "Requires careful steam management; Dutch oven is most consistent."
+    }
+  ],
+
+  "notes": [
+    "Bulk time is temperature- and starter-dependent. Watch the dough (rise, bubbles, feel), not the clock.",
+    "Over-proofing shows as a very fragile dough that doesn’t spring back and can collapse or spread.",
+    "Under-proofing shows as tight crumb and explosive tearing beyond the score."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/whole_wheat_sandwich_bread",
+      "breads/recipes/sandwich_bread_white"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Canonical classic sourdough country loaf with Dutch oven bake and optional cold proof for flavor and crust."
+  }
+}

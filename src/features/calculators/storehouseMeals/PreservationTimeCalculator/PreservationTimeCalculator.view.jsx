@@ -27,7 +27,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import { runPreservationTimeCalculator } from "./PreservationTimeCalculator.shim";
 
 /**
@@ -45,7 +45,7 @@ const DEFAULT_INPUT = {
   altitudeMeters: null,
   ambientTemperatureC: 20,
   ambientHumidityPercent: 50,
-  householdRiskTolerance: "low"
+  householdRiskTolerance: "low",
 };
 
 /**
@@ -67,7 +67,11 @@ function buildSessionFromResult(calculatorResult) {
   if (!calculatorResult || !calculatorResult.output) return null;
   const { output } = calculatorResult;
   const override = output.sessionTemplateOverride;
-  if (!override || !Array.isArray(override.steps) || override.steps.length === 0) {
+  if (
+    !override ||
+    !Array.isArray(override.steps) ||
+    override.steps.length === 0
+  ) {
     return null;
   }
 
@@ -79,7 +83,7 @@ function buildSessionFromResult(calculatorResult) {
     title: override.title || "Preservation session",
     source: {
       type: "manual",
-      refId: null
+      refId: null,
     },
     steps: override.steps.map((step, index) => ({
       id: step.id || `step-${index + 1}`,
@@ -90,27 +94,27 @@ function buildSessionFromResult(calculatorResult) {
       metadata: step.metadata || {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: ""
-      }
+        cueNotes: "",
+      },
     })),
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt,
-    updatedAt: createdAt
+    updatedAt: createdAt,
   };
 }
 
@@ -132,7 +136,9 @@ const PreservationTimeCalculatorView = () => {
   // Hydrate last used input from localStorage (simple persistence).
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem("ssa.preservationTimeCalculator.input");
+      const raw = window.localStorage.getItem(
+        "ssa.preservationTimeCalculator.input"
+      );
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === "object") {
@@ -140,7 +146,10 @@ const PreservationTimeCalculatorView = () => {
         }
       }
     } catch (err) {
-      console.warn("[PreservationTimeCalculatorView] Failed to restore input from localStorage", err);
+      console.warn(
+        "[PreservationTimeCalculatorView] Failed to restore input from localStorage",
+        err
+      );
     }
   }, []);
 
@@ -152,7 +161,10 @@ const PreservationTimeCalculatorView = () => {
         JSON.stringify(input)
       );
     } catch (err) {
-      console.warn("[PreservationTimeCalculatorView] Failed to persist input to localStorage", err);
+      console.warn(
+        "[PreservationTimeCalculatorView] Failed to persist input to localStorage",
+        err
+      );
     }
   }, [input]);
 
@@ -186,7 +198,7 @@ const PreservationTimeCalculatorView = () => {
     try {
       const calcResult = await runPreservationTimeCalculator({
         input,
-        source: "ui"
+        source: "ui",
       });
       setResult(calcResult);
     } catch (err) {
@@ -213,11 +225,14 @@ const PreservationTimeCalculatorView = () => {
         type: "session.requested",
         ts: nowISO(),
         source: "PreservationTimeCalculatorView",
-        data: { session }
+        data: { session },
       });
       setShowModal(false);
     } catch (err) {
-      console.warn("[PreservationTimeCalculatorView] Failed to emit session.requested", err);
+      console.warn(
+        "[PreservationTimeCalculatorView] Failed to emit session.requested",
+        err
+      );
     }
   };
 
@@ -231,8 +246,9 @@ const PreservationTimeCalculatorView = () => {
         <div>
           <h1 className="text-xl font-semibold">Preservation Time Planner</h1>
           <p className="text-sm text-gray-500">
-            Estimate processing and storage times for canning, dehydrating, curing, and more,
-            then launch a preservation session in the SSA SessionRunner.
+            Estimate processing and storage times for canning, dehydrating,
+            curing, and more, then launch a preservation session in the SSA
+            SessionRunner.
           </p>
         </div>
         <button
@@ -251,10 +267,13 @@ const PreservationTimeCalculatorView = () => {
             {/* Modal header */}
             <div className="flex items-center justify-between border-b px-5 py-3">
               <div>
-                <h2 className="text-lg font-semibold">Plan a Preservation Session</h2>
+                <h2 className="text-lg font-semibold">
+                  Plan a Preservation Session
+                </h2>
                 <p className="text-xs text-gray-500">
-                  Adjust your inputs, review estimated durations and storage windows, then start a
-                  session that the SessionRunner can track across the app.
+                  Adjust your inputs, review estimated durations and storage
+                  windows, then start a session that the SessionRunner can track
+                  across the app.
                 </p>
               </div>
               <button
@@ -272,7 +291,9 @@ const PreservationTimeCalculatorView = () => {
               {/* Left column: inputs */}
               <div className="flex-1 space-y-4 overflow-y-auto pr-1">
                 <section>
-                  <h3 className="text-sm font-semibold text-gray-700">Food & Method</h3>
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    Food & Method
+                  </h3>
                   <div className="mt-2 space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600">
@@ -298,8 +319,12 @@ const PreservationTimeCalculatorView = () => {
                         onChange={handleChange}
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       >
-                        <option value="pressureCanning">Pressure canning</option>
-                        <option value="waterBathCanning">Water bath canning</option>
+                        <option value="pressureCanning">
+                          Pressure canning
+                        </option>
+                        <option value="waterBathCanning">
+                          Water bath canning
+                        </option>
                         <option value="dehydration">Dehydration</option>
                         <option value="curing">Curing</option>
                         <option value="fermentation">Fermentation</option>
@@ -312,7 +337,9 @@ const PreservationTimeCalculatorView = () => {
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold text-gray-700">Container & Conditions</h3>
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    Container & Conditions
+                  </h3>
                   <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-600">
@@ -359,7 +386,8 @@ const PreservationTimeCalculatorView = () => {
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                       <p className="mt-1 text-[10px] text-gray-400">
-                        Used to roughly adjust boiling-based methods for altitude.
+                        Used to roughly adjust boiling-based methods for
+                        altitude.
                       </p>
                     </div>
 
@@ -396,7 +424,9 @@ const PreservationTimeCalculatorView = () => {
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold text-gray-700">Household Risk Tolerance</h3>
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    Household Risk Tolerance
+                  </h3>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {["veryLow", "low", "moderate", "high"].map((level) => (
                       <button
@@ -405,7 +435,7 @@ const PreservationTimeCalculatorView = () => {
                         onClick={() =>
                           setInput((prev) => ({
                             ...prev,
-                            householdRiskTolerance: level
+                            householdRiskTolerance: level,
                           }))
                         }
                         className={`rounded-full px-3 py-1 text-xs font-medium border ${
@@ -428,11 +458,14 @@ const PreservationTimeCalculatorView = () => {
 
               {/* Right column: results + session preview */}
               <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50/60 p-3 md:p-4">
-                <h3 className="text-sm font-semibold text-gray-700">Estimated Durations</h3>
+                <h3 className="text-sm font-semibold text-gray-700">
+                  Estimated Durations
+                </h3>
 
                 {!hasResult && (
                   <div className="mt-3 rounded-lg border border-dashed border-gray-300 bg-white p-3 text-xs text-gray-500">
-                    Run the calculator to see estimated processing and storage times.
+                    Run the calculator to see estimated processing and storage
+                    times.
                   </div>
                 )}
 
@@ -448,8 +481,8 @@ const PreservationTimeCalculatorView = () => {
                         </span>
                       </div>
                       <p className="mt-1 text-[11px] text-gray-500">
-                        Always base real processing time on a tested recipe for this exact food,
-                        jar size, and altitude.
+                        Always base real processing time on a tested recipe for
+                        this exact food, jar size, and altitude.
                       </p>
                     </div>
 
@@ -463,26 +496,32 @@ const PreservationTimeCalculatorView = () => {
                         </span>
                       </div>
                       <p className="mt-1 text-[11px] text-gray-500">
-                        Approx. {output.recommendedStorageTimeDays} days, risk band:{" "}
-                        <span className="font-semibold">{output.riskBand}</span>.
+                        Approx. {output.recommendedStorageTimeDays} days, risk
+                        band:{" "}
+                        <span className="font-semibold">{output.riskBand}</span>
+                        .
                       </p>
                     </div>
 
-                    {Array.isArray(output.warnings) && output.warnings.length > 0 && (
-                      <div className="rounded-lg bg-white p-3 shadow-inner">
-                        <p className="text-xs font-semibold text-amber-700">
-                          Safety & planning notes
-                        </p>
-                        <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-amber-800">
-                          {output.warnings.slice(0, 5).map((w, idx) => (
-                            <li key={idx}>{w}</li>
-                          ))}
-                          {output.warnings.length > 5 && (
-                            <li>+ {output.warnings.length - 5} more internal notes…</li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
+                    {Array.isArray(output.warnings) &&
+                      output.warnings.length > 0 && (
+                        <div className="rounded-lg bg-white p-3 shadow-inner">
+                          <p className="text-xs font-semibold text-amber-700">
+                            Safety & planning notes
+                          </p>
+                          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-amber-800">
+                            {output.warnings.slice(0, 5).map((w, idx) => (
+                              <li key={idx}>{w}</li>
+                            ))}
+                            {output.warnings.length > 5 && (
+                              <li>
+                                + {output.warnings.length - 5} more internal
+                                notes…
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
 
                     {output.sessionTemplateOverride && (
                       <div className="rounded-lg bg-white p-3 shadow-sm">
@@ -497,7 +536,10 @@ const PreservationTimeCalculatorView = () => {
                           {output.sessionTemplateOverride.steps
                             .slice(0, 3)
                             .map((step, idx) => (
-                              <li key={step.id || idx} className="flex justify-between gap-2">
+                              <li
+                                key={step.id || idx}
+                                className="flex justify-between gap-2"
+                              >
                                 <span className="font-medium">
                                   {idx + 1}. {step.title}
                                 </span>
@@ -515,8 +557,8 @@ const PreservationTimeCalculatorView = () => {
                 {/* Footer actions */}
                 <div className="mt-4 flex flex-col gap-2 border-t border-gray-200 pt-3 md:flex-row md:items-center md:justify-between">
                   <div className="text-[11px] text-gray-400">
-                    This is a planning tool only. Always follow tested guidance for safe
-                    preservation.
+                    This is a planning tool only. Always follow tested guidance
+                    for safe preservation.
                   </div>
 
                   <div className="flex gap-2">
@@ -532,7 +574,9 @@ const PreservationTimeCalculatorView = () => {
                     <button
                       type="button"
                       onClick={handleStartSession}
-                      disabled={!hasResult || !result?.output?.sessionTemplateOverride}
+                      disabled={
+                        !hasResult || !result?.output?.sessionTemplateOverride
+                      }
                       className="rounded-lg border border-emerald-600 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
                     >
                       Start preservation session
@@ -545,11 +589,12 @@ const PreservationTimeCalculatorView = () => {
             {/* Optional subtle bottom bar mimicking SessionRunner's persistent feel */}
             <div className="flex items-center justify-between border-t bg-gray-50 px-5 py-2 text-[11px] text-gray-500">
               <span>
-                This planner will hand off a session to the global SessionRunner so it can keep
-                running while you navigate.
+                This planner will hand off a session to the global SessionRunner
+                so it can keep running while you navigate.
               </span>
               <span className="hidden md:inline">
-                Tip: You can keep this modal open while you prepare your workspace.
+                Tip: You can keep this modal open while you prepare your
+                workspace.
               </span>
             </div>
           </div>

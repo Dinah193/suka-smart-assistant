@@ -1,0 +1,385 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.levantine.chicken_shawarma",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Chicken Shawarma (Oven or Skillet)",
+    "description": "Juicy, deeply spiced Levantine-style chicken shawarma with a tangy garlic-lemon yogurt marinade. Designed for easy home cooking (sheet pan or skillet) with optional quick garlic sauce.",
+    "tags": [
+      "cuisine.levantine",
+      "chicken",
+      "shawarma",
+      "weeknight.friendly",
+      "mealprep.friendly",
+      "oven",
+      "stovetop",
+      "high_protein"
+    ]
+  },
+
+  "summary": "Home-style chicken shawarma using a classic warm-spice blend (cumin, coriander, paprika, turmeric, cinnamon/allspice) and a lemon-garlic yogurt marinade for tenderness and depth. Best results come from at least 2 hours of marinating and finishing with a quick high-heat sear/broil for charred edges. Serve in pita with garlic sauce or tahini, pickles, and salad.",
+
+  "yields": {
+    "servings": 6,
+    "makes": "About 1.2–1.4 kg cooked chicken (enough for 6 wraps or 6 bowls)"
+  },
+
+  "timing": {
+    "activeMins": 25,
+    "totalMins": 55,
+    "notes": "Total excludes marinating time (recommended 2–24 hours)."
+  },
+
+  "diet": {
+    "tags": ["gluten_free_optional", "high_protein"],
+    "notes": "Use gluten-free pita or serve as a bowl for gluten-free. Use dairy-free yogurt to make marinade dairy-free."
+  },
+
+  "methods": ["marinate", "roast", "sear_optional", "broil_optional"],
+
+  "compat": {
+    "kitchenCapabilitiesAnyOf": ["oven", "stovetop", "broiler"],
+    "notes": "Primary method is oven sheet-pan roasting; optional broil or skillet finish adds char."
+  },
+
+  "allergens": ["milk"],
+
+  "safety": {
+    "foodSafetyNotes": [
+      "Cook chicken to a safe internal temperature (165°F / 74°C).",
+      "If using leftover marinade as a sauce, boil it first; do not use raw marinade that touched raw chicken.",
+      "Cool leftovers quickly and refrigerate within 2 hours; reheat until steaming hot."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken",
+      "ingredientIds": ["ing.chicken_thighs_boneless_skinless"]
+    },
+    {
+      "id": "group.marinade",
+      "label": "Shawarma marinade",
+      "ingredientIds": [
+        "ing.yogurt_plain",
+        "ing.lemon_juice",
+        "ing.olive_oil",
+        "ing.garlic",
+        "ing.cumin_ground",
+        "ing.coriander_ground",
+        "ing.paprika",
+        "ing.turmeric_ground",
+        "ing.cinnamon_ground_optional",
+        "ing.allspice_ground_optional",
+        "ing.black_pepper",
+        "ing.salt_kosher",
+        "ing.red_pepper_flakes_optional"
+      ]
+    },
+    {
+      "id": "group.onion_pan",
+      "label": "Optional sheet-pan aromatics",
+      "ingredientIds": ["ing.onion_yellow", "ing.lemon_slices_optional"]
+    },
+    {
+      "id": "group.garlic_sauce_optional",
+      "label": "Quick garlic sauce (optional)",
+      "ingredientIds": [
+        "ing.mayonnaise_optional",
+        "ing.yogurt_plain_optional",
+        "ing.garlic_sauce_garlic",
+        "ing.lemon_juice_sauce",
+        "ing.salt_sauce"
+      ]
+    },
+    {
+      "id": "group.serving_optional",
+      "label": "To serve (optional)",
+      "ingredientIds": [
+        "ing.pita",
+        "ing.tomato",
+        "ing.cucumber",
+        "ing.red_onion_optional",
+        "ing.pickles_or_pickled_turnips",
+        "ing.parsley_optional",
+        "ing.tahini_optional",
+        "ing.hot_sauce_optional"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.chicken_thighs_boneless_skinless",
+      "label": "Boneless, skinless chicken thighs",
+      "amount": { "value": 1200, "unit": "g" },
+      "notes": "Thighs stay juicier than breast. If using breast, reduce cook time and avoid overcooking."
+    },
+
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Full-fat recommended for best flavor and tenderness."
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 3 Tbsp."
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 3 Tbsp."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic cloves, finely grated or minced",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 5–6 cloves."
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet or smoked)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 Tbsp."
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.cinnamon_ground_optional",
+      "label": "Ground cinnamon (optional)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+    {
+      "id": "ing.allspice_ground_optional",
+      "label": "Ground allspice (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Ground black pepper",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 2 tsp. Adjust for fine salt."
+    },
+    {
+      "id": "ing.red_pepper_flakes_optional",
+      "label": "Red pepper flakes (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp, or to taste."
+    },
+
+    {
+      "id": "ing.onion_yellow",
+      "label": "Yellow onion, thinly sliced (optional)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Optional sheet-pan bed; gets sweet and roasty."
+    },
+    {
+      "id": "ing.lemon_slices_optional",
+      "label": "Lemon, thinly sliced (optional)",
+      "amount": { "value": 1, "unit": "count" },
+      "notes": "Optional; roasts with the chicken for aroma."
+    },
+
+    {
+      "id": "ing.mayonnaise_optional",
+      "label": "Mayonnaise (optional, for quick garlic sauce)",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "Optional; for a fast creamy sauce. Substitute more yogurt for a lighter sauce."
+    },
+    {
+      "id": "ing.yogurt_plain_optional",
+      "label": "Plain yogurt (optional, for quick garlic sauce)",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "Optional; balances mayo or can replace it."
+    },
+    {
+      "id": "ing.garlic_sauce_garlic",
+      "label": "Garlic, finely grated (for quick garlic sauce)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 cloves."
+    },
+    {
+      "id": "ing.lemon_juice_sauce",
+      "label": "Fresh lemon juice (for quick garlic sauce)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 Tbsp."
+    },
+    {
+      "id": "ing.salt_sauce",
+      "label": "Salt (for quick garlic sauce)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/3 tsp; adjust to taste."
+    },
+
+    {
+      "id": "ing.pita",
+      "label": "Pita bread (optional)",
+      "amount": { "value": 6, "unit": "count" },
+      "notes": "Warm before serving."
+    },
+    {
+      "id": "ing.tomato",
+      "label": "Tomatoes, sliced (optional)",
+      "amount": { "value": 250, "unit": "g" }
+    },
+    {
+      "id": "ing.cucumber",
+      "label": "Cucumber, sliced (optional)",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "ing.red_onion_optional",
+      "label": "Red onion, thinly sliced (optional)",
+      "amount": { "value": 80, "unit": "g" }
+    },
+    {
+      "id": "ing.pickles_or_pickled_turnips",
+      "label": "Pickles or pickled turnips (optional)",
+      "amount": { "value": 150, "unit": "g" }
+    },
+    {
+      "id": "ing.parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "amount": { "value": 10, "unit": "g" }
+    },
+    {
+      "id": "ing.tahini_optional",
+      "label": "Tahini (optional)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Serve as drizzle or thin into tahini sauce."
+    },
+    {
+      "id": "ing.hot_sauce_optional",
+      "label": "Hot sauce (optional)",
+      "amount": { "value": 60, "unit": "ml" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.make_marinade",
+      "title": "Make the shawarma marinade",
+      "instructions": [
+        "In a large bowl, whisk together yogurt, lemon juice, olive oil, grated garlic, cumin, coriander, paprika, turmeric, cinnamon (optional), allspice (optional), black pepper, salt, and red pepper flakes (optional).",
+        "Taste and adjust salt/lemon/spice (it should be boldly seasoned)."
+      ]
+    },
+    {
+      "id": "step.marinate_chicken",
+      "title": "Marinate the chicken",
+      "instructions": [
+        "Add chicken thighs to the bowl and toss until fully coated.",
+        "Cover and refrigerate at least 2 hours (best 8–24 hours).",
+        "If short on time, marinate at room temperature for 30 minutes while you prep (then cook promptly)."
+      ],
+      "timers": [
+        {
+          "id": "timer.minimum_marinade",
+          "label": "Minimum marinate",
+          "minutes": 120
+        }
+      ]
+    },
+    {
+      "id": "step.preheat",
+      "title": "Preheat and set up the pan",
+      "instructions": [
+        "Heat oven to 425°F / 220°C.",
+        "Line a sheet pan with foil or parchment for easier cleanup.",
+        "Optional: scatter sliced onion on the pan as a bed; add lemon slices if using."
+      ]
+    },
+    {
+      "id": "step.roast",
+      "title": "Roast the chicken",
+      "instructions": [
+        "Arrange chicken thighs on the sheet pan in a single layer (let excess marinade cling—don’t wipe it off).",
+        "Roast 18–22 minutes, depending on thickness, until cooked through (165°F / 74°C internal).",
+        "If your oven runs cool or pieces are large, add a few minutes as needed."
+      ],
+      "timers": [{ "id": "timer.roast", "label": "Roast time", "minutes": 20 }]
+    },
+    {
+      "id": "step.char_edges",
+      "title": "Char the edges (highly recommended)",
+      "instructions": [
+        "For best shawarma-style flavor, finish with one of these options:",
+        "Option A (Broiler): Move pan to broiler and broil 2–4 minutes until browned/charred in spots (watch closely).",
+        "Option B (Skillet): Transfer cooked chicken to a hot skillet with a drizzle of oil; sear 1–2 minutes per side for crisp edges."
+      ],
+      "timers": [
+        { "id": "timer.broil", "label": "Broil (watch closely)", "minutes": 3 }
+      ]
+    },
+    {
+      "id": "step.rest_slice",
+      "title": "Rest and slice",
+      "instructions": [
+        "Rest chicken 5 minutes.",
+        "Slice thinly against the grain or chop into bite-sized pieces.",
+        "Toss with any pan juices/onion bits for extra flavor."
+      ],
+      "timers": [{ "id": "timer.rest", "label": "Rest", "minutes": 5 }]
+    },
+    {
+      "id": "step.quick_garlic_sauce_optional",
+      "title": "Quick garlic sauce (optional)",
+      "instructions": [
+        "Stir together mayonnaise (optional), yogurt, grated garlic, lemon juice, and salt.",
+        "Rest 5–10 minutes to mellow the garlic, then adjust salt/lemon."
+      ],
+      "timers": [
+        { "id": "timer.sauce_rest", "label": "Sauce rest", "minutes": 8 }
+      ]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble and serve",
+      "instructions": [
+        "Warm pita briefly (dry skillet or oven).",
+        "Fill with chicken, tomatoes, cucumber, red onion (optional), pickles/pickled turnips, parsley, and garlic sauce or tahini.",
+        "Serve immediately; add hot sauce if desired."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Chicken breast option: use 900–1000 g breast; roast ~14–18 minutes and pull as soon as it reaches 165°F / 74°C to avoid dryness.",
+    "Make-ahead: Cooked chicken keeps 3–4 days refrigerated. Reheat in a hot skillet for best texture.",
+    "Flavor boost: Add 1 tsp ground cardamom or 1 tsp sumac to the marinade if you want a more aromatic, restaurant-style profile."
+  ]
+}

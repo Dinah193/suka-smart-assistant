@@ -28,7 +28,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -61,9 +61,16 @@ function isoNow() {
 
 function uuid(prefix = "res") {
   try {
-    return globalThis?.crypto?.randomUUID?.() || `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return (
+      globalThis?.crypto?.randomUUID?.() ||
+      `${prefix}_${Date.now().toString(36)}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+    );
   } catch {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 }
 
@@ -76,19 +83,30 @@ function emit(type, data) {
 }
 
 async function exportToHubIfEnabled(payload) {
-  if (!featureFlags?.familyFundMode || !HubPacketFormatter || !FamilyFundConnector) return;
+  if (
+    !featureFlags?.familyFundMode ||
+    !HubPacketFormatter ||
+    !FamilyFundConnector
+  )
+    return;
   try {
-    const packet = HubPacketFormatter.formatResourceChange?.(payload) || payload;
+    const packet =
+      HubPacketFormatter.formatResourceChange?.(payload) || payload;
     await FamilyFundConnector.send?.(packet);
   } catch (err) {
     // Silent fail by design
-    console.warn("[ResourcesRepo] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[ResourcesRepo] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
 function ensureDB() {
   if (!db || typeof db !== "object" || !db.resources) {
-    throw new Error("Dexie 'db.resources' table not available. Ensure '@/db' exports a Dexie with a 'resources' table.");
+    throw new Error(
+      "Dexie 'db.resources' table not available. Ensure '@/db' exports a Dexie with a 'resources' table."
+    );
   }
 }
 
@@ -98,13 +116,33 @@ function ensureDB() {
  * status: "active" | "inactive" | "retired" | "maintenance" | "offline" | "available" | "busy" | "away"
  */
 function normalizeResource(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid resource payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid resource payload." };
 
   const now = isoNow();
-  const allowedTypes = new Set(["device", "person", "room", "animal", "tool", "appliance", "vehicle", "zone"]);
-  const allowedStatus = new Set(["active", "inactive", "retired", "maintenance", "offline", "available", "busy", "away"]);
+  const allowedTypes = new Set([
+    "device",
+    "person",
+    "room",
+    "animal",
+    "tool",
+    "appliance",
+    "vehicle",
+    "zone",
+  ]);
+  const allowedStatus = new Set([
+    "active",
+    "inactive",
+    "retired",
+    "maintenance",
+    "offline",
+    "available",
+    "busy",
+    "away",
+  ]);
 
-  const type = (input.type && String(input.type).trim().toLowerCase()) || "device";
+  const type =
+    (input.type && String(input.type).trim().toLowerCase()) || "device";
   const status = allowedStatus.has(input.status) ? input.status : "active";
 
   const record = {
@@ -117,7 +155,9 @@ function normalizeResource(input = {}) {
 
     // Capability tags help the automation runtime discover surfaces:
     // examples: ["screen", "speaker", "microphone", "camera", "timer", "wake-lock", "webrtc", "ble", "rfid"]
-    capabilities: Array.isArray(input.capabilities) ? dedupeStrings(input.capabilities) : [],
+    capabilities: Array.isArray(input.capabilities)
+      ? dedupeStrings(input.capabilities)
+      : [],
 
     // Placement / Ownership
     location: {
@@ -143,20 +183,26 @@ function normalizeResource(input = {}) {
 
     presence: {
       state: normalizePresence(input?.presence?.state), // "online" | "offline" | "present" | "away" | "unknown"
-      lastSeenAt: input?.presence?.lastSeenAt || (status === "offline" ? null : now),
+      lastSeenAt:
+        input?.presence?.lastSeenAt || (status === "offline" ? null : now),
       // lightweight signal snapshot for automations
       signal: input?.presence?.signal || null, // { rssi, batteryPct, charging }
     },
 
     schedule: {
       // availability windows (ISO): [{ start, end, daysOfWeek?: [0..6] }]
-      availability: Array.isArray(input?.schedule?.availability) ? input.schedule.availability : [],
+      availability: Array.isArray(input?.schedule?.availability)
+        ? input.schedule.availability
+        : [],
       // do-not-disturb windows: [{ start, end, daysOfWeek?: [0..6] }]
       dnd: Array.isArray(input?.schedule?.dnd) ? input.schedule.dnd : [],
       timezone: input?.schedule?.timezone || null,
     },
 
-    metadata: input.metadata && typeof input.metadata === "object" ? input.metadata : {},
+    metadata:
+      input.metadata && typeof input.metadata === "object"
+        ? input.metadata
+        : {},
 
     createdAt: input.createdAt || now,
     updatedAt: now,
@@ -206,7 +252,8 @@ const ResourcesRepo = {
    */
   async bulkCreate(list = []) {
     ensureDB();
-    if (!Array.isArray(list) || !list.length) return { ok: false, error: "Nothing to create." };
+    if (!Array.isArray(list) || !list.length)
+      return { ok: false, error: "Nothing to create." };
 
     const ready = [];
     for (const r of list) {
@@ -217,10 +264,17 @@ const ResourcesRepo = {
 
     try {
       const ids = await db.resources.bulkPut(ready);
-      const payload = { action: "bulkCreate", count: ready.length, resources: ready.map((r) => r.id) };
+      const payload = {
+        action: "bulkCreate",
+        count: ready.length,
+        resources: ready.map((r) => r.id),
+      };
       emit("resource.bulk_created", payload);
       await exportToHubIfEnabled(payload);
-      return { ok: true, data: Array.isArray(ids) ? ids : ready.map((r) => r.id) };
+      return {
+        ok: true,
+        data: Array.isArray(ids) ? ids : ready.map((r) => r.id),
+      };
     } catch (err) {
       console.error("[ResourcesRepo.bulkCreate] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -279,7 +333,9 @@ const ResourcesRepo = {
         coll = coll.and((r) => r?.assignedTo?.personId === personId);
       }
       if (capabilityHas) {
-        const req = Array.isArray(capabilityHas) ? new Set(capabilityHas) : new Set([capabilityHas]);
+        const req = Array.isArray(capabilityHas)
+          ? new Set(capabilityHas)
+          : new Set([capabilityHas]);
         coll = coll.and((r) => {
           const caps = new Set(r?.capabilities || []);
           for (const c of req) if (!caps.has(c)) return false;
@@ -289,17 +345,26 @@ const ResourcesRepo = {
       if (text) {
         const q = String(text).toLowerCase();
         coll = coll.and((r) => {
-          const inName = String(r.name || "").toLowerCase().includes(q);
-          const inAlias = (r.alias || []).some((a) => String(a).toLowerCase().includes(q));
+          const inName = String(r.name || "")
+            .toLowerCase()
+            .includes(q);
+          const inAlias = (r.alias || []).some((a) =>
+            String(a).toLowerCase().includes(q)
+          );
           return inName || inAlias;
         });
       }
 
       const dir = sortDir === "asc" ? 1 : -1;
-      const arr = await coll.sortBy(sortBy).then((a) => (dir === 1 ? a : a.reverse()));
+      const arr = await coll
+        .sortBy(sortBy)
+        .then((a) => (dir === 1 ? a : a.reverse()));
       const slice = arr.slice(offset, offset + limit);
 
-      return { ok: true, data: { total: arr.length, items: slice, offset, limit } };
+      return {
+        ok: true,
+        data: { total: arr.length, items: slice, offset, limit },
+      };
     } catch (err) {
       console.error("[ResourcesRepo.list] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -311,12 +376,17 @@ const ResourcesRepo = {
    */
   async update(id, next) {
     ensureDB();
-    if (!id || !next || typeof next !== "object") return { ok: false, error: "Invalid update payload." };
+    if (!id || !next || typeof next !== "object")
+      return { ok: false, error: "Invalid update payload." };
 
     const current = await db.resources.get(id);
     if (!current) return { ok: false, error: "Not found." };
 
-    const res = normalizeResource({ ...next, id, createdAt: current.createdAt });
+    const res = normalizeResource({
+      ...next,
+      id,
+      createdAt: current.createdAt,
+    });
     if (!res.ok) return { ok: false, error: res.error };
 
     try {
@@ -336,14 +406,19 @@ const ResourcesRepo = {
    */
   async patch(id, partial = {}) {
     ensureDB();
-    if (!id || typeof partial !== "object") return { ok: false, error: "Invalid patch payload." };
+    if (!id || typeof partial !== "object")
+      return { ok: false, error: "Invalid patch payload." };
     try {
       const current = await db.resources.get(id);
       if (!current) return { ok: false, error: "Not found." };
 
       const merged = { ...current, ...partial, id, updatedAt: isoNow() };
       await db.resources.put(merged);
-      const payload = { action: "patch", resource: merged, fields: Object.keys(partial) };
+      const payload = {
+        action: "patch",
+        resource: merged,
+        fields: Object.keys(partial),
+      };
       emit("resource.patched", payload);
       await exportToHubIfEnabled(payload);
       return { ok: true, data: merged };
@@ -391,7 +466,8 @@ const ResourcesRepo = {
    */
   async bulkRemove(ids = []) {
     ensureDB();
-    if (!Array.isArray(ids) || !ids.length) return { ok: false, error: "Nothing to remove." };
+    if (!Array.isArray(ids) || !ids.length)
+      return { ok: false, error: "Nothing to remove." };
     try {
       await db.resources.bulkDelete(ids);
       const payload = { action: "bulkDelete", ids };
@@ -429,7 +505,9 @@ const ResourcesRepo = {
   },
 
   async assignToRoom(id, roomId) {
-    const res = await this.patch(id, { location: { ...(await this._getLocation(id)), roomId } });
+    const res = await this.patch(id, {
+      location: { ...(await this._getLocation(id)), roomId },
+    });
     if (res.ok) {
       const payload = { action: "assign.room", id, roomId };
       emit("resource.assigned_room", payload);
@@ -439,7 +517,9 @@ const ResourcesRepo = {
   },
 
   async linkPerson(id, personId, householdRole = null) {
-    const res = await this.patch(id, { assignedTo: { personId, householdRole } });
+    const res = await this.patch(id, {
+      assignedTo: { personId, householdRole },
+    });
     if (res.ok) {
       const payload = { action: "assign.person", id, personId, householdRole };
       emit("resource.assigned_person", payload);
@@ -449,7 +529,9 @@ const ResourcesRepo = {
   },
 
   async unlinkPerson(id) {
-    const res = await this.patch(id, { assignedTo: { personId: null, householdRole: null } });
+    const res = await this.patch(id, {
+      assignedTo: { personId: null, householdRole: null },
+    });
     if (res.ok) {
       const payload = { action: "unassign.person", id };
       emit("resource.unassigned_person", payload);
@@ -459,10 +541,15 @@ const ResourcesRepo = {
   },
 
   async setCapabilities(id, caps = []) {
-    if (!Array.isArray(caps)) return { ok: false, error: "capabilities must be an array." };
+    if (!Array.isArray(caps))
+      return { ok: false, error: "capabilities must be an array." };
     const res = await this.patch(id, { capabilities: dedupeStrings(caps) });
     if (res.ok) {
-      const payload = { action: "capabilities.set", id, capabilities: res.data.capabilities };
+      const payload = {
+        action: "capabilities.set",
+        id,
+        capabilities: res.data.capabilities,
+      };
       emit("resource.capabilities_set", payload);
       exportToHubIfEnabled(payload);
     }
@@ -470,7 +557,8 @@ const ResourcesRepo = {
   },
 
   async addCapabilities(id, caps = []) {
-    if (!Array.isArray(caps) || !caps.length) return { ok: false, error: "No capabilities to add." };
+    if (!Array.isArray(caps) || !caps.length)
+      return { ok: false, error: "No capabilities to add." };
     const curr = await this.getById(id);
     if (!curr.ok) return curr;
     const merged = dedupeStrings([...(curr.data.capabilities || []), ...caps]);
@@ -478,7 +566,8 @@ const ResourcesRepo = {
   },
 
   async removeCapabilities(id, caps = []) {
-    if (!Array.isArray(caps) || !caps.length) return { ok: false, error: "No capabilities to remove." };
+    if (!Array.isArray(caps) || !caps.length)
+      return { ok: false, error: "No capabilities to remove." };
     const curr = await this.getById(id);
     if (!curr.ok) return curr;
     const drop = new Set(caps);
@@ -492,7 +581,12 @@ const ResourcesRepo = {
       presence: { state: normalizePresence(state), lastSeenAt: now, signal },
     });
     if (res.ok) {
-      const payload = { action: "presence.ping", id, state: res.data?.presence?.state, lastSeenAt: now };
+      const payload = {
+        action: "presence.ping",
+        id,
+        state: res.data?.presence?.state,
+        lastSeenAt: now,
+      };
       emit("resource.presence_ping", payload);
       exportToHubIfEnabled(payload);
     }
@@ -503,16 +597,21 @@ const ResourcesRepo = {
     // Helper: if lastSeenAt < cutoff, set state offline.
     const r = await this.getById(id);
     if (!r.ok) return r;
-    const last = r.data?.presence?.lastSeenAt ? new Date(r.data.presence.lastSeenAt).getTime() : 0;
+    const last = r.data?.presence?.lastSeenAt
+      ? new Date(r.data.presence.lastSeenAt).getTime()
+      : 0;
     const cutoff = isoCutoff ? new Date(isoCutoff).getTime() : 0;
     if (last && cutoff && last < cutoff) {
-      return this.patch(id, { presence: { ...(r.data.presence || {}), state: "offline" } });
+      return this.patch(id, {
+        presence: { ...(r.data.presence || {}), state: "offline" },
+      });
     }
     return { ok: true, data: r.data }; // no-op
   },
 
   async setAvailability(id, availability = []) {
-    if (!Array.isArray(availability)) return { ok: false, error: "availability must be an array." };
+    if (!Array.isArray(availability))
+      return { ok: false, error: "availability must be an array." };
     const r = await this.getById(id);
     if (!r.ok) return r;
     const schedule = { ...(r.data.schedule || {}), availability };
@@ -526,7 +625,8 @@ const ResourcesRepo = {
   },
 
   async setDnd(id, dnd = []) {
-    if (!Array.isArray(dnd)) return { ok: false, error: "dnd must be an array." };
+    if (!Array.isArray(dnd))
+      return { ok: false, error: "dnd must be an array." };
     const r = await this.getById(id);
     if (!r.ok) return r;
     const schedule = { ...(r.data.schedule || {}), dnd };

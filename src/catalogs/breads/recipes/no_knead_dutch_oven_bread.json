@@ -1,0 +1,271 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.no_knead_dutch_oven_bread",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "No-Knead Dutch Oven Bread",
+    "subtitle": "Minimal effort • great first artisan loaf • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Canonical baseline for an easy no-knead loaf baked in a Dutch oven. Long fermentation builds flavor with minimal effort."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "artisan bread",
+    "subprofiles": ["no-knead", "dutch-oven", "beginner-artisan"],
+    "mealArchetypes": ["bread", "table bread", "toast"],
+    "servingStyles": ["boule", "sliced"],
+    "plannerTags": [
+      "bread",
+      "no-knead",
+      "artisan",
+      "dutch oven",
+      "crusty",
+      "beginner"
+    ]
+  },
+
+  "yield": {
+    "servings": 12,
+    "servingSize": { "value": 1, "unit": "slice" },
+    "notes": "1 medium loaf (~800–900g baked)."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 960,
+    "totalMins": 975
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "mixing bowl",
+      "scale or measuring cups",
+      "Dutch oven with lid",
+      "oven"
+    ],
+    "recommended": [
+      "parchment paper",
+      "bench scraper",
+      "instant-read thermometer (optional)"
+    ],
+    "optional": [
+      "proofing basket or bowl + towel",
+      "spray bottle",
+      "cooling rack"
+    ]
+  },
+
+  "dietFlags": ["vegan"],
+  "allergens": ["wheat", "gluten"],
+
+  "signals": {
+    "bread": true,
+    "noKnead": true,
+    "crusty": true,
+    "beginnerFriendly": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "none",
+    "saltiness": "moderate",
+    "richness": "low",
+    "crumb": "chewy/moderately open",
+    "crust": "thick/crisp",
+    "notes": "Simple wheaty flavor with mild tang from long fermentation; crisp crackly crust from Dutch oven steam."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "All-purpose flour (or bread flour; or fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 430, "unit": "g" },
+      "notes": "AP gives a tender crumb; bread flour gives more chew and slightly better rise."
+    },
+    {
+      "id": "water",
+      "label": "Water (room temperature)",
+      "role": "hydration",
+      "amount": { "value": 345, "unit": "g" },
+      "notes": "About 80% hydration. Hold back 20–30g for fresh milled flour; add only if dough feels too stiff."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 9, "unit": "g" }
+    },
+    {
+      "id": "yeast",
+      "label": "Instant yeast (or active dry)",
+      "role": "leavening",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": "About 1/2 teaspoon. Long fermentation does the heavy lifting. If using active dry, you can mix it in dry (no need to bloom for this recipe)."
+    },
+    {
+      "id": "bench_flour",
+      "label": "Flour for dusting (AP or rice flour)",
+      "role": "prep",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "parchment",
+      "label": "Parchment paper (for transfer, optional)",
+      "role": "prep",
+      "amount": { "value": 1, "unit": "sheet" },
+      "optional": true,
+      "notes": "Optional but highly recommended for safe transfer into a hot Dutch oven."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Mix (no kneading)",
+      "instructions": [
+        "In a bowl, combine flour, salt, and yeast.",
+        "Add water and stir until no dry flour remains. The dough will look shaggy and sticky.",
+        "Cover the bowl."
+      ],
+      "activeMins": 5
+    },
+    {
+      "id": "step_02",
+      "title": "Long rise (bulk fermentation)",
+      "instructions": [
+        "Let dough rise at room temperature 12–18 hours.",
+        "It’s ready when the surface is bubbly, the dough has expanded significantly, and it looks loose and airy.",
+        "Cool rooms may need closer to 18 hours; warm rooms may be ready closer to 12."
+      ],
+      "handsOffMins": 900,
+      "timers": [{ "label": "Bulk fermentation (typical)", "mins": 900 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Shape (gentle)",
+      "instructions": [
+        "Dust a work surface with flour. Scrape dough out of the bowl.",
+        "With floured hands, fold the dough over itself a few times to form a rough ball. Keep it gentle—don’t punch down aggressively.",
+        "Option A (simple): place seam-side down on a lightly floured surface for the bench rest.",
+        "Option B (clean transfer): place on parchment and shape into a round."
+      ],
+      "activeMins": 5
+    },
+    {
+      "id": "step_04",
+      "title": "Bench rest / short proof",
+      "instructions": [
+        "Cover loosely and rest 45–90 minutes until slightly puffy.",
+        "Meanwhile, preheat the Dutch oven in the oven."
+      ],
+      "handsOffMins": 60,
+      "timers": [{ "label": "Bench rest (typical)", "mins": 60 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Preheat Dutch oven",
+      "instructions": [
+        "Place Dutch oven (with lid) in the oven and preheat to 450°F (232°C) for 30–45 minutes.",
+        "A thoroughly preheated pot is key to oven spring and crust."
+      ],
+      "handsOffMins": 40,
+      "timers": [{ "label": "Preheat", "mins": 40 }],
+      "temperature": { "type": "oven", "value": 450, "unit": "F" }
+    },
+    {
+      "id": "step_06",
+      "title": "Bake (covered then uncovered)",
+      "instructions": [
+        "Carefully remove the hot Dutch oven.",
+        "Transfer dough into the pot: easiest is lifting by parchment; otherwise, flip dough seam-side down quickly into the pot.",
+        "Cover with lid and bake 30 minutes.",
+        "Remove lid and bake 12–18 minutes more until deeply golden brown.",
+        "Optional doneness check: internal temperature ~205–210°F (96–99°C)."
+      ],
+      "timers": [
+        { "label": "Covered bake", "mins": 30 },
+        { "label": "Uncovered bake (start checking)", "mins": 12 }
+      ],
+      "temperature": { "type": "oven", "value": 450, "unit": "F" }
+    },
+    {
+      "id": "step_07",
+      "title": "Cool completely",
+      "instructions": [
+        "Remove bread to a rack and cool at least 90 minutes before slicing.",
+        "Cutting too early can make the crumb gummy."
+      ],
+      "handsOffMins": 90,
+      "timers": [{ "label": "Cooling", "mins": 90 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour absorbs more water and can ferment faster; bran can reduce rise unless you adjust technique.",
+    "guidelines": [
+      "For best beginner results, use a blend: 70–85% fresh milled flour + 15–30% bread/AP flour.",
+      "Hold back 20–30g water; add only if dough is stiff after mixing. Fresh milled can look dry at first then loosen as it hydrates.",
+      "If using 100% fresh milled, expect a slightly tighter crumb and less loft; consider extending the bench rest and using a tighter shaping fold.",
+      "If your room is warm, shorten the bulk fermentation (check at 10–12 hours) to avoid over-fermentation."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 25,
+      "rangeAddBackG": [0, 35]
+    }
+  },
+
+  "storage": {
+    "counter": "Best day-of for crust. Store cut-side down on a board or loosely wrapped 1 day; then bag to prevent drying.",
+    "freezer": "Slice and freeze up to 2–3 months. Toast from frozen.",
+    "refresh": "To re-crisp crust: spritz lightly with water and bake at 400°F (205°C) for 8–12 minutes."
+  },
+
+  "variations": [
+    {
+      "name": "More flavor (tiny whole wheat)",
+      "change": "Use 400g AP/bread flour + 30g whole wheat flour; keep water the same (or add 5–10g if dough feels stiff).",
+      "notes": "Slightly more rustic flavor without changing the method."
+    },
+    {
+      "name": "Faster schedule (same-day-ish)",
+      "change": "Increase yeast to 3g and ferment 4–6 hours (until bubbly and expanded), then proceed as written.",
+      "notes": "Less tang and slightly less complex flavor than the long-rise version."
+    },
+    {
+      "name": "Seeded loaf",
+      "change": "Add 30–60g mixed seeds (sesame, flax, sunflower) during initial mix.",
+      "notes": "If adding many seeds, you may need +10–20g water."
+    }
+  ],
+
+  "notes": [
+    "The dough is intentionally wet and sticky—this is normal for no-knead bread and helps create holes in the crumb.",
+    "If the loaf spreads too much, your dough may be over-fermented or too wet; shorten bulk next time or reduce water by 15–25g.",
+    "If the loaf is dense, your yeast may be weak or the dough under-fermented; extend bulk or ensure yeast is fresh."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/sourdough_country_loaf",
+      "breads/recipes/sandwich_bread_white",
+      "breads/recipes/whole_wheat_sandwich_bread"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Canonical no-knead loaf using long fermentation for flavor and Dutch oven steam for crust. Designed for first-time artisan success."
+  }
+}

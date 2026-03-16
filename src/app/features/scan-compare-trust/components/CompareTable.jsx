@@ -31,7 +31,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 /* --------------------------------- Optional deps (defensive) -------------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -66,7 +66,9 @@ try {
 const CURRENCY = "USD";
 const fmtMoney = (n, currency = CURRENCY) =>
   typeof n === "number"
-    ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(n)
+    ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(
+        n
+      )
     : "—";
 
 // Base units: weight (g), volume (ml), count (ea)
@@ -187,7 +189,9 @@ function bestCoupon(offer = {}) {
   const cs = offer.coupons || [];
   if (!cs.length) return null;
   // prefer the largest absolute value
-  return cs.slice().sort((a, b) => Number(b.value || 0) - Number(a.value || 0))[0];
+  return cs
+    .slice()
+    .sort((a, b) => Number(b.value || 0) - Number(a.value || 0))[0];
 }
 
 /** Price cycle hint */
@@ -210,8 +214,17 @@ function SaveToFavoriteSessionButton({ offer }) {
     setBusy(true);
     const payload = {
       type: "shopping",
-      label: `Fav: ${offer?.brand || ""} ${offer?.name || offer?.upc || ""}`.trim(),
-      items: [{ upc: offer?.upc, name: offer?.name, price: offer?.price, store: offer?.store }],
+      label: `Fav: ${offer?.brand || ""} ${
+        offer?.name || offer?.upc || ""
+      }`.trim(),
+      items: [
+        {
+          upc: offer?.upc,
+          name: offer?.name,
+          price: offer?.price,
+          store: offer?.store,
+        },
+      ],
       createdAt: Date.now(),
       source: "CompareTable",
     };
@@ -221,7 +234,10 @@ function SaveToFavoriteSessionButton({ offer }) {
       } else {
         eventBus.emit("favorites:session:add", payload);
       }
-      analytics.track("favorite_session_saved", { upc: offer?.upc, store: offer?.store });
+      analytics.track("favorite_session_saved", {
+        upc: offer?.upc,
+        store: offer?.store,
+      });
     } catch (e) {
       console.error(e);
     } finally {
@@ -248,7 +264,9 @@ function SaveToFavoriteScheduleButton({ offer }) {
   const save = async () => {
     setBusy(true);
     const payload = {
-      label: `Deal watch: ${offer?.brand || ""} ${offer?.name || offer?.upc || ""}`.trim(),
+      label: `Deal watch: ${offer?.brand || ""} ${
+        offer?.name || offer?.upc || ""
+      }`.trim(),
       when: "next_discount_window", // your scheduler can resolve this relative signal
       meta: { upc: offer?.upc, store: offer?.store },
       createdAt: Date.now(),
@@ -260,7 +278,10 @@ function SaveToFavoriteScheduleButton({ offer }) {
       } else {
         eventBus.emit("favorites:schedule:add", payload);
       }
-      analytics.track("favorite_schedule_saved", { upc: offer?.upc, store: offer?.store });
+      analytics.track("favorite_schedule_saved", {
+        upc: offer?.upc,
+        store: offer?.store,
+      });
     } catch (e) {
       console.error(e);
     } finally {
@@ -291,8 +312,11 @@ function PackMath({ offer }) {
     return (
       <span className="text-xs text-gray-600">
         {pack.qty} × {pack.size.value}
-        {unit} = <strong>{Number.isFinite(total) ? total.toFixed(0) : total}</strong>{" "}
-        {UNIT_MAP[String(pack.size.unit).toLowerCase()]?.kind === "count" ? "ea" : unit.toLowerCase()}
+        {unit} ={" "}
+        <strong>{Number.isFinite(total) ? total.toFixed(0) : total}</strong>{" "}
+        {UNIT_MAP[String(pack.size.unit).toLowerCase()]?.kind === "count"
+          ? "ea"
+          : unit.toLowerCase()}
       </span>
     );
   }
@@ -309,7 +333,7 @@ function PackMath({ offer }) {
 
 function Badges({ offer }) {
   const badges = deriveBadges(offer);
-  if (!badges.length && !(offer?.coupons?.length)) return null;
+  if (!badges.length && !offer?.coupons?.length) return null;
 
   const b = (label, style) => (
     <span
@@ -329,7 +353,10 @@ function Badges({ offer }) {
   });
 
   const coupon = bestCoupon(offer);
-  if (coupon) nodes.push(b(`Coupon −${fmtMoney(coupon.value)}`, "border-blue-300 text-blue-700"));
+  if (coupon)
+    nodes.push(
+      b(`Coupon −${fmtMoney(coupon.value)}`, "border-blue-300 text-blue-700")
+    );
 
   return <div className="flex flex-wrap">{nodes}</div>;
 }
@@ -341,7 +368,10 @@ function Badges({ offer }) {
  * @param {Array}  props.offers
  * @param {string} [props.title]
  */
-export default function CompareTable({ offers = [], title = "Compare offers" }) {
+export default function CompareTable({
+  offers = [],
+  title = "Compare offers",
+}) {
   const [sortKey, setSortKey] = useState("unitPrice");
   const [sortDir, setSortDir] = useState("asc"); // 'asc' | 'desc'
   const [selected, setSelected] = useState(new Set());
@@ -375,7 +405,9 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
 
   const toggleSort = (key) => {
     setSortKey((prev) => (prev === key ? prev : key));
-    setSortDir((prev) => (sortKey === key ? (prev === "asc" ? "desc" : "asc") : "asc"));
+    setSortDir((prev) =>
+      sortKey === key ? (prev === "asc" ? "desc" : "asc") : "asc"
+    );
   };
 
   const toggleSelect = useCallback((id) => {
@@ -392,7 +424,12 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
     const payload = {
       type: "shopping",
       label: `Picked ${items.length} items (CompareTable)`,
-      items: items.map((o) => ({ upc: o.upc, name: o.name, store: o.store, price: o.price })),
+      items: items.map((o) => ({
+        upc: o.upc,
+        name: o.name,
+        store: o.store,
+        price: o.price,
+      })),
       createdAt: Date.now(),
       source: "CompareTable",
     };
@@ -406,7 +443,10 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
     const payload = {
       label: `Watch ${items.length} items for sale window`,
       when: "next_discount_window",
-      meta: { upcs: items.map((o) => o.upc), stores: [...new Set(items.map((o) => o.store))] },
+      meta: {
+        upcs: items.map((o) => o.upc),
+        stores: [...new Set(items.map((o) => o.store))],
+      },
       createdAt: Date.now(),
       source: "CompareTable",
     };
@@ -485,8 +525,12 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
               const lineThrough =
                 coupon && o.price - coupon.value >= 0 ? (
                   <>
-                    <span className="text-gray-400 mr-1 line-through">{fmtMoney(o.price)}</span>
-                    <span className="text-gray-900">{fmtMoney(o.price - coupon.value)}</span>
+                    <span className="text-gray-400 mr-1 line-through">
+                      {fmtMoney(o.price)}
+                    </span>
+                    <span className="text-gray-900">
+                      {fmtMoney(o.price - coupon.value)}
+                    </span>
                   </>
                 ) : (
                   <span className="text-gray-900">{fmtMoney(o.price)}</span>
@@ -520,13 +564,17 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
                       ) : null}
                       <div>
                         <div className="font-medium leading-tight">
-                          {o.brand ? <span className="text-gray-700">{o.brand} </span> : null}
+                          {o.brand ? (
+                            <span className="text-gray-700">{o.brand} </span>
+                          ) : null}
                           {o.name || o.upc || "Unnamed"}
                         </div>
                         <div className="text-xs text-gray-500">
                           {o.upc ? <span>UPC: {o.upc}</span> : null}
                           {o.meta?.tags?.length ? (
-                            <span className="ml-2">• {o.meta.tags.slice(0, 3).join(", ")}</span>
+                            <span className="ml-2">
+                              • {o.meta.tags.slice(0, 3).join(", ")}
+                            </span>
                           ) : null}
                         </div>
                       </div>
@@ -535,7 +583,9 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
                   <td className="px-3 py-2 align-top">
                     <PackMath offer={o} />
                   </td>
-                  <td className="px-3 py-2 align-top whitespace-nowrap">{lineThrough}</td>
+                  <td className="px-3 py-2 align-top whitespace-nowrap">
+                    {lineThrough}
+                  </td>
                   <td className="px-3 py-2 align-top whitespace-nowrap">
                     {upDisplay != null ? (
                       <span className="font-semibold">
@@ -547,11 +597,15 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
                     {isAlt ? (
                       <div className="text-[11px] text-gray-600">
                         {o.delta > 0
-                          ? `+${fmtMoney(o.delta)} vs cheapest (${o.deltaPct.toFixed(0)}%)`
+                          ? `+${fmtMoney(
+                              o.delta
+                            )} vs cheapest (${o.deltaPct.toFixed(0)}%)`
                           : `${fmtMoney(o.delta)} vs cheapest`}
                       </div>
                     ) : (
-                      <div className="text-[11px] text-green-700 font-medium">Cheapest</div>
+                      <div className="text-[11px] text-green-700 font-medium">
+                        Cheapest
+                      </div>
                     )}
                   </td>
                   <td className="px-3 py-2 align-top">
@@ -582,7 +636,10 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
                             qty: 1,
                             source: "CompareTable",
                           });
-                          analytics.track("shopping_list_add", { upc: o.upc, store: o.store });
+                          analytics.track("shopping_list_add", {
+                            upc: o.upc,
+                            store: o.store,
+                          });
                         }}
                       >
                         ➕ List
@@ -618,9 +675,10 @@ export default function CompareTable({ offers = [], title = "Compare offers" }) 
 
       {/* Subtle footnote explaining units / fairness of compare */}
       <div className="mt-2 text-[11px] text-gray-500">
-        Unit prices are normalized per base unit ({unitLabel}) for apples-to-apples comparisons.
-        Multi-packs are converted to total quantity. Coupons shown are best-available; additional
-        offers may apply at checkout.
+        Unit prices are normalized per base unit ({unitLabel}) for
+        apples-to-apples comparisons. Multi-packs are converted to total
+        quantity. Coupons shown are best-available; additional offers may apply
+        at checkout.
       </div>
     </div>
   );

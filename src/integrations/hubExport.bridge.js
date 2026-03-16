@@ -23,10 +23,10 @@
  *    internal `hub.export.failed` event. Successes fan out `hub.export.sent`.
  */
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import featureFlags from "../config/featureFlags";
-import HubPacketFormatter from "../hub/HubPacketFormatter";
-import FamilyFundConnector from "../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
@@ -64,13 +64,23 @@ function dedupeKey(item) {
   const d = item?.data || {};
   switch (item.type) {
     case "hub.plan.snapshot":
-      return `${item.type}:${d.planId || "unknown"}:${d.window?.start || ""}:${d.window?.end || ""}`;
+      return `${item.type}:${d.planId || "unknown"}:${d.window?.start || ""}:${
+        d.window?.end || ""
+      }`;
     case "hub.actuals.session":
-      return `${item.type}:${d.sessionId || ""}:${d.runId || d.completedAt || ""}`;
+      return `${item.type}:${d.sessionId || ""}:${
+        d.runId || d.completedAt || ""
+      }`;
     case "hub.inventory.delta":
-      return `${item.type}:${(d.deltas || []).map((x) => `${x.itemId}:${x.qty}`).slice(0, 8).join("|")}`;
+      return `${item.type}:${(d.deltas || [])
+        .map((x) => `${x.itemId}:${x.qty}`)
+        .slice(0, 8)
+        .join("|")}`;
     case "hub.shortage.alert":
-      return `${item.type}:${(d.items || []).map((x) => x.itemId || x.sku || x.name).slice(0, 8).join("|")}`;
+      return `${item.type}:${(d.items || [])
+        .map((x) => x.itemId || x.sku || x.name)
+        .slice(0, 8)
+        .join("|")}`;
     default:
       return `${item.type}:${JSON.stringify(d).slice(0, 96)}`;
   }
@@ -133,7 +143,10 @@ async function flush() {
   } catch (e) {
     // Formatting failure — drop batch (don't retry malformed payloads)
     telemetry("format.error", { error: String(e?.message || e) });
-    safeEmit("hub.export.failed", { reason: "format_error", size: batch.length });
+    safeEmit("hub.export.failed", {
+      reason: "format_error",
+      size: batch.length,
+    });
     backoffMs = 0;
     flushSoon(BATCH_INTERVAL_MS);
     return;
@@ -149,8 +162,14 @@ async function flush() {
     if (queue.length) flushSoon(250);
   } catch (e) {
     // Transient send issue — push items back to the front and back off
-    telemetry("flush.error", { error: String(e?.message || e), count: packets.length });
-    safeEmit("hub.export.failed", { reason: "send_error", error: String(e?.message || e) });
+    telemetry("flush.error", {
+      error: String(e?.message || e),
+      count: packets.length,
+    });
+    safeEmit("hub.export.failed", {
+      reason: "send_error",
+      error: String(e?.message || e),
+    });
     queue.unshift(...batch); // restore
     backoffMs = backoffMs ? Math.min(MAX_BACKOFF_MS, backoffMs * 2) : 1_000;
     flushSoon(backoffMs);
@@ -175,7 +194,8 @@ function onPlanRecomputed(evt) {
     data: {
       planId: d.planId || d.meta?.planId || "unknown",
       window: d.window || null,
-      modelVersion: d.recalculation?.meta?.modelVersion || d.meta?.modelVersion || null,
+      modelVersion:
+        d.recalculation?.meta?.modelVersion || d.meta?.modelVersion || null,
       reason: d.recalculation?.reason || "plan_recomputed",
       sessions: (d.affectedSessions || d.sessions || []).map((s) => ({
         sessionId: s.sessionId || s.id,
@@ -321,9 +341,17 @@ function wire() {
   // Actuals across domains
   subscriptions.push(eventBus.on("session.run.logged", onSessionRunLogged));
   subscriptions.push(eventBus.on("session.completed", onSessionCompleted));
-  subscriptions.push(eventBus.on("meal.executed", (e) => onDomainCompletion(e, "cooking")));
-  subscriptions.push(eventBus.on("garden.harvest.logged", (e) => onDomainCompletion(e, "garden")));
-  subscriptions.push(eventBus.on("preservation.completed", (e) => onDomainCompletion(e, "preservation")));
+  subscriptions.push(
+    eventBus.on("meal.executed", (e) => onDomainCompletion(e, "cooking"))
+  );
+  subscriptions.push(
+    eventBus.on("garden.harvest.logged", (e) => onDomainCompletion(e, "garden"))
+  );
+  subscriptions.push(
+    eventBus.on("preservation.completed", (e) =>
+      onDomainCompletion(e, "preservation")
+    )
+  );
 
   // Storehouse deltas
   subscriptions.push(eventBus.on("inventory.updated", onInventoryUpdated));

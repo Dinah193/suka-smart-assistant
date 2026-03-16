@@ -1,0 +1,525 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.quesadillas",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tex-Mex Quesadillas",
+    "subtitle": "Crispy, cheesy tortillas with optional chicken or steak, peppers/onions, and a quick skillet method.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Designed as a flexible template: cheese-only base + optional protein + optional veg.",
+        "Includes griddle/sheet-pan options and kid-friendly mild variant."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.street_food",
+      "archetype.bowls",
+      "archetype.plated_meals"
+    ],
+    "servingStyles": ["street_food", "snacks", "family_style", "plates"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "main.quick",
+      "weeknight.friendly",
+      "kid.friendly",
+      "leftovers.friendly",
+      "pantry.flexible"
+    ],
+    "subprofiles": [
+      "texmex.cheese_forward",
+      "texmex.peppers_onions",
+      "texmex.salsa_sourcream"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 2, "unit": "quesadilla_wedges" },
+    "notes": "Makes 4 quesadillas (8 wedges each if quartered)."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 0,
+    "totalMins": 20
+  },
+  "difficulty": "beginner",
+  "summary": "A reliable Tex-Mex quesadilla template: melty cheese + crisp tortilla, with optional fajita veg and protein. Great for fast dinners and leftover remixing.",
+  "signals": {
+    "batchFriendly": "prep_components",
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "kidFriendly": true
+  },
+  "tasteProfile": {
+    "salt": 2,
+    "acid": 1,
+    "sweet": 0,
+    "heat": 1,
+    "umami": 3,
+    "notes": ["cheesy", "toasty", "savory", "salsa_optional"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.skillet",
+      "equipment.spatuIa",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.griddle",
+      "equipment.tongs",
+      "equipment.box_grater"
+    ],
+    "optional": [
+      {
+        "id": "equipment.sheet_pan",
+        "label": "Sheet pan (oven method)",
+        "required": false,
+        "notes": "Useful for cooking many quesadillas at once."
+      }
+    ]
+  },
+  "dietFlags": ["diet.vegetarian_optional", "diet.gluten_free_optional"],
+  "allergens": ["allergen.dairy", "allergen.wheat"],
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Base",
+      "items": [
+        "ingredient.flour_tortillas",
+        "ingredient.cheddar",
+        "ingredient.monterey_jack",
+        "ingredient.oaxaca_cheese"
+      ]
+    },
+    {
+      "id": "group.fat",
+      "label": "Fat (for crisping)",
+      "items": ["ingredient.neutral_oil", "ingredient.butter"]
+    },
+    {
+      "id": "group.veg_optional",
+      "label": "Optional fajita vegetables",
+      "items": [
+        "ingredient.bell_pepper",
+        "ingredient.onion",
+        "ingredient.jalapeno"
+      ]
+    },
+    {
+      "id": "group.protein_optional",
+      "label": "Optional protein",
+      "items": [
+        "ingredient.chicken_cooked",
+        "ingredient.steak_cooked",
+        "ingredient.black_beans",
+        "ingredient.refried_beans"
+      ]
+    },
+    {
+      "id": "group.flavor_optional",
+      "label": "Optional flavor boosts",
+      "items": [
+        "ingredient.taco_seasoning",
+        "ingredient.cumin",
+        "ingredient.chili_powder",
+        "ingredient.garlic_powder"
+      ]
+    },
+    {
+      "id": "group.serve_with",
+      "label": "Serve with",
+      "items": [
+        "ingredient.salsa",
+        "ingredient.sour_cream",
+        "ingredient.guacamole",
+        "ingredient.cilantro",
+        "ingredient.lime"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.flour_tortillas",
+      "label": "Flour tortillas (8–10 inch)",
+      "role": "base",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": "Use burrito-size for fold-over style; use smaller for snack quesadillas."
+    },
+    {
+      "id": "ingredient.monterey_jack",
+      "label": "Monterey Jack, shredded",
+      "role": "cheese",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Or use a Tex-Mex blend."
+    },
+    {
+      "id": "ingredient.cheddar",
+      "label": "Cheddar, shredded (optional blend)",
+      "role": "cheese",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true,
+      "notes": "Use half Jack + half cheddar for stronger flavor."
+    },
+    {
+      "id": "ingredient.oaxaca_cheese",
+      "label": "Oaxaca cheese (optional)",
+      "role": "cheese",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true,
+      "notes": "Great melt; substitute for Jack if preferred."
+    },
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Use as needed to lightly coat the pan."
+    },
+    {
+      "id": "ingredient.butter",
+      "label": "Butter (optional, extra crisp)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.bell_pepper",
+      "label": "Bell pepper, thinly sliced (optional)",
+      "role": "veg",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, thinly sliced (optional)",
+      "role": "veg",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.jalapeno",
+      "label": "Jalapeño, thinly sliced (optional)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Remove seeds for milder heat."
+    },
+
+    {
+      "id": "ingredient.chicken_cooked",
+      "label": "Cooked chicken, shredded or diced (optional)",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Leftover rotisserie chicken works perfectly."
+    },
+    {
+      "id": "ingredient.steak_cooked",
+      "label": "Cooked steak, thinly sliced (optional)",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.black_beans",
+      "label": "Black beans, drained (optional)",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true,
+      "notes": "Pat dry a bit so the quesadilla stays crisp."
+    },
+    {
+      "id": "ingredient.refried_beans",
+      "label": "Refried beans (optional)",
+      "role": "protein",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "optional": true,
+      "notes": "Spread thinly; too much makes it hard to crisp."
+    },
+
+    {
+      "id": "ingredient.taco_seasoning",
+      "label": "Taco seasoning (optional)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin (optional)",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder (optional)",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.garlic_powder",
+      "label": "Garlic powder (optional)",
+      "role": "spice",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.salsa",
+      "label": "Salsa (for serving)",
+      "role": "sauce",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.sour_cream",
+      "label": "Sour cream (for serving)",
+      "role": "topping",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.guacamole",
+      "label": "Guacamole (for serving)",
+      "role": "topping",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime wedges (optional)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_fillings",
+      "title": "Prep optional fillings (veg/protein)",
+      "activeMins": 6,
+      "instructions": [
+        "If using fajita vegetables: slice pepper and onion (and jalapeño if desired).",
+        "If using cooked protein: shred/dice chicken or thinly slice cooked steak.",
+        "Keep fillings relatively dry so the quesadilla crisps well."
+      ],
+      "checks": ["Fillings prepped; not overly wet"]
+    },
+    {
+      "id": "step.cook_veg_optional",
+      "title": "Optional: sauté fajita vegetables",
+      "activeMins": 6,
+      "instructions": [
+        "Heat a skillet over medium-high with a small drizzle of oil.",
+        "Add peppers and onions; sauté 4–6 minutes until softened with light browning.",
+        "Season with a pinch of taco seasoning (or cumin/chili powder/garlic powder).",
+        "Transfer to a plate and wipe the pan if needed."
+      ],
+      "timers": [{ "label": "Sauté veg", "minutes": 5 }],
+      "checks": ["Veg softened; some browning; not watery"]
+    },
+    {
+      "id": "step.build_quesadilla",
+      "title": "Build the quesadilla (fold-over or full-round)",
+      "activeMins": 5,
+      "instructions": [
+        "Fold-over method (fast): sprinkle cheese on one half of each tortilla, add a thin layer of fillings, then top with a bit more cheese and fold shut.",
+        "Full-round method (extra even): place one tortilla down, sprinkle cheese, add fillings, add a little more cheese, then top with a second tortilla.",
+        "Keep fillings in a thin layer so the cheese can melt before the tortilla over-browns."
+      ],
+      "checks": ["Cheese on both sides of fillings; not overstuffed"]
+    },
+    {
+      "id": "step.toast_first_side",
+      "title": "Toast first side until golden and cheese starts melting",
+      "activeMins": 5,
+      "instructions": [
+        "Heat skillet (or griddle) over medium. Add a light film of oil (or a small pat of butter).",
+        "Place quesadilla in the pan and cook 2–4 minutes until the underside is golden.",
+        "Press gently with a spatula to encourage browning and help the cheese bond."
+      ],
+      "timers": [{ "label": "First side toast", "minutes": 3 }],
+      "checks": ["Underside golden; cheese beginning to melt"]
+    },
+    {
+      "id": "step.flip_finish",
+      "title": "Flip and finish melting",
+      "activeMins": 4,
+      "instructions": [
+        "Flip carefully (use a wide spatula; for full-round, consider holding the top with your hand or using a plate-assisted flip).",
+        "Cook 2–3 minutes more until the second side is golden and the cheese is fully melted.",
+        "Transfer to a cutting board and rest 1 minute before slicing."
+      ],
+      "timers": [{ "label": "Second side toast", "minutes": 2 }],
+      "checks": ["Both sides crisp; cheese fully melted; structure holds"]
+    },
+    {
+      "id": "step.slice_serve",
+      "title": "Slice and serve",
+      "activeMins": 2,
+      "instructions": [
+        "Slice into wedges (usually 4 per quesadilla; 6 if very large).",
+        "Serve with salsa, sour cream, and/or guacamole. Add cilantro and lime if desired."
+      ],
+      "checks": ["Wedges cleanly cut; fillings stable"]
+    },
+    {
+      "id": "step.oven_batch",
+      "title": "Oven batch method (optional, feeds a crowd)",
+      "activeMins": 8,
+      "handsOffMins": 10,
+      "instructions": [
+        "Preheat oven to 425°F. Place a sheet pan inside to preheat (helps crisp).",
+        "Assemble quesadillas. Brush lightly with oil or melted butter on the outside.",
+        "Place on the hot sheet pan and bake 5 minutes; flip and bake 4–6 minutes more until crisp and melted."
+      ],
+      "timers": [{ "label": "Oven bake (total)", "minutes": 10 }],
+      "checks": ["Crisp exterior; fully melted cheese"]
+    }
+  ],
+  "methods": [
+    "method.saute_optional",
+    "method.toast",
+    "method.melt",
+    "method.slice"
+  ],
+  "pairings": {
+    "bestWith": [
+      "recipes.tex_mex.mexican_rice",
+      "recipes.tex_mex.refried_beans",
+      "recipes.tex_mex.chipotle_sauce"
+    ],
+    "alsoGreatWith": ["pico_de_gallo", "corn_salad", "simple_green_salad"]
+  },
+  "storage": {
+    "fridge": {
+      "duration": "3 days",
+      "notes": [
+        "Store wedges airtight.",
+        "Re-crisp in a dry skillet over medium heat or air-fryer; avoid microwaving if you want crispness."
+      ]
+    },
+    "freezer": {
+      "duration": "1 month",
+      "notes": [
+        "Freeze in a single layer, then bag. Reheat from frozen in oven/air-fryer until hot and crisp.",
+        "Best with cheese-only or chicken; high-moisture fillings can soften."
+      ]
+    }
+  },
+  "safety": {
+    "notes": [
+      "If using cooked chicken/steak, ensure it was cooled and stored safely before reusing.",
+      "Reheat leftovers until steaming hot."
+    ]
+  },
+  "planner": {
+    "makeAhead": [
+      "Prep fajita veg and protein ahead; assemble and cook in 5 minutes.",
+      "Shred a block of cheese once for the week to reduce active time."
+    ],
+    "leftoverRemix": [
+      "Use leftover fajita meat/veg from fajitas.json.",
+      "Add a thin layer of refried beans as a glue and extra protein."
+    ],
+    "portioning": {
+      "notes": [
+        "For kids: use small tortillas and mild cheese; skip jalapeño; serve salsa on the side.",
+        "For higher protein: add beans + chicken, but keep layers thin."
+      ]
+    }
+  },
+  "variations": [
+    {
+      "id": "variation.cheese_only",
+      "label": "Cheese-only (classic kid-friendly)",
+      "when": { "mode": "simple" },
+      "adapt": {
+        "notes": [
+          "Skip fillings; use extra cheese for strong melt and structure.",
+          "Serve with salsa and/or sour cream."
+        ]
+      }
+    },
+    {
+      "id": "variation.fajita_style",
+      "label": "Fajita-style quesadillas",
+      "when": { "use": "fajita_veg" },
+      "adapt": {
+        "notes": [
+          "Sauté peppers/onions first, then add sliced steak or chicken.",
+          "Optional: a pinch of taco seasoning in the veg."
+        ]
+      }
+    },
+    {
+      "id": "variation.beans_and_cheese",
+      "label": "Beans & cheese",
+      "when": { "use": "beans" },
+      "adapt": {
+        "notes": [
+          "Spread refried beans thinly, then add cheese and toast.",
+          "Add jalapeño pickles or green chiles if you want heat."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free",
+      "label": "Gluten-free quesadillas",
+      "when": { "diet": "gluten_free" },
+      "adapt": {
+        "notes": [
+          "Use certified GF tortillas (often more delicate).",
+          "Cook slightly lower and flip carefully to prevent cracking."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": [
+      "cuisine.tex_mex",
+      "street_food",
+      "weeknight.friendly"
+    ],
+    "ingredientIds": [
+      "ingredient.flour_tortillas",
+      "ingredient.monterey_jack",
+      "ingredient.neutral_oil"
+    ],
+    "methodIds": ["method.toast", "method.melt"],
+    "equipmentIds": ["equipment.skillet"],
+    "search": {
+      "keywords": [
+        "quesadilla",
+        "tex mex quesadilla",
+        "cheese quesadilla",
+        "chicken quesadilla",
+        "steak quesadilla"
+      ],
+      "aliases": ["quesadillas", "cheese quesadilla"]
+    }
+  }
+}

@@ -1,0 +1,1110 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "SSA canonical dishes catalog for Asian Fusion cuisine.",
+    "DishV2 entries are used by planners, search/browse UI, and deterministic adapters.",
+    "IDs/tags follow ^[a-z0-9_.-]+$ and are intentionally SSA-friendly (stable, portable)."
+  ],
+
+  "meta": {
+    "id": "cuisines.asian_fusion.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Asian Fusion • Dishes Catalog",
+    "cuisineId": "cuisines.asian_fusion",
+    "status": "canonical",
+    "description": "Curated dish definitions for an Asian Fusion overlay cuisine (East/SE Asian techniques + pantry; adaptable across proteins, grains, and vegetables).",
+    "version": "1.0.0",
+    "author": "SSA Catalog Curation",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "notes": [
+      "Use with asian_fusion/cuisine.profile.json and cuisine rulesets.",
+      "Designed to support weeknight meals and batch-friendly bases (rice, noodles, stir-fry sauces)."
+    ]
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "description": "Asian Fusion dishes catalog: rice bowls, noodle bowls, stir-fries, curries, dumplings, marinades, and quick pickles. This catalog focuses on adaptable templates that can be instantiated using the household’s inventory and capability constraints.",
+
+  "tags": [
+    "cuisine.asian_fusion",
+    "overlay.cuisine",
+    "planner.catalog",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+
+  "dishes": [
+    {
+      "id": "asian_fusion.teriyaki_chicken_rice_bowl",
+      "label": "Teriyaki Chicken Rice Bowl",
+      "aka": ["Chicken Teriyaki Bowl", "Teriyaki Bowl"],
+      "subprofiles": ["asian_fusion.japanese_inspired"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["bowls", "family_style"],
+      "mealArchetypes": ["archetype.bowl", "archetype.protein_and_starch"],
+      "signals": {
+        "batchFriendly": "sauce",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "sauce_only"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_thighs", "ingredient.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": [
+            "ingredient.rice_white",
+            "ingredient.rice_jasmine",
+            "ingredient.rice_brown"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.broccoli",
+            "ingredient.snap_peas",
+            "ingredient.green_beans",
+            "ingredient.carrots"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.soy_sauce", "ingredient.tamari"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": [
+            "ingredient.brown_sugar",
+            "ingredient.honey",
+            "ingredient.maple_syrup"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.sesame_seeds", "ingredient.scallions"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry", "method.simmer", "method.pan_sear"],
+      "equipmentRecommended": ["equipment.wok", "equipment.rice_cooker"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.saucepan"],
+      "ingredientsCore": [
+        "ingredient.soy_sauce",
+        "ingredient.garlic",
+        "ingredient.ginger"
+      ],
+      "allergens": ["allergen.soy", "allergen.sesame"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "typical": ["side.quick_cucumber_salad", "side.miso_soup"],
+        "condiments": ["condiment.chili_crisp", "condiment.sriracha"]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.teriyaki_bowl.gluten_free",
+          "label": "Gluten-Free (Tamari)",
+          "when": { "hasDietFlag": "diet.gluten_free" },
+          "adapt": { "swap": { "ingredient.soy_sauce": "ingredient.tamari" } }
+        },
+        {
+          "id": "asian_fusion.teriyaki_bowl.veg",
+          "label": "Vegetarian (Tofu)",
+          "when": { "hasDietFlag": "diet.vegetarian" },
+          "adapt": { "swapRole": { "protein": "ingredient.tofu_firm" } }
+        }
+      ],
+      "plannerTags": ["weeknight", "bowl", "sauce_batchable", "leftovers"]
+    },
+
+    {
+      "id": "asian_fusion.gochujang_glazed_salmon",
+      "label": "Gochujang-Glazed Salmon",
+      "aka": ["Korean Chili-Glazed Salmon"],
+      "subprofiles": ["asian_fusion.korean_inspired"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 3,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 5 },
+      "servingStyles": ["plates", "bowls"],
+      "mealArchetypes": ["archetype.protein_and_sides", "archetype.bowl"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.salmon"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.gochujang", "ingredient.ssamjang"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.rice_vinegar", "ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.honey", "ingredient.brown_sugar"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": [
+            "ingredient.rice_jasmine",
+            "ingredient.rice_white",
+            "ingredient.rice_brown"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.bok_choy",
+            "ingredient.broccoli",
+            "ingredient.cabbage",
+            "ingredient.green_beans"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.sesame_seeds", "ingredient.scallions"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.broil", "method.roast", "method.pan_sear"],
+      "equipmentRecommended": ["equipment.sheet_pan", "equipment.oven"],
+      "equipmentMinimum": ["equipment.skillet"],
+      "ingredientsCore": ["ingredient.gochujang", "ingredient.garlic"],
+      "allergens": ["allergen.fish", "allergen.soy", "allergen.sesame"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "typical": ["side.quick_pickles", "side.kimchi"],
+        "condiments": ["condiment.sesame_oil", "condiment.chili_crisp"]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.gochujang_salmon.less_heat",
+          "label": "Milder Heat",
+          "when": { "heatPreferenceMax": 2 },
+          "adapt": {
+            "reduce": { "ingredient.gochujang": "by_half" },
+            "add": { "ingredient.ketchup": "1_tbsp" }
+          }
+        }
+      ],
+      "plannerTags": ["weeknight", "spicy", "quick_roast"]
+    },
+
+    {
+      "id": "asian_fusion.sesame_ginger_noodles",
+      "label": "Sesame Ginger Noodles",
+      "aka": ["Cold Sesame Noodles", "Ginger Sesame Noodles"],
+      "subprofiles": ["asian_fusion.chinese_inspired"],
+      "category": "main",
+      "difficulty": 1,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 0 },
+      "servingStyles": ["bowls", "street_food"],
+      "mealArchetypes": ["archetype.noodle_bowl"],
+      "signals": {
+        "batchFriendly": "sauce",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "sauce_only"
+      },
+      "coreComponents": [
+        {
+          "role": "noodles",
+          "items": [
+            "ingredient.noodles_soba",
+            "ingredient.noodles_ramen",
+            "ingredient.noodles_spaghetti"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.sesame_oil",
+            "ingredient.tahini",
+            "ingredient.peanut_butter"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.soy_sauce", "ingredient.tamari"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.rice_vinegar", "ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.honey", "ingredient.brown_sugar"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.cucumber",
+            "ingredient.carrots",
+            "ingredient.cabbage",
+            "ingredient.bell_pepper"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.sesame_seeds",
+            "ingredient.scallions",
+            "ingredient.cilantro"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "heat",
+          "items": [
+            "ingredient.chili_crisp",
+            "ingredient.sriracha",
+            "ingredient.crushed_red_pepper"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.boil", "method.toss"],
+      "equipmentRecommended": ["equipment.colander", "equipment.mixing_bowl"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.sesame_oil",
+        "ingredient.soy_sauce",
+        "ingredient.ginger"
+      ],
+      "allergens": ["allergen.soy", "allergen.sesame", "allergen.peanuts"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "typical": ["side.edamame", "side.quick_pickles"],
+        "protein_addons": [
+          "ingredient.shredded_chicken",
+          "ingredient.tofu_firm",
+          "ingredient.shrimp"
+        ]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.sesame_noodles.gluten_free",
+          "label": "Gluten-Free",
+          "when": { "hasDietFlag": "diet.gluten_free" },
+          "adapt": {
+            "swap": { "ingredient.soy_sauce": "ingredient.tamari" },
+            "prefer": { "noodles": "ingredient.noodles_rice" }
+          }
+        }
+      ],
+      "plannerTags": ["weeknight", "noodles", "sauce_batchable", "cold_or_hot"]
+    },
+
+    {
+      "id": "asian_fusion.stir_fry_vegetables_and_protein",
+      "label": "Stir-Fry Vegetables + Protein (Flexible)",
+      "aka": ["Everyday Stir Fry", "Kitchen Sink Stir Fry"],
+      "subprofiles": ["asian_fusion.core"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 25, "handsOffMins": 0 },
+      "servingStyles": ["family_style", "plates", "bowls"],
+      "mealArchetypes": ["archetype.stir_fry"],
+      "signals": {
+        "batchFriendly": "sauce",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "sauce_only"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken_thighs",
+            "ingredient.pork_tenderloin",
+            "ingredient.beef_flank_steak",
+            "ingredient.tofu_firm",
+            "ingredient.shrimp"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.broccoli",
+            "ingredient.bok_choy",
+            "ingredient.snap_peas",
+            "ingredient.cabbage",
+            "ingredient.bell_pepper",
+            "ingredient.mushrooms"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.soy_sauce",
+            "ingredient.tamari",
+            "ingredient.oyster_sauce"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.rice_vinegar", "ingredient.lime_juice"],
+          "chooseOne": false
+        },
+        {
+          "role": "thickener",
+          "items": ["ingredient.cornstarch", "ingredient.arrowroot_powder"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.neutral_oil", "ingredient.sesame_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": [
+            "ingredient.chili_garlic_sauce",
+            "ingredient.chili_crisp",
+            "ingredient.sriracha"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.scallions",
+            "ingredient.sesame_seeds",
+            "ingredient.cilantro"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry", "method.velvet", "method.reduce"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.skillet"],
+      "ingredientsCore": [
+        "ingredient.garlic",
+        "ingredient.ginger",
+        "ingredient.soy_sauce"
+      ],
+      "allergens": ["allergen.soy", "allergen.sesame", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "serveWith": ["dish.steamed_rice", "dish.fried_rice", "dish.noodles"],
+        "quickSides": ["side.quick_pickles", "side.cucumber_salad"]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.stir_fry.low_sodium",
+          "label": "Lower Sodium",
+          "when": { "hasDietFlag": "diet.low_sodium" },
+          "adapt": {
+            "prefer": {
+              "ingredient.soy_sauce": "ingredient.low_sodium_soy_sauce"
+            },
+            "increase": { "ingredient.garlic": "more" }
+          }
+        }
+      ],
+      "plannerTags": ["weeknight", "stir_fry", "flexible", "sauce_batchable"]
+    },
+
+    {
+      "id": "asian_fusion.thai_inspired_coconut_curry",
+      "label": "Thai-Inspired Coconut Curry (Flexible)",
+      "aka": ["Coconut Curry", "Thai Curry"],
+      "subprofiles": ["asian_fusion.thai_inspired"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 25, "totalMins": 45, "handsOffMins": 15 },
+      "servingStyles": ["stew_and_starch", "family_style", "bowls"],
+      "mealArchetypes": ["archetype.curry", "archetype.stew_and_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "base_only"
+      },
+      "coreComponents": [
+        {
+          "role": "curry_paste",
+          "items": [
+            "ingredient.red_curry_paste",
+            "ingredient.green_curry_paste"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "items": ["ingredient.coconut_milk"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken_thighs",
+            "ingredient.shrimp",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.bell_pepper",
+            "ingredient.zucchini",
+            "ingredient.green_beans",
+            "ingredient.bok_choy"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.brown_sugar", "ingredient.honey"],
+          "chooseOne": false
+        },
+        {
+          "role": "herbs",
+          "items": ["ingredient.cilantro", "ingredient.basil"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer", "method.saute", "method.stew"],
+      "equipmentRecommended": ["equipment.dutch_oven"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": ["ingredient.coconut_milk", "ingredient.lime_juice"],
+      "allergens": ["allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["ingredient.rice_jasmine", "ingredient.rice_white"],
+        "optionalSides": ["side.quick_pickles", "side.cucumber_salad"]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.coconut_curry.veg",
+          "label": "Vegetarian",
+          "when": { "hasDietFlag": "diet.vegetarian" },
+          "adapt": { "swapRole": { "protein": "ingredient.tofu_firm" } }
+        }
+      ],
+      "plannerTags": ["batch", "curry", "freezer_partial"]
+    },
+
+    {
+      "id": "asian_fusion.fried_rice",
+      "label": "Fried Rice (Flexible)",
+      "aka": ["Stir-Fried Rice", "House Fried Rice"],
+      "subprofiles": ["asian_fusion.core"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 25, "handsOffMins": 0 },
+      "servingStyles": ["family_style", "one_pot", "bowls"],
+      "mealArchetypes": ["archetype.one_pan", "archetype.bowl"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.rice_cooked_day_old"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.eggs",
+            "ingredient.chicken_thighs",
+            "ingredient.shrimp",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.peas",
+            "ingredient.carrots",
+            "ingredient.scallions",
+            "ingredient.cabbage"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.soy_sauce", "ingredient.tamari"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.neutral_oil", "ingredient.sesame_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir_fry", "method.scramble"],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": ["equipment.skillet"],
+      "ingredientsCore": [
+        "ingredient.rice_cooked_day_old",
+        "ingredient.soy_sauce",
+        "ingredient.scallions"
+      ],
+      "allergens": ["allergen.soy", "allergen.eggs", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "notes": "Best with chilled day-old rice for proper texture; add quick pickle for contrast."
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.fried_rice.veg",
+          "label": "Vegetarian",
+          "when": { "hasDietFlag": "diet.vegetarian" },
+          "adapt": {
+            "omit": ["ingredient.shrimp", "ingredient.chicken_thighs"],
+            "increase": { "ingredient.eggs": "or_tofu" }
+          }
+        }
+      ],
+      "plannerTags": ["weeknight", "one_pan", "leftover_rice", "batch"]
+    },
+
+    {
+      "id": "asian_fusion.miso_ginger_soup",
+      "label": "Miso Ginger Soup",
+      "aka": ["Miso Soup (Ginger)", "Simple Miso Soup"],
+      "subprofiles": ["asian_fusion.japanese_inspired"],
+      "category": "soup",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["one_pot", "family_style"],
+      "mealArchetypes": ["archetype.soup"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "broth",
+          "items": ["ingredient.dashi", "ingredient.vegetable_broth"],
+          "chooseOne": true
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.miso_paste"],
+          "chooseOne": true
+        },
+        {
+          "role": "addins",
+          "items": [
+            "ingredient.tofu_silken",
+            "ingredient.scallions",
+            "ingredient.seaweed_nori"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.ginger"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer", "method.whisk_off_heat"],
+      "equipmentRecommended": ["equipment.pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": ["ingredient.miso_paste", "ingredient.ginger"],
+      "allergens": ["allergen.soy"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "serveWith": ["dish.fried_rice", "dish.sesame_noodles", "side.edamame"]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.miso_soup.gluten_free",
+          "label": "Gluten-Free",
+          "when": { "hasDietFlag": "diet.gluten_free" },
+          "adapt": {
+            "note": "Use certified GF miso and broth; avoid barley miso."
+          }
+        }
+      ],
+      "plannerTags": ["quick", "soup", "weeknight"]
+    },
+
+    {
+      "id": "asian_fusion.quick_pickled_cucumbers",
+      "label": "Quick Pickled Cucumbers",
+      "aka": ["Quick Pickles (Cucumber)", "Rice Vinegar Cucumbers"],
+      "subprofiles": ["asian_fusion.core"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 20, "handsOffMins": 10 },
+      "servingStyles": ["snacks", "family_style"],
+      "mealArchetypes": ["archetype.side", "archetype.condiment"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "produce",
+          "items": ["ingredient.cucumber"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.rice_vinegar"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar", "ingredient.honey"],
+          "chooseOne": true
+        },
+        { "role": "salt", "items": ["ingredient.salt"], "chooseOne": true },
+        {
+          "role": "optional",
+          "items": [
+            "ingredient.sesame_seeds",
+            "ingredient.crushed_red_pepper",
+            "ingredient.ginger"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.quick_pickle"],
+      "equipmentRecommended": ["equipment.jar", "equipment.mandoline"],
+      "equipmentMinimum": ["equipment.bowl"],
+      "ingredientsCore": ["ingredient.cucumber", "ingredient.rice_vinegar"],
+      "allergens": ["allergen.sesame"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "notes": "Use as a bright counterpoint to rich bowls, stir-fries, and fried rice."
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.quick_pickles.spicy",
+          "label": "Spicy Pickles",
+          "when": { "prefersHeatMin": 3 },
+          "adapt": { "add": { "ingredient.crushed_red_pepper": "to_taste" } }
+        }
+      ],
+      "plannerTags": ["side", "make_ahead", "weeknight", "bright"]
+    },
+
+    {
+      "id": "asian_fusion.dumpling_bowl_soup",
+      "label": "Dumpling Bowl Soup (Shortcut)",
+      "aka": ["Wonton Soup Shortcut", "Dumpling Soup"],
+      "subprofiles": ["asian_fusion.core"],
+      "category": "soup",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 5 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": ["archetype.soup", "archetype.bowl"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "dumplings",
+          "items": ["ingredient.frozen_dumplings"],
+          "chooseOne": true
+        },
+        {
+          "role": "broth",
+          "items": ["ingredient.chicken_broth", "ingredient.vegetable_broth"],
+          "chooseOne": true
+        },
+        {
+          "role": "greens",
+          "items": [
+            "ingredient.spinach",
+            "ingredient.bok_choy",
+            "ingredient.napa_cabbage"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.scallions",
+            "ingredient.sesame_oil",
+            "ingredient.chili_crisp"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer", "method.boil"],
+      "equipmentRecommended": ["equipment.pot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": ["ingredient.frozen_dumplings", "ingredient.ginger"],
+      "allergens": ["allergen.gluten", "allergen.soy", "allergen.sesame"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": { "notes": "Fast comfort meal; add greens for balance." },
+      "variations": [
+        {
+          "id": "asian_fusion.dumpling_soup.gluten_free",
+          "label": "Gluten-Free",
+          "when": { "hasDietFlag": "diet.gluten_free" },
+          "adapt": {
+            "note": "Use gluten-free dumplings and certified GF broth."
+          }
+        }
+      ],
+      "plannerTags": ["weeknight", "shortcut", "soup"]
+    },
+
+    {
+      "id": "asian_fusion.garlic_ginger_marinade",
+      "label": "Garlic Ginger Marinade (Multipurpose)",
+      "aka": ["Asian Marinade Base", "Garlic Ginger Sauce"],
+      "subprofiles": ["asian_fusion.core"],
+      "category": "sauce",
+      "difficulty": 1,
+      "heatTypical": 1,
+      "time": { "activeMins": 10, "totalMins": 10, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "family_style"],
+      "mealArchetypes": ["archetype.sauce", "archetype.marinade"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "marinade"
+      },
+      "coreComponents": [
+        {
+          "role": "umami",
+          "items": ["ingredient.soy_sauce", "ingredient.tamari"],
+          "chooseOne": true
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.rice_vinegar", "ingredient.lime_juice"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.honey", "ingredient.brown_sugar"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatics",
+          "items": ["ingredient.garlic", "ingredient.ginger"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.sesame_oil", "ingredient.neutral_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "heat",
+          "items": [
+            "ingredient.sriracha",
+            "ingredient.chili_garlic_sauce",
+            "ingredient.chili_crisp"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.whisk", "method.marinade"],
+      "equipmentRecommended": ["equipment.jar", "equipment.whisk"],
+      "equipmentMinimum": ["equipment.bowl"],
+      "ingredientsCore": [
+        "ingredient.soy_sauce",
+        "ingredient.garlic",
+        "ingredient.ginger"
+      ],
+      "allergens": ["allergen.soy", "allergen.sesame"],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "useOn": [
+          "ingredient.chicken_thighs",
+          "ingredient.pork_tenderloin",
+          "ingredient.tofu_firm",
+          "ingredient.shrimp"
+        ]
+      },
+      "variations": [
+        {
+          "id": "asian_fusion.marinade.low_sugar",
+          "label": "Lower Sugar",
+          "when": { "hasDietFlag": "diet.low_sugar" },
+          "adapt": { "reduce": { "sweetener": "by_half" } }
+        }
+      ],
+      "plannerTags": ["batch", "sauce", "marinade"]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.asian_fusion": [
+        "asian_fusion.teriyaki_chicken_rice_bowl",
+        "asian_fusion.gochujang_glazed_salmon",
+        "asian_fusion.sesame_ginger_noodles",
+        "asian_fusion.stir_fry_vegetables_and_protein",
+        "asian_fusion.thai_inspired_coconut_curry",
+        "asian_fusion.fried_rice",
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.quick_pickled_cucumbers",
+        "asian_fusion.dumpling_bowl_soup",
+        "asian_fusion.garlic_ginger_marinade"
+      ]
+    },
+
+    "byArchetype": {
+      "archetype.bowl": [
+        "asian_fusion.teriyaki_chicken_rice_bowl",
+        "asian_fusion.gochujang_glazed_salmon",
+        "asian_fusion.fried_rice",
+        "asian_fusion.dumpling_bowl_soup"
+      ],
+      "archetype.noodle_bowl": ["asian_fusion.sesame_ginger_noodles"],
+      "archetype.stir_fry": ["asian_fusion.stir_fry_vegetables_and_protein"],
+      "archetype.curry": ["asian_fusion.thai_inspired_coconut_curry"],
+      "archetype.soup": [
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.dumpling_bowl_soup"
+      ],
+      "archetype.side": ["asian_fusion.quick_pickled_cucumbers"],
+      "archetype.condiment": ["asian_fusion.quick_pickled_cucumbers"],
+      "archetype.sauce": ["asian_fusion.garlic_ginger_marinade"],
+      "archetype.marinade": ["asian_fusion.garlic_ginger_marinade"],
+      "archetype.protein_and_starch": [
+        "asian_fusion.teriyaki_chicken_rice_bowl"
+      ],
+      "archetype.protein_and_sides": ["asian_fusion.gochujang_glazed_salmon"],
+      "archetype.one_pan": ["asian_fusion.fried_rice"],
+      "archetype.stew_and_starch": ["asian_fusion.thai_inspired_coconut_curry"]
+    },
+
+    "aliasIndex": {
+      "teriyaki chicken rice bowl": "asian_fusion.teriyaki_chicken_rice_bowl",
+      "chicken teriyaki bowl": "asian_fusion.teriyaki_chicken_rice_bowl",
+      "teriyaki bowl": "asian_fusion.teriyaki_chicken_rice_bowl",
+
+      "gochujang glazed salmon": "asian_fusion.gochujang_glazed_salmon",
+      "korean chili-glazed salmon": "asian_fusion.gochujang_glazed_salmon",
+      "korean chili glazed salmon": "asian_fusion.gochujang_glazed_salmon",
+
+      "sesame ginger noodles": "asian_fusion.sesame_ginger_noodles",
+      "cold sesame noodles": "asian_fusion.sesame_ginger_noodles",
+      "ginger sesame noodles": "asian_fusion.sesame_ginger_noodles",
+
+      "everyday stir fry": "asian_fusion.stir_fry_vegetables_and_protein",
+      "kitchen sink stir fry": "asian_fusion.stir_fry_vegetables_and_protein",
+      "stir-fry vegetables + protein": "asian_fusion.stir_fry_vegetables_and_protein",
+      "stir fry vegetables + protein": "asian_fusion.stir_fry_vegetables_and_protein",
+
+      "coconut curry": "asian_fusion.thai_inspired_coconut_curry",
+      "thai curry": "asian_fusion.thai_inspired_coconut_curry",
+      "thai-inspired coconut curry": "asian_fusion.thai_inspired_coconut_curry",
+      "thai inspired coconut curry": "asian_fusion.thai_inspired_coconut_curry",
+
+      "fried rice": "asian_fusion.fried_rice",
+      "house fried rice": "asian_fusion.fried_rice",
+      "stir-fried rice": "asian_fusion.fried_rice",
+      "stir fried rice": "asian_fusion.fried_rice",
+
+      "miso ginger soup": "asian_fusion.miso_ginger_soup",
+      "simple miso soup": "asian_fusion.miso_ginger_soup",
+      "miso soup (ginger)": "asian_fusion.miso_ginger_soup",
+      "miso soup ginger": "asian_fusion.miso_ginger_soup",
+
+      "quick pickled cucumbers": "asian_fusion.quick_pickled_cucumbers",
+      "rice vinegar cucumbers": "asian_fusion.quick_pickled_cucumbers",
+      "quick pickles cucumber": "asian_fusion.quick_pickled_cucumbers",
+
+      "dumpling bowl soup": "asian_fusion.dumpling_bowl_soup",
+      "dumpling soup": "asian_fusion.dumpling_bowl_soup",
+      "wonton soup shortcut": "asian_fusion.dumpling_bowl_soup",
+
+      "garlic ginger marinade": "asian_fusion.garlic_ginger_marinade",
+      "asian marinade base": "asian_fusion.garlic_ginger_marinade",
+      "garlic ginger sauce": "asian_fusion.garlic_ginger_marinade"
+    },
+
+    "keywordIndex": {
+      "teriyaki": ["asian_fusion.teriyaki_chicken_rice_bowl"],
+      "gochujang": ["asian_fusion.gochujang_glazed_salmon"],
+      "korean": ["asian_fusion.gochujang_glazed_salmon"],
+      "salmon": ["asian_fusion.gochujang_glazed_salmon"],
+      "sesame": [
+        "asian_fusion.sesame_ginger_noodles",
+        "asian_fusion.quick_pickled_cucumbers"
+      ],
+      "noodles": ["asian_fusion.sesame_ginger_noodles"],
+      "stir fry": [
+        "asian_fusion.stir_fry_vegetables_and_protein",
+        "asian_fusion.fried_rice"
+      ],
+      "stir-fry": [
+        "asian_fusion.stir_fry_vegetables_and_protein",
+        "asian_fusion.fried_rice"
+      ],
+      "curry": ["asian_fusion.thai_inspired_coconut_curry"],
+      "thai": ["asian_fusion.thai_inspired_coconut_curry"],
+      "fried rice": ["asian_fusion.fried_rice"],
+      "miso": ["asian_fusion.miso_ginger_soup"],
+      "pickles": ["asian_fusion.quick_pickled_cucumbers"],
+      "dumplings": ["asian_fusion.dumpling_bowl_soup"],
+      "marinade": ["asian_fusion.garlic_ginger_marinade"],
+      "ginger": [
+        "asian_fusion.teriyaki_chicken_rice_bowl",
+        "asian_fusion.sesame_ginger_noodles",
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.garlic_ginger_marinade"
+      ]
+    },
+
+    "tagIndex": {
+      "cuisine.asian_fusion": [
+        "asian_fusion.teriyaki_chicken_rice_bowl",
+        "asian_fusion.gochujang_glazed_salmon",
+        "asian_fusion.sesame_ginger_noodles",
+        "asian_fusion.stir_fry_vegetables_and_protein",
+        "asian_fusion.thai_inspired_coconut_curry",
+        "asian_fusion.fried_rice",
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.quick_pickled_cucumbers",
+        "asian_fusion.dumpling_bowl_soup",
+        "asian_fusion.garlic_ginger_marinade"
+      ],
+      "weeknight": [
+        "asian_fusion.teriyaki_chicken_rice_bowl",
+        "asian_fusion.gochujang_glazed_salmon",
+        "asian_fusion.sesame_ginger_noodles",
+        "asian_fusion.stir_fry_vegetables_and_protein",
+        "asian_fusion.fried_rice",
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.quick_pickled_cucumbers",
+        "asian_fusion.dumpling_bowl_soup"
+      ],
+      "batch": [
+        "asian_fusion.thai_inspired_coconut_curry",
+        "asian_fusion.fried_rice",
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.quick_pickled_cucumbers",
+        "asian_fusion.garlic_ginger_marinade"
+      ],
+      "bowl": [
+        "asian_fusion.teriyaki_chicken_rice_bowl",
+        "asian_fusion.gochujang_glazed_salmon",
+        "asian_fusion.fried_rice",
+        "asian_fusion.dumpling_bowl_soup"
+      ],
+      "noodles": ["asian_fusion.sesame_ginger_noodles"],
+      "stir_fry": ["asian_fusion.stir_fry_vegetables_and_protein"],
+      "curry": ["asian_fusion.thai_inspired_coconut_curry"],
+      "soup": [
+        "asian_fusion.miso_ginger_soup",
+        "asian_fusion.dumpling_bowl_soup"
+      ],
+      "side": ["asian_fusion.quick_pickled_cucumbers"],
+      "sauce": ["asian_fusion.garlic_ginger_marinade"],
+      "spicy": [
+        "asian_fusion.gochujang_glazed_salmon",
+        "asian_fusion.thai_inspired_coconut_curry"
+      ]
+    }
+  }
+}

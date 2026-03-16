@@ -22,7 +22,11 @@ const toISO = (d) => (d ? new Date(d).toISOString() : null);
 const minutes = (n) => n * 60 * 1000;
 
 const deepClone = (obj) => {
-  try { return JSON.parse(JSON.stringify(obj)); } catch { return obj; }
+  try {
+    return JSON.parse(JSON.stringify(obj));
+  } catch {
+    return obj;
+  }
 };
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -30,17 +34,57 @@ const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 /* ---------------------------- Lazy/Dynamic Imports -------------------------- */
 async function lazyImports() {
   const out = {};
-  try { out.RecipeStore = (await import(/* @vite-ignore */ "@/store/RecipeStore.js")).default; } catch {}
-  try { out.MealPlanStore = (await import(/* @vite-ignore */ "@/store/MealPlanStore.js")).default; } catch {}
-  try { out.InventoryStore = (await import(/* @vite-ignore */ "@/store/InventoryStore.js")).default; } catch {}
-  try { out.IngredientsIndex = (await import(/* @vite-ignore */ "@/store/IngredientsIndex.js")).default; } catch {}
-  try { out.CookingStore = (await import(/* @vite-ignore */ "@/store/CookingStore.js")).default; } catch {}
-  try { out.EventBus = (await import(/* @vite-ignore */ "@/services/events/eventBus.js")).default; } catch {}
-  try { out.CalendarUtils = await import(/* @vite-ignore */ "@/utils/timeUtils.js"); } catch {}
-  try { out.SabbathTemplate = (await import(/* @vite-ignore */ "@/services/templates/sabbathSunsetAwareMealPrep.js")); } catch {}
+  try {
+    out.RecipeStore = (
+      await import(/* @vite-ignore */ "@/store/RecipeStore.js")
+    ).default;
+  } catch {}
+  try {
+    out.MealPlanStore = (
+      await import(/* @vite-ignore */ "@/store/MealPlanStore.js")
+    ).default;
+  } catch {}
+  try {
+    out.InventoryStore = (
+      await import(/* @vite-ignore */ "@/store/InventoryStore.js")
+    ).default;
+  } catch {}
+  try {
+    out.IngredientsIndex = (
+      await import(/* @vite-ignore */ "@/store/IngredientsIndex.js")
+    ).default;
+  } catch {}
+  try {
+    out.CookingStore = (
+      await import(/* @vite-ignore */ "@/store/CookingStore.js")
+    ).default;
+  } catch {}
+  try {
+    out.EventBus = (
+      await import(/* @vite-ignore */ "@/services/events/eventBus.js")
+    ).default;
+  } catch {}
+  try {
+    out.CalendarUtils = await import(/* @vite-ignore */ "@/utils/timeUtils.js");
+  } catch {}
+  try {
+    out.SabbathTemplate = await import(
+      /* @vite-ignore */ "@/services/templates/sabbathSunsetAwareMealPrep.js"
+    );
+  } catch {}
   // Optional agents (used if present)
-  try { out.recipeConsolidator = (await import(/* @vite-ignore */ "@/agents/recipeConsolidatorAgent.js"))?.default; } catch {}
-  try { out.batchCookingAgent = (await import(/* @vite-ignore */ "@/agents/batchCookingAgent.js"))?.default; } catch {}
+  try {
+    out.recipeConsolidator = (
+      await import(
+        /* @vite-ignore */ "@/agents/shims/recipeConsolidatorShim.js"
+      )
+    )?.default;
+  } catch {}
+  try {
+    out.batchCookingAgent = (
+      await import(/* @vite-ignore */ "@/agents/shims/batchCookingShim.js")
+    )?.default;
+  } catch {}
   return out;
 }
 
@@ -54,17 +98,24 @@ async function lazyImports() {
  *   }
  */
 function isWithinMealWindow(rhythm, when = new Date()) {
-  if (!rhythm || !Array.isArray(rhythm.windows) || !rhythm.windows.length) return true;
-  const hhmm = (d) => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  if (!rhythm || !Array.isArray(rhythm.windows) || !rhythm.windows.length)
+    return true;
+  const hhmm = (d) =>
+    `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(
+      2,
+      "0"
+    )}`;
   const now = hhmm(when);
   return rhythm.windows.some((w) => {
-    const s = w.start, e = w.end;
+    const s = w.start,
+      e = w.end;
     return s <= now && now <= e;
   });
 }
 
 function nextMealWindowStart(rhythm, ref = new Date()) {
-  if (!rhythm || !Array.isArray(rhythm.windows) || !rhythm.windows.length) return null;
+  if (!rhythm || !Array.isArray(rhythm.windows) || !rhythm.windows.length)
+    return null;
   const today = new Date(ref);
   const toDate = (hhmm) => {
     const [h, m] = hhmm.split(":").map(Number);
@@ -75,8 +126,10 @@ function nextMealWindowStart(rhythm, ref = new Date()) {
   const nowMs = today.getTime();
   const candidates = rhythm.windows
     .map((w) => toDate(w.start))
-    .map((d) => (d.getTime() < nowMs ? new Date(d.getTime() + 24 * 3600 * 1000) : d))
-    .sort((a,b) => a.getTime() - b.getTime());
+    .map((d) =>
+      d.getTime() < nowMs ? new Date(d.getTime() + 24 * 3600 * 1000) : d
+    )
+    .sort((a, b) => a.getTime() - b.getTime());
   return candidates[0] || null;
 }
 
@@ -88,7 +141,9 @@ function computeInventoryNeeds(inventoryStore, recipeItems) {
   let score = 1;
 
   recipeItems.forEach((it) => {
-    const have = inventoryStore?.getQuantity ? (inventoryStore.getQuantity(it.key) ?? 0) : 0;
+    const have = inventoryStore?.getQuantity
+      ? inventoryStore.getQuantity(it.key) ?? 0
+      : 0;
     const need = it.qty ?? 0;
     const delta = have - need;
     const rec = {
@@ -117,8 +172,8 @@ function normalizeStep(s) {
     id: uid("step"),
     label: s.label || s.title || "Step",
     estMin: s.estMin ?? s.estimate ?? 3,
-    timer: s.timer ?? null,     // seconds
-    heat: s.heat ?? null,       // "low" | "med" | "high" | temp number
+    timer: s.timer ?? null, // seconds
+    heat: s.heat ?? null, // "low" | "med" | "high" | temp number
     station: s.station ?? null, // "Stove" | "Oven" | "Prep" | "Canning" | ...
     tools: s.tools ?? [],
     hazards: s.hazards ?? [],
@@ -144,7 +199,8 @@ function integrateTasks(recipes) {
 
   // Group "prep" tasks by keyword
   const prepMap = new Map();
-  const prepRegex = /(chop|dice|mince|slice|julienne|peel|wash|rinse|measure|mix|whisk|marinate)/i;
+  const prepRegex =
+    /(chop|dice|mince|slice|julienne|peel|wash|rinse|measure|mix|whisk|marinate)/i;
 
   const getKey = (label) => {
     const low = label.toLowerCase();
@@ -160,7 +216,14 @@ function integrateTasks(recipes) {
   for (const st of all) {
     if (prepRegex.test(st.label)) {
       const key = getKey(st.label);
-      const bucket = prepMap.get(key) || { id: uid("prep"), label: st.label, members: [], estMin: 0, tools: new Set(), hazards: new Set() };
+      const bucket = prepMap.get(key) || {
+        id: uid("prep"),
+        label: st.label,
+        members: [],
+        estMin: 0,
+        tools: new Set(),
+        hazards: new Set(),
+      };
       bucket.members.push(st);
       bucket.estMin += st.estMin || 2;
       st.tools?.forEach((t) => bucket.tools.add(t));
@@ -174,7 +237,10 @@ function integrateTasks(recipes) {
   for (const [, b] of prepMap) {
     merged.push({
       id: b.id,
-      label: `Prep: ${b.members.map((m) => m.label).join(" + ").slice(0, 120)}`,
+      label: `Prep: ${b.members
+        .map((m) => m.label)
+        .join(" + ")
+        .slice(0, 120)}`,
       estMin: Math.ceil(b.estMin * 0.65), // merging saves time
       timer: null,
       heat: null,
@@ -194,12 +260,42 @@ function integrateTasks(recipes) {
 function buildStations(recipes) {
   // Base stations; will be filtered if unused
   const base = [
-    { key: "Prep", label: "Prep Station", surfaces: ["counter"], tools: ["cutting board", "chef knife", "bowls"] },
-    { key: "Stove", label: "Stove / Range", surfaces: [], tools: ["skillet", "saucepan"] },
-    { key: "Oven", label: "Oven / Bake", surfaces: [], tools: ["sheet pan", "dutch oven"] },
-    { key: "Canning", label: "Pressure Canning", surfaces: [], tools: ["pressure canner", "jar lifter", "rings/lids"] },
-    { key: "Dehydrate", label: "Dehydrating", surfaces: [], tools: ["dehydrator", "trays"] },
-    { key: "Label", label: "Labeling & Storage", surfaces: [], tools: ["labels", "marker"] },
+    {
+      key: "Prep",
+      label: "Prep Station",
+      surfaces: ["counter"],
+      tools: ["cutting board", "chef knife", "bowls"],
+    },
+    {
+      key: "Stove",
+      label: "Stove / Range",
+      surfaces: [],
+      tools: ["skillet", "saucepan"],
+    },
+    {
+      key: "Oven",
+      label: "Oven / Bake",
+      surfaces: [],
+      tools: ["sheet pan", "dutch oven"],
+    },
+    {
+      key: "Canning",
+      label: "Pressure Canning",
+      surfaces: [],
+      tools: ["pressure canner", "jar lifter", "rings/lids"],
+    },
+    {
+      key: "Dehydrate",
+      label: "Dehydrating",
+      surfaces: [],
+      tools: ["dehydrator", "trays"],
+    },
+    {
+      key: "Label",
+      label: "Labeling & Storage",
+      surfaces: [],
+      tools: ["labels", "marker"],
+    },
   ];
 
   const needed = new Set(["Prep"]);
@@ -207,8 +303,19 @@ function buildStations(recipes) {
     (r.steps || []).forEach((s) => {
       const lab = (s.label || "").toLowerCase();
       if (lab.includes("bake") || lab.includes("oven")) needed.add("Oven");
-      if (lab.includes("simmer") || lab.includes("boil") || lab.includes("stir") || lab.includes("stove")) needed.add("Stove");
-      if (lab.includes("can ") || lab.includes("canning") || lab.includes("jar")) needed.add("Canning");
+      if (
+        lab.includes("simmer") ||
+        lab.includes("boil") ||
+        lab.includes("stir") ||
+        lab.includes("stove")
+      )
+        needed.add("Stove");
+      if (
+        lab.includes("can ") ||
+        lab.includes("canning") ||
+        lab.includes("jar")
+      )
+        needed.add("Canning");
       if (lab.includes("dehydrate")) needed.add("Dehydrate");
       if (lab.includes("label") || lab.includes("store")) needed.add("Label");
     });
@@ -249,8 +356,10 @@ function buildEquipmentList(recipes) {
       if ((s.label || "").toLowerCase().includes("bake")) add("sheet pan", 1);
       if ((s.label || "").toLowerCase().includes("saute")) add("skillet", 1);
       if ((s.label || "").toLowerCase().includes("boil")) add("saucepan", 1);
-      if ((s.label || "").toLowerCase().includes("can")) add("pressure canner", 1);
-      if ((s.label || "").toLowerCase().includes("dehydrate")) add("dehydrator", 1);
+      if ((s.label || "").toLowerCase().includes("can"))
+        add("pressure canner", 1);
+      if ((s.label || "").toLowerCase().includes("dehydrate"))
+        add("dehydrator", 1);
     });
   });
 
@@ -272,12 +381,15 @@ function detectSpecialties(recipes) {
     const tags = (r.tags || []).map((t) => t.toLowerCase());
     const name = (r.name || "").toLowerCase();
     const check = (key) => tags.includes(key) || name.includes(key);
-    flags.pressureCanning = flags.pressureCanning || check("canning") || check("pressure canning");
-    flags.sausageMaking   = flags.sausageMaking   || check("sausage");
-    flags.dehydrating     = flags.dehydrating     || check("dehydrate") || check("dehydrating");
-    flags.winemaking      = flags.winemaking      || check("wine") || check("winemaking");
-    flags.smoking         = flags.smoking         || check("smoke") || check("smoking");
-    flags.distilling      = flags.distilling      || check("distill") || check("distilling");
+    flags.pressureCanning =
+      flags.pressureCanning || check("canning") || check("pressure canning");
+    flags.sausageMaking = flags.sausageMaking || check("sausage");
+    flags.dehydrating =
+      flags.dehydrating || check("dehydrate") || check("dehydrating");
+    flags.winemaking = flags.winemaking || check("wine") || check("winemaking");
+    flags.smoking = flags.smoking || check("smoke") || check("smoking");
+    flags.distilling =
+      flags.distilling || check("distill") || check("distilling");
   });
   return flags;
 }
@@ -295,7 +407,7 @@ async function applySabbathAwareness(draft, imports, locationPref) {
         if (typeof mod?.getUpcomingSabbathWindow === "function") {
           return await mod.getUpcomingSabbathWindow(locationPref || null);
         }
-      } catch(_) {}
+      } catch (_) {}
       return null;
     })();
 
@@ -350,7 +462,9 @@ async function consolidateFromPlan(imports, opts) {
     ? MealPlanStore.getRange(window?.start, window?.end)
     : [];
   const planMeals = (plans || []).flatMap((p) => p.meals || []);
-  const filtered = planMeals.filter((m) => includeTags.includes(m.mealType || m.tag));
+  const filtered = planMeals.filter((m) =>
+    includeTags.includes(m.mealType || m.tag)
+  );
   const recipes = filtered
     .map((m) => RecipeStore?.getById?.(m.recipeId))
     .filter(Boolean);
@@ -359,7 +473,13 @@ async function consolidateFromPlan(imports, opts) {
 }
 
 /* ------------------------------ Draft Composer ------------------------------ */
-function composeDraft({ recipes, inventory, rhythm, titleHint, servingsOverride }) {
+function composeDraft({
+  recipes,
+  inventory,
+  rhythm,
+  titleHint,
+  servingsOverride,
+}) {
   const stations = buildStations(recipes);
   const specialties = detectSpecialties(recipes);
 
@@ -374,8 +494,10 @@ function composeDraft({ recipes, inventory, rhythm, titleHint, servingsOverride 
     (r.ingredients || []).forEach((ing) => {
       // Expect RecipeStore normalization: { key, qty, unit, label, category }
       ingredientLines.push({
-        key: ing.key || (ing.label || ing.name),
-        qty: servingsOverride ? Math.ceil((ing.qty || 0) * servingsOverride / (r.servings || 1)) : ing.qty || 0,
+        key: ing.key || ing.label || ing.name,
+        qty: servingsOverride
+          ? Math.ceil(((ing.qty || 0) * servingsOverride) / (r.servings || 1))
+          : ing.qty || 0,
         unit: ing.unit || "",
         label: ing.label || ing.name || ing.key || "item",
         category: ing.category || "general",
@@ -389,10 +511,20 @@ function composeDraft({ recipes, inventory, rhythm, titleHint, servingsOverride 
     sequence: stations.map((s) => s.key),
     overlaps: [
       { with: ["Stove", "Oven"], note: "Simmer sauces while roasting/baking." },
-      { with: ["Prep", "Canning"], note: "Sterilize jars while finishing last saute." },
+      {
+        with: ["Prep", "Canning"],
+        note: "Sterilize jars while finishing last saute.",
+      },
     ],
-    multitimer: { enabled: true, timersCount: timers.length, voiceAlerts: true },
-    labeling: specialties.pressureCanning || specialties.dehydrating || specialties.winemaking,
+    multitimer: {
+      enabled: true,
+      timersCount: timers.length,
+      voiceAlerts: true,
+    },
+    labeling:
+      specialties.pressureCanning ||
+      specialties.dehydrating ||
+      specialties.winemaking,
   };
 
   // Metrics
@@ -434,8 +566,12 @@ function composeDraft({ recipes, inventory, rhythm, titleHint, servingsOverride 
 
     safety: {
       allergens: [...new Set(recipes.flatMap((r) => r.allergens || []))],
-      knifeWork: itp.integrated.some((s) => /chop|dice|mince|slice/i.test(s.label)),
-      heatSources: itp.integrated.some((s) => /bake|boil|simmer|saute|roast/i.test(s.label)),
+      knifeWork: itp.integrated.some((s) =>
+        /chop|dice|mince|slice/i.test(s.label)
+      ),
+      heatSources: itp.integrated.some((s) =>
+        /bake|boil|simmer|saute|roast/i.test(s.label)
+      ),
       ventilationRecommended: true,
     },
 
@@ -453,7 +589,12 @@ function composeDraft({ recipes, inventory, rhythm, titleHint, servingsOverride 
         reminders: [{ offsetMinutes: 10, type: "notification" }],
       },
       telemetry: { event: "draft.cooking.generated" },
-      printing: { labels: specialties.pressureCanning || specialties.dehydrating || specialties.winemaking },
+      printing: {
+        labels:
+          specialties.pressureCanning ||
+          specialties.dehydrating ||
+          specialties.winemaking,
+      },
     },
   };
 
@@ -504,7 +645,9 @@ export default async function generateCookingSession(input = {}, ctx = {}) {
   } = input;
 
   const { onProgress, signal } = ctx;
-  const progress = (phase, pct) => { if (typeof onProgress === "function") onProgress(phase, pct); };
+  const progress = (phase, pct) => {
+    if (typeof onProgress === "function") onProgress(phase, pct);
+  };
 
   progress("init", 3);
   const imports = await lazyImports();
@@ -513,7 +656,11 @@ export default async function generateCookingSession(input = {}, ctx = {}) {
 
   progress("consolidate", 12);
   const consolidation = await consolidateFromPlan(imports, {
-    planId, window, includeTags, selectedRecipeIds, servingsOverride,
+    planId,
+    window,
+    includeTags,
+    selectedRecipeIds,
+    servingsOverride,
   });
 
   const recipes = consolidation.recipes || [];
@@ -532,7 +679,12 @@ export default async function generateCookingSession(input = {}, ctx = {}) {
         timers: [],
         metrics: { totalRecipes: 0, totalSteps: 0, estMinutes: 0 },
         integrations: { calendarSync: { enabled: false, reminders: [] } },
-        notices: [{ type: "empty", message: "No recipes were found in the selected window or list." }],
+        notices: [
+          {
+            type: "empty",
+            message: "No recipes were found in the selected window or list.",
+          },
+        ],
       },
       meta: { consolidated: false, reason: "no_recipes" },
     };
@@ -550,7 +702,11 @@ export default async function generateCookingSession(input = {}, ctx = {}) {
   });
 
   // Label printing hint for canning/dehydrating/winemaking
-  if (draft.specialties.pressureCanning || draft.specialties.dehydrating || draft.specialties.winemaking) {
+  if (
+    draft.specialties.pressureCanning ||
+    draft.specialties.dehydrating ||
+    draft.specialties.winemaking
+  ) {
     draft.labels = {
       enabled: true,
       fields: ["Product", "Batch", "Date", "Ingredients", "Net Wt/Vol"],
@@ -576,9 +732,13 @@ export default async function generateCookingSession(input = {}, ctx = {}) {
   // Meta for SessionDraftDetail to show context chips
   const meta = {
     consolidated: true,
-    planWindow: window ? { start: toISO(window.start), end: toISO(window.end) } : null,
+    planWindow: window
+      ? { start: toISO(window.start), end: toISO(window.end) }
+      : null,
     includeTags,
-    selectedCount: Array.isArray(selectedRecipeIds) ? selectedRecipeIds.length : null,
+    selectedCount: Array.isArray(selectedRecipeIds)
+      ? selectedRecipeIds.length
+      : null,
     rhythm: rhythm || null,
     sabbathAware: !!sabbathAware,
   };

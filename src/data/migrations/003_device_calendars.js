@@ -27,7 +27,7 @@
 // Optional soft import of the shared event bus
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus")?.default;
+  eventBus = require("@/services/events/eventBus")?.default;
 } catch {}
 
 /** Emit SSA-shaped envelopes safely (never crash) */
@@ -161,10 +161,13 @@ async function seedExample(db) {
   const t = db.table("deviceCalendars");
   if (!t) return;
 
-  const sample = await t.where("[deviceId+start]").between(
-    ["kitchen-display", "2025-11-08T00:00:00.000Z"],
-    ["kitchen-display", "2025-11-09T23:59:59.999Z"]
-  ).first();
+  const sample = await t
+    .where("[deviceId+start]")
+    .between(
+      ["kitchen-display", "2025-11-08T00:00:00.000Z"],
+      ["kitchen-display", "2025-11-09T23:59:59.999Z"]
+    )
+    .first();
 
   if (!sample) {
     try {
@@ -211,23 +214,25 @@ async function applyMigration(db) {
   const version = nextSchemaVersion(db);
   const stores = getStoreDefinitions();
 
-  db.version(version).stores(stores).upgrade(async (tx) => {
-    // Record migration metadata if a meta table exists
-    try {
-      const meta = tx.table("meta");
-      if (meta) {
-        await meta.put({
-          key: "migration.003",
-          value: {
-            appliedAt: new Date().toISOString(),
-            stores,
-          },
-        });
+  db.version(version)
+    .stores(stores)
+    .upgrade(async (tx) => {
+      // Record migration metadata if a meta table exists
+      try {
+        const meta = tx.table("meta");
+        if (meta) {
+          await meta.put({
+            key: "migration.003",
+            value: {
+              appliedAt: new Date().toISOString(),
+              stores,
+            },
+          });
+        }
+      } catch {
+        /* meta not guaranteed */
       }
-    } catch {
-      /* meta not guaranteed */
-    }
-  });
+    });
 
   await db.open().catch((err) => {
     console.error("[SSA] Migration 003 open failed:", err);

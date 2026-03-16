@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suka.local/agents/prompts/reasoner-contracts/scheduleTradeoffs.delta.schema.json",
+  "$id": "https://suka.local/agents/runtime/reasoner/prompts/reasoner-contracts/scheduleTradeoffs.delta.schema.json",
   "title": "SSA Reasoner – Garden/Animal Schedule Tradeoffs Delta",
   "description": "Delta-style schema for proposed schedule tradeoffs for garden and animal sessions/steps. Used by the Reasoner to suggest rescheduling, batching, or skipping tasks based on weather, daylight, Sabbath, quiet hours, animal welfare, and household workload.",
   "type": "object",
@@ -16,10 +16,7 @@
       "description": "Domains this delta applies to. Typically a subset of ['garden', 'animals'].",
       "items": {
         "type": "string",
-        "enum": [
-          "garden",
-          "animals"
-        ]
+        "enum": ["garden", "animals"]
       },
       "minItems": 1,
       "uniqueItems": true
@@ -56,20 +53,13 @@
           "status": {
             "type": "string",
             "description": "Whether this tradeoff is newly proposed, already accepted, or deprecated.",
-            "enum": [
-              "proposed",
-              "accepted",
-              "deprecated"
-            ],
+            "enum": ["proposed", "accepted", "deprecated"],
             "default": "proposed"
           },
           "operation": {
             "type": "string",
             "description": "How this delta should be applied.",
-            "enum": [
-              "upsert",
-              "remove"
-            ],
+            "enum": ["upsert", "remove"],
             "default": "upsert"
           },
           "sessionId": {
@@ -110,18 +100,11 @@
               "priority": {
                 "type": "string",
                 "description": "Priority within household operations.",
-                "enum": [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical"
-                ],
+                "enum": ["low", "medium", "high", "critical"],
                 "default": "medium"
               }
             },
-            "required": [
-              "title"
-            ]
+            "required": ["title"]
           },
           "currentSchedule": {
             "type": "object",
@@ -143,10 +126,7 @@
                 "description": "Human-friendly label such as 'early morning', 'midday', 'evening', 'after sunset'."
               }
             },
-            "required": [
-              "start",
-              "end"
-            ]
+            "required": ["start", "end"]
           },
           "alternativeSlots": {
             "type": "array",
@@ -180,10 +160,7 @@
                   "description": "Notes explaining why this slot is recommended (e.g. 'cooler temperatures, less animal stress')."
                 }
               },
-              "required": [
-                "start",
-                "end"
-              ]
+              "required": ["start", "end"]
             }
           },
           "drivers": {
@@ -295,12 +272,7 @@
       }
     }
   },
-  "required": [
-    "schemaVersion",
-    "domains",
-    "generatedAt",
-    "tradeoffs"
-  ],
+  "required": ["schemaVersion", "domains", "generatedAt", "tradeoffs"],
   "$defs": {
     "guardResult": {
       "type": "object",
@@ -318,11 +290,7 @@
         "severity": {
           "type": "string",
           "description": "Severity level for a non-ok guard.",
-          "enum": [
-            "info",
-            "warning",
-            "hard-block"
-          ]
+          "enum": ["info", "warning", "hard-block"]
         },
         "reasonCode": {
           "type": "string",
@@ -339,11 +307,7 @@
         "suggestedAction": {
           "type": "string",
           "description": "Suggested next step if this guard is not ok.",
-          "enum": [
-            "proceed",
-            "reschedule",
-            "require-user-confirmation"
-          ]
+          "enum": ["proceed", "reschedule", "require-user-confirmation"]
         },
         "checkedAt": {
           "type": "string",
@@ -351,10 +315,7 @@
           "description": "When the guard was evaluated."
         }
       },
-      "required": [
-        "guardId",
-        "ok"
-      ]
+      "required": ["guardId", "ok"]
     },
     "guardSummary": {
       "type": "object",
@@ -396,10 +357,7 @@
           "description": "Timestamp for the aggregate evaluation."
         }
       },
-      "required": [
-        "okToStart",
-        "hasWarnings"
-      ]
+      "required": ["okToStart", "hasWarnings"]
     }
   }
 }

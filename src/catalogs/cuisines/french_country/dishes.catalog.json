@@ -1,0 +1,1026 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "notes": [
+    "French Country dishes catalog (SSA canonical).",
+    "All ids/tags are lowercase and match ^[a-z0-9_.-]+$.",
+    "Dish ids are namespaced under dishes.french_country.*",
+    "Techniques/equipment/ingredients ids are SSA-style placeholders; align to your canonical ingredient/equipment/method catalogs as needed."
+  ],
+  "meta": {
+    "id": "cuisines.french_country.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "French Country • Dishes Catalog",
+    "cuisineId": "cuisines.french_country",
+    "status": "canonical",
+    "description": "Planner- and UI-friendly dish archetypes and signature dishes for French Country cooking (rustic French home-style: braises, roasts, soups, gratins, pan sauces, bistro classics).",
+    "version": "1.0.0",
+    "author": "ssa",
+    "createdAt": "2026-01-23T00:00:00.000Z",
+    "updatedAt": "2026-01-23T00:00:00.000Z",
+    "notes": [
+      "Use this catalog to seed meal planning + search for French Country.",
+      "Indexes are precomputed for deterministic lookups."
+    ]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+  "dishes": [
+    {
+      "id": "dishes.french_country.coq_au_vin",
+      "label": "Coq au Vin",
+      "aka": ["Chicken braised in red wine", "Coq au vin rouge"],
+      "subprofiles": ["cuisines.french_country.burgundy"],
+      "category": "main",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 35, "totalMins": 135, "handsOffMins": 90 },
+      "servingStyles": ["family_style", "plated_meals"],
+      "mealArchetypes": [
+        "archetypes.braise_and_side",
+        "archetypes.sauce_forward_main"
+      ],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "good"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_thighs_bone_in"],
+          "chooseOne": false
+        },
+        {
+          "role": "stew_base",
+          "items": ["ingredient.red_wine_dry"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion_yellow", "ingredient.garlic"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.mushrooms", "ingredient.carrots"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter_unsalted", "ingredient.olive_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "method.sear",
+        "method.braise",
+        "method.deglaze",
+        "method.reduce"
+      ],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.tongs",
+        "equipment.thermometer_instant"
+      ],
+      "equipmentMinimum": ["equipment.heavy_pot_with_lid", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.chicken_thighs_bone_in",
+        "ingredient.red_wine_dry",
+        "ingredient.onion_yellow",
+        "ingredient.garlic",
+        "ingredient.mushrooms",
+        "ingredient.butter_unsalted",
+        "ingredient.thyme",
+        "ingredient.bay_leaf"
+      ],
+      "allergens": ["allergen.dairy", "allergen.alcohol"],
+      "dietFlags": [],
+      "pairingHints": {
+        "starches": ["dish.mashed_potatoes", "dish.buttered_noodles"],
+        "veg_sides": [
+          "dish.green_beans_almondine",
+          "dish.simple_salad_vinaigrette"
+        ]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.coq_au_vin.white_wine",
+          "label": "White-wine braise (coq au vin blanc)",
+          "when": { "preference": "lighter_sauce" },
+          "adapt": {
+            "swap": { "ingredient.red_wine_dry": "ingredient.white_wine_dry" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "braise",
+        "sauce",
+        "batch_friendly",
+        "comfort_food"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.beef_bourguignon",
+      "label": "Beef Bourguignon",
+      "aka": ["Boeuf bourguignon", "Red wine beef stew"],
+      "subprofiles": ["cuisines.french_country.burgundy"],
+      "category": "main",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 40, "totalMins": 195, "handsOffMins": 150 },
+      "servingStyles": ["family_style", "one_pot"],
+      "mealArchetypes": [
+        "archetypes.braise_and_side",
+        "archetypes.stew_and_starch"
+      ],
+      "signals": {
+        "batchFriendly": "excellent",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "excellent"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef_chuck"],
+          "chooseOne": false
+        },
+        {
+          "role": "stew_base",
+          "items": ["ingredient.red_wine_dry", "ingredient.beef_stock"],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.carrots",
+            "ingredient.mushrooms",
+            "ingredient.pearl_onions"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "thickener",
+          "items": ["ingredient.flour_all_purpose"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.bacon", "ingredient.olive_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.sear", "method.braise", "method.reduce"],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.wood_spoon",
+        "equipment.thermometer_instant"
+      ],
+      "equipmentMinimum": ["equipment.heavy_pot_with_lid", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.beef_chuck",
+        "ingredient.red_wine_dry",
+        "ingredient.beef_stock",
+        "ingredient.carrots",
+        "ingredient.mushrooms",
+        "ingredient.onion_yellow",
+        "ingredient.garlic",
+        "ingredient.thyme",
+        "ingredient.bay_leaf"
+      ],
+      "allergens": ["allergen.gluten", "allergen.alcohol"],
+      "dietFlags": [],
+      "pairingHints": {
+        "starches": [
+          "dish.mashed_potatoes",
+          "dish.egg_noodles",
+          "dish.crusty_bread"
+        ],
+        "veg_sides": ["dish.simple_salad_vinaigrette"]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.beef_bourguignon.gluten_free",
+          "label": "Gluten-free thickening",
+          "when": { "diet": "gluten_free" },
+          "adapt": {
+            "swap": { "ingredient.flour_all_purpose": "ingredient.cornstarch" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "stew",
+        "braise",
+        "freezer_friendly",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.roast_chicken_pan_sauce",
+      "label": "Roast Chicken with Pan Sauce",
+      "aka": ["Poulet rôti", "Sunday roast chicken"],
+      "subprofiles": ["cuisines.french_country.general"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 95, "handsOffMins": 70 },
+      "servingStyles": ["family_style", "holiday_feasts"],
+      "mealArchetypes": [
+        "archetypes.roast_and_sides",
+        "archetypes.sauce_forward_main"
+      ],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "fair"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.whole_chicken"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter_unsalted", "ingredient.olive_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": [
+            "ingredient.garlic",
+            "ingredient.thyme",
+            "ingredient.rosemary"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["ingredient.chicken_stock", "ingredient.white_wine_dry"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.potatoes",
+            "ingredient.carrots",
+            "ingredient.onion_yellow"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.roast", "method.deglaze", "method.reduce"],
+      "equipmentRecommended": [
+        "equipment.roasting_pan",
+        "equipment.thermometer_instant",
+        "equipment.saucepan"
+      ],
+      "equipmentMinimum": ["equipment.oven", "equipment.sheet_pan"],
+      "ingredientsCore": [
+        "ingredient.whole_chicken",
+        "ingredient.salt",
+        "ingredient.black_pepper",
+        "ingredient.butter_unsalted",
+        "ingredient.garlic",
+        "ingredient.thyme",
+        "ingredient.chicken_stock"
+      ],
+      "allergens": ["allergen.dairy", "allergen.alcohol"],
+      "dietFlags": ["diet.low_carb_optional"],
+      "pairingHints": {
+        "veg_sides": ["dish.green_beans_almondine", "dish.roasted_root_veg"],
+        "salads": ["dish.simple_salad_vinaigrette"]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.roast_chicken.pan_sauce_lemon",
+          "label": "Lemon pan sauce",
+          "when": { "preference": "bright_acid" },
+          "adapt": { "add": { "ingredient.lemon_juice": "to_taste" } }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "roast",
+        "sunday_dinner",
+        "pan_sauce",
+        "family_style"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.potato_gratin_dauphinois",
+      "label": "Potato Gratin (Gratin Dauphinois)",
+      "aka": ["Gratin dauphinois", "Creamy potato bake"],
+      "subprofiles": ["cuisines.french_country.alps"],
+      "category": "side",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 90, "handsOffMins": 65 },
+      "servingStyles": ["family_style", "holiday_feasts"],
+      "mealArchetypes": ["archetypes.baked_side", "archetypes.comfort_side"],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "fair"
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.potatoes"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter_unsalted"],
+          "chooseOne": false
+        },
+        {
+          "role": "dairy",
+          "items": ["ingredient.heavy_cream", "ingredient.milk_whole"],
+          "chooseOne": true
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.gruyere", "ingredient.parmesan"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.garlic", "ingredient.nutmeg"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.slice", "method.bake", "method.infuse"],
+      "equipmentRecommended": [
+        "equipment.mandoline",
+        "equipment.baking_dish",
+        "equipment.oven"
+      ],
+      "equipmentMinimum": [
+        "equipment.knife",
+        "equipment.baking_dish",
+        "equipment.oven"
+      ],
+      "ingredientsCore": [
+        "ingredient.potatoes",
+        "ingredient.heavy_cream",
+        "ingredient.garlic",
+        "ingredient.butter_unsalted",
+        "ingredient.gruyere",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.vegetarian"],
+      "pairingHints": {
+        "mains": ["dishes.french_country.roast_chicken_pan_sauce"]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.potato_gratin.dairy_light",
+          "label": "Lighter dairy (milk-forward)",
+          "when": { "preference": "lighter" },
+          "adapt": {
+            "swap": { "ingredient.heavy_cream": "ingredient.milk_whole" }
+          }
+        }
+      ],
+      "plannerTags": ["french_country", "gratin", "side", "baked", "holiday"]
+    },
+
+    {
+      "id": "dishes.french_country.ratatouille",
+      "label": "Ratatouille",
+      "aka": ["Provencal vegetable stew", "Ratatouille niçoise"],
+      "subprofiles": ["cuisines.french_country.provence"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 60, "handsOffMins": 35 },
+      "servingStyles": ["family_style", "one_pot"],
+      "mealArchetypes": [
+        "archetypes.veg_forward_side",
+        "archetypes.stew_and_side"
+      ],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "good"
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.eggplant",
+            "ingredient.zucchini",
+            "ingredient.bell_pepper",
+            "ingredient.tomatoes"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.garlic", "ingredient.onion_yellow"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.olive_oil"],
+          "chooseOne": false
+        },
+        {
+          "role": "herb",
+          "items": [
+            "ingredient.thyme",
+            "ingredient.basil",
+            "ingredient.herbes_de_provence"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.saute", "method.stew", "method.simmer"],
+      "equipmentRecommended": ["equipment.dutch_oven", "equipment.wood_spoon"],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.eggplant",
+        "ingredient.zucchini",
+        "ingredient.tomatoes",
+        "ingredient.olive_oil",
+        "ingredient.garlic"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "mains": ["dishes.french_country.roast_chicken_pan_sauce"],
+        "starches": ["dish.crusty_bread", "dish.polenta"]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.ratatouille.oven_roasted",
+          "label": "Oven-roasted ratatouille",
+          "when": { "equipment": "oven" },
+          "adapt": { "method": "method.roast_then_stew" }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "provence",
+        "vegetable",
+        "weeknight",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.french_onion_soup",
+      "label": "French Onion Soup",
+      "aka": ["Soupe à l'oignon", "Onion soup gratinée"],
+      "subprofiles": ["cuisines.french_country.bistro"],
+      "category": "soup",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 85, "handsOffMins": 65 },
+      "servingStyles": ["bowls", "plated_meals"],
+      "mealArchetypes": ["archetypes.soup_and_bread", "archetypes.soup_course"],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "good"
+      },
+      "coreComponents": [
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion_yellow"],
+          "chooseOne": false
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.beef_stock", "ingredient.chicken_stock"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter_unsalted", "ingredient.olive_oil"],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.baguette", "ingredient.gruyere"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "method.caramelize",
+        "method.deglaze",
+        "method.simmer",
+        "method.broil"
+      ],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.oven",
+        "equipment.broiler_safe_bowls"
+      ],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.onion_yellow",
+        "ingredient.butter_unsalted",
+        "ingredient.beef_stock",
+        "ingredient.thyme",
+        "ingredient.baguette",
+        "ingredient.gruyere"
+      ],
+      "allergens": ["allergen.dairy", "allergen.gluten"],
+      "dietFlags": [],
+      "pairingHints": { "salads": ["dish.simple_salad_vinaigrette"] },
+      "variations": [
+        {
+          "id": "dishes.french_country.french_onion_soup.vegetarian",
+          "label": "Vegetarian stock",
+          "when": { "diet": "vegetarian" },
+          "adapt": {
+            "swap": { "ingredient.beef_stock": "ingredient.vegetable_stock" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "soup",
+        "bistro",
+        "comfort_food",
+        "winter"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.lentil_soup",
+      "label": "French Lentil Soup",
+      "aka": ["Lentilles du puy soup", "Country lentil soup"],
+      "subprofiles": ["cuisines.french_country.auvergne"],
+      "category": "soup",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 55, "handsOffMins": 40 },
+      "servingStyles": ["bowls", "one_pot"],
+      "mealArchetypes": [
+        "archetypes.stew_and_starch",
+        "archetypes.soup_course"
+      ],
+      "signals": {
+        "batchFriendly": "excellent",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "excellent"
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.lentils_green"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": [
+            "ingredient.onion_yellow",
+            "ingredient.carrots",
+            "ingredient.celery"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.olive_oil", "ingredient.duck_fat"],
+          "chooseOne": true
+        },
+        {
+          "role": "umami",
+          "items": ["ingredient.bacon", "ingredient.smoked_ham_hock"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.saute", "method.simmer"],
+      "equipmentRecommended": ["equipment.dutch_oven"],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.lentils_green",
+        "ingredient.onion_yellow",
+        "ingredient.carrots",
+        "ingredient.celery"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegetarian_optional"],
+      "pairingHints": { "bread": ["dish.crusty_bread"] },
+      "variations": [
+        {
+          "id": "dishes.french_country.lentil_soup.vegetarian",
+          "label": "Vegetarian version",
+          "when": { "diet": "vegetarian" },
+          "adapt": {
+            "remove": ["ingredient.bacon"],
+            "swap": { "ingredient.chicken_stock": "ingredient.vegetable_stock" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "lentils",
+        "soup",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.nicoise_salad",
+      "label": "Niçoise Salad",
+      "aka": ["Salade niçoise"],
+      "subprofiles": ["cuisines.french_country.provence"],
+      "category": "salad",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["plates", "bowls"],
+      "mealArchetypes": ["archetypes.salad_main", "archetypes.plates"],
+      "signals": {
+        "batchFriendly": "partial",
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": "no"
+      },
+      "coreComponents": [
+        {
+          "role": "greens",
+          "items": ["ingredient.lettuce", "ingredient.arugula"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.tuna",
+            "ingredient.sardines",
+            "ingredient.eggs"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.green_beans",
+            "ingredient.tomatoes",
+            "ingredient.potatoes"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": ["ingredient.olives", "ingredient.capers"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.boil", "method.blanch", "method.assemble"],
+      "equipmentRecommended": ["equipment.pot", "equipment.colander"],
+      "equipmentMinimum": ["equipment.knife", "equipment.bowl"],
+      "ingredientsCore": [
+        "ingredient.tuna",
+        "ingredient.eggs",
+        "ingredient.green_beans",
+        "ingredient.potatoes",
+        "ingredient.tomatoes",
+        "ingredient.olives"
+      ],
+      "allergens": ["allergen.egg", "allergen.fish"],
+      "dietFlags": ["diet.gluten_free"],
+      "pairingHints": { "dressings": ["dish.mustard_vinaigrette"] },
+      "variations": [],
+      "plannerTags": [
+        "french_country",
+        "provence",
+        "salad",
+        "weeknight",
+        "light"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.omelet_fines_herbes",
+      "label": "Omelet aux fines herbes",
+      "aka": ["Herb omelet", "French omelette"],
+      "subprofiles": ["cuisines.french_country.bistro"],
+      "category": "breakfast",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 12, "handsOffMins": 2 },
+      "servingStyles": ["plates", "breakfast"],
+      "mealArchetypes": [
+        "archetypes.breakfast_plate",
+        "archetypes.quick_protein"
+      ],
+      "signals": {
+        "batchFriendly": "no",
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": "no"
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ingredient.eggs"], "chooseOne": false },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter_unsalted"],
+          "chooseOne": false
+        },
+        {
+          "role": "herb",
+          "items": [
+            "ingredient.chives",
+            "ingredient.parsley",
+            "ingredient.tarragon"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.whisk", "method.pan_fry", "method.fold"],
+      "equipmentRecommended": [
+        "equipment.nonstick_skillet",
+        "equipment.silicone_spatula"
+      ],
+      "equipmentMinimum": ["equipment.skillet", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.eggs",
+        "ingredient.butter_unsalted",
+        "ingredient.chives"
+      ],
+      "allergens": ["allergen.egg", "allergen.dairy"],
+      "dietFlags": ["diet.gluten_free", "diet.low_carb"],
+      "pairingHints": {
+        "sides": ["dish.simple_salad_vinaigrette", "dish.toast_baguette"]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.omelet_fines_herbes.cheese",
+          "label": "Cheese omelet",
+          "when": { "preference": "cheese" },
+          "adapt": { "add": { "ingredient.gruyere": "to_taste" } }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "breakfast",
+        "omelet",
+        "quick",
+        "protein"
+      ]
+    },
+
+    {
+      "id": "dishes.french_country.crepes",
+      "label": "Crêpes",
+      "aka": ["Crepes", "French pancakes"],
+      "subprofiles": ["cuisines.french_country.brittany"],
+      "category": "dessert",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 45, "handsOffMins": 10 },
+      "servingStyles": ["snacks", "breakfast", "family_style"],
+      "mealArchetypes": ["archetypes.sweet_breakfast", "archetypes.dessert"],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "good"
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ingredient.flour_all_purpose"],
+          "chooseOne": false
+        },
+        { "role": "protein", "items": ["ingredient.eggs"], "chooseOne": false },
+        {
+          "role": "dairy",
+          "items": ["ingredient.milk_whole"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter_unsalted"],
+          "chooseOne": false
+        },
+        { "role": "sweet", "items": ["ingredient.sugar"], "chooseOne": true }
+      ],
+      "techniques": ["method.whisk", "method.rest_batter", "method.pan_fry"],
+      "equipmentRecommended": ["equipment.crepe_pan", "equipment.blender"],
+      "equipmentMinimum": ["equipment.skillet", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.flour_all_purpose",
+        "ingredient.eggs",
+        "ingredient.milk_whole",
+        "ingredient.butter_unsalted"
+      ],
+      "allergens": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+      "dietFlags": ["diet.vegetarian"],
+      "pairingHints": {
+        "fillings_sweet": [
+          "ingredient.jam",
+          "ingredient.honey",
+          "ingredient.chocolate_spread"
+        ],
+        "fillings_savory": [
+          "ingredient.ham",
+          "ingredient.cheese",
+          "ingredient.spinach"
+        ]
+      },
+      "variations": [
+        {
+          "id": "dishes.french_country.crepes.buckwheat_galettes",
+          "label": "Buckwheat galettes (savory)",
+          "when": { "preference": "savory" },
+          "adapt": {
+            "swap": {
+              "ingredient.flour_all_purpose": "ingredient.buckwheat_flour"
+            }
+          }
+        }
+      ],
+      "plannerTags": [
+        "french_country",
+        "dessert",
+        "breakfast",
+        "crepes",
+        "batch_friendly"
+      ]
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisines.french_country": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.roast_chicken_pan_sauce",
+        "dishes.french_country.potato_gratin_dauphinois",
+        "dishes.french_country.ratatouille",
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.lentil_soup",
+        "dishes.french_country.nicoise_salad",
+        "dishes.french_country.omelet_fines_herbes",
+        "dishes.french_country.crepes"
+      ]
+    },
+    "byArchetype": {
+      "archetypes.braise_and_side": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon"
+      ],
+      "archetypes.sauce_forward_main": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.roast_chicken_pan_sauce"
+      ],
+      "archetypes.stew_and_starch": [
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.lentil_soup"
+      ],
+      "archetypes.roast_and_sides": [
+        "dishes.french_country.roast_chicken_pan_sauce"
+      ],
+      "archetypes.baked_side": [
+        "dishes.french_country.potato_gratin_dauphinois"
+      ],
+      "archetypes.comfort_side": [
+        "dishes.french_country.potato_gratin_dauphinois"
+      ],
+      "archetypes.veg_forward_side": ["dishes.french_country.ratatouille"],
+      "archetypes.soup_and_bread": ["dishes.french_country.french_onion_soup"],
+      "archetypes.soup_course": [
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.lentil_soup"
+      ],
+      "archetypes.salad_main": ["dishes.french_country.nicoise_salad"],
+      "archetypes.breakfast_plate": [
+        "dishes.french_country.omelet_fines_herbes"
+      ],
+      "archetypes.quick_protein": ["dishes.french_country.omelet_fines_herbes"],
+      "archetypes.sweet_breakfast": ["dishes.french_country.crepes"],
+      "archetypes.dessert": ["dishes.french_country.crepes"]
+    },
+    "aliasIndex": {
+      "coq au vin": "dishes.french_country.coq_au_vin",
+      "chicken braised in red wine": "dishes.french_country.coq_au_vin",
+      "boeuf bourguignon": "dishes.french_country.beef_bourguignon",
+      "beef bourguignon": "dishes.french_country.beef_bourguignon",
+      "poulet roti": "dishes.french_country.roast_chicken_pan_sauce",
+      "roast chicken with pan sauce": "dishes.french_country.roast_chicken_pan_sauce",
+      "gratin dauphinois": "dishes.french_country.potato_gratin_dauphinois",
+      "potato gratin": "dishes.french_country.potato_gratin_dauphinois",
+      "ratatouille": "dishes.french_country.ratatouille",
+      "french onion soup": "dishes.french_country.french_onion_soup",
+      "soupe a l oignon": "dishes.french_country.french_onion_soup",
+      "french lentil soup": "dishes.french_country.lentil_soup",
+      "salade nicoise": "dishes.french_country.nicoise_salad",
+      "nicoise salad": "dishes.french_country.nicoise_salad",
+      "omelet aux fines herbes": "dishes.french_country.omelet_fines_herbes",
+      "french omelette": "dishes.french_country.omelet_fines_herbes",
+      "crepes": "dishes.french_country.crepes",
+      "crêpes": "dishes.french_country.crepes"
+    },
+    "keywordIndex": {
+      "braise": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon"
+      ],
+      "stew": [
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.lentil_soup",
+        "dishes.french_country.ratatouille"
+      ],
+      "roast": ["dishes.french_country.roast_chicken_pan_sauce"],
+      "gratin": ["dishes.french_country.potato_gratin_dauphinois"],
+      "vegetable": ["dishes.french_country.ratatouille"],
+      "soup": [
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.lentil_soup"
+      ],
+      "salad": ["dishes.french_country.nicoise_salad"],
+      "breakfast": [
+        "dishes.french_country.omelet_fines_herbes",
+        "dishes.french_country.crepes"
+      ],
+      "dessert": ["dishes.french_country.crepes"],
+      "bistro": [
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.omelet_fines_herbes"
+      ]
+    },
+    "tagIndex": {
+      "french_country": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.roast_chicken_pan_sauce",
+        "dishes.french_country.potato_gratin_dauphinois",
+        "dishes.french_country.ratatouille",
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.lentil_soup",
+        "dishes.french_country.nicoise_salad",
+        "dishes.french_country.omelet_fines_herbes",
+        "dishes.french_country.crepes"
+      ],
+      "braise": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon"
+      ],
+      "roast": ["dishes.french_country.roast_chicken_pan_sauce"],
+      "soup": [
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.lentil_soup"
+      ],
+      "salad": ["dishes.french_country.nicoise_salad"],
+      "breakfast": [
+        "dishes.french_country.omelet_fines_herbes",
+        "dishes.french_country.crepes"
+      ],
+      "dessert": ["dishes.french_country.crepes"],
+      "batch_friendly": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.potato_gratin_dauphinois",
+        "dishes.french_country.ratatouille",
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.lentil_soup",
+        "dishes.french_country.crepes"
+      ],
+      "freezer_friendly": [
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.lentil_soup"
+      ],
+      "comfort_food": [
+        "dishes.french_country.coq_au_vin",
+        "dishes.french_country.beef_bourguignon",
+        "dishes.french_country.french_onion_soup",
+        "dishes.french_country.potato_gratin_dauphinois"
+      ],
+      "weeknight": [
+        "dishes.french_country.ratatouille",
+        "dishes.french_country.lentil_soup",
+        "dishes.french_country.nicoise_salad"
+      ]
+    }
+  }
+}

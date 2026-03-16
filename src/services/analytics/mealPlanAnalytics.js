@@ -20,20 +20,57 @@ import EventEmitter from "eventemitter3";
 ----------------------------------------------------------------------------- */
 let automation;
 let eventBus;
-let PreferencesStore, MealPlanStore, InventoryStore, RecipeStore, HealthStore, CalendarStore;
+let PreferencesStore,
+  MealPlanStore,
+  InventoryStore,
+  RecipeStore,
+  HealthStore,
+  CalendarStore;
 let CoalitionStore, GroupStore, MarketplaceStore, PaymentsStore;
-try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-try { ({ usePreferencesStore: PreferencesStore } = await import("@/store/PreferencesStore")); } catch {}
-try { ({ useMealPlanStore: MealPlanStore } = await import("@/store/MealPlanStore")); } catch {}
-try { ({ useInventoryStore: InventoryStore } = await import("@/store/InventoryStore")); } catch {}
-try { ({ useRecipeStore: RecipeStore } = await import("@/store/RecipeStore")); } catch {}
-try { ({ useHealthStore: HealthStore } = await import("@/store/HealthStore")); } catch {}
-try { ({ useCalendarStore: CalendarStore } = await import("@/store/CalendarStore")); } catch {}
-try { ({ useCoalitionStore: CoalitionStore } = await import("@/store/CoalitionStore")); } catch {}
-try { ({ useGroupStore: GroupStore } = await import("@/store/GroupStore")); } catch {}
-try { ({ useMarketplaceStore: MarketplaceStore } = await import("@/store/MarketplaceStore")); } catch {}
-try { ({ usePaymentsStore: PaymentsStore } = await import("@/store/PaymentsStore")); } catch {}
+try {
+  ({ automation } = await import("@/services/automation/runtime"));
+} catch {}
+try {
+  ({ eventBus } = await import("@/services/events/eventBus"));
+} catch {}
+try {
+  ({ usePreferencesStore: PreferencesStore } = await import(
+    "@/store/PreferencesStore"
+  ));
+} catch {}
+try {
+  ({ useMealPlanStore: MealPlanStore } = await import("@/store/MealPlanStore"));
+} catch {}
+try {
+  ({ useInventoryStore: InventoryStore } = await import(
+    "@/store/InventoryStore"
+  ));
+} catch {}
+try {
+  ({ useRecipeStore: RecipeStore } = await import("@/store/RecipeStore"));
+} catch {}
+try {
+  ({ useHealthStore: HealthStore } = await import("@/store/HealthStore"));
+} catch {}
+try {
+  ({ useCalendarStore: CalendarStore } = await import("@/store/CalendarStore"));
+} catch {}
+try {
+  ({ useCoalitionStore: CoalitionStore } = await import(
+    "@/store/CoalitionStore"
+  ));
+} catch {}
+try {
+  ({ useGroupStore: GroupStore } = await import("@/store/GroupStore"));
+} catch {}
+try {
+  ({ useMarketplaceStore: MarketplaceStore } = await import(
+    "@/store/MarketplaceStore"
+  ));
+} catch {}
+try {
+  ({ usePaymentsStore: PaymentsStore } = await import("@/store/PaymentsStore"));
+} catch {}
 
 /* -----------------------------------------------------------------------------
    Small utils
@@ -47,8 +84,20 @@ const sum = (xs) => xs.reduce((a, b) => a + b, 0);
 const avg = (xs) => (xs.length ? sum(xs) / xs.length : 0);
 
 const safeJSON = {
-  parse: (s, f = null) => { try { return JSON.parse(s); } catch { return f; } },
-  stringify: (o) => { try { return JSON.stringify(o); } catch { return ""; } },
+  parse: (s, f = null) => {
+    try {
+      return JSON.parse(s);
+    } catch {
+      return f;
+    }
+  },
+  stringify: (o) => {
+    try {
+      return JSON.stringify(o);
+    } catch {
+      return "";
+    }
+  },
 };
 
 const storage = (() => {
@@ -79,16 +128,76 @@ const coalitionCache = (() => {
 /* -----------------------------------------------------------------------------
    Store accessors (defensive)
 ----------------------------------------------------------------------------- */
-function readPrefs()      { try { return PreferencesStore?.() || {}; } catch { return {}; } }
-function readHealth()     { try { return HealthStore?.() || {}; } catch { return {}; } }
-function readMealPlan()   { try { return MealPlanStore?.() || {}; } catch { return {}; } }
-function readInventory()  { try { return InventoryStore?.() || {}; } catch { return {}; } }
-function readRecipes()    { try { return RecipeStore?.() || {}; } catch { return {}; } }
-function readCalendar()   { try { return CalendarStore?.() || {}; } catch { return {}; } }
-function readCoalitions() { try { return CoalitionStore?.() || { coalitions: [] }; } catch { return { coalitions: [] }; } }
-function readGroups()     { try { return GroupStore?.() || { groups: [] }; } catch { return { groups: [] }; } }
-function readMarketplace(){ try { return MarketplaceStore?.() || { listings: [], sales: [] }; } catch { return { listings: [], sales: [] }; } }
-function readPayments()   { try { return PaymentsStore?.() || { payouts: [] }; } catch { return { payouts: [] }; } }
+function readPrefs() {
+  try {
+    return PreferencesStore?.() || {};
+  } catch {
+    return {};
+  }
+}
+function readHealth() {
+  try {
+    return HealthStore?.() || {};
+  } catch {
+    return {};
+  }
+}
+function readMealPlan() {
+  try {
+    return MealPlanStore?.() || {};
+  } catch {
+    return {};
+  }
+}
+function readInventory() {
+  try {
+    return InventoryStore?.() || {};
+  } catch {
+    return {};
+  }
+}
+function readRecipes() {
+  try {
+    return RecipeStore?.() || {};
+  } catch {
+    return {};
+  }
+}
+function readCalendar() {
+  try {
+    return CalendarStore?.() || {};
+  } catch {
+    return {};
+  }
+}
+function readCoalitions() {
+  try {
+    return CoalitionStore?.() || { coalitions: [] };
+  } catch {
+    return { coalitions: [] };
+  }
+}
+function readGroups() {
+  try {
+    return GroupStore?.() || { groups: [] };
+  } catch {
+    return { groups: [] };
+  }
+}
+function readMarketplace() {
+  try {
+    return MarketplaceStore?.() || { listings: [], sales: [] };
+  } catch {
+    return { listings: [], sales: [] };
+  }
+}
+function readPayments() {
+  try {
+    return PaymentsStore?.() || { payouts: [] };
+  } catch {
+    return { payouts: [] };
+  }
+}
 
 /* -----------------------------------------------------------------------------
    Shapes we analyze (defensive, optional):
@@ -112,61 +221,97 @@ export function computeMealPlanSnapshot({
 } = {}) {
   const schedule = mealPlan?.schedule || [];
   const logs = mealPlan?.logs || [];
-  const recipeById = new Map((recipes?.all || []).map(r => [r.id, r]));
+  const recipeById = new Map((recipes?.all || []).map((r) => [r.id, r]));
 
   const horizonDays = Number(prefs?.cooking?.planHorizonDays || 7);
   const since7 = Date.now() - 7 * dayMs;
   const since30 = Date.now() - 30 * dayMs;
 
   // 1) Adherence (planned vs actually cooked, last 7d)
-  const planned7 = schedule.filter(d => (d.ts || d.dateTs) >= since7);
-  const cooked7  = logs.filter(l => l.ts >= since7);
-  const hits7 = cooked7.filter(l => wasPlannedFor(planned7, l)).length;
+  const planned7 = schedule.filter((d) => (d.ts || d.dateTs) >= since7);
+  const cooked7 = logs.filter((l) => l.ts >= since7);
+  const hits7 = cooked7.filter((l) => wasPlannedFor(planned7, l)).length;
   const onPlanPct = planned7.length ? hits7 / planned7.length : 0;
 
   // 2) Horizon coverage (days with any meal within horizon)
-  const nextHorizon = schedule.filter(d => (d.ts || d.dateTs) <= (Date.now() + horizonDays * dayMs));
+  const nextHorizon = schedule.filter(
+    (d) => (d.ts || d.dateTs) <= Date.now() + horizonDays * dayMs
+  );
   const coverageDays = countDaysWithMeals(nextHorizon);
 
   // 3) Grocery budget delta (last 30d planned est vs logged cost)
-  const plannedCost30 = estimatePlannedCost(schedule.filter(d => (d.ts || d.dateTs) >= since30), recipeById);
-  const loggedCost30  = sum(logs.filter(l => l.ts >= since30).map(l => Number(l.cost || 0)));
+  const plannedCost30 = estimatePlannedCost(
+    schedule.filter((d) => (d.ts || d.dateTs) >= since30),
+    recipeById
+  );
+  const loggedCost30 = sum(
+    logs.filter((l) => l.ts >= since30).map((l) => Number(l.cost || 0))
+  );
   const groceryDelta30 = round2((plannedCost30 || 0) - (loggedCost30 || 0)); // positive = under budget
 
   // 4) Macro coverage vs target (avg per-day coverage implied by plan next horizon)
   const macroTarget = macroTargetFrom(prefs, health);
   const plannedMacros = estimatePlannedMacros(nextHorizon, recipeById);
-  const perDayPlanned = scaleMacros(plannedMacros, 1 / Math.max(1, coverageDays));
+  const perDayPlanned = scaleMacros(
+    plannedMacros,
+    1 / Math.max(1, coverageDays)
+  );
   const macroCoverage = macroAdherencePct(perDayPlanned, macroTarget);
 
   // 5) Variety score (distinct cuisines & proteins planned in horizon)
-  const { varietyScore, cuisines, proteins } = computeVariety(nextHorizon, recipeById);
+  const { varietyScore, cuisines, proteins } = computeVariety(
+    nextHorizon,
+    recipeById
+  );
 
   // 6) Repeat rate in horizon
-  const repeatRate = computeRepeatRate(nextHorizon.map(d => d.recipeId));
+  const repeatRate = computeRepeatRate(nextHorizon.map((d) => d.recipeId));
 
   // 7) Prep load balance
   const prepBalance = computePrepBalance(nextHorizon, recipeById);
 
   // 8) Plan outline for coalitions/creators
-  const horizonRecipeIds = Array.from(new Set(nextHorizon.map(d => d.recipeId).filter(Boolean)));
-  const avgServingsPlanned = avg(nextHorizon.map(d => Number(d.servings || 0)).filter(Boolean)) || 0;
+  const horizonRecipeIds = Array.from(
+    new Set(nextHorizon.map((d) => d.recipeId).filter(Boolean))
+  );
+  const avgServingsPlanned =
+    avg(nextHorizon.map((d) => Number(d.servings || 0)).filter(Boolean)) || 0;
 
   // 9) Upcoming calendar conflicts
   const conflicts = estimateConflicts(nextHorizon, calendar);
 
   // 10) Marketplace summary (if selling)
-  const market = summarizeMarketplace(mealPlan?.activePlanId, readMarketplace(), readPayments());
+  const market = summarizeMarketplace(
+    mealPlan?.activePlanId,
+    readMarketplace(),
+    readPayments()
+  );
 
   return {
     ts: now(),
     horizonDays,
-    adherence: { hits7, planned7: planned7.length, onPlanPct: round2(onPlanPct) },
+    adherence: {
+      hits7,
+      planned7: planned7.length,
+      onPlanPct: round2(onPlanPct),
+    },
     coverage: { daysWithMeals: coverageDays },
-    grocery:  { plannedCost30: round2(plannedCost30), actualCost30: round2(loggedCost30), delta30: groceryDelta30 },
-    macros:   { target: macroTarget, perDayPlanned, coverage: macroCoverage },
-    variety:  { score: varietyScore, cuisines, proteins, repeatRate: round2(repeatRate) },
-    prep:     { balanceStd: round2(prepBalance.std), avgDailyPrepMin: round2(prepBalance.avg) },
+    grocery: {
+      plannedCost30: round2(plannedCost30),
+      actualCost30: round2(loggedCost30),
+      delta30: groceryDelta30,
+    },
+    macros: { target: macroTarget, perDayPlanned, coverage: macroCoverage },
+    variety: {
+      score: varietyScore,
+      cuisines,
+      proteins,
+      repeatRate: round2(repeatRate),
+    },
+    prep: {
+      balanceStd: round2(prepBalance.std),
+      avgDailyPrepMin: round2(prepBalance.avg),
+    },
     conflicts,
     marketplace: market,
     plan: { horizonRecipeIds, avgServingsPlanned }, // NEW
@@ -175,16 +320,24 @@ export function computeMealPlanSnapshot({
 
 /* --------------------------------- Helpers --------------------------------- */
 function wasPlannedFor(plannedDays, log) {
-  const d = new Date(log.ts); d.setHours(0,0,0,0);
+  const d = new Date(log.ts);
+  d.setHours(0, 0, 0, 0);
   const dayKey = d.getTime();
-  return plannedDays.some(p => {
-    const pt = new Date(p.ts || p.dateTs); pt.setHours(0,0,0,0);
-    return pt.getTime() === dayKey && (!p.recipeId || p.recipeId === log.recipeId);
+  return plannedDays.some((p) => {
+    const pt = new Date(p.ts || p.dateTs);
+    pt.setHours(0, 0, 0, 0);
+    return (
+      pt.getTime() === dayKey && (!p.recipeId || p.recipeId === log.recipeId)
+    );
   });
 }
-function countDaysWithMeals(entries=[]) {
+function countDaysWithMeals(entries = []) {
   const s = new Set();
-  entries.forEach(d => { const t = new Date(d.ts || d.dateTs); t.setHours(0,0,0,0); s.add(t.getTime()); });
+  entries.forEach((d) => {
+    const t = new Date(d.ts || d.dateTs);
+    t.setHours(0, 0, 0, 0);
+    s.add(t.getTime());
+  });
   return s.size;
 }
 function macroTargetFrom(prefs, health) {
@@ -198,93 +351,141 @@ function macroTargetFrom(prefs, health) {
   return { calories, protein, carbs, fat };
 }
 function scaleMacros(m, k) {
-  return { calories: m.calories * k, protein: m.protein * k, carbs: m.carbs * k, fat: m.fat * k };
+  return {
+    calories: m.calories * k,
+    protein: m.protein * k,
+    carbs: m.carbs * k,
+    fat: m.fat * k,
+  };
 }
 function macroAdherencePct(avgPerDay, target) {
   const pct = (a, t) => (t ? clamp(a / t, 0, 2) : 0);
   const p = {
     calories: pct(avgPerDay.calories, target.calories),
-    protein:  pct(avgPerDay.protein,  target.protein),
-    carbs:    pct(avgPerDay.carbs,    target.carbs),
-    fat:      pct(avgPerDay.fat,      target.fat),
+    protein: pct(avgPerDay.protein, target.protein),
+    carbs: pct(avgPerDay.carbs, target.carbs),
+    fat: pct(avgPerDay.fat, target.fat),
   };
   p.overall = round2((p.calories + p.protein + p.carbs + p.fat) / 4);
   return p;
 }
 function estimatePlannedCost(entries, recipeById) {
-  return sum(entries.map(e => {
-    const r = recipeById.get(e.recipeId);
-    if (!r) return 0;
-    const cost = Number(r.costEstimate || 0) || (Number(r.prepMin || 20) * 0.3);
-    const servings = Number(e.servings || 4);
-    return cost * (servings / Number(r.servings || 4));
-  }));
+  return sum(
+    entries.map((e) => {
+      const r = recipeById.get(e.recipeId);
+      if (!r) return 0;
+      const cost = Number(r.costEstimate || 0) || Number(r.prepMin || 20) * 0.3;
+      const servings = Number(e.servings || 4);
+      return cost * (servings / Number(r.servings || 4));
+    })
+  );
 }
 function estimatePlannedMacros(entries, recipeById) {
-  return entries.reduce((acc, e) => {
-    const r = recipeById.get(e.recipeId) || {};
-    const base = r.macros || {};
-    const factor = (e.servings || 4) / Number(r.servings || 4);
-    acc.calories += Number(base.calories || 0) * factor;
-    acc.protein  += Number(base.protein  || 0) * factor;
-    acc.carbs    += Number(base.carbs    || 0) * factor;
-    acc.fat      += Number(base.fat      || 0) * factor;
-    return acc;
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  return entries.reduce(
+    (acc, e) => {
+      const r = recipeById.get(e.recipeId) || {};
+      const base = r.macros || {};
+      const factor = (e.servings || 4) / Number(r.servings || 4);
+      acc.calories += Number(base.calories || 0) * factor;
+      acc.protein += Number(base.protein || 0) * factor;
+      acc.carbs += Number(base.carbs || 0) * factor;
+      acc.fat += Number(base.fat || 0) * factor;
+      return acc;
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
 }
 function computeVariety(entries, recipeById) {
-  const cuisines = new Set(); const proteins = new Set();
-  entries.forEach(e => {
+  const cuisines = new Set();
+  const proteins = new Set();
+  entries.forEach((e) => {
     const r = recipeById.get(e.recipeId) || {};
     if (r.cuisine) cuisines.add(r.cuisine.toLowerCase());
     if (r.protein) proteins.add(r.protein.toLowerCase());
   });
-  const c = cuisines.size; const p = proteins.size;
-  const score = Math.min(100, Math.round(((c + p) / Math.max(2, entries.length / 2)) * 50));
-  return { varietyScore: score, cuisines: Array.from(cuisines), proteins: Array.from(proteins) };
+  const c = cuisines.size;
+  const p = proteins.size;
+  const score = Math.min(
+    100,
+    Math.round(((c + p) / Math.max(2, entries.length / 2)) * 50)
+  );
+  return {
+    varietyScore: score,
+    cuisines: Array.from(cuisines),
+    proteins: Array.from(proteins),
+  };
 }
-function computeRepeatRate(recipeIds=[]) {
-  const counts = recipeIds.reduce((m, id) => (m[id] = (m[id] || 0) + 1, m), {});
-  const repeats = Object.values(counts).filter(n => n > 1).reduce((a, b) => a + (b - 1), 0);
+function computeRepeatRate(recipeIds = []) {
+  const counts = recipeIds.reduce(
+    (m, id) => ((m[id] = (m[id] || 0) + 1), m),
+    {}
+  );
+  const repeats = Object.values(counts)
+    .filter((n) => n > 1)
+    .reduce((a, b) => a + (b - 1), 0);
   return recipeIds.length ? repeats / recipeIds.length : 0;
 }
 function computePrepBalance(entries, recipeById) {
   const perDay = new Map();
-  entries.forEach(e => {
+  entries.forEach((e) => {
     const key = dayKey(e.ts || e.dateTs);
     const r = recipeById.get(e.recipeId) || {};
-    const mins = Number(r.prepMin || 20) * (Number(e.servings || 4) / Number(r.servings || 4));
+    const mins =
+      Number(r.prepMin || 20) *
+      (Number(e.servings || 4) / Number(r.servings || 4));
     perDay.set(key, (perDay.get(key) || 0) + mins);
   });
   const arr = Array.from(perDay.values());
   const mean = avg(arr);
-  const variance = arr.length ? avg(arr.map(x => (x - mean) ** 2)) : 0;
+  const variance = arr.length ? avg(arr.map((x) => (x - mean) ** 2)) : 0;
   return { avg: mean, std: Math.sqrt(variance) };
 }
-function dayKey(ts) { const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
+function dayKey(ts) {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
 function estimateConflicts(entries, calendar) {
   const events = calendar?.events || [];
-  const windowStartH = 17, windowEndH = 19;
-  const byDay = new Set(entries.map(e => dayKey(e.ts || e.dateTs)));
+  const windowStartH = 17,
+    windowEndH = 19;
+  const byDay = new Set(entries.map((e) => dayKey(e.ts || e.dateTs)));
   return events
-    .filter(ev => {
+    .filter((ev) => {
       const start = new Date(ev.startTs || ev.start).getTime();
-      const end   = new Date(ev.endTs || ev.end).getTime();
-      const d = new Date(start); const k = (d.setHours(0,0,0,0), d.getTime());
+      const end = new Date(ev.endTs || ev.end).getTime();
+      const d = new Date(start);
+      const k = (d.setHours(0, 0, 0, 0), d.getTime());
       if (!byDay.has(k)) return false;
-      const ws = new Date(k); ws.setHours(windowStartH,0,0,0);
-      const we = new Date(k); we.setHours(windowEndH,0,0,0);
+      const ws = new Date(k);
+      ws.setHours(windowStartH, 0, 0, 0);
+      const we = new Date(k);
+      we.setHours(windowEndH, 0, 0, 0);
       return Math.max(start, ws.getTime()) < Math.min(end, we.getTime());
     })
-    .map(ev => ({ title: ev.title, startTs: ev.startTs || ev.start, endTs: ev.endTs || ev.end }));
+    .map((ev) => ({
+      title: ev.title,
+      startTs: ev.startTs || ev.start,
+      endTs: ev.endTs || ev.end,
+    }));
 }
 function summarizeMarketplace(activePlanId, marketplace, _payments) {
   if (!activePlanId) return { listed: false };
-  const listings = (marketplace?.listings || []).filter(x => x.planId === activePlanId);
-  const sales = (marketplace?.sales || []).filter(x => x.planId === activePlanId);
-  const revenue = sum(sales.map(s => Number(s.price || 0)));
+  const listings = (marketplace?.listings || []).filter(
+    (x) => x.planId === activePlanId
+  );
+  const sales = (marketplace?.sales || []).filter(
+    (x) => x.planId === activePlanId
+  );
+  const revenue = sum(sales.map((s) => Number(s.price || 0)));
   const lastSaleTs = sales.length ? sales[sales.length - 1].ts : null;
-  return { listed: listings.length > 0, price: listings[0]?.price || null, sales: sales.length, revenue: round2(revenue), lastSaleTs };
+  return {
+    listed: listings.length > 0,
+    price: listings[0]?.price || null,
+    sales: sales.length,
+    revenue: round2(revenue),
+    lastSaleTs,
+  };
 }
 
 /* -----------------------------------------------------------------------------
@@ -298,27 +499,49 @@ export function toDashboardCards(snapshot) {
       title: "On-Plan (7d)",
       value: `${Math.round((snapshot.adherence.onPlanPct || 0) * 100)}%`,
       meta: `${snapshot.adherence.hits7}/${snapshot.adherence.planned7} meals`,
-      intent: snapshot.adherence.onPlanPct >= 0.7 ? "success" : snapshot.adherence.onPlanPct >= 0.5 ? "info" : "warning",
+      intent:
+        snapshot.adherence.onPlanPct >= 0.7
+          ? "success"
+          : snapshot.adherence.onPlanPct >= 0.5
+          ? "info"
+          : "warning",
     },
     {
       id: "coverage",
       title: "Horizon Coverage",
       value: `${snapshot.coverage.daysWithMeals}/${snapshot.horizonDays} days`,
       meta: "Days with at least 1 planned meal",
-      intent: snapshot.coverage.daysWithMeals >= snapshot.horizonDays - 1 ? "success" : snapshot.coverage.daysWithMeals >= Math.ceil(snapshot.horizonDays * 0.7) ? "info" : "warning",
+      intent:
+        snapshot.coverage.daysWithMeals >= snapshot.horizonDays - 1
+          ? "success"
+          : snapshot.coverage.daysWithMeals >=
+            Math.ceil(snapshot.horizonDays * 0.7)
+          ? "info"
+          : "warning",
     },
     {
       id: "macro-coverage",
       title: "Macro Coverage",
       value: `${Math.round((snapshot.macros.coverage.overall || 0) * 100)}%`,
-      meta: `P:${Math.round(snapshot.macros.coverage.protein*100)} C:${Math.round(snapshot.macros.coverage.carbs*100)} F:${Math.round(snapshot.macros.coverage.fat*100)}`,
-      intent: snapshot.macros.coverage.overall >= 0.9 ? "success" : snapshot.macros.coverage.overall >= 0.7 ? "info" : "warning",
+      meta: `P:${Math.round(
+        snapshot.macros.coverage.protein * 100
+      )} C:${Math.round(snapshot.macros.coverage.carbs * 100)} F:${Math.round(
+        snapshot.macros.coverage.fat * 100
+      )}`,
+      intent:
+        snapshot.macros.coverage.overall >= 0.9
+          ? "success"
+          : snapshot.macros.coverage.overall >= 0.7
+          ? "info"
+          : "warning",
     },
     {
       id: "variety",
       title: "Variety",
       value: `${snapshot.variety.score}/100`,
-      meta: `${snapshot.variety.cuisines.length} cuisines · ${snapshot.variety.proteins.length} proteins · ${Math.round(snapshot.variety.repeatRate*100)}% repeats`,
+      meta: `${snapshot.variety.cuisines.length} cuisines · ${
+        snapshot.variety.proteins.length
+      } proteins · ${Math.round(snapshot.variety.repeatRate * 100)}% repeats`,
       intent: snapshot.variety.score >= 70 ? "success" : "info",
     },
     {
@@ -333,7 +556,12 @@ export function toDashboardCards(snapshot) {
       title: "Prep Balance",
       value: `${snapshot.prep.avgDailyPrepMin}m avg`,
       meta: `Std dev ${snapshot.prep.balanceStd}m`,
-      intent: snapshot.prep.balanceStd <= 20 ? "success" : snapshot.prep.balanceStd <= 40 ? "info" : "warning",
+      intent:
+        snapshot.prep.balanceStd <= 20
+          ? "success"
+          : snapshot.prep.balanceStd <= 40
+          ? "info"
+          : "warning",
     },
   ];
 }
@@ -349,9 +577,17 @@ export function toDashboardCards(snapshot) {
 
 // Resolve another member’s planning context
 async function getMemberKitchen(userId) {
-  try { return await CoalitionStore?.getMemberKitchen?.(userId); } catch {}
-  try { return await GroupStore?.getMemberKitchen?.(userId); } catch {}
-  try { return coalitionCache.get()[`kitchen:${userId}`] || null; } catch { return null; }
+  try {
+    return await CoalitionStore?.getMemberKitchen?.(userId);
+  } catch {}
+  try {
+    return await GroupStore?.getMemberKitchen?.(userId);
+  } catch {}
+  try {
+    return coalitionCache.get()[`kitchen:${userId}`] || null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -367,17 +603,36 @@ export async function computeCoalitionMealPlanSnapshot({
 } = {}) {
   if (!coalitionId) return null;
 
-  const coalition =
-    (coalitions.coalitions || []).find(c => String(c.id) === String(coalitionId)) ||
-    (groups.groups || []).find(g => String(g.id) === String(coalitionId) && (g.type === "meal_coalition" || g.type === "coalition" || g.kind === "coalition")) ||
-    { id: coalitionId, name: "Meal Planning Coalition", members: [], pooledDemand: {}, fairness: { basis: "servings" } };
+  const coalition = (coalitions.coalitions || []).find(
+    (c) => String(c.id) === String(coalitionId)
+  ) ||
+    (groups.groups || []).find(
+      (g) =>
+        String(g.id) === String(coalitionId) &&
+        (g.type === "meal_coalition" ||
+          g.type === "coalition" ||
+          g.kind === "coalition")
+    ) || {
+      id: coalitionId,
+      name: "Meal Planning Coalition",
+      members: [],
+      pooledDemand: {},
+      fairness: { basis: "servings" },
+    };
 
   const members = coalition.members || [];
   const memberSnaps = [];
 
   for (const m of members) {
     const ctx = await memberResolver(m.userId);
-    if (!ctx) { memberSnaps.push({ userId: m.userId, name: m.displayName || m.userId, error: "unavailable" }); continue; }
+    if (!ctx) {
+      memberSnaps.push({
+        userId: m.userId,
+        name: m.displayName || m.userId,
+        error: "unavailable",
+      });
+      continue;
+    }
     const snap = computeMealPlanSnapshot({
       prefs: ctx.prefs || {},
       health: ctx.health || {},
@@ -386,7 +641,11 @@ export async function computeCoalitionMealPlanSnapshot({
       recipes: ctx.recipes || {},
       calendar: ctx.calendar || {},
     });
-    memberSnaps.push({ userId: m.userId, name: m.displayName || m.userId, snapshot: snap });
+    memberSnaps.push({
+      userId: m.userId,
+      name: m.displayName || m.userId,
+      snapshot: snap,
+    });
   }
 
   const agg = aggregateCoalitionMealPlans(memberSnaps, coalition, horizonDays);
@@ -399,10 +658,10 @@ export async function computeCoalitionMealPlanSnapshot({
     name: coalition.name,
     horizonDays,
     members: memberSnaps,
-    pooled: agg.pooled,       // adoption, overlap, macro fit, marketplace roll-up
-    fairness: agg.fairness,   // contribution balance
-    coordination: agg.coord,  // anchor dinners / bulk-prep / swaps
-    marketplace: agg.market,  // creator analytics
+    pooled: agg.pooled, // adoption, overlap, macro fit, marketplace roll-up
+    fairness: agg.fairness, // contribution balance
+    coordination: agg.coord, // anchor dinners / bulk-prep / swaps
+    marketplace: agg.market, // creator analytics
     alerts,
   };
 }
@@ -414,26 +673,35 @@ function aggregateCoalitionMealPlans(memberSnaps, coalition, _horizonDays) {
     minCoverageDays: null,
     avgVarietyScore: 0,
     repeatRateAvg: 0,
-    menuOverlap: { overlapIndex: 0, sharedRecipeCount: 0, uniqueRecipeCount: 0, topSharedRecipes: [] },
+    menuOverlap: {
+      overlapIndex: 0,
+      sharedRecipeCount: 0,
+      uniqueRecipeCount: 0,
+      topSharedRecipes: [],
+    },
     macroFit: { avgFit: 0, lowFitMembers: [] },
   };
 
   const perMember = [];
   const recipeFreq = new Map(); // recipeId -> households count
-  const pairFreq = new Map();   // "idA|idB" -> households that co-planned pair
+  const pairFreq = new Map(); // "idA|idB" -> households that co-planned pair
   let adopters = 0;
   let macroFitSum = 0;
   const lowFit = [];
 
   for (const m of memberSnaps) {
-    const s = m.snapshot; if (!s) continue;
+    const s = m.snapshot;
+    if (!s) continue;
 
     pooled.avgOnPlanPct += Number(s.adherence?.onPlanPct || 0);
     pooled.avgVarietyScore += Number(s.variety?.score || 0);
     pooled.repeatRateAvg += Number(s.variety?.repeatRate || 0);
 
     const cov = Number(s.coverage?.daysWithMeals || 0);
-    pooled.minCoverageDays = pooled.minCoverageDays == null ? cov : Math.min(pooled.minCoverageDays, cov);
+    pooled.minCoverageDays =
+      pooled.minCoverageDays == null
+        ? cov
+        : Math.min(pooled.minCoverageDays, cov);
     if (cov >= Math.ceil((s.horizonDays || 7) * 0.7)) adopters++;
 
     // menu overlap inputs
@@ -444,7 +712,8 @@ function aggregateCoalitionMealPlans(memberSnaps, coalition, _horizonDays) {
     const arr = Array.from(setIds);
     for (let i = 0; i < arr.length; i++) {
       for (let j = i + 1; j < arr.length; j++) {
-        const a = arr[i], b = arr[j];
+        const a = arr[i],
+          b = arr[j];
         const key = a < b ? `${a}|${b}` : `${b}|${a}`;
         pairFreq.set(key, (pairFreq.get(key) || 0) + 1);
       }
@@ -453,18 +722,25 @@ function aggregateCoalitionMealPlans(memberSnaps, coalition, _horizonDays) {
     // macro fit
     const fit = Number(s.macros?.coverage?.overall || 0);
     macroFitSum += fit;
-    if (fit < 0.75) lowFit.push({ userId: m.userId, name: m.name, fit: round2(fit) });
+    if (fit < 0.75)
+      lowFit.push({ userId: m.userId, name: m.name, fit: round2(fit) });
 
     // contribution basis
     const basis = coalition?.fairness?.basis || "servings";
     const basisValue =
-      basis === "plans"    ? cov :
-      basis === "time"     ? Number(s.prep?.avgDailyPrepMin || 0) :
-                             Math.round((s.horizonDays || 7) * (s.adherence?.onPlanPct || 0));
-    perMember.push({ userId: m.userId, name: m.name, basisValue: round2(basisValue) });
+      basis === "plans"
+        ? cov
+        : basis === "time"
+        ? Number(s.prep?.avgDailyPrepMin || 0)
+        : Math.round((s.horizonDays || 7) * (s.adherence?.onPlanPct || 0));
+    perMember.push({
+      userId: m.userId,
+      name: m.name,
+      basisValue: round2(basisValue),
+    });
   }
 
-  const n = memberSnaps.filter(m => !!m.snapshot).length || 1;
+  const n = memberSnaps.filter((m) => !!m.snapshot).length || 1;
   pooled.avgOnPlanPct = round2(pooled.avgOnPlanPct / n);
   pooled.avgVarietyScore = Math.round(pooled.avgVarietyScore / n);
   pooled.repeatRateAvg = round2(pooled.repeatRateAvg / n);
@@ -502,7 +778,12 @@ function aggregateCoalitionMealPlans(memberSnaps, coalition, _horizonDays) {
     });
 
   // Coordination suggestions
-  const coord = coalitionCoordinationMealPlans({ memberSnaps, coalition, pooled, bundleOps });
+  const coord = coalitionCoordinationMealPlans({
+    memberSnaps,
+    coalition,
+    pooled,
+    bundleOps,
+  });
 
   // Marketplace roll-up if any member lists their plan
   const market = aggregateMarketplace(memberSnaps, bundleOps);
@@ -514,13 +795,15 @@ function aggregateCoalitionMealPlans(memberSnaps, coalition, _horizonDays) {
 
 function coalitionFairness(perMember, coalition) {
   const basis = coalition?.fairness?.basis || "servings";
-  const values = perMember.map(m => Number(m.basisValue || 0));
+  const values = perMember.map((m) => Number(m.basisValue || 0));
   const mean = avg(values);
-  const mad = avg(values.map(v => Math.abs(v - mean)));
+  const mad = avg(values.map((v) => Math.abs(v - mean)));
   const imbalanceIdx = mean ? round2(mad / mean) : 0;
   return {
-    basis, mean: round2(mean), imbalanceIdx,
-    members: perMember.map(m => ({ ...m })),
+    basis,
+    mean: round2(mean),
+    imbalanceIdx,
+    members: perMember.map((m) => ({ ...m })),
   };
 }
 
@@ -533,7 +816,7 @@ function coalitionCoordinationMealPlans({ memberSnaps, pooled, bundleOps }) {
     suggestions.push({
       type: "anchor_dinners",
       note: "Low shared-menu overlap. Standardize 2–3 anchor dinners for bulk prep.",
-      anchors: recommend.map(r => r.recipeId),
+      anchors: recommend.map((r) => r.recipeId),
     });
   }
 
@@ -563,10 +846,14 @@ function coalitionCoordinationMealPlans({ memberSnaps, pooled, bundleOps }) {
 
 function aggregateMarketplace(memberSnaps, bundleOps) {
   const entries = memberSnaps
-    .map(m => ({ userId: m.userId, name: m.name, mp: m.snapshot?.marketplace }))
-    .filter(x => x?.mp?.listed);
-  const totalRevenue = round2(sum(entries.map(e => e.mp.revenue || 0)));
-  const totalSales = sum(entries.map(e => e.mp.sales || 0));
+    .map((m) => ({
+      userId: m.userId,
+      name: m.name,
+      mp: m.snapshot?.marketplace,
+    }))
+    .filter((x) => x?.mp?.listed);
+  const totalRevenue = round2(sum(entries.map((e) => e.mp.revenue || 0)));
+  const totalSales = sum(entries.map((e) => e.mp.sales || 0));
 
   // Lightweight creator insights
   const creatorInsights = {
@@ -586,7 +873,12 @@ function buildCoalitionMealPlanAlerts(agg) {
       level: "info",
       code: "LOW_ADOPTION",
       message: "Coalition plan adoption is low. Share a quick-start template.",
-      actions: [{ label: "Share Template", topic: "mealplan.coalition.template.share.open" }],
+      actions: [
+        {
+          label: "Share Template",
+          topic: "mealplan.coalition.template.share.open",
+        },
+      ],
     });
   }
   if ((agg?.pooled?.minCoverageDays ?? 0) < 3) {
@@ -594,15 +886,23 @@ function buildCoalitionMealPlanAlerts(agg) {
       level: "warning",
       code: "COVERAGE_LOW",
       message: "Some households have <3 days covered. Assign catch-up plans.",
-      actions: [{ label: "Assign Catch-Up", topic: "mealplan.coalition.assign.open" }],
+      actions: [
+        { label: "Assign Catch-Up", topic: "mealplan.coalition.assign.open" },
+      ],
     });
   }
   if ((agg?.pooled?.menuOverlap?.overlapIndex || 0) < 0.2) {
     alerts.push({
       level: "info",
       code: "LOW_OVERLAP",
-      message: "Shared menu overlap is low. Add 2 anchor dinners for bulk prep.",
-      actions: [{ label: "Pick Anchors", topic: "mealplan.coalition.anchors.pick.open" }],
+      message:
+        "Shared menu overlap is low. Add 2 anchor dinners for bulk prep.",
+      actions: [
+        {
+          label: "Pick Anchors",
+          topic: "mealplan.coalition.anchors.pick.open",
+        },
+      ],
     });
   }
   if ((agg?.pooled?.macroFit?.avgFit || 0) < 0.75) {
@@ -610,7 +910,12 @@ function buildCoalitionMealPlanAlerts(agg) {
       level: "info",
       code: "LOW_MACRO_FIT",
       message: "Average macro fit is low. Suggest higher-fit swaps.",
-      actions: [{ label: "Suggest Swaps", topic: "mealplan.coalition.macros.suggest.open" }],
+      actions: [
+        {
+          label: "Suggest Swaps",
+          topic: "mealplan.coalition.macros.suggest.open",
+        },
+      ],
     });
   }
   return alerts;
@@ -676,8 +981,12 @@ class MealPlanAnalytics extends EventEmitter {
     this._coalitions = coalitionCache.get(); // { [id]: snapshot }
     this._hooked = false;
   }
-  get snapshot() { return this._snapshot; }
-  get coalitionSnaps() { return this._coalitions; }
+  get snapshot() {
+    return this._snapshot;
+  }
+  get coalitionSnaps() {
+    return this._coalitions;
+  }
 
   recompute() {
     const snap = computeMealPlanSnapshot({});
@@ -685,7 +994,9 @@ class MealPlanAnalytics extends EventEmitter {
     storage.set(snap);
     this.emit("updated", snap);
     automation?.emitEvent?.("mealplan.analytics.updated", { snapshot: snap });
-    try { this._maybeNBA(snap); } catch {}
+    try {
+      this._maybeNBA(snap);
+    } catch {}
     return snap;
   }
 
@@ -695,8 +1006,13 @@ class MealPlanAnalytics extends EventEmitter {
     this._coalitions[coalitionId] = snap;
     coalitionCache.set(this._coalitions);
     this.emit("coalition.updated", { coalitionId, snapshot: snap });
-    automation?.emitEvent?.("mealplan.coalition.analytics.updated", { coalitionId, snapshot: snap });
-    try { this._maybeNBACoalition(snap); } catch {}
+    automation?.emitEvent?.("mealplan.coalition.analytics.updated", {
+      coalitionId,
+      snapshot: snap,
+    });
+    try {
+      this._maybeNBACoalition(snap);
+    } catch {}
     return snap;
   }
 
@@ -704,12 +1020,21 @@ class MealPlanAnalytics extends EventEmitter {
     if (!automation?.emitEvent) return;
 
     // Low coverage → suggest quick-add plan
-    if ((snap.coverage?.daysWithMeals || 0) < Math.ceil((snap.horizonDays || 7) * 0.6)) {
+    if (
+      (snap.coverage?.daysWithMeals || 0) <
+      Math.ceil((snap.horizonDays || 7) * 0.6)
+    ) {
       automation.emitEvent("nba", {
         topic: "nba",
         kind: "plan-low-coverage",
         message: "Your plan has low coverage. Add a quick 3-day plan?",
-        actions: [{ label: "Quick Add", topic: "mealplan.quickadd.open", payload: { days: 3 } }],
+        actions: [
+          {
+            label: "Quick Add",
+            topic: "mealplan.quickadd.open",
+            payload: { days: 3 },
+          },
+        ],
         ts: now(),
       });
     }
@@ -720,7 +1045,9 @@ class MealPlanAnalytics extends EventEmitter {
         topic: "nba",
         kind: "variety-suggest",
         message: "Repeats are high. Want a 5-recipe variety pack (≤30m)?",
-        actions: [{ label: "Suggest Pack", topic: "mealplan.variety.suggest.open" }],
+        actions: [
+          { label: "Suggest Pack", topic: "mealplan.variety.suggest.open" },
+        ],
         ts: now(),
       });
     }
@@ -730,8 +1057,14 @@ class MealPlanAnalytics extends EventEmitter {
       automation.emitEvent("nba", {
         topic: "nba",
         kind: "conflicts",
-        message: "Calendar conflicts detected during cook windows. Shift those meals?",
-        actions: [{ label: "Resolve Conflicts", topic: "mealplan.conflicts.resolve.open" }],
+        message:
+          "Calendar conflicts detected during cook windows. Shift those meals?",
+        actions: [
+          {
+            label: "Resolve Conflicts",
+            topic: "mealplan.conflicts.resolve.open",
+          },
+        ],
         ts: now(),
       });
     }
@@ -742,7 +1075,13 @@ class MealPlanAnalytics extends EventEmitter {
         topic: "nba",
         kind: "market-promote",
         message: "Your plan performs well. Promote it on the marketplace?",
-        actions: [{ label: "Promote Plan", topic: "marketplace.plan.promote", payload: { planId: readMealPlan()?.activePlanId } }],
+        actions: [
+          {
+            label: "Promote Plan",
+            topic: "marketplace.plan.promote",
+            payload: { planId: readMealPlan()?.activePlanId },
+          },
+        ],
         ts: now(),
       });
     }
@@ -756,7 +1095,13 @@ class MealPlanAnalytics extends EventEmitter {
         topic: "nba",
         kind: "meal-coalition-adoption",
         message: "Coalition plan adoption is low. Share a ready-made template?",
-        actions: [{ label: "Share Template", topic: "mealplan.coalition.template.share.open", payload: { coalitionId: coalSnap.coalitionId } }],
+        actions: [
+          {
+            label: "Share Template",
+            topic: "mealplan.coalition.template.share.open",
+            payload: { coalitionId: coalSnap.coalitionId },
+          },
+        ],
         ts: now(),
       });
     }
@@ -765,8 +1110,15 @@ class MealPlanAnalytics extends EventEmitter {
       automation.emitEvent("nba", {
         topic: "nba",
         kind: "meal-coalition-anchors",
-        message: "Shared menu overlap is low. Pick 2–3 anchor dinners for bulk prep?",
-        actions: [{ label: "Pick Anchors", topic: "mealplan.coalition.anchors.pick.open", payload: { coalitionId: coalSnap.coalitionId } }],
+        message:
+          "Shared menu overlap is low. Pick 2–3 anchor dinners for bulk prep?",
+        actions: [
+          {
+            label: "Pick Anchors",
+            topic: "mealplan.coalition.anchors.pick.open",
+            payload: { coalitionId: coalSnap.coalitionId },
+          },
+        ],
         ts: now(),
       });
     }
@@ -775,8 +1127,15 @@ class MealPlanAnalytics extends EventEmitter {
       automation.emitEvent("nba", {
         topic: "nba",
         kind: "creator-bundle-op",
-        message: "Frequent co-planned pairs detected. Package them as a mini-bundle?",
-        actions: [{ label: "Create Bundle", topic: "marketplace.bundle.create.open", payload: { coalitionId: coalSnap.coalitionId } }],
+        message:
+          "Frequent co-planned pairs detected. Package them as a mini-bundle?",
+        actions: [
+          {
+            label: "Create Bundle",
+            topic: "marketplace.bundle.create.open",
+            payload: { coalitionId: coalSnap.coalitionId },
+          },
+        ],
         ts: now(),
       });
     }
@@ -786,7 +1145,12 @@ class MealPlanAnalytics extends EventEmitter {
     if (this._hooked) return;
     this._hooked = true;
 
-    const watch = (topic) => automation?.onTopic?.(topic, () => { try { this.recompute(); } catch {} });
+    const watch = (topic) =>
+      automation?.onTopic?.(topic, () => {
+        try {
+          this.recompute();
+        } catch {}
+      });
 
     [
       "meals.plan.updated",
@@ -800,7 +1164,7 @@ class MealPlanAnalytics extends EventEmitter {
       "cooking.meal.logged",
       "marketplace.listing.updated",
       "marketplace.sale.logged",
-    ].forEach(t => watch(t));
+    ].forEach((t) => watch(t));
 
     // Coalition events
     const coalTopics = [
@@ -809,21 +1173,31 @@ class MealPlanAnalytics extends EventEmitter {
       "coalition.targets.updated",
       "coalition.demand.updated",
     ];
-    coalTopics.forEach(t => automation?.onTopic?.(t, async (evt) => {
-      const cid = evt?.payload?.coalitionId;
-      if (cid) try { await this.recomputeCoalition(cid); } catch {}
-    }));
+    coalTopics.forEach((t) =>
+      automation?.onTopic?.(t, async (evt) => {
+        const cid = evt?.payload?.coalitionId;
+        if (cid)
+          try {
+            await this.recomputeCoalition(cid);
+          } catch {}
+      })
+    );
 
     // Local fallback bus
     if (eventBus?.on) {
       [
-        "meals.plan.updated","inventory.updated","grocery.list.generated","calendar.updated",
+        "meals.plan.updated",
+        "inventory.updated",
+        "grocery.list.generated",
+        "calendar.updated",
         ...coalTopics,
-      ].forEach(t => eventBus.on(t, async (payload) => {
-        const cid = payload?.coalitionId ?? null;
-        if (cid) await this.recomputeCoalition(cid);
-        else this.recompute();
-      }));
+      ].forEach((t) =>
+        eventBus.on(t, async (payload) => {
+          const cid = payload?.coalitionId ?? null;
+          if (cid) await this.recomputeCoalition(cid);
+          else this.recompute();
+        })
+      );
     }
   }
 }
@@ -840,7 +1214,8 @@ function registerAutomationTemplates() {
     {
       id: "mealplan.daily-kpis",
       title: "Meal Plan: Daily KPIs",
-      description: "Compute planning KPIs; nudge for conflicts or low coverage.",
+      description:
+        "Compute planning KPIs; nudge for conflicts or low coverage.",
       tags: ["mealplan", "analytics"],
       schedule: { at: "07:30" },
       timeoutMs: 12000,
@@ -853,18 +1228,29 @@ function registerAutomationTemplates() {
     {
       id: "mealplan.weekly-refresh",
       title: "Meal Plan: Weekly Refresh",
-      description: "Check next 7 days coverage and generate a quick-add if needed.",
+      description:
+        "Check next 7 days coverage and generate a quick-add if needed.",
       tags: ["mealplan", "analytics", "forecast"],
       schedule: { days: [0], at: "09:00" }, // Sundays
       timeoutMs: 15000,
       async run({ emit }) {
         const snap = mealPlanAnalytics.snapshot || computeMealPlanSnapshot({});
-        if ((snap.coverage?.daysWithMeals || 0) < Math.ceil((snap.horizonDays || 7) * 0.7)) {
+        if (
+          (snap.coverage?.daysWithMeals || 0) <
+          Math.ceil((snap.horizonDays || 7) * 0.7)
+        ) {
           emit?.("nba", {
             topic: "nba",
             kind: "plan-low-coverage",
-            message: "Weekly check: coverage looks light. Add a quick 3-day plan?",
-            actions: [{ label: "Quick Add", topic: "mealplan.quickadd.open", payload: { days: 3 } }],
+            message:
+              "Weekly check: coverage looks light. Add a quick 3-day plan?",
+            actions: [
+              {
+                label: "Quick Add",
+                topic: "mealplan.quickadd.open",
+                payload: { days: 3 },
+              },
+            ],
             ts: now(),
           });
         }
@@ -874,17 +1260,26 @@ function registerAutomationTemplates() {
     {
       id: "mealplan.coalition-daily",
       title: "Meal Plan: Coalition KPIs",
-      description: "Aggregate multi-household analytics & creator insights (no pooled shortages).",
+      description:
+        "Aggregate multi-household analytics & creator insights (no pooled shortages).",
       tags: ["mealplan", "analytics", "coalition"],
       schedule: { at: "07:40" },
       timeoutMs: 30000,
       async run({ emit }) {
         const coalitions = (readCoalitions().coalitions || []).concat(
-          (readGroups().groups || []).filter(g => g.type === "meal_coalition" || g.type === "coalition" || g.kind === "coalition")
+          (readGroups().groups || []).filter(
+            (g) =>
+              g.type === "meal_coalition" ||
+              g.type === "coalition" ||
+              g.kind === "coalition"
+          )
         );
         for (const c of coalitions) {
           const snap = await mealPlanAnalytics.recomputeCoalition(c.id);
-          emit?.("mealplan.coalition.analytics.daily", { coalitionId: c.id, snapshot: snap });
+          emit?.("mealplan.coalition.analytics.daily", {
+            coalitionId: c.id,
+            snapshot: snap,
+          });
         }
         return { ok: true, coalitions: coalitions.length };
       },
@@ -894,17 +1289,28 @@ function registerAutomationTemplates() {
   // Triggers
   automation.registerTrigger(() => {
     const topics = [
-      "meals.plan.updated","recipe.updated","inventory.updated","grocery.list.generated",
-      "calendar.updated","cooking.meal.logged","inventory.delta",
-      "marketplace.listing.updated","marketplace.sale.logged",
-      "coalition.membership.updated","coalition.memberKitchen.updated","coalition.targets.updated","coalition.demand.updated",
+      "meals.plan.updated",
+      "recipe.updated",
+      "inventory.updated",
+      "grocery.list.generated",
+      "calendar.updated",
+      "cooking.meal.logged",
+      "inventory.delta",
+      "marketplace.listing.updated",
+      "marketplace.sale.logged",
+      "coalition.membership.updated",
+      "coalition.memberKitchen.updated",
+      "coalition.targets.updated",
+      "coalition.demand.updated",
     ];
-    const unsubs = topics.map(t => automation.onTopic?.(t, async (evt) => {
-      const cid = evt?.payload?.coalitionId ?? null;
-      if (cid) await mealPlanAnalytics.recomputeCoalition(cid);
-      else mealPlanAnalytics.recompute();
-    }));
-    return () => unsubs.forEach(u => u?.());
+    const unsubs = topics.map((t) =>
+      automation.onTopic?.(t, async (evt) => {
+        const cid = evt?.payload?.coalitionId ?? null;
+        if (cid) await mealPlanAnalytics.recomputeCoalition(cid);
+        else mealPlanAnalytics.recompute();
+      })
+    );
+    return () => unsubs.forEach((u) => u?.());
   });
 }
 
@@ -921,13 +1327,19 @@ export function getDashboardCards() {
   return toDashboardCards(getSnapshot());
 }
 export async function getCoalitionSnapshot(coalitionId) {
-  return mealPlanAnalytics.coalitionSnaps?.[coalitionId] || await mealPlanAnalytics.recomputeCoalition(coalitionId);
+  return (
+    mealPlanAnalytics.coalitionSnaps?.[coalitionId] ||
+    (await mealPlanAnalytics.recomputeCoalition(coalitionId))
+  );
 }
 export function getCoalitionCards(coalitionId) {
   const snap = mealPlanAnalytics.coalitionSnaps?.[coalitionId];
   return toCoalitionCards(snap);
 }
-export function exportMealPlanAnalytics({ format = "json", coalitionId = null } = {}) {
+export function exportMealPlanAnalytics({
+  format = "json",
+  coalitionId = null,
+} = {}) {
   if (coalitionId) {
     const snap = mealPlanAnalytics.coalitionSnaps?.[coalitionId];
     if (!snap) return null;
@@ -945,7 +1357,7 @@ export function exportMealPlanAnalytics({ format = "json", coalitionId = null } 
         ["macroFit", snap.pooled?.macroFit?.avgFit ?? 0],
         ["imbalanceIdx", snap.fairness?.imbalanceIdx ?? 0],
       ];
-      return row.map(r => r.join(",")).join("\n");
+      return row.map((r) => r.join(",")).join("\n");
     }
     return null;
   }
@@ -965,7 +1377,7 @@ export function exportMealPlanAnalytics({ format = "json", coalitionId = null } 
       ["prepAvgDailyMin", snap.prep.avgDailyPrepMin],
       ["prepStd", snap.prep.balanceStd],
     ];
-    return rows.map(r => r.join(",")).join("\n");
+    return rows.map((r) => r.join(",")).join("\n");
   }
   return null;
 }

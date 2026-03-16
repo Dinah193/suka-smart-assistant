@@ -32,8 +32,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useCallback, useState } from "react";
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * Emit a “play the next runnable session now” request for Feast Preparation.
@@ -65,7 +65,10 @@ function requestNextSession(domainHints, focusArea) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[FeastPrepPlanning] Failed to emit session.requestNext", err);
+    console.error(
+      "[FeastPrepPlanning] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -137,20 +140,20 @@ function FeastPrepFlowModal({ open, onClose }) {
             </li>
           </ol>
 
-        <p>
-          Every time you hit a “Now” button, the global SessionRunner opens,
-          runs your tasks with timers and cues, and stays active even if you
-          switch pages or open other SSA tools.
-        </p>
-
-        {familyFundMode && (
-          <p className="text-emerald-200/80">
-            With <span className="font-semibold">Family Fund Mode</span>{" "}
-            enabled, completed feast-related sessions can export anonymous
-            analytics to your Hub, helping you refine menus, timelines, and
-            resource use from feast to feast.
+          <p>
+            Every time you hit a “Now” button, the global SessionRunner opens,
+            runs your tasks with timers and cues, and stays active even if you
+            switch pages or open other SSA tools.
           </p>
-        )}
+
+          {familyFundMode && (
+            <p className="text-emerald-200/80">
+              With <span className="font-semibold">Family Fund Mode</span>{" "}
+              enabled, completed feast-related sessions can export anonymous
+              analytics to your Hub, helping you refine menus, timelines, and
+              resource use from feast to feast.
+            </p>
+          )}
         </div>
 
         <div className="mt-4 flex justify-end">
@@ -214,7 +217,14 @@ function FeastPrepPlanningPage() {
   // CTA handlers for different focus areas
   const handleNowFullPlan = useCallback(() => {
     requestNextSession(
-      ["storehouse", "cooking", "cleaning", "garden", "animals", "preservation"],
+      [
+        "storehouse",
+        "cooking",
+        "cleaning",
+        "garden",
+        "animals",
+        "preservation",
+      ],
       "feast-preparation-plan"
     );
   }, []);
@@ -232,7 +242,10 @@ function FeastPrepPlanningPage() {
   }, []);
 
   const handleNowGardenAnimals = useCallback(() => {
-    requestNextSession(["garden", "animals", "storehouse"], "feast-garden-animals");
+    requestNextSession(
+      ["garden", "animals", "storehouse"],
+      "feast-garden-animals"
+    );
   }, []);
 
   const handleNowPreservationReset = useCallback(() => {
@@ -268,7 +281,8 @@ function FeastPrepPlanningPage() {
             <p className="text-[11px] text-slate-500">
               Opens the next runnable{" "}
               <span className="font-semibold text-slate-300">
-                storehouse / cooking / cleaning / garden / animals / preservation
+                storehouse / cooking / cleaning / garden / animals /
+                preservation
               </span>{" "}
               session in the SessionRunner.
             </p>
@@ -485,7 +499,9 @@ function FeastPrepPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   <span>
-                    <span className="font-semibold">Scriptural Year & Calendar:</span>{" "}
+                    <span className="font-semibold">
+                      Scriptural Year & Calendar:
+                    </span>{" "}
                     see exactly where the feast sits in the year and how much
                     time you have to prepare.
                   </span>
@@ -493,7 +509,9 @@ function FeastPrepPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-sky-400" />
                   <span>
-                    <span className="font-semibold">Biblical Offering Planner:</span>{" "}
+                    <span className="font-semibold">
+                      Biblical Offering Planner:
+                    </span>{" "}
                     match offerings to real resources in your storehouse and
                     fields instead of guessing.
                   </span>
@@ -501,7 +519,9 @@ function FeastPrepPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
                   <span>
-                    <span className="font-semibold">Macro / Nutrition tools:</span>{" "}
+                    <span className="font-semibold">
+                      Macro / Nutrition tools:
+                    </span>{" "}
                     keep feast meals joyful but still kind to your people&apos;s
                     bodies (especially those with health needs).
                   </span>

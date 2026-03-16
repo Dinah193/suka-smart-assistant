@@ -32,29 +32,37 @@ const path = require("path");
 // --------- shared services (defensive requires) ----------
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 // --------- job modules (loaded defensively with requireSafe) ----------
-const compileTodayJob = requireSafe("@/runtime/jobs/compileTodayPlan.job.js");   // .run(args)
-const hourlyRecalcJob = requireSafe("@/runtime/jobs/hourlyRecalc.job.js");       // .run(args)
-const readinessSweepJob = requireSafe("@/runtime/jobs/readinessSweep.job.js");   // .run(args)
+const compileTodayJob = requireSafe("@/runtime/jobs/compileTodayPlan.job.js"); // .run(args)
+const hourlyRecalcJob = requireSafe("@/runtime/jobs/hourlyRecalc.job.js"); // .run(args)
+const readinessSweepJob = requireSafe("@/runtime/jobs/readinessSweep.job.js"); // .run(args)
 
 // Optional handlers
-const autoPlannerHandler = requireSafe("@/runtime/jobs/handlers/autoPlanner.js"); // .run(args)
-const schedulerTickHandler = requireSafe("@/runtime/jobs/handlers/schedulerTick.js"); // .run(args)
+const autoPlannerHandler = requireSafe(
+  "@/runtime/jobs/handlers/autoPlanner.js"
+); // .run(args)
+const schedulerTickHandler = requireSafe(
+  "@/runtime/jobs/handlers/schedulerTick.js"
+); // .run(args)
 
 // --------- public API ----------
 module.exports = {
@@ -71,7 +79,7 @@ module.exports = {
       const res = await compileTodayJob.run(args || {});
       emit("planning.controller.compileToday.completed", {
         ok: !!(res && res.ok),
-        meta: shrink(res)
+        meta: shrink(res),
       });
       // compileTodayPlan.job emits and (optionally) exports on its own; no duplicate export here.
       return res || { ok: false };
@@ -93,7 +101,7 @@ module.exports = {
       const res = await hourlyRecalcJob.run(args || {});
       emit("planning.controller.quickRecalc.completed", {
         ok: !!(res && res.ok),
-        meta: shrink(res)
+        meta: shrink(res),
       });
 
       // If placements occurred and the hourly job did not mirror (it normally does),
@@ -103,7 +111,7 @@ module.exports = {
           type: "planning.controller.quickRecalc.placements",
           ts: new Date().toISOString(),
           source: "runtime.controllers.PlannerController",
-          data: { placed: res.placed, considered: res.considered }
+          data: { placed: res.placed, considered: res.considered },
         });
       }
       return res || { ok: false };
@@ -125,17 +133,23 @@ module.exports = {
       const res = await readinessSweepJob.run(args || {});
       emit("planning.controller.readinessSweep.completed", {
         ok: !!(res && res.ok),
-        meta: shrink(res)
+        meta: shrink(res),
       });
 
       // If the sweep queued prep tasks or reservations, mirror a small summary (jobs also export).
-      const changed = res && res.ok && ((res.prepsQueued || 0) > 0 || (res.reservations || 0) > 0);
+      const changed =
+        res &&
+        res.ok &&
+        ((res.prepsQueued || 0) > 0 || (res.reservations || 0) > 0);
       if (changed) {
         await exportToHubIfEnabled({
           type: "planning.controller.readinessSweep.delta",
           ts: new Date().toISOString(),
           source: "runtime.controllers.PlannerController",
-          data: { prepsQueued: res.prepsQueued || 0, reservations: res.reservations || 0 }
+          data: {
+            prepsQueued: res.prepsQueued || 0,
+            reservations: res.reservations || 0,
+          },
         });
       }
       return res || { ok: false };
@@ -155,17 +169,23 @@ module.exports = {
     ensureJob("autoPlanner", autoPlannerHandler, "run");
 
     // apply safe defaults if not provided
-    const a = Object.assign({ deadlineHorizonMinutes: 240, maxPlacements: 5 }, args || {});
+    const a = Object.assign(
+      { deadlineHorizonMinutes: 240, maxPlacements: 5 },
+      args || {}
+    );
     try {
       const res = await autoPlannerHandler.run(a);
-      emit("planning.controller.autoplan.completed", { ok: !!(res && res.ok), meta: shrink(res) });
+      emit("planning.controller.autoplan.completed", {
+        ok: !!(res && res.ok),
+        meta: shrink(res),
+      });
 
       if (res && res.ok && Number(res.placed || 0) > 0) {
         await exportToHubIfEnabled({
           type: "planning.controller.autoplan.placements",
           ts: new Date().toISOString(),
           source: "runtime.controllers.PlannerController",
-          data: { placed: res.placed, attempted: a.maxPlacements }
+          data: { placed: res.placed, attempted: a.maxPlacements },
         });
       }
       return res || { ok: false };
@@ -185,13 +205,16 @@ module.exports = {
 
     try {
       const res = await schedulerTickHandler.run({ emitPreviewOnly: true });
-      emit("planning.controller.previewTick.completed", { ok: !!(res && res.ok), meta: shrink(res) });
+      emit("planning.controller.previewTick.completed", {
+        ok: !!(res && res.ok),
+        meta: shrink(res),
+      });
       return res || { ok: false };
     } catch (err) {
       emit("planning.controller.previewTick.failed", { error: msg(err) });
       return { ok: false, error: msg(err) };
     }
-  }
+  },
 };
 
 // --------- helpers ---------
@@ -236,7 +259,18 @@ function sanitizeArgs(args) {
 function shrink(obj) {
   if (!obj || typeof obj !== "object") return obj;
   const shallow = {};
-  const allow = ["ok","placed","considered","planCount","inspected","blockers","prepsQueued","reservations","skipped","reason"];
+  const allow = [
+    "ok",
+    "placed",
+    "considered",
+    "planCount",
+    "inspected",
+    "blockers",
+    "prepsQueued",
+    "reservations",
+    "skipped",
+    "reason",
+  ];
   for (let i = 0; i < allow.length; i++) {
     const k = allow[i];
     if (Object.prototype.hasOwnProperty.call(obj, k)) shallow[k] = obj[k];
@@ -250,7 +284,12 @@ function msg(err) {
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type: type, ts: new Date().toISOString(), source: "runtime.controllers.PlannerController", data: data });
+    eventBus.emit({
+      type: type,
+      ts: new Date().toISOString(),
+      source: "runtime.controllers.PlannerController",
+      data: data,
+    });
   } catch (_) {}
 }
 
@@ -258,7 +297,9 @@ async function exportToHubIfEnabled(payload) {
   if (!featureFlags || !featureFlags.familyFundMode) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
-    const packet = await (HubPacketFormatter.format ? HubPacketFormatter.format(payload) : payload);
+    const packet = await (HubPacketFormatter.format
+      ? HubPacketFormatter.format(payload)
+      : payload);
     if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
       await FamilyFundConnector.send(packet);
     }

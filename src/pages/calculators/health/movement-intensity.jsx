@@ -17,16 +17,11 @@
  *   • connect results into the Planning Graph for stability/health.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import MovementIntensityCalculatorView from "@/features/calculators/health/MovementIntensityCalculator.view";
+import MovementIntensityCalculatorView from "@/features/calculators/health/MovementIntensityCalculator/MovementIntensityCalculator.view.jsx";
 
 const CALCULATOR_ID = "movement-intensity";
 
@@ -128,8 +123,8 @@ function MovementSummaryCard({ result, onUseInSession }) {
             Weekly Movement Snapshot
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            SSA can blend this with chores, garden work, and cooking sessions
-            so your body moves more while you care for your home.
+            SSA can blend this with chores, garden work, and cooking sessions so
+            your body moves more while you care for your home.
           </p>
         </div>
         <span className="text-[10px] px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-slate-200 whitespace-nowrap">
@@ -218,14 +213,10 @@ export default function MovementIntensityCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.health.movement-intensity",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.health.movement-intensity",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -253,9 +244,7 @@ export default function MovementIntensityCalculatorPage() {
             ? calcResult.vigorousMinutes
             : undefined,
         status:
-          typeof calcResult.status === "string"
-            ? calcResult.status
-            : "unknown",
+          typeof calcResult.status === "string" ? calcResult.status : "unknown",
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };

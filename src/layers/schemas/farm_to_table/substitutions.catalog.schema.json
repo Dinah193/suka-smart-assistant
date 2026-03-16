@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.suka.local/ssa/catalogs/farm_to_table/substitutions.catalog.schema.json",
+  "title": "SSA Farm-to-Table • Substitutions Catalog Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "catalogId",
+    "version",
+    "generatedAt",
+    "groups",
+    "rules"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "catalogId": {
+      "type": "string",
+      "const": "farm_to_table.substitutions"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "enums": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "indexes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "resolutionOrder": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/group"
+      },
+      "default": []
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rule"
+      },
+      "default": []
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$",
+      "minLength": 3,
+      "maxLength": 180
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "tag": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_\\-\\.]{1,80}$"
+    },
+    "tagArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/tag"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "groupMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "includesComponentIds": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "tagsAny": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "categoryIds": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "substitutionGroupsAny": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "description",
+        "match"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        },
+        "match": {
+          "$ref": "#/$defs/groupMatch"
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cuisinesAny": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "cuisinesNot": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "dietsAny": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "dietsNot": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "allergensAny": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "allergensNot": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "whenCondition": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Flexible condition block. Engines may interpret known keys like targetRole, missingGroupAny, intentTagsAny, etc."
+    },
+    "replaceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fromComponentId"
+      ],
+      "properties": {
+        "fromComponentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "toComponentId": {
+          "type": "string"
+        },
+        "toComponentGroup": {
+          "type": "string"
+        },
+        "toComponentIdFallback": {
+          "type": "string"
+        }
+      }
+    },
+    "suggestionItem": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Flexible suggestion object for engines/UI."
+    },
+    "thenBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "applyMode": {
+          "type": "string",
+          "enum": [
+            "replace",
+            "add",
+            "remove",
+            "prefer",
+            "avoid",
+            "suggest"
+          ]
+        },
+        "preferGroups": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "avoidGroups": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "preferByCuisine": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/stringArray"
+          },
+          "default": {}
+        },
+        "preferBySource": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "preferSeasonal": {
+          "type": "boolean"
+        },
+        "replace": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/replaceItem"
+          },
+          "default": []
+        },
+        "addPrefer": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Flexible additions such as spices/aromatics/acids per cuisine."
+        },
+        "alsoAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/suggestionItem"
+          },
+          "default": []
+        },
+        "alsoSuggest": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/suggestionItem"
+          },
+          "default": []
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/suggestionItem"
+          },
+          "default": []
+        },
+        "avoidTags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "fallbackStrategies": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "description",
+        "priority",
+        "when",
+        "constraints",
+        "then",
+        "reasonCodes",
+        "notes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "when": {
+          "$ref": "#/$defs/whenCondition"
+        },
+        "constraints": {
+          "$ref": "#/$defs/constraints"
+        },
+        "then": {
+          "$ref": "#/$defs/thenBlock"
+        },
+        "reasonCodes": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

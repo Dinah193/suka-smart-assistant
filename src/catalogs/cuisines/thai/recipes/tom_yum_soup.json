@@ -1,0 +1,533 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai.recipes.tom_yum_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tom Yum Soup (Hot & Sour Thai Soup)",
+    "subtitle": "Bright lemongrass-lime hot & sour broth with galangal, kaffir lime leaf, mushrooms, and shrimp (optional creamy version).",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Canonical tom yum for SSA catalogs with both clear (nam sai) and creamy (nam khon) variants.",
+        "Uses deterministic ingredient ids and step structure compatible with SSA recipe.schema.json."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "thai",
+    "subprofiles": ["thai.soups", "thai.hot_sour", "thai.tom_yum_family"],
+    "category": "soup",
+    "mealArchetypes": ["meal.lunch", "meal.dinner"],
+    "servingStyles": ["serving.one_pot", "serving.bowls"],
+    "plannerTags": [
+      "cuisine.thai",
+      "dish.tom_yum",
+      "category.soup",
+      "flavor.hot_sour",
+      "flavor.citrus",
+      "flavor.umami",
+      "method.simmer",
+      "weeknight.friendly",
+      "low_oil"
+    ]
+  },
+
+  "summary": "Tom yum is Thailand’s iconic hot-and-sour soup: an aromatic broth infused with lemongrass, galangal, and kaffir lime leaf, balanced with lime juice, fish sauce, and chili heat—often served with shrimp and mushrooms.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Makes ~1.5–1.7 L soup; serves 4 as a meal with rice or 6 as a starter."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "totalMins": 35,
+    "handsOffMins": 15
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": false,
+    "weeknightPossible": true,
+    "leftoversGood": "medium",
+    "freezerFriendly": false,
+    "notes": [
+      "Best fresh. If storing, add lime juice and herbs at reheat time.",
+      "Shrimp can overcook on reheat; consider removing shrimp before storing."
+    ]
+  },
+
+  "tasteProfile": {
+    "pillars": ["hot", "sour", "savory", "aromatic"],
+    "heatTypical": 3,
+    "sournessTypical": 4,
+    "notes": "Balance is the goal: fish sauce for salt/umami, lime for sour, chili for heat."
+  },
+
+  "equipment": {
+    "required": [
+      { "id": "equipment.saucepot", "label": "Medium pot", "required": true },
+      { "id": "equipment.knife", "label": "Chef's knife", "required": true },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.fine_mesh_strainer",
+      "equipment.ladle",
+      "equipment.measuring_spoons",
+      "equipment.measuring_cups"
+    ],
+    "optional": [
+      {
+        "id": "equipment.mortar_pestle",
+        "label": "Mortar & pestle (for bruising aromatics)",
+        "required": false
+      }
+    ],
+    "minimum": ["equipment.pot", "equipment.knife", "equipment.cutting_board"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": ["allergen.fish", "allergen.shellfish"],
+
+  "ingredientGroups": [
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics (infuse the broth)",
+      "items": [
+        "ingredient.lemongrass",
+        "ingredient.galangal",
+        "ingredient.kaffir_lime_leaf",
+        "ingredient.thai_chili",
+        "ingredient.garlic"
+      ]
+    },
+    {
+      "id": "group.broth",
+      "label": "Broth base",
+      "items": [
+        "ingredient.stock_chicken",
+        "ingredient.water",
+        "ingredient.fish_sauce"
+      ]
+    },
+    {
+      "id": "group.main",
+      "label": "Soup add-ins",
+      "items": [
+        "ingredient.mushrooms",
+        "ingredient.shrimp",
+        "ingredient.tomato",
+        "ingredient.onion"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish and garnish",
+      "items": [
+        "ingredient.lime_juice",
+        "ingredient.cilantro",
+        "ingredient.green_onion",
+        "ingredient.chili_paste_roasted"
+      ]
+    },
+    {
+      "id": "group.creamy_optional",
+      "label": "Optional creamy (Tom Yum Nam Khon)",
+      "items": [
+        "ingredient.evaporated_milk",
+        "ingredient.coconut_milk",
+        "ingredient.thai_chili_paste"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.stock_chicken",
+      "label": "Chicken stock (or light seafood stock)",
+      "role": "base",
+      "amount": { "value": 1200, "unit": "ml" },
+      "notes": "Water works too; stock adds depth."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water (if needed to top up)",
+      "role": "base",
+      "amount": { "value": 250, "unit": "ml" },
+      "optional": true,
+      "notes": "Use if your stock is very concentrated or to reach desired volume."
+    },
+
+    {
+      "id": "ingredient.lemongrass",
+      "label": "Lemongrass stalks, smashed and cut into 2-inch pieces",
+      "role": "aromatic",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": [
+        "Bruise/smash to release oils. These pieces are typically not eaten."
+      ]
+    },
+    {
+      "id": "ingredient.galangal",
+      "label": "Galangal, sliced (or ginger as fallback)",
+      "role": "aromatic",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": ["Galangal is traditional; ginger is acceptable but different."]
+    },
+    {
+      "id": "ingredient.kaffir_lime_leaf",
+      "label": "Kaffir lime leaves, torn",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Tear to release aroma. Remove before eating if desired."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, lightly smashed",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" }
+    },
+    {
+      "id": "ingredient.thai_chili",
+      "label": "Thai bird's eye chilies, smashed (adjust to taste)",
+      "role": "heat",
+      "amount": { "value": 3, "unit": "each" },
+      "notes": [
+        "For mild: use 1 chili or omit and add chili paste at the table."
+      ]
+    },
+
+    {
+      "id": "ingredient.mushrooms",
+      "label": "Mushrooms, sliced (straw mushrooms or cremini)",
+      "role": "main",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, thinly sliced (optional)",
+      "role": "main",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.tomato",
+      "label": "Tomato, wedges (optional)",
+      "role": "main",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Common in many restaurant versions; adds sweetness."
+    },
+
+    {
+      "id": "ingredient.shrimp",
+      "label": "Shrimp, peeled and deveined",
+      "role": "protein",
+      "amount": { "value": 350, "unit": "g" },
+      "notes": "Add at the end; cook just until opaque."
+    },
+
+    {
+      "id": "ingredient.fish_sauce",
+      "label": "Fish sauce",
+      "role": "umami",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Adjust at the end after lime juice."
+    },
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Lime juice (fresh), to finish",
+      "role": "acid",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Add off-heat to keep it bright."
+    },
+    {
+      "id": "ingredient.chili_paste_roasted",
+      "label": "Roasted chili paste (nam prik pao), optional",
+      "role": "umami",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Adds smoky-sweet depth; common in tom yum goong."
+    },
+
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped (garnish)",
+      "role": "garnish",
+      "amount": { "value": 12, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.green_onion",
+      "label": "Green onion, sliced (garnish)",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.evaporated_milk",
+      "label": "Evaporated milk (optional creamy version)",
+      "role": "optional_component",
+      "amount": { "value": 120, "unit": "ml" },
+      "optional": true,
+      "notes": "Traditional creamy tom yum often uses evaporated milk."
+    },
+    {
+      "id": "ingredient.coconut_milk",
+      "label": "Coconut milk (optional creamy version alternative)",
+      "role": "optional_component",
+      "amount": { "value": 150, "unit": "ml" },
+      "optional": true,
+      "notes": "Use instead of evaporated milk for a coconut-forward creamy tom yum."
+    },
+    {
+      "id": "ingredient.thai_chili_paste",
+      "label": "Chili paste for creamy version (optional)",
+      "role": "optional_component",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "If using evaporated/coconut milk, a little extra chili paste helps maintain flavor intensity."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Prep aromatics and add-ins",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "Bruise lemongrass with the back of a knife and cut into 2-inch pieces.",
+        "Slice galangal; tear kaffir lime leaves; lightly smash garlic and chilies.",
+        "Slice mushrooms; slice onion and wedge tomato if using.",
+        "Pat shrimp dry and keep chilled until needed."
+      ],
+      "checks": [
+        "Aromatics are bruised/torn for maximum infusion.",
+        "Shrimp is ready to add at the end (prevents overcooking)."
+      ]
+    },
+    {
+      "id": "step.infuse",
+      "title": "Infuse the broth",
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "instructions": [
+        "Add stock (and water if using) to a pot and bring to a gentle simmer.",
+        "Add lemongrass, galangal, kaffir lime leaves, garlic, and chilies.",
+        "Simmer gently to infuse the broth."
+      ],
+      "timers": [{ "label": "Infuse aromatics", "minutes": 10 }],
+      "checks": [
+        "Broth smells fragrant and citrusy; keep at a gentle simmer, not a hard boil."
+      ]
+    },
+    {
+      "id": "step.add_veg",
+      "title": "Add mushrooms and vegetables",
+      "activeMins": 4,
+      "handsOffMins": 5,
+      "instructions": [
+        "Add mushrooms (and onion/tomato if using).",
+        "Simmer until mushrooms are tender."
+      ],
+      "timers": [{ "label": "Cook mushrooms", "minutes": 5 }],
+      "checks": ["Mushrooms are tender; broth remains clear and aromatic."]
+    },
+    {
+      "id": "step.add_shrimp",
+      "title": "Cook shrimp gently",
+      "activeMins": 3,
+      "handsOffMins": 2,
+      "instructions": [
+        "Add shrimp and simmer just until opaque and curled.",
+        "Turn off heat as soon as shrimp is cooked through."
+      ],
+      "timers": [{ "label": "Cook shrimp", "minutes": 2 }],
+      "checks": ["Shrimp is just opaque; avoid overcooking."]
+    },
+    {
+      "id": "step.season_finish",
+      "title": "Season and finish (lime + fish sauce)",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Off heat, stir in fish sauce and lime juice.",
+        "If using roasted chili paste (nam prik pao), stir it in now for depth.",
+        "Taste and balance: add more lime for brightness, fish sauce for salt/umami, or chili paste/chilies for heat."
+      ],
+      "checks": [
+        "Hot-sour balance is bright and punchy.",
+        "Lime is added off-heat to stay fresh."
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve and garnish",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Ladle into bowls.",
+        "Garnish with cilantro and green onion if desired.",
+        "Optional: remove lemongrass pieces and lime leaves before serving for easier eating."
+      ]
+    }
+  ],
+
+  "methods": ["method.simmer", "method.infuse", "method.one_pot"],
+
+  "pairings": {
+    "starches": [
+      { "id": "thai.jasmine_rice", "label": "Jasmine rice" },
+      { "id": "thai.sticky_rice", "label": "Sticky rice" }
+    ],
+    "sides": [
+      { "id": "thai.som_tam", "label": "Green papaya salad (som tam)" },
+      { "id": "thai.cucumber_salad", "label": "Cucumber salad" }
+    ],
+    "notes": "Serve with rice to mellow the intensity and stretch the meal."
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 2,
+      "notes": "Store broth separately if possible; add lime juice and herbs after reheating."
+    },
+    "freezer": {
+      "recommended": false,
+      "notes": "Not ideal; aromatics dull and shrimp texture suffers. If freezing, freeze broth only."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Do not boil shrimp hard; gentle simmer prevents toughness.",
+      "Cool leftovers quickly and refrigerate within 2 hours."
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.clear_vs_creamy",
+      "title": "Clear (Nam Sai) vs Creamy (Nam Khon)",
+      "notes": [
+        "Clear tom yum: keep as written—lime + fish sauce off-heat.",
+        "Creamy tom yum: after shrimp is cooked, stir in 120 ml evaporated milk OR 150 ml coconut milk, plus 1–2 tsp chili paste; warm gently without boiling, then add lime and fish sauce off-heat."
+      ]
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.creamy_evaporated",
+      "label": "Tom Yum Nam Khon (creamy with evaporated milk)",
+      "when": { "preference": { "style": "creamy" } },
+      "adapt": {
+        "notes": [
+          "After shrimp is cooked, stir in evaporated milk and a little extra chili paste; warm gently, then finish with lime and fish sauce off-heat."
+        ]
+      }
+    },
+    {
+      "id": "var.creamy_coconut",
+      "label": "Creamy coconut tom yum",
+      "when": { "preference": { "style": "coconut_creamy" } },
+      "adapt": {
+        "notes": [
+          "Use coconut milk instead of evaporated milk for a richer coconut profile; keep heat balanced with extra lime at the end."
+        ]
+      }
+    },
+    {
+      "id": "var.chicken",
+      "label": "Tom Yum Gai (chicken)",
+      "when": { "diet": { "noShellfish": true } },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.shrimp": {
+            "use": ["ingredient.chicken_breast"],
+            "notes": "Use 350–450g thin-sliced chicken breast or thigh; simmer 6–10 minutes until cooked, then proceed."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.vegetarian",
+      "label": "Vegetarian tom yum",
+      "when": { "dietFlags": ["diet.vegetarian"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.fish_sauce": {
+            "use": [
+              "ingredient.soy_sauce_light",
+              "ingredient.mushroom_seasoning"
+            ],
+            "notes": "Season to taste; keep the hot-sour balance."
+          },
+          "ingredient.stock_chicken": {
+            "use": ["ingredient.stock_vegetable"],
+            "notes": "Use a light vegetable stock; avoid overly sweet stocks."
+          },
+          "ingredient.shrimp": {
+            "use": ["ingredient.tofu_firm"],
+            "notes": "Add tofu cubes near the end to warm through."
+          }
+        }
+      }
+    }
+  ],
+
+  "notes": [
+    "Traditional aromatics (lemongrass/galangal/kaffir lime leaf) are infused then typically left in the bowl; remove for easier eating if desired.",
+    "Always add lime juice off heat to prevent bitterness and preserve aroma.",
+    "If too sour: add a touch of sugar (not listed) or extra stock; if too salty: add stock/water; if too spicy: add more mushrooms or a splash of coconut milk."
+  ],
+
+  "compat": {
+    "catalog": {
+      "cuisinePath": "src/catalogs/cuisines/thai/recipes/tom_yum_soup.json",
+      "dishId": "thai.tom_yum_soup"
+    },
+    "search": {
+      "aliases": [
+        "tom yum",
+        "tom yum goong",
+        "tom yum soup",
+        "ต้มยำ",
+        "ต้มยำกุ้ง"
+      ],
+      "keywords": [
+        "lemongrass",
+        "galangal",
+        "kaffir lime leaf",
+        "hot and sour",
+        "shrimp soup"
+      ]
+    }
+  },
+
+  "audit": {
+    "createdBy": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "reviewed": true,
+    "reviewNotes": [
+      "Schema-required fields present: schemaVersion/meta/ingredients/steps.",
+      "All ingredients include id+label and amount.value/unit; optional flags used where needed.",
+      "All steps include id+title and instructions[] (timers use minutes field)."
+    ]
+  }
+}

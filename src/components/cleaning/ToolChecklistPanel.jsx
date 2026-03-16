@@ -6,7 +6,7 @@ import {
   PlusCircle,
   Zap,
   Bot,
-  Broom,
+  // Broom, // ❌ not exported by your lucide-react build
   Wrench,
   Search,
   Filter,
@@ -17,6 +17,7 @@ import {
   Hammer,
   CalendarDays,
   Info,
+  Brush, // ✅ replace Broom with Brush (exists in lucide-react builds)
 } from "lucide-react";
 
 /**
@@ -38,14 +39,23 @@ import {
  */
 
 // ---------------- Utilities ----------------
-const pretty = (s = "") => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const pretty = (s = "") =>
+  s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 const keyOf = (x) => (x && (x.key || x.id)) || "";
-const setFrom = (arr = []) => { const s = new Set(); arr.forEach((x) => s.add(keyOf(x))); return s; };
+const setFrom = (arr = []) => {
+  const s = new Set();
+  arr.forEach((x) => s.add(keyOf(x)));
+  return s;
+};
 const iso = (d = new Date()) => new Date(d).toISOString();
 
-function isSabbath(dateObj, { saturdayAsSabbath = false, hebrewDayOfWeek } = {}) {
+function isSabbath(
+  dateObj,
+  { saturdayAsSabbath = false, hebrewDayOfWeek } = {}
+) {
   if (saturdayAsSabbath) return dateObj.getDay() === 6; // Saturday
-  if (typeof hebrewDayOfWeek === "function") return hebrewDayOfWeek(dateObj) === 7; // Hebrew Day-7
+  if (typeof hebrewDayOfWeek === "function")
+    return hebrewDayOfWeek(dateObj) === 7; // Hebrew Day-7
   return false;
 }
 
@@ -56,13 +66,56 @@ async function _useAutomationBus() {
 
 // ---------------- Fallback tool templates ----------------
 const FALLBACK_TOOLS = [
-  { id: "tl_mop_bucket", name: "Mop & Bucket", type: "manual", status: "available", tags: ["floors"] },
-  { id: "tl_scrub_brush", name: "Scrub Brush", type: "manual", status: "available", tags: ["scrub"] },
-  { id: "tl_vacuum", name: "Vacuum Cleaner", type: "electric", status: "missing", tags: ["carpet"] },
-  { id: "tl_steam_cleaner", name: "Steam Cleaner", type: "electric", status: "missing", tags: ["bath", "kitchen"] },
-  { id: "tl_robot_vac", name: "Robot Vacuum (Roomba)", type: "smart", status: "missing", tags: ["automation"] },
-  { id: "tl_microfiber", name: "Microfiber Cloths", type: "manual", status: "available", tags: ["dust", "glass"], qty: 6 },
-  { id: "tl_squeegee", name: "Squeegee", type: "manual", status: "missing", tags: ["glass"] },
+  {
+    id: "tl_mop_bucket",
+    name: "Mop & Bucket",
+    type: "manual",
+    status: "available",
+    tags: ["floors"],
+  },
+  {
+    id: "tl_scrub_brush",
+    name: "Scrub Brush",
+    type: "manual",
+    status: "available",
+    tags: ["scrub"],
+  },
+  {
+    id: "tl_vacuum",
+    name: "Vacuum Cleaner",
+    type: "electric",
+    status: "missing",
+    tags: ["carpet"],
+  },
+  {
+    id: "tl_steam_cleaner",
+    name: "Steam Cleaner",
+    type: "electric",
+    status: "missing",
+    tags: ["bath", "kitchen"],
+  },
+  {
+    id: "tl_robot_vac",
+    name: "Robot Vacuum (Roomba)",
+    type: "smart",
+    status: "missing",
+    tags: ["automation"],
+  },
+  {
+    id: "tl_microfiber",
+    name: "Microfiber Cloths",
+    type: "manual",
+    status: "available",
+    tags: ["dust", "glass"],
+    qty: 6,
+  },
+  {
+    id: "tl_squeegee",
+    name: "Squeegee",
+    type: "manual",
+    status: "missing",
+    tags: ["glass"],
+  },
 ];
 
 // ---------------- Component ----------------
@@ -78,7 +131,9 @@ export default function ToolChecklistPanel({
   // Seed & persistence
   const [tools, setTools] = useState(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem("toolChecklist.v1") || "null");
+      const saved = JSON.parse(
+        localStorage.getItem("toolChecklist.v1") || "null"
+      );
       if (Array.isArray(saved)) return saved;
     } catch {}
     const seed = initialTools || FALLBACK_TOOLS;
@@ -95,23 +150,53 @@ export default function ToolChecklistPanel({
 
   // UI state
   const [filter, setFilter] = useState(() => {
-    try { return localStorage.getItem("toolChecklist.filter") || "all"; } catch { return "all"; }
+    try {
+      return localStorage.getItem("toolChecklist.filter") || "all";
+    } catch {
+      return "all";
+    }
   });
   const [q, setQ] = useState(() => {
-    try { return localStorage.getItem("toolChecklist.q") || ""; } catch { return ""; }
+    try {
+      return localStorage.getItem("toolChecklist.q") || "";
+    } catch {
+      return "";
+    }
   });
   const [customInput, setCustomInput] = useState("");
   const [qtyInput, setQtyInput] = useState("");
 
   // Persist
-  useEffect(() => { try { localStorage.setItem("toolChecklist.v1", JSON.stringify(tools)); } catch {} }, [tools]);
-  useEffect(() => { try { localStorage.setItem("toolChecklist.filter", filter); } catch {} }, [filter]);
-  useEffect(() => { try { localStorage.setItem("toolChecklist.q", q); } catch {} }, [q]);
-  useEffect(() => { try { onChange && onChange(tools); } catch {} }, [tools, onChange]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("toolChecklist.v1", JSON.stringify(tools));
+    } catch {}
+  }, [tools]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("toolChecklist.filter", filter);
+    } catch {}
+  }, [filter]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("toolChecklist.q", q);
+    } catch {}
+  }, [q]);
+  useEffect(() => {
+    try {
+      onChange && onChange(tools);
+    } catch {}
+  }, [tools, onChange]);
 
   // Derived
-  const invSet = useMemo(() => setFrom(equipmentInventory), [equipmentInventory]);
-  const sabbathActive = useMemo(() => isSabbath(new Date(), { saturdayAsSabbath, hebrewDayOfWeek }), [saturdayAsSabbath, hebrewDayOfWeek]);
+  const invSet = useMemo(
+    () => setFrom(equipmentInventory),
+    [equipmentInventory]
+  );
+  const sabbathActive = useMemo(
+    () => isSabbath(new Date(), { saturdayAsSabbath, hebrewDayOfWeek }),
+    [saturdayAsSabbath, hebrewDayOfWeek]
+  );
 
   const filteredTools = useMemo(() => {
     const text = q.trim().toLowerCase();
@@ -143,13 +228,16 @@ export default function ToolChecklistPanel({
     return "available";
   }, []);
 
-  const toggleStatus = useCallback((id) => {
-    setTools((list) =>
-      list.map((t) =>
-        t.id === id ? { ...t, status: cycleStatus(t.status) } : t
-      )
-    );
-  }, [cycleStatus]);
+  const toggleStatus = useCallback(
+    (id) => {
+      setTools((list) =>
+        list.map((t) =>
+          t.id === id ? { ...t, status: cycleStatus(t.status) } : t
+        )
+      );
+    },
+    [cycleStatus]
+  );
 
   const handleAddCustom = useCallback(() => {
     if (!customInput.trim()) return;
@@ -180,30 +268,75 @@ export default function ToolChecklistPanel({
     if (!missing.length) return;
 
     if (acqMode === "borrow") {
-      const payload = { source: "ToolChecklistPanel", createdAt: iso(), tools: missing.map((t) => ({ key: t.id, name: t.name, qty: t.qty || 1 })) };
-      try { bus.emit && bus.emit("tools/requestBorrow", payload); } catch {}
-      try { onExport && onExport({ type: "borrow", payload }); } catch {}
+      const payload = {
+        source: "ToolChecklistPanel",
+        createdAt: iso(),
+        tools: missing.map((t) => ({
+          key: t.id,
+          name: t.name,
+          qty: t.qty || 1,
+        })),
+      };
+      try {
+        bus.emit && bus.emit("tools/requestBorrow", payload);
+      } catch {}
+      try {
+        onExport && onExport({ type: "borrow", payload });
+      } catch {}
     } else {
-      const payload = { source: "ToolChecklistPanel", createdAt: iso(), items: missing.map((t) => ({ name: t.name, qty: t.qty || 1, unit: "item", tags: ["cleaning-tools"], note: "Tool required" })) };
-      try { bus.emit && bus.emit("shopping/addItems", payload); } catch {}
-      try { onExport && onExport({ type: "shopping", payload }); } catch {}
+      const payload = {
+        source: "ToolChecklistPanel",
+        createdAt: iso(),
+        items: missing.map((t) => ({
+          name: t.name,
+          qty: t.qty || 1,
+          unit: "item",
+          tags: ["cleaning-tools"],
+          note: "Tool required",
+        })),
+      };
+      try {
+        bus.emit && bus.emit("shopping/addItems", payload);
+      } catch {}
+      try {
+        onExport && onExport({ type: "shopping", payload });
+      } catch {}
     }
   }
   async function resolveBorrow() {
     const bus = await _useAutomationBus();
     const list = tools.filter((t) => t.status === "borrow");
     if (!list.length) return;
-    const payload = { source: "ToolChecklistPanel", createdAt: iso(), tools: list.map((t) => ({ key: t.id, name: t.name })) };
-    try { bus.emit && bus.emit("tools/requestBorrow", payload); } catch {}
-    try { onExport && onExport({ type: "borrow", payload }); } catch {}
+    const payload = {
+      source: "ToolChecklistPanel",
+      createdAt: iso(),
+      tools: list.map((t) => ({ key: t.id, name: t.name })),
+    };
+    try {
+      bus.emit && bus.emit("tools/requestBorrow", payload);
+    } catch {}
+    try {
+      onExport && onExport({ type: "borrow", payload });
+    } catch {}
   }
   async function resolveRepair() {
     const bus = await _useAutomationBus();
     const list = tools.filter((t) => t.status === "repair");
     if (!list.length) return;
-    const payload = { source: "ToolChecklistPanel", createdAt: iso(), items: list.map((t) => ({ title: `Repair: ${t.name}`, metadata: { toolId: t.id } })) };
-    try { bus.emit && bus.emit("tools/scheduleRepairIntake", payload); } catch {}
-    try { onExport && onExport({ type: "repair", payload }); } catch {}
+    const payload = {
+      source: "ToolChecklistPanel",
+      createdAt: iso(),
+      items: list.map((t) => ({
+        title: `Repair: ${t.name}`,
+        metadata: { toolId: t.id },
+      })),
+    };
+    try {
+      bus.emit && bus.emit("tools/scheduleRepairIntake", payload);
+    } catch {}
+    try {
+      onExport && onExport({ type: "repair", payload });
+    } catch {}
   }
 
   return (
@@ -219,25 +352,41 @@ export default function ToolChecklistPanel({
           ) : null}
           <button
             onClick={() => setFilter("all")}
-            className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-700"}`}
+            className={`px-3 py-1 rounded ${
+              filter === "all"
+                ? "bg-blue-500 text-white"
+                : "bg-blue-100 text-blue-700"
+            }`}
           >
             All ({counts.all})
           </button>
           <button
             onClick={() => setFilter("manual")}
-            className={`px-3 py-1 rounded flex items-center gap-1 ${filter === "manual" ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-700"}`}
+            className={`px-3 py-1 rounded flex items-center gap-1 ${
+              filter === "manual"
+                ? "bg-blue-500 text-white"
+                : "bg-blue-100 text-blue-700"
+            }`}
           >
-            <Broom size={16} /> Manual ({counts.manual})
+            <Brush size={16} /> Manual ({counts.manual})
           </button>
           <button
             onClick={() => setFilter("electric")}
-            className={`px-3 py-1 rounded flex items-center gap-1 ${filter === "electric" ? "bg-yellow-500 text-white" : "bg-yellow-100 text-yellow-700"}`}
+            className={`px-3 py-1 rounded flex items-center gap-1 ${
+              filter === "electric"
+                ? "bg-yellow-500 text-white"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
           >
             <Zap size={16} /> Electric ({counts.electric})
           </button>
           <button
             onClick={() => setFilter("smart")}
-            className={`px-3 py-1 rounded flex items-center gap-1 ${filter === "smart" ? "bg-indigo-500 text-white" : "bg-indigo-100 text-indigo-700"}`}
+            className={`px-3 py-1 rounded flex items-center gap-1 ${
+              filter === "smart"
+                ? "bg-indigo-500 text-white"
+                : "bg-indigo-100 text-indigo-700"
+            }`}
           >
             <Bot size={16} /> Smart ({counts.smart})
           </button>
@@ -246,8 +395,15 @@ export default function ToolChecklistPanel({
 
       {/* Search + bulk */}
       <div className="flex flex-wrap gap-2 items-center mb-4">
-        <label className="relative flex-1 min-w-[200px]" aria-label="Search tools">
-          <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden />
+        <label
+          className="relative flex-1 min-w-[200px]"
+          aria-label="Search tools"
+        >
+          <Search
+            size={14}
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400"
+            aria-hidden
+          />
           <input
             type="text"
             placeholder="Search by name or tag…"
@@ -267,16 +423,28 @@ export default function ToolChecklistPanel({
         </label>
 
         <div className="flex items-center gap-2 text-xs">
-          <button className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50" onClick={() => markAll("available")}>
+          <button
+            className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50"
+            onClick={() => markAll("available")}
+          >
             Mark all Available
           </button>
-          <button className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50" onClick={() => markAll("missing")}>
+          <button
+            className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50"
+            onClick={() => markAll("missing")}
+          >
             Mark all Missing
           </button>
-          <button className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50" onClick={() => markAll("borrow")}>
+          <button
+            className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50"
+            onClick={() => markAll("borrow")}
+          >
             Mark all Borrow
           </button>
-          <button className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50" onClick={() => markAll("repair")}>
+          <button
+            className="px-2.5 py-1 rounded border bg-white hover:bg-slate-50"
+            onClick={() => markAll("repair")}
+          >
             Mark all Repair
           </button>
         </div>
@@ -303,15 +471,22 @@ export default function ToolChecklistPanel({
             >
               <div className="min-w-0 pr-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-stone-800 truncate">{tool.name}</span>
+                  <span className="font-medium text-stone-800 truncate">
+                    {tool.name}
+                  </span>
                   {Array.isArray(tool.tags) && tool.tags.length ? (
                     <span className="text-[10px] px-1 py-0.5 rounded bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[140px]">
                       {tool.tags.slice(0, 2).join(" • ")}
-                      {tool.tags.length > 2 ? " +" + (tool.tags.length - 2) : ""}
+                      {tool.tags.length > 2
+                        ? " +" + (tool.tags.length - 2)
+                        : ""}
                     </span>
                   ) : null}
                   {typeof tool.qty === "number" ? (
-                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600" title="Quantity">
+                    <span
+                      className="text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600"
+                      title="Quantity"
+                    >
                       x{tool.qty}
                     </span>
                   ) : null}
@@ -325,17 +500,29 @@ export default function ToolChecklistPanel({
                   <StatusPill status={tool.status} />
                   {present ? (
                     <span className="inline-flex items-center gap-1">
-                      <CheckCircle size={12} className="text-emerald-600" /> Present
+                      <CheckCircle size={12} className="text-emerald-600" />{" "}
+                      Present
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1">
-                      <XCircle size={12} className="text-amber-600" /> Not present
+                      <XCircle size={12} className="text-amber-600" /> Not
+                      present
                     </span>
                   )}
                   {preferences?.toolSubstitutions?.[tool.id]?.length ? (
-                    <span className="inline-flex items-center gap-1" title="Substitutions available">
-                      <Info size={12} /> Alt: {preferences.toolSubstitutions[tool.id].map(pretty).slice(0, 2).join(", ")}
-                      {preferences.toolSubstitutions[tool.id].length > 2 ? " +" + (preferences.toolSubstitutions[tool.id].length - 2) : ""}
+                    <span
+                      className="inline-flex items-center gap-1"
+                      title="Substitutions available"
+                    >
+                      <Info size={12} /> Alt:{" "}
+                      {preferences.toolSubstitutions[tool.id]
+                        .map(pretty)
+                        .slice(0, 2)
+                        .join(", ")}
+                      {preferences.toolSubstitutions[tool.id].length > 2
+                        ? " +" +
+                          (preferences.toolSubstitutions[tool.id].length - 2)
+                        : ""}
                     </span>
                   ) : null}
                 </div>
@@ -387,7 +574,11 @@ export default function ToolChecklistPanel({
           title="Resolve Missing"
           subtitle="Send missing tools to Shopping (or Borrow, per preference)."
           icon={ShoppingCart}
-          actionLabel={preferences?.toolAcquireMode === "borrow" ? "Request Borrow" : "Add to Shopping"}
+          actionLabel={
+            preferences?.toolAcquireMode === "borrow"
+              ? "Request Borrow"
+              : "Add to Shopping"
+          }
           onAction={resolveMissing}
         />
         <ResolverCard
@@ -412,15 +603,29 @@ export default function ToolChecklistPanel({
 // ---------------- UI bits ----------------
 function StatusPill({ status }) {
   const map = {
-    available: { cls: "bg-blue-600 text-white", icon: CheckCircle, label: "Available" },
-    missing: { cls: "bg-stone-300 text-black", icon: XCircle, label: "Missing" },
-    borrow: { cls: "bg-indigo-600 text-white", icon: Handshake, label: "Borrow" },
+    available: {
+      cls: "bg-blue-600 text-white",
+      icon: CheckCircle,
+      label: "Available",
+    },
+    missing: {
+      cls: "bg-stone-300 text-black",
+      icon: XCircle,
+      label: "Missing",
+    },
+    borrow: {
+      cls: "bg-indigo-600 text-white",
+      icon: Handshake,
+      label: "Borrow",
+    },
     repair: { cls: "bg-amber-600 text-white", icon: Wrench, label: "Repair" },
   };
   const m = map[status] || map.available;
   const Icon = m.icon;
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] ${m.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] ${m.cls}`}
+    >
       <Icon size={12} /> {m.label}
     </span>
   );
@@ -448,26 +653,59 @@ function ResolverCard({ title, subtitle, icon: Icon, actionLabel, onAction }) {
 (function runSelfTests() {
   try {
     // Status cycle
-    const cycle = (s) => (s === "available" ? "missing" : s === "missing" ? "borrow" : s === "borrow" ? "repair" : "available");
-    console.assert(cycle("available") === "missing", "[TEST] available → missing");
+    const cycle = (s) =>
+      s === "available"
+        ? "missing"
+        : s === "missing"
+        ? "borrow"
+        : s === "borrow"
+        ? "repair"
+        : "available";
+    console.assert(
+      cycle("available") === "missing",
+      "[TEST] available → missing"
+    );
     console.assert(cycle("missing") === "borrow", "[TEST] missing → borrow");
     console.assert(cycle("borrow") === "repair", "[TEST] borrow → repair");
-    console.assert(cycle("repair") === "available", "[TEST] repair → available");
+    console.assert(
+      cycle("repair") === "available",
+      "[TEST] repair → available"
+    );
 
     // Filtering/search
     const list = [
       { id: "tl_mop_bucket", name: "Mop & Bucket", type: "manual" },
-      { id: "tl_robot_vac", name: "Robot Vacuum (Roomba)", type: "smart", tags: ["automation"] },
+      {
+        id: "tl_robot_vac",
+        name: "Robot Vacuum (Roomba)",
+        type: "smart",
+        tags: ["automation"],
+      },
     ];
     const q = "robot";
-    const filtered = list.filter((t) => [t.name, t.type, ...(t.tags || [])].join(" ").toLowerCase().includes(q));
-    console.assert(filtered.length === 1 && filtered[0].id === "tl_robot_vac", "[TEST] search filter by keyword");
+    const filtered = list.filter((t) =>
+      [t.name, t.type, ...(t.tags || [])].join(" ").toLowerCase().includes(q)
+    );
+    console.assert(
+      filtered.length === 1 && filtered[0].id === "tl_robot_vac",
+      "[TEST] search filter by keyword"
+    );
 
     // Sabbath logic checks
     const sat = new Date("2025-10-11T12:00:00Z");
-    console.assert(isSabbath(sat, { saturdayAsSabbath: true }) === true, "[TEST] saturdayAsSabbath true on Sat");
-    console.assert(isSabbath(sat, { hebrewDayOfWeek: () => 7 }) === true, "[TEST] Hebrew DOW = 7 true");
+    console.assert(
+      isSabbath(sat, { saturdayAsSabbath: true }) === true,
+      "[TEST] saturdayAsSabbath true on Sat"
+    );
+    console.assert(
+      isSabbath(sat, { hebrewDayOfWeek: () => 7 }) === true,
+      "[TEST] Hebrew DOW = 7 true"
+    );
   } catch (e) {
-    if (typeof console !== "undefined") console.warn("ToolChecklistPanel self-tests skipped/failed:", e?.message || e);
+    if (typeof console !== "undefined")
+      console.warn(
+        "ToolChecklistPanel self-tests skipped/failed:",
+        e?.message || e
+      );
   }
 })();

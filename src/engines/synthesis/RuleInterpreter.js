@@ -40,9 +40,9 @@
  * - Supports optional YAML rule packs (if a yaml loader is provided upstream that compiles to JS).
  */
 
-import eventBus from 'src/services/eventBus.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
-const SOURCE = 'RuleInterpreter';
+const SOURCE = "RuleInterpreter";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Public API
@@ -56,16 +56,29 @@ const SOURCE = 'RuleInterpreter';
  */
 export async function loadAllRules(options = {}) {
   const force = !!options.force;
-  const domainsFilter = Array.isArray(options.domains) ? options.domains.map(nl) : null;
+  const domainsFilter = Array.isArray(options.domains)
+    ? options.domains.map(nl)
+    : null;
 
-  if (!force && CACHE.registry && (!domainsFilter || equalSets(new Set(domainsFilter), CACHE.domainSet))) {
-    return { ok: true, registry: CACHE.registry, version: CACHE.version, sources: CACHE.sources.slice() };
+  if (
+    !force &&
+    CACHE.registry &&
+    (!domainsFilter || equalSets(new Set(domainsFilter), CACHE.domainSet))
+  ) {
+    return {
+      ok: true,
+      registry: CACHE.registry,
+      version: CACHE.version,
+      sources: CACHE.sources.slice(),
+    };
   }
 
-  emit('rules.load.started', { force, domainsFilter: domainsFilter || 'all' });
+  emit("rules.load.started", { force, domainsFilter: domainsFilter || "all" });
 
   const discovered = await discoverRuleModules(domainsFilter);
-  const { registry, sources, invalid } = await normalizeAndRegister(discovered.modules);
+  const { registry, sources, invalid } = await normalizeAndRegister(
+    discovered.modules
+  );
 
   const version = stampVersion(registry);
 
@@ -74,7 +87,7 @@ export async function loadAllRules(options = {}) {
   CACHE.sources = sources;
   CACHE.domainSet = new Set(registry.keys());
 
-  emit('rules.load.completed', {
+  emit("rules.load.completed", {
     version,
     domains: Array.from(registry.keys()),
     ruleCount: countRules(registry),
@@ -83,7 +96,7 @@ export async function loadAllRules(options = {}) {
 
   // Report invalid rules once (non-fatal)
   for (const inv of invalid) {
-    emit('rules.rule.invalid', inv);
+    emit("rules.rule.invalid", inv);
   }
 
   return { ok: true, registry, version, sources };
@@ -112,18 +125,24 @@ export function registerRule(domain, rule) {
 
   const normalized = toRuleSpec(rule, { fallbackDomain: d });
   if (!normalized.ok) {
-    emit('rules.rule.invalid', { reason: normalized.error || 'normalize failed', domain: d });
+    emit("rules.rule.invalid", {
+      reason: normalized.error || "normalize failed",
+      domain: d,
+    });
     return;
   }
 
   if (!CACHE.registry) {
     CACHE.registry = new Map();
-    CACHE.sources = ['runtime'];
+    CACHE.sources = ["runtime"];
   }
   if (!CACHE.registry.has(d)) CACHE.registry.set(d, []);
   CACHE.registry.get(d).push(normalized.rule);
   CACHE.version = stampVersion(CACHE.registry);
-  emit('rules.rule.registered', { domain: d, id: normalized.rule.id || '<fn>' });
+  emit("rules.rule.registered", {
+    domain: d,
+    id: normalized.rule.id || "<fn>",
+  });
 }
 
 /**
@@ -142,7 +161,7 @@ export function listDomains() {
 
 /** Get current version/etag of registry (changes when rules change). */
 export function getVersion() {
-  return CACHE.version || '0';
+  return CACHE.version || "0";
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -162,20 +181,29 @@ async function discoverRuleModules(domainsFilter) {
   const modules = [];
 
   // 1) Aggregator
-  const agg = await softImport('src/engines/synthesis/rules/index.js');
+  const agg = await softImport("src/engines/synthesis/rules/index.js");
   if (agg) {
     const pack = agg.default || agg;
-    const entries = Object.entries(pack).filter(([k]) => includeDomain(domainsFilter, k));
+    const entries = Object.entries(pack).filter(([k]) =>
+      includeDomain(domainsFilter, k)
+    );
     for (const [k, val] of entries) {
       const domain = nl(k);
       const list = Array.isArray(val) ? val : [val];
       modules.push({ domain, mods: list });
     }
-    sources.push('rules/index.js');
+    sources.push("rules/index.js");
   }
 
   // Known domains (expandable)
-  const domainCandidates = ['recipe', 'cleaning', 'garden', 'animal', 'preservation', 'storehouse'];
+  const domainCandidates = [
+    "recipe",
+    "cleaning",
+    "garden",
+    "animal",
+    "preservation",
+    "storehouse",
+  ];
 
   // 2) Per-domain modules
   for (const dom of domainCandidates) {
@@ -208,10 +236,13 @@ async function discoverRuleModules(domainsFilter) {
 async function eagerGlobIfAvailable(domainsFilter) {
   try {
     // @ts-ignore — Some bundlers provide import.meta.glob
-    if (typeof import.meta?.glob !== 'function') return { modules: [], sources: [] };
+    if (typeof import.meta?.glob !== "function")
+      return { modules: [], sources: [] };
 
     // Search under the rules folder
-    const files = import.meta.glob('/src/engines/synthesis/rules/**/*.js', { eager: true });
+    const files = import.meta.glob("/src/engines/synthesis/rules/**/*.js", {
+      eager: true,
+    });
     const buckets = new Map(); // domain -> list
     const sources = [];
 
@@ -223,10 +254,13 @@ async function eagerGlobIfAvailable(domainsFilter) {
 
       if (!buckets.has(domain)) buckets.set(domain, []);
       buckets.get(domain).push(...list);
-      sources.push(path.replace(/^\/?src\//, 'src/'));
+      sources.push(path.replace(/^\/?src\//, "src/"));
     }
 
-    const modules = Array.from(buckets.entries()).map(([domain, mods]) => ({ domain: nl(domain), mods }));
+    const modules = Array.from(buckets.entries()).map(([domain, mods]) => ({
+      domain: nl(domain),
+      mods,
+    }));
     return { modules, sources };
   } catch {
     return { modules: [], sources: [] };
@@ -234,7 +268,9 @@ async function eagerGlobIfAvailable(domainsFilter) {
 }
 
 function inferDomainFromPath(p) {
-  const m = String(p).match(/rules\/([^\/]+)\/?(index)?\.js$/i) || String(p).match(/rules\/([^\/]+)\.js$/i);
+  const m =
+    String(p).match(/rules\/([^\/]+)\/?(index)?\.js$/i) ||
+    String(p).match(/rules\/([^\/]+)\.js$/i);
   return m ? nl(m[1]) : null;
 }
 
@@ -254,7 +290,11 @@ async function normalizeAndRegister(discovered) {
       if (norm.ok) {
         registry.get(d).push(norm.rule);
       } else {
-        invalid.push({ domain: d, reason: norm.error || 'invalid', sample: summarizeRule(raw) });
+        invalid.push({
+          domain: d,
+          reason: norm.error || "invalid",
+          sample: summarizeRule(raw),
+        });
       }
     }
     sources.push(d);
@@ -262,7 +302,11 @@ async function normalizeAndRegister(discovered) {
 
   // order by priority (desc), then id for stability
   for (const [dom, list] of registry) {
-    list.sort((a, b) => (b.priority || 0) - (a.priority || 0) || String(a.id || '').localeCompare(String(b.id || '')));
+    list.sort(
+      (a, b) =>
+        (b.priority || 0) - (a.priority || 0) ||
+        String(a.id || "").localeCompare(String(b.id || ""))
+    );
   }
 
   return { registry, sources: Array.from(new Set(sources)), invalid };
@@ -271,7 +315,7 @@ async function normalizeAndRegister(discovered) {
 function toRuleSpec(raw, { fallbackDomain }) {
   try {
     // Functional
-    if (typeof raw === 'function') {
+    if (typeof raw === "function") {
       const id = raw.name || undefined;
       return {
         ok: true,
@@ -281,29 +325,30 @@ function toRuleSpec(raw, { fallbackDomain }) {
           priority: 0,
           when: () => true,
           produce: async (...args) => raw(...args), // maintain signature
-          __kind: 'fn',
+          __kind: "fn",
         },
       };
     }
 
     // Declarative object
-    if (raw && typeof raw === 'object') {
+    if (raw && typeof raw === "object") {
       // If it's nested { default: {...} }
-      const obj = raw.default && typeof raw.default === 'object' ? raw.default : raw;
+      const obj =
+        raw.default && typeof raw.default === "object" ? raw.default : raw;
 
       // Array pack inside single file
       if (Array.isArray(obj)) {
         // handled by caller — should not reach here
-        return { ok: false, error: 'Array should be unpacked earlier' };
+        return { ok: false, error: "Array should be unpacked earlier" };
       }
 
       const id = obj.id || null;
       const domain = nl(obj.domain) || nl(fallbackDomain);
-      const when = typeof obj.when === 'function' ? obj.when : () => true;
-      const produce = typeof obj.produce === 'function' ? obj.produce : null;
+      const when = typeof obj.when === "function" ? obj.when : () => true;
+      const produce = typeof obj.produce === "function" ? obj.produce : null;
 
       if (!produce) {
-        return { ok: false, error: 'Missing produce()' };
+        return { ok: false, error: "Missing produce()" };
       }
 
       const rule = {
@@ -312,14 +357,14 @@ function toRuleSpec(raw, { fallbackDomain }) {
         priority: toInt(obj.priority, 0),
         when,
         produce,
-        __kind: 'decl',
+        __kind: "decl",
       };
       return { ok: true, rule };
     }
 
-    return { ok: false, error: 'Unsupported rule shape' };
+    return { ok: false, error: "Unsupported rule shape" };
   } catch (err) {
-    return { ok: false, error: err?.message || 'normalize failed' };
+    return { ok: false, error: err?.message || "normalize failed" };
   }
 }
 
@@ -338,11 +383,11 @@ function stampVersion(registry) {
   for (const [dom, list] of registry.entries()) {
     acc.push(dom);
     for (const r of list) {
-      acc.push(String(r.id || '<fn>'));
+      acc.push(String(r.id || "<fn>"));
       acc.push(String(r.priority || 0));
     }
   }
-  return hash(acc.join('|'));
+  return hash(acc.join("|"));
 }
 
 function countRules(registry) {
@@ -356,7 +401,7 @@ function countRules(registry) {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: new Date().toISOString(),
       source: SOURCE,
@@ -377,14 +422,15 @@ async function softImport(path) {
 }
 
 function summarizeRule(raw) {
-  if (typeof raw === 'function') return `<fn:${raw.name || 'anonymous'}>`;
+  if (typeof raw === "function") return `<fn:${raw.name || "anonymous"}>`;
   if (Array.isArray(raw)) return `<array:${raw.length}>`;
-  if (raw && typeof raw === 'object') return `<obj:${Object.keys(raw).slice(0, 3).join(',')}>`;
+  if (raw && typeof raw === "object")
+    return `<obj:${Object.keys(raw).slice(0, 3).join(",")}>`;
   return String(raw);
 }
 
 function nl(s) {
-  return s ? String(s).toLowerCase().trim() : '';
+  return s ? String(s).toLowerCase().trim() : "";
 }
 
 function toInt(n, fallback) {
@@ -400,7 +446,7 @@ function equalSets(a, b) {
 
 function hash(str) {
   let h = 2166136261 >>> 0; // FNV-1a
-  const s = String(str || '');
+  const s = String(str || "");
   for (let i = 0; i < s.length; i += 1) {
     h ^= s.charCodeAt(i);
     h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);

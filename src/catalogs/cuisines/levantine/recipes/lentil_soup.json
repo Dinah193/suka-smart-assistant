@@ -1,0 +1,291 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.levantine.lentil_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Levantine Lentil Soup (Shorbat Adas)",
+    "description": "Classic Levantine lentil soup with red lentils, aromatics, cumin, and lemon. Smooth or lightly chunky, naturally vegan, pantry-friendly, and ideal for meal prep.",
+    "tags": [
+      "cuisine.levantine",
+      "soup",
+      "lentils",
+      "vegan",
+      "vegetarian",
+      "dairy_free",
+      "one_pot",
+      "mealprep.friendly",
+      "weeknight.friendly",
+      "budget.friendly"
+    ]
+  },
+
+  "summary": "Traditional Levantine red lentil soup (Shorbat Adas) built on onion-carrot aromatics, cumin, and a bright lemon finish. Red lentils cook quickly and naturally thicken the soup; blend fully for a silky texture or blend partially for a rustic bowl. Lemon at the end is essential for the classic flavor.",
+
+  "yields": {
+    "servings": 6,
+    "makes": "About 2.0–2.2 L (8–9 cups)"
+  },
+
+  "timing": {
+    "activeMins": 15,
+    "totalMins": 45,
+    "notes": "Blending is optional and adds a few minutes."
+  },
+
+  "diet": {
+    "tags": [
+      "vegan",
+      "vegetarian",
+      "dairy_free",
+      "egg_free",
+      "nut_free",
+      "gluten_free"
+    ],
+    "notes": "Gluten-free as written. Serve with GF bread if desired."
+  },
+
+  "methods": ["saute", "simmer", "blend_optional"],
+
+  "compat": {
+    "kitchenCapabilitiesAnyOf": [
+      "stovetop",
+      "immersion_blender_optional",
+      "blender_optional"
+    ],
+    "notes": "If you don't have a blender, mash with a potato masher for a thicker texture."
+  },
+
+  "allergens": [],
+
+  "safety": {
+    "foodSafetyNotes": [
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Reheat until steaming hot throughout; thin with water/stock as needed."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Soup base",
+      "ingredientIds": [
+        "ing.olive_oil",
+        "ing.onion_yellow",
+        "ing.carrot",
+        "ing.garlic",
+        "ing.cumin_ground",
+        "ing.turmeric_ground_optional",
+        "ing.paprika_optional",
+        "ing.tomato_paste_optional",
+        "ing.lentils_red",
+        "ing.water_or_veg_stock",
+        "ing.salt_kosher",
+        "ing.black_pepper",
+        "ing.bay_leaf_optional"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish",
+      "ingredientIds": ["ing.lemon_juice", "ing.lemon_zest_optional"]
+    },
+    {
+      "id": "group.serving_optional",
+      "label": "To serve (optional)",
+      "ingredientIds": [
+        "ing.parsley_optional",
+        "ing.cilantro_optional",
+        "ing.pita_optional",
+        "ing.croutons_optional",
+        "ing.olive_oil_drizzle_optional"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 Tbsp."
+    },
+    {
+      "id": "ing.onion_yellow",
+      "label": "Yellow onion, diced",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 large onion."
+    },
+    {
+      "id": "ing.carrot",
+      "label": "Carrots, diced",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 2 medium carrots."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic cloves, minced",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 4 cloves."
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "ing.turmeric_ground_optional",
+      "label": "Ground turmeric (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp for color and warmth."
+    },
+    {
+      "id": "ing.paprika_optional",
+      "label": "Paprika (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp. Sweet or smoked."
+    },
+    {
+      "id": "ing.tomato_paste_optional",
+      "label": "Tomato paste (optional)",
+      "amount": { "value": 16, "unit": "g" },
+      "notes": "About 1 Tbsp. Adds depth and color; omit for a more classic plain version."
+    },
+    {
+      "id": "ing.lentils_red",
+      "label": "Red lentils",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Rinse well until water runs mostly clear; pick out debris."
+    },
+    {
+      "id": "ing.water_or_veg_stock",
+      "label": "Water or vegetable stock",
+      "amount": { "value": 1500, "unit": "ml" },
+      "notes": "Start here; add more to thin as needed."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Start here; adjust at the end."
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Ground black pepper",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "amount": { "value": 1, "unit": "count" }
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 3 Tbsp; add to taste at the end."
+    },
+    {
+      "id": "ing.lemon_zest_optional",
+      "label": "Lemon zest (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp for extra brightness."
+    },
+
+    {
+      "id": "ing.parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "amount": { "value": 10, "unit": "g" }
+    },
+    {
+      "id": "ing.cilantro_optional",
+      "label": "Fresh cilantro, chopped (optional)",
+      "amount": { "value": 10, "unit": "g" }
+    },
+    {
+      "id": "ing.pita_optional",
+      "label": "Pita bread (optional)",
+      "amount": { "value": 6, "unit": "count" },
+      "notes": "Warm and serve alongside."
+    },
+    {
+      "id": "ing.croutons_optional",
+      "label": "Croutons (optional)",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": "Optional crunchy topping."
+    },
+    {
+      "id": "ing.olive_oil_drizzle_optional",
+      "label": "Olive oil, for drizzling (optional)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 Tbsp."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.saute_aromatics",
+      "title": "Sauté the aromatics",
+      "instructions": [
+        "Heat olive oil in a pot over medium heat.",
+        "Add diced onion and carrots with a pinch of salt. Cook 6–8 minutes until softened.",
+        "Add garlic and cook 30–60 seconds until fragrant (do not brown)."
+      ],
+      "timers": [
+        { "id": "timer.saute_veg", "label": "Sauté aromatics", "minutes": 7 }
+      ]
+    },
+    {
+      "id": "step.bloom_spices",
+      "title": "Bloom spices (and tomato paste if using)",
+      "instructions": [
+        "Add cumin (and turmeric/paprika if using). Stir 20–30 seconds to bloom.",
+        "If using tomato paste, add it now and cook 1 minute, stirring, to deepen flavor."
+      ],
+      "timers": [{ "id": "timer.bloom", "label": "Bloom spices", "minutes": 1 }]
+    },
+    {
+      "id": "step.add_lentils_liquid",
+      "title": "Add lentils and simmer",
+      "instructions": [
+        "Add rinsed red lentils, water/stock, salt, black pepper, and bay leaf (optional).",
+        "Bring to a gentle boil, then reduce to a steady simmer.",
+        "Simmer 18–22 minutes until lentils are fully soft and the soup is naturally thickened."
+      ],
+      "timers": [{ "id": "timer.simmer", "label": "Simmer", "minutes": 20 }]
+    },
+    {
+      "id": "step.blend_optional",
+      "title": "Blend (optional) for texture",
+      "instructions": [
+        "Remove bay leaf if used.",
+        "For silky soup: blend until smooth using an immersion blender (in the pot) or a countertop blender (work in batches).",
+        "For rustic soup: blend briefly or mash with a potato masher.",
+        "If too thick, add a little water/stock and stir until desired consistency."
+      ]
+    },
+    {
+      "id": "step.finish_lemon",
+      "title": "Finish with lemon",
+      "instructions": [
+        "Turn off heat.",
+        "Stir in lemon juice (and zest if using). Taste and adjust salt, pepper, and lemon.",
+        "Optional: drizzle with olive oil and garnish with parsley/cilantro."
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve hot with pita or croutons (optional).",
+        "Store leftovers refrigerated 3–4 days; the soup thickens as it sits—thin with water when reheating."
+      ]
+    }
+  ]
+}

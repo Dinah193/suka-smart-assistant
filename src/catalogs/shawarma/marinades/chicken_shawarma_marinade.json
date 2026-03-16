@@ -1,0 +1,192 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.marinades.chicken_shawarma_marinade",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Chicken Shawarma Marinade",
+    "tags": [
+      "marinade",
+      "shawarma",
+      "chicken",
+      "middle_eastern",
+      "spice_blend",
+      "citrus",
+      "garlic_forward",
+      "yogurt_based",
+      "make_ahead",
+      "batch_friendly",
+      "grill",
+      "oven",
+      "stovetop"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Yogurt + citrus chicken shawarma marinade with classic warm spices, designed for thighs or breast."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.greek_yogurt.plain",
+      "label": "Plain Greek yogurt",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": [
+        "About 1 cup. Whole-milk preferred.",
+        "Sub: plain yogurt (may be thinner)."
+      ]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": ["About 2 tablespoons."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": ["About 3 tablespoons."]
+    },
+    {
+      "id": "ing.lemon_zest",
+      "label": "Lemon zest",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 tablespoon; optional but brightens flavor."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": ["About 4–5 medium cloves."]
+    },
+    {
+      "id": "ing.onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": [
+        "About 1 1/2 teaspoons.",
+        "Sub: 60 g grated onion (about 1/2 small onion) for a more traditional profile."
+      ]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 2.5, "unit": "g" },
+      "notes": ["About 1 teaspoon; classic shawarma color and earthiness."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/2 teaspoon."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; adds warm shawarma note."]
+    },
+    {
+      "id": "ing.cardamom_ground",
+      "label": "Ground cardamom",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; optional but very authentic."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 3/4 teaspoon."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": [
+        "About 1 3/4 teaspoons. This marinade is sized for ~1.4–1.8 kg (3–4 lb) chicken.",
+        "If you plan to salt again before cooking, reduce to 7 g."
+      ]
+    },
+    {
+      "id": "ing.chili_powder",
+      "label": "Mild chili powder (or cayenne for heat)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": [
+        "About 1 teaspoon.",
+        "For spicier: use 0.5–1 g cayenne instead."
+      ]
+    },
+    {
+      "id": "ing.vinegar.white",
+      "label": "White vinegar",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": ["Optional; adds extra tang. Skip if you prefer softer acidity."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Make the marinade",
+      "instructions": [
+        "In a bowl, whisk yogurt, olive oil, lemon juice, optional lemon zest, garlic, and optional vinegar until smooth.",
+        "Whisk in spices (cumin, coriander, paprika, turmeric, allspice, cinnamon, optional cardamom), black pepper, salt, and chili powder/cayenne."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Coat the chicken",
+      "instructions": [
+        "Add chicken (thighs preferred, or breasts) to a zip bag or covered container.",
+        "Pour marinade over chicken and massage until evenly coated."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Marinate time",
+      "instructions": [
+        "Refrigerate at least 2 hours.",
+        "Best flavor/texture: 8–16 hours.",
+        "Avoid marinating much beyond 24 hours (yogurt + acid can soften texture too much)."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Cooking guidance (notes)",
+      "instructions": [
+        "Shake off excess marinade before cooking to improve browning (leave a thin coating).",
+        "Cook hot: grill, cast iron skillet, or high-heat oven/roast.",
+        "Rest cooked chicken 5–10 minutes, then slice for wraps and bowls."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Food safety",
+      "instructions": [
+        "Marinate chicken in the refrigerator (not at room temperature).",
+        "Discard used marinade that touched raw chicken, or boil thoroughly before using for basting."
+      ]
+    }
+  ]
+}

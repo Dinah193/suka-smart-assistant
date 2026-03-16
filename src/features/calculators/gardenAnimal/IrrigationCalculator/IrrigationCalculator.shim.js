@@ -48,7 +48,8 @@ export function runIrrigationCalculator(payload, options = {}) {
     typeof safePayload.version === "string" ? safePayload.version : "1.0.0";
 
   const inputs = normalizeInputs(safePayload.inputs || {});
-  const baseDate = options.baseDate instanceof Date ? options.baseDate : new Date();
+  const baseDate =
+    options.baseDate instanceof Date ? options.baseDate : new Date();
   const horizonDays =
     typeof options.horizonDays === "number" && options.horizonDays > 0
       ? Math.floor(options.horizonDays)
@@ -178,7 +179,11 @@ function normalizeSoil(soil) {
  */
 function normalizeIrrigationSystem(sys) {
   const safe = sys && typeof sys === "object" ? { ...sys } : {};
-  if (!["drip", "soaker", "sprinkler", "flood", "hand", "other"].includes(safe.method)) {
+  if (
+    !["drip", "soaker", "sprinkler", "flood", "hand", "other"].includes(
+      safe.method
+    )
+  ) {
     safe.method = "drip";
   }
   if (
@@ -206,7 +211,10 @@ function normalizeIrrigationSystem(sys) {
  */
 function normalizeClimate(climate) {
   const safe = climate && typeof climate === "object" ? { ...climate } : {};
-  if (typeof safe.referenceEToMmPerDay !== "number" || safe.referenceEToMmPerDay < 0) {
+  if (
+    typeof safe.referenceEToMmPerDay !== "number" ||
+    safe.referenceEToMmPerDay < 0
+  ) {
     safe.referenceEToMmPerDay = 4; // moderate ET default
   }
   if (!Array.isArray(safe.recentRainfallIn)) {
@@ -240,7 +248,10 @@ function normalizeUserPreferences(prefs) {
   ) {
     safe.maxIrrigationEventsPerWeek = 3;
   }
-  if (typeof safe.skipIfRainAboveIn !== "number" || safe.skipIfRainAboveIn < 0) {
+  if (
+    typeof safe.skipIfRainAboveIn !== "number" ||
+    safe.skipIfRainAboveIn < 0
+  ) {
     safe.skipIfRainAboveIn = 0.25;
   }
   if (!safe.waterRestrictions || typeof safe.waterRestrictions !== "object") {
@@ -271,7 +282,8 @@ function computeWaterRequirements(inputs) {
 
   for (const bed of beds) {
     const bedId = bed.bedId;
-    const area = typeof bed.surfaceAreaSqFt === "number" ? bed.surfaceAreaSqFt : 0;
+    const area =
+      typeof bed.surfaceAreaSqFt === "number" ? bed.surfaceAreaSqFt : 0;
     if (!bedId || area <= 0) continue;
 
     const inches = estimateWeeklyInchesForBed(bed, inputs.climate);
@@ -279,7 +291,8 @@ function computeWaterRequirements(inputs) {
 
     // Convert inches over ft² to gallons: 1 inch over 1 ft² ≈ 0.623 gallons.
     const bedGallons = area * inches * 0.623;
-    const zoneId = typeof bed.zoneId === "string" && bed.zoneId ? bed.zoneId : "default";
+    const zoneId =
+      typeof bed.zoneId === "string" && bed.zoneId ? bed.zoneId : "default";
 
     if (!perZoneGallonsPerWeek[zoneId]) {
       perZoneGallonsPerWeek[zoneId] = 0;
@@ -351,7 +364,8 @@ function estimateWeeklyInchesForBed(bed, climate) {
   // Mulch and soil texture adjustments
   if (bed.soil) {
     const soil = bed.soil;
-    const mulchDepth = typeof soil.mulchDepthIn === "number" ? soil.mulchDepthIn : 0;
+    const mulchDepth =
+      typeof soil.mulchDepthIn === "number" ? soil.mulchDepthIn : 0;
     if (mulchDepth >= 3) {
       inches -= 0.2;
     } else if (mulchDepth >= 1) {
@@ -375,9 +389,10 @@ function estimateWeeklyInchesForBed(bed, climate) {
   }
 
   // Climate ET adjustment
-  const eto = climate && typeof climate.referenceEToMmPerDay === "number"
-    ? climate.referenceEToMmPerDay
-    : 4;
+  const eto =
+    climate && typeof climate.referenceEToMmPerDay === "number"
+      ? climate.referenceEToMmPerDay
+      : 4;
 
   if (eto >= 6) {
     inches += 0.25;
@@ -395,6 +410,9 @@ function estimateWeeklyInchesForBed(bed, climate) {
 /**
  * Compute concrete irrigation events within the planning horizon.
  *
+ * NOTE:
+ * - This MUST be exported because IrrigationCalculator.hooks.js imports it.
+ *
  * @param {any} inputs
  * @param {{
  *   perBedInchesPerWeek: Record<string, number>,
@@ -404,19 +422,15 @@ function estimateWeeklyInchesForBed(bed, climate) {
  * @param {{ baseDate: Date, horizonDays: number }} options
  * @returns {Array<any>}
  */
-function computeIrrigationSchedule(inputs, waterRequirements, options) {
+export function computeIrrigationSchedule(inputs, waterRequirements, options) {
   const { baseDate, horizonDays } = options;
-  const {
-    beds,
-    irrigationSystem,
-    userPreferences: prefs,
-    climate,
-  } = inputs;
+  const { beds, irrigationSystem, userPreferences: prefs, climate } = inputs;
 
   const schedule = [];
   const zoneGallons = waterRequirements.perZoneGallonsPerWeek || {};
   const maxEventsPerWeek = prefs.maxIrrigationEventsPerWeek || 3;
-  const applicationRateInPerHour = irrigationSystem.defaultApplicationRateInPerHour || 0.25;
+  const applicationRateInPerHour =
+    irrigationSystem.defaultApplicationRateInPerHour || 0.25;
 
   const zoneIds = Object.keys(zoneGallons);
   if (zoneIds.length === 0) {
@@ -439,7 +453,8 @@ function computeIrrigationSchedule(inputs, waterRequirements, options) {
 
     // Convert gallons into inches for an "average" bed in the zone, for guidance
     const meta = zoneMeta[zoneId];
-    const effectiveArea = meta && meta.totalAreaSqFt > 0 ? meta.totalAreaSqFt : 1;
+    const effectiveArea =
+      meta && meta.totalAreaSqFt > 0 ? meta.totalAreaSqFt : 1;
     const inchesPerEvent = gallonsPerEvent / (effectiveArea * 0.623); // reverse of ft²→gal
 
     for (let i = 0; i < eventsCount; i++) {
@@ -448,10 +463,14 @@ function computeIrrigationSchedule(inputs, waterRequirements, options) {
 
       const startDateTimeLocal = getPreferredStartTime(eventDate, prefs);
       const durationHours =
-        applicationRateInPerHour > 0 ? inchesPerEvent / applicationRateInPerHour : 0;
+        applicationRateInPerHour > 0
+          ? inchesPerEvent / applicationRateInPerHour
+          : 0;
       const durationMinutes = durationHours * 60;
 
-      const eventId = `irrigation_${zoneId}_${formatDateKey(eventDate)}_${i + 1}`;
+      const eventId = `irrigation_${zoneId}_${formatDateKey(eventDate)}_${
+        i + 1
+      }`;
 
       const event = {
         eventId,
@@ -511,8 +530,10 @@ function buildZoneMeta(beds, perBedInchesPerWeek) {
   if (!Array.isArray(beds)) return meta;
 
   for (const bed of beds) {
-    const zoneId = typeof bed.zoneId === "string" && bed.zoneId ? bed.zoneId : "default";
-    const area = typeof bed.surfaceAreaSqFt === "number" ? bed.surfaceAreaSqFt : 0;
+    const zoneId =
+      typeof bed.zoneId === "string" && bed.zoneId ? bed.zoneId : "default";
+    const area =
+      typeof bed.surfaceAreaSqFt === "number" ? bed.surfaceAreaSqFt : 0;
     const inches = perBedInchesPerWeek[bed.bedId] || 0;
 
     if (!meta[zoneId]) {
@@ -529,8 +550,7 @@ function buildZoneMeta(beds, perBedInchesPerWeek) {
 
     // simple incremental average
     const n = z.bedIds.length;
-    z.averageInchesPerWeek =
-      ((z.averageInchesPerWeek * (n - 1)) + inches) / n;
+    z.averageInchesPerWeek = (z.averageInchesPerWeek * (n - 1) + inches) / n;
   }
 
   return meta;
@@ -557,7 +577,9 @@ function buildAlerts(inputs, waterRequirements, schedule) {
         1
       )} gallons. Consider adding mulch, improving soil organic matter, or reducing plant density.`,
       relatedBedIds: (inputs.beds || []).map((b) => b.bedId),
-      relatedZoneIds: Object.keys(waterRequirements.perZoneGallonsPerWeek || {}),
+      relatedZoneIds: Object.keys(
+        waterRequirements.perZoneGallonsPerWeek || {}
+      ),
     });
   }
 
@@ -570,7 +592,9 @@ function buildAlerts(inputs, waterRequirements, schedule) {
       if (!evt.startDateTimeLocal) continue;
       const d = new Date(evt.startDateTimeLocal);
       const weekday = d.getDay(); // 0 = Sunday
-      const weekdayKey = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][weekday];
+      const weekdayKey = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][
+        weekday
+      ];
 
       if (Array.isArray(restrictions.allowedWeekdays)) {
         if (!restrictions.allowedWeekdays.includes(weekdayKey)) {
@@ -592,7 +616,10 @@ function buildAlerts(inputs, waterRequirements, schedule) {
           [],
           ...restrictedEvents.map((e) => e.bedIds || [])
         ),
-        relatedZoneIds: mergeUnique([], ...restrictedEvents.map((e) => [e.zoneId])),
+        relatedZoneIds: mergeUnique(
+          [],
+          ...restrictedEvents.map((e) => [e.zoneId])
+        ),
       });
     }
   }
@@ -635,7 +662,9 @@ function buildAlerts(inputs, waterRequirements, schedule) {
 function getPreferredStartTime(date, prefs) {
   const d = new Date(date.getTime());
   const timeOfDay =
-    prefs && prefs.preferredTimeOfDay ? prefs.preferredTimeOfDay : "early_morning";
+    prefs && prefs.preferredTimeOfDay
+      ? prefs.preferredTimeOfDay
+      : "early_morning";
 
   switch (timeOfDay) {
     case "early_morning":
@@ -664,7 +693,8 @@ function getPreferredStartTime(date, prefs) {
  * @returns {any | undefined}
  */
 function findForecastForDate(forecastDaily, date) {
-  if (!Array.isArray(forecastDaily) || forecastDaily.length === 0) return undefined;
+  if (!Array.isArray(forecastDaily) || forecastDaily.length === 0)
+    return undefined;
   const targetKey = formatDateKey(date);
   return forecastDaily.find((f) => {
     if (!f || typeof f.date !== "string") return false;
@@ -728,7 +758,8 @@ export function irrigationEventToSession(event) {
 
   const nowIso = new Date().toISOString();
   const id = `session_irrigation_${event.eventId || "unknown"}`;
-  const title = event.sessionTemplate?.title || `Irrigation: ${event.zoneId || "zone"}`;
+  const title =
+    event.sessionTemplate?.title || `Irrigation: ${event.zoneId || "zone"}`;
 
   return {
     id,
@@ -755,12 +786,16 @@ export function irrigationEventToSession(event) {
         id: `${id}_step_2`,
         title: "Monitor system",
         desc: "Walk the beds, check emitters/sprinklers, adjust coverage, and confirm water reaches root zones.",
-        durationSec: Math.max(60, Math.round((event.durationMinutes || 0) * 60) - 120),
+        durationSec: Math.max(
+          60,
+          Math.round((event.durationMinutes || 0) * 60) - 120
+        ),
         blockers: ["weather", "equipment"],
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Look for dry spots or pooling water and adjust accordingly.",
+          cueNotes:
+            "Look for dry spots or pooling water and adjust accordingly.",
         },
       },
       {
@@ -808,3 +843,19 @@ const IrrigationCalculatorShim = {
 };
 
 export default IrrigationCalculatorShim;
+
+/* -------------------------------------------------------------------------- */
+/* Local helpers referenced above                                              */
+/* -------------------------------------------------------------------------- */
+
+function buildEventNote(zoneId, meta) {
+  const beds = meta && Array.isArray(meta.bedIds) ? meta.bedIds.length : 0;
+  const avg =
+    meta && typeof meta.averageInchesPerWeek === "number"
+      ? meta.averageInchesPerWeek
+      : 0;
+  const parts = [`Zone ${zoneId}`];
+  if (beds > 0) parts.push(`${beds} bed${beds === 1 ? "" : "s"}`);
+  if (avg > 0) parts.push(`avg ${roundTo(avg, 2)} in/week`);
+  return parts.join(" · ");
+}

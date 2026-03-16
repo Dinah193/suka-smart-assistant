@@ -1,0 +1,328 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.baked_beans",
+    "type": "recipe",
+    "name": "BBQ Baked Beans (Sweet-Smoky, Stovetop or Oven)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Classic BBQ baked beans designed for cookouts and meal prep.",
+        "Works with canned beans for speed or dry beans if you want from-scratch control."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "side",
+    "mealArchetypes": ["cookout", "potluck", "family_style"],
+    "servingStyles": ["bbq_plate", "buffet", "side_dish"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "side.beans",
+      "cookout",
+      "potluck",
+      "make_ahead",
+      "method.bake",
+      "method.simmer"
+    ]
+  },
+  "yield": {
+    "servings": 8,
+    "notes": "About 8 side servings (1/2 cup) or 12 smaller servings."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 55,
+    "totalMins": 75
+  },
+  "difficulty": "beginner",
+  "equipment": {
+    "minimum": ["equipment.stovetop", "equipment.saucepan", "equipment.spoon"],
+    "recommended": [
+      "equipment.dutch_oven",
+      "equipment.oven",
+      "equipment.baking_dish",
+      "equipment.chef_knife",
+      "equipment.cut_board"
+    ],
+    "optional": ["equipment.slow_cooker"]
+  },
+  "dietFlags": ["gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredients.baked_beans_canned",
+      "label": "Beans (canned), drained and rinsed",
+      "qty": 48,
+      "unit": "oz",
+      "notes": "Use navy beans, pinto beans, or great northern. (3 x 15–16 oz cans).",
+      "optional": false
+    },
+    {
+      "id": "ingredients.onion",
+      "label": "Onion, diced",
+      "qty": 1,
+      "unit": "each",
+      "notes": "Yellow onion preferred.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic, minced",
+      "qty": 3,
+      "unit": "cloves",
+      "optional": true
+    },
+    {
+      "id": "ingredients.bbq_sauce",
+      "label": "BBQ sauce",
+      "qty": 1,
+      "unit": "cup",
+      "notes": "Tomato-based BBQ sauce works best. Adjust sweetness/heat to taste.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.ketchup",
+      "label": "Ketchup",
+      "qty": 0.5,
+      "unit": "cup",
+      "optional": true
+    },
+    {
+      "id": "ingredients.mustard",
+      "label": "Yellow mustard",
+      "qty": 1,
+      "unit": "tbsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.brown_sugar",
+      "label": "Brown sugar",
+      "qty": 0.25,
+      "unit": "cup",
+      "notes": "Start with 1/4 cup; increase if your BBQ sauce is not sweet.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.molasses",
+      "label": "Molasses",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Optional but very classic for depth.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Balances sweetness. Use white vinegar if needed.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.worcestershire_sauce",
+      "label": "Worcestershire sauce",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Optional umami boost.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.smoked_paprika",
+      "label": "Smoked paprika",
+      "qty": 1,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.chili_powder",
+      "label": "Chili powder",
+      "qty": 1,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Kosher salt",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Adjust at end—BBQ sauce and ketchup can be salty.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.bacon",
+      "label": "Bacon, diced (optional)",
+      "qty": 6,
+      "unit": "oz",
+      "notes": "Optional—renders fat and adds smoky flavor. Substitute smoked sausage pieces if preferred.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.smoked_sausage",
+      "label": "Smoked sausage, sliced (optional)",
+      "qty": 8,
+      "unit": "oz",
+      "notes": "Optional—kielbasa/hot link adds body; great when serving as a main-ish side.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.green_bell_pepper",
+      "label": "Bell pepper, diced (optional)",
+      "qty": 0.5,
+      "unit": "each",
+      "optional": true
+    },
+    {
+      "id": "ingredients.jalapeno",
+      "label": "Jalapeño, minced (optional)",
+      "qty": 1,
+      "unit": "each",
+      "notes": "Optional heat—remove seeds for milder.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Prep aromatics and optional meat",
+      "body": "Dice onion (and pepper if using). Mince garlic. If using bacon, dice; if using smoked sausage, slice into coins/half-moons.",
+      "timers": []
+    },
+    {
+      "id": "step.render_bacon_optional",
+      "title": "Optional: render bacon and sauté aromatics",
+      "body": "If using bacon: cook in a Dutch oven or deep skillet over medium heat until fat renders and bacon starts to crisp (about 6–8 minutes). Add onion (and bell pepper) and sauté until softened (3–5 minutes). Add garlic for 30 seconds until fragrant. If not using bacon, sauté onion in 1 tbsp oil instead.",
+      "timers": [
+        { "label": "Render bacon", "mins": 7 },
+        { "label": "Sauté onion/pepper", "mins": 4 }
+      ]
+    },
+    {
+      "id": "step_build_sauce",
+      "title": "Build the BBQ bean sauce",
+      "body": "Stir in BBQ sauce, ketchup (optional), mustard (optional), brown sugar, molasses (optional), vinegar (optional), Worcestershire (optional), smoked paprika/chili powder/pepper. Bring to a gentle simmer. Taste: it should be a little sweeter and slightly tangy—beans will mellow it.",
+      "timers": [{ "label": "Simmer sauce", "mins": 4 }]
+    },
+    {
+      "id": "step_add_beans",
+      "title": "Add beans (and optional sausage) and simmer",
+      "body": "Stir in drained/rinsed beans. If using smoked sausage, add it now. Keep at a low simmer for 10 minutes to marry flavors. If too thick, add a splash of water; if too thin, simmer uncovered.",
+      "timers": [{ "label": "Simmer with beans", "mins": 10 }]
+    },
+    {
+      "id": "step_bake_or_finish",
+      "title": "Bake (recommended) or finish on stovetop",
+      "body": "Oven method (best flavor): transfer to a baking dish or keep in oven-safe Dutch oven and bake at 325°F for 40–50 minutes, stirring once halfway, until thick and glossy. Stovetop method: simmer gently, uncovered, 20–30 minutes, stirring occasionally. Avoid high heat to prevent scorching.",
+      "timers": [{ "label": "Bake or simmer to thicken", "mins": 45 }]
+    },
+    {
+      "id": "step_adjust",
+      "title": "Adjust seasoning and serve",
+      "body": "Taste and adjust: add more vinegar for tang, more sugar for sweetness, more salt/pepper as needed. Serve hot alongside brisket, ribs, pulled pork, BBQ chicken, or sausages.",
+      "timers": []
+    }
+  ],
+  "pairings": {
+    "mains": [
+      {
+        "id": "cuisines.bbq.recipes.smoked_brisket",
+        "label": "Smoked Brisket"
+      },
+      { "id": "cuisines.bbq.recipes.bbq_ribs", "label": "BBQ Ribs" },
+      { "id": "cuisines.bbq.recipes.pulled_pork", "label": "Pulled Pork" },
+      {
+        "id": "cuisines.bbq.recipes.smoked_chicken",
+        "label": "Smoked Chicken"
+      },
+      { "id": "cuisines.bbq.recipes.bbq_sausage", "label": "BBQ Sausage" }
+    ],
+    "sides": [
+      { "id": "dishes.bbq.cole_slaw", "label": "Cole Slaw" },
+      { "id": "dishes.bbq.potato_salad", "label": "Potato Salad" },
+      { "id": "dishes.bbq.cornbread", "label": "Cornbread" },
+      { "id": "dishes.bbq.mac_and_cheese", "label": "Mac and Cheese" },
+      { "id": "dishes.bbq.pickles_onions", "label": "Pickles + Onions" }
+    ]
+  },
+  "storage": {
+    "refrigerate": {
+      "instructions": "Cool quickly, then refrigerate in a sealed container.",
+      "maxDays": 4
+    },
+    "freeze": {
+      "instructions": "Freeze in flat bags or containers for up to 3 months. Thaw overnight in fridge.",
+      "maxDays": 90
+    },
+    "reheat": {
+      "instructions": "Reheat gently on stovetop with a splash of water, or microwave covered, stirring halfway.",
+      "notes": "Avoid high heat; sugars can scorch."
+    }
+  },
+  "planner": {
+    "batchable": true,
+    "makeAhead": true,
+    "leftovers": {
+      "goodFor": [
+        "bbq_bean_bowls",
+        "hot_dog_toppers",
+        "loaded_baked_potatoes",
+        "breakfast_hash_side",
+        "bean_and_sausage_stew"
+      ],
+      "notes": "These thicken as they cool—add a splash of water when reheating."
+    },
+    "serveModes": [
+      {
+        "id": "serveMode.side_dish",
+        "label": "Classic Side",
+        "notes": "Serve 1/2 cup alongside smoked meats."
+      },
+      {
+        "id": "serveMode.mainish",
+        "label": "Hearty Beans",
+        "notes": "Add smoked sausage or chopped brisket for a heartier bowl."
+      },
+      {
+        "id": "serveMode.topping",
+        "label": "Topping",
+        "notes": "Spoon on hot dogs/sausages or over baked potatoes."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "equipment",
+      "notes": [
+        "Slow cooker: after building sauce and adding beans, cook on LOW 3–4 hours or HIGH 1.5–2 hours; vent lid near end if too thin.",
+        "Smoker: place beans in a foil pan and smoke at 250–275°F for 1.5–2 hours, stirring once, for extra smoke flavor."
+      ]
+    },
+    {
+      "kind": "flavor",
+      "notes": [
+        "More tang (Carolina-ish): increase vinegar to 2–3 tbsp and reduce brown sugar slightly.",
+        "More sweet (Kansas City-ish): increase brown sugar to 1/3 cup and use a sweeter BBQ sauce.",
+        "More heat: add jalapeño or a pinch of cayenne; finish with hot sauce."
+      ]
+    },
+    {
+      "kind": "diet",
+      "notes": [
+        "Vegetarian: omit bacon/sausage and use a vegetarian BBQ sauce/Worcestershire alternative.",
+        "Lower sugar: reduce brown sugar by half and choose a lower-sugar BBQ sauce; flavor with smoked paprika + vinegar."
+      ]
+    }
+  ]
+}

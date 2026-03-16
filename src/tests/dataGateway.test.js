@@ -35,7 +35,6 @@
 // If your actual file name or function name is different, adjust the imports.
 // -----------------------------------------------------------------------------
 
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // 👇 adjust if your alias differs
@@ -76,13 +75,13 @@ vi.mock("@/db", () => {
 });
 
 // mock Hub pipeline (format + send)
-vi.mock("@/services/HubPacketFormatter", () => ({
+vi.mock("@/services/hub/HubPacketFormatter", () => ({
   default: {
     format: vi.fn((payload) => ({ ...payload, formattedForHub: true })),
   },
 }));
 
-vi.mock("@/services/FamilyFundConnector", () => ({
+vi.mock("@/services/hub/FamilyFundConnector", () => ({
   default: {
     send: vi.fn(async () => ({ ok: true })),
   },
@@ -116,8 +115,10 @@ describe("dataGateway", () => {
       },
     });
 
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
     HubPacketFormatter.format.mockClear();
     FamilyFundConnector.send.mockClear();
   });
@@ -177,8 +178,10 @@ describe("dataGateway", () => {
 
     await dataGateway.saveDomainRecord("inventory", inv);
 
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
 
     expect(HubPacketFormatter.format).not.toHaveBeenCalled();
     expect(FamilyFundConnector.send).not.toHaveBeenCalled();
@@ -202,8 +205,10 @@ describe("dataGateway", () => {
 
     await dataGateway.saveDomainRecord("inventory", inv);
 
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
 
     expect(HubPacketFormatter.format).toHaveBeenCalled();
     expect(FamilyFundConnector.send).toHaveBeenCalled();
@@ -318,7 +323,8 @@ describe("dataGateway", () => {
       },
     });
 
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
     FamilyFundConnector.send.mockImplementationOnce(async () => {
       throw new Error("network down");
     });
@@ -330,7 +336,7 @@ describe("dataGateway", () => {
         ts: new Date().toISOString(),
         source: "test",
         data: { foo: "bar" },
-      }),
+      })
     ).resolves.not.toThrow();
   });
 

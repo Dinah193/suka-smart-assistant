@@ -1,0 +1,1362 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19",
+  "notes": [
+    "SSA Ghanaian dishes catalog (V2 entries) for planners/search/UI browse.",
+    "IDs and tags are lowercase and match ^[a-z0-9_.-]+$.",
+    "Indexes are generated explicitly here for deterministic behavior (no runtime rebuilding required).",
+    "If you later add recipe files, keep dish ids stable and map recipe ids in planner layers (separately)."
+  ],
+  "meta": {
+    "id": "cuisines.ghanaian.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Ghanaian Dishes",
+    "cuisineId": "cuisines.ghanaian",
+    "status": "canonical",
+    "notes": [
+      "Curated canonical browse set for Ghanaian cuisine.",
+      "Includes core soups, stews, starches, and condiments commonly referenced by planners."
+    ],
+    "description": "Dish browse catalog for Ghanaian cuisine, including soups/stews served with starches, rice dishes, street foods, and key condiments (e.g., shito, fresh pepper).",
+    "version": "2026.01",
+    "author": "Suka Smart Assistant",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19"
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+  "dishes": [
+    {
+      "id": "dish.ghanaian.groundnut_soup",
+      "label": "Groundnut Soup",
+      "aka": ["Peanut Soup", "Ghana Groundnut Soup"],
+      "subprofiles": ["cuisines.ghanaian.akan"],
+      "category": "category.soup",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": {
+        "activeMins": 30,
+        "totalMins": 105,
+        "handsOffMins": 75
+      },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["base.groundnut", "base.tomato_pepper"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.protein",
+          "items": [
+            "ingredient.goat_meat",
+            "ingredient.beef",
+            "ingredient.chicken"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.cassava",
+            "ingredient.plantain_green",
+            "ingredient.yam"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.simmer", "method.stew", "method.blend"],
+      "equipmentRecommended": ["tool.blender", "tool.pressure_cooker"],
+      "equipmentMinimum": [
+        "tool.pot_stock",
+        "tool.knife",
+        "tool.board",
+        "tool.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.peanut_butter_natural",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.ginger",
+        "ingredient.scotch_bonnet",
+        "ingredient.tomatoes_canned"
+      ],
+      "allergens": ["allergen.peanut", "allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.ghanaian.fufu", "dish.ghanaian.omo_tuo"],
+        "condiments": [
+          "dish.ghanaian.fresh_pepper_sauce",
+          "dish.ghanaian.shito"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "soup",
+        "stew_and_starch",
+        "batch_friendly",
+        "freezer_friendly",
+        "pepper_forward",
+        "groundnut"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.light_soup",
+      "label": "Light Soup",
+      "aka": ["Ghana Light Soup", "Pepper Soup (Ghana-style)"],
+      "subprofiles": ["cuisines.ghanaian.akan", "cuisines.ghanaian.ewe"],
+      "category": "category.soup",
+      "difficulty": 3,
+      "heatTypical": 4,
+      "time": {
+        "activeMins": 25,
+        "totalMins": 90,
+        "handsOffMins": 65
+      },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["base.tomato_pepper"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.protein",
+          "items": [
+            "ingredient.goat_meat",
+            "ingredient.chicken",
+            "ingredient.fish"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.cassava",
+            "ingredient.plantain_green",
+            "ingredient.yam",
+            "ingredient.rice"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.simmer", "method.blend", "method.reduce"],
+      "equipmentRecommended": ["tool.blender"],
+      "equipmentMinimum": [
+        "tool.pot_stock",
+        "tool.knife",
+        "tool.board",
+        "tool.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.onion",
+        "ingredient.ginger",
+        "ingredient.garlic",
+        "ingredient.scotch_bonnet",
+        "ingredient.tomatoes_canned"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.ghanaian.fufu", "dish.ghanaian.rice"],
+        "finishes": ["ingredient.lime"]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "soup",
+        "pepper_forward",
+        "weeknight_possible",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.palm_nut_soup",
+      "label": "Palm Nut Soup",
+      "aka": ["Abenkwan", "Palm Fruit Soup"],
+      "subprofiles": ["cuisines.ghanaian.akan"],
+      "category": "category.soup",
+      "difficulty": 4,
+      "heatTypical": 3,
+      "time": {
+        "activeMins": 35,
+        "totalMins": 130,
+        "handsOffMins": 95
+      },
+      "servingStyles": ["stew_and_starch", "holiday_feasts", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["base.palm_nut"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.protein",
+          "items": [
+            "ingredient.goat_meat",
+            "ingredient.beef",
+            "ingredient.chicken",
+            "ingredient.fish",
+            "ingredient.smoked_fish"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.rice",
+            "ingredient.cassava",
+            "ingredient.plantain_green"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.simmer", "method.stew"],
+      "equipmentRecommended": ["tool.pressure_cooker"],
+      "equipmentMinimum": [
+        "tool.pot_stock",
+        "tool.knife",
+        "tool.board",
+        "tool.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.palm_nut_concentrate",
+        "ingredient.onion",
+        "ingredient.scotch_bonnet"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.ghanaian.omo_tuo", "dish.ghanaian.fufu"]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "soup",
+        "palm_oil",
+        "batch_friendly",
+        "freezer_friendly",
+        "holiday"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.okro_stew",
+      "label": "Okro Stew",
+      "aka": ["Okra Stew", "Okro Soup (stew-thick)"],
+      "subprofiles": ["cuisines.ghanaian.ga_dangme", "cuisines.ghanaian.ewe"],
+      "category": "category.stew",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": {
+        "activeMins": 25,
+        "totalMins": 70,
+        "handsOffMins": 45
+      },
+      "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "partial"
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["base.okro", "base.tomato_pepper"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.protein",
+          "items": [
+            "ingredient.fish",
+            "ingredient.smoked_fish",
+            "ingredient.shrimp_dried",
+            "ingredient.beef"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.fermented_corn_dough",
+            "ingredient.fermented_cassava_dough",
+            "ingredient.rice"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.simmer", "method.stew"],
+      "equipmentRecommended": ["tool.blender"],
+      "equipmentMinimum": [
+        "tool.pot_stock",
+        "tool.knife",
+        "tool.board",
+        "tool.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.okra",
+        "ingredient.onion",
+        "ingredient.scotch_bonnet",
+        "ingredient.palm_oil"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.ghanaian.banku", "dish.ghanaian.kenkey"],
+        "condiments": [
+          "dish.ghanaian.shito",
+          "dish.ghanaian.fresh_pepper_sauce"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "stew",
+        "okra",
+        "weeknight_possible",
+        "batch_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.red_red",
+      "label": "Red-Red (Beans Stew)",
+      "aka": ["Red Red", "Ghana Beans Stew"],
+      "subprofiles": ["cuisines.ghanaian.akan"],
+      "category": "category.stew",
+      "difficulty": 2,
+      "heatTypical": 2,
+      "time": {
+        "activeMins": 25,
+        "totalMins": 65,
+        "handsOffMins": 40
+      },
+      "servingStyles": ["family_style", "bowls", "one_pot"],
+      "mealArchetypes": ["archetype.beans_and_plantain"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.legume",
+          "items": ["ingredient.black_eyed_peas", "ingredient.kidney_beans"],
+          "chooseOne": true
+        },
+        {
+          "role": "role.fat",
+          "items": ["ingredient.palm_oil"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.plantain_ripe",
+            "ingredient.rice",
+            "ingredient.gari"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.simmer", "method.stew", "method.fry"],
+      "equipmentRecommended": ["tool.skilet_large"],
+      "equipmentMinimum": [
+        "tool.pot_stock",
+        "tool.pan",
+        "tool.knife",
+        "tool.board",
+        "tool.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.palm_oil",
+        "ingredient.onion",
+        "ingredient.tomato_paste",
+        "ingredient.scotch_bonnet",
+        "ingredient.black_eyed_peas"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "pairingHints": {
+        "serveWith": ["dish.ghanaian.fried_plantain", "dish.ghanaian.gari"],
+        "condiments": ["dish.ghanaian.shito"]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "beans",
+        "plantain",
+        "weeknight_possible",
+        "batch_friendly",
+        "freezer_friendly",
+        "budget_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.waakye",
+      "label": "Waakye",
+      "aka": ["Rice and Beans (Waakye)"],
+      "subprofiles": ["cuisines.ghanaian.ga_dangme", "cuisines.ghanaian.akan"],
+      "category": "category.rice",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": {
+        "activeMins": 25,
+        "totalMins": 75,
+        "handsOffMins": 50
+      },
+      "servingStyles": ["bowls", "street_food", "family_style"],
+      "mealArchetypes": ["archetype.stew_and_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "partial"
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["ingredient.rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.legume",
+          "items": ["ingredient.black_eyed_peas", "ingredient.kidney_beans"],
+          "chooseOne": true
+        },
+        {
+          "role": "role.condiment",
+          "items": ["dish.ghanaian.shito"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.boil", "method.simmer"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["tool.pot_stock", "tool.knife", "tool.board"],
+      "ingredientsCore": [
+        "ingredient.rice",
+        "ingredient.black_eyed_peas",
+        "ingredient.onion"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "commonSides": [
+          "dish.ghanaian.fried_plantain",
+          "dish.ghanaian.boiled_egg",
+          "side.salad_simple"
+        ],
+        "condiments": [
+          "dish.ghanaian.shito",
+          "dish.ghanaian.fresh_pepper_sauce"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "rice",
+        "beans",
+        "street_food",
+        "batch_friendly",
+        "weeknight_possible"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.jollof_rice",
+      "label": "Jollof Rice (Ghana-style)",
+      "aka": ["Ghana Jollof"],
+      "subprofiles": ["cuisines.ghanaian.ga_dangme", "cuisines.ghanaian.akan"],
+      "category": "category.rice",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": {
+        "activeMins": 25,
+        "totalMins": 70,
+        "handsOffMins": 45
+      },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["archetype.stew_and_rice"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["base.jollof"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.starch",
+          "items": ["ingredient.rice"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.protein",
+          "items": ["ingredient.chicken", "ingredient.beef", "ingredient.fish"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.stew", "method.simmer"],
+      "equipmentRecommended": ["tool.dutch_oven"],
+      "equipmentMinimum": [
+        "tool.pot_stock",
+        "tool.knife",
+        "tool.board",
+        "tool.spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.rice",
+        "ingredient.tomato_paste",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.ginger",
+        "ingredient.chili"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.ghanaian.fried_plantain", "side.salad_simple"]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "rice",
+        "one_pot",
+        "batch_friendly",
+        "freezer_friendly",
+        "weeknight_possible"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.kenkey",
+      "label": "Kenkey",
+      "aka": ["Dorkunu", "Fermented Corn Dumpling"],
+      "subprofiles": ["cuisines.ghanaian.ga_dangme"],
+      "category": "category.starch",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": {
+        "activeMins": 45,
+        "totalMins": 240,
+        "handsOffMins": 195
+      },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.starch",
+          "items": ["ingredient.fermented_corn_dough"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.ferment", "method.steam", "method.boil"],
+      "equipmentRecommended": ["tool.steamer"],
+      "equipmentMinimum": ["tool.pot_stock", "tool.spoon"],
+      "ingredientsCore": ["ingredient.fermented_corn_dough", "ingredient.salt"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.ghanaian.grilled_tilapia",
+          "dish.ghanaian.fresh_pepper_sauce"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "starch",
+        "fermented",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.banku",
+      "label": "Banku",
+      "aka": ["Fermented Corn and Cassava Dumpling"],
+      "subprofiles": ["cuisines.ghanaian.ga_dangme", "cuisines.ghanaian.ewe"],
+      "category": "category.starch",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": {
+        "activeMins": 35,
+        "totalMins": 70,
+        "handsOffMins": 35
+      },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.fermented_corn_dough",
+            "ingredient.fermented_cassava_dough"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.stir", "method.simmer"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["tool.pot_stock", "tool.spoon"],
+      "ingredientsCore": [
+        "ingredient.fermented_corn_dough",
+        "ingredient.fermented_cassava_dough",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.ghanaian.okro_stew",
+          "dish.ghanaian.grilled_tilapia",
+          "dish.ghanaian.fresh_pepper_sauce"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "starch",
+        "fermented",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.fufu",
+      "label": "Fufu",
+      "aka": ["Cassava and Plantain Fufu", "Ghana Fufu"],
+      "subprofiles": ["cuisines.ghanaian.akan"],
+      "category": "category.starch",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": {
+        "activeMins": 45,
+        "totalMins": 75,
+        "handsOffMins": 30
+      },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": false,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "role.starch",
+          "items": [
+            "ingredient.cassava",
+            "ingredient.plantain_green",
+            "ingredient.yam"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.boil", "method.pound"],
+      "equipmentRecommended": ["tool.mortar_pestle"],
+      "equipmentMinimum": ["tool.pot_stock", "tool.spoon"],
+      "ingredientsCore": ["ingredient.cassava", "ingredient.plantain_green"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.ghanaian.groundnut_soup",
+          "dish.ghanaian.light_soup",
+          "dish.ghanaian.palm_nut_soup"
+        ]
+      },
+      "plannerTags": ["cuisine.ghanaian", "starch", "swallow", "traditional"]
+    },
+    {
+      "id": "dish.ghanaian.omo_tuo",
+      "label": "Omo Tuo (Rice Balls)",
+      "aka": ["Rice Balls", "Omotuo"],
+      "subprofiles": ["cuisines.ghanaian.akan"],
+      "category": "category.starch",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": {
+        "activeMins": 20,
+        "totalMins": 45,
+        "handsOffMins": 25
+      },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.starch",
+          "items": ["ingredient.rice"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.boil", "method.shape"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["tool.pot_stock", "tool.spoon"],
+      "ingredientsCore": ["ingredient.rice", "ingredient.salt"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.ghanaian.palm_nut_soup",
+          "dish.ghanaian.groundnut_soup"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "starch",
+        "weeknight_possible",
+        "freezer_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.shito",
+      "label": "Shito (Black Pepper Sauce)",
+      "aka": ["Ghana Black Pepper Sauce"],
+      "subprofiles": [],
+      "category": "category.condiment",
+      "difficulty": 3,
+      "heatTypical": 4,
+      "time": {
+        "activeMins": 35,
+        "totalMins": 75,
+        "handsOffMins": 40
+      },
+      "servingStyles": ["snacks", "street_food", "family_style"],
+      "mealArchetypes": [
+        "archetype.stew_and_rice",
+        "archetype.grill_and_pepper"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "role.condiment",
+          "items": ["condiment.shito"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.umami",
+          "items": ["ingredient.dried_shrimp", "ingredient.smoked_fish"],
+          "chooseOne": true
+        },
+        {
+          "role": "role.heat",
+          "items": ["ingredient.chili_flakes", "ingredient.scotch_bonnet"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.fry", "method.reduce"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["tool.pan", "tool.spoon"],
+      "ingredientsCore": [
+        "ingredient.oil",
+        "ingredient.onion",
+        "ingredient.chili_flakes"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "pairsWith": [
+          "dish.ghanaian.waakye",
+          "dish.ghanaian.grilled_tilapia",
+          "dish.ghanaian.fried_plantain"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "condiment",
+        "pepper_forward",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.fresh_pepper_sauce",
+      "label": "Fresh Pepper Sauce",
+      "aka": ["Kpakpo Shito (fresh style)", "Pepper & Onion Sauce"],
+      "subprofiles": [],
+      "category": "category.condiment",
+      "difficulty": 1,
+      "heatTypical": 4,
+      "time": {
+        "activeMins": 10,
+        "totalMins": 10,
+        "handsOffMins": 0
+      },
+      "servingStyles": ["street_food", "family_style"],
+      "mealArchetypes": [
+        "archetype.grill_and_pepper",
+        "archetype.soup_and_swallow"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "role.condiment",
+          "items": ["condiment.fresh_pepper_sauce"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.heat",
+          "items": ["ingredient.scotch_bonnet", "ingredient.habanero"],
+          "chooseOne": true
+        },
+        {
+          "role": "role.acid",
+          "items": ["ingredient.lime", "ingredient.lemon"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.chop", "method.blend"],
+      "equipmentRecommended": ["tool.blender"],
+      "equipmentMinimum": ["tool.knife", "tool.board"],
+      "ingredientsCore": [
+        "ingredient.onion",
+        "ingredient.scotch_bonnet",
+        "ingredient.lime",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegan"],
+      "pairingHints": {
+        "pairsWith": [
+          "dish.ghanaian.grilled_tilapia",
+          "dish.ghanaian.banku",
+          "dish.ghanaian.kenkey"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "condiment",
+        "pepper_forward",
+        "weeknight_possible",
+        "fresh"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.grilled_tilapia",
+      "label": "Grilled Tilapia",
+      "aka": ["Charred Tilapia (Ghana-style)"],
+      "subprofiles": ["cuisines.ghanaian.ga_dangme"],
+      "category": "category.protein",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": {
+        "activeMins": 20,
+        "totalMins": 40,
+        "handsOffMins": 20
+      },
+      "servingStyles": ["grill_and_sides", "street_food", "family_style"],
+      "mealArchetypes": ["archetype.grill_and_pepper"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "role.protein",
+          "items": ["ingredient.fish"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.condiment",
+          "items": ["dish.ghanaian.fresh_pepper_sauce"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.starch",
+          "items": [
+            "dish.ghanaian.banku",
+            "dish.ghanaian.kenkey",
+            "ingredient.rice"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["method.grill", "method.marinate"],
+      "equipmentRecommended": ["tool.grill"],
+      "equipmentMinimum": ["tool.pan", "tool.knife", "tool.board"],
+      "ingredientsCore": [
+        "ingredient.fish",
+        "ingredient.ginger",
+        "ingredient.garlic",
+        "ingredient.onion",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.ghanaian.banku",
+          "dish.ghanaian.kenkey",
+          "dish.ghanaian.fresh_pepper_sauce"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "protein",
+        "grilled",
+        "weeknight_possible"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.fried_plantain",
+      "label": "Fried Ripe Plantain",
+      "aka": ["Kelewele (spiced plantain, variant)"],
+      "subprofiles": [],
+      "category": "category.side",
+      "difficulty": 1,
+      "heatTypical": 1,
+      "time": {
+        "activeMins": 15,
+        "totalMins": 20,
+        "handsOffMins": 5
+      },
+      "servingStyles": ["snacks", "side", "street_food", "family_style"],
+      "mealArchetypes": [
+        "archetype.beans_and_plantain",
+        "archetype.stew_and_rice"
+      ],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "role.side",
+          "items": ["ingredient.plantain_ripe"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.fry"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["tool.pan", "tool.knife", "tool.board"],
+      "ingredientsCore": [
+        "ingredient.plantain_ripe",
+        "ingredient.oil",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegan"],
+      "pairingHints": {
+        "pairsWith": [
+          "dish.ghanaian.red_red",
+          "dish.ghanaian.jollof_rice",
+          "dish.ghanaian.waakye"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "side",
+        "plantain",
+        "weeknight_possible"
+      ]
+    },
+    {
+      "id": "dish.ghanaian.koko",
+      "label": "Hausa Koko (Spiced Millet Porridge)",
+      "aka": ["Koko", "Millet Porridge"],
+      "subprofiles": [],
+      "category": "category.breakfast",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": {
+        "activeMins": 15,
+        "totalMins": 35,
+        "handsOffMins": 20
+      },
+      "servingStyles": ["breakfast", "bowls"],
+      "mealArchetypes": ["archetype.breakfast_porridge"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "role.base",
+          "items": ["ingredient.millet"],
+          "chooseOne": false
+        },
+        {
+          "role": "role.aromatics",
+          "items": [
+            "ingredient.ginger",
+            "ingredient.clove",
+            "ingredient.nutmeg"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["method.simmer", "method.whisk"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["tool.pot_stock", "tool.whisk"],
+      "ingredientsCore": [
+        "ingredient.millet",
+        "ingredient.ginger",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegan"],
+      "pairingHints": {
+        "pairsWith": ["side.bread", "side.koose"]
+      },
+      "plannerTags": [
+        "cuisine.ghanaian",
+        "breakfast",
+        "porridge",
+        "weeknight_possible"
+      ]
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisines.ghanaian": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.omo_tuo",
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce",
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fried_plantain",
+        "dish.ghanaian.koko"
+      ]
+    },
+    "byArchetype": {
+      "archetype.soup_and_swallow": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.omo_tuo"
+      ],
+      "archetype.stew_and_rice": [
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.shito"
+      ],
+      "archetype.grill_and_pepper": [
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fresh_pepper_sauce",
+        "dish.ghanaian.shito"
+      ],
+      "archetype.beans_and_plantain": [
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.fried_plantain"
+      ],
+      "archetype.breakfast_porridge": ["dish.ghanaian.koko"]
+    },
+    "aliasIndex": {
+      "abenkwan": "dish.ghanaian.palm_nut_soup",
+      "ashanti fufu": "dish.ghanaian.fufu",
+      "banku": "dish.ghanaian.banku",
+      "charred tilapia (ghana-style)": "dish.ghanaian.grilled_tilapia",
+      "dorkunu": "dish.ghanaian.kenkey",
+      "fermented corn dumpling": "dish.ghanaian.kenkey",
+      "fermented corn and cassava dumpling": "dish.ghanaian.banku",
+      "ghana beans stew": "dish.ghanaian.red_red",
+      "ghana black pepper sauce": "dish.ghanaian.shito",
+      "ghana groundnut soup": "dish.ghanaian.groundnut_soup",
+      "ghana jollof": "dish.ghanaian.jollof_rice",
+      "ghana light soup": "dish.ghanaian.light_soup",
+      "ghana fufu": "dish.ghanaian.fufu",
+      "grilled tilapia": "dish.ghanaian.grilled_tilapia",
+      "groundnut soup": "dish.ghanaian.groundnut_soup",
+      "hausa koko": "dish.ghanaian.koko",
+      "kenkey": "dish.ghanaian.kenkey",
+      "kelewele": "dish.ghanaian.fried_plantain",
+      "koko": "dish.ghanaian.koko",
+      "light soup": "dish.ghanaian.light_soup",
+      "millet porridge": "dish.ghanaian.koko",
+      "omotuo": "dish.ghanaian.omo_tuo",
+      "omo tuo": "dish.ghanaian.omo_tuo",
+      "okra stew": "dish.ghanaian.okro_stew",
+      "okro stew": "dish.ghanaian.okro_stew",
+      "palm fruit soup": "dish.ghanaian.palm_nut_soup",
+      "palm nut soup": "dish.ghanaian.palm_nut_soup",
+      "peanut soup": "dish.ghanaian.groundnut_soup",
+      "pepper & onion sauce": "dish.ghanaian.fresh_pepper_sauce",
+      "pepper and onion sauce": "dish.ghanaian.fresh_pepper_sauce",
+      "pepper soup (ghana-style)": "dish.ghanaian.light_soup",
+      "red red": "dish.ghanaian.red_red",
+      "rice balls": "dish.ghanaian.omo_tuo",
+      "rice and beans (waakye)": "dish.ghanaian.waakye",
+      "shito": "dish.ghanaian.shito",
+      "tilapia": "dish.ghanaian.grilled_tilapia",
+      "waakye": "dish.ghanaian.waakye"
+    },
+    "keywordIndex": {
+      "abenkwan": ["dish.ghanaian.palm_nut_soup"],
+      "banku": [
+        "dish.ghanaian.banku",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fresh_pepper_sauce"
+      ],
+      "beans": ["dish.ghanaian.red_red", "dish.ghanaian.waakye"],
+      "breakfast": ["dish.ghanaian.koko"],
+      "condiment": ["dish.ghanaian.shito", "dish.ghanaian.fresh_pepper_sauce"],
+      "fermented": ["dish.ghanaian.kenkey", "dish.ghanaian.banku"],
+      "fish": [
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.palm_nut_soup"
+      ],
+      "fufu": [
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup"
+      ],
+      "groundnut": ["dish.ghanaian.groundnut_soup"],
+      "jollof": ["dish.ghanaian.jollof_rice"],
+      "kenkey": [
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fresh_pepper_sauce"
+      ],
+      "okra": ["dish.ghanaian.okro_stew"],
+      "omotuo": [
+        "dish.ghanaian.omo_tuo",
+        "dish.ghanaian.palm_nut_soup",
+        "dish.ghanaian.groundnut_soup"
+      ],
+      "palm": ["dish.ghanaian.palm_nut_soup", "dish.ghanaian.red_red"],
+      "plantain": [
+        "dish.ghanaian.fried_plantain",
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.fufu"
+      ],
+      "porridge": ["dish.ghanaian.koko"],
+      "rice": [
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.omo_tuo"
+      ],
+      "shito": [
+        "dish.ghanaian.shito",
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.red_red"
+      ],
+      "soup": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup"
+      ],
+      "starch": [
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.omo_tuo"
+      ],
+      "stew": ["dish.ghanaian.okro_stew", "dish.ghanaian.red_red"],
+      "street": [
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce",
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fried_plantain"
+      ],
+      "tilapia": ["dish.ghanaian.grilled_tilapia"],
+      "waakye": ["dish.ghanaian.waakye"]
+    },
+    "tagIndex": {
+      "batch_friendly": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.omo_tuo",
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce",
+        "dish.ghanaian.koko"
+      ],
+      "beans": ["dish.ghanaian.red_red", "dish.ghanaian.waakye"],
+      "breakfast": ["dish.ghanaian.koko"],
+      "budget_friendly": ["dish.ghanaian.red_red"],
+      "condiment": ["dish.ghanaian.shito", "dish.ghanaian.fresh_pepper_sauce"],
+      "freezer_friendly": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup",
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.omo_tuo",
+        "dish.ghanaian.shito"
+      ],
+      "fresh": ["dish.ghanaian.fresh_pepper_sauce"],
+      "groundnut": ["dish.ghanaian.groundnut_soup"],
+      "okra": ["dish.ghanaian.okro_stew"],
+      "pepper_forward": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce"
+      ],
+      "plantain": ["dish.ghanaian.fried_plantain"],
+      "protein": ["dish.ghanaian.grilled_tilapia"],
+      "rice": ["dish.ghanaian.waakye", "dish.ghanaian.jollof_rice"],
+      "soup": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup"
+      ],
+      "starch": [
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.omo_tuo"
+      ],
+      "street_food": [
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce",
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fried_plantain"
+      ],
+      "stew": ["dish.ghanaian.okro_stew", "dish.ghanaian.red_red"],
+      "traditional": ["dish.ghanaian.fufu"],
+      "weeknight_possible": [
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.omo_tuo",
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce",
+        "dish.ghanaian.grilled_tilapia",
+        "dish.ghanaian.fried_plantain",
+        "dish.ghanaian.koko"
+      ]
+    },
+    "bySubprofile": {
+      "cuisines.ghanaian.akan": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup",
+        "dish.ghanaian.red_red",
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.omo_tuo"
+      ],
+      "cuisines.ghanaian.ga_dangme": [
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.waakye",
+        "dish.ghanaian.jollof_rice",
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.grilled_tilapia"
+      ],
+      "cuisines.ghanaian.ewe": [
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.okro_stew",
+        "dish.ghanaian.banku"
+      ]
+    },
+    "byCategory": {
+      "category.breakfast": ["dish.ghanaian.koko"],
+      "category.condiment": [
+        "dish.ghanaian.shito",
+        "dish.ghanaian.fresh_pepper_sauce"
+      ],
+      "category.protein": ["dish.ghanaian.grilled_tilapia"],
+      "category.rice": ["dish.ghanaian.waakye", "dish.ghanaian.jollof_rice"],
+      "category.side": ["dish.ghanaian.fried_plantain"],
+      "category.soup": [
+        "dish.ghanaian.groundnut_soup",
+        "dish.ghanaian.light_soup",
+        "dish.ghanaian.palm_nut_soup"
+      ],
+      "category.starch": [
+        "dish.ghanaian.kenkey",
+        "dish.ghanaian.banku",
+        "dish.ghanaian.fufu",
+        "dish.ghanaian.omo_tuo"
+      ],
+      "category.stew": ["dish.ghanaian.okro_stew", "dish.ghanaian.red_red"]
+    }
+  }
+}

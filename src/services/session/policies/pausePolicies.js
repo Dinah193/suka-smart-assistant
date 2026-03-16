@@ -8,27 +8,36 @@
   const isBrowser = typeof window !== "undefined";
   const now = () => Date.now();
 
-  let eventBus = { on(){}, off(){}, emit(){} };
+  let eventBus = { on() {}, off() {}, emit() {} };
   try {
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
   let relativeScheduler = null;
-  try { relativeScheduler = (require("@/services/session/RelativeScheduler") || {}).relativeScheduler || null; } catch (_e) {}
+  try {
+    relativeScheduler =
+      (require("@/services/session/RelativeScheduler") || {})
+        .relativeScheduler || null;
+  } catch (_e) {}
 
   let scheduleHelpers = null; // expected: isSabbath(), inQuietHours(), withholdsForDomain(domain)
-  try { scheduleHelpers = require("@/services/scheduleHelpers"); } catch (_e) {}
+  try {
+    scheduleHelpers = require("@/services/scheduleHelpers");
+  } catch (_e) {}
 
   let automation = null; // for optional info toasts
-  try { automation = (require("@/services/automation/runtime") || {}).automation || null; } catch (_e) {}
+  try {
+    automation =
+      (require("@/services/automation/runtime") || {}).automation || null;
+  } catch (_e) {}
 
   // ------------------------------ Constants -----------------------------------
   const POLICY = Object.freeze({
-    FREEZE: "freeze",            // freeze suspendable timers; pause anchor
-    CONTINUE: "continue",        // allow to proceed (may mute notifs)
-    SAFETY_ONLY: "safety-only",  // block normal ops, allow safety interventions
-    MUTE: "mute",                // continue but mute emits (quiet-hours/Sabbath UX)
+    FREEZE: "freeze", // freeze suspendable timers; pause anchor
+    CONTINUE: "continue", // allow to proceed (may mute notifs)
+    SAFETY_ONLY: "safety-only", // block normal ops, allow safety interventions
+    MUTE: "mute", // continue but mute emits (quiet-hours/Sabbath UX)
   });
 
   const REASON = Object.freeze({
@@ -48,8 +57,8 @@
   // Example item payload: { suspendable:true, hot:true, perishable:true, safetyCritical:false }
   const TRAIT = Object.freeze({
     SUSPENDABLE: "suspendable",
-    HOT: "hot",                   // in-oven/on-burner/on-heat
-    PERISHABLE: "perishable",     // food at risk if delayed too long
+    HOT: "hot", // in-oven/on-burner/on-heat
+    PERISHABLE: "perishable", // food at risk if delayed too long
     SAFETY_CRITICAL: "safetyCritical",
   });
 
@@ -73,7 +82,8 @@
       quiet: POLICY.MUTE,
       withhold: POLICY.FREEZE,
       biohazard: POLICY.SAFETY_ONLY,
-      rules(item){ // HOT always continues (but may mute)
+      rules(item) {
+        // HOT always continues (but may mute)
         if (item?.traits?.[TRAIT.HOT]) return POLICY.CONTINUE;
         return null;
       },
@@ -98,7 +108,7 @@
       quiet: POLICY.MUTE,
       withhold: POLICY.FREEZE,
       biohazard: POLICY.SAFETY_ONLY,
-      rules(item){
+      rules(item) {
         if (item?.traits?.[TRAIT.SAFETY_CRITICAL]) return POLICY.SAFETY_ONLY;
         return null;
       },
@@ -110,17 +120,31 @@
 
   // ------------------------------ Helpers -------------------------------------
   function isSabbath(ts = now()) {
-    try { return !!(scheduleHelpers?.isSabbath && scheduleHelpers.isSabbath(ts)); } catch { return false; }
+    try {
+      return !!(scheduleHelpers?.isSabbath && scheduleHelpers.isSabbath(ts));
+    } catch {
+      return false;
+    }
   }
   function inQuietHours(ts = now()) {
-    try { return !!(scheduleHelpers?.inQuietHours && scheduleHelpers.inQuietHours(ts)); } catch { return false; }
+    try {
+      return !!(
+        scheduleHelpers?.inQuietHours && scheduleHelpers.inQuietHours(ts)
+      );
+    } catch {
+      return false;
+    }
   }
   function activeWithholds(domain) {
     try {
-      const ws = scheduleHelpers?.withholdsForDomain ? (scheduleHelpers.withholdsForDomain(domain) || []) : [];
+      const ws = scheduleHelpers?.withholdsForDomain
+        ? scheduleHelpers.withholdsForDomain(domain) || []
+        : [];
       const ts = now();
-      return ws.filter(w => !w.until || w.until > ts);
-    } catch { return []; }
+      return ws.filter((w) => !w.until || w.until > ts);
+    } catch {
+      return [];
+    }
   }
 
   function getDomainPolicy(domain) {
@@ -128,7 +152,7 @@
   }
 
   function isSuspendable(item) {
-    return !!(item?.traits?.[TRAIT.SUSPENDABLE]);
+    return !!item?.traits?.[TRAIT.SUSPENDABLE];
   }
 
   function shouldMute(reason) {
@@ -152,10 +176,16 @@
 
     // 1) Safety first (explicit conflicts)
     const conflicts = Array.isArray(ctx.conflicts) ? ctx.conflicts : [];
-    const conflictKinds = new Set(conflicts.map(c => (c.kind || "").toLowerCase()));
+    const conflictKinds = new Set(
+      conflicts.map((c) => (c.kind || "").toLowerCase())
+    );
 
     if (conflictKinds.has("biohazard")) {
-      return verdict(POLICY.SAFETY_ONLY, REASON.BIOHAZARD, "Biohazard conflict");
+      return verdict(
+        POLICY.SAFETY_ONLY,
+        REASON.BIOHAZARD,
+        "Biohazard conflict"
+      );
     }
     if (conflictKinds.has("appliance")) {
       return verdict(POLICY.FREEZE, REASON.APPLIANCE, "Appliance conflict");
@@ -176,19 +206,37 @@
     if (isSabbath(ts)) {
       // domain rules may override item with HOT → continue but muted
       const ruleHit = policy.rules?.(ctx.item);
-      if (ruleHit === POLICY.CONTINUE) return verdict(POLICY.MUTE, REASON.SABBATH, "Sabbath: continue (hot) but mute");
+      if (ruleHit === POLICY.CONTINUE)
+        return verdict(
+          POLICY.MUTE,
+          REASON.SABBATH,
+          "Sabbath: continue (hot) but mute"
+        );
       return verdict(policy.sabbath || POLICY.MUTE, REASON.SABBATH, "Sabbath");
     }
     if (inQuietHours(ts)) {
       const ruleHit = policy.rules?.(ctx.item);
-      if (ruleHit === POLICY.CONTINUE) return verdict(POLICY.MUTE, REASON.QUIET_HOURS, "Quiet hours: continue (hot) but mute");
-      return verdict(policy.quiet || POLICY.MUTE, REASON.QUIET_HOURS, "Quiet hours");
+      if (ruleHit === POLICY.CONTINUE)
+        return verdict(
+          POLICY.MUTE,
+          REASON.QUIET_HOURS,
+          "Quiet hours: continue (hot) but mute"
+        );
+      return verdict(
+        policy.quiet || POLICY.MUTE,
+        REASON.QUIET_HOURS,
+        "Quiet hours"
+      );
     }
 
     // 4) Domain withholds map (from scheduleHelpers)
     const withholds = activeWithholds(domain);
     if (withholds.length) {
-      return verdict(policy.withhold || POLICY.FREEZE, REASON.SAFETY, "Domain withhold active");
+      return verdict(
+        policy.withhold || POLICY.FREEZE,
+        REASON.SAFETY,
+        "Domain withhold active"
+      );
     }
 
     // 5) Domain/item-specific edge rules
@@ -196,7 +244,11 @@
     if (rule) return verdict(rule, REASON.NONE, "Domain rule");
 
     // 6) Default
-    return verdict(policy.default || POLICY.FREEZE, REASON.NONE, "Default policy");
+    return verdict(
+      policy.default || POLICY.FREEZE,
+      REASON.NONE,
+      "Default policy"
+    );
   }
 
   function verdict(policy, reason, note) {
@@ -217,7 +269,10 @@
     const { policy, reason, note } = evaluation;
 
     if (policy === POLICY.FREEZE || policy === POLICY.SAFETY_ONLY) {
-      try { relativeScheduler?.pauseAnchor && relativeScheduler.pauseAnchor(anchorId); } catch (_e) {}
+      try {
+        relativeScheduler?.pauseAnchor &&
+          relativeScheduler.pauseAnchor(anchorId);
+      } catch (_e) {}
     }
 
     // Emit a standardized event so HUD/guards can adapt UI accordingly
@@ -232,9 +287,12 @@
     // Optional: minimal UX hint
     if (automation?.notify && policy !== POLICY.CONTINUE) {
       automation.notify({
-        title: policy === POLICY.FREEZE ? "Session paused" :
-               policy === POLICY.SAFETY_ONLY ? "Safety-only mode" :
-               "Muted notifications",
+        title:
+          policy === POLICY.FREEZE
+            ? "Session paused"
+            : policy === POLICY.SAFETY_ONLY
+            ? "Safety-only mode"
+            : "Muted notifications",
         message: note || "Policy applied.",
         scope: "local",
         severity: "info",
@@ -256,7 +314,10 @@
         conflicts: e.conflicts || [],
         ts: e.ts || now(),
       });
-      eventBus.emit("session.pause.policy.evaluated", { anchorId: e.anchorId || null, evaluation: evaln });
+      eventBus.emit("session.pause.policy.evaluated", {
+        anchorId: e.anchorId || null,
+        evaluation: evaln,
+      });
       if (e.apply && e.anchorId) applyToAnchor(e.anchorId, evaln);
     });
 
@@ -268,14 +329,19 @@
 
       const evaln = evaluate({
         domain,
-        conflicts: [{ kind: (conf.kind || "").toLowerCase(), until: conf.until || null }],
+        conflicts: [
+          { kind: (conf.kind || "").toLowerCase(), until: conf.until || null },
+        ],
       });
       applyToAnchor(anchorId, evaln);
     });
 
     // Respect user pause/resume buttons
     eventBus.on("session.paused.requested", (e = {}) => {
-      const evaln = evaluate({ domain: e.domain || "general", userPause: true });
+      const evaln = evaluate({
+        domain: e.domain || "general",
+        userPause: true,
+      });
       applyToAnchor(e.anchorId, evaln);
     });
     // Note: actual resume is handled by callers; no policy needed to resume
@@ -283,8 +349,12 @@
 
   // ------------------------------ Public API ----------------------------------
   const pausePolicies = {
-    POLICY, REASON, TRAIT,
-    init() { wire(); },
+    POLICY,
+    REASON,
+    TRAIT,
+    init() {
+      wire();
+    },
 
     // Evaluate without side effects
     evaluate,
@@ -295,8 +365,15 @@
     // Registry: add/override a domain table
     registerDomainPolicy(domain, table) {
       if (!domain || typeof table !== "object") return;
-      policyRegistry[domain] = Object.assign({}, getDomainPolicy(domain), table);
-      eventBus.emit("session.pause.policy.updated", { domain, table: policyRegistry[domain] });
+      policyRegistry[domain] = Object.assign(
+        {},
+        getDomainPolicy(domain),
+        table
+      );
+      eventBus.emit("session.pause.policy.updated", {
+        domain,
+        table: policyRegistry[domain],
+      });
     },
 
     getDomainPolicy,

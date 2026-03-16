@@ -39,7 +39,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -96,9 +96,9 @@ let POLICY = Object.freeze({
   version: "1.0",
   // Drift thresholds (plan level, vs planned end or previous ETA)
   drift: {
-    softMin: 10,      // soft drift threshold
-    hardMin: 30,      // hard drift threshold
-    escalateMin: 60,  // emit risk.drift.escalate when beyond this
+    softMin: 10, // soft drift threshold
+    hardMin: 30, // hard drift threshold
+    escalateMin: 60, // emit risk.drift.escalate when beyond this
   },
   // Per-window lateness thresholds (ETA vs planned end)
   late: {
@@ -107,13 +107,13 @@ let POLICY = Object.freeze({
   },
   // Resource conflicts
   conflicts: {
-    maxAllowed: 0,        // number of capacityUnmet/invalidWindow blockers tolerated
-    warnAbove: 0,         // warn when > warnAbove
+    maxAllowed: 0, // number of capacityUnmet/invalidWindow blockers tolerated
+    warnAbove: 0, // warn when > warnAbove
   },
   // P90 protection — if planned duration < P90 * factor trigger exceed
   p90: {
-    factor: 1.0,          // if planned < P90 * factor → risk.p90.exceed
-    minSamples: 5,        // require at least N samples for confidence
+    factor: 1.0, // if planned < P90 * factor → risk.p90.exceed
+    minSamples: 5, // require at least N samples for confidence
   },
   // Risk scoring weights per signal
   scoring: {
@@ -131,10 +131,10 @@ let POLICY = Object.freeze({
   domains: {
     cooking: {
       late: { softMin: 3, hardMin: 10 }, // time-sensitive plating
-      p90: { factor: 0.9 },              // be safer than P90
+      p90: { factor: 0.9 }, // be safer than P90
     },
     preservation: {
-      late: { softMin: 1, hardMin: 3 },  // safety-critical timing
+      late: { softMin: 1, hardMin: 3 }, // safety-critical timing
       p90: { factor: 1.1 },
     },
     garden: {
@@ -169,7 +169,8 @@ async function getDurationStats(domain = "generic", taskType = "any") {
       return summarizeDurations(arr || []);
     }
     if (dataGateway?.kv?.get) {
-      const arr = (await dataGateway.kv.get("durations", `${domain}:${taskType}`)) || [];
+      const arr =
+        (await dataGateway.kv.get("durations", `${domain}:${taskType}`)) || [];
       return summarizeDurations(arr || []);
     }
   } catch {}
@@ -225,7 +226,10 @@ async function evaluatePolicy(req = {}) {
     const planId = String(req.planId || "").trim() || `ad-hoc-${Date.now()}`;
     const windows = Array.isArray(req.windows) ? req.windows.slice() : [];
     if (!windows.length) {
-      emit("scheduling.risk.policy.error", source, { message: "No windows supplied", planId });
+      emit("scheduling.risk.policy.error", source, {
+        message: "No windows supplied",
+        planId,
+      });
       return emptyResult(planId);
     }
 
@@ -236,9 +240,10 @@ async function evaluatePolicy(req = {}) {
     // Build plan-level signals
     const plannedEndMs = toMs(req.planEndISO || inferPlannedEnd(windows));
     const latestEtaMs = inferLatestETAms(windows);
-    const driftMin = isNum(plannedEndMs) && isNum(latestEtaMs)
-      ? Math.round((latestEtaMs - plannedEndMs) / 60000)
-      : 0;
+    const driftMin =
+      isNum(plannedEndMs) && isNum(latestEtaMs)
+        ? Math.round((latestEtaMs - plannedEndMs) / 60000)
+        : 0;
 
     const planSignals = [];
     const triggers = [];
@@ -246,30 +251,57 @@ async function evaluatePolicy(req = {}) {
     const dpol = POLICY.drift || {};
     if (isNum(driftMin) && driftMin >= (dpol.softMin ?? 10)) {
       planSignals.push({ code: "DRIFT_SOFT", value: driftMin });
-      triggers.push({ code: "risk.late.soft", level: "plan", scope: "plan", meta: { driftMin } });
+      triggers.push({
+        code: "risk.late.soft",
+        level: "plan",
+        scope: "plan",
+        meta: { driftMin },
+      });
     }
     if (isNum(driftMin) && driftMin >= (dpol.hardMin ?? 30)) {
       planSignals.push({ code: "DRIFT_HARD", value: driftMin });
-      triggers.push({ code: "risk.late.hard", level: "plan", scope: "plan", meta: { driftMin } });
+      triggers.push({
+        code: "risk.late.hard",
+        level: "plan",
+        scope: "plan",
+        meta: { driftMin },
+      });
     }
     if (isNum(driftMin) && driftMin >= (dpol.escalateMin ?? 60)) {
       planSignals.push({ code: "DRIFT_ESCALATE", value: driftMin });
-      triggers.push({ code: "risk.drift.escalate", level: "plan", scope: "plan", meta: { driftMin } });
+      triggers.push({
+        code: "risk.drift.escalate",
+        level: "plan",
+        scope: "plan",
+        meta: { driftMin },
+      });
     }
 
     // Conflicts triggers
-    const conflictCount = conflicts.filter((c) => c.type === "capacityUnmet" || c.type === "invalidWindow").length;
+    const conflictCount = conflicts.filter(
+      (c) => c.type === "capacityUnmet" || c.type === "invalidWindow"
+    ).length;
     const cpol = POLICY.conflicts || {};
     if (conflictCount > (cpol.warnAbove ?? 0)) {
       planSignals.push({ code: "CONFLICTS", value: conflictCount });
-      triggers.push({ code: "risk.conflicts.excess", level: "plan", scope: "plan", meta: { conflictCount } });
+      triggers.push({
+        code: "risk.conflicts.excess",
+        level: "plan",
+        scope: "plan",
+        meta: { conflictCount },
+      });
     }
 
     // Blockers triggers (from checks)
     const blockerCount = issues.filter((i) => i.severity === "blocker").length;
     if (blockerCount > 0) {
       planSignals.push({ code: "BLOCKERS", value: blockerCount });
-      triggers.push({ code: "risk.blockers.present", level: "plan", scope: "plan", meta: { blockerCount } });
+      triggers.push({
+        code: "risk.blockers.present",
+        level: "plan",
+        scope: "plan",
+        meta: { blockerCount },
+      });
     }
 
     // Per-window evaluation
@@ -283,43 +315,76 @@ async function evaluatePolicy(req = {}) {
       const signals = [];
       const plannedEnd = toMs(w.endISO);
       const eta = toMs(w.etaISO || w.endISO);
-      const delayMin = isNum(plannedEnd) && isNum(eta) ? Math.round((eta - plannedEnd) / 60000) : 0;
+      const delayMin =
+        isNum(plannedEnd) && isNum(eta)
+          ? Math.round((eta - plannedEnd) / 60000)
+          : 0;
 
       // Lateness
       if (delayMin >= (pol.late.softMin ?? 5)) {
         signals.push({ code: "LATE_SOFT", value: delayMin });
-        triggers.push({ code: "risk.late.soft", level: "window", scope: "window", windowId: w.id, meta: { delayMin } });
+        triggers.push({
+          code: "risk.late.soft",
+          level: "window",
+          scope: "window",
+          windowId: w.id,
+          meta: { delayMin },
+        });
       }
       if (delayMin >= (pol.late.hardMin ?? 15)) {
         signals.push({ code: "LATE_HARD", value: delayMin });
-        triggers.push({ code: "risk.late.hard", level: "window", scope: "window", windowId: w.id, meta: { delayMin } });
+        triggers.push({
+          code: "risk.late.hard",
+          level: "window",
+          scope: "window",
+          windowId: w.id,
+          meta: { delayMin },
+        });
       }
 
       // P90 exceed — check historical stats
-      const durationPlannedMin = Math.max(1, Math.round(((plannedEnd || 0) - (toMs(w.startISO) || 0)) / 60000));
+      const durationPlannedMin = Math.max(
+        1,
+        Math.round(((plannedEnd || 0) - (toMs(w.startISO) || 0)) / 60000)
+      );
       const stats = await getDurationStats(domain, String(w.taskType || "any"));
       if (isNum(stats.p90) && stats.count >= (pol.p90.minSamples ?? 5)) {
         const threshold = stats.p90 * (pol.p90.factor ?? 1.0);
         if (durationPlannedMin < threshold) {
-          signals.push({ code: "P90_EXCEED", planned: durationPlannedMin, p90: stats.p90, factor: pol.p90.factor ?? 1.0 });
+          signals.push({
+            code: "P90_EXCEED",
+            planned: durationPlannedMin,
+            p90: stats.p90,
+            factor: pol.p90.factor ?? 1.0,
+          });
           triggers.push({
             code: "risk.p90.exceed",
             level: "window",
             scope: "window",
             windowId: w.id,
-            meta: { planned: durationPlannedMin, p90: stats.p90, factor: pol.p90.factor ?? 1.0, samples: stats.count },
+            meta: {
+              planned: durationPlannedMin,
+              p90: stats.p90,
+              factor: pol.p90.factor ?? 1.0,
+              samples: stats.count,
+            },
           });
         }
       }
 
       // Risk scoring
-      const score = computeWindowRiskScore(signals, pol.scoring || POLICY.scoring);
+      const score = computeWindowRiskScore(
+        signals,
+        pol.scoring || POLICY.scoring
+      );
       windowScores.set(w.id, score);
       windowSignals[w.id] = signals;
     }
 
     // Plan risk score: weighted sum
-    const planRiskScore = computePlanRiskScore(planSignals, POLICY.scoring) + avg([...windowScores.values()]);
+    const planRiskScore =
+      computePlanRiskScore(planSignals, POLICY.scoring) +
+      avg([...windowScores.values()]);
 
     const payload = {
       planId,
@@ -333,22 +398,38 @@ async function evaluatePolicy(req = {}) {
     emit("scheduling.risk.policy.evaluated", source, payload);
 
     // Emit a "triggered" event when there is at least one HARD signal
-    const fired = triggers.filter((t) =>
-      t.code === "risk.late.hard" || t.code === "risk.drift.escalate" || t.code === "risk.blockers.present" || t.code === "risk.conflicts.excess" || t.code === "risk.p90.exceed"
+    const fired = triggers.filter(
+      (t) =>
+        t.code === "risk.late.hard" ||
+        t.code === "risk.drift.escalate" ||
+        t.code === "risk.blockers.present" ||
+        t.code === "risk.conflicts.excess" ||
+        t.code === "risk.p90.exceed"
     );
     if (fired.length) {
-      emit("scheduling.risk.policy.triggered", source, { planId, triggers: fired, planRiskScore: payload.planRiskScore });
+      emit("scheduling.risk.policy.triggered", source, {
+        planId,
+        triggers: fired,
+        planRiskScore: payload.planRiskScore,
+      });
     }
 
     if (req.export === true) {
-      await exportToHubIfEnabled({ action: "risk.policy.evaluated", ...payload });
+      await exportToHubIfEnabled({
+        action: "risk.policy.evaluated",
+        ...payload,
+      });
     }
 
     return payload;
   } catch (err) {
-    emit("scheduling.risk.policy.error", "engines/scheduling/riskController/policy.evaluatePolicy", {
-      message: String(err?.message || err),
-    });
+    emit(
+      "scheduling.risk.policy.error",
+      "engines/scheduling/riskController/policy.evaluatePolicy",
+      {
+        message: String(err?.message || err),
+      }
+    );
     return emptyResult(String(req?.planId || ""));
   }
 }
@@ -356,11 +437,18 @@ async function evaluatePolicy(req = {}) {
 /* -------------------------------- Internals -------------------------------- */
 
 function emptyResult(planId) {
-  return { planId, planRiskScore: 0, signals: { plan: [], windows: {} }, triggers: [], ts: nowISO() };
+  return {
+    planId,
+    planRiskScore: 0,
+    signals: { plan: [], windows: {} },
+    triggers: [],
+    ts: nowISO(),
+  };
 }
 
 function withDomainOverrides(policy, domain) {
-  const d = (policy.domains && policy.domains[domain]) ? policy.domains[domain] : {};
+  const d =
+    policy.domains && policy.domains[domain] ? policy.domains[domain] : {};
   return mergeDeep(policy, d);
 }
 
@@ -368,10 +456,17 @@ function computeWindowRiskScore(signals, weights) {
   let score = 0;
   for (const s of signals) {
     switch (s.code) {
-      case "LATE_SOFT": score += weights.lateSoft ?? 0.5; break;
-      case "LATE_HARD": score += weights.lateHard ?? 1.0; break;
-      case "P90_EXCEED": score += weights.p90Exceed ?? 0.7; break;
-      default: break;
+      case "LATE_SOFT":
+        score += weights.lateSoft ?? 0.5;
+        break;
+      case "LATE_HARD":
+        score += weights.lateHard ?? 1.0;
+        break;
+      case "P90_EXCEED":
+        score += weights.p90Exceed ?? 0.7;
+        break;
+      default:
+        break;
     }
   }
   return score;
@@ -381,12 +476,23 @@ function computePlanRiskScore(planSignals, weights) {
   let score = 0;
   for (const s of planSignals) {
     switch (s.code) {
-      case "DRIFT_SOFT": score += weights.driftSoft ?? 0.4; break;
-      case "DRIFT_HARD": score += weights.driftHard ?? 0.8; break;
-      case "DRIFT_ESCALATE": score += weights.driftEscalate ?? 1.2; break;
-      case "BLOCKERS": score += weights.blockers ?? 1.0; break;
-      case "CONFLICTS": score += weights.conflicts ?? 0.8; break;
-      default: break;
+      case "DRIFT_SOFT":
+        score += weights.driftSoft ?? 0.4;
+        break;
+      case "DRIFT_HARD":
+        score += weights.driftHard ?? 0.8;
+        break;
+      case "DRIFT_ESCALATE":
+        score += weights.driftEscalate ?? 1.2;
+        break;
+      case "BLOCKERS":
+        score += weights.blockers ?? 1.0;
+        break;
+      case "CONFLICTS":
+        score += weights.conflicts ?? 0.8;
+        break;
+      default:
+        break;
     }
   }
   return score;

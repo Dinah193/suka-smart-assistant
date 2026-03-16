@@ -1,0 +1,362 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.citrus_chili.recipes.chili_citrus_rice",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chili-Citrus Rice",
+    "subtitle": "Fluffy rice with lime/lemon, garlic, and a gentle chili warmth"
+  },
+  "classification": {
+    "cuisine": "citrus_chili",
+    "category": "side",
+    "mealArchetypes": [
+      "starch_side",
+      "rice_side",
+      "bowls",
+      "plates",
+      "weeknight_side"
+    ],
+    "servingStyles": ["family_style", "bowls", "plates"],
+    "plannerTags": [
+      "cuisine.citrus_chili",
+      "side.rice",
+      "weeknight.friendly",
+      "batch.friendly",
+      "meal_prep",
+      "freezer.friendly",
+      "spice_adjustable"
+    ]
+  },
+  "summary": "A bright, savory rice side finished with citrus zest/juice and chili. Pairs with chili-lime chicken, citrus fish, orange-chili pork, shrimp, and roasted vegetables for easy bowls.",
+  "yield": {
+    "servings": 6,
+    "notes": "Makes ~6 cups cooked rice (varies by rice type)."
+  },
+  "time": {
+    "activeMins": 10,
+    "handsOffMins": 20,
+    "totalMins": 30
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": "high",
+    "leftoversGood": true,
+    "freezerFriendly": "high",
+    "spiceAdjustable": true,
+    "mealPrepFriendly": true,
+    "onePot": true
+  },
+  "tasteProfile": {
+    "heatLevel": 1,
+    "acidity": "citrus-forward finish",
+    "salt": "medium",
+    "sweetness": "low",
+    "notes": [
+      "fluffy grains",
+      "bright zest",
+      "garlic warmth",
+      "mild chili tingle"
+    ]
+  },
+  "equipment": {
+    "minimum": [
+      "fine_mesh_strainer_optional",
+      "saucepan_with_lid",
+      "measuring_cups",
+      "fork"
+    ],
+    "recommended": ["microplane_or_grater", "citrus_juicer", "small_bowl"],
+    "optional": [
+      {
+        "id": "rice_cooker",
+        "label": "Rice cooker",
+        "notes": "Use the rice cooker method variation for set-and-forget cooking."
+      }
+    ]
+  },
+  "allergens": ["citrus"],
+  "dietFlags": ["vegetarian", "vegan_optional", "gluten_free"],
+  "keywords": [
+    "chili citrus rice",
+    "lime chili rice",
+    "lemon chili rice",
+    "citrus rice side",
+    "rice for bowls"
+  ],
+  "tags": [
+    "cuisine.citrus_chili",
+    "side.rice",
+    "meal_prep",
+    "batch.friendly",
+    "weeknight.friendly"
+  ],
+  "methods": ["simmer", "steam_rest", "citrus_finish"],
+  "ingredientGroups": [
+    {
+      "id": "rice_base",
+      "label": "Rice Base",
+      "items": [
+        "rice_uncooked",
+        "water_or_broth",
+        "salt",
+        "oil_or_butter_optional"
+      ]
+    },
+    {
+      "id": "citrus_chili_finish",
+      "label": "Chili-Citrus Finish",
+      "items": [
+        "garlic",
+        "chili_flakes_or_powder",
+        "citrus_zest",
+        "citrus_juice",
+        "scallions_or_cilantro_optional"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "rice_uncooked",
+      "label": "Long-grain white rice (uncooked)",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "cups" },
+      "notes": "Jasmine or basmati work best. See variations for brown rice."
+    },
+    {
+      "id": "water_or_broth",
+      "label": "Water (or light broth)",
+      "role": "liquid",
+      "amount": { "value": 480, "unit": "ml" },
+      "notes": "For most long-grain white rice: 2 cups rice : 2 cups liquid. Adjust to your rice brand if needed."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "oil_or_butter_optional",
+      "label": "Olive oil or butter (optional)",
+      "role": "fat",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Adds silkiness; omit butter for vegan."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, finely minced (or grated)",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "cloves" }
+    },
+    {
+      "id": "chili_flakes_or_powder",
+      "label": "Red pepper flakes (or mild chili powder)",
+      "role": "heat",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": "Use 1/4 tsp for very mild; up to 1 tsp for more heat."
+    },
+    {
+      "id": "citrus_zest",
+      "label": "Citrus zest (lime or lemon)",
+      "role": "citrus",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Zest before juicing. Lime = brighter; lemon = softer."
+    },
+    {
+      "id": "citrus_juice",
+      "label": "Fresh citrus juice (lime or lemon)",
+      "role": "citrus",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 1 large lime or lemon."
+    },
+    {
+      "id": "scallions_or_cilantro_optional",
+      "label": "Sliced scallions or chopped cilantro (optional)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Rinse rice (recommended for fluffy grains)",
+      "instructions": [
+        "Rinse rice in a fine-mesh strainer under cool water until the water runs mostly clear (30–60 seconds).",
+        "Drain well."
+      ],
+      "activeMins": 2,
+      "checks": ["Rice looks less starchy and drains well"]
+    },
+    {
+      "id": "step_02",
+      "title": "Build the pot",
+      "instructions": [
+        "Add rice, water (or broth), salt, and oil/butter (optional) to a saucepan.",
+        "Stir in the minced garlic and chili flakes (or chili powder).",
+        "Bring to a gentle boil over medium-high heat."
+      ],
+      "activeMins": 3,
+      "checks": ["Garlic and chili are evenly dispersed in the liquid"]
+    },
+    {
+      "id": "step_03",
+      "title": "Simmer, cover, and steam",
+      "instructions": [
+        "Once boiling, reduce heat to low, cover tightly, and simmer for 15 minutes (avoid lifting the lid).",
+        "Turn off heat and let rice rest, covered, for 5 minutes to finish steaming."
+      ],
+      "handsOffMins": 20,
+      "timers": [
+        { "label": "Covered simmer", "minutes": 15 },
+        { "label": "Steam rest (covered)", "minutes": 5 }
+      ],
+      "checks": ["Rice is tender and liquid is absorbed"]
+    },
+    {
+      "id": "step_04",
+      "title": "Finish with citrus and fluff",
+      "instructions": [
+        "In a small bowl, combine citrus zest and citrus juice.",
+        "Uncover rice and fluff with a fork.",
+        "Drizzle citrus mixture over the rice and gently fold to distribute.",
+        "Taste and adjust: add a pinch of salt, more zest, or a tiny squeeze of juice if needed.",
+        "Top with scallions or cilantro (optional)."
+      ],
+      "activeMins": 5,
+      "checks": [
+        "Rice is fluffy (not mashed)",
+        "Citrus is bright but not sour (use more zest vs more juice if you want more aroma without extra acidity)"
+      ]
+    }
+  ],
+  "pairings": {
+    "proteins": [
+      "chili_lime_chicken",
+      "citrus_marinated_fish",
+      "orange_chili_pork",
+      "garlic_shrimp"
+    ],
+    "sides": [
+      "lemon_chili_vegetables",
+      "herb_roasted_vegetables",
+      "simple_salad_optional"
+    ],
+    "sauces": [
+      "yogurt_lime_sauce_optional",
+      "garlic_aioli_optional",
+      "hot_sauce_optional"
+    ]
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 5,
+      "notes": "Cool quickly; store airtight. Great for bowls and quick stir-fries."
+    },
+    "freezer": {
+      "ok": true,
+      "maxMonths": 2,
+      "notes": "Freeze flat in portion bags for quick reheat."
+    },
+    "reheat": {
+      "methods": ["microwave", "skillet", "steamer"],
+      "notes": "Add 1–2 tsp water per cup before reheating to restore fluff. Add a fresh squeeze of citrus after reheating if desired."
+    }
+  },
+  "safety": {
+    "handling": [
+      "Cool rice promptly (within 1 hour) and refrigerate to reduce food safety risk.",
+      "Reheat leftovers until steaming hot."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation_rice_cooker",
+      "label": "Rice cooker method",
+      "notes": [
+        "Add rice, water/broth, salt, garlic, and chili to the rice cooker.",
+        "Cook on the standard white rice setting.",
+        "Fold in citrus zest + juice after cooking and fluffing."
+      ]
+    },
+    {
+      "id": "variation_brown_rice",
+      "label": "Brown rice version",
+      "notes": [
+        "Use 2 cups brown rice + 2.5 cups water/broth (600 ml) (adjust per brand).",
+        "Simmer 35–40 minutes, then rest 10 minutes.",
+        "Finish with citrus as written."
+      ]
+    },
+    {
+      "id": "variation_coconut_citrus_chili",
+      "label": "Coconut chili-citrus rice",
+      "notes": [
+        "Replace 1/2 cup (120 ml) of the water with coconut milk for a richer, Caribbean-leaning side.",
+        "Keep citrus finish; consider using lime."
+      ]
+    },
+    {
+      "id": "variation_herby",
+      "label": "Herby chili-citrus rice",
+      "notes": [
+        "Fold in 1/4 cup chopped cilantro or parsley with the citrus finish.",
+        "Great with fish and shrimp."
+      ]
+    }
+  ],
+  "planner": {
+    "cuisineId": "cuisines.citrus_chili",
+    "defaultCourse": "side",
+    "weeknightNotes": [
+      "Make a double batch for bowls all week.",
+      "Finish with zest + juice after cooking for the cleanest citrus flavor."
+    ],
+    "shopping": {
+      "corePantry": [
+        "rice_uncooked",
+        "salt",
+        "chili_flakes_or_powder",
+        "oil_or_butter_optional"
+      ],
+      "fresh": [
+        "garlic",
+        "citrus_zest",
+        "citrus_juice",
+        "scallions_or_cilantro_optional"
+      ]
+    }
+  },
+  "compat": {
+    "cuisine": "citrus_chili",
+    "dishId": "chili_citrus_rice",
+    "ingredientIds": [
+      "rice_uncooked",
+      "water_or_broth",
+      "salt",
+      "oil_or_butter_optional",
+      "garlic",
+      "chili_flakes_or_powder",
+      "citrus_zest",
+      "citrus_juice",
+      "scallions_or_cilantro_optional"
+    ],
+    "equipmentIds": [
+      "fine_mesh_strainer_optional",
+      "saucepan_with_lid",
+      "measuring_cups",
+      "fork",
+      "microplane_or_grater",
+      "citrus_juicer",
+      "small_bowl",
+      "rice_cooker"
+    ],
+    "methodIds": ["simmer", "steam_rest", "citrus_finish"]
+  }
+}

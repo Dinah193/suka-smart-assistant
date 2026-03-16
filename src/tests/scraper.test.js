@@ -18,7 +18,12 @@ const events = [];
 const eventBusMock = {
   emit: vi.fn((envelope) => {
     if (!envelope || typeof envelope !== "object") throw new Error("Bad event");
-    if (!envelope.type || !envelope.ts || !envelope.source || envelope.data === undefined) {
+    if (
+      !envelope.type ||
+      !envelope.ts ||
+      !envelope.source ||
+      envelope.data === undefined
+    ) {
       throw new Error("Event missing required envelope fields");
     }
     events.push(envelope);
@@ -31,7 +36,7 @@ const eventBusMock = {
   },
 };
 
-vi.mock("../services/eventBus.js", () => ({ eventBus: eventBusMock }));
+vi.mock("../services/events/eventBus.js", () => ({ eventBus: eventBusMock }));
 
 // ---------------------------------------------------------------------------
 // Optional real modules — if your repo already has these, the tests will use
@@ -56,7 +61,10 @@ const FallbackTableScraper = {
    * - Returns headers (lowercased snake), rows[], meta
    * - Emits import.parsed or validation.failed envelopes
    */
-  parseHtmlTable(html, { origin = "internal:test", domain = "pricebook" } = {}) {
+  parseHtmlTable(
+    html,
+    { origin = "internal:test", domain = "pricebook" } = {}
+  ) {
     if (typeof html !== "string" || !html.trim()) {
       const fail = {
         type: "validation.failed",
@@ -66,7 +74,11 @@ const FallbackTableScraper = {
         meta: { v: 1 },
       };
       eventBusMock.emit(fail);
-      return { headers: [], rows: [], meta: { ok: false, errors: fail.data.errors } };
+      return {
+        headers: [],
+        rows: [],
+        meta: { ok: false, errors: fail.data.errors },
+      };
     }
 
     // VERY small HTML walker: extracts headers & cells without external deps.
@@ -81,7 +93,11 @@ const FallbackTableScraper = {
         meta: { v: 1 },
       };
       eventBusMock.emit(fail);
-      return { headers: [], rows: [], meta: { ok: false, errors: fail.data.errors } };
+      return {
+        headers: [],
+        rows: [],
+        meta: { ok: false, errors: fail.data.errors },
+      };
     }
     const table = tableMatch[0];
 
@@ -93,8 +109,8 @@ const FallbackTableScraper = {
     let headers = ths;
     if (headers.length === 0) {
       const firstRow = table.match(/<tr[^>]*>([\s\S]*?)<\/tr>/i)?.[1] ?? "";
-      const tds = [...firstRow.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((m) =>
-        normalizeHeader(stripTags(m[1]))
+      const tds = [...firstRow.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(
+        (m) => normalizeHeader(stripTags(m[1]))
       );
       headers = tds;
     }
@@ -106,7 +122,9 @@ const FallbackTableScraper = {
 
     const rows = rowBlocks
       .map((block) => {
-        const cells = [...block.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((m) => stripTags(m[1]));
+        const cells = [...block.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(
+          (m) => stripTags(m[1])
+        );
         if (cells.length === 0) return null;
         // Allow ragged rows (pad or trim to headers length)
         const vals = cells.slice(0, headers.length);
@@ -155,7 +173,10 @@ const FallbackJsonNormalizer = {
         type: "validation.failed",
         ts: isoNow(),
         source: "src/import/normalizers/JsonNormalizer.js:normalize",
-        data: { errors: [{ message: "Input must be object/array" }], severity: "error" },
+        data: {
+          errors: [{ message: "Input must be object/array" }],
+          severity: "error",
+        },
         meta: { v: 1 },
       };
       eventBusMock.emit(fail);
@@ -189,7 +210,8 @@ try {
 }
 try {
   // eslint-disable-next-line import/no-unresolved
-  JsonNormalizer = (await import("../import/normalizers/JsonNormalizer.js")).default;
+  JsonNormalizer = (await import("../import/normalizers/JsonNormalizer.js"))
+    .default;
 } catch {
   JsonNormalizer = FallbackJsonNormalizer;
 }
@@ -239,7 +261,8 @@ function coerceValue(v) {
 }
 
 function deepNormalize(node, issues, path = "root") {
-  if (Array.isArray(node)) return node.map((v, i) => deepNormalize(v, issues, `${path}[${i}]`));
+  if (Array.isArray(node))
+    return node.map((v, i) => deepNormalize(v, issues, `${path}[${i}]`));
   if (node && typeof node === "object") {
     const out = {};
     for (const [k, v] of Object.entries(node)) {
@@ -335,7 +358,13 @@ describe("HTML table scraping → normalized rows", () => {
       domain: "pricebook",
     });
 
-    expect(headers).toEqual(["product", "price", "qty", "updated_at", "source"]);
+    expect(headers).toEqual([
+      "product",
+      "price",
+      "qty",
+      "updated_at",
+      "source",
+    ]);
     expect(meta.ok).toBe(true);
     expect(rows.length).toBe(2);
 
@@ -360,7 +389,9 @@ describe("HTML table scraping → normalized rows", () => {
     const parsedEvt = emitted.find((e) => e.type === "import.parsed");
     expectCanonical(parsedEvt);
     expect(parsedEvt.data?.domain).toBe("pricebook");
-    expect(parsedEvt.data?.entity?.meta?.origin).toBe("https://example.com/kroger/week45");
+    expect(parsedEvt.data?.entity?.meta?.origin).toBe(
+      "https://example.com/kroger/week45"
+    );
   });
 
   it("emits validation.failed on missing table", () => {
@@ -401,7 +432,9 @@ describe("Loose JSON → contract-ready normalization", () => {
   });
 
   it("emits validation.failed on non-object input", () => {
-    const { entity, issues } = JsonNormalizer.normalize(null, { domain: "recipe" });
+    const { entity, issues } = JsonNormalizer.normalize(null, {
+      domain: "recipe",
+    });
     expect(entity).toBeNull();
     expect(issues.length).toBeGreaterThan(0);
     const [evt] = eventBusMock._drain();
@@ -426,7 +459,9 @@ describe("Scraper robustness: ragged rows, missing headers, currencies, percents
         <tr><td>Widget B</td><td>  5% </td></tr>
       </table>
     `;
-    const { headers, rows } = TableScraper.parseHtmlTable(html, { domain: "coupon" });
+    const { headers, rows } = TableScraper.parseHtmlTable(html, {
+      domain: "coupon",
+    });
     expect(headers).toEqual(["name", "discount", "price"]);
     expect(rows[0].discount).toBe(25);
     expect(rows[0].price).toBe(1299);
@@ -442,7 +477,9 @@ describe("Scraper robustness: ragged rows, missing headers, currencies, percents
         <tr><td>abc-1</td><td>12</td><td>2025-11-11T00:00:00Z</td></tr>
       </table>
     `;
-    const { headers, rows } = TableScraper.parseHtmlTable(html, { domain: "storehouse" });
+    const { headers, rows } = TableScraper.parseHtmlTable(html, {
+      domain: "storehouse",
+    });
     expect(headers).toEqual(["sku", "qty", "updated"]);
     expect(rows[0].sku).toBe("abc-1");
     expect(rows[0].qty).toBe(12);

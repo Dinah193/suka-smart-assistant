@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { runGardenPlantingCalendarCalculatorShim } from "./GardenPlantingCalendarCalculator.shim";
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 /**
  * GardenPlantingCalendarCalculatorView
@@ -19,7 +19,7 @@ import eventBus from "@/services/eventBus";
 export default function GardenPlantingCalendarCalculatorView({
   initialPayload,
   onPayloadChange,
-  onResult
+  onResult,
 }) {
   const [payload, setPayload] = useState(() =>
     initialPayload && typeof initialPayload === "object"
@@ -45,8 +45,8 @@ export default function GardenPlantingCalendarCalculatorView({
       totalCropsPlanned: 0,
       totalPlantingEvents: 0,
       totalHarvestWindows: 0,
-      notes: ""
-    }
+      notes: "",
+    },
   };
 
   const sortedPlantingWindows = useMemo(
@@ -79,7 +79,7 @@ export default function GardenPlantingCalendarCalculatorView({
     try {
       const next = await runGardenPlantingCalendarCalculatorShim(payload, {
         eventBus,
-        featureFlags: { familyFundMode: false } // view-level default; real flagging happens upstream
+        featureFlags: { familyFundMode: false }, // view-level default; real flagging happens upstream
       });
       setResult(next);
       if (onResult) onResult(next);
@@ -98,8 +98,8 @@ export default function GardenPlantingCalendarCalculatorView({
       ...payload,
       inputs: {
         ...payload.inputs,
-        ...partial
-      }
+        ...partial,
+      },
     };
     setPayload(next);
     if (onPayloadChange) onPayloadChange(next);
@@ -125,7 +125,7 @@ export default function GardenPlantingCalendarCalculatorView({
         field === "successionIntervalDays" ||
         field === "maxSuccessions"
           ? toInt(value, "")
-          : value
+          : value,
     };
     updateInputs({ crops: nextCrops });
   }
@@ -141,8 +141,8 @@ export default function GardenPlantingCalendarCalculatorView({
         successionEnabled: false,
         successionIntervalDays: 7,
         maxSuccessions: 1,
-        targetUse: "fresh"
-      }
+        targetUse: "fresh",
+      },
     ];
     updateInputs({ crops: nextCrops });
   }
@@ -168,14 +168,11 @@ export default function GardenPlantingCalendarCalculatorView({
           type: "session.requested",
           ts,
           source: "calculators/garden/GardenPlantingCalendarCalculator.view",
-          data: { session }
+          data: { session },
         });
       }
     } catch (err) {
-      console.warn(
-        "[GardenPlantingCalendarCalculator.view] emit failed:",
-        err
-      );
+      console.warn("[GardenPlantingCalendarCalculator.view] emit failed:", err);
     }
   }
 
@@ -187,8 +184,8 @@ export default function GardenPlantingCalendarCalculatorView({
         <div>
           <h2 className="ssa-calculator-title">Garden Planting Calendar</h2>
           <p className="ssa-calculator-subtitle">
-            Connect climate, Hebrew calendar, and crops to generate planting
-            and harvest windows that link directly into your SSA garden sessions.
+            Connect climate, Hebrew calendar, and crops to generate planting and
+            harvest windows that link directly into your SSA garden sessions.
           </p>
         </div>
         <div className="ssa-calculator-actions">
@@ -276,8 +273,8 @@ export default function GardenPlantingCalendarCalculatorView({
 
           <p className="ssa-helper-text">
             Hebrew calendar calculations and feast-day mappings are handled
-            upstream. This view simply consumes those mapped Gregorian dates
-            and shows where your harvest overlaps them.
+            upstream. This view simply consumes those mapped Gregorian dates and
+            shows where your harvest overlaps them.
           </p>
         </div>
 
@@ -639,9 +636,7 @@ export default function GardenPlantingCalendarCalculatorView({
                       {ev.kind || "event"}
                     </span>
                   </div>
-                  {ev.notes && (
-                    <p className="ssa-timeline-notes">{ev.notes}</p>
-                  )}
+                  {ev.notes && <p className="ssa-timeline-notes">{ev.notes}</p>}
                   <div className="ssa-timeline-meta">
                     {ev.cropId && (
                       <span className="ssa-cell-sub">Crop: {ev.cropId}</span>
@@ -678,26 +673,26 @@ function getDefaultPayload() {
   return {
     context: {
       nodeKey: "gardenPlantingCalendar",
-      version: "1.0.0"
+      version: "1.0.0",
     },
     inputs: {
       climate: {
         lastFrostDate: "",
         firstFrostDate: "",
         zone: "",
-        notes: ""
+        notes: "",
       },
       calendar: {
         year: now.getFullYear(),
         alignWithFeastDays: true,
-        feastDays: []
+        feastDays: [],
       },
       crops: [],
       gardenLayout: {
-        beds: []
-      }
+        beds: [],
+      },
     },
-    outputs: null
+    outputs: null,
   };
 }
 
@@ -735,8 +730,8 @@ function buildGardenSessionFromWindow(windowItem, type) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Stop when bed is level, moist, and free of large clumps."
-        }
+          cueNotes: "Stop when bed is level, moist, and free of large clumps.",
+        },
       },
       {
         id: baseStepId("sow"),
@@ -747,8 +742,8 @@ function buildGardenSessionFromWindow(windowItem, type) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Ensure firm seed-to-soil contact and good spacing."
-        }
+          cueNotes: "Ensure firm seed-to-soil contact and good spacing.",
+        },
       },
       {
         id: baseStepId("water-in"),
@@ -759,8 +754,8 @@ function buildGardenSessionFromWindow(windowItem, type) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Check for pooling; adjust flow as needed."
-        }
+          cueNotes: "Check for pooling; adjust flow as needed.",
+        },
       }
     );
   } else if (isHarvest) {
@@ -774,8 +769,8 @@ function buildGardenSessionFromWindow(windowItem, type) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "texture",
-          cueNotes: "Skip any damaged or diseased produce."
-        }
+          cueNotes: "Skip any damaged or diseased produce.",
+        },
       },
       {
         id: baseStepId("harvest"),
@@ -786,8 +781,8 @@ function buildGardenSessionFromWindow(windowItem, type) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Keep produce shaded and cool while working."
-        }
+          cueNotes: "Keep produce shaded and cool while working.",
+        },
       }
     );
   } else {
@@ -801,8 +796,8 @@ function buildGardenSessionFromWindow(windowItem, type) {
       metadata: {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: ""
-      }
+        cueNotes: "",
+      },
     });
   }
 
@@ -812,7 +807,7 @@ function buildGardenSessionFromWindow(windowItem, type) {
     title,
     source: {
       type: "gardenPlan",
-      refId: windowItem.windowId || windowItem.eventId || null
+      refId: windowItem.windowId || windowItem.eventId || null,
     },
     steps,
     prefs: { voiceGuidance: true, haptic: true, autoAdvance: false },
@@ -821,14 +816,14 @@ function buildGardenSessionFromWindow(windowItem, type) {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 }
 

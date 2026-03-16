@@ -1,0 +1,544 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.recipes.arroz_con_pollo",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Arroz con Pollo (Peruvian-Style)",
+    "subtitle": "Cilantro-aji green rice with braised chicken, peas, carrots, and beer stock",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Peruvian arroz con pollo typically uses a green cilantro/aji base and is braised together so the rice absorbs the flavor.",
+        "This recipe is written to be deterministic and adaptable to different cookware (Dutch oven, heavy pot, rice cooker finish)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Peruvian",
+    "subprofiles": [
+      "cuisines.peruvian",
+      "one_pot",
+      "herb_forward",
+      "pepper.aji_amarillo_optional"
+    ],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.one_pot_meal",
+      "meal_archetype.family_style",
+      "meal_archetype.weeknight"
+    ],
+    "servingStyles": ["one_pot", "family_style", "stovetop_braise"],
+    "plannerTags": [
+      "cuisine.peruvian",
+      "one_pot",
+      "family_style",
+      "rice_dish",
+      "chicken",
+      "cilantro_forward",
+      "green_rice",
+      "batch_friendly",
+      "leftovers_good",
+      "weeknight_possible",
+      "meal_prep"
+    ]
+  },
+
+  "summary": "Peruvian arroz con pollo is a one-pot chicken-and-rice dish with a vivid green cilantro base, lightly spicy ají, and braised rice that drinks up savory stock (often with beer).",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a main; 8 with sides."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 45,
+    "totalMins": 75
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": "Rice texture softens after freezing but is workable for meal prep."
+  },
+
+  "tasteProfile": {
+    "primary": ["savory", "herby", "bright", "comforting"],
+    "heat": {
+      "typical": 1,
+      "range": [0, 3],
+      "note": "Ají amarillo is optional; keep mild for family style."
+    },
+    "aromatics": ["onion", "garlic", "cilantro"],
+    "texture": ["tender_chicken", "fluffy_rice", "soft_veg"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.stovetop",
+      "equipment.heavy_pot_with_lid",
+      "equipment.blender_or_food_processor",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.measuring_cups"
+    ],
+    "recommended": [
+      "equipment.dutch_oven",
+      "equipment.instant_read_thermometer",
+      "equipment.fine_mesh_strainer"
+    ],
+    "optional": [
+      {
+        "id": "equipment.rice_cooker",
+        "label": "Rice cooker",
+        "notes": "You can finish the rice in a rice cooker after browning chicken and building the base."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.gluten_optional", "diet.dairy_free"],
+  "allergens": {
+    "mayContain": ["allergen.alcohol_optional"],
+    "notes": [
+      "Beer is optional; substitute extra stock. Alcohol cooks off but trace may remain depending on simmer time."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_thighs_bone_in_skin_on",
+      "label": "Chicken thighs, bone-in skin-on (or drumsticks)",
+      "role": "protein",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": "Bone-in gives the best flavor. You can use boneless thighs; reduce braise time slightly."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.25, "unit": "tsp" },
+      "notes": "Split between chicken seasoning and final rice seasoning."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional but common in many home versions."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro leaves and tender stems",
+      "role": "herb_base",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Packed cups. This is what creates the signature green color."
+    },
+    {
+      "id": "ingredient.spinach",
+      "label": "Spinach (optional, for deeper green)",
+      "role": "herb_base",
+      "optional": true,
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "Optional; helps color if cilantro is mild or small."
+    },
+    {
+      "id": "ingredient.aji_amarillo_paste",
+      "label": "Ají amarillo paste",
+      "role": "heat_flavor",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Optional; adds classic Peruvian fruit-pepper flavor. Start small for mild."
+    },
+
+    {
+      "id": "ingredient.beer_lager",
+      "label": "Lager beer (optional)",
+      "role": "braising_liquid",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Traditional in many recipes; substitute stock if preferred."
+    },
+    {
+      "id": "ingredient.chicken_stock",
+      "label": "Chicken stock/broth (low sodium preferred)",
+      "role": "braising_liquid",
+      "amount": { "value": 2.5, "unit": "cup" }
+    },
+
+    {
+      "id": "ingredient.rice_long_grain",
+      "label": "Long-grain white rice, rinsed until water runs mostly clear",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Rinsing helps keep the rice fluffy, not gummy."
+    },
+
+    {
+      "id": "ingredient.carrots",
+      "label": "Carrots, diced small",
+      "role": "vegetable",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.peas_green",
+      "label": "Frozen green peas",
+      "role": "vegetable",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.bell_pepper_red",
+      "label": "Red bell pepper, sliced (optional)",
+      "role": "vegetable",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Some versions include pimiento/roasted pepper strips or bell pepper."
+    },
+
+    {
+      "id": "ingredient.lime",
+      "label": "Lime wedges (to serve)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.cilantro_garnish",
+      "label": "Cilantro, chopped (garnish)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken & seasoning",
+      "items": [
+        "ingredient.chicken_thighs_bone_in_skin_on",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.cumin_ground",
+        "ingredient.oil_neutral"
+      ]
+    },
+    {
+      "id": "group.green_base",
+      "label": "Green cilantro base",
+      "items": [
+        "ingredient.onion_yellow",
+        "ingredient.garlic",
+        "ingredient.cilantro",
+        "ingredient.spinach",
+        "ingredient.aji_amarillo_paste"
+      ]
+    },
+    {
+      "id": "group.rice_and_liquid",
+      "label": "Rice & braising liquid",
+      "items": [
+        "ingredient.rice_long_grain",
+        "ingredient.beer_lager",
+        "ingredient.chicken_stock"
+      ]
+    },
+    {
+      "id": "group.veg_finish",
+      "label": "Vegetables & finish",
+      "items": [
+        "ingredient.carrots",
+        "ingredient.peas_green",
+        "ingredient.bell_pepper_red",
+        "ingredient.lime",
+        "ingredient.cilantro_garnish"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_blend_green_base",
+      "title": "Blend the green cilantro base",
+      "instructions": [
+        "Add cilantro (and optional spinach) to a blender with 1/2 cup chicken stock (or water).",
+        "Blend until very smooth and bright green; scrape down as needed.",
+        "Set aside; this is the signature flavor/color base."
+      ],
+      "timers": [{ "label": "Blend green base", "minutes": 2 }],
+      "checks": [
+        "Base is smooth (no large leaf pieces).",
+        "Color is vivid green (spinach helps if cilantro is pale)."
+      ]
+    },
+    {
+      "id": "step.002_season_chicken",
+      "title": "Season the chicken",
+      "instructions": [
+        "Pat chicken dry for better browning.",
+        "Season all sides with 1 1/2 tsp salt, black pepper, and optional cumin.",
+        "Let sit while you heat the pot."
+      ],
+      "timers": [{ "label": "Season/rest chicken", "minutes": 5 }],
+      "checks": ["Chicken surface is dry and evenly seasoned."]
+    },
+    {
+      "id": "step.003_brown_chicken",
+      "title": "Brown the chicken",
+      "instructions": [
+        "Heat oil in a heavy pot or Dutch oven over medium-high heat.",
+        "Brown chicken skin-side down until golden (work in batches if needed).",
+        "Flip and brown the second side briefly.",
+        "Remove chicken to a plate; keep the rendered fat in the pot."
+      ],
+      "timers": [{ "label": "Brown chicken", "minutes": 10 }],
+      "checks": [
+        "Chicken has good golden color (fond on bottom is OK).",
+        "Fat is rendered (especially with skin-on thighs)."
+      ]
+    },
+    {
+      "id": "step.004_saute_aromatics",
+      "title": "Sauté onion and garlic",
+      "instructions": [
+        "Lower heat to medium.",
+        "Add onion and cook until softened, scraping up browned bits.",
+        "Add garlic and cook 30–60 seconds until fragrant (do not burn)."
+      ],
+      "timers": [
+        { "label": "Cook onions", "minutes": 5 },
+        { "label": "Cook garlic", "minutes": 1 }
+      ],
+      "checks": [
+        "Onions are softened and sweet-smelling; garlic is fragrant, not browned."
+      ]
+    },
+    {
+      "id": "step.005_toast_rice_and_build_liquid",
+      "title": "Toast rice and build the braising liquid",
+      "instructions": [
+        "Stir in rinsed rice and toast 1–2 minutes to coat in aromatics and fat.",
+        "Stir in optional ají amarillo paste and cook 30 seconds to bloom.",
+        "Add beer (if using) and simmer 1 minute to reduce slightly.",
+        "Add remaining chicken stock and the blended green base; stir well."
+      ],
+      "timers": [
+        { "label": "Toast rice", "minutes": 2 },
+        { "label": "Reduce beer (optional)", "minutes": 1 }
+      ],
+      "checks": [
+        "Rice looks lightly translucent at edges after toasting.",
+        "Liquid is evenly green with no clumps."
+      ]
+    },
+    {
+      "id": "step.006_braise_chicken_and_rice",
+      "title": "Nestle chicken and braise until rice is tender",
+      "instructions": [
+        "Return chicken (and any juices) to the pot, nestling pieces into the rice mixture.",
+        "Add diced carrots now (peas go later).",
+        "Bring to a gentle simmer, then cover and reduce heat to low.",
+        "Cook covered until rice is tender and chicken is cooked through.",
+        "Add peas in the last 5 minutes so they stay bright."
+      ],
+      "timers": [
+        { "label": "Covered braise", "minutes": 25 },
+        { "label": "Add peas near end", "minutes": 5 }
+      ],
+      "checks": [
+        "Rice grains are tender (no hard center).",
+        "Chicken reaches safe doneness (165°F / 74°C in thickest part)."
+      ]
+    },
+    {
+      "id": "step.007_rest_and_fluff",
+      "title": "Rest, fluff, and serve",
+      "instructions": [
+        "Turn off heat and let the pot rest covered 10 minutes to finish steaming.",
+        "Fluff rice gently with a fork, keeping chicken pieces intact.",
+        "Taste and adjust salt (use remaining ~3/4 tsp as needed depending on stock).",
+        "Garnish with cilantro and serve with lime wedges."
+      ],
+      "timers": [{ "label": "Rest/steam", "minutes": 10 }],
+      "checks": [
+        "Rice is fluffy, not wet; if slightly wet, rest uncovered 3–5 minutes.",
+        "Seasoning is balanced; finish with lime at the table."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "sides": [
+      "peruvian.salsa_criolla",
+      "simple_salad",
+      "fried_plantains_optional"
+    ],
+    "condiments": ["peruvian.aji_verde", "lime_wedges"],
+    "drinks": ["peruvian.chicha_morada", "sparkling_water", "iced_tea"]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "4 days",
+      "notes": "Cool quickly, store covered. Reheat gently with a splash of stock/water to loosen rice."
+    },
+    "freeze": {
+      "duration": "2 months",
+      "notes": "Freeze in portions. Rice softens when thawed; still useful for meal prep."
+    },
+    "foodSafety": {
+      "notes": [
+        "Cool rice promptly (spread on a tray for faster cooling if needed).",
+        "Reheat leftovers to steaming hot (165°F / 74°C recommended)."
+      ]
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Rinse rice; prep onion/garlic", "mins": 10 },
+      { "task": "Blend cilantro base", "mins": 5 },
+      { "task": "Brown chicken", "mins": 12 },
+      { "task": "Braise and rest", "mins": 40 }
+    ],
+    "makeAheadNotes": [
+      "Blend cilantro base up to 24 hours ahead; refrigerate tightly covered.",
+      "Dice carrots/onion ahead for faster weeknight assembly."
+    ],
+    "scalingNotes": [
+      "Double batch works well in a large Dutch oven; keep simmer gentle to prevent scorching.",
+      "For boneless thighs, begin checking doneness 5 minutes earlier."
+    ],
+    "weeknightTips": [
+      "Use boneless thighs + pre-chopped mirepoix to reduce active time.",
+      "Skip beer and use all stock for faster, simpler build."
+    ]
+  },
+
+  "methods": [
+    "technique.blend",
+    "technique.sear",
+    "technique.saute",
+    "technique.toast",
+    "technique.braise",
+    "technique.steam_rest"
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.peruvian",
+    "dishId": "peruvian.arroz_con_pollo",
+    "search": {
+      "aliases": [
+        "arroz con pollo",
+        "peruvian green rice with chicken",
+        "cilantro rice chicken"
+      ],
+      "keywords": [
+        "cilantro",
+        "green rice",
+        "aji amarillo",
+        "one pot",
+        "braised rice",
+        "peas",
+        "carrots",
+        "beer"
+      ]
+    }
+  },
+
+  "notes": [
+    "Liquid ratio: This recipe targets fluffy long-grain rice. If your pot runs hot or you see scorching, add 1/4 cup stock and keep heat low.",
+    "If cilantro flavor is strong/bitter, reduce cilantro to 1 1/2 cups and include spinach for color.",
+    "For a more classic Peruvian aroma, add a bay leaf when simmering (remove before serving)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.boneless_fast",
+      "label": "Boneless thigh weeknight version",
+      "when": { "preference": ["fast"] },
+      "adapt": {
+        "notes": [
+          "Use 2 lb boneless skinless thighs. Brown quickly, then braise 18–22 minutes total.",
+          "Begin checking rice at 18 minutes; add peas at minute ~15–17."
+        ]
+      }
+    },
+    {
+      "id": "variation.no_beer",
+      "label": "No-beer / all-stock",
+      "when": { "restriction": ["no_alcohol"] },
+      "adapt": {
+        "notes": [
+          "Skip beer. Increase chicken stock by 1/2 cup (total 3 cups).",
+          "Add 1 tsp vinegar or extra lime at the table for brightness if desired."
+        ]
+      }
+    },
+    {
+      "id": "variation.spicy_aji",
+      "label": "More ají-forward (mild-medium heat)",
+      "when": { "heat": ["medium"] },
+      "adapt": {
+        "notes": [
+          "Increase ají amarillo paste to 2 tbsp total (split between rice base and a small spoon into the green blend).",
+          "Serve with ají verde for extra heat control."
+        ]
+      }
+    },
+    {
+      "id": "variation.veg_additions",
+      "label": "Extra veggies (bell pepper + corn)",
+      "when": { "preference": ["more_veg"] },
+      "adapt": {
+        "notes": [
+          "Add sliced bell pepper with onions.",
+          "Add 1/2 cup corn kernels with peas in the last 5 minutes."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Rice dishes should be cooled promptly and stored cold to reduce risk of Bacillus cereus growth.",
+      "Reheat leftovers thoroughly and avoid repeated warm-cool cycles."
+    ]
+  }
+}

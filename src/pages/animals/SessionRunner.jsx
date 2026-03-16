@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // src/pages/animals/SessionRunner.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 /* -----------------------------------------------------------------------------
@@ -10,7 +16,7 @@ const isBrowser = typeof window !== "undefined";
 
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch {}
 
@@ -21,7 +27,11 @@ try {
 } catch {}
 
 let pausePolicies = {
-  constants: { REASON_USER: "user", REASON_SAFETY: "safety", REASON_SABBATH: "sabbath" },
+  constants: {
+    REASON_USER: "user",
+    REASON_SAFETY: "safety",
+    REASON_SABBATH: "sabbath",
+  },
   shouldFreeze: () => false,
   canContinue: () => true,
   normalize: (p) => ({ ...p }),
@@ -52,7 +62,10 @@ try {
   offsetParser = (mod && (mod.default || mod)) || offsetParser;
 } catch {}
 
-let calendarSync = { addEvents: async () => ({ ok: true }), writeSession: async () => ({ ok: true }) };
+let calendarSync = {
+  addEvents: async () => ({ ok: true }),
+  writeSession: async () => ({ ok: true }),
+};
 try {
   const mod = require("@/services/calendar/calendarSync");
   calendarSync = (mod && (mod.default || mod)) || calendarSync;
@@ -72,13 +85,19 @@ let useSettingsStore = () => ({
 });
 try {
   const mod = require("@/stores/settingsStore");
-  useSettingsStore = (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
+  useSettingsStore =
+    (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
 } catch {}
 
-let useFavoriteSessions = () => ({ list: () => [], save: async () => ({ ok: true }), remove: async () => ({ ok: true }) });
+let useFavoriteSessions = () => ({
+  list: () => [],
+  save: async () => ({ ok: true }),
+  remove: async () => ({ ok: true }),
+});
 try {
   const mod = require("@/hooks/useFavoriteSessions");
-  useFavoriteSessions = (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
+  useFavoriteSessions =
+    (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
 } catch {}
 
 let useSchedules = () => ({ list: () => [], save: async () => ({ ok: true }) });
@@ -109,12 +128,19 @@ const fallbackSchedKey = "animals:schedules";
 const localFavAPI = {
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(fallbackFavKey) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(fallbackFavKey) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (fav) => {
     if (!isBrowser) return { ok: false };
     const all = localFavAPI.list();
-    const next = [...all.filter((f) => f.id !== fav.id), { ...fav, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((f) => f.id !== fav.id),
+      { ...fav, updatedAt: Date.now() },
+    ];
     localStorage.setItem(fallbackFavKey, JSON.stringify(next));
     return { ok: true };
   },
@@ -128,12 +154,19 @@ const localFavAPI = {
 const localSchedAPI = {
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(fallbackSchedKey) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(fallbackSchedKey) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (s) => {
     if (!isBrowser) return { ok: false };
     const all = localSchedAPI.list();
-    const next = [...all.filter((x) => x.id !== s.id), { ...s, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((x) => x.id !== s.id),
+      { ...s, updatedAt: Date.now() },
+    ];
     localStorage.setItem(fallbackSchedKey, JSON.stringify(next));
     return { ok: true };
   },
@@ -151,11 +184,26 @@ const Banner = ({ title, subtitle, onExit, onPause, onResume, isPaused }) => (
       </div>
       <div className="flex gap-2">
         {!isPaused ? (
-          <button className="px-3 py-2 rounded-xl border bg-amber-50 hover:bg-amber-100" onClick={onPause}>Pause</button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-amber-50 hover:bg-amber-100"
+            onClick={onPause}
+          >
+            Pause
+          </button>
         ) : (
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={onResume}>Resume</button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={onResume}
+          >
+            Resume
+          </button>
         )}
-        <button className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100" onClick={onExit}>Exit</button>
+        <button
+          className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100"
+          onClick={onExit}
+        >
+          Exit
+        </button>
       </div>
     </div>
   </div>
@@ -171,12 +219,20 @@ const Timeline = ({ steps = [], currentIndex = 0 }) => (
           key={s.id || i}
           className={[
             "p-3 rounded-xl border",
-            active ? "bg-blue-50 border-blue-300" : done ? "bg-green-50 border-green-300" : "bg-zinc-50 border-zinc-200",
+            active
+              ? "bg-blue-50 border-blue-300"
+              : done
+              ? "bg-green-50 border-green-300"
+              : "bg-zinc-50 border-zinc-200",
           ].join(" ")}
         >
-          <div className="font-medium">{i + 1}. {s.title || s.task || "Untitled Step"}</div>
+          <div className="font-medium">
+            {i + 1}. {s.title || s.task || "Untitled Step"}
+          </div>
           {s.hints ? <div className="text-sm opacity-75">{s.hints}</div> : null}
-          {s.duration ? <div className="text-xs opacity-60 mt-1">~{s.duration} min</div> : null}
+          {s.duration ? (
+            <div className="text-xs opacity-60 mt-1">~{s.duration} min</div>
+          ) : null}
         </div>
       );
     })}
@@ -189,10 +245,22 @@ const PauseModal = ({ open, reason, onClose, onContinue }) => {
     <div className="fixed inset-0 z-40 grid place-items-center bg-black/40">
       <div className="w-[min(560px,92vw)] rounded-2xl bg-white dark:bg-zinc-900 shadow-xl border border-zinc-200 dark:border-zinc-700 p-4">
         <div className="text-lg font-semibold mb-1">Session Paused</div>
-        <div className="text-sm opacity-80 mb-4">{reason || "Session is paused."}</div>
+        <div className="text-sm opacity-80 mb-4">
+          {reason || "Session is paused."}
+        </div>
         <div className="flex justify-end gap-2">
-          <button className="px-3 py-2 rounded-xl border bg-zinc-50" onClick={onClose}>Close</button>
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={onContinue}>Continue</button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-zinc-50"
+            onClick={onClose}
+          >
+            Close
+          </button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={onContinue}
+          >
+            Continue
+          </button>
         </div>
       </div>
     </div>
@@ -216,35 +284,78 @@ export default function AnimalsSessionRunner() {
 
   // Resolve hooks or fallbacks for favorites/schedules
   const favHook = (() => {
-    try { const h = useFavoriteSessions(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useFavoriteSessions();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localFavAPI;
   })();
   const schedHook = (() => {
-    try { const h = useSchedules(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useSchedules();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localSchedAPI;
   })();
 
   // Router state may carry templateId, seeded steps, resume info
   const routeState = (location && location.state) || {};
-  const templateId = routeState.templateId || defaults?.animalsTemplateId || "daily-animal-rounds";
+  const templateId =
+    routeState.templateId ||
+    defaults?.animalsTemplateId ||
+    "daily-animal-rounds";
 
   // Session state
-  const [sessionId] = useState(() => routeState.sessionId || `animals-${uid()}`);
+  const [sessionId] = useState(
+    () => routeState.sessionId || `animals-${uid()}`
+  );
   const [title, setTitle] = useState(routeState.title || "Animal Care Session");
-  const [subtitle, setSubtitle] = useState(routeState.subtitle || "Feed • Water • Clean • Check health.");
+  const [subtitle, setSubtitle] = useState(
+    routeState.subtitle || "Feed • Water • Clean • Check health."
+  );
   const [steps, setSteps] = useState(() => {
-    const seed = (routeState.steps || []).map((s, i) => ({ id: s.id || `st-${i}-${uid()}`, ...s }));
+    const seed = (routeState.steps || []).map((s, i) => ({
+      id: s.id || `st-${i}-${uid()}`,
+      ...s,
+    }));
     return seed.length
       ? seed
       : [
-          { id: `st-${uid()}`, title: "Feed & Water (all pens)", duration: 10, hints: "Verify levels, troughs/bottles, mineral salt" },
-          { id: `st-${uid()}`, title: "Health Checks", duration: 8, hints: "Eyes, gait, body condition, temp if indicated" },
-          { id: `st-${uid()}`, title: "Stalls/Bedding", duration: 8, hints: "Spot clean, add dry bedding where needed" },
-          { id: `st-${uid()}`, title: "Milk/Egg Collection", duration: 7, hints: "Sanitize, record yields; chill promptly" },
-          { id: `st-${uid()}`, title: "Perimeter & Gates", duration: 5, hints: "Fences, latches, predators, water lines" },
+          {
+            id: `st-${uid()}`,
+            title: "Feed & Water (all pens)",
+            duration: 10,
+            hints: "Verify levels, troughs/bottles, mineral salt",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Health Checks",
+            duration: 8,
+            hints: "Eyes, gait, body condition, temp if indicated",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Stalls/Bedding",
+            duration: 8,
+            hints: "Spot clean, add dry bedding where needed",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Milk/Egg Collection",
+            duration: 7,
+            hints: "Sanitize, record yields; chill promptly",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Perimeter & Gates",
+            duration: 5,
+            hints: "Fences, latches, predators, water lines",
+          },
         ];
   });
-  const [idx, setIdx] = useState(() => Math.min(routeState.currentIndex || 0, Math.max(steps.length - 1, 0)));
+  const [idx, setIdx] = useState(() =>
+    Math.min(routeState.currentIndex || 0, Math.max(steps.length - 1, 0))
+  );
   const [paused, setPaused] = useState(false);
   const [pauseReason, setPauseReason] = useState("");
   const [startedAt] = useState(routeState.startedAt || nowISO());
@@ -259,19 +370,26 @@ export default function AnimalsSessionRunner() {
     (async () => {
       try {
         if (!(routeState.steps && routeState.steps.length)) {
-          const enrich = await AnimalQueueManager.suggestSteps?.({ templateId, sessionId });
+          const enrich = await AnimalQueueManager.suggestSteps?.({
+            templateId,
+            sessionId,
+          });
           if (Array.isArray(enrich) && enrich.length) {
             setSteps((prev) => {
               const map = new Map(prev.map((p) => [p.title, p]));
               enrich.forEach((e) => {
-                if (!map.has(e.title)) map.set(e.title, { id: `st-${uid()}`, ...e });
+                if (!map.has(e.title))
+                  map.set(e.title, { id: `st-${uid()}`, ...e });
               });
               return Array.from(map.values());
             });
           }
         }
       } catch (e) {
-        console.warn("AnimalQueueManager.suggestSteps failed:", e?.message || e);
+        console.warn(
+          "AnimalQueueManager.suggestSteps failed:",
+          e?.message || e
+        );
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -280,9 +398,16 @@ export default function AnimalsSessionRunner() {
   // Keyboard controls
   useEffect(() => {
     const onKey = (e) => {
-      if (e.code === "Space") { e.preventDefault(); paused ? onResume() : onPause(); }
-      else if (e.code === "ArrowRight") { e.preventDefault(); goNext(); }
-      else if (e.code === "ArrowLeft") { e.preventDefault(); goPrev(); }
+      if (e.code === "Space") {
+        e.preventDefault();
+        paused ? onResume() : onPause();
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -308,8 +433,18 @@ export default function AnimalsSessionRunner() {
         });
         if (guardRes?.shortages?.length) {
           setShortages(guardRes.shortages);
-          eventBus.emit("inventory:signals", { domain: "animals", sessionId, shortages: guardRes.shortages });
-          try { InventoryMonitor.emit?.("inventory:signals", { domain: "animals", sessionId, shortages: guardRes.shortages }); } catch {}
+          eventBus.emit("inventory:signals", {
+            domain: "animals",
+            sessionId,
+            shortages: guardRes.shortages,
+          });
+          try {
+            InventoryMonitor.emit?.("inventory:signals", {
+              domain: "animals",
+              sessionId,
+              shortages: guardRes.shortages,
+            });
+          } catch {}
         }
       } catch (e) {
         console.warn("Inventory guard skipped:", e?.message || e);
@@ -321,11 +456,21 @@ export default function AnimalsSessionRunner() {
   // Sabbath / Quiet hours guard at mount
   useEffect(() => {
     try {
-      const shouldFreeze = pausePolicies.shouldFreeze?.({ domain: "animals", quietHours, sabbath, rhythms, now: new Date() });
+      const shouldFreeze = pausePolicies.shouldFreeze?.({
+        domain: "animals",
+        quietHours,
+        sabbath,
+        rhythms,
+        now: new Date(),
+      });
       if (shouldFreeze) {
         setPaused(true);
         setPauseReason("Paused by household guard (Sabbath/Quiet Hours).");
-        eventBus.emit("session:paused", { sessionId, domain: "animals", reason: pausePolicies.constants?.REASON_SABBATH || "guard" });
+        eventBus.emit("session:paused", {
+          sessionId,
+          domain: "animals",
+          reason: pausePolicies.constants?.REASON_SABBATH || "guard",
+        });
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -371,7 +516,8 @@ export default function AnimalsSessionRunner() {
   // Orchestration listeners
   useEffect(() => {
     const onStep = (payload) => {
-      if (payload?.sessionId !== sessionId || payload?.domain !== "animals") return;
+      if (payload?.sessionId !== sessionId || payload?.domain !== "animals")
+        return;
       if (payload.type === "next") goNext();
       if (payload.type === "prev") goPrev();
       if (payload.type === "pause") onPause(payload.reason);
@@ -391,17 +537,30 @@ export default function AnimalsSessionRunner() {
 
   const goNext = useCallback(() => {
     setIdx((i) => Math.min(i + 1, Math.max(steps.length - 1, 0)));
-    eventBus.emit("session:step:changed", { sessionId, domain: "animals", index: Math.min(idx + 1, steps.length - 1) });
+    eventBus.emit("session:step:changed", {
+      sessionId,
+      domain: "animals",
+      index: Math.min(idx + 1, steps.length - 1),
+    });
     // Domain signal (useful for logs/NBA): what just finished?
     try {
       const done = steps[idx];
-      if (done?.title) eventBus.emit("animal:action:completed", { sessionId, step: done.title, at: nowISO() });
+      if (done?.title)
+        eventBus.emit("animal:action:completed", {
+          sessionId,
+          step: done.title,
+          at: nowISO(),
+        });
     } catch {}
   }, [idx, sessionId, steps]);
 
   const goPrev = useCallback(() => {
     setIdx((i) => Math.max(i - 1, 0));
-    eventBus.emit("session:step:changed", { sessionId, domain: "animals", index: Math.max(idx - 1, 0) });
+    eventBus.emit("session:step:changed", {
+      sessionId,
+      domain: "animals",
+      index: Math.max(idx - 1, 0),
+    });
   }, [idx, sessionId]);
 
   const onPause = useCallback(
@@ -420,15 +579,27 @@ export default function AnimalsSessionRunner() {
   );
 
   const onResume = useCallback(() => {
-    const ok = pausePolicies.canContinue?.({ domain: "animals", quietHours, sabbath, now: new Date() });
-    if (!ok) { setPauseReason("Cannot resume yet due to household guard."); return; }
+    const ok = pausePolicies.canContinue?.({
+      domain: "animals",
+      quietHours,
+      sabbath,
+      now: new Date(),
+    });
+    if (!ok) {
+      setPauseReason("Cannot resume yet due to household guard.");
+      return;
+    }
     setPaused(false);
     setPauseReason("");
     eventBus.emit("session:resumed", { sessionId, domain: "animals" });
   }, [sessionId, quietHours, sabbath]);
 
   const onExit = useCallback(() => {
-    eventBus.emit("session:ended", { sessionId, domain: "animals", finishedAt: nowISO() });
+    eventBus.emit("session:ended", {
+      sessionId,
+      domain: "animals",
+      finishedAt: nowISO(),
+    });
     navigate("/animals", { replace: true });
   }, [navigate, sessionId]);
 
@@ -451,7 +622,15 @@ export default function AnimalsSessionRunner() {
     } else {
       alert("Could not save favorite.");
     }
-  }, [favHook, scheduleSuggestion, sessionId, startedAt, steps, templateId, title]);
+  }, [
+    favHook,
+    scheduleSuggestion,
+    sessionId,
+    startedAt,
+    steps,
+    templateId,
+    title,
+  ]);
 
   /* -------------------------------- Save: Schedule Template ------------------------------ */
   const saveScheduleTemplate = useCallback(async () => {
@@ -471,7 +650,8 @@ export default function AnimalsSessionRunner() {
     };
     setScheduleSuggestion(sched);
 
-    const res = await (schedHook.save?.(sched) || Promise.resolve({ ok: false }));
+    const res = await (schedHook.save?.(sched) ||
+      Promise.resolve({ ok: false }));
     if (res?.ok) {
       eventBus.emit("schedules:changed", { domain: "animals" });
       alert("Schedule template saved ✓");
@@ -488,7 +668,14 @@ export default function AnimalsSessionRunner() {
         meta: { sessionTemplateId: sched.id, source: "SessionRunner" },
       });
     } catch {}
-  }, [calendarSync, rhythms?.preferMorning, schedHook, steps, templateId, title]);
+  }, [
+    calendarSync,
+    rhythms?.preferMorning,
+    schedHook,
+    steps,
+    templateId,
+    title,
+  ]);
 
   /* --------------------------------- Render --------------------------------- */
   const currentStep = steps[idx] || {};
@@ -503,7 +690,9 @@ export default function AnimalsSessionRunner() {
       {/* Top bar */}
       <div className="mb-3 flex items-center justify-between">
         <div className="text-sm opacity-70">
-          <Link className="underline" to="/animals">Animals</Link>
+          <Link className="underline" to="/animals">
+            Animals
+          </Link>
           <span className="mx-1">/</span>
           <span>Session</span>
           {shortagesBadge}
@@ -513,7 +702,10 @@ export default function AnimalsSessionRunner() {
 
       {/* Banner */}
       <Banner
-        title={`${title} (${Math.max(0, Math.min(100, Math.round(((idx + 1) / (steps.length || 1)) * 100)))}%)`}
+        title={`${title} (${Math.max(
+          0,
+          Math.min(100, Math.round(((idx + 1) / (steps.length || 1)) * 100))
+        )}%)`}
         subtitle={subtitle}
         onExit={onExit}
         onPause={onPause}
@@ -523,13 +715,22 @@ export default function AnimalsSessionRunner() {
 
       {/* Actions */}
       <div className="mt-3 flex flex-wrap gap-2">
-        <button className="px-3 py-2 rounded-xl border bg-blue-50 hover:bg-blue-100" onClick={saveFavorite}>
+        <button
+          className="px-3 py-2 rounded-xl border bg-blue-50 hover:bg-blue-100"
+          onClick={saveFavorite}
+        >
           Save Favorite Session
         </button>
-        <button className="px-3 py-2 rounded-xl border bg-purple-50 hover:bg-purple-100" onClick={saveScheduleTemplate}>
+        <button
+          className="px-3 py-2 rounded-xl border bg-purple-50 hover:bg-purple-100"
+          onClick={saveScheduleTemplate}
+        >
           Save as Schedule Template
         </button>
-        <button className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100" onClick={() => navigate("/scheduler/settings")}>
+        <button
+          className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100"
+          onClick={() => navigate("/scheduler/settings")}
+        >
           Open Scheduler Settings
         </button>
       </div>
@@ -537,15 +738,29 @@ export default function AnimalsSessionRunner() {
       {/* Current step card */}
       <div className="mt-4 p-4 rounded-2xl border bg-white dark:bg-zinc-900">
         <div className="flex items-baseline justify-between">
-          <div className="text-lg font-semibold">{currentStep.title || "Step"}</div>
-          <div className="text-xs opacity-70">Step {idx + 1} of {steps.length}</div>
+          <div className="text-lg font-semibold">
+            {currentStep.title || "Step"}
+          </div>
+          <div className="text-xs opacity-70">
+            Step {idx + 1} of {steps.length}
+          </div>
         </div>
-        {currentStep.hints ? <div className="mt-1 text-sm opacity-80">{currentStep.hints}</div> : null}
+        {currentStep.hints ? (
+          <div className="mt-1 text-sm opacity-80">{currentStep.hints}</div>
+        ) : null}
         <div className="mt-3 flex gap-2">
-          <button className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100" onClick={goPrev} disabled={idx === 0}>
+          <button
+            className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100"
+            onClick={goPrev}
+            disabled={idx === 0}
+          >
             ← Back
           </button>
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={goNext} disabled={idx >= steps.length - 1}>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={goNext}
+            disabled={idx >= steps.length - 1}
+          >
             Next →
           </button>
         </div>
@@ -557,11 +772,17 @@ export default function AnimalsSessionRunner() {
       </div>
 
       {/* Pause modal */}
-      <PauseModal open={paused} reason={pauseReason} onClose={() => setPauseReason("")} onContinue={onResume} />
+      <PauseModal
+        open={paused}
+        reason={pauseReason}
+        onClose={() => setPauseReason("")}
+        onContinue={onResume}
+      />
 
       {/* Footer / secondary info */}
       <div className="mt-6 text-xs opacity-60">
-        Template: <code>{templateId}</code> • Session ID: <code>{sessionId}</code> • Started:{" "}
+        Template: <code>{templateId}</code> • Session ID:{" "}
+        <code>{sessionId}</code> • Started:{" "}
         <time dateTime={startedAt}>{new Date(startedAt).toLocaleString()}</time>
       </div>
     </div>

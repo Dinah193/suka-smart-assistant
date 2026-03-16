@@ -1,0 +1,264 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.fried_plantains",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Fried Plantains",
+    "subtitle": "Sweet maduros or savory tostones-style slices (pan-fried)",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from common Caribbean home-cooking plantain preparations (ripe sweet slices and green twice-fried-style).",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": [
+      "jamaican",
+      "trini_tobago",
+      "haitian",
+      "dominican",
+      "puerto_rican",
+      "cuban"
+    ],
+    "category": "side",
+    "mealArchetypes": ["fried_starch_side", "street_food_side"],
+    "servingStyles": ["snacks", "street_food", "plated_meals", "family_style"],
+    "plannerTags": ["caribbean", "plantain", "fried", "side", "snack", "quick"]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "plate" },
+    "notes": "One medium plantain serves 1–2 depending on what else is served."
+  },
+
+  "time": {
+    "activeMins": 12,
+    "totalMins": 18,
+    "handsOffMins": 0
+  },
+
+  "difficulty": 1,
+
+  "nutritionHints": {
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": false,
+    "weeknightPossible": true,
+    "leftoversGood": false,
+    "freezerFriendly": false
+  },
+
+  "tasteProfile": {
+    "heatTypical": 0,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 3,
+    "sourness": 0,
+    "saltiness": 1,
+    "umami": 0,
+    "signature": ["plantain_caramelized", "crispy_edges", "soft_center"]
+  },
+
+  "equipment": {
+    "recommended": ["cast_iron_skillet", "tongs", "paper_towels", "plate"],
+    "minimum": ["skillet", "stovetop"],
+    "optional": ["thermometer", "wire_rack"]
+  },
+
+  "dietFlags": ["vegan", "vegetarian", "gluten_free", "dairy_free"],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "plantains",
+      "label": "Plantains",
+      "amount": { "value": 2, "unit": "each" },
+      "role": "starch",
+      "notes": "Use yellow/black-speckled for sweet maduros; use green for savory twice-fry style."
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral frying oil",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "role": "fat",
+      "notes": "Enough for shallow frying (about 1/4–1/2 inch depth)."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "seasoning",
+      "notes": "Season to taste. For sweet plantains, a tiny pinch makes them pop."
+    },
+    {
+      "id": "ground_cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "spice",
+      "optional": true,
+      "notes": "Optional for sweet version."
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "sweetener",
+      "optional": true,
+      "notes": "Optional for very ripe plantains if you want extra caramel notes."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "acid",
+      "optional": true,
+      "notes": "Optional finish for brightness."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "prep_plantains",
+      "title": "Peel and slice",
+      "domain": "cooking",
+      "activeMins": 6,
+      "instructions": [
+        "Cut off both ends of each plantain.",
+        "Score the peel lengthwise (1–3 lines), then peel away the skin.",
+        "Slice on a diagonal into 1/2-inch pieces (sweet version) OR into 1-inch chunks (green plantain option).",
+        "Pat slices dry if they seem wet—less splatter and better browning."
+      ],
+      "inputs": {
+        "ingredients": ["plantains"],
+        "equipment": ["cutting_board", "chef_knife", "paper_towels"]
+      }
+    },
+    {
+      "id": "heat_oil",
+      "title": "Heat oil for shallow frying",
+      "domain": "cooking",
+      "activeMins": 2,
+      "instructions": [
+        "Add oil to a skillet to reach about 1/4–1/2 inch depth.",
+        "Heat over medium to medium-high until shimmering.",
+        "If using a thermometer, aim for ~350°F for ripe plantains; ~360°F for green plantains."
+      ],
+      "inputs": {
+        "ingredients": ["neutral_oil"],
+        "equipment": ["skillet", "stovetop", "thermometer"]
+      }
+    },
+    {
+      "id": "fry_first_side",
+      "title": "Fry until golden",
+      "domain": "cooking",
+      "activeMins": 6,
+      "instructions": [
+        "Carefully add plantain slices in a single layer (work in batches).",
+        "Fry 2–3 minutes per side for ripe plantains until deep golden with caramelized edges.",
+        "For green plantains (savory): fry 2 minutes per side until pale golden and slightly tender.",
+        "Transfer to paper towels or a rack to drain."
+      ],
+      "inputs": {
+        "ingredients": ["plantains"],
+        "equipment": ["tongs", "skillet", "stovetop", "paper_towels", "plate"]
+      }
+    },
+    {
+      "id": "season_and_finish",
+      "title": "Season and serve",
+      "domain": "cooking",
+      "activeMins": 4,
+      "instructions": [
+        "Season immediately with a pinch of salt.",
+        "Optional sweet finish: dust with cinnamon and/or a tiny sprinkle of brown sugar.",
+        "Optional bright finish: a few drops of lime juice.",
+        "Serve hot as a side or snack."
+      ],
+      "inputs": {
+        "ingredients": ["salt", "ground_cinnamon", "brown_sugar", "lime_juice"],
+        "equipment": ["plate"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "mains": [
+      "caribbean.curry_chicken",
+      "caribbean.stewed_chicken",
+      "caribbean.jerk_chicken",
+      "caribbean.braised_oxtail",
+      "caribbean.stewed_fish"
+    ],
+    "sides": ["caribbean.callaloo", "greens", "salad", "cabbage_slaw"],
+    "condiments": ["pepper_sauce", "pikliz", "lime_juice"],
+    "drinks": ["caribbean.sorrel_drink", "ginger_beer"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.fried_plantains.green_tostones_style",
+      "label": "Green Plantains (Twice-Fried Style)",
+      "when": { "hasIngredientsAll": ["plantains"] },
+      "adapt": {
+        "method": "twice_fry_optional",
+        "notes": "Use green plantains. After first fry, smash each piece (using a cup or tostonera), then fry again 1–2 minutes per side until crisp. Salt more generously; serve with garlic sauce or lime."
+      }
+    },
+    {
+      "id": "caribbean.fried_plantains.air_fryer",
+      "label": "Air Fryer Plantains (Less Oil)",
+      "when": { "hasEquipmentAll": ["air_fryer"] },
+      "adapt": {
+        "method": "air_fry",
+        "notes": "Toss slices lightly with oil. Air fry at 380°F for ~10–14 minutes, flipping halfway, until browned."
+      }
+    },
+    {
+      "id": "caribbean.fried_plantains.low_sugar",
+      "label": "Less Sweet Finish",
+      "when": { "preference": { "sweetnessMax": 2 } },
+      "adapt": {
+        "notes": "Use just-ripe yellow plantains (not black), skip sugar, finish only with salt + lime."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 1,
+      "notes": "Best fresh. Refrigerated leftovers soften."
+    },
+    "freezer": {
+      "safeMonths": 0,
+      "notes": "Not recommended for best texture."
+    },
+    "reheat": {
+      "methods": ["air_fryer", "oven"],
+      "notes": "Re-crisp at 375°F for 5–8 minutes. Avoid microwave if you want crisp edges."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "side",
+    "batchPlanHints": {
+      "goodForBatch": false,
+      "prepTasks": ["Peel and slice plantains", "Set draining station"],
+      "makeAhead": [
+        "Slice plantains up to 30 minutes ahead; keep covered to prevent drying"
+      ]
+    }
+  }
+}

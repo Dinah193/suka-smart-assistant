@@ -1,0 +1,1502 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "SSA canonical dishes catalog for Nigerian cuisine (planner + browse + search).",
+    "IDs use lowercase tokens matching ^[a-z0-9_.-]+$.",
+    "Signals fields are strict booleans (batchFriendly/leftoversGood/freezerFriendly) for schema compliance."
+  ],
+
+  "meta": {
+    "id": "cuisines.nigerian.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Nigerian • Dishes Catalog",
+    "cuisineId": "cuisines.nigerian",
+    "status": "canonical",
+    "description": "Planner-ready dish entries representing common Nigerian meals, soups, stews, snacks, and staples.",
+    "version": "1.0.0",
+    "author": "ssa.canonical",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "dish.nigerian.jollof_rice",
+      "label": "Jollof Rice",
+      "aka": ["Party Jollof", "Smoky Jollof Rice"],
+      "subprofiles": [
+        "subprofile.nigerian.party",
+        "subprofile.nigerian.home_style"
+      ],
+      "category": "rice",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 70, "handsOffMins": 45 },
+      "servingStyles": ["family_style", "holiday_feasts", "plates"],
+      "mealArchetypes": ["archetype.rice_main", "archetype.stew_and_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.rice_long_grain", "ingredient.rice_parboiled"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.tomato",
+            "ingredient.tomato_paste",
+            "ingredient.red_bell_pepper",
+            "ingredient.onion"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["spice.thyme", "spice.curry_powder", "spice.bay_leaf"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.blend",
+        "technique.simmer",
+        "technique.rice_absorption"
+      ],
+      "equipmentRecommended": ["equipment.blender", "equipment.oven"],
+      "equipmentMinimum": [
+        "equipment.pot_heavy",
+        "equipment.spoon_wooden",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.rice_long_grain",
+        "ingredient.tomato",
+        "ingredient.red_bell_pepper",
+        "ingredient.onion",
+        "ingredient.oil",
+        "ingredient.stock",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "proteins": [
+          "dish.nigerian.suya",
+          "dish.nigerian.grilled_chicken",
+          "dish.nigerian.moi_moi"
+        ],
+        "sides": [
+          "dish.nigerian.fried_plantains",
+          "dish.nigerian.cabbage_salad"
+        ]
+      },
+      "variations": [
+        {
+          "id": "dish.nigerian.jollof_rice.variation.party_smoky",
+          "label": "Party-Style Smoky Finish",
+          "when": { "goal": "smoky_note" },
+          "adapt": { "bakeFinish": true, "reduceWaterSlightly": true }
+        }
+      ],
+      "plannerTags": [
+        "nigerian",
+        "rice",
+        "party",
+        "tomato_base",
+        "batch_friendly",
+        "leftovers"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.fried_rice",
+      "label": "Nigerian Fried Rice",
+      "aka": ["Green Fried Rice"],
+      "subprofiles": ["subprofile.nigerian.home_style"],
+      "category": "rice",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 30, "totalMins": 50, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "plates", "holiday_feasts"],
+      "mealArchetypes": ["archetype.rice_main", "archetype.weeknight_pan"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.rice_parboiled", "ingredient.rice_long_grain"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.carrot",
+            "ingredient.green_beans",
+            "ingredient.peas",
+            "ingredient.sweet_corn"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.chicken",
+            "ingredient.shrimp",
+            "ingredient.liver_beef"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.parboil",
+        "technique.stir_fry",
+        "technique.saute"
+      ],
+      "equipmentRecommended": ["equipment.wok"],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.pan_large",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.rice_parboiled",
+        "ingredient.mixed_vegetables",
+        "ingredient.onion",
+        "ingredient.oil",
+        "ingredient.stock",
+        "ingredient.salt",
+        "spice.curry_powder"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free"],
+      "pairingHints": {
+        "proteins": [
+          "dish.nigerian.grilled_chicken",
+          "dish.nigerian.pepper_soup"
+        ],
+        "sides": [
+          "dish.nigerian.cabbage_salad",
+          "dish.nigerian.fried_plantains"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "rice",
+        "weeknight",
+        "one_pan",
+        "leftovers",
+        "veg_forward"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.ayamase_ofada_sauce",
+      "label": "Ayamase (Ofada Sauce)",
+      "aka": ["Designer Stew", "Green Pepper Stew"],
+      "subprofiles": ["subprofile.nigerian.yoruba"],
+      "category": "stew",
+      "difficulty": 4,
+      "heatTypical": 4,
+      "time": { "activeMins": 40, "totalMins": 90, "handsOffMins": 50 },
+      "servingStyles": ["family_style", "stew_and_starch", "plates"],
+      "mealArchetypes": [
+        "archetype.stew_and_starch",
+        "archetype.sauce_and_side"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.green_bell_pepper",
+            "ingredient.scotch_bonnet",
+            "ingredient.onion"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": ["ingredient.egg", "ingredient.beef", "ingredient.tripe"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.palm_oil", "ingredient.vegetable_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.blend",
+        "technique.fry_low_and_slow",
+        "technique.simmer"
+      ],
+      "equipmentRecommended": ["equipment.blender"],
+      "equipmentMinimum": [
+        "equipment.pot_heavy",
+        "equipment.spoon_wooden",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.palm_oil",
+        "ingredient.green_bell_pepper",
+        "ingredient.onion",
+        "ingredient.iru",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.egg"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "starches": [
+          "dish.nigerian.ofada_rice",
+          "dish.nigerian.boiled_yam",
+          "dish.nigerian.plantain_boiled"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "yoruba",
+        "stew",
+        "high_heat",
+        "palm_oil",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.egusi_soup",
+      "label": "Egusi Soup",
+      "aka": ["Egusi Stew"],
+      "subprofiles": ["subprofile.nigerian.igbo", "subprofile.nigerian.yoruba"],
+      "category": "soup",
+      "difficulty": 4,
+      "heatTypical": 3,
+      "time": { "activeMins": 35, "totalMins": 80, "handsOffMins": 45 },
+      "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+      "mealArchetypes": [
+        "archetype.soup_and_swallow",
+        "archetype.stew_and_starch"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "thickener",
+          "items": ["ingredient.egusi"],
+          "chooseOne": false
+        },
+        {
+          "role": "greens",
+          "items": ["ingredient.ugu", "ingredient.spinach"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.goat",
+            "ingredient.beef",
+            "ingredient.dried_fish"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.thicken",
+        "technique.saute"
+      ],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot_heavy",
+        "equipment.spoon_wooden",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.egusi",
+        "ingredient.palm_oil",
+        "ingredient.onion",
+        "ingredient.stock",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.fish", "allergen.seeds"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "swallows": [
+          "dish.nigerian.fufu",
+          "dish.nigerian.pounded_yam",
+          "dish.nigerian.eba"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "soup",
+        "swallow_pairing",
+        "egusi",
+        "freezer_friendly",
+        "one_pot"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.ogbono_soup",
+      "label": "Ogbono Soup",
+      "aka": ["Draw Soup (Ogbono)"],
+      "subprofiles": ["subprofile.nigerian.igbo"],
+      "category": "soup",
+      "difficulty": 4,
+      "heatTypical": 2,
+      "time": { "activeMins": 30, "totalMins": 75, "handsOffMins": 45 },
+      "servingStyles": ["stew_and_starch", "one_pot", "family_style"],
+      "mealArchetypes": ["archetype.soup_and_swallow"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "thickener",
+          "items": ["ingredient.ogbono"],
+          "chooseOne": false
+        },
+        {
+          "role": "greens",
+          "items": ["ingredient.ugu", "ingredient.bitterleaf"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.beef",
+            "ingredient.goat",
+            "ingredient.stockfish"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.simmer", "technique.thicken", "technique.stir"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot_heavy",
+        "equipment.spoon_wooden",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.ogbono",
+        "ingredient.palm_oil",
+        "ingredient.onion",
+        "ingredient.stock",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.fish", "allergen.seeds"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "swallows": [
+          "dish.nigerian.fufu",
+          "dish.nigerian.eba",
+          "dish.nigerian.semo"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "soup",
+        "draw_soup",
+        "swallow_pairing",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.okra_soup",
+      "label": "Okra Soup",
+      "aka": ["Okro Soup", "Draw Soup (Okra)"],
+      "subprofiles": ["subprofile.nigerian.delta", "subprofile.nigerian.ijaw"],
+      "category": "soup",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 25, "totalMins": 55, "handsOffMins": 30 },
+      "servingStyles": ["stew_and_starch", "one_pot", "family_style"],
+      "mealArchetypes": [
+        "archetype.soup_and_swallow",
+        "archetype.weeknight_pot"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        { "role": "veg", "items": ["ingredient.okra"], "chooseOne": false },
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.shrimp_dried",
+            "ingredient.dried_fish",
+            "ingredient.beef"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "greens",
+          "items": ["ingredient.ugu", "ingredient.spinach"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.chop_fine",
+        "technique.stir"
+      ],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.knife",
+        "equipment.board",
+        "equipment.spoon_wooden"
+      ],
+      "ingredientsCore": [
+        "ingredient.okra",
+        "ingredient.onion",
+        "ingredient.palm_oil",
+        "ingredient.stock",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.fish", "allergen.shellfish"],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+      "pairingHints": {
+        "swallows": [
+          "dish.nigerian.eba",
+          "dish.nigerian.amala",
+          "dish.nigerian.fufu"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "okra",
+        "soup",
+        "weeknight",
+        "one_pot",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.pepper_soup",
+      "label": "Pepper Soup",
+      "aka": ["Goat Pepper Soup", "Catfish Pepper Soup"],
+      "subprofiles": ["subprofile.nigerian.universal"],
+      "category": "soup",
+      "difficulty": 3,
+      "heatTypical": 4,
+      "time": { "activeMins": 20, "totalMins": 60, "handsOffMins": 40 },
+      "servingStyles": ["one_pot", "bowls", "family_style"],
+      "mealArchetypes": ["archetype.broth_soup", "archetype.light_meal"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": [
+            "ingredient.goat",
+            "ingredient.catfish",
+            "ingredient.chicken"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["spice.uziza", "spice.uda", "spice.calabash_nutmeg"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion", "ingredient.ginger"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.simmer",
+        "technique.toast_spices",
+        "technique.broth"
+      ],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.onion",
+        "ingredient.salt",
+        "ingredient.pepper",
+        "ingredient.stock"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.keto_friendly"
+      ],
+      "pairingHints": {
+        "sides": ["dish.nigerian.boiled_yam", "dish.nigerian.fried_plantains"]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "soup",
+        "high_heat",
+        "brothy",
+        "weeknight",
+        "keto_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.moi_moi",
+      "label": "Moi Moi (Steamed Bean Pudding)",
+      "aka": ["Moimoi"],
+      "subprofiles": ["subprofile.nigerian.yoruba"],
+      "category": "legume",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 75, "handsOffMins": 50 },
+      "servingStyles": ["snacks", "plates", "family_style"],
+      "mealArchetypes": ["archetype.protein_side", "archetype.snack"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.black_eyed_peas", "ingredient.brown_beans"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion", "ingredient.red_bell_pepper"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.oil", "ingredient.palm_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.blend", "technique.steam", "technique.set"],
+      "equipmentRecommended": ["equipment.blender", "equipment.steamer"],
+      "equipmentMinimum": ["equipment.pot", "equipment.lid", "equipment.bowl"],
+      "ingredientsCore": [
+        "ingredient.black_eyed_peas",
+        "ingredient.onion",
+        "ingredient.oil",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "pairingHints": {
+        "mains": ["dish.nigerian.jollof_rice", "dish.nigerian.fried_rice"],
+        "sides": ["dish.nigerian.ogaranya_sauce"]
+      },
+      "variations": [
+        {
+          "id": "dish.nigerian.moi_moi.variation_fish",
+          "label": "Fish-Enriched",
+          "when": { "has": "ingredient.fish" },
+          "adapt": { "add": ["ingredient.sardines", "ingredient.mackerel"] }
+        }
+      ],
+      "plannerTags": [
+        "nigerian",
+        "legume",
+        "steamed",
+        "protein_side",
+        "freezer_friendly",
+        "gluten_free"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.akara",
+      "label": "Akara (Bean Fritters)",
+      "aka": ["Bean Cake"],
+      "subprofiles": ["subprofile.nigerian.yoruba"],
+      "category": "snack",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 30, "totalMins": 45, "handsOffMins": 15 },
+      "servingStyles": ["snacks", "breakfast", "street_food"],
+      "mealArchetypes": ["archetype.snack", "archetype.breakfast"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.black_eyed_peas"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion", "ingredient.pepper"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.oil_for_frying"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.blend", "technique.deep_fry"],
+      "equipmentRecommended": ["equipment.thermometer_oil"],
+      "equipmentMinimum": [
+        "equipment.pot_deep",
+        "equipment.spoon",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.black_eyed_peas",
+        "ingredient.onion",
+        "ingredient.salt",
+        "ingredient.oil_for_frying"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "sauces": ["dish.nigerian.pepper_sauce"],
+        "sides": ["dish.nigerian.ogi_pap"]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "snack",
+        "street_food",
+        "fried",
+        "breakfast",
+        "gluten_free"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.suya",
+      "label": "Suya (Spiced Grilled Meat)",
+      "aka": ["Beef Suya", "Chicken Suya"],
+      "subprofiles": ["subprofile.nigerian.north"],
+      "category": "grill",
+      "difficulty": 3,
+      "heatTypical": 3,
+      "time": { "activeMins": 25, "totalMins": 55, "handsOffMins": 30 },
+      "servingStyles": ["street_food", "snacks", "plates"],
+      "mealArchetypes": ["archetype.grilled_protein", "archetype.snack"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.beef", "ingredient.chicken"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["spice.suya_mix", "ingredient.peanut_powder"],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "items": [
+            "ingredient.onion_raw",
+            "ingredient.tomato",
+            "ingredient.cucumber"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.marinate",
+        "technique.grill",
+        "technique.skewer"
+      ],
+      "equipmentRecommended": ["equipment.grill", "equipment.skewers"],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.sheet_pan",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.beef",
+        "spice.suya_mix",
+        "ingredient.oil",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.peanut"],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.keto_friendly"
+      ],
+      "pairingHints": {
+        "sides": [
+          "dish.nigerian.fried_plantains",
+          "dish.nigerian.cabbage_salad"
+        ],
+        "starches": ["dish.nigerian.jollof_rice"]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "grilled",
+        "street_food",
+        "spicy",
+        "high_protein",
+        "keto_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.fried_plantains",
+      "label": "Fried Plantains",
+      "aka": ["Dodo"],
+      "subprofiles": ["subprofile.nigerian.universal"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 5 },
+      "servingStyles": ["snacks", "plates", "family_style"],
+      "mealArchetypes": ["archetype.side", "archetype.snack"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.plantain_ripe"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.oil_for_frying"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.slice", "technique.pan_fry"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pan",
+        "equipment.spatula",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.plantain_ripe",
+        "ingredient.oil_for_frying",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "mains": [
+          "dish.nigerian.jollof_rice",
+          "dish.nigerian.fried_rice",
+          "dish.nigerian.ewa_agoyin"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "side",
+        "snack",
+        "fried",
+        "quick",
+        "kid_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.ewa_agoyin",
+      "label": "Ewa Agoyin (Beans + Pepper Sauce)",
+      "aka": ["Ewa Aganyin"],
+      "subprofiles": ["subprofile.nigerian.yoruba"],
+      "category": "legume",
+      "difficulty": 3,
+      "heatTypical": 4,
+      "time": { "activeMins": 25, "totalMins": 75, "handsOffMins": 50 },
+      "servingStyles": ["family_style", "plates", "street_food"],
+      "mealArchetypes": ["archetype.legume_main", "archetype.stew_and_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.brown_beans", "ingredient.black_eyed_peas"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.dried_red_pepper",
+            "ingredient.onion",
+            "ingredient.palm_oil"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": [
+            "ingredient.bread",
+            "ingredient.fried_plantain",
+            "ingredient.boiled_yam"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.boil",
+        "technique.fry_low_and_slow",
+        "technique.mash"
+      ],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.pan",
+        "equipment.spoon_wooden"
+      ],
+      "ingredientsCore": [
+        "ingredient.brown_beans",
+        "ingredient.palm_oil",
+        "ingredient.onion",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.vegetarian_option"
+      ],
+      "pairingHints": {
+        "sides": ["dish.nigerian.fried_plantains"],
+        "additions": ["dish.nigerian.boiled_egg"]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "beans",
+        "spicy",
+        "street_food",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.pounded_yam",
+      "label": "Pounded Yam",
+      "aka": ["Iyan"],
+      "subprofiles": ["subprofile.nigerian.yoruba"],
+      "category": "swallow",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 40, "handsOffMins": 15 },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.swallow"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ingredient.yam"], "chooseOne": false }
+      ],
+      "techniques": ["technique.boil", "technique.pound", "technique.knead"],
+      "equipmentRecommended": [
+        "equipment.mortar_and_pestle",
+        "equipment.stand_mixer"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.bowl",
+        "equipment.spoon_wooden"
+      ],
+      "ingredientsCore": [
+        "ingredient.yam",
+        "ingredient.salt",
+        "ingredient.water"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "soups": [
+          "dish.nigerian.egusi_soup",
+          "dish.nigerian.ogbono_soup",
+          "dish.nigerian.okra_soup"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "swallow",
+        "starch",
+        "gluten_free",
+        "traditional"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.eba",
+      "label": "Eba (Garri Swallow)",
+      "aka": ["Garri"],
+      "subprofiles": ["subprofile.nigerian.universal"],
+      "category": "swallow",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 12, "handsOffMins": 2 },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.swallow"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ingredient.garri"], "chooseOne": false }
+      ],
+      "techniques": ["technique.whisk", "technique.knead"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.bowl",
+        "equipment.spoon_wooden"
+      ],
+      "ingredientsCore": ["ingredient.garri", "ingredient.water"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "soups": [
+          "dish.nigerian.okra_soup",
+          "dish.nigerian.egusi_soup",
+          "dish.nigerian.ogbono_soup"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "swallow",
+        "quick",
+        "gluten_free",
+        "traditional"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.fufu",
+      "label": "Fufu",
+      "aka": ["Cassava Fufu", "African Fufu"],
+      "subprofiles": ["subprofile.nigerian.universal"],
+      "category": "swallow",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 12, "totalMins": 15, "handsOffMins": 3 },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.swallow"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.cassava_fufu"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.stir", "technique.knead"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.spoon_wooden",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": ["ingredient.cassava_fufu", "ingredient.water"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "soups": [
+          "dish.nigerian.egusi_soup",
+          "dish.nigerian.ogbono_soup",
+          "dish.nigerian.okra_soup"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "swallow",
+        "gluten_free",
+        "quick",
+        "traditional"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.amala",
+      "label": "Amala",
+      "aka": ["Elubo Swallow"],
+      "subprofiles": ["subprofile.nigerian.yoruba"],
+      "category": "swallow",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 12, "totalMins": 15, "handsOffMins": 3 },
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "mealArchetypes": ["archetype.swallow"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.elubo_yam_flour"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.whisk", "technique.knead"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.spoon_wooden",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": ["ingredient.elubo_yam_flour", "ingredient.water"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "soups": ["dish.nigerian.okra_soup", "dish.nigerian.egusi_soup"]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "yoruba",
+        "swallow",
+        "gluten_free",
+        "traditional"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.nkwobi",
+      "label": "Nkwobi (Spicy Cow Foot)",
+      "aka": ["Spicy Cowfoot"],
+      "subprofiles": ["subprofile.nigerian.igbo"],
+      "category": "appetizer",
+      "difficulty": 4,
+      "heatTypical": 4,
+      "time": { "activeMins": 30, "totalMins": 120, "handsOffMins": 90 },
+      "servingStyles": ["snacks", "street_food", "plates"],
+      "mealArchetypes": ["archetype.appetizer", "archetype.protein_dish"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.cow_foot"],
+          "chooseOne": false
+        },
+        {
+          "role": "sauce",
+          "items": [
+            "ingredient.palm_oil",
+            "ingredient.ugba",
+            "ingredient.utazi"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["spice.uziza", "ingredient.scotch_bonnet"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.boil", "technique.simmer", "technique.toss"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equipment.pot_heavy",
+        "equipment.bowl",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.cow_foot",
+        "ingredient.palm_oil",
+        "ingredient.onion",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.dairy_free",
+        "diet.gluten_free",
+        "diet.keto_friendly"
+      ],
+      "pairingHints": {
+        "sides": ["dish.nigerian.boiled_yam", "dish.nigerian.plantain_boiled"]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "igbo",
+        "spicy",
+        "protein",
+        "keto_friendly",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.nigerian.boli",
+      "label": "Boli (Roasted Plantain)",
+      "aka": ["Roasted Plantain"],
+      "subprofiles": ["subprofile.nigerian.street"],
+      "category": "street_food",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 25, "handsOffMins": 15 },
+      "servingStyles": ["street_food", "snacks"],
+      "mealArchetypes": ["archetype.snack", "archetype.side"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.plantain_ripe", "ingredient.plantain_unripe"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.roast", "technique.grill"],
+      "equipmentRecommended": ["equipment.grill"],
+      "equipmentMinimum": ["equipment.oven", "equipment.sheet_pan"],
+      "ingredientsCore": ["ingredient.plantain_ripe", "ingredient.salt"],
+      "allergens": [],
+      "dietFlags": ["diet.dairy_free", "diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "sides": [
+          "dish.nigerian.groundnut_peanuts",
+          "dish.nigerian.pepper_sauce"
+        ]
+      },
+      "variations": [],
+      "plannerTags": [
+        "nigerian",
+        "street_food",
+        "snack",
+        "roasted",
+        "quick",
+        "kid_friendly"
+      ]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.nigerian": [
+        "dish.nigerian.jollof_rice",
+        "dish.nigerian.fried_rice",
+        "dish.nigerian.ayamase_ofada_sauce",
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.moi_moi",
+        "dish.nigerian.akara",
+        "dish.nigerian.suya",
+        "dish.nigerian.fried_plantains",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.pounded_yam",
+        "dish.nigerian.eba",
+        "dish.nigerian.fufu",
+        "dish.nigerian.amala",
+        "dish.nigerian.nkwobi",
+        "dish.nigerian.boli"
+      ]
+    },
+
+    "byArchetype": {
+      "archetype.rice_main": [
+        "dish.nigerian.jollof_rice",
+        "dish.nigerian.fried_rice"
+      ],
+      "archetype.stew_and_starch": [
+        "dish.nigerian.jollof_rice",
+        "dish.nigerian.ayamase_ofada_sauce",
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.ewa_agoyin"
+      ],
+      "archetype.soup_and_swallow": [
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup"
+      ],
+      "archetype.broth_soup": ["dish.nigerian.pepper_soup"],
+      "archetype.swallow": [
+        "dish.nigerian.pounded_yam",
+        "dish.nigerian.eba",
+        "dish.nigerian.fufu",
+        "dish.nigerian.amala"
+      ],
+      "archetype.snack": [
+        "dish.nigerian.akara",
+        "dish.nigerian.suya",
+        "dish.nigerian.fried_plantains",
+        "dish.nigerian.boli",
+        "dish.nigerian.moi_moi"
+      ],
+      "archetype.breakfast": ["dish.nigerian.akara"],
+      "archetype.grilled_protein": ["dish.nigerian.suya"],
+      "archetype.side": ["dish.nigerian.fried_plantains", "dish.nigerian.boli"],
+      "archetype.legume_main": ["dish.nigerian.ewa_agoyin"],
+      "archetype.protein_side": ["dish.nigerian.moi_moi"],
+      "archetype.appetizer": ["dish.nigerian.nkwobi"]
+    },
+
+    "aliasIndex": {
+      "jollof rice": "dish.nigerian.jollof_rice",
+      "party jollof": "dish.nigerian.jollof_rice",
+      "smoky jollof": "dish.nigerian.jollof_rice",
+      "nigerian fried rice": "dish.nigerian.fried_rice",
+      "designer stew": "dish.nigerian.ayamase_ofada_sauce",
+      "ayamase": "dish.nigerian.ayamase_ofada_sauce",
+      "ofada sauce": "dish.nigerian.ayamase_ofada_sauce",
+      "egusi": "dish.nigerian.egusi_soup",
+      "egusi soup": "dish.nigerian.egusi_soup",
+      "ogbono soup": "dish.nigerian.ogbono_soup",
+      "okra soup": "dish.nigerian.okra_soup",
+      "okro soup": "dish.nigerian.okra_soup",
+      "pepper soup": "dish.nigerian.pepper_soup",
+      "goat pepper soup": "dish.nigerian.pepper_soup",
+      "catfish pepper soup": "dish.nigerian.pepper_soup",
+      "moi moi": "dish.nigerian.moi_moi",
+      "moimoi": "dish.nigerian.moi_moi",
+      "akara": "dish.nigerian.akara",
+      "bean fritters": "dish.nigerian.akara",
+      "suya": "dish.nigerian.suya",
+      "dodo": "dish.nigerian.fried_plantains",
+      "fried plantains": "dish.nigerian.fried_plantains",
+      "ewa agoyin": "dish.nigerian.ewa_agoyin",
+      "iyan": "dish.nigerian.pounded_yam",
+      "pounded yam": "dish.nigerian.pounded_yam",
+      "eba": "dish.nigerian.eba",
+      "garri": "dish.nigerian.eba",
+      "fufu": "dish.nigerian.fufu",
+      "amala": "dish.nigerian.amala",
+      "nkwobi": "dish.nigerian.nkwobi",
+      "boli": "dish.nigerian.boli",
+      "roasted plantain": "dish.nigerian.boli"
+    },
+
+    "keywordIndex": {
+      "rice": ["dish.nigerian.jollof_rice", "dish.nigerian.fried_rice"],
+      "beans": [
+        "dish.nigerian.moi_moi",
+        "dish.nigerian.akara",
+        "dish.nigerian.ewa_agoyin"
+      ],
+      "swallow": [
+        "dish.nigerian.pounded_yam",
+        "dish.nigerian.eba",
+        "dish.nigerian.fufu",
+        "dish.nigerian.amala"
+      ],
+      "soup": [
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup"
+      ],
+      "stew": ["dish.nigerian.ayamase_ofada_sauce", "dish.nigerian.egusi_soup"],
+      "okra": ["dish.nigerian.okra_soup"],
+      "egusi": ["dish.nigerian.egusi_soup"],
+      "ogbono": ["dish.nigerian.ogbono_soup"],
+      "pepper": [
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.suya"
+      ],
+      "plantain": ["dish.nigerian.fried_plantains", "dish.nigerian.boli"],
+      "grilled": ["dish.nigerian.suya", "dish.nigerian.boli"],
+      "fried": [
+        "dish.nigerian.akara",
+        "dish.nigerian.fried_plantains",
+        "dish.nigerian.fried_rice"
+      ]
+    },
+
+    "tagIndex": {
+      "nigerian": [
+        "dish.nigerian.jollof_rice",
+        "dish.nigerian.fried_rice",
+        "dish.nigerian.ayamase_ofada_sauce",
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.moi_moi",
+        "dish.nigerian.akara",
+        "dish.nigerian.suya",
+        "dish.nigerian.fried_plantains",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.pounded_yam",
+        "dish.nigerian.eba",
+        "dish.nigerian.fufu",
+        "dish.nigerian.amala",
+        "dish.nigerian.nkwobi",
+        "dish.nigerian.boli"
+      ],
+      "rice": ["dish.nigerian.jollof_rice", "dish.nigerian.fried_rice"],
+      "soup": [
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup"
+      ],
+      "swallow": [
+        "dish.nigerian.pounded_yam",
+        "dish.nigerian.eba",
+        "dish.nigerian.fufu",
+        "dish.nigerian.amala"
+      ],
+      "street_food": [
+        "dish.nigerian.suya",
+        "dish.nigerian.akara",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.boli"
+      ],
+      "snack": [
+        "dish.nigerian.akara",
+        "dish.nigerian.suya",
+        "dish.nigerian.fried_plantains",
+        "dish.nigerian.boli",
+        "dish.nigerian.moi_moi"
+      ],
+      "spicy": [
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.suya",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.ayamase_ofada_sauce",
+        "dish.nigerian.nkwobi"
+      ],
+      "batch_friendly": [
+        "dish.nigerian.jollof_rice",
+        "dish.nigerian.fried_rice",
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.moi_moi",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.ayamase_ofada_sauce",
+        "dish.nigerian.nkwobi"
+      ],
+      "freezer_friendly": [
+        "dish.nigerian.egusi_soup",
+        "dish.nigerian.ogbono_soup",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.moi_moi",
+        "dish.nigerian.ewa_agoyin",
+        "dish.nigerian.ayamase_ofada_sauce",
+        "dish.nigerian.nkwobi"
+      ],
+      "weeknight": [
+        "dish.nigerian.fried_rice",
+        "dish.nigerian.okra_soup",
+        "dish.nigerian.pepper_soup",
+        "dish.nigerian.akara",
+        "dish.nigerian.suya",
+        "dish.nigerian.fried_plantains",
+        "dish.nigerian.eba",
+        "dish.nigerian.fufu",
+        "dish.nigerian.amala",
+        "dish.nigerian.boli"
+      ]
+    }
+  }
+}

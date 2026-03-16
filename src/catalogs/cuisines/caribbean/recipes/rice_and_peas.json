@@ -1,0 +1,244 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.rice_and_peas",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Rice and Peas",
+    "subtitle": "Coconut rice with red beans, thyme, scallion, and Scotch bonnet",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from Jamaican and Eastern Caribbean home-cooking traditions.",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": ["jamaican", "eastern_caribbean"],
+    "category": "side",
+    "mealArchetypes": ["rice_legume_base"],
+    "servingStyles": ["family_style", "plated_meals"],
+    "plannerTags": ["caribbean", "rice", "beans", "coconut", "staple"]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "Staple side dish; commonly paired with stews and braises."
+  },
+
+  "time": {
+    "activeMins": 10,
+    "totalMins": 45,
+    "handsOffMins": 35
+  },
+
+  "difficulty": 1,
+
+  "nutritionHints": {
+    "fiberForward": true,
+    "plantProtein": true,
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "heatTypical": 1,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 1,
+    "sourness": 0,
+    "saltiness": 2,
+    "umami": 1,
+    "signature": [
+      "coconut",
+      "thyme",
+      "scallion",
+      "allspice",
+      "scotch_bonnet_aroma"
+    ]
+  },
+
+  "equipment": {
+    "recommended": ["heavy_pot_with_lid", "fine_mesh_strainer"],
+    "minimum": ["pot_with_lid", "stovetop"],
+    "optional": ["rice_cooker"]
+  },
+
+  "dietFlags": ["vegan", "vegetarian", "gluten_free"],
+  "allergens": ["coconut"],
+
+  "ingredients": [
+    {
+      "id": "long_grain_rice",
+      "label": "Long-grain rice",
+      "amount": { "value": 2, "unit": "cup" },
+      "role": "grain"
+    },
+    {
+      "id": "dried_red_kidney_beans",
+      "label": "Red kidney beans (cooked)",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "role": "legume",
+      "notes": "Canned beans may be used; rinse well."
+    },
+    {
+      "id": "coconut_milk",
+      "label": "Coconut milk",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "role": "liquid"
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "role": "liquid"
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (whole, bruised)",
+      "amount": { "value": 2, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "thyme",
+      "label": "Fresh thyme",
+      "amount": { "value": 4, "unit": "sprig" },
+      "role": "herb"
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (whole)",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "heat",
+      "notes": "Keep whole for aroma only."
+    },
+    {
+      "id": "allspice",
+      "label": "Allspice (whole berries)",
+      "amount": { "value": 3, "unit": "each" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "role": "seasoning"
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "rinse_rice",
+      "title": "Rinse the rice",
+      "domain": "cooking",
+      "activeMins": 3,
+      "instructions": [
+        "Rinse rice under cold water until the water runs mostly clear."
+      ],
+      "inputs": {
+        "ingredients": ["long_grain_rice"],
+        "equipment": ["fine_mesh_strainer"]
+      }
+    },
+    {
+      "id": "build_pot",
+      "title": "Build the pot",
+      "domain": "cooking",
+      "activeMins": 5,
+      "instructions": [
+        "Add rice, beans, coconut milk, water, scallion, thyme, allspice, salt, and Scotch bonnet to the pot.",
+        "Stir gently once to distribute."
+      ],
+      "inputs": {
+        "ingredients": [
+          "long_grain_rice",
+          "dried_red_kidney_beans",
+          "coconut_milk",
+          "water",
+          "scallion",
+          "thyme",
+          "allspice",
+          "salt",
+          "scotch_bonnet"
+        ],
+        "equipment": ["pot_with_lid"]
+      }
+    },
+    {
+      "id": "cook",
+      "title": "Cook the rice",
+      "domain": "cooking",
+      "handsOffMins": 35,
+      "instructions": [
+        "Bring to a gentle boil uncovered.",
+        "Cover, reduce heat to low, and simmer 30–35 minutes until liquid is absorbed.",
+        "Remove from heat and rest 5 minutes."
+      ],
+      "timers": [{ "label": "Simmer", "mins": 35 }],
+      "inputs": {
+        "equipment": ["pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "finish",
+      "title": "Fluff and serve",
+      "domain": "cooking",
+      "activeMins": 2,
+      "instructions": [
+        "Remove scallion, thyme stems, allspice, and Scotch bonnet.",
+        "Fluff rice gently with a fork and serve."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "mains": [
+      "caribbean.curry_chicken",
+      "caribbean.jerk_chicken",
+      "caribbean.stewed_beef",
+      "caribbean.braised_oxtail"
+    ],
+    "vegSides": ["caribbean.callaloo", "steamed_cabbage"],
+    "condiments": ["pepper_sauce"],
+    "drinks": ["caribbean.sorrel_drink", "ginger_beer"]
+  },
+
+  "storage": {
+    "fridge": {
+      "safeDays": 4,
+      "notes": "Cool quickly; store airtight."
+    },
+    "freezer": {
+      "safeMonths": 2,
+      "notes": "Freeze in portions; thaw overnight."
+    },
+    "reheat": {
+      "methods": ["microwave", "stovetop"],
+      "notes": "Sprinkle with water before reheating."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": ["Rinse rice", "Cook beans ahead"],
+      "makeAhead": ["Cook beans up to 3 days ahead"]
+    }
+  }
+}

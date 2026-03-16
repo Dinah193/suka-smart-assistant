@@ -16,11 +16,27 @@ const isVitest = !!globalThis.vi;
 
 const { describe, it, expect, beforeEach, afterEach } = (function () {
   const v = {
-    describe: globalThis.describe || (isVitest ? require("vitest").describe : require("@jest/globals").describe),
-    it: globalThis.it || (isVitest ? require("vitest").it : require("@jest/globals").it),
-    expect: globalThis.expect || (isVitest ? require("vitest").expect : require("@jest/globals").expect),
-    beforeEach: globalThis.beforeEach || (isVitest ? require("vitest").beforeEach : require("@jest/globals").beforeEach),
-    afterEach: globalThis.afterEach || (isVitest ? require("vitest").afterEach : require("@jest/globals").afterEach),
+    describe:
+      globalThis.describe ||
+      (isVitest
+        ? require("vitest").describe
+        : require("@jest/globals").describe),
+    it:
+      globalThis.it ||
+      (isVitest ? require("vitest").it : require("@jest/globals").it),
+    expect:
+      globalThis.expect ||
+      (isVitest ? require("vitest").expect : require("@jest/globals").expect),
+    beforeEach:
+      globalThis.beforeEach ||
+      (isVitest
+        ? require("vitest").beforeEach
+        : require("@jest/globals").beforeEach),
+    afterEach:
+      globalThis.afterEach ||
+      (isVitest
+        ? require("vitest").afterEach
+        : require("@jest/globals").afterEach),
   };
   return v;
 })();
@@ -34,14 +50,14 @@ const notifications = [];
 let QUIET = false;
 let SABBATH = false;
 let NEXT_UNQUIET = null; // number | null
-let WITHHOLDS = [];      // array of withholds for the given domain
+let WITHHOLDS = []; // array of withholds for the given domain
 
 // Deterministic base time: Mon Oct 27, 2025 09:00:00 CT (UTC-5)
 const BASE = Date.UTC(2025, 9, 27, 14, 0, 0);
 
 // ------------------------------ Mocks ---------------------------------------
 
-T?.mock?.("@/services/eventBus", () => {
+T?.mock?.("@/services/events/eventBus", () => {
   const handlers = new Map();
   return {
     __esModule: true,
@@ -49,7 +65,11 @@ T?.mock?.("@/services/eventBus", () => {
       emit: (evt, payload) => {
         emissions.push({ evt, payload });
         const h = handlers.get(evt);
-        if (h) { try { h(payload); } catch (e) {} }
+        if (h) {
+          try {
+            h(payload);
+          } catch (e) {}
+        }
         return true;
       },
       on: (evt, fn) => handlers.set(evt, fn),
@@ -77,7 +97,9 @@ T?.mock?.("@/services/scheduleHelpers", () => {
     nextUnquiet: () => NEXT_UNQUIET,
     withholdsForDomain: (domain) => {
       // Return active withholds matching domain or "*" wildcard
-      return WITHHOLDS.filter(w => !w.domain || w.domain === domain || w.domain === "*");
+      return WITHHOLDS.filter(
+        (w) => !w.domain || w.domain === domain || w.domain === "*"
+      );
     },
   };
 });
@@ -87,7 +109,12 @@ let PREFS = {
   user: { locale: "en-US", timeZone: "America/Chicago" },
   quietHours: { enabled: false, start: "22:00", end: "06:00" },
   sabbathGuard: { enabled: false },
-  safety: { softLeadMs: 120000, hardGraceMs: 60000, cooldownMs: 1, minTickMs: 5000 },
+  safety: {
+    softLeadMs: 120000,
+    hardGraceMs: 60000,
+    cooldownMs: 1,
+    minTickMs: 5000,
+  },
 };
 
 T?.mock?.("@/stores/scheduler/prefs", () => {
@@ -117,7 +144,12 @@ beforeEach(async () => {
     user: { locale: "en-US", timeZone: "America/Chicago" },
     quietHours: { enabled: false, start: "22:00", end: "06:00" },
     sabbathGuard: { enabled: false },
-    safety: { softLeadMs: 120000, hardGraceMs: 60000, cooldownMs: 1, minTickMs: 5000 },
+    safety: {
+      softLeadMs: 120000,
+      hardGraceMs: 60000,
+      cooldownMs: 1,
+      minTickMs: 5000,
+    },
   };
 
   // Fake timers + fixed system time
@@ -131,7 +163,10 @@ beforeEach(async () => {
 
   // Import AFTER mocks so the module binds to them
   const mod = await import("@/services/session/RelativeScheduler");
-  relativeScheduler = mod.relativeScheduler || (mod.default && mod.default.relativeScheduler) || mod;
+  relativeScheduler =
+    mod.relativeScheduler ||
+    (mod.default && mod.default.relativeScheduler) ||
+    mod;
   generateRepeats = mod.generateRepeats;
   resolveAnchor = mod.resolveAnchor;
 
@@ -183,14 +218,19 @@ describe("Guards • Quiet Hours", () => {
     });
 
     relativeScheduler.schedule(anchor.anchorId, [
-      { title: "Start simmer", offsetMs: 0, suspendable: true, kind: "reminder" },
+      {
+        title: "Start simmer",
+        offsetMs: 0,
+        suspendable: true,
+        kind: "reminder",
+      },
     ]);
 
     // Let first tick process -> should mute
     await advance(60);
 
-    const muted = emissions.filter(e => e.evt === "relative.reminder.muted");
-    const due = emissions.filter(e => e.evt === "relative.reminder.due");
+    const muted = emissions.filter((e) => e.evt === "relative.reminder.muted");
+    const due = emissions.filter((e) => e.evt === "relative.reminder.due");
     expect(muted.length).toBeGreaterThan(0);
     expect(due.length).toBe(0);
 
@@ -198,11 +238,15 @@ describe("Guards • Quiet Hours", () => {
     QUIET = false;
     await advance(60);
 
-    const unquiet = emissions.filter(e => e.evt === "relative.reminder.unquietReady");
+    const unquiet = emissions.filter(
+      (e) => e.evt === "relative.reminder.unquietReady"
+    );
     expect(unquiet.length).toBeGreaterThan(0);
 
     // A user-facing notification should have been queued when muted
-    expect(notifications.some(n => /Queued: Start simmer/i.test(n.title))).toBe(true);
+    expect(
+      notifications.some((n) => /Queued: Start simmer/i.test(n.title))
+    ).toBe(true);
   });
 });
 
@@ -219,17 +263,26 @@ describe("Guards • Sabbath", () => {
     });
 
     relativeScheduler.schedule(anchor.anchorId, [
-      { title: "Morning feed", offsetMs: 0, suspendable: true, kind: "reminder" },
+      {
+        title: "Morning feed",
+        offsetMs: 0,
+        suspendable: true,
+        kind: "reminder",
+      },
     ]);
 
     await advance(60);
 
-    const muted = emissions.filter(e => e.evt === "relative.reminder.muted");
-    const due = emissions.filter(e => e.evt === "relative.reminder.due");
+    const muted = emissions.filter((e) => e.evt === "relative.reminder.muted");
+    const due = emissions.filter((e) => e.evt === "relative.reminder.due");
     expect(muted.length).toBeGreaterThan(0);
     expect(due.length).toBe(0);
     // Check mutedBecause flag
-    expect(muted[0].payload?.mutedBecause || muted[0].mutedBecause || muted[0].mutedbecause).toBeDefined();
+    expect(
+      muted[0].payload?.mutedBecause ||
+        muted[0].mutedBecause ||
+        muted[0].mutedbecause
+    ).toBeDefined();
   });
 });
 
@@ -240,9 +293,7 @@ describe("Guards • Weather/withholds", () => {
     SABBATH = false;
 
     // Fake a 'storm' withhold for garden domain
-    WITHHOLDS = [
-      { domain: "garden", kind: "storm", until: BASE + 3_600_000 },
-    ];
+    WITHHOLDS = [{ domain: "garden", kind: "storm", until: BASE + 3_600_000 }];
 
     const anchor = relativeScheduler.createAnchor({
       anchorId: "a3",
@@ -257,9 +308,13 @@ describe("Guards • Weather/withholds", () => {
 
     await advance(60);
 
-    const conflicts = emissions.filter(e => e.evt === "planner.conflict.detected");
-    const nbareq = emissions.filter(e => e.evt === "nba.suggestion.requested");
-    const due = emissions.filter(e => e.evt === "relative.reminder.due");
+    const conflicts = emissions.filter(
+      (e) => e.evt === "planner.conflict.detected"
+    );
+    const nbareq = emissions.filter(
+      (e) => e.evt === "nba.suggestion.requested"
+    );
+    const due = emissions.filter((e) => e.evt === "relative.reminder.due");
 
     expect(conflicts.length).toBeGreaterThan(0);
     expect(nbareq.length).toBeGreaterThan(0);

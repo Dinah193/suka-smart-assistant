@@ -18,7 +18,7 @@
  * - Returns a Session object conforming to the shared SSA session contract.
  */
 
-import { emit } from "@/services/eventBus"; // optional analytics (unused here to remain pure)
+import { emit } from "@/services/events/eventBus"; // optional analytics (unused here to remain pure)
 
 /** ------------------------------- Types ----------------------------------- */
 /**
@@ -69,7 +69,15 @@ import { emit } from "@/services/eventBus"; // optional analytics (unused here t
 const SAFE_DEFAULT_STEP_SEC = 120;
 const ISO_NOW = () => new Date().toISOString();
 
-const NOISY_TYPES = new Set(["vacuum", "steam-mop", "wash", "dry", "laundry", "dishwasher", "polish"]);
+const NOISY_TYPES = new Set([
+  "vacuum",
+  "steam-mop",
+  "wash",
+  "dry",
+  "laundry",
+  "dishwasher",
+  "polish",
+]);
 const OUTDOOR_TYPES = new Set(["outdoor", "windows"]);
 
 /** -------------------------- Registries (extensible) ---------------------- */
@@ -79,7 +87,8 @@ const prepSynthesizers = [
   (plan) => {
     const allSupplies = new Set();
     for (const z of plan?.zones || []) {
-      for (const t of z?.tasks || []) for (const s of t?.supplies || []) allSupplies.add(s);
+      for (const t of z?.tasks || [])
+        for (const s of t?.supplies || []) allSupplies.add(s);
     }
     if (!allSupplies.size) return null;
     return {
@@ -92,7 +101,9 @@ const prepSynthesizers = [
   /** Stage equipment */
   (plan) => {
     const allEquip = new Set();
-    for (const z of plan?.zones || []) for (const t of z?.tasks || []) for (const e of t?.equipment || []) allEquip.add(e);
+    for (const z of plan?.zones || [])
+      for (const t of z?.tasks || [])
+        for (const e of t?.equipment || []) allEquip.add(e);
     if (!allEquip.size) return null;
     return {
       title: "Stage equipment",
@@ -103,7 +114,9 @@ const prepSynthesizers = [
   },
   /** Pre-treat heavy soil (heuristic) */
   (plan) => {
-    const heavy = (plan?.zones || []).some((z) => (z?.tasks || []).some((t) => t.soilLevel === "high"));
+    const heavy = (plan?.zones || []).some((z) =>
+      (z?.tasks || []).some((t) => t.soilLevel === "high")
+    );
     if (!heavy) return null;
     return {
       title: "Pre-treat heavy soil",
@@ -116,19 +129,24 @@ const prepSynthesizers = [
 
 const timingHeuristics = [
   // explicit duration
-  (task, _ctx) => (Number.isFinite(task.durationSec) ? clamp(task.durationSec, 10, 8 * 3600) : null),
+  (task, _ctx) =>
+    Number.isFinite(task.durationSec)
+      ? clamp(task.durationSec, 10, 8 * 3600)
+      : null,
   // by type
   (task, _ctx) => {
     const t = (task.type || "").toLowerCase();
     if (t === "vacuum") return scaleBySoil(3 * 60, task.soilLevel);
-    if (t === "mop" || t === "steam-mop") return scaleBySoil(4 * 60, task.soilLevel);
+    if (t === "mop" || t === "steam-mop")
+      return scaleBySoil(4 * 60, task.soilLevel);
     if (t === "dust") return scaleBySoil(2 * 60, task.soilLevel);
     if (t === "sanitize" || t === "disinfect") return 3 * 60;
     if (t === "windows") return scaleBySoil(4 * 60, task.soilLevel);
     if (t === "declutter") return scaleBySoil(5 * 60, task.soilLevel);
     if (t === "wash" || t === "dry" || t === "laundry") return 60; // per action checkpoint (not full cycle)
     if (t === "trash") return 90;
-    if (t === "wipe" || t === "scrub") return scaleBySoil(3 * 60, task.soilLevel);
+    if (t === "wipe" || t === "scrub")
+      return scaleBySoil(3 * 60, task.soilLevel);
     if (t === "polish") return 2 * 60;
     return null;
   },
@@ -140,8 +158,14 @@ const guardInferers = [
   // Inventory guard: required supplies missing
   (ctx, step) => {
     const blockers = new Set();
-    if (ctx.inventoryHas && Array.isArray(step.metadata?.supplies) && step.metadata.supplies.length) {
-      const missing = step.metadata.supplies.filter((s) => !ctx.inventoryHas(s));
+    if (
+      ctx.inventoryHas &&
+      Array.isArray(step.metadata?.supplies) &&
+      step.metadata.supplies.length
+    ) {
+      const missing = step.metadata.supplies.filter(
+        (s) => !ctx.inventoryHas(s)
+      );
       if (missing.length) blockers.add("inventory");
     }
     return blockers;
@@ -149,8 +173,14 @@ const guardInferers = [
   // Equipment guard: equipment required but not available
   (ctx, step) => {
     const blockers = new Set();
-    const eqs = Array.isArray(step.metadata?.equipment) ? step.metadata.equipment : [];
-    if (ctx.equipmentHas && eqs.length && !eqs.every((e) => ctx.equipmentHas(e))) {
+    const eqs = Array.isArray(step.metadata?.equipment)
+      ? step.metadata.equipment
+      : [];
+    if (
+      ctx.equipmentHas &&
+      eqs.length &&
+      !eqs.every((e) => ctx.equipmentHas(e))
+    ) {
       blockers.add("equipment");
     }
     return blockers;
@@ -159,7 +189,9 @@ const guardInferers = [
   (ctx, step) => {
     const blockers = new Set();
     if (ctx.assumeQuietHoursSensitive !== false) {
-      const eqs = Array.isArray(step.metadata?.equipment) ? step.metadata.equipment : [];
+      const eqs = Array.isArray(step.metadata?.equipment)
+        ? step.metadata.equipment
+        : [];
       const noisy = eqs.some((e) => NOISY_TYPES.has(String(e).toLowerCase()));
       if (noisy) blockers.add("quietHours");
     }
@@ -172,14 +204,19 @@ const guardInferers = [
       ctx.assumeWeatherSensitive !== false &&
       (step.metadata?.outdoor === true ||
         (Array.isArray(step.metadata?.equipment) &&
-          step.metadata.equipment.some((e) => OUTDOOR_TYPES.has(String(e).toLowerCase()))));
+          step.metadata.equipment.some((e) =>
+            OUTDOOR_TYPES.has(String(e).toLowerCase())
+          )));
     if (isOutdoor) blockers.add("weather");
     return blockers;
   },
   // Sabbath: plan meta flag
   (ctx, _step) => {
     const blockers = new Set();
-    if (ctx.assumeSabbathSensitive !== false && ctx.planMeta?.sabbathSensitive) {
+    if (
+      ctx.assumeSabbathSensitive !== false &&
+      ctx.planMeta?.sabbathSensitive
+    ) {
       blockers.add("sabbath");
     }
     return blockers;
@@ -221,7 +258,8 @@ export function composeRoutine(plan, options = {}) {
     assumeQuietHoursSensitive: options.assumeQuietHoursSensitive ?? true,
     assumeSabbathSensitive: options.assumeSabbathSensitive ?? true,
     assumeWeatherSensitive: options.assumeWeatherSensitive ?? true,
-    defaultStepDurationSec: options.defaultStepDurationSec ?? SAFE_DEFAULT_STEP_SEC,
+    defaultStepDurationSec:
+      options.defaultStepDurationSec ?? SAFE_DEFAULT_STEP_SEC,
   };
 
   // 1) Synthesized prep
@@ -241,7 +279,10 @@ export function composeRoutine(plan, options = {}) {
   }
 
   // 3) Final safety de-dupe and index IDs
-  const steps = [...prep, ...taskSteps].map((s, i) => ({ ...s, id: `${sessionId}-${i + 1}` }));
+  const steps = [...prep, ...taskSteps].map((s, i) => ({
+    ...s,
+    id: `${sessionId}-${i + 1}`,
+  }));
 
   /** @type {import('../../types').Session|any} */
   const session = {
@@ -250,16 +291,27 @@ export function composeRoutine(plan, options = {}) {
     title: plan?.title || "Cleaning Session",
     source: { type: "cleaningPlan", refId: plan?.id || null },
     steps,
-    prefs: { voiceGuidance: true, haptic: true, autoAdvance: false, ...(options?.prefs || {}) },
+    prefs: {
+      voiceGuidance: true,
+      haptic: true,
+      autoAdvance: false,
+      ...(options?.prefs || {}),
+    },
     status: "pending",
-    progress: { currentStepIndex: 0, elapsedSec: 0, startedAt: null, pausedAt: null },
+    progress: {
+      currentStepIndex: 0,
+      elapsedSec: 0,
+      startedAt: null,
+      pausedAt: null,
+    },
     analytics: { skippedSteps: [], adjustments: [] },
     createdAt: nowIso,
     updatedAt: nowIso,
   };
 
   const sessionErrs = validateSession(session);
-  if (sessionErrs.length) console.warn("[composeRoutine] Session contract warnings:", sessionErrs);
+  if (sessionErrs.length)
+    console.warn("[composeRoutine] Session contract warnings:", sessionErrs);
 
   return session;
 }
@@ -272,12 +324,17 @@ function synthesizePrep(plan) {
 
   for (const fn of prepSynthesizers) {
     const s = safeCall(fn, plan);
-    if (s && s.title) out.push({
-      title: s.title,
-      desc: s.desc || s.title,
-      durationSec: clamp(Number(s.durationSec) || SAFE_DEFAULT_STEP_SEC, 10, 8 * 3600),
-      metadata: s.metadata || {},
-    });
+    if (s && s.title)
+      out.push({
+        title: s.title,
+        desc: s.desc || s.title,
+        durationSec: clamp(
+          Number(s.durationSec) || SAFE_DEFAULT_STEP_SEC,
+          10,
+          8 * 3600
+        ),
+        metadata: s.metadata || {},
+      });
   }
 
   // General opening step
@@ -301,7 +358,8 @@ function stepFromPrep(prep, ctx, _index) {
     metadata: { ...(prep.metadata || {}) },
   };
   const blockers = new Set();
-  for (const inf of guardInferers) for (const b of inf(ctx, step)) blockers.add(b);
+  for (const inf of guardInferers)
+    for (const b of inf(ctx, step)) blockers.add(b);
   step.blockers = Array.from(blockers);
   return step;
 }
@@ -327,7 +385,8 @@ function stepFromTask(task, zone, ctx, _index) {
 
   // Blockers
   const blockers = new Set();
-  for (const inf of guardInferers) for (const b of inf(ctx, step)) blockers.add(b);
+  for (const inf of guardInferers)
+    for (const b of inf(ctx, step)) blockers.add(b);
   step.blockers = Array.from(blockers);
 
   return step;
@@ -340,10 +399,13 @@ function zoneHeaderStep(zone, ctx, _i) {
     desc: `Quick scan for hazards, pick up clutter, open blinds for light.`,
     durationSec: 60,
     blockers: [],
-    metadata: { cueNotes: "Reset the space; prioritize high-traffic paths first" },
+    metadata: {
+      cueNotes: "Reset the space; prioritize high-traffic paths first",
+    },
   };
   const blockers = new Set();
-  for (const inf of guardInferers) for (const b of inf(ctx, step)) blockers.add(b);
+  for (const inf of guardInferers)
+    for (const b of inf(ctx, step)) blockers.add(b);
   step.blockers = Array.from(blockers);
   return step;
 }
@@ -358,7 +420,8 @@ function zoneWrapStep(zone, ctx, _i) {
     metadata: { cueNotes: "QA pass; leave room tidy and ventilated" },
   };
   const blockers = new Set();
-  for (const inf of guardInferers) for (const b of inf(ctx, step)) blockers.add(b);
+  for (const inf of guardInferers)
+    for (const b of inf(ctx, step)) blockers.add(b);
   step.blockers = Array.from(blockers);
   return step;
 }
@@ -381,13 +444,20 @@ function scaleBySoil(base, soil) {
 
 function cueNotesForTask(task) {
   const t = (task.type || "").toLowerCase();
-  if (t === "windows") return "Use 'S' strokes; wipe edges; check for streaks against light";
-  if (t === "vacuum") return "Slow overlapping passes; edges first; empty canister if >2/3 full";
-  if (t === "mop" || t === "steam-mop") return "Figure-8 pattern; keep solution fresh; wring well";
-  if (t === "sanitize" || t === "disinfect") return "Respect dwell time per label; avoid mixing chemicals";
-  if (t === "dust") return "Top-to-bottom; capture (don't spread); use microfiber";
-  if (t === "declutter") return "Use 3 bins: keep/donate/trash; set a 10-min cap";
-  if (t === "trash") return "Tie bags securely; wipe bin rims; insert fresh liner";
+  if (t === "windows")
+    return "Use 'S' strokes; wipe edges; check for streaks against light";
+  if (t === "vacuum")
+    return "Slow overlapping passes; edges first; empty canister if >2/3 full";
+  if (t === "mop" || t === "steam-mop")
+    return "Figure-8 pattern; keep solution fresh; wring well";
+  if (t === "sanitize" || t === "disinfect")
+    return "Respect dwell time per label; avoid mixing chemicals";
+  if (t === "dust")
+    return "Top-to-bottom; capture (don't spread); use microfiber";
+  if (t === "declutter")
+    return "Use 3 bins: keep/donate/trash; set a 10-min cap";
+  if (t === "trash")
+    return "Tie bags securely; wipe bin rims; insert fresh liner";
   return "Work clean → dirty; high → low";
 }
 
@@ -402,11 +472,16 @@ function formatTaskTitle(task, zone) {
 function validatePlan(plan) {
   /** @type {string[]} */
   const errs = [];
-  if (!plan || typeof plan !== "object") { errs.push("plan object required"); return errs; }
+  if (!plan || typeof plan !== "object") {
+    errs.push("plan object required");
+    return errs;
+  }
   if (!plan.title) errs.push("plan.title missing");
-  if (!Array.isArray(plan.zones) || plan.zones.length === 0) errs.push("plan.zones missing or empty");
+  if (!Array.isArray(plan.zones) || plan.zones.length === 0)
+    errs.push("plan.zones missing or empty");
   plan.zones?.forEach((z, zi) => {
-    if (!Array.isArray(z.tasks) || z.tasks.length === 0) errs.push(`zones[${zi}].tasks missing or empty`);
+    if (!Array.isArray(z.tasks) || z.tasks.length === 0)
+      errs.push(`zones[${zi}].tasks missing or empty`);
   });
   return errs;
 }
@@ -415,11 +490,14 @@ function validateSession(session) {
   /** @type {string[]} */
   const errs = [];
   if (!session.id) errs.push("session.id missing");
-  if (session.domain !== "cleaning") errs.push("session.domain must be 'cleaning'");
-  if (!Array.isArray(session.steps) || !session.steps.length) errs.push("session.steps missing/empty");
+  if (session.domain !== "cleaning")
+    errs.push("session.domain must be 'cleaning'");
+  if (!Array.isArray(session.steps) || !session.steps.length)
+    errs.push("session.steps missing/empty");
   session.steps?.forEach((s, i) => {
     if (!s.title) errs.push(`steps[${i}].title missing`);
-    if (!Number.isFinite(s.durationSec)) errs.push(`steps[${i}].durationSec invalid`);
+    if (!Number.isFinite(s.durationSec))
+      errs.push(`steps[${i}].durationSec invalid`);
     if (!Array.isArray(s.blockers)) errs.push(`steps[${i}].blockers invalid`);
   });
   return errs;
@@ -432,7 +510,11 @@ function clamp(n, min, max) {
 }
 
 function safeCall(fn, ...args) {
-  try { return fn?.(...args); } catch { return null; }
+  try {
+    return fn?.(...args);
+  } catch {
+    return null;
+  }
 }
 
 /** RFC4122-ish fallback UUID (browser crypto preferred) */

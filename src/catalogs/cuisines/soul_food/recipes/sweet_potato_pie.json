@@ -1,0 +1,181 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.sweet_potato_pie.v1",
+    "name": "Soul Food Sweet Potato Pie",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Classic sweet potato pie with a smooth custard filling and warm spices. Uses a single 9-inch crust (homemade or store-bought)."
+    },
+    "tags": [
+      "soul_food",
+      "sweet_potato_pie",
+      "pie",
+      "dessert",
+      "holiday",
+      "thanksgiving",
+      "baked",
+      "custard"
+    ],
+    "allergens": ["milk", "wheat", "egg"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": false
+    },
+    "summary": "Silky sweet potato custard pie with cinnamon, nutmeg, and vanilla in a flaky 9-inch crust.",
+    "difficulty": "medium",
+    "servings": {
+      "count": 10,
+      "unit": "servings"
+    },
+    "yield": "1 (9-inch) pie",
+    "timing": {
+      "prepMinutes": 25,
+      "inactiveMinutes": 120,
+      "cookMinutes": 65,
+      "totalMinutes": 210
+    },
+    "equipment": [
+      { "id": "pie_plate_9in", "label": "9-inch pie plate", "required": true },
+      { "id": "mixing_bowl", "label": "Mixing bowl", "required": true },
+      { "id": "whisk", "label": "Whisk", "required": true },
+      {
+        "id": "potato_masher_or_mixer",
+        "label": "Potato masher or hand mixer",
+        "required": false
+      },
+      {
+        "id": "sheet_pan",
+        "label": "Sheet pan (to catch drips)",
+        "required": false
+      }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Custard pies are safely cooked when the center reaches at least 165°F.",
+        "Pie should jiggle slightly in the center and set as it cools."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "pie_crust_9in",
+      "label": "9-inch pie crust (unbaked; homemade or store-bought)",
+      "amount": { "value": 1, "unit": "piece" }
+    },
+
+    {
+      "id": "sweet_potatoes",
+      "label": "Sweet potatoes, cooked and mashed (about 2–3 medium)",
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "unsalted_butter",
+      "label": "Unsalted butter, melted",
+      "amount": { "value": 4, "unit": "tbsp" }
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar (light or dark)",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "granulated_sugar",
+      "label": "Sugar",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "evaporated_milk",
+      "label": "Evaporated milk",
+      "amount": { "value": 1, "unit": "can_12oz" }
+    },
+    {
+      "id": "eggs",
+      "label": "Eggs",
+      "amount": { "value": 2, "unit": "large" }
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+
+    {
+      "id": "ground_cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ground_nutmeg",
+      "label": "Ground nutmeg",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ground_ginger",
+      "label": "Ground ginger (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Lemon juice (optional, brightens flavor)",
+      "amount": { "value": 1, "unit": "tsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven",
+      "body": "Preheat oven to 350°F. Place a sheet pan on the lower rack if desired to catch any drips."
+    },
+    {
+      "id": "step_02_prep_potatoes",
+      "title": "Prepare sweet potato mash",
+      "body": "If not already cooked: bake sweet potatoes at 400°F until very tender (45–70 minutes), cool slightly, peel, and mash until smooth. Measure 2 cups mashed sweet potato."
+    },
+    {
+      "id": "step_03_mix_filling",
+      "title": "Mix filling",
+      "body": "In a bowl, combine mashed sweet potato, melted butter, brown sugar, granulated sugar, cinnamon, nutmeg, ginger (optional), salt, vanilla, and lemon juice (optional). Mix until smooth."
+    },
+    {
+      "id": "step_04_add_eggs_milk",
+      "title": "Add eggs and milk",
+      "body": "Whisk in eggs until fully incorporated. Slowly whisk in evaporated milk until the filling is smooth and pourable."
+    },
+    {
+      "id": "step_05_fill_crust",
+      "title": "Fill crust",
+      "body": "Place pie crust in a 9-inch pie plate. Pour filling into crust and smooth the top."
+    },
+    {
+      "id": "step_06_bake",
+      "title": "Bake until set",
+      "body": "Bake 50–65 minutes, until the edges are set and the center jiggles slightly (like gelatin). If crust browns too fast, cover edges loosely with foil."
+    },
+    {
+      "id": "step_07_cool",
+      "title": "Cool to set",
+      "body": "Cool at room temperature 1–2 hours to fully set. Slice and serve (plain, with whipped cream, or a drizzle of caramel)."
+    }
+  ]
+}

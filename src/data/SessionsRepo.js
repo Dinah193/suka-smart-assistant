@@ -415,6 +415,60 @@ async function getRunningSession() {
 }
 
 /**
+ * List sessions by status across all domains.
+ * @param {string[]|string} statuses
+ * @returns {Promise<SessionObject[]>}
+ */
+async function listByStatus(statuses) {
+  const wanted = Array.isArray(statuses)
+    ? statuses.filter(Boolean)
+    : [statuses].filter(Boolean);
+  if (!wanted.length) return [];
+
+  const table = getSessionsTable();
+  let all = [];
+
+  if (table) {
+    try {
+      all = await table.toArray();
+    } catch {
+      all = [];
+    }
+  }
+
+  if (!all.length) {
+    all = Array.from(memorySessions.values());
+  }
+
+  return all.filter((s) => wanted.includes(s?.status));
+}
+
+// Legacy method aliases used by newer UI modules.
+async function writeCheckpoint(sessionId, progress) {
+  return saveCheckpoint(sessionId, progress);
+}
+
+async function updateProgress(sessionId, progress) {
+  return saveCheckpoint(sessionId, progress);
+}
+
+async function setStatus(sessionId, status, analyticsPatch) {
+  return updateSessionStatus(sessionId, status, analyticsPatch);
+}
+
+async function get(id) {
+  return getSessionById(id);
+}
+
+async function put(session) {
+  return upsertSession(session);
+}
+
+async function getRunning() {
+  return getRunningSession();
+}
+
+/**
  * Convenience query: find candidate sessions for Next/Now button for a domain.
  *
  * This is deliberately simple; the orchestrator / skills layer can apply
@@ -632,11 +686,58 @@ module.exports = {
   getSessionById,
   upsertSession,
   saveCheckpoint,
+  writeCheckpoint,
+  updateProgress,
   updateSessionStatus,
+  setStatus,
+  get,
+  put,
   setSessionFavorite,
   listSessionsByDomain,
+  listByStatus,
   getRunningSession,
+  getRunning,
   findCandidateSessionsForDomain,
   createSessionSkeleton,
   deleteSession
+};
+
+export {
+  getSessionById,
+  upsertSession,
+  saveCheckpoint,
+  writeCheckpoint,
+  updateProgress,
+  updateSessionStatus,
+  setStatus,
+  get,
+  put,
+  setSessionFavorite,
+  listSessionsByDomain,
+  listByStatus,
+  getRunningSession,
+  getRunning,
+  findCandidateSessionsForDomain,
+  createSessionSkeleton,
+  deleteSession,
+};
+
+export default {
+  getSessionById,
+  upsertSession,
+  saveCheckpoint,
+  writeCheckpoint,
+  updateProgress,
+  updateSessionStatus,
+  setStatus,
+  get,
+  put,
+  setSessionFavorite,
+  listSessionsByDomain,
+  listByStatus,
+  getRunningSession,
+  getRunning,
+  findCandidateSessionsForDomain,
+  createSessionSkeleton,
+  deleteSession,
 };

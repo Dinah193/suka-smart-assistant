@@ -1,0 +1,116 @@
+{
+  "id": "cajun_red_beans_and_rice",
+  "name": "Cajun Red Beans and Rice",
+  "servings": 8,
+  "ingredients": [
+    {
+      "item": "dried red kidney beans",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "rinsed and picked over"
+    },
+    {
+      "item": "water",
+      "amount": 8,
+      "unit": "cups",
+      "prep": "for soaking (or use quick-soak method)"
+    },
+
+    { "item": "neutral oil", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "andouille sausage",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "sliced into rounds"
+    },
+    {
+      "item": "smoked ham hock",
+      "amount": 1,
+      "unit": "each",
+      "prep": "or 2 smoked ham shanks"
+    },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 5, "unit": "cloves", "prep": "minced" },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "Cajun seasoning", "amount": 2, "unit": "tsp" },
+    { "item": "black pepper", "amount": 0.75, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "add to taste near the end (ham/sausage are salty)"
+    },
+
+    {
+      "item": "chicken stock",
+      "amount": 6,
+      "unit": "cups",
+      "prep": "or water; add more as needed"
+    },
+
+    { "item": "hot sauce", "amount": 1, "unit": "to_taste" },
+
+    { "item": "cooked white rice", "amount": 8, "unit": "servings" },
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Soak beans (preferred): Place beans in a large bowl, cover with about 8 cups water, and soak 8–12 hours. Drain and rinse. Quick-soak option: cover beans with water, boil 2 minutes, remove from heat, cover 1 hour, then drain and rinse."
+    },
+    {
+      "order": 2,
+      "text": "Brown sausage: Heat oil in a heavy pot over medium-high heat. Add sausage and cook until browned. Transfer sausage to a plate; leave drippings in the pot."
+    },
+    {
+      "order": 3,
+      "text": "Saute the trinity: Reduce heat to medium. Add onion, bell pepper, and celery. Cook until softened, scraping up browned bits. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 4,
+      "text": "Add beans and aromatics: Stir in drained beans, ham hock, bay leaves, thyme, paprika, Cajun seasoning, and black pepper."
+    },
+    {
+      "order": 5,
+      "text": "Simmer: Add stock (or water) to cover the beans by about 1–2 inches. Bring to a gentle boil, then reduce to a steady simmer. Cook partially covered, stirring occasionally and adding more liquid as needed to keep beans submerged."
+    },
+    {
+      "order": 6,
+      "text": "Cook until creamy: Simmer until beans are tender and starting to break down, and the liquid thickens. This can take 1.5–3 hours depending on bean age. Stir more often as it thickens to prevent sticking."
+    },
+    {
+      "order": 7,
+      "text": "Mash for texture: Remove ham hock. Shred any meat and return it to the pot. Use a spoon or potato masher to mash a portion of the beans against the side/bottom of the pot to create a creamy base, then stir to combine."
+    },
+    {
+      "order": 8,
+      "text": "Return sausage and season: Stir browned sausage back in and simmer 10–15 minutes. Taste, then add salt as needed (start small—sausage/ham can be salty). Add hot sauce to taste."
+    },
+    {
+      "order": 9,
+      "text": "Serve: Spoon red beans over hot cooked rice. Garnish with green onions and parsley."
+    }
+  ]
+}

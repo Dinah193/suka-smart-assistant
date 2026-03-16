@@ -1,0 +1,486 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.chicken_curry",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Indian Chicken Curry",
+    "subtitle": "Onion-tomato masala base with warm spices; weeknight-friendly",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/chicken_curry.json",
+      "notes": [
+        "Canonical baseline chicken curry (North-Indian style).",
+        "Designed for deterministic adaptation: tadka/bloom-spices, onion-tomato masala, optional yogurt finish."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "main",
+    "mealArchetypes": ["meal.main.curry"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "role.curry_or_dal",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good",
+      "spice.forward"
+    ]
+  },
+
+  "summary": "A foundational Indian chicken curry built on an onion-tomato masala with cumin, coriander, turmeric, and garam masala. Finish with a little lemon (and optional yogurt) for balance.",
+
+  "keywords": [
+    "chicken curry",
+    "indian curry",
+    "masala",
+    "onion tomato masala",
+    "bhuna",
+    "weeknight",
+    "basmati",
+    "roti",
+    "naan"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.chicken_curry",
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "weeknight.friendly",
+    "batch.friendly",
+    "leftovers.good"
+  ],
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1.25, "unit": "cups" },
+    "notes": "Serves 4 as a main with rice/flatbread; 5–6 with sides."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 25,
+    "totalMins": 50
+  },
+
+  "difficulty": 3,
+
+  "equipment": {
+    "minimum": [
+      "equip.heavy_pot_or_dutch_oven",
+      "equip.knife",
+      "equip.cutting_board"
+    ],
+    "recommended": ["equip.instant_read_thermometer", "equip.blender"],
+    "optional": [
+      {
+        "id": "equip.pressure_cooker",
+        "label": "Pressure cooker / Instant Pot",
+        "required": false,
+        "notes": "Optional: speeds up cooking; not required for this baseline."
+      }
+    ]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "yes (freeze without yogurt finish for best texture)",
+    "weeknightPossible": true
+  },
+
+  "tasteProfile": {
+    "heat": 2,
+    "aroma": ["warm_spices", "toasted_cumin", "garlic_ginger"],
+    "balance": ["savory", "tomato_tang", "optional_creamy_finish"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": {
+    "contains": ["allergen.dairy_optional"],
+    "mayContain": [],
+    "notes": [
+      "Dairy is optional if finishing with yogurt or cream.",
+      "Use dairy-free yogurt (coconut/soy) for a dairy-free version."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "grp.protein",
+      "label": "Protein",
+      "items": ["ing.chicken_thighs_boneless_skinless"]
+    },
+    {
+      "id": "grp.mirepoix_aromatics",
+      "label": "Aromatics",
+      "items": ["ing.onion", "ing.garlic", "ing.ginger"]
+    },
+    {
+      "id": "grp.spices",
+      "label": "Spices",
+      "items": [
+        "spice.cumin",
+        "spice.coriander",
+        "spice.turmeric",
+        "spice.kashmiri_chili",
+        "spice.garam_masala",
+        "spice.black_pepper"
+      ]
+    },
+    {
+      "id": "grp.masalabase",
+      "label": "Masala Base + Liquid",
+      "items": ["ing.tomato_crushed", "ing.chicken_stock_or_water"]
+    },
+    {
+      "id": "grp.finish",
+      "label": "Finish",
+      "items": ["ing.lemon", "ing.cilantro", "ing.yogurt_plain"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.chicken_thighs_boneless_skinless",
+      "label": "Boneless, skinless chicken thighs",
+      "role": "role.protein",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": [
+        "Cut into 1–1.5 inch pieces.",
+        "Chicken breast works too; reduce simmer time to avoid drying."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Adjust to taste; you will season in layers."
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Avocado, grapeseed, sunflower, or canola."
+    },
+    {
+      "id": "ing.ghee",
+      "label": "Ghee",
+      "role": "role.fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional but classic; replace with oil to keep dairy-free."
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, finely diced",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "large" },
+      "notes": "About 2 cups diced."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 5, "unit": "cloves" }
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Or use ginger-garlic paste."
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Adjust for heat; Kashmiri is more color than burn."
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black pepper",
+      "role": "role.spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.tomato_crushed",
+      "label": "Crushed tomatoes",
+      "role": "role.masalabase",
+      "amount": { "value": 14, "unit": "oz" },
+      "notes": "Or 3–4 medium tomatoes, blended."
+    },
+    {
+      "id": "ing.chicken_stock_or_water",
+      "label": "Chicken stock (or water)",
+      "role": "role.liquid",
+      "amount": { "value": 1.25, "unit": "cups" },
+      "notes": "Add more for a thinner curry."
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.finish_spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Add near the end for best aroma."
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt",
+      "role": "role.finish",
+      "amount": { "value": 0.33, "unit": "cup" },
+      "optional": true,
+      "notes": [
+        "Optional for a tangy, creamy finish.",
+        "Temper first and add off-heat to prevent curdling."
+      ]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.finish_acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Or substitute lime, amchur, or a little tamarind."
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Cilantro, chopped",
+      "role": "role.garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "method.simmer"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep and season",
+      "instructions": [
+        "Pat chicken dry and cut into bite-sized pieces.",
+        "Season chicken with 1 tsp of the salt (reserve the rest for adjusting later).",
+        "Dice onion; mince garlic; grate ginger."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0
+    },
+    {
+      "id": "step_02_sweat_onions",
+      "title": "Build the onion base",
+      "instructions": [
+        "Heat a heavy pot over medium heat.",
+        "Add oil (and ghee if using).",
+        "Add onions and a pinch of salt; cook, stirring often, until deeply golden (10–15 minutes).",
+        "If onions start to stick, splash in 1–2 tbsp water and scrape up browned bits."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 3,
+      "timers": [{ "label": "Cook onions to golden", "minutes": 12 }],
+      "checks": [
+        "Onions should be golden-brown, not pale.",
+        "Browning here drives the curry’s depth."
+      ]
+    },
+    {
+      "id": "step_03_bloom_spices",
+      "title": "Bloom aromatics and spices",
+      "instructions": [
+        "Add garlic and ginger; cook 30–60 seconds until fragrant.",
+        "Add cumin, coriander, turmeric, Kashmiri chili, and black pepper.",
+        "Stir continuously for 20–30 seconds to bloom spices without burning."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Bloom spices", "seconds": 30 }],
+      "checks": [
+        "Spices should smell fragrant and toasted, not bitter or burnt.",
+        "Lower heat immediately if spices darken too fast."
+      ]
+    },
+    {
+      "id": "step_04_masala_base",
+      "title": "Cook the tomato masala",
+      "instructions": [
+        "Add crushed tomatoes and stir well.",
+        "Simmer uncovered 8–12 minutes until the masala thickens and you see oil/fat separating at the edges.",
+        "This step removes raw tomato flavor and concentrates spice."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 7,
+      "timers": [{ "label": "Reduce masala", "minutes": 10 }],
+      "checks": [
+        "Masala should look thicker and darker, not watery.",
+        "Oil separation at edges is a good sign of doneness."
+      ]
+    },
+    {
+      "id": "step_05_simmer_chicken",
+      "title": "Simmer chicken until tender",
+      "instructions": [
+        "Add chicken and stir to coat in the masala.",
+        "Pour in stock/water, bring to a gentle simmer, then reduce heat to low.",
+        "Cover and simmer 18–25 minutes, stirring occasionally, until chicken is cooked through and tender."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 18,
+      "timers": [{ "label": "Simmer chicken", "minutes": 20 }],
+      "temperature": {
+        "type": "internal",
+        "value": 165,
+        "unit": "F",
+        "notes": "Chicken is safe at 165°F; thighs remain tender a bit higher."
+      },
+      "checks": [
+        "Sauce should be gently bubbling, not rapidly boiling.",
+        "Chicken should be opaque and tender; adjust liquid for desired thickness."
+      ]
+    },
+    {
+      "id": "step_06_finish_balance",
+      "title": "Finish, balance, and serve",
+      "instructions": [
+        "Stir in garam masala and simmer 1 minute.",
+        "Turn off heat. Add lemon juice.",
+        "Optional yogurt finish (anti-curdle): temper yogurt with a few spoonfuls of hot curry liquid, then stir in off-heat.",
+        "Taste and adjust salt, heat, and acidity. Garnish with cilantro if using."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Bloom garam masala", "minutes": 1 }],
+      "checks": [
+        "Add yogurt off-heat to prevent curdling.",
+        "If curry tastes flat, add a touch more lemon or salt."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "dish.indian.jeera_rice",
+      "dish.indian.basmati_rice",
+      "dish.indian.roti",
+      "dish.indian.naan"
+    ],
+    "coolingSides": ["dish.indian.raita", "dish.indian.kachumber_salad"],
+    "condiments": ["dish.indian.mango_pickle", "dish.indian.mint_chutney"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Cool quickly; store covered.",
+        "Reheat gently to avoid splitting if yogurt was added."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 3,
+      "notes": [
+        "For best freezer results, freeze before adding yogurt.",
+        "Thaw overnight in fridge; reheat gently with a splash of water."
+      ]
+    }
+  },
+
+  "planner": {
+    "roles": {
+      "main": "role.curry_or_dal",
+      "starch": "role.rice_or_flatbread",
+      "coolingSide": "role.raita_or_salad",
+      "condiment": "role.pickle_or_chutney"
+    },
+    "leftoversPlan": [
+      "Day 2: serve as curry bowls over rice with cucumber/onion salad.",
+      "Day 3: turn into a quick curry wrap with flatbread and yogurt sauce."
+    ],
+    "batchNotes": [
+      "Double the masala base and freeze half for a faster future curry.",
+      "Batch-friendly: flavor improves after resting."
+    ]
+  },
+
+  "safety": {
+    "notes": [
+      "Cook chicken to a safe internal temperature (165°F).",
+      "Cool leftovers within 2 hours; reheat until steaming hot.",
+      "If using yogurt, add off-heat and avoid boiling after adding."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.coconut_milk_south_indian",
+      "label": "Coconut milk variation (South-leaning)",
+      "when": { "preference": "dairy_free_or_creamy" },
+      "adapt": {
+        "swap": [{ "from": "ing.yogurt_plain", "to": "ing.coconut_milk" }],
+        "notes": [
+          "Replace yogurt with 1/2 cup coconut milk at the end.",
+          "Add curry leaves if available for a South Indian aroma."
+        ]
+      }
+    },
+    {
+      "id": "var.quick_weeknight",
+      "label": "Quick weeknight shortcut",
+      "when": { "constraint": "time_under_35" },
+      "adapt": {
+        "notes": [
+          "Use pre-made onion-tomato masala (frozen) and reduce onion cook time to 5 minutes.",
+          "Use chicken breast and simmer 10–12 minutes."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.chicken_curry",
+    "aliases": ["murgh curry", "indian chicken curry"],
+    "index": {
+      "primaryTokens": ["chicken", "curry", "masala", "indian"],
+      "secondaryTokens": ["garam masala", "turmeric", "cumin", "coriander"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

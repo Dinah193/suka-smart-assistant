@@ -19,7 +19,7 @@ const autoPauseCalls = [];
 // ---- Mocks -----------------------------------------------------------------
 
 // Typed-ish EventBus mock (captures emissions)
-T?.mock?.("@/services/eventBus", () => {
+T?.mock?.("@/services/events/eventBus", () => {
   const handlers = new Map();
   return {
     __esModule: true,
@@ -109,8 +109,8 @@ beforeEach(async () => {
 
   // Dynamic import AFTER mocks so the module resolves mocked deps
   const mod = await import("@/utils/safetyEscalation");
-  evaluate = (mod.default?.evaluate || mod.evaluate);
-  evaluateMany = (mod.default?.evaluateMany || mod.evaluateMany);
+  evaluate = mod.default?.evaluate || mod.evaluate;
+  evaluateMany = mod.default?.evaluateMany || mod.evaluateMany;
 });
 
 afterEach(() => {
@@ -127,16 +127,19 @@ describe("RelativeScheduler • freeze/continue/safety", () => {
     const softAt = nowBase + 10; // in 10ms
     const dueAt = nowBase + 60_000; // 1 minute out
 
-    const result = evaluate({
-      id: "session:A#step:1",
-      domain: "cooking",
-      title: "Preheat oven",
-      softAt,
-      dueAt,
-      maxOverrunMs: 60_000,
-      risk: { heat: true, perishables: false },
-      meta: { sessionId: "A", stepIndex: 1, priority: "normal" },
-    }, nowBase + 15); // now passes soft
+    const result = evaluate(
+      {
+        id: "session:A#step:1",
+        domain: "cooking",
+        title: "Preheat oven",
+        softAt,
+        dueAt,
+        maxOverrunMs: 60_000,
+        risk: { heat: true, perishables: false },
+        meta: { sessionId: "A", stepIndex: 1, priority: "normal" },
+      },
+      nowBase + 15
+    ); // now passes soft
 
     expect(result.level).toBe("soft");
     expect(result.code).toBe("APPROACHING_DEADLINE");
@@ -155,15 +158,18 @@ describe("RelativeScheduler • freeze/continue/safety", () => {
     const maxOverrunMs = 3_000; // 3s grace
     const now = nowBase + 10_500; // 2.5s beyond hard
 
-    const result = evaluate({
-      id: "session:B#step:2",
-      domain: "cooking",
-      title: "Sear steak side A",
-      dueAt,
-      maxOverrunMs,
-      risk: { heat: true, perishables: true },
-      meta: { sessionId: "B", stepIndex: 2, priority: "high" },
-    }, now);
+    const result = evaluate(
+      {
+        id: "session:B#step:2",
+        domain: "cooking",
+        title: "Sear steak side A",
+        dueAt,
+        maxOverrunMs,
+        risk: { heat: true, perishables: true },
+        meta: { sessionId: "B", stepIndex: 2, priority: "high" },
+      },
+      now
+    );
 
     expect(result.level).toBe("hard");
     expect(result.code).toBe("DEADLINE_PASSED");
@@ -182,15 +188,18 @@ describe("RelativeScheduler • freeze/continue/safety", () => {
     const dueAt = nowBase + 2_000;
     const now = nowBase + 10_000; // way past hard
 
-    const result = evaluate({
-      id: "session:C#step:1",
-      domain: "cleaning",
-      title: "Start washer",
-      dueAt,
-      maxOverrunMs: 1000,
-      risk: { chemicals: true },
-      meta: { sessionId: "C", stepIndex: 1, priority: "normal" },
-    }, now);
+    const result = evaluate(
+      {
+        id: "session:C#step:1",
+        domain: "cleaning",
+        title: "Start washer",
+        dueAt,
+        maxOverrunMs: 1000,
+        risk: { chemicals: true },
+        meta: { sessionId: "C", stepIndex: 1, priority: "normal" },
+      },
+      now
+    );
 
     expect(result.level).toBe("soft");
     expect(result.code).toMatch(/GUARD_DOWNGRADE/i);
@@ -210,15 +219,18 @@ describe("RelativeScheduler • freeze/continue/safety", () => {
     const dueAt = nowBase + 1_000;
     const now = nowBase + 10_000;
 
-    const result = evaluate({
-      id: "session:D#step:3",
-      domain: "animals",
-      title: "Morning feed",
-      dueAt,
-      maxOverrunMs: 2000,
-      risk: { animals: true },
-      meta: { sessionId: "D", stepIndex: 3, priority: "high" },
-    }, now);
+    const result = evaluate(
+      {
+        id: "session:D#step:3",
+        domain: "animals",
+        title: "Morning feed",
+        dueAt,
+        maxOverrunMs: 2000,
+        risk: { animals: true },
+        meta: { sessionId: "D", stepIndex: 3, priority: "high" },
+      },
+      now
+    );
 
     // Because the internal sabbath detection is heuristic, we accept either downgrade
     // when sabbath is flagged OR ensure that hard escalation does not trigger auto-pause.
@@ -236,26 +248,32 @@ describe("RelativeScheduler • freeze/continue/safety", () => {
     const dueAt = nowBase + 5_000;
 
     // Case A: small grace → past hard
-    const rA = evaluate({
-      id: "session:E#step:1",
-      domain: "cooking",
-      title: "Simmer sauce",
-      dueAt,
-      maxOverrunMs: 1_000, // tiny grace
-      risk: { heat: true },
-      meta: { sessionId: "E", stepIndex: 1 },
-    }, nowBase + 7_200); // 2.2s over hard
+    const rA = evaluate(
+      {
+        id: "session:E#step:1",
+        domain: "cooking",
+        title: "Simmer sauce",
+        dueAt,
+        maxOverrunMs: 1_000, // tiny grace
+        risk: { heat: true },
+        meta: { sessionId: "E", stepIndex: 1 },
+      },
+      nowBase + 7_200
+    ); // 2.2s over hard
 
     // Case B: large grace from favorite override → still in-grace
-    const rB = evaluate({
-      id: "session:E#step:2",
-      domain: "cooking",
-      title: "Reduce sauce",
-      dueAt,
-      maxOverrunMs: 5_000, // longer grace (favorite override)
-      risk: { heat: true },
-      meta: { sessionId: "E", stepIndex: 2 },
-    }, nowBase + 7_200); // only 2.2s over due; but within 5s grace
+    const rB = evaluate(
+      {
+        id: "session:E#step:2",
+        domain: "cooking",
+        title: "Reduce sauce",
+        dueAt,
+        maxOverrunMs: 5_000, // longer grace (favorite override)
+        risk: { heat: true },
+        meta: { sessionId: "E", stepIndex: 2 },
+      },
+      nowBase + 7_200
+    ); // only 2.2s over due; but within 5s grace
 
     expect(rA.level).toBe("hard");
     expect(rA.code).toBe("DEADLINE_PASSED"); // beyond grace

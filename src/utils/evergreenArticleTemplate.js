@@ -19,36 +19,67 @@ const slugify = (s) =>
     .replace(/(^-|-$)/g, "");
 
 const safeJSON = {
-  parse: (s, f = null) => { try { return JSON.parse(s); } catch { return f; } },
-  stringify: (o) => { try { return JSON.stringify(o); } catch { return "{}"; } },
+  parse: (s, f = null) => {
+    try {
+      return JSON.parse(s);
+    } catch {
+      return f;
+    }
+  },
+  stringify: (o) => {
+    try {
+      return JSON.stringify(o);
+    } catch {
+      return "{}";
+    }
+  },
 };
 
 /* --------------------------- defensive dependencies ------------------------ */
-let eventBus = { on(){}, off(){}, emit(){} };
+let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
 let PlanStorageRouter = null; // cloud/drive/local bridge
-try { PlanStorageRouter = require("@/services/plans/PlanStorageRouter").default; } catch (_e) {}
+try {
+  PlanStorageRouter = require("@/services/plans/PlanStorageRouter").default;
+} catch (_e) {}
 
 let useFavoritePlans = null; // Zustand hook (optional)
-try { useFavoritePlans = require("@/hooks/useFavoritePlans").default; } catch (_e) {}
+try {
+  useFavoritePlans = require("@/hooks/useFavoritePlans").default;
+} catch (_e) {}
 
 let date = null; // nice date helpers (optional)
-try { date = require("@/utils/date").default || require("@/utils/date"); } catch (_e) {}
+try {
+  date = require("@/utils/date").default || require("@/utils/date");
+} catch (_e) {}
 
 /* ------------------------------ tiny utilities ----------------------------- */
-function pad2(n){ return (n<10?"0":"") + n; }
-function dateStamp(){
-  const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+function pad2(n) {
+  return (n < 10 ? "0" : "") + n;
 }
-function canonical(base, slug){ return (base || "https://example.com") + "/" + slug; }
+function dateStamp() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function canonical(base, slug) {
+  return (base || "https://example.com") + "/" + slug;
+}
 
 /* ------------------------------- schema builders --------------------------- */
-function buildCommonSchema({ title, description, author, url, image, publishedISO, modifiedISO, tags }) {
+function buildCommonSchema({
+  title,
+  description,
+  author,
+  url,
+  image,
+  publishedISO,
+  modifiedISO,
+  tags,
+}) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -69,7 +100,7 @@ function buildFAQSchema(faq = []) {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faq.map(q => ({
+    mainEntity: faq.map((q) => ({
       "@type": "Question",
       name: q.q,
       acceptedAnswer: { "@type": "Answer", text: q.a },
@@ -77,7 +108,16 @@ function buildFAQSchema(faq = []) {
   };
 }
 
-function buildHowToSchema({ title, description, url, image, steps = [], supplies = [], tools = [], durationISO }) {
+function buildHowToSchema({
+  title,
+  description,
+  url,
+  image,
+  steps = [],
+  supplies = [],
+  tools = [],
+  durationISO,
+}) {
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
@@ -91,16 +131,27 @@ function buildHowToSchema({ title, description, url, image, steps = [], supplies
       name: s.title || `Step ${i + 1}`,
       text: s.text || s,
     })),
-    supply: supplies.map(x => ({ "@type": "HowToSupply", name: x })),
-    tool: tools.map(x => ({ "@type": "HowToTool", name: x })),
+    supply: supplies.map((x) => ({ "@type": "HowToSupply", name: x })),
+    tool: tools.map((x) => ({ "@type": "HowToTool", name: x })),
     url,
   };
 }
 
 function buildRecipeSchema({
-  title, description, url, image, author, cuisine, keywords,
-  prepTimeISO, cookTimeISO, totalTimeISO, recipeYield,
-  ingredients = [], instructions = [], nutrition = {}
+  title,
+  description,
+  url,
+  image,
+  author,
+  cuisine,
+  keywords,
+  prepTimeISO,
+  cookTimeISO,
+  totalTimeISO,
+  recipeYield,
+  ingredients = [],
+  instructions = [],
+  nutrition = {},
 }) {
   return {
     "@context": "https://schema.org",
@@ -119,10 +170,12 @@ function buildRecipeSchema({
     recipeInstructions: instructions.map((s, i) => ({
       "@type": "HowToStep",
       position: i + 1,
-      text: typeof s === "string" ? s : (s.text || s.title || `Step ${i + 1}`),
+      text: typeof s === "string" ? s : s.text || s.title || `Step ${i + 1}`,
       name: s.title || undefined,
     })),
-    nutrition: Object.keys(nutrition || {}).length ? { "@type": "NutritionInformation", ...nutrition } : undefined,
+    nutrition: Object.keys(nutrition || {}).length
+      ? { "@type": "NutritionInformation", ...nutrition }
+      : undefined,
     url,
   };
 }
@@ -178,9 +231,11 @@ async function defaultGetRelated({ tags = [], domain = "meals" } = {}) {
   eventBus.emit?.("content.related.requested", req);
   // Fallback: simple tag->topic route patterns
   const base = "/topics";
-  const links = (tags || []).slice(0, 6).map(t => ({
+  const links = (tags || []).slice(0, 6).map((t) => ({
     title: `Explore ${t}`,
-    href: `${base}?tag=${encodeURIComponent(t)}&domain=${encodeURIComponent(domain)}`,
+    href: `${base}?tag=${encodeURIComponent(t)}&domain=${encodeURIComponent(
+      domain
+    )}`,
   }));
   // Add module hubs
   links.push({ title: "Meals Hub", href: "/meals" });
@@ -233,14 +288,25 @@ function createEvergreenArticle(options) {
   // JSON-LD
   const schema = [];
   const baseSchema = buildCommonSchema({
-    title, description: desc, author, url, image: hero, publishedISO, modifiedISO, tags,
+    title,
+    description: desc,
+    author,
+    url,
+    image: hero,
+    publishedISO,
+    modifiedISO,
+    tags,
   });
   if (baseSchema) schema.push(baseSchema);
 
   if (moduleDomain === "meals" && options.recipe) {
     schema.push(
       buildRecipeSchema({
-        title, description: desc, url, image: hero, author,
+        title,
+        description: desc,
+        url,
+        image: hero,
+        author,
         cuisine: options.recipe.cuisine,
         keywords: tags,
         prepTimeISO: options.recipe.prepTimeISO,
@@ -255,7 +321,10 @@ function createEvergreenArticle(options) {
   } else if (options.howto) {
     schema.push(
       buildHowToSchema({
-        title, description: desc, url, image: hero,
+        title,
+        description: desc,
+        url,
+        image: hero,
         steps: options.howto.steps || [],
         supplies: options.howto.supplies || [],
         tools: options.howto.tools || [],
@@ -312,7 +381,7 @@ function createEvergreenArticle(options) {
   if (options.faq?.length) {
     blocks.push("## FAQ");
     options.faq.forEach(({ q, a }) => {
-      blocks.push(`**${q}**`); 
+      blocks.push(`**${q}**`);
       blocks.push(`${a}`);
     });
   }
@@ -322,12 +391,18 @@ function createEvergreenArticle(options) {
 
   async function assemble() {
     const related = await getRelated({ tags, domain: moduleDomain });
-    const linkLines = (related || []).map(link => `- [${link.title}](${link.href})`);
+    const linkLines = (related || []).map(
+      (link) => `- [${link.title}](${link.href})`
+    );
     const relatedMD = linkLines.length
       ? `\n## Explore next\n${linkLines.join("\n")}\n`
       : "";
 
-    const body = blocks.concat([relatedMD, renderCTAOutro({ title, module: moduleDomain, articleId })])
+    const body = blocks
+      .concat([
+        relatedMD,
+        renderCTAOutro({ title, module: moduleDomain, articleId }),
+      ])
       .filter(Boolean)
       .join("\n\n");
 
@@ -358,7 +433,7 @@ function createEvergreenArticle(options) {
     url,
     frontmatter,
     schema,
-    assemble,                 // async -> { frontmatter, bodyMarkdown, htmlBlocks }
+    assemble, // async -> { frontmatter, bodyMarkdown, htmlBlocks }
     toMarkdown: async () => {
       const a = await assemble();
       return `---\n${yaml(frontmatter)}\n---\n\n${a.bodyMarkdown}\n`;
@@ -381,8 +456,12 @@ function renderCTAIntro({ title, module, articleId }) {
   return [
     `> **Quick start:** Create a plan from this guide or save it as a Favorite to reuse.`,
     ``,
-    `<!-- CTA:create-plan data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(planTitle)}" -->`,
-    `<!-- CTA:save-favorite data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(planTitle)}" -->`,
+    `<!-- CTA:create-plan data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(
+      planTitle
+    )}" -->`,
+    `<!-- CTA:save-favorite data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(
+      planTitle
+    )}" -->`,
   ].join("\n");
 }
 
@@ -394,29 +473,39 @@ function renderCTAOutro({ title, module, articleId }) {
     `- Create a plan: _Build steps & schedule from this guide._`,
     `- Save as Favorite: _Keep your best version ready to run again._`,
     ``,
-    `<!-- CTA:create-plan data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(planTitle)}" -->`,
-    `<!-- CTA:save-favorite data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(planTitle)}" -->`,
+    `<!-- CTA:create-plan data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(
+      planTitle
+    )}" -->`,
+    `<!-- CTA:save-favorite data-article="${articleId}" data-module="${module}" data-plan-title="${escapeHTML(
+      planTitle
+    )}" -->`,
   ].join("\n");
 }
 
 function renderMealsRecipe(recipe = {}) {
   const lines = [];
   lines.push("## Ingredients");
-  (recipe.ingredients || []).forEach(i => lines.push(`- ${i}`));
+  (recipe.ingredients || []).forEach((i) => lines.push(`- ${i}`));
   lines.push("");
   lines.push("## Instructions");
   (recipe.instructions || []).forEach((s, idx) => {
-    const text = typeof s === "string" ? s : (s.text || s.title || `Step ${idx + 1}`);
+    const text =
+      typeof s === "string" ? s : s.text || s.title || `Step ${idx + 1}`;
     lines.push(`${idx + 1}. ${text}`);
   });
   if (recipe.yield) lines.push(`\n**Yield:** ${recipe.yield}`);
   if (recipe.prepTimeISO || recipe.cookTimeISO || recipe.totalTimeISO) {
     lines.push("\n**Time:**");
-    if (recipe.prepTimeISO) lines.push(`- Prep: ${isoToHuman(recipe.prepTimeISO)}`);
-    if (recipe.cookTimeISO) lines.push(`- Cook: ${isoToHuman(recipe.cookTimeISO)}`);
-    if (recipe.totalTimeISO) lines.push(`- Total: ${isoToHuman(recipe.totalTimeISO)}`);
+    if (recipe.prepTimeISO)
+      lines.push(`- Prep: ${isoToHuman(recipe.prepTimeISO)}`);
+    if (recipe.cookTimeISO)
+      lines.push(`- Cook: ${isoToHuman(recipe.cookTimeISO)}`);
+    if (recipe.totalTimeISO)
+      lines.push(`- Total: ${isoToHuman(recipe.totalTimeISO)}`);
   }
-  lines.push("\n> _Tip: Use fresh-ground whole-grain flour for maximal nutrition and flavor._");
+  lines.push(
+    "\n> _Tip: Use fresh-ground whole-grain flour for maximal nutrition and flavor._"
+  );
   return lines.join("\n");
 }
 
@@ -424,18 +513,18 @@ function renderHowTo(title, howto = {}) {
   const lines = [];
   if (howto.supplies?.length) {
     lines.push("## Supplies");
-    howto.supplies.forEach(i => lines.push(`- ${i}`));
+    howto.supplies.forEach((i) => lines.push(`- ${i}`));
     lines.push("");
   }
   if (howto.tools?.length) {
     lines.push("## Tools");
-    howto.tools.forEach(i => lines.push(`- ${i}`));
+    howto.tools.forEach((i) => lines.push(`- ${i}`));
     lines.push("");
   }
   lines.push(`## ${title} Steps`);
   (howto.steps || []).forEach((s, idx) => {
-    const name = typeof s === "string" ? null : (s.title || null);
-    const text = typeof s === "string" ? s : (s.text || "");
+    const name = typeof s === "string" ? null : s.title || null;
+    const text = typeof s === "string" ? s : s.text || "";
     lines.push(`**Step ${idx + 1}${name ? ` — ${name}` : ""}**`);
     lines.push(text);
     lines.push("");
@@ -447,30 +536,31 @@ function renderHowTo(title, howto = {}) {
 }
 
 function renderProTips(moduleDomain) {
-  const tips = {
-    meals: [
-      "Batch similar tasks to boost throughput.",
-      "Label and date all freezer items.",
-      "Keep a running pantry inventory to auto-suggest swaps.",
-    ],
-    cleaning: [
-      "Use 15-minute sprints to maintain streaks.",
-      "Stage caddies on each floor for faster resets.",
-      "Mix homemade cleaners fresh and note dilutions.",
-    ],
-    garden: [
-      "Log harvests → auto-sync to inventory for preserve planning.",
-      "Use mulch to retain moisture and suppress weeds.",
-      "Plan succession sowings on your calendar.",
-    ],
-    animals: [
-      "Standardize morning/evening checks to reduce misses.",
-      "Rotate pasture to protect forage and break parasite cycles.",
-      "Schedule processor drop-offs well in advance.",
-    ],
-  }[moduleDomain] || [];
+  const tips =
+    {
+      meals: [
+        "Batch similar tasks to boost throughput.",
+        "Label and date all freezer items.",
+        "Keep a running pantry inventory to auto-suggest swaps.",
+      ],
+      cleaning: [
+        "Use 15-minute sprints to maintain streaks.",
+        "Stage caddies on each floor for faster resets.",
+        "Mix homemade cleaners fresh and note dilutions.",
+      ],
+      garden: [
+        "Log harvests → auto-sync to inventory for preserve planning.",
+        "Use mulch to retain moisture and suppress weeds.",
+        "Plan succession sowings on your calendar.",
+      ],
+      animals: [
+        "Standardize morning/evening checks to reduce misses.",
+        "Rotate pasture to protect forage and break parasite cycles.",
+        "Schedule processor drop-offs well in advance.",
+      ],
+    }[moduleDomain] || [];
   return tips.length
-    ? `## Pro Tips\n` + tips.map(t => `- ${t}`).join("\n")
+    ? `## Pro Tips\n` + tips.map((t) => `- ${t}`).join("\n")
     : "";
 }
 
@@ -483,11 +573,23 @@ function toHTMLBlocks(frontmatter, markdownBody, schemaArray) {
     head: [
       `<link rel="canonical" href="${escapeAttr(frontmatter.canonical)}"/>`,
       `<meta property="og:title" content="${escapeAttr(frontmatter.title)}"/>`,
-      `<meta property="og:description" content="${escapeAttr(frontmatter.description || "")}"/>`,
-      frontmatter.heroImage ? `<meta property="og:image" content="${escapeAttr(frontmatter.heroImage)}"/>` : "",
-      `<meta name="article:published_time" content="${escapeAttr(frontmatter.date)}"/>`,
-      `<script type="application/ld+json">${escapeHTML(JSON.stringify(ld))}</script>`,
-    ].filter(Boolean).join("\n"),
+      `<meta property="og:description" content="${escapeAttr(
+        frontmatter.description || ""
+      )}"/>`,
+      frontmatter.heroImage
+        ? `<meta property="og:image" content="${escapeAttr(
+            frontmatter.heroImage
+          )}"/>`
+        : "",
+      `<meta name="article:published_time" content="${escapeAttr(
+        frontmatter.date
+      )}"/>`,
+      `<script type="application/ld+json">${escapeHTML(
+        JSON.stringify(ld)
+      )}</script>`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
     bodyMarkdown: markdownBody,
   };
 }
@@ -495,8 +597,9 @@ function toHTMLBlocks(frontmatter, markdownBody, schemaArray) {
 /* ------------------------------- helpers ----------------------------------- */
 function isoToHuman(iso = "") {
   // quick ISO 8601 duration converter like PT1H30M -> "1h 30m"
-  const m = String(iso).match(/^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i) ||
-            String(iso).match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i);
+  const m =
+    String(iso).match(/^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i) ||
+    String(iso).match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i);
   if (!m) return iso;
   const d = parseInt(m[1] || "0", 10);
   const h = parseInt(m[2] || "0", 10);
@@ -518,32 +621,47 @@ function yaml(obj) {
     if (v == null) return;
     if (Array.isArray(v)) {
       lines.push(`${pad}${k}:`);
-      v.forEach(x => {
+      v.forEach((x) => {
         if (typeof x === "object" && x) {
           lines.push(`${pad}-`);
-          Object.keys(x).forEach(sub => write(sub, x[sub], depth + 1));
+          Object.keys(x).forEach((sub) => write(sub, x[sub], depth + 1));
         } else {
           lines.push(`${pad}- ${String(x)}`);
         }
       });
     } else if (typeof v === "object") {
       lines.push(`${pad}${k}:`);
-      Object.keys(v).forEach(sub => write(sub, v[sub], depth + 1));
+      Object.keys(v).forEach((sub) => write(sub, v[sub], depth + 1));
     } else {
       const needsQuote = /[:#>-]|^\s|\s$/.test(String(v));
       lines.push(`${pad}${k}: ${needsQuote ? JSON.stringify(String(v)) : v}`);
     }
   };
-  Object.keys(obj).forEach(k => write(k, obj[k], 0));
+  Object.keys(obj).forEach((k) => write(k, obj[k], 0));
   return lines.join("\n");
 }
 
-function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function escapeAttr(s){ return escapeHTML(s).replace(/"/g, "&quot;"); }
+function escapeHTML(s) {
+  return String(s).replace(
+    /[&<>"']/g,
+    (m) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[
+        m
+      ])
+  );
+}
+function escapeAttr(s) {
+  return escapeHTML(s).replace(/"/g, "&quot;");
+}
 
 /* --------------------------- public CTA utilities -------------------------- */
 // Call from your page/template when a CTA button is clicked
-function emitCreatePlanFromArticle({ articleId, module, planTitle, tags = [] }) {
+function emitCreatePlanFromArticle({
+  articleId,
+  module,
+  planTitle,
+  tags = [],
+}) {
   eventBus.emit?.("plan.fromArticle.requested", {
     domain: module || "meals",
     articleId,
@@ -553,18 +671,35 @@ function emitCreatePlanFromArticle({ articleId, module, planTitle, tags = [] }) 
   });
 }
 
-async function saveFavoriteFromArticle({ articleId, module, planTitle, tags = [], target = "local" }) {
-  const res = await saveFavoritePlan({
-    articleId,
-    title: planTitle,
-    domain: module || "meals",
-    createdISO: toISO(),
-    tags,
-  }, target);
+async function saveFavoriteFromArticle({
+  articleId,
+  module,
+  planTitle,
+  tags = [],
+  target = "local",
+}) {
+  const res = await saveFavoritePlan(
+    {
+      articleId,
+      title: planTitle,
+      domain: module || "meals",
+      createdISO: toISO(),
+      tags,
+    },
+    target
+  );
   if (res?.ok) {
-    eventBus.emit?.("toast", { kind: "success", message: "Saved as Favorite Plan", tsISO: toISO() });
+    eventBus.emit?.("toast", {
+      kind: "success",
+      message: "Saved as Favorite Plan",
+      tsISO: toISO(),
+    });
   } else {
-    eventBus.emit?.("toast", { kind: "error", message: "Could not save favorite", tsISO: toISO() });
+    eventBus.emit?.("toast", {
+      kind: "error",
+      message: "Could not save favorite",
+      tsISO: toISO(),
+    });
   }
   return res;
 }

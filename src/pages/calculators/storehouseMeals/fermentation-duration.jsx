@@ -19,10 +19,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import FermentationDurationCalculatorView from "@/features/calculators/storehouseMeals/FermentationDurationCalculator.view";
+import FermentationDurationCalculatorView from "@/features/calculators/storehouseMeals/FermentationDurationCalculator/FermentationDurationCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.fermentationDuration";
 
@@ -116,9 +116,7 @@ function requestFermentationSession(result) {
         familyFundMode: !!familyFundMode,
         sessionHint: {
           title:
-            result?.batchName ||
-            result?.fermentType ||
-            "Fermentation Session",
+            result?.batchName || result?.fermentType || "Fermentation Session",
           suggestedDomain: "preservation",
           tags: ["fermentation", "burpSchedule", "storehouse"],
         },
@@ -207,15 +205,18 @@ function FermentationSummaryCard({
   const riskText = useMemo(() => {
     if (!Array.isArray(riskFlags) || riskFlags.length === 0) return null;
     const map = {
-      tempTooLow: "Ambient temperature is on the low side — expect slower fermentation.",
+      tempTooLow:
+        "Ambient temperature is on the low side — expect slower fermentation.",
       tempTooHigh:
         "Ambient temperature is on the high side — watch closely for over-fermentation.",
-      saltLow: "Salt concentration may be low — higher spoilage risk. Monitor carefully.",
+      saltLow:
+        "Salt concentration may be low — higher spoilage risk. Monitor carefully.",
       saltHigh:
         "Salt concentration is on the high side — fermentation may be slower but safer.",
       headspaceLow:
         "Headspace is low — watch for brine overflow and keep everything submerged.",
-      unknown: "Some parameters are unusual — rely heavily on smell, look, and taste.",
+      unknown:
+        "Some parameters are unusual — rely heavily on smell, look, and taste.",
     };
     return riskFlags.map((f) => map[f] || "Check your parameters carefully.");
   }, [riskFlags]);
@@ -275,9 +276,7 @@ function FermentationSummaryCard({
           <span className="text-slate-400 mb-0.5">Temperature Lane</span>
           <span className="text-slate-50 font-semibold">
             {tempRangeF?.minF != null && tempRangeF?.maxF != null
-              ? `${tempRangeF.minF.toFixed(0)}–${tempRangeF.maxF.toFixed(
-                  0
-                )}°F`
+              ? `${tempRangeF.minF.toFixed(0)}–${tempRangeF.maxF.toFixed(0)}°F`
               : "Not set"}
           </span>
           <span className="text-slate-500">
@@ -384,8 +383,7 @@ export default function FermentationDurationCalculatorPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.title =
-      "Fermentation Duration Calculator | Suka Smart Assistant";
+    document.title = "Fermentation Duration Calculator | Suka Smart Assistant";
   }, []);
 
   /**
@@ -398,15 +396,10 @@ export default function FermentationDurationCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source:
-            "pages.calculators.storehouseMeals.fermentation-duration",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.fermentation-duration",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -486,9 +479,7 @@ export default function FermentationDurationCalculatorPage() {
         riskFlags: Array.isArray(calcResult.riskFlags)
           ? calcResult.riskFlags
           : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };

@@ -1,7 +1,7 @@
 // C:\Users\larho\suka-smart-assistant\src\features\calculators\gardenAnimal\SoilAmendmentCalculator\SoilAmendmentCalculator.hooks.js
 
 import { useMemo, useEffect } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /**
  * SoilAmendmentCalculator.hooks
@@ -147,7 +147,10 @@ import { emit } from "@/services/eventBus";
  * @returns {SoilStabilityResult}
  */
 export function useSoilStabilityFromAmendments(payload, options = {}) {
-  const { autoEmitEvents = true, eventSource = "calculators/SoilAmendmentCalculator" } = options;
+  const {
+    autoEmitEvents = true,
+    eventSource = "calculators/SoilAmendmentCalculator",
+  } = options;
 
   const result = useMemo(() => {
     const empty = /** @type {SoilStabilityResult} */ ({
@@ -156,8 +159,8 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
         areaWeightedScore: 0,
         stabilityRating: "fragile",
         yieldModifier: 0.75,
-        globalConcerns: []
-      }
+        globalConcerns: [],
+      },
     });
 
     if (!payload || !payload.inputs) return empty;
@@ -168,7 +171,9 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
     const soilTests = Array.isArray(inputs.soilTests) ? inputs.soilTests : [];
     const target = inputs.targetFertility || {};
     const gardenLayout = inputs.gardenLayout || {};
-    const layoutBeds = Array.isArray(gardenLayout.beds) ? gardenLayout.beds : [];
+    const layoutBeds = Array.isArray(gardenLayout.beds)
+      ? gardenLayout.beds
+      : [];
 
     // quick lookup
     const testsByBedId = groupTestsByBedId(soilTests);
@@ -194,9 +199,12 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
       const area = safeNumber(layoutBed?.areaSqFt, 0);
       const bedName = bedRaw.name || layoutBed?.name || `Bed ${bedId || "?"}`;
 
-      const effectiveTexture = bedRaw.texture || soilProfile.defaultTexture || "loam";
+      const effectiveTexture =
+        bedRaw.texture || soilProfile.defaultTexture || "loam";
       const organicMatterPct =
-        typeof bedRaw.organicMatterPct === "number" ? bedRaw.organicMatterPct : null;
+        typeof bedRaw.organicMatterPct === "number"
+          ? bedRaw.organicMatterPct
+          : null;
       const drainage = bedRaw.drainage || "moderate";
 
       const tests = testsByBedId.get(bedId) || [];
@@ -206,14 +214,15 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
       const targetPhMin = typeof target.phMin === "number" ? target.phMin : 6.2;
       const targetPhMax = typeof target.phMax === "number" ? target.phMax : 6.8;
 
-      const { score, limitingFactor, yieldModifier, stabilityRating } = computeBedScore({
-        texture: effectiveTexture,
-        organicMatterPct,
-        drainage,
-        ph,
-        targetPhMin,
-        targetPhMax
-      });
+      const { score, limitingFactor, yieldModifier, stabilityRating } =
+        computeBedScore({
+          texture: effectiveTexture,
+          organicMatterPct,
+          drainage,
+          ph,
+          targetPhMin,
+          targetPhMax,
+        });
 
       perBed.push({
         bedId,
@@ -224,7 +233,7 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
         limitingFactor,
         organicMatterPct,
         ph,
-        drainage
+        drainage,
       });
 
       if (area > 0) {
@@ -247,10 +256,12 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
     } else if (perBed.length > 0) {
       // Fallback if no areas defined
       const avgScore =
-        perBed.reduce((acc, b) => acc + (b.soilScore || 0), 0) / (perBed.length || 1);
+        perBed.reduce((acc, b) => acc + (b.soilScore || 0), 0) /
+        (perBed.length || 1);
       areaWeightedScore = avgScore;
       overallYieldModifier =
-        perBed.reduce((acc, b) => acc + (b.yieldModifier || 0), 0) / (perBed.length || 1);
+        perBed.reduce((acc, b) => acc + (b.yieldModifier || 0), 0) /
+        (perBed.length || 1);
     }
 
     const overallStabilityRating = classifyStability(areaWeightedScore);
@@ -262,8 +273,8 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
         areaWeightedScore,
         stabilityRating: overallStabilityRating,
         yieldModifier: clamp(overallYieldModifier, 0.5, 1.25),
-        globalConcerns: Array.from(globalConcerns)
-      }
+        globalConcerns: Array.from(globalConcerns),
+      },
     };
 
     return result;
@@ -281,13 +292,16 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
         source: options.eventSource || "calculators/SoilAmendmentCalculator",
         data: {
           context: payload.context || {},
-          stability: result
-        }
+          stability: result,
+        },
       });
     } catch (err) {
       // Fail-soft; never break UI because of event bus issues
       // eslint-disable-next-line no-console
-      console.warn("[SoilAmendmentCalculator] Failed to emit stability event", err);
+      console.warn(
+        "[SoilAmendmentCalculator] Failed to emit stability event",
+        err
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -295,7 +309,7 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
     payload && payload.context && payload.context.runId,
     result.overall.areaWeightedScore,
     result.overall.yieldModifier,
-    result.perBed.length
+    result.perBed.length,
   ]);
 
   return result;
@@ -323,7 +337,7 @@ export function useSoilStabilityFromAmendments(payload, options = {}) {
  */
 export function useSoilYieldHintsForGarden(payload) {
   const stability = useSoilStabilityFromAmendments(payload, {
-    autoEmitEvents: false
+    autoEmitEvents: false,
   });
 
   return useMemo(
@@ -331,10 +345,10 @@ export function useSoilYieldHintsForGarden(payload) {
       perBed: stability.perBed.map((b) => ({
         bedId: b.bedId,
         yieldModifier: b.yieldModifier,
-        stabilityRating: b.stabilityRating
+        stabilityRating: b.stabilityRating,
       })),
       overallYieldModifier: stability.overall.yieldModifier,
-      stabilityRating: stability.overall.stabilityRating
+      stabilityRating: stability.overall.stabilityRating,
     }),
     [stability]
   );
@@ -403,14 +417,8 @@ function chooseLatestTest(tests) {
  * }} params
  */
 function computeBedScore(params) {
-  const {
-    texture,
-    organicMatterPct,
-    drainage,
-    ph,
-    targetPhMin,
-    targetPhMax
-  } = params;
+  const { texture, organicMatterPct, drainage, ph, targetPhMin, targetPhMax } =
+    params;
 
   // 1) Organic matter 0–40
   let omScore = 0;
@@ -477,7 +485,8 @@ function computeBedScore(params) {
 
   let limitingFactor = "";
   if (phConcern) limitingFactor = phConcern;
-  if (omConcern && (!limitingFactor || omScore < phScore)) limitingFactor = omConcern;
+  if (omConcern && (!limitingFactor || omScore < phScore))
+    limitingFactor = omConcern;
   if (drainageConcern && (!limitingFactor || drainageScore < omScore)) {
     limitingFactor = drainageConcern;
   }
@@ -497,7 +506,7 @@ function computeBedScore(params) {
     score,
     limitingFactor,
     yieldModifier,
-    stabilityRating
+    stabilityRating,
   };
 }
 

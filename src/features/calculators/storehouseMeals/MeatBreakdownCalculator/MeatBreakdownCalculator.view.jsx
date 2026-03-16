@@ -25,7 +25,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} MeatBreakdownCalculatorViewProps
@@ -89,8 +89,12 @@ const MeatBreakdownCalculatorView = ({
       const q = cutFilter.trim().toLowerCase();
       rows = rows.filter((c) => {
         return (
-          String(c.name || "").toLowerCase().includes(q) ||
-          String(c.primal || "").toLowerCase().includes(q)
+          String(c.name || "")
+            .toLowerCase()
+            .includes(q) ||
+          String(c.primal || "")
+            .toLowerCase()
+            .includes(q)
         );
       });
     }
@@ -146,9 +150,7 @@ const MeatBreakdownCalculatorView = ({
   const weightUnitLabel = summary.weightUnit === "kg" ? "kg" : "lb";
   const basisLabel = basisTypeToLabel(summary.basisType);
 
-  const layoutClass = compact
-    ? "space-y-4"
-    : "space-y-6 md:space-y-8";
+  const layoutClass = compact ? "space-y-4" : "space-y-6 md:space-y-8";
 
   return (
     <div className={layoutClass}>
@@ -161,14 +163,15 @@ const MeatBreakdownCalculatorView = ({
           <p className="text-xs md:text-sm text-slate-500">
             {renderAnimalHeader(animal)} &bull; Basis:{" "}
             <span className="font-medium">
-              {summary.basisWeight.toFixed(1)} {weightUnitLabel} (
-              {basisLabel})
+              {summary.basisWeight.toFixed(1)} {weightUnitLabel} ({basisLabel})
             </span>
           </p>
           {carcass.slaughterDate && (
             <p className="text-xs text-slate-400 mt-0.5">
               Slaughtered on {carcass.slaughterDate}
-              {carcass.processingDate ? ` • Cut on ${carcass.processingDate}` : ""}
+              {carcass.processingDate
+                ? ` • Cut on ${carcass.processingDate}`
+                : ""}
             </p>
           )}
         </div>
@@ -220,10 +223,7 @@ const MeatBreakdownCalculatorView = ({
       </div>
 
       {/* Cut detail modal */}
-      <CutDetailModal
-        cut={selectedCut}
-        onClose={() => setSelectedCut(null)}
-      />
+      <CutDetailModal cut={selectedCut} onClose={() => setSelectedCut(null)} />
     </div>
   );
 };
@@ -433,15 +433,9 @@ const CutsTable = ({ cuts, weightUnitLabel, onSelectCut }) => {
               <th className="px-3 py-2 font-medium text-right">
                 Weight ({weightUnitLabel})
               </th>
-              <th className="px-3 py-2 font-medium text-right">
-                % of Meat
-              </th>
-              <th className="px-3 py-2 font-medium text-right">
-                Packages
-              </th>
-              <th className="px-3 py-2 font-medium text-right">
-                Servings
-              </th>
+              <th className="px-3 py-2 font-medium text-right">% of Meat</th>
+              <th className="px-3 py-2 font-medium text-right">Packages</th>
+              <th className="px-3 py-2 font-medium text-right">Servings</th>
             </tr>
           </thead>
           <tbody>
@@ -464,9 +458,7 @@ const CutsTable = ({ cuts, weightUnitLabel, onSelectCut }) => {
                 </td>
                 <td className="px-3 py-2 align-middle">
                   <div className="flex flex-col">
-                    <span className="text-slate-700">
-                      {cut.primal || "—"}
-                    </span>
+                    <span className="text-slate-700">{cut.primal || "—"}</span>
                     {cut.subPrimal ? (
                       <span className="text-[11px] text-slate-400">
                         {cut.subPrimal}
@@ -502,8 +494,8 @@ const ByproductsCard = ({ byproducts, basisWeight, weightUnitLabel }) => {
   if (!byproducts.length) {
     return (
       <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
-        No byproducts recorded yet. Trim fat, bones, and organs will appear
-        here for stock, rendering, or pet food planning.
+        No byproducts recorded yet. Trim fat, bones, and organs will appear here
+        for stock, rendering, or pet food planning.
       </div>
     );
   }
@@ -517,7 +509,10 @@ const ByproductsCard = ({ byproducts, basisWeight, weightUnitLabel }) => {
               ? ((bp.weight || 0) / basisWeight) * 100
               : bp.yieldPctOfBasis ?? 0;
           return (
-            <div key={idx} className="border-b border-slate-100 pb-1.5 mb-1.5 last:border-b-0 last:pb-0 last:mb-0">
+            <div
+              key={idx}
+              className="border-b border-slate-100 pb-1.5 mb-1.5 last:border-b-0 last:pb-0 last:mb-0"
+            >
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-medium text-slate-800">

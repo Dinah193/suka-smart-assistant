@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../schemas/cuisine.ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-17T00:00:00-06:00",
+  "meta": {
+    "id": "cajun.ruleset.v1",
+    "type": "cuisine_ruleset",
+    "domain": "cuisines",
+    "locale": "en-US"
+  },
+  "scope": {
+    "cuisineId": "cajun"
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  }
+}

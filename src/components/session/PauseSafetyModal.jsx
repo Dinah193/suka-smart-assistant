@@ -12,7 +12,8 @@ const BTN =
   "inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 active:translate-y-px";
 const VAR = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
-  subtle: "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
+  subtle:
+    "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
   ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
   warn: "bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-600",
   danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600",
@@ -25,7 +26,7 @@ const FIELD =
 /* ----------------------------- Defensive imports ---------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch (_) {}
 
@@ -43,7 +44,9 @@ try {
 
 let SaveSessionModalLazy = null;
 try {
-  SaveSessionModalLazy = React.lazy(() => import("@/components/sessions/SaveSessionModal.jsx"));
+  SaveSessionModalLazy = React.lazy(() =>
+    import("@/components/session/SaveSessionModal.jsx")
+  );
 } catch (_) {}
 
 /* ---------------------------------- Icons ---------------------------------- */
@@ -105,7 +108,10 @@ function toastSafe(message, variant = "success") {
   }
 }
 const safeFile = (name = "session") =>
-  String(name).toLowerCase().replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-");
+  String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/-+/g, "-");
 
 /* -------------------------------- Component -------------------------------- */
 /**
@@ -144,7 +150,9 @@ export default function PauseSafetyModal({
 
   /* --------------------------- Favorite THIS SESSION -------------------------- */
   const favApi = useFavoriteSessions ? useFavoriteSessions(domain) : null;
-  const [isFav, setIsFav] = useState(() => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false);
+  const [isFav, setIsFav] = useState(
+    () => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false
+  );
   useEffect(() => {
     if (favApi && sessionId) setIsFav(!!favApi.isFavorite?.(sessionId));
   }, [favApi, sessionId]);
@@ -153,7 +161,11 @@ export default function PauseSafetyModal({
     if (!sessionId) return;
     try {
       if (favApi?.toggleFavorite) {
-        const next = await favApi.toggleFavorite(sessionId, { id: sessionId, title: sessionTitle, domain });
+        const next = await favApi.toggleFavorite(sessionId, {
+          id: sessionId,
+          title: sessionTitle,
+          domain,
+        });
         setIsFav(!!next);
       } else {
         const next = !isFav;
@@ -166,7 +178,11 @@ export default function PauseSafetyModal({
           source: "PauseSafetyModal",
         });
       }
-      toastSafe(isFav ? "Removed from favorite sessions." : "Added to favorite sessions.");
+      toastSafe(
+        isFav
+          ? "Removed from favorite sessions."
+          : "Added to favorite sessions."
+      );
     } catch (e) {
       console.warn("[PauseSafetyModal] favorite toggle failed", e);
       toastSafe("Could not update favorite sessions.", "error");
@@ -175,7 +191,11 @@ export default function PauseSafetyModal({
 
   /* --------------------------------- Actions -------------------------------- */
   const resume = () => {
-    eventBus.emit?.("session.start.requested", { domain, sessionId, source: "PauseSafetyModal" });
+    eventBus.emit?.("session.start.requested", {
+      domain,
+      sessionId,
+      source: "PauseSafetyModal",
+    });
     onClose?.();
   };
 
@@ -213,12 +233,23 @@ export default function PauseSafetyModal({
   };
 
   const extend = (offset = "+5m") => {
-    eventBus.emit?.("session.extend.requested", { domain, sessionId, offset, stepId: step?.id, source: "PauseSafetyModal" });
+    eventBus.emit?.("session.extend.requested", {
+      domain,
+      sessionId,
+      offset,
+      stepId: step?.id,
+      source: "PauseSafetyModal",
+    });
     toastSafe(`Extended ${offset}.`);
   };
 
   const snooze = (offset = "+10m") => {
-    eventBus.emit?.("session.snooze.requested", { domain, sessionId, offset, source: "PauseSafetyModal" });
+    eventBus.emit?.("session.snooze.requested", {
+      domain,
+      sessionId,
+      offset,
+      source: "PauseSafetyModal",
+    });
     toastSafe(`Snoozed ${offset}.`);
   };
 
@@ -228,21 +259,33 @@ export default function PauseSafetyModal({
       return;
     }
     setSaveOpen(true);
-    eventBus.emit?.("session.save.modal.opened", { domain, sessionId, source: "PauseSafetyModal" });
+    eventBus.emit?.("session.save.modal.opened", {
+      domain,
+      sessionId,
+      source: "PauseSafetyModal",
+    });
   };
 
   const exportSnapshot = () => {
     if (!sessionId) return;
     setSaving(true);
     try {
-      const fallback = { id: sessionId, domain, title: sessionTitle, step, etaISO };
+      const fallback = {
+        id: sessionId,
+        domain,
+        title: sessionTitle,
+        step,
+        etaISO,
+      };
       eventBus.emit?.("session.snapshot.requested", {
         sessionId,
         domain,
         source: "PauseSafetyModal",
         reply: (snapshot) => {
           const data = snapshot || fallback;
-          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+          const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: "application/json",
+          });
           const a = document.createElement("a");
           a.href = URL.createObjectURL(blob);
           a.download = `${safeFile(sessionTitle)}.json`;
@@ -255,7 +298,9 @@ export default function PauseSafetyModal({
       // If no listener responds in your app, it still downloads via fallback after ~tick
       setTimeout(() => {
         if (saving) {
-          const blob = new Blob([JSON.stringify(fallback, null, 2)], { type: "application/json" });
+          const blob = new Blob([JSON.stringify(fallback, null, 2)], {
+            type: "application/json",
+          });
           const a = document.createElement("a");
           a.href = URL.createObjectURL(blob);
           a.download = `${safeFile(sessionTitle)}.json`;
@@ -287,18 +332,28 @@ export default function PauseSafetyModal({
 
   const riskIcon = (k) => {
     switch (k) {
-      case "inventory": return <I.ShoppingCart className="h-3.5 w-3.5" />;
-      case "weather": return <I.CloudLightning className="h-3.5 w-3.5" />;
-      case "time": return <I.Clock className="h-3.5 w-3.5" />;
-      case "appliance": return <I.ThermometerSnowflake className="h-3.5 w-3.5" />;
-      default: return <I.Alert className="h-3.5 w-3.5" />;
+      case "inventory":
+        return <I.ShoppingCart className="h-3.5 w-3.5" />;
+      case "weather":
+        return <I.CloudLightning className="h-3.5 w-3.5" />;
+      case "time":
+        return <I.Clock className="h-3.5 w-3.5" />;
+      case "appliance":
+        return <I.ThermometerSnowflake className="h-3.5 w-3.5" />;
+      default:
+        return <I.Alert className="h-3.5 w-3.5" />;
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={WRAP} role="dialog" aria-modal="true" aria-label="Pause options">
+    <div
+      className={WRAP}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Pause options"
+    >
       <div className={CARD}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 px-5 py-4">
@@ -307,10 +362,15 @@ export default function PauseSafetyModal({
               Pause Session
             </h3>
             <p className="mt-0.5 text-xs text-gray-600">
-              Choose how you want to pause. You can freeze timers or activate safety policies.
+              Choose how you want to pause. You can freeze timers or activate
+              safety policies.
             </p>
           </div>
-          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose} aria-label="Close">
+          <button
+            className={cx(BTN, VAR.ghost, "px-2")}
+            onClick={onClose}
+            aria-label="Close"
+          >
             <I.X className="h-4 w-4" />
           </button>
         </div>
@@ -345,7 +405,11 @@ export default function PauseSafetyModal({
                   aria-pressed={isFav}
                   title={isFav ? "Unfavorite session" : "Favorite session"}
                 >
-                  {isFav ? <I.Star className="h-4 w-4 text-amber-500" /> : <I.StarOff className="h-4 w-4" />}
+                  {isFav ? (
+                    <I.Star className="h-4 w-4 text-amber-500" />
+                  ) : (
+                    <I.StarOff className="h-4 w-4" />
+                  )}
                 </button>
                 <button className={cx(BTN, VAR.subtle)} onClick={saveSession}>
                   <I.Save className="h-4 w-4" />
@@ -355,8 +419,14 @@ export default function PauseSafetyModal({
             </div>
 
             <div className="mt-3">
-              <p className="text-sm font-medium text-gray-900 truncate">{step?.title || sessionTitle}</p>
-              {step?.notes && <p className="mt-1 text-sm text-gray-600 line-clamp-3">{step.notes}</p>}
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {step?.title || sessionTitle}
+              </p>
+              {step?.notes && (
+                <p className="mt-1 text-sm text-gray-600 line-clamp-3">
+                  {step.notes}
+                </p>
+              )}
             </div>
           </div>
 
@@ -380,7 +450,9 @@ export default function PauseSafetyModal({
 
           {/* Pause note */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Add a note (optional)</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Add a note (optional)
+            </label>
             <input
               className={FIELD}
               value={freezeNote}
@@ -391,15 +463,25 @@ export default function PauseSafetyModal({
 
           {/* Quick actions */}
           <div className="flex flex-wrap items-center gap-2">
-            <button className={cx(BTN, VAR.ghost)} onClick={() => extend("+5m")}>
+            <button
+              className={cx(BTN, VAR.ghost)}
+              onClick={() => extend("+5m")}
+            >
               <I.Plus className="h-4 w-4" />
               Extend +5m
             </button>
-            <button className={cx(BTN, VAR.ghost)} onClick={() => snooze("+10m")}>
+            <button
+              className={cx(BTN, VAR.ghost)}
+              onClick={() => snooze("+10m")}
+            >
               <I.AlarmPlus className="h-4 w-4" />
               Snooze +10m
             </button>
-            <button className={cx(BTN, VAR.ghost)} onClick={exportSnapshot} disabled={saving}>
+            <button
+              className={cx(BTN, VAR.ghost)}
+              onClick={exportSnapshot}
+              disabled={saving}
+            >
               <I.Download className="h-4 w-4" />
               Export snapshot
             </button>
@@ -424,8 +506,8 @@ export default function PauseSafetyModal({
       </div>
 
       {/* Save session modal (lazy preferred) */}
-      {saveOpen && (
-        SaveSessionModalLazy ? (
+      {saveOpen &&
+        (SaveSessionModalLazy ? (
           <Suspense fallback={null}>
             <SaveSessionModalLazy
               isOpen={saveOpen}
@@ -434,7 +516,10 @@ export default function PauseSafetyModal({
               domain={domain}
               sessionId={sessionId}
               onSaved={(saved) => {
-                eventBus.emit?.("session.saved", { from: "PauseSafetyModal", saved });
+                eventBus.emit?.("session.saved", {
+                  from: "PauseSafetyModal",
+                  saved,
+                });
                 toastSafe("Session saved.");
                 setSaveOpen(false);
               }}
@@ -447,19 +532,27 @@ export default function PauseSafetyModal({
             defaultTitle={sessionTitle}
             onClose={() => setSaveOpen(false)}
             onSaved={(saved) => {
-              eventBus.emit?.("session.saved", { from: "PauseSafetyModal", saved });
+              eventBus.emit?.("session.saved", {
+                from: "PauseSafetyModal",
+                saved,
+              });
               toastSafe("Session saved.");
               setSaveOpen(false);
             }}
           />
-        )
-      )}
+        ))}
     </div>
   );
 }
 
 /* --------------------------------- Inline Save ------------------------------ */
-function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }) {
+function InlineSaveSession({
+  domain,
+  sessionId,
+  defaultTitle,
+  onClose,
+  onSaved,
+}) {
   const [name, setName] = useState(defaultTitle || "");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -472,7 +565,10 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
     setBusy(true);
     try {
       const payload = { id: sessionId, domain, title: name, notes };
-      eventBus.emit?.("session.save.requested", { payload, source: "PauseSafetyModal" });
+      eventBus.emit?.("session.save.requested", {
+        payload,
+        source: "PauseSafetyModal",
+      });
       onSaved?.(payload);
     } finally {
       setBusy(false);
@@ -480,22 +576,49 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
   };
 
   return (
-    <div className={WRAP} role="dialog" aria-modal="true" aria-label="Save session">
+    <div
+      className={WRAP}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Save session"
+    >
       <div className={CARD}>
         <div className="flex items-center justify-between border-b border-gray-200 bg-white px-5 py-4">
           <h3 className="text-base font-semibold">Save Session</h3>
-          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose}><I.X className="h-4 w-4" /></button>
+          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose}>
+            <I.X className="h-4 w-4" />
+          </button>
         </div>
         <div className="px-5 py-4">
-          <label className="block text-sm font-medium text-gray-700">Title</label>
-          <input className={FIELD} value={name} onChange={(e) => setName(e.target.value)} placeholder="Session title" />
+          <label className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <input
+            className={FIELD}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Session title"
+          />
 
-          <label className="mt-4 block text-sm font-medium text-gray-700">Notes</label>
-          <textarea className={cx(FIELD, "min-h-[96px]")} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="What should future-you remember?" />
+          <label className="mt-4 block text-sm font-medium text-gray-700">
+            Notes
+          </label>
+          <textarea
+            className={cx(FIELD, "min-h-[96px]")}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="What should future-you remember?"
+          />
         </div>
         <div className="flex justify-end gap-2 border-t border-gray-200 bg-gray-50 px-5 py-3">
-          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>Cancel</button>
-          <button className={cx(BTN, VAR.primary)} onClick={submit} disabled={busy}>
+          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={cx(BTN, VAR.primary)}
+            onClick={submit}
+            disabled={busy}
+          >
             <I.Save className="h-4 w-4" />
             Save
           </button>

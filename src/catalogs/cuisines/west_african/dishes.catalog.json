@@ -1,0 +1,511 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "dishes.west_african",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "normalization": {
+      "case": "lower",
+      "trim": true,
+      "collapseWhitespace": true,
+      "stripPunctuation": true
+    }
+  },
+  "notes": [
+    "West African dishes catalog used by SSA Meal Planner + search/browse.",
+    "Ingredient IDs referenced here should align with SSA ingredient catalogs and alias maps.",
+    "Technique IDs referenced here should align with techniques.glossary.json."
+  ],
+  "dishes": [
+    {
+      "id": "dish.jollof_rice",
+      "label": "Jollof Rice",
+      "cuisineId": "cuisine.west_african",
+      "archetypeId": "archetype_rice_pot",
+      "course": "dinner",
+      "difficulty": "intermediate",
+      "servingStyles": ["one_pot", "family_style"],
+      "summary": "Tomato-pepper-onion rice cooked in seasoned stock until fluffy and deeply colored; widely shared across West Africa with regional variations.",
+      "originHints": ["Nigeria", "Ghana", "Senegal"],
+      "tags": [
+        "rice",
+        "one_pot",
+        "tomato_base",
+        "weeknight_friendly",
+        "party_food"
+      ],
+      "keywords": [
+        "jollof",
+        "jollof rice",
+        "tomato rice",
+        "party rice",
+        "west african rice",
+        "one pot rice"
+      ],
+      "aliases": ["party jollof", "tomato pepper rice", "red rice"],
+      "ingredients": {
+        "required": [
+          "rice_white_longgrain",
+          "tomato",
+          "tomato_paste",
+          "onion_yellow",
+          "pepper_bell",
+          "oil_neutral",
+          "salt"
+        ],
+        "optional": [
+          "garlic",
+          "ginger",
+          "pepper_hot_scotch_bonnet_optional",
+          "spice_thyme_dried",
+          "spice_bay_leaf",
+          "stock_chicken_or_beef_optional"
+        ],
+        "swappableRoles": [
+          {
+            "role": "protein",
+            "preferred": "chicken_generic",
+            "fallbacks": [
+              "beef_generic",
+              "fish_generic",
+              "egg_chicken_optional"
+            ]
+          }
+        ]
+      },
+      "techniques": [
+        "prep_mise_en_place",
+        "saute",
+        "stew",
+        "reduce",
+        "season_to_taste",
+        "rest"
+      ],
+      "allergens": {
+        "mayContain": [],
+        "commonTriggers": [],
+        "notes": [
+          "Often served with fried plantain or simple salad; adjust sides per household allergens."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 75,
+        "activeMinutesEstimate": 25,
+        "equipmentIds": [
+          "pot_lidded",
+          "stove_burner",
+          "knife_chef",
+          "cutting_board"
+        ],
+        "skillFocus": ["tomato_base", "rice_cookery", "seasoning_balance"],
+        "weeknightBias": "high"
+      }
+    },
+    {
+      "id": "dish.pepper_stew",
+      "label": "Pepper Stew",
+      "cuisineId": "cuisine.west_african",
+      "archetypeId": "archetype_stew_with_starch",
+      "course": "dinner",
+      "difficulty": "intermediate",
+      "servingStyles": ["stew_and_starch", "family_style"],
+      "summary": "A rich tomato-pepper-onion stew simmered until concentrated; served with rice, yam, plantain, or other starches.",
+      "originHints": ["Nigeria", "Ghana"],
+      "tags": ["stew", "tomato_base", "pepper", "family_style"],
+      "keywords": [
+        "pepper stew",
+        "tomato pepper stew",
+        "red stew",
+        "west african stew"
+      ],
+      "aliases": ["red stew", "tomato pepper stew"],
+      "ingredients": {
+        "required": [
+          "tomato",
+          "onion_yellow",
+          "pepper_bell",
+          "oil_neutral",
+          "salt"
+        ],
+        "optional": [
+          "tomato_paste",
+          "garlic",
+          "ginger",
+          "pepper_hot_scotch_bonnet_optional",
+          "spice_thyme_dried",
+          "spice_bay_leaf",
+          "fish_dried_smoked_optional"
+        ],
+        "swappableRoles": [
+          {
+            "role": "protein",
+            "preferred": "chicken_generic",
+            "fallbacks": [
+              "goat",
+              "beef_generic",
+              "fish_generic",
+              "beans_black_eyed_pea"
+            ]
+          },
+          {
+            "role": "starch",
+            "preferred": "rice_white_longgrain",
+            "fallbacks": [
+              "yam",
+              "plantain",
+              "cassava_fufu_optional",
+              "cornmeal_fufu_optional"
+            ]
+          }
+        ]
+      },
+      "techniques": [
+        "prep_mise_en_place",
+        "saute",
+        "reduce",
+        "stew",
+        "season_to_taste"
+      ],
+      "allergens": {
+        "mayContain": ["allergen_fish_optional"],
+        "commonTriggers": ["fish_dried_smoked_optional"],
+        "notes": [
+          "If using dried fish or crayfish, ensure fish/shellfish preferences are applied."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 80,
+        "activeMinutesEstimate": 30,
+        "equipmentIds": [
+          "pot_lidded",
+          "stove_burner",
+          "blender_optional",
+          "knife_chef",
+          "cutting_board"
+        ],
+        "skillFocus": ["tomato_base", "reduction", "heat_control"],
+        "weeknightBias": "medium"
+      }
+    },
+    {
+      "id": "dish.groundnut_soup",
+      "label": "Groundnut Soup",
+      "cuisineId": "cuisine.west_african",
+      "archetypeId": "archetype_stew_with_starch",
+      "course": "dinner",
+      "difficulty": "intermediate",
+      "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+      "summary": "Peanut-forward soup/stew simmered with aromatics and protein; served with rice or starches depending on region.",
+      "originHints": ["Ghana", "Sierra Leone", "Liberia", "Senegal"],
+      "tags": ["peanut", "soup", "stew", "comfort_food", "family_style"],
+      "keywords": ["groundnut soup", "peanut soup", "west african peanut soup"],
+      "aliases": ["peanut soup", "groundnut stew"],
+      "ingredients": {
+        "required": ["peanut", "onion_yellow", "salt"],
+        "optional": [
+          "tomato_optional",
+          "garlic",
+          "ginger",
+          "pepper_hot_scotch_bonnet_optional",
+          "stock_chicken_or_beef_optional"
+        ],
+        "swappableRoles": [
+          {
+            "role": "protein",
+            "preferred": "chicken_generic",
+            "fallbacks": [
+              "goat",
+              "beef_generic",
+              "fish_generic",
+              "beans_black_eyed_pea"
+            ]
+          },
+          {
+            "role": "starch",
+            "preferred": "rice_white_longgrain",
+            "fallbacks": ["yam", "plantain", "cassava_fufu_optional"]
+          }
+        ]
+      },
+      "techniques": [
+        "prep_mise_en_place",
+        "stew",
+        "season_to_taste",
+        "reduce_optional"
+      ],
+      "allergens": {
+        "mayContain": ["allergen_peanut"],
+        "commonTriggers": ["peanut"],
+        "notes": [
+          "High peanut content—ensure peanut allergy rules are enforced before planning."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 90,
+        "activeMinutesEstimate": 25,
+        "equipmentIds": ["pot_lidded", "stove_burner", "spoon_wooden"],
+        "skillFocus": ["simmering", "thickening", "seasoning_balance"],
+        "weeknightBias": "medium"
+      }
+    },
+    {
+      "id": "dish.akara_bean_fritters",
+      "label": "Bean Fritters (Akara-style)",
+      "cuisineId": "cuisine.west_african",
+      "archetypeId": "archetype_fritter_or_cake",
+      "course": "breakfast",
+      "difficulty": "intermediate",
+      "servingStyles": ["street_food", "snacks", "breakfast"],
+      "summary": "Whipped black-eyed pea batter fried into crisp fritters; often paired with pepper sauce or served alongside light stews.",
+      "originHints": ["Nigeria", "Benin"],
+      "tags": ["fritter", "beans", "fried", "street_food", "breakfast"],
+      "keywords": [
+        "akara",
+        "bean fritters",
+        "black eyed pea fritters",
+        "west african fritters"
+      ],
+      "aliases": ["akara fritters", "bean cake"],
+      "ingredients": {
+        "required": [
+          "beans_black_eyed_pea",
+          "onion_yellow",
+          "oil_neutral",
+          "salt"
+        ],
+        "optional": ["pepper_hot_scotch_bonnet_optional", "pepper_black"],
+        "swappableRoles": [
+          {
+            "role": "serve_with",
+            "preferred": "pepper_sauce_optional",
+            "fallbacks": ["pepper_sauce_cooked", "stew_optional"]
+          }
+        ]
+      },
+      "techniques": [
+        "prep_mise_en_place",
+        "fry_deep_optional",
+        "season_to_taste",
+        "rest_optional"
+      ],
+      "allergens": {
+        "mayContain": [],
+        "commonTriggers": [],
+        "notes": [
+          "Frying oil management is important; filter/reuse rules may apply via household safety settings."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": false,
+        "leftoversFriendly": false,
+        "timeMinutesEstimate": 50,
+        "activeMinutesEstimate": 35,
+        "equipmentIds": [
+          "bowl_large",
+          "skimmer_or_spider",
+          "thermometer_optional",
+          "pan_deep_or_pot",
+          "stove_burner"
+        ],
+        "skillFocus": ["frying", "batter_consistency", "oil_temperature"],
+        "weeknightBias": "low"
+      }
+    },
+    {
+      "id": "dish.ogi_pap",
+      "label": "Corn Pap (Ogi/Akamu-style)",
+      "cuisineId": "cuisine.west_african",
+      "archetypeId": "archetype_breakfast_porridge",
+      "course": "breakfast",
+      "difficulty": "beginner",
+      "servingStyles": ["breakfast", "family_style"],
+      "summary": "Smooth warm pap/porridge made from cornmeal or fermented corn base depending on tradition; commonly served with milk, peanuts, or small sides.",
+      "originHints": ["Nigeria", "Ghana"],
+      "tags": ["porridge", "breakfast", "comfort_food"],
+      "keywords": ["ogi", "akamu", "corn pap", "corn porridge"],
+      "aliases": ["ogi", "akamu", "pap"],
+      "ingredients": {
+        "required": ["cornmeal", "water", "salt_optional"],
+        "optional": [
+          "milk_optional",
+          "peanut_optional",
+          "fruit_optional",
+          "sweetener_optional"
+        ],
+        "swappableRoles": [
+          {
+            "role": "grain",
+            "preferred": "cornmeal",
+            "fallbacks": ["millet", "sorghum"]
+          }
+        ]
+      },
+      "techniques": [
+        "prep_mise_en_place",
+        "stirring",
+        "simmer",
+        "season_to_taste"
+      ],
+      "allergens": {
+        "mayContain": ["allergen_milk_optional", "allergen_peanut_optional"],
+        "commonTriggers": ["milk_optional", "peanut_optional"],
+        "notes": [
+          "If serving with milk or peanuts, apply allergen preferences."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 20,
+        "activeMinutesEstimate": 15,
+        "equipmentIds": ["pot_small", "whisk_or_spoon", "stove_burner"],
+        "skillFocus": ["porridge_texture", "heat_control"],
+        "weeknightBias": "high"
+      }
+    },
+    {
+      "id": "dish.pepper_sauce",
+      "label": "Pepper Sauce",
+      "cuisineId": "cuisine.west_african",
+      "archetypeId": "archetype_grilled_protein_with_sauce",
+      "course": "side",
+      "difficulty": "beginner",
+      "servingStyles": ["snacks", "street_food"],
+      "summary": "Spicy pepper blend used as a condiment or accompaniment to grilled meats, fritters, and rice dishes; raw or cooked variations.",
+      "originHints": ["West Africa"],
+      "tags": ["sauce", "pepper", "condiment"],
+      "keywords": [
+        "pepper sauce",
+        "shito style",
+        "hot pepper sauce",
+        "west african pepper sauce"
+      ],
+      "aliases": ["hot pepper sauce", "pepper blend"],
+      "ingredients": {
+        "required": [
+          "pepper_hot_scotch_bonnet_optional",
+          "onion_yellow",
+          "salt"
+        ],
+        "optional": [
+          "oil_neutral",
+          "tomato_optional",
+          "lime_optional",
+          "vinegar_apple_cider_optional"
+        ],
+        "swappableRoles": [
+          {
+            "role": "heat",
+            "preferred": "pepper_hot_scotch_bonnet_optional",
+            "fallbacks": ["pepper_hot_habanero", "pepper_red_flakes"]
+          }
+        ]
+      },
+      "techniques": [
+        "prep_mise_en_place",
+        "blend_optional",
+        "saute_optional",
+        "season_to_taste"
+      ],
+      "allergens": {
+        "mayContain": [],
+        "commonTriggers": [],
+        "notes": ["Use gloves and ventilation for hot peppers."]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 15,
+        "activeMinutesEstimate": 12,
+        "equipmentIds": [
+          "knife_chef",
+          "cutting_board",
+          "blender_optional",
+          "bowl"
+        ],
+        "skillFocus": ["pepper_handling", "seasoning_balance"],
+        "weeknightBias": "high"
+      }
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisine.west_african": [
+        "dish.jollof_rice",
+        "dish.pepper_stew",
+        "dish.groundnut_soup",
+        "dish.akara_bean_fritters",
+        "dish.ogi_pap",
+        "dish.pepper_sauce"
+      ]
+    },
+    "byArchetype": {
+      "archetype_rice_pot": ["dish.jollof_rice"],
+      "archetype_stew_with_starch": ["dish.pepper_stew", "dish.groundnut_soup"],
+      "archetype_fritter_or_cake": ["dish.akara_bean_fritters"],
+      "archetype_breakfast_porridge": ["dish.ogi_pap"],
+      "archetype_grilled_protein_with_sauce": ["dish.pepper_sauce"]
+    },
+    "aliasIndex": {
+      "jollof": "dish.jollof_rice",
+      "jollof rice": "dish.jollof_rice",
+      "tomato rice": "dish.jollof_rice",
+      "party jollof": "dish.jollof_rice",
+      "pepper stew": "dish.pepper_stew",
+      "red stew": "dish.pepper_stew",
+      "groundnut soup": "dish.groundnut_soup",
+      "peanut soup": "dish.groundnut_soup",
+      "akara": "dish.akara_bean_fritters",
+      "bean fritters": "dish.akara_bean_fritters",
+      "corn pap": "dish.ogi_pap",
+      "ogi": "dish.ogi_pap",
+      "akamu": "dish.ogi_pap",
+      "pepper sauce": "dish.pepper_sauce",
+      "hot pepper sauce": "dish.pepper_sauce"
+    },
+    "keywordIndex": {
+      "jollof": ["dish.jollof_rice"],
+      "rice": ["dish.jollof_rice"],
+      "one pot rice": ["dish.jollof_rice"],
+      "tomato base": ["dish.jollof_rice", "dish.pepper_stew"],
+      "pepper": ["dish.pepper_stew", "dish.pepper_sauce"],
+      "stew": ["dish.pepper_stew", "dish.groundnut_soup"],
+      "peanut": ["dish.groundnut_soup"],
+      "groundnut": ["dish.groundnut_soup"],
+      "fritter": ["dish.akara_bean_fritters"],
+      "beans": ["dish.akara_bean_fritters"],
+      "porridge": ["dish.ogi_pap"],
+      "breakfast": ["dish.akara_bean_fritters", "dish.ogi_pap"],
+      "sauce": ["dish.pepper_sauce"]
+    },
+    "tagIndex": {
+      "rice": ["dish.jollof_rice"],
+      "one_pot": ["dish.jollof_rice"],
+      "tomato_base": ["dish.jollof_rice", "dish.pepper_stew"],
+      "weeknight_friendly": ["dish.jollof_rice"],
+      "party_food": ["dish.jollof_rice"],
+      "stew": ["dish.pepper_stew", "dish.groundnut_soup"],
+      "pepper": ["dish.pepper_stew", "dish.pepper_sauce"],
+      "peanut": ["dish.groundnut_soup"],
+      "soup": ["dish.groundnut_soup"],
+      "fritter": ["dish.akara_bean_fritters"],
+      "beans": ["dish.akara_bean_fritters"],
+      "fried": ["dish.akara_bean_fritters"],
+      "street_food": ["dish.akara_bean_fritters"],
+      "breakfast": ["dish.akara_bean_fritters", "dish.ogi_pap"],
+      "porridge": ["dish.ogi_pap"],
+      "comfort_food": ["dish.groundnut_soup", "dish.ogi_pap"],
+      "sauce": ["dish.pepper_sauce"],
+      "condiment": ["dish.pepper_sauce"]
+    }
+  }
+}

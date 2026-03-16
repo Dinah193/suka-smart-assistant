@@ -17,10 +17,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 // If you already have a ScraperEngine or PricebookScraper service, wire it here.
 import { ScraperEngine } from "../../../services/scraper/ScraperEngine"; // <-- stub/assumed
 
@@ -162,7 +162,9 @@ function buildLookupKey(item) {
 async function findLocalEntry(item, lookupKey) {
   if (!db || !db.pricebook) {
     // eslint-disable-next-line no-console
-    console.warn("[pricebookMatch] db.pricebook missing; returning null entry.");
+    console.warn(
+      "[pricebookMatch] db.pricebook missing; returning null entry."
+    );
     return null;
   }
 
@@ -179,14 +181,21 @@ async function findLocalEntry(item, lookupKey) {
     }
 
     if (db.pricebook.where) {
-      const byLookup = await db.pricebook.where("lookupKey").equals(lookupKey).first();
+      const byLookup = await db.pricebook
+        .where("lookupKey")
+        .equals(lookupKey)
+        .first();
       if (byLookup) return byLookup;
     }
 
     // Fallback: naive search by name if your schema doesn't have the indices yet.
     if (db.pricebook.toArray) {
       const all = await db.pricebook.toArray();
-      const lowerName = ((item.name || "") + " " + (item.brand || "")).toLowerCase();
+      const lowerName = (
+        (item.name || "") +
+        " " +
+        (item.brand || "")
+      ).toLowerCase();
       const candidate =
         all.find((entry) =>
           String(entry.name || "")
@@ -246,7 +255,13 @@ function normalizeQuotes(rawQuotes) {
  * @param {PricebookEntry|null} [existing]
  * @returns {Promise<PricebookEntry|null>}
  */
-async function scrapeAndUpsert(item, lookupKey, eventSource, scrapeContext = {}, existing = null) {
+async function scrapeAndUpsert(
+  item,
+  lookupKey,
+  eventSource,
+  scrapeContext = {},
+  existing = null
+) {
   emit("pricebook.scrape.requested", eventSource, {
     item,
     lookupKey,
@@ -266,7 +281,10 @@ async function scrapeAndUpsert(item, lookupKey, eventSource, scrapeContext = {},
     quotes = normalizeQuotes(result && result.quotes);
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[pricebookMatch] ScraperEngine.fetchPriceQuotes failed:", err);
+    console.error(
+      "[pricebookMatch] ScraperEngine.fetchPriceQuotes failed:",
+      err
+    );
     emit("pricebook.scrape.failed", eventSource, {
       item,
       lookupKey,
@@ -304,7 +322,9 @@ async function scrapeAndUpsert(item, lookupKey, eventSource, scrapeContext = {},
   try {
     if (!db || !db.pricebook || !db.pricebook.put) {
       // eslint-disable-next-line no-console
-      console.warn("[pricebookMatch] db.pricebook.put not available; skipping upsert.");
+      console.warn(
+        "[pricebookMatch] db.pricebook.put not available; skipping upsert."
+      );
     } else {
       await db.pricebook.put(entry);
     }
@@ -330,7 +350,8 @@ async function scrapeAndUpsert(item, lookupKey, eventSource, scrapeContext = {},
  * @returns {SwapOption[]}
  */
 function buildSwapOptions(item, entry) {
-  if (!entry || !Array.isArray(entry.prices) || entry.prices.length === 0) return [];
+  if (!entry || !Array.isArray(entry.prices) || entry.prices.length === 0)
+    return [];
 
   const qty = Number.isFinite(item?.qty) && item.qty > 0 ? item.qty : 1;
 
@@ -400,7 +421,8 @@ function buildSwapOptions(item, entry) {
  * @param {string} eventSource
  */
 async function exportMatchesToHub(results, eventSource) {
-  if (!familyFundMode || !Array.isArray(results) || results.length === 0) return;
+  if (!familyFundMode || !Array.isArray(results) || results.length === 0)
+    return;
 
   try {
     const payload = HubPacketFormatter.formatPricebookMatch(results, {
@@ -483,7 +505,13 @@ export async function matchAgainstPricebook(items, options = {}) {
       if (stale) staleCount += 1;
 
       if (stale && scrapeIfStale) {
-        const fresh = await scrapeAndUpsert(item, lookupKey, eventSource, scrapeContext, localEntry);
+        const fresh = await scrapeAndUpsert(
+          item,
+          lookupKey,
+          eventSource,
+          scrapeContext,
+          localEntry
+        );
         if (fresh) {
           entry = fresh;
           result.scraped = true;
@@ -537,10 +565,15 @@ export async function matchAgainstPricebook(items, options = {}) {
 export async function getBestPriceOptionForItem(item, options = {}) {
   const { results } = await matchAgainstPricebook([item], options);
   const match = results[0] || null;
-  if (!match || !Array.isArray(match.swapOptions) || match.swapOptions.length === 0) {
+  if (
+    !match ||
+    !Array.isArray(match.swapOptions) ||
+    match.swapOptions.length === 0
+  ) {
     return { option: null, match };
   }
 
-  const best = match.swapOptions.find((opt) => opt.isCheapest) || match.swapOptions[0];
+  const best =
+    match.swapOptions.find((opt) => opt.isCheapest) || match.swapOptions[0];
   return { option: best, match };
 }

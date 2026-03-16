@@ -39,10 +39,16 @@
  * -----------------------------------------------------------------------------
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
-import eventBus from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 import useWakeLock from "@/hooks/useWakeLock";
 import pip from "@/features/session/session.pip";
 
@@ -54,14 +60,20 @@ let FamilyFundConnector = null;
     const m2 = await import("@/services/hub/FamilyFundConnector");
     HubPacketFormatter = m1?.default || null;
     FamilyFundConnector = m2?.default || null;
-  } catch { /* no-op */ }
+  } catch {
+    /* no-op */
+  }
 })();
 
 const SOURCE = "features.session.overlay";
 const isoNow = () => new Date().toISOString();
 const emit = (type, data = {}) => {
   const payload = { type, ts: isoNow(), source: SOURCE, data };
-  try { eventBus?.emit?.(payload); } catch { /* no-op */ }
+  try {
+    eventBus?.emit?.(payload);
+  } catch {
+    /* no-op */
+  }
   if (featureFlags?.familyFundMode) exportToHubIfEnabled(payload);
   return payload;
 };
@@ -71,7 +83,9 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }
 
 const POS_KEY = "ssa.session.overlay.pos.v1";
@@ -96,7 +110,9 @@ function readPos() {
   return null;
 }
 function writePos(x, y) {
-  try { localStorage.setItem(POS_KEY, JSON.stringify({ x, y })); } catch {}
+  try {
+    localStorage.setItem(POS_KEY, JSON.stringify({ x, y }));
+  } catch {}
 }
 
 /**
@@ -121,22 +137,36 @@ export default function SessionMiniOverlay({
   const [container, setContainer] = useState(null);
 
   // Timer state mirrors session.progress.elapsedSec with a local tick when running.
-  const [elapsed, setElapsed] = useState(Number(session?.progress?.elapsedSec || 0));
+  const [elapsed, setElapsed] = useState(
+    Number(session?.progress?.elapsedSec || 0)
+  );
 
   // Drag position
   const startPos = readPos() || { x: 16, y: 16 };
   const [pos, setPos] = useState(startPos);
-  const dragRef = useRef({ dragging: false, startX: 0, startY: 0, baseX: startPos.x, baseY: startPos.y });
+  const dragRef = useRef({
+    dragging: false,
+    startX: 0,
+    startY: 0,
+    baseX: startPos.x,
+    baseY: startPos.y,
+  });
 
   // Wake lock (optional, small boost to prevent dimming when mini overlay is in use)
   const reason = `session:${session?.id || "unknown"}`;
   const wl = useWakeLock({ auto: keepAwake, reason, hubSync: false });
 
-  const { step, idx, total } = useMemo(() => getCurrentStep(session), [session]);
+  const { step, idx, total } = useMemo(
+    () => getCurrentStep(session),
+    [session]
+  );
   const paused = session?.status === "paused";
 
   // Keep elapsed ticking while running; stop when paused/aborted/completed
-  useEffect(() => setElapsed(Number(session?.progress?.elapsedSec || 0)), [session?.progress?.elapsedSec]);
+  useEffect(
+    () => setElapsed(Number(session?.progress?.elapsedSec || 0)),
+    [session?.progress?.elapsedSec]
+  );
   useEffect(() => {
     if (!visible) return;
     if (paused || session?.status !== "running") return;
@@ -157,12 +187,14 @@ export default function SessionMiniOverlay({
   // Portal mount
   useEffect(() => {
     setMounted(true);
-    const el = document?.getElementById?.("ssa-overlay-root") || (() => {
-      const root = document.createElement("div");
-      root.id = "ssa-overlay-root";
-      document.body.appendChild(root);
-      return root;
-    })();
+    const el =
+      document?.getElementById?.("ssa-overlay-root") ||
+      (() => {
+        const root = document.createElement("div");
+        root.id = "ssa-overlay-root";
+        document.body.appendChild(root);
+        return root;
+      })();
     setContainer(el);
     emit("ui.overlay.opened", { sessionId: session?.id });
     return () => {
@@ -209,41 +241,50 @@ export default function SessionMiniOverlay({
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       setPos((p) => {
-        const nx = Math.max(8, Math.min(p.x, vw - 8 - 320));  // assume ~320px width
-        const ny = Math.max(8, Math.min(p.y, vh - 8 - 120));  // assume ~120px height
+        const nx = Math.max(8, Math.min(p.x, vw - 8 - 320)); // assume ~320px width
+        const ny = Math.max(8, Math.min(p.y, vh - 8 - 120)); // assume ~120px height
         if (nx !== p.x || ny !== p.y) {
           writePos(nx, ny);
           emit("ui.overlay.moved", { x: nx, y: ny });
         }
-        return (nx !== p.x || ny !== p.y) ? { x: nx, y: ny } : p;
+        return nx !== p.x || ny !== p.y ? { x: nx, y: ny } : p;
       });
     };
     window.addEventListener("resize", clamp);
     return () => window.removeEventListener("resize", clamp);
   }, []);
 
-  const fireAction = useCallback((action) => {
-    const payload = emit("ui.overlay.action", { action, sessionId: session?.id });
-    if (typeof onAction === "function") onAction(action);
-    // Side-effects for certain actions that are UI-only:
-    if (action === "pip" && pip.supported()) {
-      pip.open(session).catch(() => {});
-    }
-    return payload;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onAction, session?.id]);
+  const fireAction = useCallback(
+    (action) => {
+      const payload = emit("ui.overlay.action", {
+        action,
+        sessionId: session?.id,
+      });
+      if (typeof onAction === "function") onAction(action);
+      // Side-effects for certain actions that are UI-only:
+      if (action === "pip" && pip.supported()) {
+        pip.open(session).catch(() => {});
+      }
+      return payload;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [onAction, session?.id]
+  );
 
   // Drag handlers
-  const onDragStart = useCallback((e) => {
-    const isTouch = e.type === "touchstart";
-    const point = isTouch ? e.touches[0] : e;
-    dragRef.current.dragging = true;
-    dragRef.current.startX = point.clientX;
-    dragRef.current.startY = point.clientY;
-    dragRef.current.baseX = pos.x;
-    dragRef.current.baseY = pos.y;
-    document.body.style.userSelect = "none";
-  }, [pos.x, pos.y]);
+  const onDragStart = useCallback(
+    (e) => {
+      const isTouch = e.type === "touchstart";
+      const point = isTouch ? e.touches[0] : e;
+      dragRef.current.dragging = true;
+      dragRef.current.startX = point.clientX;
+      dragRef.current.startY = point.clientY;
+      dragRef.current.baseX = pos.x;
+      dragRef.current.baseY = pos.y;
+      document.body.style.userSelect = "none";
+    },
+    [pos.x, pos.y]
+  );
 
   const onDragMove = useCallback((e) => {
     if (!dragRef.current.dragging) return;
@@ -289,29 +330,65 @@ export default function SessionMiniOverlay({
     fontFamily: `ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial`,
   };
   const styleHeader = {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    gap: "8px", padding: "8px 10px", cursor: "grab", background: "rgba(255,255,255,.04)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "8px",
+    padding: "8px 10px",
+    cursor: "grab",
+    background: "rgba(255,255,255,.04)",
   };
-  const styleTitle = { fontWeight: 700, fontSize: 13, color: "#95A3B9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" };
+  const styleTitle = {
+    fontWeight: 700,
+    fontSize: 13,
+    color: "#95A3B9",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  };
   const styleBody = { padding: "10px", display: "grid", gap: "8px" };
-  const styleStep = { fontWeight: 700, fontSize: 15, lineHeight: 1.2, maxHeight: 44, overflow: "hidden" };
+  const styleStep = {
+    fontWeight: 700,
+    fontSize: 15,
+    lineHeight: 1.2,
+    maxHeight: 44,
+    overflow: "hidden",
+  };
   const styleRow = { display: "flex", alignItems: "center", gap: "8px" };
-  const styleBar = { flex: 1, height: 6, borderRadius: 999, background: "rgba(255,255,255,.08)", overflow: "hidden" };
-  const styleFill = { height: "100%", width: `${progressPct}%`, background: "linear-gradient(90deg, #6AA0FF, #9AD0FF)" };
+  const styleBar = {
+    flex: 1,
+    height: 6,
+    borderRadius: 999,
+    background: "rgba(255,255,255,.08)",
+    overflow: "hidden",
+  };
+  const styleFill = {
+    height: "100%",
+    width: `${progressPct}%`,
+    background: "linear-gradient(90deg, #6AA0FF, #9AD0FF)",
+  };
   const styleTimer = { fontVariantNumeric: "tabular-nums", fontWeight: 700 };
-  const styleControls = { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px" };
+  const styleControls = {
+    display: "grid",
+    gridTemplateColumns: "repeat(5, 1fr)",
+    gap: "8px",
+  };
   const btn = {
-    appearance: "none", border: "1px solid rgba(255,255,255,.10)", background: "rgba(255,255,255,.06)", color: "#EAF2FF",
-    borderRadius: 10, padding: "8px 6px", fontWeight: 700, fontSize: 12, cursor: "pointer", textAlign: "center",
+    appearance: "none",
+    border: "1px solid rgba(255,255,255,.10)",
+    background: "rgba(255,255,255,.06)",
+    color: "#EAF2FF",
+    borderRadius: 10,
+    padding: "8px 6px",
+    fontWeight: 700,
+    fontSize: 12,
+    cursor: "pointer",
+    textAlign: "center",
   };
   const btnDanger = { ...btn, borderColor: "rgba(255,122,122,.35)" };
 
   return createPortal(
-    <section
-      role="region"
-      aria-label="Session mini overlay"
-      style={styleWrap}
-    >
+    <section role="region" aria-label="Session mini overlay" style={styleWrap}>
       {/* Drag header */}
       <div
         style={styleHeader}
@@ -353,7 +430,9 @@ export default function SessionMiniOverlay({
         </div>
 
         <div style={styleRow}>
-          <div style={styleBar} aria-hidden="true"><span style={styleFill} /></div>
+          <div style={styleBar} aria-hidden="true">
+            <span style={styleFill} />
+          </div>
           <div style={styleTimer} title="Elapsed">
             {mmss(elapsed)}
           </div>
@@ -361,13 +440,23 @@ export default function SessionMiniOverlay({
 
         {/* Cues */}
         <div style={{ fontSize: 12, color: "#FFCC66" }}>
-          {step?.metadata?.donenessCue ? `Cue: ${step.metadata.donenessCue}` : ""}
-          {Number.isFinite(+step?.metadata?.tempTargetF) ? `  •  Target: ${Math.round(+step.metadata.tempTargetF)}°F` : ""}
+          {step?.metadata?.donenessCue
+            ? `Cue: ${step.metadata.donenessCue}`
+            : ""}
+          {Number.isFinite(+step?.metadata?.tempTargetF)
+            ? `  •  Target: ${Math.round(+step.metadata.tempTargetF)}°F`
+            : ""}
         </div>
 
         {/* Controls */}
         <div style={styleControls}>
-          <button style={btn} onClick={() => fireAction("prev")} title="Previous (P)">Prev</button>
+          <button
+            style={btn}
+            onClick={() => fireAction("prev")}
+            title="Previous (P)"
+          >
+            Prev
+          </button>
           <button
             style={btn}
             onClick={() => fireAction(paused ? "resume" : "pause")}
@@ -375,8 +464,20 @@ export default function SessionMiniOverlay({
           >
             {paused ? "Resume" : "Pause"}
           </button>
-          <button style={btn} onClick={() => fireAction("next")} title="Next (N)">Next</button>
-          <button style={btn} onClick={() => fireAction("open")} title="Open full Session Runner (O)">Open</button>
+          <button
+            style={btn}
+            onClick={() => fireAction("next")}
+            title="Next (N)"
+          >
+            Next
+          </button>
+          <button
+            style={btn}
+            onClick={() => fireAction("open")}
+            title="Open full Session Runner (O)"
+          >
+            Open
+          </button>
           <button
             style={btn}
             onClick={() => {
@@ -391,11 +492,18 @@ export default function SessionMiniOverlay({
         </div>
 
         {/* Footer meta */}
-        <div style={{ display: "flex", justifyContent: "space-between", color: "#95A3B9", fontSize: 11 }}>
-          <span>Step {idx + 1}/{total || 0}</span>
-          <span style={{ opacity: .9 }}>
-            {session?.domain || ""}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            color: "#95A3B9",
+            fontSize: 11,
+          }}
+        >
+          <span>
+            Step {idx + 1}/{total || 0}
           </span>
+          <span style={{ opacity: 0.9 }}>{session?.domain || ""}</span>
         </div>
       </div>
     </section>,

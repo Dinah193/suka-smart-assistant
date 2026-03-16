@@ -1,0 +1,379 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.jollof_rice",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.jollof_rice",
+    "label": "Jollof Rice",
+    "altLabels": ["Party Jollof Rice", "Tomato Pepper Rice"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["West Africa", "Nigeria", "Ghana"],
+    "tags": [
+      "west_african",
+      "rice",
+      "one_pot",
+      "tomato_base",
+      "weeknight_friendly",
+      "batch_friendly"
+    ]
+  },
+  "summary": {
+    "oneLine": "Tomato–pepper–onion rice cooked in seasoned stock until fluffy and deeply colored.",
+    "notes": [
+      "This is a canonical SSA baseline recipe designed for deterministic planning and adaptation.",
+      "Regional variants vary on heat, smoky notes, and sweetness. Sweetness should come from onions/peppers, not added sugar."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Main dish servings (with protein + side)."
+  },
+  "time": {
+    "totalMinutes": 80,
+    "activeMinutes": 25,
+    "restMinutes": 10
+  },
+  "difficulty": "intermediate",
+  "servingStyles": ["one_pot", "family_style"],
+  "plannerHints": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightBias": "high",
+    "mealArchetypeId": "archetype_rice_pot"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Nutrition is intentionally left as an estimate placeholder for SSA nutrition pipeline to compute."
+    ]
+  },
+  "allergens": {
+    "mayContain": [],
+    "commonTriggers": [],
+    "notes": [
+      "If cooked with stock cubes that contain allergens, ensure household allergen rules are applied."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pot_lidded", "label": "Lidded pot / Dutch oven", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "spoon_wooden", "label": "Wooden spoon", "qty": 1 },
+      { "id": "measuring_cups", "label": "Measuring cups", "qty": 1 }
+    ],
+    "optional": [
+      { "id": "blender", "label": "Blender", "qty": 1 },
+      { "id": "food_processor", "label": "Food processor", "qty": 1 },
+      { "id": "fine_sieve", "label": "Fine sieve/strainer", "qty": 1 }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "rice_white_longgrain",
+      "label": "Long-grain white rice",
+      "qty": 3,
+      "unit": "cup",
+      "role": "starch",
+      "notes": ["Rinse until water runs mostly clear; drain well."]
+    },
+    {
+      "id": "tomato",
+      "label": "Tomatoes",
+      "qty": 5,
+      "unit": "count",
+      "role": "base",
+      "notes": [
+        "Roma/plum preferred for thicker sauce; adjust cookdown if watery."
+      ]
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "qty": 3,
+      "unit": "tbsp",
+      "role": "base",
+      "notes": ["Helps deepen color and reduce watery flavor."]
+    },
+    {
+      "id": "pepper_bell",
+      "label": "Red bell pepper",
+      "qty": 1,
+      "unit": "count",
+      "role": "base"
+    },
+    {
+      "id": "onion_yellow",
+      "label": "Yellow onion",
+      "qty": 2,
+      "unit": "count",
+      "role": "aromatic",
+      "notes": [
+        "One for blending/chopping into base; one for sauté (or both blended)."
+      ]
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic",
+      "qty": 4,
+      "unit": "clove",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "aromatic",
+      "optional": true,
+      "notes": ["Grated or chopped."]
+    },
+    {
+      "id": "pepper_hot_scotch_bonnet_optional",
+      "label": "Scotch bonnet (or habanero)",
+      "qty": 1,
+      "unit": "count",
+      "role": "heat",
+      "optional": true,
+      "notes": ["Use gloves; start with half for low-medium heat."]
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil",
+      "qty": 0.33,
+      "unit": "cup",
+      "role": "fat",
+      "notes": ["Can reduce to 1/4 cup for lighter finish."]
+    },
+    {
+      "id": "stock_chicken_or_beef_optional",
+      "label": "Chicken or beef stock",
+      "qty": 4,
+      "unit": "cup",
+      "role": "liquid",
+      "optional": true,
+      "notes": ["If not using stock, use water and adjust seasoning."]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "qty": 1.5,
+      "unit": "cup",
+      "role": "liquid",
+      "notes": [
+        "Total liquid is stock + water; adjust by rice brand and pot seal."
+      ]
+    },
+    {
+      "id": "spice_thyme_dried",
+      "label": "Dried thyme",
+      "qty": 1,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "spice_bay_leaf",
+      "label": "Bay leaf",
+      "qty": 2,
+      "unit": "count",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "pepper_black",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 2,
+      "unit": "tsp",
+      "role": "seasoning",
+      "notes": [
+        "Start with 1 tsp if using salted stock or cubes; adjust at end."
+      ]
+    },
+    {
+      "id": "seasoning_stock_cube_optional",
+      "label": "Stock cube / seasoning cube",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true,
+      "notes": [
+        "Optional; ensure household preferences allow and allergen rules apply."
+      ]
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "blend_optional",
+    "saute",
+    "reduce",
+    "stew",
+    "season_to_taste",
+    "rest"
+  ],
+  "steps": [
+    {
+      "id": "step.prep_rice",
+      "title": "Rinse and drain the rice",
+      "body": "Rinse rice in cool water until water runs mostly clear. Drain very well to avoid gummy texture.",
+      "timeMinutes": 5,
+      "timers": [{ "label": "Drain rice", "seconds": 300 }],
+      "hazards": []
+    },
+    {
+      "id": "step.make_base",
+      "title": "Make the tomato-pepper base",
+      "body": "Blend (or finely chop) tomatoes, bell pepper, 1 onion, garlic, ginger, and hot pepper (optional) until smooth. If very watery, you may simmer the blend uncovered 5–10 minutes to reduce.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Blend base", "seconds": 600 }],
+      "hazards": [
+        {
+          "type": "pepper",
+          "message": "Use gloves when handling very hot peppers; avoid touching eyes/face and ventilate when blending."
+        }
+      ]
+    },
+    {
+      "id": "step.saute_onion_paste",
+      "title": "Sauté onion and fry tomato paste",
+      "body": "Heat oil in a lidded pot over medium heat. Add remaining onion (sliced or chopped) and cook 3–5 minutes until soft. Add tomato paste and stir constantly 2–3 minutes to caramelize slightly (reduces raw taste).",
+      "timeMinutes": 8,
+      "timers": [
+        { "label": "Sauté onions", "seconds": 240 },
+        { "label": "Fry tomato paste", "seconds": 150 }
+      ],
+      "hazards": []
+    },
+    {
+      "id": "step.reduce_base",
+      "title": "Cook down the base",
+      "body": "Pour in blended base carefully (it may splatter). Add thyme, bay leaves, black pepper, and seasoning cube (optional). Simmer uncovered 12–18 minutes, stirring occasionally, until the base deepens in color and thickens.",
+      "timeMinutes": 18,
+      "timers": [{ "label": "Cook down base", "seconds": 900 }],
+      "hazards": [
+        {
+          "type": "splatter",
+          "message": "Tomato base can splatter; reduce heat and stir carefully."
+        }
+      ]
+    },
+    {
+      "id": "step.add_liquid_season",
+      "title": "Add stock/water and season",
+      "body": "Add stock and water. Bring to a gentle boil. Taste the liquid and adjust salt so it tastes slightly saltier than you want the finished rice (rice will absorb seasoning).",
+      "timeMinutes": 5,
+      "timers": [{ "label": "Bring to gentle boil", "seconds": 300 }],
+      "hazards": []
+    },
+    {
+      "id": "step.add_rice_cook",
+      "title": "Add rice and cook covered",
+      "body": "Stir in drained rice. Reduce heat to low, cover tightly, and cook 20–25 minutes until rice is tender and liquid absorbed. Avoid lifting the lid too often; check once at 20 minutes.",
+      "timeMinutes": 25,
+      "timers": [{ "label": "Cook rice covered", "seconds": 1500 }],
+      "hazards": []
+    },
+    {
+      "id": "step.steam_rest",
+      "title": "Steam and rest, then fluff",
+      "body": "Turn off heat. Keep covered 8–10 minutes to steam and finish. Remove bay leaves, then fluff gently with a fork. Taste and adjust salt/pepper. If rice is still firm, sprinkle 2–4 tbsp water, cover, and steam 5 more minutes.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Rest/steam", "seconds": 600 }],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve with grilled chicken, beef, fish, or stewed beans.",
+      "Optional sides: fried plantain, simple salad/coleslaw."
+    ],
+    "garnishes": ["onion_scallion_optional", "lime_optional"],
+    "storage": {
+      "refrigeratorDays": 4,
+      "freezerDays": 90,
+      "reheatNotes": [
+        "Reheat with a splash of water/stock covered to restore moisture.",
+        "Cool rice quickly before refrigerating for food safety."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "riceTexture": "fluffy_tender",
+      "baseReduction": "thickened_deep_color"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["pepper_hot_scotch_bonnet_optional"],
+        "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+        "notes": "Habanero is closest in fruity heat; start small and adjust."
+      },
+      {
+        "whenMissing": ["stock_chicken_or_beef_optional"],
+        "useInstead": ["water"],
+        "notes": "If using only water, increase seasoning (salt/spices) carefully."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["blender"],
+        "doInstead": "Finely chop tomatoes, peppers, onion, garlic, ginger; simmer longer to break down."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "fish",
+        "avoid": [
+          "fish_dried_smoked_optional",
+          "dried_crayfish_optional",
+          "shrimp_dried_optional"
+        ],
+        "notes": "Use stock and careful seasoning for umami instead."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Liquid should taste a bit stronger than desired finished rice before adding rice.",
+      "Base should be cooked down to reduce raw tomato taste."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Rice is gummy",
+        "likelyCause": "Rice not drained well or too much liquid",
+        "fix": "Drain thoroughly; reduce total liquid slightly next time; keep lid sealed."
+      },
+      {
+        "problem": "Rice scorched at bottom",
+        "likelyCause": "Heat too high or pot not heavy enough",
+        "fix": "Use a heavier pot, lower heat, consider a heat diffuser."
+      },
+      {
+        "problem": "Tastes like raw tomato",
+        "likelyCause": "Base not cooked down long enough",
+        "fix": "Simmer base longer until deeper color and aroma; fry tomato paste well."
+      }
+    ]
+  }
+}

@@ -16,19 +16,27 @@
 const path = require("path");
 
 let eventBus = {
-  emit: function () { /* fallback for tests */ },
-  on: function () { return function () {}; }
+  emit: function () {
+    /* fallback for tests */
+  },
+  on: function () {
+    return function () {};
+  },
 };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
-} catch (_) { /* noop */ }
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
+} catch (_) {
+  /* noop */
+}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
-} catch (_) { /* noop */ }
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
+} catch (_) {
+  /* noop */
+}
 
 const SCHEDULE_PATH = path.join(__dirname, "cron.schedule.json");
 let loadedSchedule = null;
@@ -44,13 +52,13 @@ const state = {
     retryPolicy: {
       maxAttempts: 3,
       backoff: { type: "exponential", initialSeconds: 15, maxSeconds: 300 },
-      retryOn: ["timeout", "network", "5xx"]
+      retryOn: ["timeout", "network", "5xx"],
     },
     timeoutSeconds: 600,
-    jitterSeconds: 30
+    jitterSeconds: 30,
   },
   activeCount: 0,
-  jobs: new Map() // id -> runtime info
+  jobs: new Map(), // id -> runtime info
 };
 
 function newRuntimeInfo(job) {
@@ -60,8 +68,14 @@ function newRuntimeInfo(job) {
     featureFlag: job.featureFlag || null,
     cron: job.cron,
     payload: job.payload,
-    timeoutSeconds: job.timeoutSeconds != null ? job.timeoutSeconds : state.defaults.timeoutSeconds,
-    jitterSeconds: job.jitterSeconds != null ? job.jitterSeconds : state.defaults.jitterSeconds,
+    timeoutSeconds:
+      job.timeoutSeconds != null
+        ? job.timeoutSeconds
+        : state.defaults.timeoutSeconds,
+    jitterSeconds:
+      job.jitterSeconds != null
+        ? job.jitterSeconds
+        : state.defaults.jitterSeconds,
     description: job.description || "",
     running: false,
     lastRunISO: null,
@@ -70,7 +84,7 @@ function newRuntimeInfo(job) {
     lastError: null,
     attempts: 0,
     nextAt: null,
-    backoffUntil: null
+    backoffUntil: null,
   };
 }
 
@@ -99,7 +113,10 @@ module.exports = {
     const info = state.jobs.get(id);
     if (!info) throw new Error("job-not-found:" + id);
     if (!isJobEnabled(info)) {
-      emit("runtime.job.skipped", { id: id, reason: "disabled-or-flagged-off" });
+      emit("runtime.job.skipped", {
+        id: id,
+        reason: "disabled-or-flagged-off",
+      });
       return;
     }
     if (info.running && !opts.ignoreDebounce) {
@@ -121,9 +138,9 @@ module.exports = {
       started: state.started,
       activeCount: state.activeCount,
       defaults: state.defaults,
-      jobs: jobs
+      jobs: jobs,
     };
-  }
+  },
 };
 
 // ------------------------------ Core Loop -----------------------------------
@@ -131,9 +148,12 @@ module.exports = {
 function tick() {
   const now = new Date();
 
-  const cap = (loadedSchedule && loadedSchedule.defaults && loadedSchedule.defaults.maxConcurrency) != null
-    ? loadedSchedule.defaults.maxConcurrency
-    : state.defaults.maxConcurrency;
+  const cap =
+    (loadedSchedule &&
+      loadedSchedule.defaults &&
+      loadedSchedule.defaults.maxConcurrency) != null
+      ? loadedSchedule.defaults.maxConcurrency
+      : state.defaults.maxConcurrency;
 
   if (state.activeCount >= cap) return;
 
@@ -153,7 +173,9 @@ function tick() {
       var staggerMs = hash(info.id) % 500; // up to 0.5s
       var delay = Math.max(0, Math.min(jitterMs + staggerMs, 60000)); // never > 60s
 
-      setTimeout(function () { runJob(info).catch(function () {}); }, delay);
+      setTimeout(function () {
+        runJob(info).catch(function () {});
+      }, delay);
 
       info.nextAt = nextOccurrence(info.cron, new Date(now.getTime() + 60000));
     }
@@ -173,8 +195,16 @@ function loadSchedule(force) {
   state.jobs.clear();
 
   (schedule.jobs || []).forEach(function (job) {
-    if (!job || !job.id || !job.cron || !(job.payload && job.payload.module && job.payload.fn)) {
-      emit("runtime.job.skipped", { id: (job && job.id) || "unknown", reason: "invalid-definition" });
+    if (
+      !job ||
+      !job.id ||
+      !job.cron ||
+      !(job.payload && job.payload.module && job.payload.fn)
+    ) {
+      emit("runtime.job.skipped", {
+        id: (job && job.id) || "unknown",
+        reason: "invalid-definition",
+      });
       return;
     }
     state.jobs.set(job.id, newRuntimeInfo(job));
@@ -192,7 +222,8 @@ function planAll() {
 
 function isJobEnabled(info) {
   if (!info.enabled) return false;
-  if (info.featureFlag && !(featureFlags && featureFlags[info.featureFlag])) return false;
+  if (info.featureFlag && !(featureFlags && featureFlags[info.featureFlag]))
+    return false;
   return true;
 }
 
@@ -201,11 +232,17 @@ function isJobEnabled(info) {
 async function runJob(info, meta) {
   meta = meta || {};
 
-  const cap = (loadedSchedule && loadedSchedule.defaults && loadedSchedule.defaults.maxConcurrency) != null
-    ? loadedSchedule.defaults.maxConcurrency
-    : state.defaults.maxConcurrency;
+  const cap =
+    (loadedSchedule &&
+      loadedSchedule.defaults &&
+      loadedSchedule.defaults.maxConcurrency) != null
+      ? loadedSchedule.defaults.maxConcurrency
+      : state.defaults.maxConcurrency;
   if (state.activeCount >= cap) {
-    emit("runtime.job.skipped", { id: info.id, reason: "global-concurrency-cap" });
+    emit("runtime.job.skipped", {
+      id: info.id,
+      reason: "global-concurrency-cap",
+    });
     return;
   }
 
@@ -223,16 +260,22 @@ async function runJob(info, meta) {
     id: info.id,
     forced: !!meta.forced,
     attempt: info.attempts,
-    description: info.description
+    description: info.description,
   });
 
   try {
     const handler = requireSafe(info.payload.module);
     const fn = handler && handler[info.payload.fn];
-    if (typeof fn !== "function") throw new Error("handler-missing-fn:" + info.payload.fn);
+    if (typeof fn !== "function")
+      throw new Error("handler-missing-fn:" + info.payload.fn);
 
-    const timeoutMs = (info.timeoutSeconds != null ? info.timeoutSeconds : state.defaults.timeoutSeconds) * 1000;
-    const result = await withTimeout(function () { return fn(info.payload.args || {}); }, timeoutMs);
+    const timeoutMs =
+      (info.timeoutSeconds != null
+        ? info.timeoutSeconds
+        : state.defaults.timeoutSeconds) * 1000;
+    const result = await withTimeout(function () {
+      return fn(info.payload.args || {});
+    }, timeoutMs);
 
     info.lastOkISO = new Date().toISOString();
     info.lastError = null;
@@ -243,13 +286,17 @@ async function runJob(info, meta) {
     emit("runtime.job.succeeded", {
       id: info.id,
       durationMs: Date.parse(info.lastOkISO) - Date.parse(info.lastRunISO),
-      result: summarizeResult(result)
+      result: summarizeResult(result),
     });
   } catch (err) {
     info.lastErrISO = new Date().toISOString();
     info.lastError = String((err && err.message) || err || "unknown");
 
-    const policy = (loadedSchedule && loadedSchedule.defaults && loadedSchedule.defaults.retryPolicy) || state.defaults.retryPolicy;
+    const policy =
+      (loadedSchedule &&
+        loadedSchedule.defaults &&
+        loadedSchedule.defaults.retryPolicy) ||
+      state.defaults.retryPolicy;
     const shouldRetry = decideRetry(err, policy);
     if (shouldRetry && info.attempts < (policy.maxAttempts || 3)) {
       const backoff = computeBackoff(info.attempts, policy);
@@ -259,13 +306,13 @@ async function runJob(info, meta) {
         id: info.id,
         attempt: info.attempts,
         backoffSeconds: backoff,
-        error: info.lastError
+        error: info.lastError,
       });
     } else {
       emit("runtime.job.failed", {
         id: info.id,
         attempt: info.attempts,
-        error: info.lastError
+        error: info.lastError,
       });
       info.attempts = 0;
       info.backoffUntil = null;
@@ -318,7 +365,11 @@ function parsePart(s, lo, hi) {
   if (s.indexOf("*/") === 0) {
     var n = Number(s.slice(2));
     if (!isFinite(n) || n <= 0) return null;
-    return asSet(range(lo, hi).filter(function (v) { return v % n === 0; }));
+    return asSet(
+      range(lo, hi).filter(function (v) {
+        return v % n === 0;
+      })
+    );
   }
   var out = new Set();
   s.split(",").forEach(function (token) {
@@ -329,27 +380,38 @@ function parsePart(s, lo, hi) {
 }
 
 function parseDOW(s) {
-  if (!s || s === "*") return asSet([0,1,2,3,4,5,6]);
-  var nameMap = { SUN:0, MON:1, TUE:2, WED:3, THU:4, FRI:5, SAT:6 };
+  if (!s || s === "*") return asSet([0, 1, 2, 3, 4, 5, 6]);
+  var nameMap = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
   var out = new Set();
   s.split(",").forEach(function (token) {
-    var t = String(token || "").trim().toUpperCase();
+    var t = String(token || "")
+      .trim()
+      .toUpperCase();
     if (t.indexOf("*/") === 0) {
       var n = Number(t.slice(2));
       if (isFinite(n) && n > 0) {
-        for (var i=0;i<7;i++) if (i % n === 0) out.add(i);
+        for (var i = 0; i < 7; i++) if (i % n === 0) out.add(i);
       }
       return;
     }
-    if (nameMap.hasOwnProperty(t)) { out.add(nameMap[t]); return; }
+    if (nameMap.hasOwnProperty(t)) {
+      out.add(nameMap[t]);
+      return;
+    }
     var num = Number(t);
     if (isFinite(num)) out.add(num === 7 ? 0 : Math.max(0, Math.min(6, num)));
   });
   return out.size ? out : null;
 }
 
-function range(a, b) { var arr=[]; for (var i=a;i<=b;i++) arr.push(i); return arr; }
-function asSet(arr) { return new Set(arr); }
+function range(a, b) {
+  var arr = [];
+  for (var i = a; i <= b; i++) arr.push(i);
+  return arr;
+}
+function asSet(arr) {
+  return new Set(arr);
+}
 
 // ------------------------------ Retry/Timeout -------------------------------
 
@@ -360,16 +422,30 @@ function decideRetry(err, policy) {
   return classes.some(function (c) {
     var t = String(c || "").toLowerCase();
     if (t === "timeout") return msg.indexOf("timeout") >= 0;
-    if (t === "network") return msg.indexOf("network") >= 0 || msg.indexOf("fetch") >= 0 || msg.indexOf("econn") >= 0;
-    if (t === "5xx") return /\b5\d{2}\b/.test(msg) || msg.indexOf("server") >= 0;
+    if (t === "network")
+      return (
+        msg.indexOf("network") >= 0 ||
+        msg.indexOf("fetch") >= 0 ||
+        msg.indexOf("econn") >= 0
+      );
+    if (t === "5xx")
+      return /\b5\d{2}\b/.test(msg) || msg.indexOf("server") >= 0;
     return false;
   });
 }
 
 function computeBackoff(attempt, policy) {
   var type = (policy && policy.backoff && policy.backoff.type) || "exponential";
-  var init = Number((policy && policy.backoff && policy.backoff.initialSeconds) != null ? policy.backoff.initialSeconds : 15);
-  var max = Number((policy && policy.backoff && policy.backoff.maxSeconds) != null ? policy.backoff.maxSeconds : 300);
+  var init = Number(
+    (policy && policy.backoff && policy.backoff.initialSeconds) != null
+      ? policy.backoff.initialSeconds
+      : 15
+  );
+  var max = Number(
+    (policy && policy.backoff && policy.backoff.maxSeconds) != null
+      ? policy.backoff.maxSeconds
+      : 300
+  );
   if (type === "fixed") return Math.min(max, init);
   var exp = Math.min(max, init * Math.pow(2, Math.max(0, attempt - 1)));
   var factor = 0.7 + Math.random() * 0.3;
@@ -378,7 +454,11 @@ function computeBackoff(attempt, policy) {
 
 async function withTimeout(fn, timeoutMs) {
   var to;
-  var timeout = new Promise(function (_, rej) { to = setTimeout(function () { rej(new Error("timeout")); }, timeoutMs); });
+  var timeout = new Promise(function (_, rej) {
+    to = setTimeout(function () {
+      rej(new Error("timeout"));
+    }, timeoutMs);
+  });
   try {
     var result = await Promise.race([Promise.resolve().then(fn), timeout]);
     return result;
@@ -398,14 +478,23 @@ function requireSafe(modulePath) {
     }
     return require(modulePath);
   } catch (err) {
-    throw new Error("handler-load-failed:" + modulePath + ":" + ((err && err.message) || err));
+    throw new Error(
+      "handler-load-failed:" + modulePath + ":" + ((err && err.message) || err)
+    );
   }
 }
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type: type, ts: new Date().toISOString(), source: "runtime.jobs.jobRunner", data: data });
-  } catch (_) { /* ignore */ }
+    eventBus.emit({
+      type: type,
+      ts: new Date().toISOString(),
+      source: "runtime.jobs.jobRunner",
+      data: data,
+    });
+  } catch (_) {
+    /* ignore */
+  }
 }
 
 function lightSnapshot(info) {
@@ -420,7 +509,7 @@ function lightSnapshot(info) {
     lastErrISO: info.lastErrISO,
     nextAtISO: info.nextAt ? info.nextAt.toISOString() : null,
     attempts: info.attempts,
-    backoffUntilISO: info.backoffUntil ? info.backoffUntil.toISOString() : null
+    backoffUntilISO: info.backoffUntil ? info.backoffUntil.toISOString() : null,
   };
 }
 

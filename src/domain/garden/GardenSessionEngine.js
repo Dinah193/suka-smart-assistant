@@ -24,10 +24,10 @@
 // - Data-changing actions (harvest → inventory) → exportToHubIfEnabled
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatGardenSessionForHub
-// - src/services/FamilyFundConnector.js
+// - src/services/hub/HubPacketFormatter.js → formatGardenSessionForHub
+// - src/services/hub/FamilyFundConnector.js
 // - src/services/garden/GardenSessionStore.js (optional)
 // - src/services/garden/ToolAndSupplyMapper.js (optional) → maps tools/supplies to inventory/storehouse
 //
@@ -38,10 +38,10 @@
 //   GardenSessionEngine.onSessionExecuted(sessionId, actuals)
 //
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatGardenSessionForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatGardenSessionForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // optional deps
 let GardenSessionStore = null;
@@ -158,7 +158,10 @@ const GardenSessionEngine = {
    */
   async onSessionExecuted(sessionId, actuals = {}) {
     let session = null;
-    if (GardenSessionStore && typeof GardenSessionStore.markExecuted === "function") {
+    if (
+      GardenSessionStore &&
+      typeof GardenSessionStore.markExecuted === "function"
+    ) {
       session = await GardenSessionStore.markExecuted(sessionId, actuals);
     }
 
@@ -262,18 +265,31 @@ async function buildGardenSessionFromItems(items, ctx = {}) {
   let supplies = collectSuppliesFromTasks(tasks);
 
   // 3. map tools/supplies to inventory/storehouse
-  if (ctx.attachSupplies && ToolAndSupplyMapper && typeof ToolAndSupplyMapper.map === "function") {
+  if (
+    ctx.attachSupplies &&
+    ToolAndSupplyMapper &&
+    typeof ToolAndSupplyMapper.map === "function"
+  ) {
     try {
-      const mapped = await ToolAndSupplyMapper.map({ tools, supplies }, { allowSubstitutions: true });
+      const mapped = await ToolAndSupplyMapper.map(
+        { tools, supplies },
+        { allowSubstitutions: true }
+      );
       tools = mapped.tools || tools;
       supplies = mapped.supplies || supplies;
     } catch (e) {
-      console.warn("[GardenSessionEngine] ToolAndSupplyMapper failed, using raw", e);
+      console.warn(
+        "[GardenSessionEngine] ToolAndSupplyMapper failed, using raw",
+        e
+      );
     }
   }
 
   // 4. estimate duration
-  const totalDuration = tasks.reduce((sum, t) => sum + (Number(t.duration) || 10), 0);
+  const totalDuration = tasks.reduce(
+    (sum, t) => sum + (Number(t.duration) || 10),
+    0
+  );
 
   const session = {
     id,
@@ -409,7 +425,8 @@ function buildMeta(items, ctx) {
     if (it.zone) zones.add(it.zone);
     const d = it.domain || "garden";
     domains.add(d);
-    if (d === "animal" || d === "forage" || d === "animal-fodder") hasAnimal = true;
+    if (d === "animal" || d === "forage" || d === "animal-fodder")
+      hasAnimal = true;
     if (d === "storehouse") hasStorehouse = true;
     if (d === "orchard") hasOrchard = true;
   });
@@ -433,7 +450,10 @@ async function persistSession(session) {
       await GardenSessionStore.save(session);
       return session;
     } catch (e) {
-      console.warn("[GardenSessionEngine] persistSession failed, returning session only", e);
+      console.warn(
+        "[GardenSessionEngine] persistSession failed, returning session only",
+        e
+      );
       return session;
     }
   }
@@ -482,7 +502,9 @@ function normalizeImportToGardenItem(imp) {
 
 function buildPrimaryLabel(it) {
   const action = it.method === "transplant" ? "Transplant" : "Sow";
-  return `${action} ${it.crop || "crop"} ${it.variety ? "(" + it.variety + ")" : ""}`;
+  return `${action} ${it.crop || "crop"} ${
+    it.variety ? "(" + it.variety + ")" : ""
+  }`;
 }
 
 function buildCareLabel(it, care) {
@@ -503,7 +525,7 @@ function guessToolsFromItem(it) {
 function guessSuppliesFromItem(it) {
   const supplies = [];
   // seed itself
-  supplies.push({ name: `${it.crop || "seed" } seeds`, qty: 1, unit: "pkt" });
+  supplies.push({ name: `${it.crop || "seed"} seeds`, qty: 1, unit: "pkt" });
   // compost or starter
   if (it.method === "transplant") {
     supplies.push({ name: "compost / transplant mix", qty: 1, unit: "bag" });
@@ -522,9 +544,11 @@ function guessToolsFromCare(care, it) {
 
 function guessSuppliesFromCare(care, it) {
   if (!care) return [];
-  if (care.type === "fertilize") return [{ name: "fertilizer", qty: 1, unit: "dose" }];
+  if (care.type === "fertilize")
+    return [{ name: "fertilizer", qty: 1, unit: "dose" }];
   if (care.type === "water") return []; // water not tracked
-  if (care.type === "trellis") return [{ name: "garden twine", qty: 1, unit: "ea" }];
+  if (care.type === "trellis")
+    return [{ name: "garden twine", qty: 1, unit: "ea" }];
   return guessSuppliesFromItem(it);
 }
 

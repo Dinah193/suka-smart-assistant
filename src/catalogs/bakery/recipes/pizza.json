@@ -1,0 +1,350 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.pizza",
+    "slug": "pizza",
+    "name": "Pizza Dough + Homemade Sauces (Reusable Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "bakery",
+      "pizza",
+      "dough",
+      "reusable",
+      "homemade-sauce",
+      "make-ahead",
+      "freezer-friendly",
+      "family",
+      "weeknight",
+      "oven-high-heat"
+    ],
+    "allergens": ["wheat"],
+    "description": "A reusable, all-purpose pizza dough baseline designed to support any pizza flavor (red sauce, white sauce, pesto, BBQ, etc.) with simple homemade sauce modules. Includes commercial flour or fine fresh-milled flour guidance (choose one), plus both same-day and cold-ferment workflows. Sauce recipes included: quick tomato pizza sauce, garlic-parmesan white sauce, and simple basil pesto."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven (high heat)" },
+    {
+      "id": "baking_steel_or_stone",
+      "label": "Baking steel/stone (recommended) or inverted sheet pan"
+    },
+    { "id": "sheet_pan", "label": "Sheet pan" },
+    {
+      "id": "parchment_paper",
+      "label": "Parchment paper (optional for transfer)"
+    },
+    { "id": "pizza_peel", "label": "Pizza peel (optional)", "optional": true },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "bench_scraper", "label": "Bench scraper" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "saucepan", "label": "Saucepan (for sauces)", "optional": true },
+    {
+      "id": "blender_or_food_processor",
+      "label": "Blender/food processor (for pesto/optional)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR fresh-milled option): bread flour or '00' flour",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Bread flour yields chewy crust; '00' yields softer, tender crust. Total dough makes 2 x 12-inch pizzas or 1 x 18-inch sheet pizza."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR commercial option): fine-milled, sifted",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Fine-mill and sift coarse bran for better extensibility. Fresh-milled absorbs more; expect +10–30 g water and slightly less stretch."
+    },
+
+    {
+      "id": "water",
+      "label": "Water (lukewarm)",
+      "amount": { "value": 325, "unit": "g" },
+      "notes": "65% hydration baseline. Adjust as needed for flour."
+    },
+    {
+      "id": "water_adjustment_optional",
+      "label": "Extra water (fresh-milled adjustment)",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "Add 10 g at a time if dough is stiff/dry; up to ~30 g total depending on flour.",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 3/4 tsp."
+    },
+    {
+      "id": "yeast_instant",
+      "label": "Instant yeast",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/2 tsp. For same-day fast rise, use 4 g (1 tsp)."
+    },
+    {
+      "id": "olive_oil_optional",
+      "label": "Olive oil (optional, slightly softer crumb)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 2 tsp. Optional; many NY/Neapolitan styles omit.",
+      "optional": true
+    },
+    {
+      "id": "sugar_optional",
+      "label": "Sugar (optional, helps browning in home ovens)",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 1 tsp. Optional; useful if baking at 450°F or below.",
+      "optional": true
+    },
+
+    {
+      "id": "semolina_or_flour_for_peel",
+      "label": "Semolina or flour (for dusting/transfer)",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "Use to prevent sticking on peel or parchment.",
+      "optional": true
+    },
+
+    {
+      "id": "sauce_module_note",
+      "label": "Sauce modules (choose one or more)",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+
+    {
+      "id": "tomato_sauce_canned",
+      "label": "Canned crushed tomatoes (quick red sauce)",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "About 14 oz.",
+      "optional": true
+    },
+    {
+      "id": "tomato_paste_optional",
+      "label": "Tomato paste (optional, thicker sauce)",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 1 tbsp.",
+      "optional": true
+    },
+    {
+      "id": "garlic_red_sauce",
+      "label": "Garlic, minced (red sauce)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 cloves.",
+      "optional": true
+    },
+    {
+      "id": "olive_oil_red_sauce",
+      "label": "Olive oil (red sauce)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp.",
+      "optional": true
+    },
+    {
+      "id": "oregano_red_sauce",
+      "label": "Dried oregano (red sauce)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "salt_red_sauce_optional",
+      "label": "Salt (red sauce, to taste)",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "pepper_flakes_optional",
+      "label": "Red pepper flakes (optional)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "butter_white_sauce",
+      "label": "Butter (white sauce)",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tbsp.",
+      "optional": true
+    },
+    {
+      "id": "garlic_white_sauce",
+      "label": "Garlic, minced (white sauce)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 cloves.",
+      "optional": true
+    },
+    {
+      "id": "flour_white_sauce",
+      "label": "Flour (white sauce)",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 2 tbsp.",
+      "optional": true
+    },
+    {
+      "id": "milk_white_sauce",
+      "label": "Milk (white sauce)",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup.",
+      "optional": true
+    },
+    {
+      "id": "parmesan_white_sauce",
+      "label": "Parmesan, finely grated (white sauce)",
+      "amount": { "value": 40, "unit": "g" },
+      "notes": "About 1/2 cup.",
+      "optional": true
+    },
+    {
+      "id": "salt_white_sauce",
+      "label": "Salt (white sauce)",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "pepper_white_sauce_optional",
+      "label": "Black pepper (white sauce, optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "basil_pesto",
+      "label": "Fresh basil (pesto)",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "Packed leaves, about 2 cups.",
+      "optional": true
+    },
+    {
+      "id": "garlic_pesto",
+      "label": "Garlic (pesto)",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 clove.",
+      "optional": true
+    },
+    {
+      "id": "nuts_pesto",
+      "label": "Pine nuts or walnuts (pesto)",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 1/4 cup.",
+      "optional": true
+    },
+    {
+      "id": "parmesan_pesto",
+      "label": "Parmesan (pesto)",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "olive_oil_pesto",
+      "label": "Olive oil (pesto)",
+      "amount": { "value": 90, "unit": "ml" },
+      "notes": "About 6 tbsp.",
+      "optional": true
+    },
+    {
+      "id": "lemon_juice_pesto_optional",
+      "label": "Lemon juice (pesto, optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "salt_pesto",
+      "label": "Salt (pesto)",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled option (not both). Fresh-milled should be fine-milled and sifted for best stretch and oven spring."
+    },
+    {
+      "id": "step_02_mix_dough",
+      "title": "Mix dough",
+      "body": "In a large bowl, combine water and yeast (and optional sugar). Add flour and mix until shaggy. Add salt (and optional olive oil) and mix until incorporated. Rest 10 minutes, then knead 4–6 minutes (or do 2–3 stretch-and-folds over 30–45 minutes) until smoother."
+    },
+    {
+      "id": "step_03_adjust_freshmilled",
+      "title": "Adjust hydration for fresh-milled flour (if needed)",
+      "body": "If using fresh-milled flour and dough feels stiff/dry, add extra water 10 g at a time until dough is tacky and pliable. Fresh-milled dough may feel less extensible; a short rest helps."
+    },
+    {
+      "id": "step_04_bulk_ferment",
+      "title": "Bulk ferment",
+      "body": "Cover and ferment at room temperature 60–120 minutes until puffy and expanded ~50–75%."
+    },
+    {
+      "id": "step_05_divide_ball",
+      "title": "Divide and ball",
+      "body": "Divide into 2 equal pieces (~415 g each) for two 12-inch pizzas (or keep as one for a sheet pizza). Form tight balls by tucking edges under. Cover and rest 20 minutes."
+    },
+    {
+      "id": "step_06_cold_ferment_option",
+      "title": "Cold ferment option (best flavor + reuse)",
+      "body": "For best flavor and reusable dough: after balling, place in lightly oiled containers, cover airtight, and refrigerate 24–72 hours. Bring to room temperature 60–120 minutes before shaping."
+    },
+    {
+      "id": "step_07_preheat_oven",
+      "title": "Preheat oven (high heat for crust)",
+      "body": "Place baking steel/stone (or inverted heavy sheet pan) on middle rack. Preheat oven to 500–550°F (260–290°C) for at least 45 minutes. High heat is the key for good pizza texture."
+    },
+    {
+      "id": "step_08_make_quick_red_sauce_optional",
+      "title": "Optional: quick tomato pizza sauce (no-cook)",
+      "body": "Stir crushed tomatoes with olive oil, minced garlic, oregano, salt, and optional pepper flakes. Add tomato paste if you want thicker sauce. Let sit 10 minutes to meld flavors."
+    },
+    {
+      "id": "step_09_make_white_sauce_optional",
+      "title": "Optional: garlic-parmesan white sauce",
+      "body": "Melt butter, sauté garlic 30 seconds. Whisk in flour and cook 30–60 seconds. Whisk in milk and simmer until lightly thickened. Stir in parmesan, salt, and optional pepper. Cool slightly before using."
+    },
+    {
+      "id": "step_10_make_pesto_optional",
+      "title": "Optional: simple basil pesto",
+      "body": "Blend basil, garlic, nuts, parmesan, salt, and optional lemon juice. Stream in olive oil until smooth. Use as sauce base or drizzle after baking."
+    },
+    {
+      "id": "step_11_shape_dough",
+      "title": "Shape dough",
+      "body": "On a lightly floured surface, press dough into a disk, leaving a thicker rim. Stretch by hand into a 12-inch round. If dough springs back, rest 5–10 minutes and continue. Avoid rolling pin for best airy rim."
+    },
+    {
+      "id": "step_12_top",
+      "title": "Top lightly (crisp bake logic)",
+      "body": "Transfer to a floured peel or parchment. Add a thin layer of sauce (2–4 tbsp), then cheese/toppings. Keep toppings moderate to avoid soggy pizza."
+    },
+    {
+      "id": "step_13_bake",
+      "title": "Bake",
+      "body": "Bake 7–12 minutes depending on oven temperature and steel/stone. Rotate once if needed. Pizza is done when crust is deeply browned and cheese is bubbling."
+    },
+    {
+      "id": "step_14_finish_and_slice",
+      "title": "Finish and slice",
+      "body": "Rest 2 minutes, then slice. Add finishing oil, herbs, or pesto drizzle as desired."
+    }
+  ],
+  "notes": [
+    "Dough reuse logic: make double batch and cold-ferment; dough balls keep 3 days in fridge or freeze up to 2 months.",
+    "Freezer logic: freeze dough balls after 1–2 hours of room-temp fermentation. Thaw overnight in fridge, then warm 60–120 minutes before shaping.",
+    "Fresh-milled flour: sift coarse bran for better stretch; allow longer rests and slightly higher hydration for extensibility.",
+    "Homemade sauces: keep sauce simple; pizza bakes fast—raw or lightly cooked sauces work best at high heat."
+  ],
+  "storage": {
+    "dough_refrigerator": "Dough balls: 24–72 hours cold ferment (airtight, lightly oiled).",
+    "dough_freezer": "Freeze dough balls up to 2 months. Thaw overnight in refrigerator.",
+    "sauce_refrigerator": "Red sauce: 5 days. White sauce: 4 days. Pesto: 5 days (cover surface with thin oil layer).",
+    "baked_pizza": "Refrigerate up to 4 days. Reheat on hot pan or in 450°F oven for crispness."
+  }
+}

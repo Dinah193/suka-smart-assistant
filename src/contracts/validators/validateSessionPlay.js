@@ -25,14 +25,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
 const nowISO = () => new Date().toISOString();
 function emit(type, data = {}) {
   try {
-    eventBus.emit({ type, ts: nowISO(), source: "contracts.validators.sessionPlay", data });
+    eventBus.emit({
+      type,
+      ts: nowISO(),
+      source: "contracts.validators.sessionPlay",
+      data,
+    });
   } catch {}
 }
 
@@ -43,7 +48,10 @@ let CONTRACT_SCHEMA = null;
 try {
   CONTRACT_SCHEMA = require("@/contracts/session.play.contract.json");
 } catch (err) {
-  console.error("[validateSessionPlay] failed to load contract schema:", err?.message || err);
+  console.error(
+    "[validateSessionPlay] failed to load contract schema:",
+    err?.message || err
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -59,9 +67,10 @@ try {
 /* -------------------------------------------------------------------------- */
 /* Pretty error formatter                                                     */
 /* -------------------------------------------------------------------------- */
-function toPointer(instancePath, dataPath/* Ajv v6 */) {
+function toPointer(instancePath, dataPath /* Ajv v6 */) {
   // Ajv v8 uses instancePath, v6 uses dataPath
-  if (typeof instancePath === "string" && instancePath.length) return instancePath;
+  if (typeof instancePath === "string" && instancePath.length)
+    return instancePath;
   if (typeof dataPath === "string" && dataPath.length) return dataPath;
   return "";
 }
@@ -78,7 +87,9 @@ function formatAjvErrors(errors = [], payloadSnippet = "") {
     const msg = e.message || "invalid";
     const params = e.params ? JSON.stringify(e.params) : "";
     const detail = e.schemaPath ? `schema: ${e.schemaPath}` : "";
-    return `${keyword} ${loc} ${msg}${params ? " " + params : ""}${detail ? " — " + detail : ""}`;
+    return `${keyword} ${loc} ${msg}${params ? " " + params : ""}${
+      detail ? " — " + detail : ""
+    }`;
   });
 }
 
@@ -87,7 +98,9 @@ function formatAjvErrors(errors = [], payloadSnippet = "") {
  */
 function preview(obj, max = 220) {
   try {
-    const s = JSON.stringify(obj, (k, v) => (typeof v === "string" && v.length > 140 ? v.slice(0, 140) + "…" : v));
+    const s = JSON.stringify(obj, (k, v) =>
+      typeof v === "string" && v.length > 140 ? v.slice(0, 140) + "…" : v
+    );
     return s.length > max ? s.slice(0, max) + "…" : s;
   } catch {
     return String(obj);
@@ -103,10 +116,14 @@ function minimalEnvelopeCheck(p) {
     errs.push("Payload must be an object.");
     return errs;
   }
-  if (typeof p.type !== "string") errs.push("Missing or invalid 'type' (string).");
-  if (typeof p.ts !== "string") errs.push("Missing or invalid 'ts' (ISO string).");
-  if (typeof p.source !== "string" || !p.source) errs.push("Missing or invalid 'source' (non-empty string).");
-  if (!p.data || typeof p.data !== "object") errs.push("Missing or invalid 'data' (object).");
+  if (typeof p.type !== "string")
+    errs.push("Missing or invalid 'type' (string).");
+  if (typeof p.ts !== "string")
+    errs.push("Missing or invalid 'ts' (ISO string).");
+  if (typeof p.source !== "string" || !p.source)
+    errs.push("Missing or invalid 'source' (non-empty string).");
+  if (!p.data || typeof p.data !== "object")
+    errs.push("Missing or invalid 'data' (object).");
   return errs;
 }
 
@@ -124,7 +141,7 @@ function buildAjvValidator() {
     const ajv = new Ajv({
       allErrors: true,
       jsonPointers: true, // for v6 to populate dataPath
-      schemaId: "auto",   // tolerate draft-07 $id
+      schemaId: "auto", // tolerate draft-07 $id
       $data: true,
       removeAdditional: false,
       useDefaults: false,
@@ -140,11 +157,13 @@ function buildAjvValidator() {
       const ok = compiled(data) === true;
       return {
         ok,
-        errors: ok ? [] : (compiled.errors || []),
+        errors: ok ? [] : compiled.errors || [],
       };
     };
   } catch (err) {
-    ajvWarnings.push(`[validateSessionPlay] Ajv compile failed: ${err?.message || err}`);
+    ajvWarnings.push(
+      `[validateSessionPlay] Ajv compile failed: ${err?.message || err}`
+    );
     return null;
   }
 }
@@ -170,7 +189,8 @@ function validateSessionPlay(payload, opts = {}) {
   const warnings = [...ajvWarnings];
 
   if (!CONTRACT_SCHEMA) {
-    const msg = "Contract schema not loaded. Ensure @/contracts/session.play.contract.json exists.";
+    const msg =
+      "Contract schema not loaded. Ensure @/contracts/session.play.contract.json exists.";
     warnings.push(msg);
   }
 
@@ -178,7 +198,8 @@ function validateSessionPlay(payload, opts = {}) {
   if (validateFn) {
     const { ok, errors } = validateFn(payload);
     if (ok) {
-      if (logOk) emit("dev.validate.sessionPlay.ok", { preview: preview(payload) });
+      if (logOk)
+        emit("dev.validate.sessionPlay.ok", { preview: preview(payload) });
       return { ok: true, warnings };
     }
     // Convert Ajv errors → strings
@@ -194,7 +215,9 @@ function validateSessionPlay(payload, opts = {}) {
       preview: preview(payload),
     });
     if (strict && throwOnError) {
-      const err = new Error(buildHelpfulMessage("session.play.*", friendly, payload));
+      const err = new Error(
+        buildHelpfulMessage("session.play.*", friendly, payload)
+      );
       err.name = "SessionPlayContractError";
       throw err;
     }
@@ -202,14 +225,22 @@ function validateSessionPlay(payload, opts = {}) {
   }
 
   // Fallback: minimal checks only
-  warnings.push("Ajv not found; using minimal envelope check (dev). Install 'ajv' for full validation.");
+  warnings.push(
+    "Ajv not found; using minimal envelope check (dev). Install 'ajv' for full validation."
+  );
   const basicErrors = minimalEnvelopeCheck(payload);
   if (basicErrors.length) {
     const friendly = basicErrors;
     const summary = { ok: false, errors: friendly, warnings };
-    emit("dev.validate.sessionPlay.fail", { count: friendly.length, errors: friendly, preview: preview(payload) });
+    emit("dev.validate.sessionPlay.fail", {
+      count: friendly.length,
+      errors: friendly,
+      preview: preview(payload),
+    });
     if (strict && throwOnError) {
-      const err = new Error(buildHelpfulMessage("session.play.*", friendly, payload));
+      const err = new Error(
+        buildHelpfulMessage("session.play.*", friendly, payload)
+      );
       err.name = "SessionPlayContractError";
       throw err;
     }

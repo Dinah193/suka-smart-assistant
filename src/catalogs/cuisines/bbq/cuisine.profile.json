@@ -1,0 +1,83 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.profile",
+    "type": "cuisine_profile",
+    "label": "BBQ • Cuisine Profile",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "notes": "SSA canonical BBQ cuisine profile for deterministic planning and adaptation (smoke/char, rubs, sauces, low-and-slow)."
+    }
+  },
+  "plannerDefaults": {
+    "locale": "en-US",
+    "aliases": ["bbq", "barbecue", "barbeque"],
+    "servingStyle": "family_style",
+    "plateModel": {
+      "vegShareMin": 0.25,
+      "proteinShareTarget": 0.33,
+      "starchShareTarget": 0.42,
+      "notes": [
+        "BBQ plates are commonly protein-forward with starch + a crisp/acidic side.",
+        "Sauce is often optional (serve on the side or glaze at the end)."
+      ]
+    },
+    "rotationHints": {
+      "avoidRepeatsWithinDays": 3,
+      "preferTechniqueRotation": true,
+      "notes": [
+        "Rotate smoke/grill/roast/braise across the week to manage time, fuel, and palate fatigue."
+      ]
+    }
+  },
+  "flavorSystem": {
+    "signatureNotes": [
+      "Smoke + char are the primary identity signals.",
+      "Dry rubs build bark; sauces are regional and optional.",
+      "Acid (often vinegar) is used to cut fat and brighten smoke-heavy flavors."
+    ],
+    "aromaticsCore": [
+      "ingredients.onion",
+      "ingredients.garlic",
+      "ingredients.green_onion_optional"
+    ],
+    "spiceCore": [
+      "ingredients.black_pepper",
+      "ingredients.paprika",
+      "ingredients.smoked_paprika",
+      "ingredients.chili_powder",
+      "ingredients.cumin",
+      "ingredients.mustard_powder_optional",
+      "ingredients.cayenne_optional"
+    ],
+    "umamiBuilders": [
+      "ingredients.worcestershire_optional",
+      "ingredients.mustard_optional",
+      "ingredients.tomato_paste_optional",
+      "ingredients.soy_sauce_optional",
+      "ingredients.smoked_salt_optional"
+    ],
+    "acidOptions": [
+      "ingredients.apple_cider_vinegar",
+      "ingredients.white_vinegar_optional",
+      "ingredients.lemon_optional",
+      "ingredients.pickled_jalapeno_brine_optional"
+    ],
+    "sweetBalanceOptions": [
+      "ingredients.brown_sugar",
+      "ingredients.honey_optional",
+      "ingredients.molasses_optional",
+      "ingredients.ketchup_optional"
+    ],
+    "heatOptions": [
+      "ingredients.cayenne_optional",
+      "ingredients.crushed_red_pepper_optional",
+      "ingredients.hot_sauce_optional",
+      "ingredients.jalapeno_optional",
+      "ingredients.chipotle_optional"
+    ]
+  }
+}

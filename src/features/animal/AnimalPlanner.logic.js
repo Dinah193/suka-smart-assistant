@@ -72,8 +72,8 @@
 // `syncAnimalPlanToSessions(...)`.
 // -----------------------------------------------------------------------------
 
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * @typedef {"cooking"|"cleaning"|"garden"|"animals"|"preservation"|"storehouse"} SessionDomain
@@ -243,7 +243,9 @@ function nowIso() {
  * @returns {string}
  */
 function makeId(prefix) {
-  return `${prefix}_${Math.random().toString(36).slice(2, 9)}_${Date.now().toString(36)}`;
+  return `${prefix}_${Math.random()
+    .toString(36)
+    .slice(2, 9)}_${Date.now().toString(36)}`;
 }
 
 /**
@@ -680,7 +682,11 @@ export function generateAnimalSessionsFromPlan(plan) {
  * @param {boolean} [opt.emitEvents=true]
  * @returns {Promise<{planId: string, sessionIds: string[]}>}
  */
-export async function syncAnimalPlanToSessions({ plan, adapter, emitEvents = true }) {
+export async function syncAnimalPlanToSessions({
+  plan,
+  adapter,
+  emitEvents = true,
+}) {
   if (!plan || !adapter || typeof adapter.saveSessionsBatch !== "function") {
     throw new Error(
       "[AnimalPlanner.logic] syncAnimalPlanToSessions requires a plan and an adapter with saveSessionsBatch"

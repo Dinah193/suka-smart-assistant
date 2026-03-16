@@ -1,0 +1,344 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.stuffed_grape_leaves",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Stuffed Grape Leaves (Dolma / Dolmades)",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Mediterranean / Eastern Mediterranean rice-stuffed grape leaves with lemon and herbs.",
+        "Designed as a deterministic baseline; supports vegan rice-herb version and optional meat version."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.mediterranean",
+    "category": "side",
+    "mealArchetypes": ["side", "mezze", "appetizer", "make_ahead"],
+    "servingStyles": ["plated", "family_style", "mezze_board"],
+    "plannerTags": [
+      "cuisine.mediterranean",
+      "mezze",
+      "lemon_forward",
+      "herb_forward",
+      "rice",
+      "make_ahead",
+      "served_cold_or_warm",
+      "vegan_default",
+      "method.simmer"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 6, "unit": "each" },
+    "notes": "Makes ~36 stuffed grape leaves (about 6 per serving)."
+  },
+
+  "time": {
+    "activeMins": 60,
+    "handsOffMins": 55,
+    "totalMins": 115
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": [
+      "mixing_bowl",
+      "saucepan",
+      "large_pot_with_lid",
+      "cutting_board",
+      "knife"
+    ],
+    "recommended": [
+      "fine_mesh_strainer",
+      "tongs",
+      "plate_weight",
+      "citrus_juicer",
+      "parchment_paper_optional"
+    ],
+    "optional": ["instant_read_thermometer"]
+  },
+
+  "dietFlags": ["vegan", "vegetarian", "dairy_free"],
+  "allergens": [],
+
+  "keywords": [
+    "dolma",
+    "dolmades",
+    "stuffed grape leaves",
+    "vine leaves",
+    "rice",
+    "lemon",
+    "herbs",
+    "mezze",
+    "Mediterranean"
+  ],
+
+  "tags": [
+    "cuisine.mediterranean",
+    "mezze",
+    "method.simmer",
+    "flavor.lemon",
+    "flavor.herb_forward",
+    "make_ahead",
+    "served_cold_or_warm"
+  ],
+
+  "signals": {
+    "profile": "lemon_herb_rice_mezze",
+    "primaryFat": "olive_oil",
+    "acid": "lemon",
+    "starch": "rice",
+    "techniqueCore": [
+      "blanch_or_rinse_leaves",
+      "mix_filling",
+      "roll",
+      "layer",
+      "simmer"
+    ],
+    "pairingCore": [
+      "tzatziki_optional",
+      "yogurt_optional",
+      "hummus",
+      "salad",
+      "olives"
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredients.grape_leaves_jarred",
+      "label": "Grape leaves (jarred, brined)",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "Typically 1 jar; aim for ~40 leaves to allow for tears and small pieces."
+    },
+    {
+      "id": "ingredients.rice",
+      "label": "Short-grain rice (or medium-grain), rinsed",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Uncooked. Short/medium grain rolls well; long grain works but is looser."
+    },
+    {
+      "id": "ingredients.onion",
+      "label": "Onion, very finely diced",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "About 1 medium onion."
+    },
+    {
+      "id": "ingredients.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "amount": { "value": 90, "unit": "ml" },
+      "notes": "Split between filling and pot layering."
+    },
+    {
+      "id": "ingredients.parsley",
+      "label": "Flat-leaf parsley, finely chopped",
+      "amount": { "value": 35, "unit": "g" }
+    },
+    {
+      "id": "ingredients.mint",
+      "label": "Fresh mint, finely chopped",
+      "amount": { "value": 12, "unit": "g" },
+      "optional": true,
+      "notes": "Classic. If unavailable, use more parsley."
+    },
+    {
+      "id": "ingredients.dill",
+      "label": "Fresh dill, finely chopped",
+      "amount": { "value": 8, "unit": "g" },
+      "optional": true,
+      "notes": "Optional but traditional in many Greek-style versions."
+    },
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon juice",
+      "amount": { "value": 90, "unit": "ml" },
+      "notes": "Split: some in filling, some in simmer liquid. About 2–3 lemons."
+    },
+    {
+      "id": "ingredients.lemon_zest",
+      "label": "Lemon zest",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "Optional brightness."
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 cloves."
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Fine salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Grape leaves are salty; adjust at the end if needed."
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.cumin",
+      "label": "Ground cumin (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "Not universal; adds warm background."
+    },
+    {
+      "id": "ingredients.pine_nuts",
+      "label": "Pine nuts (optional)",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Optional richness."
+    },
+    {
+      "id": "ingredients.raisins",
+      "label": "Raisins or currants (optional)",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Adds sweet-sour contrast in some regional styles."
+    },
+    {
+      "id": "ingredients.vegetable_broth",
+      "label": "Vegetable broth or water (for simmering)",
+      "amount": { "value": 720, "unit": "ml" },
+      "notes": "Enough to come about halfway up the rolls after layering."
+    },
+    {
+      "id": "ingredients.tomato_slices",
+      "label": "Tomato slices or potato slices (for pot base, optional)",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Helps prevent sticking and adds aroma."
+    },
+    {
+      "id": "ingredients.lemon_slices",
+      "label": "Lemon slices (optional, for layering)",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredients.ground_lamb",
+      "label": "Ground lamb or beef (optional meat version)",
+      "amount": { "value": 250, "unit": "g" },
+      "optional": true,
+      "notes": "If using meat, reduce rice slightly or keep same for a heartier filling."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prepare_leaves",
+      "title": "Prepare grape leaves",
+      "body": "Separate grape leaves carefully. Rinse each leaf under cool water to remove brine. If leaves are very salty or tough, blanch in simmering water 30–60 seconds, then drain and cool. Keep covered with a damp towel to prevent drying while rolling.",
+      "timers": [{ "label": "Optional blanch", "seconds": 60 }]
+    },
+    {
+      "id": "step_02_make_filling",
+      "title": "Mix rice-herb filling",
+      "body": "In a bowl, combine rinsed rice, onion, parsley, mint (optional), dill (optional), garlic (optional), pine nuts/raisins (optional), salt, pepper, cumin (optional), 45 ml olive oil, and 45 ml lemon juice. Mix until evenly coated.",
+      "notes": "If using meat version: add ground lamb/beef, and consider reducing rice to 170 g for a more meat-forward dolma."
+    },
+    {
+      "id": "step_03_set_up_pot",
+      "title": "Prepare pot for layering",
+      "body": "In a wide pot, drizzle 15 ml olive oil. If using tomato/potato slices, layer them on the bottom to reduce sticking. Add a few torn grape leaves (or damaged leaves) as an extra protective layer."
+    },
+    {
+      "id": "step_04_roll_grape_leaves",
+      "title": "Roll the dolma",
+      "body": "Place a leaf shiny-side down, stem end toward you. Trim thick stem nub if needed. Add about 1 to 1.5 tbsp filling (20–25 g) near the stem end. Fold left and right sides inward, then roll tightly from bottom to top into a small cigar shape. Do not overfill—rice expands. Place seam-side down in the pot.",
+      "notes": "Tight rolling prevents unraveling and helps even cooking."
+    },
+    {
+      "id": "step_05_layer_and_pack",
+      "title": "Layer tightly in the pot",
+      "body": "Arrange rolls snugly, seam-side down, in concentric circles. Build 2–3 layers if needed. Drizzle remaining olive oil over the top. Add lemon slices (optional) between layers or on top."
+    },
+    {
+      "id": "step_06_add_liquid_and_weight",
+      "title": "Add simmering liquid and weight the rolls",
+      "body": "Whisk broth/water with remaining lemon juice. Pour into pot until liquid reaches about halfway up the rolls (do not fully submerge). Place a heat-safe plate (upside down) directly on top of the rolls as a weight to prevent floating/unrolling. Cover with a lid.",
+      "notes": "If you don’t have a plate, use a smaller lid or a piece of parchment plus a small heat-safe bowl as a weight."
+    },
+    {
+      "id": "step_07_simmer",
+      "title": "Simmer gently until rice is tender",
+      "body": "Bring to a gentle simmer over medium heat, then reduce to low. Cook 40–55 minutes, maintaining a low simmer. Check after 40 minutes: rice should be tender and rolls should feel firm. If liquid evaporates too quickly, add a small splash of hot water.",
+      "timers": [{ "label": "Simmer (typical)", "seconds": 3000 }]
+    },
+    {
+      "id": "step_08_rest_and_set",
+      "title": "Rest to set",
+      "body": "Turn off heat and let dolma rest, covered, 10–15 minutes. Remove the plate carefully. Let cool slightly before serving. These are excellent at room temperature or chilled.",
+      "timers": [{ "label": "Rest", "seconds": 900 }]
+    },
+    {
+      "id": "step_09_serve",
+      "title": "Serve",
+      "body": "Serve with extra lemon wedges. Optional: pair with tzatziki or a simple yogurt sauce (for non-vegan service), plus a Greek salad, hummus, or roasted vegetables."
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 5,
+      "container": "airtight",
+      "notes": "Serve chilled or bring to room temp. Rewarm gently with a splash of water/broth in a covered pan."
+    },
+    "freeze": {
+      "maxMonths": 2,
+      "notes": "Freeze in a single layer then transfer to a container. Thaw overnight in fridge; rewarm gently."
+    }
+  },
+
+  "variations": [
+    {
+      "id": "variation_vegan_classic",
+      "title": "Vegan classic (default)",
+      "changes": [
+        "Use rice-herb filling as written.",
+        "Serve with tahini-lemon sauce or hummus instead of yogurt-based sauces."
+      ]
+    },
+    {
+      "id": "variation_meat_dolma",
+      "title": "Meat dolma (lamb/beef + rice)",
+      "changes": [
+        "Add 250 g ground lamb or beef to filling.",
+        "Optionally reduce rice to 170 g for meat-forward texture.",
+        "Simmer time may increase slightly (5–10 minutes) depending on roll size."
+      ]
+    },
+    {
+      "id": "variation_spiced_tomato",
+      "title": "Tomato-tinted simmer (regional style)",
+      "changes": [
+        "Add 30–60 ml tomato sauce to the simmer liquid.",
+        "Add a pinch of paprika or allspice to the filling."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Key success factor: roll tightly and pack snugly; use a plate weight to prevent floating and unraveling.",
+    "Salt varies by brand of brined grape leaves. Rinse well and taste before adding extra salt late.",
+    "If using fresh grape leaves (seasonal), blanch 1–2 minutes to soften and remove bitterness.",
+    "Pairs well with: hummus, tabbouleh, roasted_vegetables_olive_oil, baked_fish_garlic_herbs (as a mezze spread)."
+  ]
+}

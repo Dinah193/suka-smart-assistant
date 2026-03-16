@@ -1,0 +1,347 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.pulled_pork",
+    "type": "recipe",
+    "name": "Pulled Pork (Smoked Pork Shoulder, Classic BBQ)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Classic low-and-slow pork shoulder for pulled pork, written for SSA planners/adapters.",
+        "Includes bark-building, wrap options, doneness cues, and safe cooling/storage guidance."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "main",
+    "mealArchetypes": ["dinner", "meal_prep"],
+    "servingStyles": ["family_style", "sandwiches", "bbq_plate"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "method.smoke",
+      "low_and_slow",
+      "protein.pork",
+      "crowd_friendly",
+      "freezer_friendly",
+      "batch_cook"
+    ]
+  },
+  "yield": {
+    "servings": 10,
+    "notes": "A 8–10 lb bone-in shoulder typically yields ~50–60% cooked meat by weight. Plan 1/3–1/2 lb cooked meat per adult serving."
+  },
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 720,
+    "totalMins": 765
+  },
+  "difficulty": "intermediate",
+  "equipment": {
+    "minimum": [
+      "equipment.smoker",
+      "equipment.knife",
+      "equipment.sheet_pan",
+      "equipment.foil"
+    ],
+    "recommended": [
+      "equipment.probe_thermometer",
+      "equipment.instant_read_thermometer",
+      "equipment.spray_bottle",
+      "equipment.tongs",
+      "equipment.large_pan",
+      "equipment.heat_resistant_gloves"
+    ],
+    "optional": [
+      "equipment.butchers_paper",
+      "equipment.fat_separator",
+      "equipment.stand_mixer"
+    ]
+  },
+  "dietFlags": ["gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredients.pork_shoulder_bone_in",
+      "label": "Pork shoulder / Boston butt (bone-in preferred)",
+      "qty": 1,
+      "unit": "roast",
+      "notes": "8–10 lb ideal. Bone-in helps moisture; boneless works too.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.yellow_mustard",
+      "label": "Yellow mustard (binder, optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Helps rub adhere; flavor cooks off.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "If using table salt, reduce amount. Salt is key for bark and seasoning.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper (coarse ground)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Texas-style simple rub is often just salt + pepper; this recipe adds classic BBQ spices too.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Paprika (sweet)",
+      "qty": 2,
+      "unit": "tbsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.brown_sugar",
+      "label": "Brown sugar",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Optional for sweetness. Reduce/omit if you prefer less sweet bark or are cooking hotter.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.garlic_powder",
+      "label": "Garlic powder",
+      "qty": 2,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.onion_powder",
+      "label": "Onion powder",
+      "qty": 2,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.chili_powder",
+      "label": "Chili powder (mild)",
+      "qty": 2,
+      "unit": "tsp",
+      "optional": false
+    },
+    {
+      "id": "ingredients.cayenne",
+      "label": "Cayenne pepper (optional)",
+      "qty": 0.5,
+      "unit": "tsp",
+      "notes": "Optional heat. Increase gradually.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.apple_juice",
+      "label": "Apple juice (spritz / wrap moisture)",
+      "qty": 1,
+      "unit": "cup",
+      "notes": "Use for spritzing or add a splash when wrapping. Can substitute apple cider vinegar + water.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar (spritz option)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "Mix 1:1 with water for spritz; balances sweetness and keeps surface tacky.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.water",
+      "label": "Water (spritz option)",
+      "qty": 0.5,
+      "unit": "cup",
+      "optional": true
+    },
+    {
+      "id": "ingredients.bbq_sauce",
+      "label": "BBQ sauce (serving, optional)",
+      "qty": 1,
+      "unit": "cup",
+      "notes": "Serve on the side or mix lightly into pulled pork with drippings.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.cider_vinegar",
+      "label": "Vinegar finishing splash (optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "A small splash brightens pulled pork and balances richness.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.wood_smoke",
+      "label": "Smoking wood (oak/hickory/pecan/apple/cherry)",
+      "qty": 3,
+      "unit": "cups",
+      "notes": "Amount depends on smoker type. Hickory/pecan are classic; fruit woods add sweetness.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.buns",
+      "label": "Buns (for sandwiches, optional)",
+      "qty": 10,
+      "unit": "each",
+      "notes": "Brioche, potato rolls, or standard hamburger buns.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.cole_slaw",
+      "label": "Cole slaw (for serving, optional)",
+      "qty": 4,
+      "unit": "cups",
+      "notes": "Classic pulled pork pairing; serve on top of sandwiches.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_trim",
+      "title": "Trim and prep the pork shoulder",
+      "body": "Pat pork shoulder dry. Trim only thick, hard exterior fat caps down to about 1/4 inch—leave most fat and collagen for moisture. Score fat cap lightly (optional) to help render. Let meat sit at room temperature 20–30 minutes while smoker preheats.",
+      "timers": [{ "label": "Prep time (estimate)", "mins": 15 }]
+    },
+    {
+      "id": "step.mix_rub",
+      "title": "Mix the dry rub",
+      "body": "Combine kosher salt, black pepper, paprika, garlic powder, onion powder, chili powder, and optional brown sugar/cayenne. Mix thoroughly and break up any brown sugar clumps.",
+      "timers": [{ "label": "Rub mix (estimate)", "mins": 5 }]
+    },
+    {
+      "id": "step.season",
+      "title": "Season pork shoulder",
+      "body": "Optional: apply a thin coat of yellow mustard as binder. Apply rub generously on all sides, pressing to adhere. For best bark, rest uncovered in the fridge 2–12 hours; otherwise rest at room temp 20–30 minutes while smoker stabilizes.",
+      "timers": [{ "label": "Season + short rest (minimum)", "mins": 25 }]
+    },
+    {
+      "id": "step.preheat_smoker",
+      "title": "Preheat smoker",
+      "body": "Preheat smoker to 225–250°F (107–121°C). Add smoking wood and aim for clean smoke (thin blue). If using a water pan, fill it for temperature stability and humidity.",
+      "timers": [{ "label": "Preheat smoker (estimate)", "mins": 20 }]
+    },
+    {
+      "id": "step.smoke_build_bark",
+      "title": "Smoke to build bark (unwrapped)",
+      "body": "Place pork shoulder on smoker, fat cap oriented based on your heat source (fat toward heat can help protect). Smoke at 225–250°F until bark is dark and set and internal temp is typically 160–170°F. This commonly takes 5–7 hours depending on size and cooker. Optional: spritz lightly every 60–90 minutes after the first 2 hours once bark is set.",
+      "timers": [
+        { "label": "Smoke phase (bark set) — typical range", "mins": 360 },
+        { "label": "Optional spritz interval", "mins": 90 }
+      ]
+    },
+    {
+      "id": "step.wrap_optional",
+      "title": "Wrap through the stall (optional but common)",
+      "body": "When bark is set and internal temp is ~160–170°F, you may wrap to push through the stall and preserve moisture. Wrap tightly in foil or butcher paper. Add a small splash of apple juice if using foil. Return to smoker and continue cooking at 250°F until probe-tender.",
+      "timers": [{ "label": "Wrapped cook (typical)", "mins": 240 }]
+    },
+    {
+      "id": "step.cook_to_tender",
+      "title": "Cook until probe-tender (doneness by feel)",
+      "body": "Continue cooking until the thickest part is probe-tender—an instant-read probe slides in with little resistance, like warm butter. Internal temp is often 195–205°F, but texture matters more than a single number. Check multiple spots; the shoulder should feel soft and yielding.",
+      "timers": [
+        { "label": "Tenderness checks (repeat as needed)", "mins": 30 }
+      ]
+    },
+    {
+      "id": "step.rest",
+      "title": "Rest (critical for juicy pulled pork)",
+      "body": "Rest wrapped pork at least 45–60 minutes (up to 2 hours) in a dry cooler or warm oven (around 150–170°F) to redistribute juices and soften collagen. Do not skip this step for best moisture.",
+      "timers": [{ "label": "Rest (minimum)", "mins": 60 }]
+    },
+    {
+      "id": "step.pull",
+      "title": "Pull the pork and season to taste",
+      "body": "Unwrap and reserve juices/drippings. Remove bone (it should slide out clean). Shred meat with gloved hands or forks, discarding large fat chunks if desired. Mix in a few tablespoons of reserved drippings for moisture. Optional: add a small splash of vinegar to brighten and/or a light amount of BBQ sauce. Taste and adjust salt/pepper.",
+      "timers": [{ "label": "Pull and mix (estimate)", "mins": 20 }]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "body": "Serve as sandwiches with buns and slaw, or as a BBQ plate with beans, potato salad, cornbread, or roasted vegetables. Keep warm in a covered pan; moisten with a little drippings as needed.",
+      "timers": []
+    },
+    {
+      "id": "step.storage_reheat",
+      "title": "Storage and reheating",
+      "body": "Cool quickly for food safety: spread meat in a shallow pan to drop temperature, then refrigerate within 2 hours. Refrigerate up to 4 days or freeze up to 3 months. Reheat gently covered with a splash of drippings/water (275°F oven) until hot, or warm on stovetop over low heat.",
+      "timers": []
+    }
+  ],
+  "pairings": {
+    "sides": [
+      { "id": "dishes.bbq.cole_slaw", "label": "Cole Slaw" },
+      { "id": "dishes.bbq.baked_beans", "label": "Baked Beans" },
+      { "id": "dishes.bbq.potato_salad", "label": "Potato Salad" },
+      { "id": "dishes.bbq.cornbread", "label": "Cornbread" },
+      { "id": "dishes.bbq.pickles", "label": "Pickles / Pickled Onions" }
+    ],
+    "sauces": [
+      {
+        "id": "dishes.bbq.tomato_based_bbq_sauce",
+        "label": "Tomato-Based BBQ Sauce"
+      },
+      {
+        "id": "dishes.bbq.vinegar_sauce_carolina",
+        "label": "Vinegar Pepper Sauce (optional)"
+      }
+    ]
+  },
+  "planner": {
+    "batchable": true,
+    "leftovers": {
+      "goodFor": [
+        "pulled_pork_tacos",
+        "loaded_nachos",
+        "bbq_mac_and_cheese",
+        "stuffed_baked_potatoes"
+      ],
+      "notes": "Plan as a weekend batch cook. Freeze in 1–2 lb portions with a little drippings for best reheating."
+    },
+    "serveModes": [
+      {
+        "id": "serveMode.sandwiches",
+        "label": "Sandwiches + Slaw",
+        "notes": "Best for crowds; keeps well warm."
+      },
+      {
+        "id": "serveMode.bbq_plate",
+        "label": "BBQ Plate",
+        "notes": "Pair with beans + starch + vegetable."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "equipment",
+      "notes": [
+        "No smoker: roast in oven at 275°F covered until tender (6–8 hours), then uncover briefly to dry the surface; broil lightly for bark-like edges if desired.",
+        "Pellet grill: stable temp is easy; spritz less often to avoid washing off bark."
+      ]
+    },
+    {
+      "kind": "doneness",
+      "notes": [
+        "Probe tenderness is the main indicator. If it’s tough at 195°F, keep cooking and re-check.",
+        "If meat shreds dry, it likely needed more rest and/or a bit of drippings mixed back in."
+      ]
+    },
+    {
+      "kind": "flavor",
+      "notes": [
+        "For Carolina-style, skip heavy sauce and finish with a vinegar-pepper splash.",
+        "For sweeter profile, keep brown sugar in rub and set with a light sauce after pulling."
+      ]
+    }
+  ]
+}

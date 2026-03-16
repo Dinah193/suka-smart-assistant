@@ -34,30 +34,38 @@ const path = require("path");
 // ---------- shared services (defensive requires) ----------
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 // ---------- engine/policy modules (defensive) ----------
-const feasibility = requireSafe("@/engines/scheduling/admission/feasibility.js"); // canMeetDeadline({...})
-const optionsEngine = requireSafe("@/engines/scheduling/admission/options.js");   // suggestAlternates, simplifyVariant
-const buffersPolicy = requireSafe("@/engines/scheduling/policies/buffers.js");    // getRecommendedBuffer(domain, kind)
-const priorities    = requireSafe("@/engines/scheduling/policies/priorities.js"); // computePriority/scoreSessions?
-const constraints   = requireSafe("@/engines/scheduling/policies/constraints.js");// isAllowed(session, ctx)
-const SessionStore  = requireSafe("@/engines/scheduling/SessionStore.js") || requireSafe("@/engines/scheduling/sessionStore.js"); // create/update/find
-const Inventory     = requireSafe("@/domain/inventory/InventoryService.js");     // quickCheck(list)
-const Storehouse    = requireSafe("@/domain/storehouse/StorehouseService.js");   // hasEquipment(list)
+const feasibility = requireSafe(
+  "@/engines/scheduling/admission/feasibility.js"
+); // canMeetDeadline({...})
+const optionsEngine = requireSafe("@/engines/scheduling/admission/options.js"); // suggestAlternates, simplifyVariant
+const buffersPolicy = requireSafe("@/engines/scheduling/policies/buffers.js"); // getRecommendedBuffer(domain, kind)
+const priorities = requireSafe("@/engines/scheduling/policies/priorities.js"); // computePriority/scoreSessions?
+const constraints = requireSafe("@/engines/scheduling/policies/constraints.js"); // isAllowed(session, ctx)
+const SessionStore =
+  requireSafe("@/engines/scheduling/SessionStore.js") ||
+  requireSafe("@/engines/scheduling/sessionStore.js"); // create/update/find
+const Inventory = requireSafe("@/domain/inventory/InventoryService.js"); // quickCheck(list)
+const Storehouse = requireSafe("@/domain/storehouse/StorehouseService.js"); // hasEquipment(list)
 
 // ---------- controller API ----------
 module.exports = {
@@ -75,14 +83,24 @@ module.exports = {
     const warnings = [];
 
     if (!norm) {
-      emit("admission.preflight.completed", { ok: false, reasons: ["invalid-candidate"] });
-      return { ok: false, reasons: ["invalid-candidate"], warnings: [], normalized: null };
+      emit("admission.preflight.completed", {
+        ok: false,
+        reasons: ["invalid-candidate"],
+      });
+      return {
+        ok: false,
+        reasons: ["invalid-candidate"],
+        warnings: [],
+        normalized: null,
+      };
     }
 
     // Basic fields
     if (!norm.title) reasons.push("missing-title");
-    if (!isFiniteMs(Date.parse(norm.deadlineISO))) reasons.push("invalid-deadline");
-    if (!isFinite(norm.estimatedMinutes) || norm.estimatedMinutes <= 0) reasons.push("invalid-estimatedMinutes");
+    if (!isFiniteMs(Date.parse(norm.deadlineISO)))
+      reasons.push("invalid-deadline");
+    if (!isFinite(norm.estimatedMinutes) || norm.estimatedMinutes <= 0)
+      reasons.push("invalid-estimatedMinutes");
 
     // Constraints snapshot
     const allowed = await allowedByConstraints(norm);
@@ -129,11 +147,19 @@ module.exports = {
     // Respect constraints (hard block)
     const allowed = await allowedByConstraints(norm);
     if (!allowed) {
-      emit("admission.proposal.completed", { ok: false, reasons: ["disallowed-by-constraints"] });
+      emit("admission.proposal.completed", {
+        ok: false,
+        reasons: ["disallowed-by-constraints"],
+      });
       return { ok: false, reasons: ["disallowed-by-constraints"] };
     }
 
-    const plan = { alternates: [], simplify: null, buffers: {}, priority: null };
+    const plan = {
+      alternates: [],
+      simplify: null,
+      buffers: {},
+      priority: null,
+    };
 
     // Buffers recommendation (for planner visuals)
     plan.buffers = safeBuffers(norm);
@@ -142,13 +168,22 @@ module.exports = {
     plan.priority = await safePriorityScore(norm);
 
     // Alternate slots
-    const a = Object.assign({ horizonMinutes: 480, alternates: 3, allowSimplify: true }, opts || {});
-    if (optionsEngine && typeof optionsEngine.suggestAlternates === "function") {
+    const a = Object.assign(
+      { horizonMinutes: 480, alternates: 3, allowSimplify: true },
+      opts || {}
+    );
+    if (
+      optionsEngine &&
+      typeof optionsEngine.suggestAlternates === "function"
+    ) {
       try {
         const alts = await optionsEngine.suggestAlternates({
           session: norm,
           limit: Math.max(1, Math.min(10, Number(a.alternates) || 3)),
-          horizonMinutes: Math.max(60, Math.min(1440, Number(a.horizonMinutes) || 480))
+          horizonMinutes: Math.max(
+            60,
+            Math.min(1440, Number(a.horizonMinutes) || 480)
+          ),
         });
         plan.alternates = Array.isArray(alts) ? alts : [];
       } catch (_) {}
@@ -159,13 +194,21 @@ module.exports = {
       const fn = optionsEngine.simplifyVariant || optionsEngine.simplify;
       if (typeof fn === "function") {
         try {
-          const simp = await fn({ session: norm, dryRun: true, intent: "admission", maxReductionPercent: 0.3 });
+          const simp = await fn({
+            session: norm,
+            dryRun: true,
+            intent: "admission",
+            maxReductionPercent: 0.3,
+          });
           if (simp && simp.variant) plan.simplify = simp.variant;
         } catch (_) {}
       }
     }
 
-    emit("admission.proposal.completed", { ok: true, planSummary: planSummary(plan) });
+    emit("admission.proposal.completed", {
+      ok: true,
+      planSummary: planSummary(plan),
+    });
     return { ok: true, plan, normalized: norm };
   },
 
@@ -193,7 +236,11 @@ module.exports = {
     const fixed = await applyChosenFixes(norm, o);
 
     // Feasibility at proposed times (after fixes)
-    const startISO = fixed.proposedStartISO || norm.preferredStartISO || norm.suggestedStartISO || nowISO();
+    const startISO =
+      fixed.proposedStartISO ||
+      norm.preferredStartISO ||
+      norm.suggestedStartISO ||
+      nowISO();
     const endISO = addMinutesISO(startISO, norm.estimatedMinutes);
     if (!(await canMeet(norm, startISO, endISO, nowISO()))) {
       // Try a tiny nudge (+/- 15m) before rejecting
@@ -205,7 +252,11 @@ module.exports = {
     }
 
     // Create or update
-    if (!SessionStore || (typeof SessionStore.create !== "function" && typeof SessionStore.upsert !== "function")) {
+    if (
+      !SessionStore ||
+      (typeof SessionStore.create !== "function" &&
+        typeof SessionStore.upsert !== "function")
+    ) {
       emitRejected("session-store-missing", norm);
       return { ok: false, error: "session-store-missing" };
     }
@@ -213,7 +264,7 @@ module.exports = {
     const payload = Object.assign({}, norm, {
       plannedStartISO: startISO,
       plannedEndISO: addMinutesISO(startISO, norm.estimatedMinutes),
-      buffers: safeBuffers(norm)
+      buffers: safeBuffers(norm),
     });
 
     try {
@@ -230,7 +281,7 @@ module.exports = {
         domain: norm.domain,
         kind: norm.kind || (norm.meta && norm.meta.kind) || "general",
         plannedStartISO: payload.plannedStartISO,
-        plannedEndISO: payload.plannedEndISO
+        plannedEndISO: payload.plannedEndISO,
       });
 
       await exportToHubIfEnabled({
@@ -242,13 +293,13 @@ module.exports = {
           domain: norm.domain,
           kind: norm.kind || (norm.meta && norm.meta.kind) || "general",
           plannedStartISO: payload.plannedStartISO,
-          plannedEndISO: payload.plannedEndISO
-        }
+          plannedEndISO: payload.plannedEndISO,
+        },
       });
 
       return { ok: true, id: res && res.id, session: res || payload };
     } catch (err) {
-      emitRejected("store-error:" + String(err && err.message || err), norm);
+      emitRejected("store-error:" + String((err && err.message) || err), norm);
       return { ok: false, error: "store-error" };
     }
   },
@@ -261,25 +312,45 @@ module.exports = {
   async upsertBatch(candidates, opts) {
     const arr = Array.isArray(candidates) ? candidates : [];
     const outcomes = [];
-    let okCount = 0; let rejectCount = 0;
+    let okCount = 0;
+    let rejectCount = 0;
 
     for (let i = 0; i < arr.length; i++) {
       const c = arr[i];
       try {
-        const upsertKey = opts && opts.upsertKeyField && c ? c[opts.upsertKeyField] : undefined;
-        const res = await this.admit(c, { upsertKey, chosenVariant: c && c.chosenVariant, chosenAlternate: c && c.chosenAlternate });
+        const upsertKey =
+          opts && opts.upsertKeyField && c ? c[opts.upsertKeyField] : undefined;
+        const res = await this.admit(c, {
+          upsertKey,
+          chosenVariant: c && c.chosenVariant,
+          chosenAlternate: c && c.chosenAlternate,
+        });
         outcomes.push(res);
         okCount += res && res.ok ? 1 : 0;
         rejectCount += res && !res.ok ? 1 : 0;
       } catch (err) {
-        outcomes.push({ ok: false, error: "exception", message: String(err && err.message || err) });
+        outcomes.push({
+          ok: false,
+          error: "exception",
+          message: String((err && err.message) || err),
+        });
         rejectCount += 1;
       }
     }
 
-    emit("admission.batch.completed", { total: arr.length, ok: okCount, rejected: rejectCount });
-    return { ok: rejectCount === 0, total: arr.length, accepted: okCount, rejected: rejectCount, outcomes };
-  }
+    emit("admission.batch.completed", {
+      total: arr.length,
+      ok: okCount,
+      rejected: rejectCount,
+    });
+    return {
+      ok: rejectCount === 0,
+      total: arr.length,
+      accepted: okCount,
+      rejected: rejectCount,
+      outcomes,
+    };
+  },
 };
 
 // ---------- admission helpers ----------
@@ -287,16 +358,29 @@ module.exports = {
 async function applyChosenFixes(norm, opts) {
   const out = {};
   if (opts && opts.chosenVariant && optionsEngine) {
-    const fn = optionsEngine.applyVariant || optionsEngine.simplifyVariant || optionsEngine.simplify;
+    const fn =
+      optionsEngine.applyVariant ||
+      optionsEngine.simplifyVariant ||
+      optionsEngine.simplify;
     if (typeof fn === "function") {
       try {
-        const applied = await fn({ session: norm, variant: opts.chosenVariant, dryRun: false, intent: "admission-apply" });
-        if (applied && applied.accepted) Object.assign(norm, { variant: applied.variant, estimatedMinutes: applied.estimatedMinutes || norm.estimatedMinutes });
+        const applied = await fn({
+          session: norm,
+          variant: opts.chosenVariant,
+          dryRun: false,
+          intent: "admission-apply",
+        });
+        if (applied && applied.accepted)
+          Object.assign(norm, {
+            variant: applied.variant,
+            estimatedMinutes: applied.estimatedMinutes || norm.estimatedMinutes,
+          });
       } catch (_) {}
     }
   }
   if (opts && opts.chosenAlternate) {
-    out.proposedStartISO = opts.chosenAlternate.startISO || opts.chosenAlternate.start || null;
+    out.proposedStartISO =
+      opts.chosenAlternate.startISO || opts.chosenAlternate.start || null;
   }
   return out;
 }
@@ -320,33 +404,51 @@ async function allowedByConstraints(session) {
   if (!constraints || typeof constraints.isAllowed !== "function") return true;
   try {
     return !!(await constraints.isAllowed(session, { nowISO: nowISO() }));
-  } catch (_) { return true; }
+  } catch (_) {
+    return true;
+  }
 }
 
 async function canMeet(session, startISO, endISO, now) {
-  if (!feasibility || typeof feasibility.canMeetDeadline !== "function") return true;
+  if (!feasibility || typeof feasibility.canMeetDeadline !== "function")
+    return true;
   try {
     return !!(await feasibility.canMeetDeadline({
       session,
       proposedStartISO: startISO,
       proposedEndISO: endISO,
-      nowISO: now
+      nowISO: now,
     }));
-  } catch (_) { return true; }
+  } catch (_) {
+    return true;
+  }
 }
 
 function safeBuffers(session) {
   try {
-    if (!buffersPolicy || typeof buffersPolicy.getRecommendedBuffer !== "function") return { beforeMs: 0, afterMs: 0 };
-    const rec = buffersPolicy.getRecommendedBuffer(session.domain || "general", session.meta && session.meta.kind);
-    return { beforeMs: Number(rec && rec.beforeMs || 0), afterMs: Number(rec && rec.afterMs || 0) };
-  } catch (_) { return { beforeMs: 0, afterMs: 0 }; }
+    if (
+      !buffersPolicy ||
+      typeof buffersPolicy.getRecommendedBuffer !== "function"
+    )
+      return { beforeMs: 0, afterMs: 0 };
+    const rec = buffersPolicy.getRecommendedBuffer(
+      session.domain || "general",
+      session.meta && session.meta.kind
+    );
+    return {
+      beforeMs: Number((rec && rec.beforeMs) || 0),
+      afterMs: Number((rec && rec.afterMs) || 0),
+    };
+  } catch (_) {
+    return { beforeMs: 0, afterMs: 0 };
+  }
 }
 
 async function safePriorityScore(session) {
   try {
     if (!priorities) return null;
-    if (typeof priorities.computePriority === "function") return await priorities.computePriority(session);
+    if (typeof priorities.computePriority === "function")
+      return await priorities.computePriority(session);
     if (typeof priorities.scoreSessions === "function") {
       const arr = await priorities.scoreSessions([session]);
       return Array.isArray(arr) && arr[0] ? arr[0].score : null;
@@ -357,17 +459,23 @@ async function safePriorityScore(session) {
 
 async function quickInventoryCheck(session) {
   try {
-    if (!Inventory || typeof Inventory.quickCheck !== "function") return { low: [], missing: [] };
+    if (!Inventory || typeof Inventory.quickCheck !== "function")
+      return { low: [], missing: [] };
     const items = extractInventoryItems(session);
     return await Inventory.quickCheck(items);
-  } catch (_) { return { low: [], missing: [] }; }
+  } catch (_) {
+    return { low: [], missing: [] };
+  }
 }
 
 async function hasEquipment(equipmentList) {
   try {
-    if (!Storehouse || typeof Storehouse.hasEquipment !== "function") return true;
+    if (!Storehouse || typeof Storehouse.hasEquipment !== "function")
+      return true;
     return !!(await Storehouse.hasEquipment(equipmentList));
-  } catch (_) { return true; }
+  } catch (_) {
+    return true;
+  }
 }
 
 // ---------- normalization & utils ----------
@@ -377,23 +485,35 @@ function normalizeCandidate(c) {
   const title = String(c.title || c.name || "").trim();
   const domain = pickDomain(c.domain);
   const estimatedMinutes = toNum(c.estimatedMinutes, 0);
-  const deadlineISO = toISO(c.deadlineISO || c.deadline || c.dueByISO || c.dueBy);
-  const preferredStartISO = toISO(c.preferredStartISO || c.preferredStart || c.suggestedStartISO || c.suggestedStart);
+  const deadlineISO = toISO(
+    c.deadlineISO || c.deadline || c.dueByISO || c.dueBy
+  );
+  const preferredStartISO = toISO(
+    c.preferredStartISO ||
+      c.preferredStart ||
+      c.suggestedStartISO ||
+      c.suggestedStart
+  );
   const equipment = Array.isArray(c.equipment) ? c.equipment : [];
-  const ingredients = Array.isArray(c.ingredients) ? c.ingredients : (Array.isArray(c.materials) ? c.materials : []);
+  const ingredients = Array.isArray(c.ingredients)
+    ? c.ingredients
+    : Array.isArray(c.materials)
+    ? c.materials
+    : [];
 
   const out = {
     id: c.id || c.sessionId,
     title,
     domain,
     kind: c.kind || (c.meta && c.meta.kind) || "general",
-    estimatedMinutes: isFinite(estimatedMinutes) && estimatedMinutes > 0 ? estimatedMinutes : 0,
+    estimatedMinutes:
+      isFinite(estimatedMinutes) && estimatedMinutes > 0 ? estimatedMinutes : 0,
     deadlineISO,
     preferredStartISO,
     suggestedStartISO: preferredStartISO, // seed
     equipment,
     ingredients,
-    meta: Object.assign({}, c.meta || {})
+    meta: Object.assign({}, c.meta || {}),
   };
 
   // Drop if minimal fields absent
@@ -403,8 +523,11 @@ function normalizeCandidate(c) {
 
 function extractInventoryItems(session) {
   const out = [];
-  const list = Array.isArray(session.ingredients) ? session.ingredients
-    : (Array.isArray(session.materials) ? session.materials : []);
+  const list = Array.isArray(session.ingredients)
+    ? session.ingredients
+    : Array.isArray(session.materials)
+    ? session.materials
+    : [];
   for (let i = 0; i < list.length; i++) {
     const it = list[i] || {};
     const sku = it.sku || it.code || null;
@@ -420,16 +543,23 @@ function pickDomain(d) {
   const s = String(d || "general").toLowerCase();
   switch (s) {
     case "recipe":
-    case "cooking": return "cooking";
-    case "cleaning": return "cleaning";
+    case "cooking":
+      return "cooking";
+    case "cleaning":
+      return "cleaning";
     case "garden":
     case "seed":
-    case "garden/seed": return "garden";
+    case "garden/seed":
+      return "garden";
     case "animal":
-    case "butchery": return "animal";
-    case "preservation": return "preservation";
-    case "storehouse": return "storehouse";
-    default: return "general";
+    case "butchery":
+      return "animal";
+    case "preservation":
+      return "preservation";
+    case "storehouse":
+      return "storehouse";
+    default:
+      return "general";
   }
 }
 
@@ -437,20 +567,26 @@ function toISO(v) {
   const t = Date.parse(v || "");
   return isFiniteMs(t) ? new Date(t).toISOString() : null;
 }
-function toNum(v, def){ const n = Number(v); return isFinite(n) ? n : def; }
-function addMinutesISO(iso, min){
+function toNum(v, def) {
+  const n = Number(v);
+  return isFinite(n) ? n : def;
+}
+function addMinutesISO(iso, min) {
   const t = Date.parse(iso || "");
   if (!isFiniteMs(t)) return null;
   return new Date(t + Math.max(0, Number(min) || 0) * 60000).toISOString();
 }
-function isFiniteMs(n){ return typeof n === "number" && isFinite(n); }
+function isFiniteMs(n) {
+  return typeof n === "number" && isFinite(n);
+}
 
 function planSummary(plan) {
   return {
     alternates: Array.isArray(plan.alternates) ? plan.alternates.length : 0,
-    hasSimplify: !!(plan.simplify),
-    hasBuffers: !!plan.buffers && (plan.buffers.beforeMs > 0 || plan.buffers.afterMs > 0),
-    priority: plan.priority
+    hasSimplify: !!plan.simplify,
+    hasBuffers:
+      !!plan.buffers && (plan.buffers.beforeMs > 0 || plan.buffers.afterMs > 0),
+    priority: plan.priority,
   };
 }
 
@@ -459,13 +595,18 @@ function emitRejected(reason, norm) {
     reason,
     domain: norm && norm.domain,
     kind: norm && (norm.kind || (norm.meta && norm.meta.kind)),
-    title: norm && norm.title
+    title: norm && norm.title,
   });
 }
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type, ts: nowISO(), source: "runtime.controllers.AdmissionController", data });
+    eventBus.emit({
+      type,
+      ts: nowISO(),
+      source: "runtime.controllers.AdmissionController",
+      data,
+    });
   } catch (_) {}
 }
 
@@ -473,7 +614,9 @@ async function exportToHubIfEnabled(payload) {
   if (!featureFlags || !featureFlags.familyFundMode) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
-    const packet = await (HubPacketFormatter.format ? HubPacketFormatter.format(payload) : payload);
+    const packet = await (HubPacketFormatter.format
+      ? HubPacketFormatter.format(payload)
+      : payload);
     if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
       await FamilyFundConnector.send(packet);
     }
@@ -493,7 +636,11 @@ function requireSafe(modulePath) {
     }
     // eslint-disable-next-line global-require, import/no-dynamic-require
     return require(modulePath);
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  }
 }
 
-function nowISO(){ return new Date().toISOString(); }
+function nowISO() {
+  return new Date().toISOString();
+}

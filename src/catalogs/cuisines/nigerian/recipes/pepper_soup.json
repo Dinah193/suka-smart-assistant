@@ -1,0 +1,271 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.pepper_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Nigerian Pepper Soup",
+    "description": "Nigerian pepper soup: a light, aromatic, spicy broth seasoned with pepper soup spice blend, traditionally made with goat meat or fish, and served hot with scent leaf or uziza.",
+    "tags": [
+      "cuisine.nigerian",
+      "soup.broth",
+      "spicy",
+      "goat",
+      "fish_option",
+      "comfort_food",
+      "weeknight.friendly",
+      "gluten_free"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "Suka Smart Assistant",
+      "reference": "Traditional Nigerian pepper soup profile with spice blend and scent leaf/uziza; standardized for SSA catalog.",
+      "url": ""
+    }
+  },
+  "summary": "Aromatic Nigerian pepper soup with goat meat (or fish), built on pepper soup spice blend and fresh aromatics for a light but intensely flavorful, spicy broth served piping hot.",
+  "yields": {
+    "servings": 6,
+    "makes": "About 2.5 quarts (10 cups)"
+  },
+  "difficulty": "beginner",
+  "time": {
+    "prepMinutes": 15,
+    "cookMinutes": 75,
+    "totalMinutes": 90
+  },
+  "diet": {
+    "suitableFor": ["gluten_free", "dairy_free"],
+    "notes": [
+      "Naturally gluten-free and dairy-free; confirm bouillon is GF if used."
+    ]
+  },
+  "allergens": ["fish"],
+  "safety": {
+    "notes": [
+      "For goat: simmer until tender; tougher cuts may need longer.",
+      "For fish: add near the end and avoid overboiling so it doesn’t break apart; remove bones before serving."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "ingredients": [
+        {
+          "id": "ingredient.goat_meat",
+          "label": "Goat meat (bone-in pieces preferred)",
+          "amount": {
+            "value": 900,
+            "unit": "g"
+          },
+          "notes": [
+            "Classic choice. Substitute: chicken, beef, or fish (see variation)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics",
+      "ingredients": [
+        {
+          "id": "ingredient.onion_yellow",
+          "label": "Yellow onion, sliced",
+          "amount": {
+            "value": 180,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.ginger",
+          "label": "Ginger, sliced or lightly crushed",
+          "amount": {
+            "value": 20,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.garlic",
+          "label": "Garlic, crushed",
+          "amount": {
+            "value": 12,
+            "unit": "g"
+          }
+        }
+      ]
+    },
+    {
+      "id": "group.spices_seasoning",
+      "label": "Pepper soup spices and seasoning",
+      "ingredients": [
+        {
+          "id": "ingredient.pepper_soup_spice",
+          "label": "Pepper soup spice blend",
+          "amount": {
+            "value": 18,
+            "unit": "g"
+          },
+          "notes": ["About 2 Tbsp, or to taste depending on blend strength."]
+        },
+        {
+          "id": "ingredient.black_pepper",
+          "label": "Black pepper, ground",
+          "amount": {
+            "value": 2,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.scotch_bonnet",
+          "label": "Scotch bonnet/habanero, whole or sliced",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["Use whole for gentler heat; slice for hotter."]
+        },
+        {
+          "id": "ingredient.salt",
+          "label": "Salt",
+          "amount": {
+            "value": 7,
+            "unit": "g"
+          },
+          "notes": ["Add to taste; start lower if using bouillon."]
+        },
+        {
+          "id": "ingredient.bouillon_powder",
+          "label": "Bouillon powder or cube (crumbled)",
+          "amount": {
+            "value": 4,
+            "unit": "g"
+          },
+          "notes": ["Optional; many versions use it."]
+        }
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish (greens/herbs)",
+      "ingredients": [
+        {
+          "id": "ingredient.scent_leaf",
+          "label": "Scent leaf (efirin) or basil, chopped",
+          "amount": {
+            "value": 20,
+            "unit": "g"
+          },
+          "notes": ["Add at the end for aroma."]
+        },
+        {
+          "id": "ingredient.uziza_leaf_optional",
+          "label": "Uziza leaf (optional), chopped",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["Optional; adds a peppery herbal note."]
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.water",
+      "label": "Water",
+      "amount": {
+        "value": 2000,
+        "unit": "ml"
+      },
+      "notes": ["Adjust depending on pot size and desired strength."]
+    }
+  ],
+  "methods": ["simmer", "boil"],
+  "compat": {
+    "equipmentRequired": [
+      "pot.dutch_oven",
+      "knife.chef",
+      "cutting_board",
+      "spoon.wooden",
+      "ladle"
+    ],
+    "appliancesOptional": ["pressure_cooker"],
+    "notes": [
+      "Pressure cooker can reduce goat cook time; then finish herbs/spice on the stove."
+    ]
+  },
+  "steps": [
+    {
+      "id": "step.clean_meat",
+      "title": "Rinse and prep goat meat",
+      "body": "Rinse goat pieces and trim any excess surface fat. Pat dry. Optional: parboil 5 minutes, drain, and rinse again if you want a cleaner broth."
+    },
+    {
+      "id": "step.build_broth",
+      "title": "Build the broth and start simmering",
+      "body": "Add goat meat, water, onions, ginger, and garlic to a pot. Bring to a boil, then reduce to a steady simmer. Skim any foam if desired. Cover partially and cook until goat is tender, 60–75 minutes (longer for tougher cuts).",
+      "timers": [
+        {
+          "id": "timer.goat_simmer",
+          "label": "Simmer goat until tender",
+          "minutes": 70
+        }
+      ]
+    },
+    {
+      "id": "step.season_spice",
+      "title": "Season with pepper soup spices",
+      "body": "Stir in pepper soup spice blend, black pepper, scotch bonnet (whole or sliced), salt, and optional bouillon. Simmer 10 minutes to bloom spices and deepen aroma.",
+      "timers": [
+        {
+          "id": "timer.bloom_spices",
+          "label": "Bloom spices in broth",
+          "minutes": 10
+        }
+      ]
+    },
+    {
+      "id": "step.finish_herbs",
+      "title": "Finish with herbs/greens",
+      "body": "Turn off heat. Stir in chopped scent leaf (or basil) and optional uziza. Cover 2 minutes to steep. Taste and adjust salt and heat."
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve hot",
+      "body": "Serve piping hot in bowls with meat. Optional accompaniments include boiled yam, rice, or bread. Refrigerate leftovers up to 4 days or freeze up to 2 months."
+    }
+  ],
+  "notes": [
+    "Signature profile: pepper soup is light but intensely aromatic—pepper soup spice blend + fresh herbs are the core.",
+    "Heat control: add scotch bonnet whole for gentler heat; slice or crush for hotter broth.",
+    "Herb timing: add scent leaf/uziza at the end so the aroma stays bright.",
+    "Goat tenderness: if goat is tough, simmer longer or use a pressure cooker then finish with spices/herbs."
+  ],
+  "variations": [
+    {
+      "id": "variation.fish_pepper_soup",
+      "label": "Fish pepper soup",
+      "notes": [
+        "Use 900 g firm fish (catfish/tilapia). Simmer aromatics 15 minutes first, then add fish and pepper soup spice; cook gently 10–12 minutes. Add herbs at the end and remove bones before serving."
+      ]
+    },
+    {
+      "id": "variation.chicken_pepper_soup",
+      "label": "Chicken pepper soup",
+      "notes": [
+        "Use 900 g bone-in chicken pieces. Simmer 30–40 minutes until tender, then proceed with spices and herbs."
+      ]
+    },
+    {
+      "id": "variation.extra_spicy",
+      "label": "Extra spicy",
+      "notes": [
+        "Increase pepper soup spice blend by 1–2 tsp and add a second scotch bonnet (or add a pinch of cayenne)."
+      ]
+    }
+  ]
+}

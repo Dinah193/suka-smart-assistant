@@ -2,10 +2,10 @@
 
 The **Animal Planner** is the SSA hub for planning animal acquisition, breeding, usage, and risk/resilience in a way that stays tightly linked to:
 
-- Storehouse & feed planning  
-- Garden & fodder planning  
-- Butchery & preservation flows  
-- Household health & micronutrient calculators  
+- Storehouse & feed planning
+- Garden & fodder planning
+- Butchery & preservation flows
+- Household health & micronutrient calculators
 - SessionRunner-powered “Now” sessions
 
 This folder contains the UI, logic, Planning Graph configuration, and mapping rules that let the animal domain plug into the global Planning Graph and SessionRunner.
@@ -75,8 +75,10 @@ This folder contains the UI, logic, Planning Graph configuration, and mapping ru
     createdAt,
     updatedAt
   }
+  ```
+
 3. AnimalPlanner.config.json
-Purpose
+   Purpose
 
 Planning Graph node configuration for the Animal Planner.
 
@@ -103,7 +105,7 @@ What inputs or prerequisite calculators it depends on (e.g., homestead goals, st
 Provide a stable contract that the Planning Graph engine can query when constructing higher-level flows (e.g., “Food Stabilization”, “Garden Season Setup”, etc.).
 
 4. AnimalPlanner.mappings.json
-Purpose
+   Purpose
 
 Next-steps mapping rules that connect Animal Planner flows to recommended actions, calculators, and other planners.
 
@@ -192,7 +194,7 @@ Offer Stability dashboard, Food Stabilization Plan, Garden Season Setup.
 These rules are how the Planning Graph engine knows what to surface as “Next best action” when the user finishes a particular Animal Planner flow.
 
 5. AnimalPlanner.routes.js
-Purpose
+   Purpose
 
 Route configuration for the Animal Planner page(s).
 
@@ -232,7 +234,7 @@ import animalPlannerRoutes from "@/features/animal/AnimalPlanner.routes";
 
 // Inside <Routes>
 {animalPlannerRoutes.map((route) => (
-  <Route
+<Route
     key={route.path}
     path={route.path}
     element={route.element}
@@ -245,21 +247,21 @@ The Animal Planner view should not directly manipulate SessionRunner state.
 
 Instead, it should:
 
-Import the eventBus from src/services/eventBus.js.
+Import the eventBus from src/services/events/eventBus.js.
 
 Emit events such as:
 
 js
 Copy code
 eventBus.emit({
-  type: "session.requestNext",
-  ts: new Date().toISOString(),
-  source: "AnimalPlannerView",
-  data: {
-    domain: "animals",
-    focusArea: "animal-breeding-calendar",
-    domainHints: ["animals", "storehouse"]
-  }
+type: "session.requestNext",
+ts: new Date().toISOString(),
+source: "AnimalPlannerView",
+data: {
+domain: "animals",
+focusArea: "animal-breeding-calendar",
+domainHints: ["animals", "storehouse"]
+}
 });
 A global session orchestrator (elsewhere in SSA) listens for session.requestNext:
 

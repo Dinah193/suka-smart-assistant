@@ -1,0 +1,1159 @@
+{
+  "schemaVersion": "1.0",
+  "cuisineKey": "aai",
+  "updatedAt": "2026-01-01T11:58:34Z",
+  "dishes": [
+    {
+      "key": "aai_collards_smoked_beef",
+      "name": "Collard Greens with Smoked Beef Bacon",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "braise",
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_pepper_vinegar",
+        "aai_braise_aromatics"
+      ],
+      "recommendedSides": [
+        "cornbread",
+        "black-eyed peas",
+        "sweet potatoes"
+      ],
+      "tags": [
+        "greens",
+        "lowCarb",
+        "preservationFriendly",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_collards_smoked_lamb",
+      "name": "Collard Greens with Smoked Lamb Bacon",
+      "mealType": "dinner",
+      "primaryProtein": "lamb",
+      "techniques": [
+        "braise"
+      ],
+      "spiceProfiles": [
+        "aai_pepper_vinegar"
+      ],
+      "recommendedSides": [
+        "cornbread",
+        "beans"
+      ],
+      "tags": [
+        "greens",
+        "lowCarb",
+        "preservationFriendly",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_blackeyedpeas_pot",
+      "name": "Black-Eyed Peas Pot (Broth-Based)",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_braise_aromatics"
+      ],
+      "recommendedSides": [
+        "rice",
+        "cornbread",
+        "greens"
+      ],
+      "tags": [
+        "budgetFriendly",
+        "legume",
+        "southern",
+        "stew"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_bbq_goat_plate",
+      "name": "BBQ Goat Plate",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "smoke",
+        "grill"
+      ],
+      "spiceProfiles": [
+        "aai_bbq_sweet_smoke"
+      ],
+      "recommendedSides": [
+        "slaw",
+        "sweet potatoes",
+        "pickles"
+      ],
+      "tags": [
+        "grill",
+        "meatHeavy",
+        "smoke",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "smoker",
+        "grill"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_suya_beef_skewers",
+      "name": "Suya Beef Skewers",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "skewer_grill",
+        "grill"
+      ],
+      "spiceProfiles": [
+        "aai_suya_classic"
+      ],
+      "recommendedSides": [
+        "cabbage slaw",
+        "jollof-style rice",
+        "pickled onion"
+      ],
+      "tags": [
+        "fast",
+        "grill",
+        "spicy",
+        "westAfrican"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "grill"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_suya_goat_skewers",
+      "name": "Suya Goat Skewers",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "skewer_grill",
+        "grill"
+      ],
+      "spiceProfiles": [
+        "aai_suya_classic"
+      ],
+      "recommendedSides": [
+        "slaw",
+        "roasted okra"
+      ],
+      "tags": [
+        "grill",
+        "spicy",
+        "westAfrican"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "grill"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_jollof_beef",
+      "name": "Jollof-Inspired Rice with Beef",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "braise",
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_jollof_base"
+      ],
+      "recommendedSides": [
+        "cucumber salad",
+        "fried plantain (optional)"
+      ],
+      "tags": [
+        "highStarch",
+        "rice",
+        "stewBase",
+        "westAfrican"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_peanut_stew_goat",
+      "name": "Peanut Stew with Goat",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "stew",
+        "braise"
+      ],
+      "spiceProfiles": [
+        "aai_sephardic_stew_spice"
+      ],
+      "recommendedSides": [
+        "rice",
+        "greens"
+      ],
+      "tags": [
+        "comfort",
+        "nutty",
+        "stew",
+        "westAfrican"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {
+        "nutFree": [
+          "sunflower-seed butter",
+          "roasted sesame paste"
+        ]
+      },
+      "avoid": []
+    },
+    {
+      "key": "aai_okra_tomato_beef_stew",
+      "name": "Okra Tomato Stew with Beef",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_okra_tomato_base"
+      ],
+      "recommendedSides": [
+        "rice",
+        "cornbread"
+      ],
+      "tags": [
+        "okra",
+        "southern",
+        "stew"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_gumbo_like_goat",
+      "name": "Gumbo-like Goat & Okra Pot (No Shellfish)",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_okra_tomato_base",
+        "aai_braise_aromatics"
+      ],
+      "recommendedSides": [
+        "rice",
+        "cornbread"
+      ],
+      "tags": [
+        "okra",
+        "southern",
+        "stew",
+        "torahSafeSeafoodFree"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_shawarma_goat_bowl",
+      "name": "Goat Shawarma Bowl",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "roast",
+        "pan-sear"
+      ],
+      "spiceProfiles": [
+        "aai_shawarma_brown",
+        "aai_citrus_garlic"
+      ],
+      "recommendedSides": [
+        "herb salad",
+        "cucumber",
+        "pickled onion"
+      ],
+      "tags": [
+        "bowl",
+        "lowCarb",
+        "mediterranean",
+        "shawarma"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "oven",
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_shawarma_lamb_wrap",
+      "name": "Lamb Shawarma Wrap/Plate",
+      "mealType": "dinner",
+      "primaryProtein": "lamb",
+      "techniques": [
+        "roast"
+      ],
+      "spiceProfiles": [
+        "aai_shawarma_brown"
+      ],
+      "recommendedSides": [
+        "flatbread",
+        "salad",
+        "roasted veg"
+      ],
+      "tags": [
+        "mediterranean",
+        "shawarma"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "oven"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_chermoula_fish",
+      "name": "Chermoula Fish with Greens",
+      "mealType": "dinner",
+      "primaryProtein": "fish",
+      "techniques": [
+        "pan-sear",
+        "grill"
+      ],
+      "spiceProfiles": [
+        "aai_mint_cilantro_chermoula",
+        "aai_citrus_garlic"
+      ],
+      "recommendedSides": [
+        "collards",
+        "roasted okra"
+      ],
+      "tags": [
+        "fast",
+        "fish",
+        "light",
+        "mediterranean"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_beef_sausage_breakfast",
+      "name": "Beef Breakfast Sausage + Eggs",
+      "mealType": "breakfast",
+      "primaryProtein": "beef",
+      "techniques": [
+        "sausage",
+        "pan-fry"
+      ],
+      "spiceProfiles": [
+        "aai_breakfast_sage"
+      ],
+      "recommendedSides": [
+        "waffles",
+        "fruit"
+      ],
+      "tags": [
+        "breakfast",
+        "fast",
+        "sausage",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_lamb_sausage_breakfast",
+      "name": "Lamb Breakfast Sausage + Eggs",
+      "mealType": "breakfast",
+      "primaryProtein": "lamb",
+      "techniques": [
+        "sausage",
+        "pan-fry"
+      ],
+      "spiceProfiles": [
+        "aai_breakfast_sage"
+      ],
+      "recommendedSides": [
+        "waffles"
+      ],
+      "tags": [
+        "breakfast",
+        "sausage",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_beef_bacon_breakfast",
+      "name": "Beef Bacon + Eggs Plate",
+      "mealType": "breakfast",
+      "primaryProtein": "beef",
+      "techniques": [
+        "pan-fry"
+      ],
+      "spiceProfiles": [
+        "aai_black_pepper_molasses"
+      ],
+      "recommendedSides": [
+        "waffles",
+        "fruit"
+      ],
+      "tags": [
+        "breakfast",
+        "cured",
+        "preservationFriendly"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_sweet_potato_hash_goat",
+      "name": "Sweet Potato Hash with Goat",
+      "mealType": "breakfast",
+      "primaryProtein": "goat",
+      "techniques": [
+        "pan-fry"
+      ],
+      "spiceProfiles": [
+        "aai_smoke_chili_lime"
+      ],
+      "recommendedSides": [
+        "eggs"
+      ],
+      "tags": [
+        "breakfast",
+        "rootVeg"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_broccoli_cheddar_soup",
+      "name": "Broccoli (Dairy-Optional) Soup",
+      "mealType": "dinner",
+      "primaryProtein": "vegetarian",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_braise_aromatics"
+      ],
+      "recommendedSides": [
+        "cornbread"
+      ],
+      "tags": [
+        "soup",
+        "vegHeavy",
+        "winter"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {
+        "dairyFree": [
+          "blend potatoes/cauliflower for creaminess"
+        ]
+      },
+      "avoid": []
+    },
+    {
+      "key": "aai_black_bean_soup",
+      "name": "Black Bean Soup (Smoked Meat Optional)",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_bbq_sweet_smoke",
+        "aai_braise_aromatics"
+      ],
+      "recommendedSides": [
+        "cornbread",
+        "rice"
+      ],
+      "tags": [
+        "budgetFriendly",
+        "legume",
+        "soup"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_chicken_noodle_alt",
+      "name": "Noodle Soup (Beef Broth + Veg)",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_stock_roast_bones"
+      ],
+      "recommendedSides": [
+        "bread"
+      ],
+      "tags": [
+        "comfort",
+        "soup"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {
+        "grainFree": [
+          "zucchini noodles",
+          "cabbage ribbons"
+        ]
+      },
+      "avoid": []
+    },
+    {
+      "key": "aai_bbq_lamb_ribs",
+      "name": "Smoked Lamb Ribs",
+      "mealType": "dinner",
+      "primaryProtein": "lamb",
+      "techniques": [
+        "smoke"
+      ],
+      "spiceProfiles": [
+        "aai_bbq_sweet_smoke"
+      ],
+      "recommendedSides": [
+        "slaw",
+        "beans"
+      ],
+      "tags": [
+        "bbq",
+        "holyDay",
+        "smoke"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "smoker"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_grilled_goat_chops",
+      "name": "Grilled Goat Chops",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "grill"
+      ],
+      "spiceProfiles": [
+        "aai_suya_classic",
+        "aai_citrus_garlic"
+      ],
+      "recommendedSides": [
+        "okra pickles",
+        "salad"
+      ],
+      "tags": [
+        "fast",
+        "grill",
+        "lowCarb"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "grill"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_roasted_rootveg_lamb",
+      "name": "Roasted Root Veg + Lamb",
+      "mealType": "dinner",
+      "primaryProtein": "lamb",
+      "techniques": [
+        "roast"
+      ],
+      "spiceProfiles": [
+        "aai_sephardic_stew_spice"
+      ],
+      "recommendedSides": [
+        "greens"
+      ],
+      "tags": [
+        "roast",
+        "winter"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "oven"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_fish_cakes",
+      "name": "Fish Cakes (Fins+Scales fish)",
+      "mealType": "dinner",
+      "primaryProtein": "fish",
+      "techniques": [
+        "pan-fry"
+      ],
+      "spiceProfiles": [
+        "aai_herb_garden"
+      ],
+      "recommendedSides": [
+        "slaw",
+        "greens"
+      ],
+      "tags": [
+        "fish",
+        "pan-fry",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_jerk_like_goat",
+      "name": "Island-Spice Goat (Caribbean-compatible)",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "grill",
+        "roast"
+      ],
+      "spiceProfiles": [
+        "aai_harissa_like",
+        "aai_smoke_chili_lime"
+      ],
+      "recommendedSides": [
+        "cabbage",
+        "sweet potato"
+      ],
+      "tags": [
+        "grill",
+        "spicy"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "grill",
+        "oven"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_bean_rice_bowl",
+      "name": "Beans + Rice Bowl with Pepper Vinegar",
+      "mealType": "lunch",
+      "primaryProtein": "vegetarian",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_pepper_vinegar"
+      ],
+      "recommendedSides": [
+        "slaw"
+      ],
+      "tags": [
+        "budgetFriendly",
+        "legume",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_soup_sandwich_combo",
+      "name": "Soup + Sandwich (Leftover Logic)",
+      "mealType": "lunch",
+      "primaryProtein": "beef",
+      "techniques": [
+        "assemble"
+      ],
+      "spiceProfiles": [
+        "aai_herb_garden"
+      ],
+      "recommendedSides": [
+        "broth",
+        "salad"
+      ],
+      "tags": [
+        "leftovers",
+        "lunch",
+        "workflow"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_stuffed_peppers_beef",
+      "name": "Stuffed Peppers (Beef + Rice)",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "bake"
+      ],
+      "spiceProfiles": [
+        "aai_braise_aromatics"
+      ],
+      "recommendedSides": [
+        "salad"
+      ],
+      "tags": [
+        "bake",
+        "family"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "oven"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_steak_and_greens",
+      "name": "Seared Steak + Garlicky Greens",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "pan-sear"
+      ],
+      "spiceProfiles": [
+        "aai_citrus_garlic"
+      ],
+      "recommendedSides": [
+        "greens",
+        "okra pickles"
+      ],
+      "tags": [
+        "fast",
+        "lowCarb",
+        "meatHeavy"
+      ],
+      "season": "all",
+      "timeBudget": "fast",
+      "budget": "medium",
+      "equipment": [
+        "pan"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_goat_curry_style",
+      "name": "Goat Curry-Style Stew (AAI profile)",
+      "mealType": "dinner",
+      "primaryProtein": "goat",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_berbere_like",
+        "aai_sephardic_stew_spice"
+      ],
+      "recommendedSides": [
+        "rice",
+        "cabbage"
+      ],
+      "tags": [
+        "spiceLayered",
+        "stew"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_roasted_eggplant_tomato",
+      "name": "Roasted Eggplant + Tomato Plate",
+      "mealType": "dinner",
+      "primaryProtein": "vegetarian",
+      "techniques": [
+        "roast"
+      ],
+      "spiceProfiles": [
+        "aai_herb_garden"
+      ],
+      "recommendedSides": [
+        "flatbread",
+        "salad"
+      ],
+      "tags": [
+        "mediterranean",
+        "vegHeavy"
+      ],
+      "season": "all",
+      "timeBudget": "medium",
+      "budget": "medium",
+      "equipment": [
+        "oven"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_falafel_like_chickpea",
+      "name": "Chickpea Patties (Falafel-like)",
+      "mealType": "dinner",
+      "primaryProtein": "vegetarian",
+      "techniques": [
+        "pan-fry",
+        "bake"
+      ],
+      "spiceProfiles": [
+        "aai_herb_garden"
+      ],
+      "recommendedSides": [
+        "salad",
+        "tahini-like sesame sauce"
+      ],
+      "tags": [
+        "legume",
+        "mediterranean"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pan",
+        "oven"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_bone_broth_night",
+      "name": "Bone Broth Night (Prep/Recovery)",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "stock"
+      ],
+      "spiceProfiles": [
+        "aai_stock_roast_bones"
+      ],
+      "recommendedSides": [
+        "salad"
+      ],
+      "tags": [
+        "broth",
+        "lowCarb",
+        "preservationFriendly"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": false,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_sausage_jambalaya_like",
+      "name": "Sausage Rice Pot (Jambalaya-like; Torah-safe)",
+      "mealType": "dinner",
+      "primaryProtein": "beef",
+      "techniques": [
+        "stew"
+      ],
+      "spiceProfiles": [
+        "aai_braise_aromatics",
+        "aai_bbq_sweet_smoke"
+      ],
+      "recommendedSides": [
+        "slaw"
+      ],
+      "tags": [
+        "highStarch",
+        "rice",
+        "sausage",
+        "southern"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "pot"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    },
+    {
+      "key": "aai_fermented_slaw_plate",
+      "name": "Fermented Slaw Side Plate",
+      "mealType": "side",
+      "primaryProtein": "vegetarian",
+      "techniques": [
+        "ferment"
+      ],
+      "spiceProfiles": [
+        "aai_ferment_brine_garlic"
+      ],
+      "recommendedSides": [],
+      "tags": [
+        "ferment",
+        "prepOnceUse3",
+        "side"
+      ],
+      "season": "all",
+      "timeBudget": "long",
+      "budget": "medium",
+      "equipment": [
+        "jar"
+      ],
+      "torahSafe": true,
+      "holyDaySuitable": true,
+      "substitutions": {},
+      "avoid": []
+    }
+  ],
+  "tagTaxonomy": {
+    "mealType": [
+      "breakfast",
+      "lunch",
+      "dinner",
+      "side",
+      "snack"
+    ],
+    "techniques": [
+      "grill",
+      "smoke",
+      "roast",
+      "braise",
+      "stew",
+      "pan-fry",
+      "bake",
+      "ferment",
+      "pickle",
+      "stock",
+      "assemble",
+      "sausage",
+      "skewer_grill"
+    ],
+    "dietTags": [
+      "lowCarb",
+      "highStarch",
+      "grain",
+      "legume",
+      "meatHeavy",
+      "vegHeavy",
+      "sugarAdded"
+    ]
+  }
+}

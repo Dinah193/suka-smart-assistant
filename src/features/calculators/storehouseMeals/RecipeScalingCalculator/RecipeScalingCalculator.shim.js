@@ -9,8 +9,8 @@
  * - Designed to be safe to call from UI, workers, or background flows (no React / DOM assumptions).
  */
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /**
@@ -98,7 +98,7 @@ export async function calculateRecipeScaling(payload) {
     emitCalculatorEvent("calculator.error", {
       calculator: "RecipeScalingCalculator",
       reason: "missing_input",
-      ts
+      ts,
     });
     throw new Error(errorMessage);
   }
@@ -114,9 +114,9 @@ export async function calculateRecipeScaling(payload) {
       recipeName: input.recipeName || baseRecipe.name || null,
       baseServings: input.baseServings,
       targetServings: input.targetServings,
-      scaleFactor: input.scaleFactor
+      scaleFactor: input.scaleFactor,
     },
-    ts
+    ts,
   });
 
   const scalingWarnings = [];
@@ -128,9 +128,7 @@ export async function calculateRecipeScaling(payload) {
   scaleFactor = clampScaleFactor(scaleFactor, input, scalingWarnings);
 
   // Compute scaled servings
-  const scaledServings = Number(
-    (input.baseServings * scaleFactor).toFixed(3)
-  );
+  const scaledServings = Number((input.baseServings * scaleFactor).toFixed(3));
 
   // Scale ingredients
   const inventoryLookup = buildInventoryLookup(input.inventorySnapshot);
@@ -157,13 +155,13 @@ export async function calculateRecipeScaling(payload) {
     appliedScaleFactor: scaleFactor,
     ingredients,
     scalingWarnings,
-    sessionsHints
+    sessionsHints,
   };
 
   const result = {
     input,
     output,
-    meta
+    meta,
   };
 
   emitCalculatorEvent("calculator.completed", {
@@ -172,9 +170,9 @@ export async function calculateRecipeScaling(payload) {
       scaledServings,
       appliedScaleFactor: scaleFactor,
       ingredientCount: ingredients.length,
-      hasWarnings: scalingWarnings.length > 0
+      hasWarnings: scalingWarnings.length > 0,
     },
-    ts: nowIso()
+    ts: nowIso(),
   });
 
   // Optional Hub export if enabled
@@ -208,7 +206,7 @@ function emitCalculatorEvent(type, data) {
       type,
       ts: nowIso(),
       source: "features/calculators/storehouseMeals/RecipeScalingCalculator",
-      data
+      data,
     });
   } catch (err) {
     // Event bus issues should never crash calculations
@@ -260,7 +258,7 @@ function normalizeBaseRecipe(baseRecipe) {
     return {
       id: null,
       name: null,
-      ingredients: []
+      ingredients: [],
     };
   }
 
@@ -278,8 +276,8 @@ function normalizeBaseRecipe(baseRecipe) {
         name: ing.name,
         quantity: typeof ing.quantity === "number" ? ing.quantity : 0,
         unit: ing.unit || "",
-        storehouseItemId: ing.storehouseItemId || null
-      }))
+        storehouseItemId: ing.storehouseItemId || null,
+      })),
   };
 }
 
@@ -297,10 +295,7 @@ function computeScaleFactor(input, scalingWarnings) {
     return input.scaleFactor;
   }
 
-  if (
-    typeof input.targetServings === "number" &&
-    input.targetServings > 0
-  ) {
+  if (typeof input.targetServings === "number" && input.targetServings > 0) {
     const factor = input.targetServings / input.baseServings;
     if (!isFinite(factor) || factor <= 0) {
       scalingWarnings.push(
@@ -370,10 +365,8 @@ function buildInventoryLookup(snapshot) {
     if (!item || !item.storehouseItemId) return;
     lookup[item.storehouseItemId] = {
       quantityAvailable:
-        typeof item.quantityAvailable === "number"
-          ? item.quantityAvailable
-          : 0,
-      unit: item.unit || ""
+        typeof item.quantityAvailable === "number" ? item.quantityAvailable : 0,
+      unit: item.unit || "",
     };
   });
 
@@ -410,9 +403,7 @@ function scaleIngredient(
 ) {
   const warnings = [];
   const baseQuantity =
-    typeof ing.quantity === "number" && ing.quantity >= 0
-      ? ing.quantity
-      : 0;
+    typeof ing.quantity === "number" && ing.quantity >= 0 ? ing.quantity : 0;
 
   const exactScaled = baseQuantity * factor;
   const scaledQuantity = applyRounding(exactScaled, roundingMode);
@@ -439,17 +430,13 @@ function scaleIngredient(
         warnings.push(
           `Inventory low for ${ing.name}: need ${scaledQuantity} ${scaledUnit}, but only ${inv.quantityAvailable} available.`
         );
-        globalWarnings.push(
-          `Low inventory for ingredient: ${ing.name}.`
-        );
+        globalWarnings.push(`Low inventory for ingredient: ${ing.name}.`);
       } else {
         inventoryStatus = "shortage";
         warnings.push(
           `Inventory shortage for ${ing.name}: need ${scaledQuantity} ${scaledUnit}, but none available.`
         );
-        globalWarnings.push(
-          `Inventory shortage for ingredient: ${ing.name}.`
-        );
+        globalWarnings.push(`Inventory shortage for ingredient: ${ing.name}.`);
       }
     }
   }
@@ -464,7 +451,7 @@ function scaleIngredient(
     storehouseItemId: ing.storehouseItemId || null,
     inventoryStatus,
     inventoryDelta,
-    warnings
+    warnings,
   };
 }
 
@@ -509,12 +496,7 @@ function applyRounding(value, roundingMode) {
  * @param {number} scaleFactor
  * @returns {{ recommendedBatchCount: number|null, estimatedTotalCookMinutes: number|null }}
  */
-function buildSessionsHints(
-  input,
-  scaledServings,
-  baseRecipe,
-  scaleFactor
-) {
+function buildSessionsHints(input, scaledServings, baseRecipe, scaleFactor) {
   let recommendedBatchCount = null;
   let estimatedTotalCookMinutes = null;
 
@@ -537,7 +519,7 @@ function buildSessionsHints(
 
   return {
     recommendedBatchCount,
-    estimatedTotalCookMinutes
+    estimatedTotalCookMinutes,
   };
 }
 
@@ -558,7 +540,7 @@ function buildMeta(meta, input) {
   return {
     calculatorVersion: "1.0.0",
     invokedAt,
-    householdId
+    householdId,
   };
 }
 
@@ -574,14 +556,14 @@ async function exportToHubIfEnabled(result) {
   try {
     const packet = HubPacketFormatter.formatCalculatorResult({
       calculator: "RecipeScalingCalculator",
-      result
+      result,
     });
 
     await FamilyFundConnector.send(packet);
 
     emitCalculatorEvent("session.exported", {
       calculator: "RecipeScalingCalculator",
-      success: true
+      success: true,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -593,5 +575,5 @@ async function exportToHubIfEnabled(result) {
 }
 
 export default {
-  calculateRecipeScaling
+  calculateRecipeScaling,
 };

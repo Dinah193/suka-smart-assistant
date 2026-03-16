@@ -37,30 +37,36 @@ const path = require("path");
 // ---------- shared services (defensive requires) ----------
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 // ---------- domain stores/engines (defensive) ----------
-const LiveSessionStore = requireSafe("@/engines/scheduling/LiveSessionStore.js"); // getActive(), getById(), update(), appendNote()
-const SessionControl   = requireSafe("@/engines/scheduling/SessionControl.js");   // pause(), resume(), extend(), split(), abort()
-const Inventory        = requireSafe("@/domain/inventory/InventoryService.js");   // driftSinceReservation(sessionId)
-const Storehouse       = requireSafe("@/domain/storehouse/StorehouseService.js"); // sensorSnapshot?(equipmentIds)
-const constraints      = requireSafe("@/engines/scheduling/policies/constraints.js");
-const buffersPolicy    = requireSafe("@/engines/scheduling/policies/buffers.js");
-const priorities       = requireSafe("@/engines/scheduling/policies/priorities.js");
-const OptionsEngine    = requireSafe("@/engines/scheduling/admission/options.js"); // simplifyVariant({session,...})
+const LiveSessionStore = requireSafe(
+  "@/engines/scheduling/LiveSessionStore.js"
+); // getActive(), getById(), update(), appendNote()
+const SessionControl = requireSafe("@/engines/scheduling/SessionControl.js"); // pause(), resume(), extend(), split(), abort()
+const Inventory = requireSafe("@/domain/inventory/InventoryService.js"); // driftSinceReservation(sessionId)
+const Storehouse = requireSafe("@/domain/storehouse/StorehouseService.js"); // sensorSnapshot?(equipmentIds)
+const constraints = requireSafe("@/engines/scheduling/policies/constraints.js");
+const buffersPolicy = requireSafe("@/engines/scheduling/policies/buffers.js");
+const priorities = requireSafe("@/engines/scheduling/policies/priorities.js");
+const OptionsEngine = requireSafe("@/engines/scheduling/admission/options.js"); // simplifyVariant({session,...})
 
 // ---------- public API ----------
 module.exports = {
@@ -83,13 +89,22 @@ module.exports = {
     }
 
     if (!LiveSessionStore || typeof LiveSessionStore.getActive !== "function") {
-      emit("risk.monitor.completed", { ok: false, reason: "missing-live-store" });
+      emit("risk.monitor.completed", {
+        ok: false,
+        reason: "missing-live-store",
+      });
       return { ok: false, inspected: 0, actions: 0 };
     }
 
     emit("risk.monitor.started", {
       maxToInspect: cfg.maxToInspect,
-      policy: pick(cfg, ["allowStepSubstitution","allowExtend","allowPause","allowAbortOnUnsafe","allowThrottle"])
+      policy: pick(cfg, [
+        "allowStepSubstitution",
+        "allowExtend",
+        "allowPause",
+        "allowAbortOnUnsafe",
+        "allowThrottle",
+      ]),
     });
 
     let active = [];
@@ -109,7 +124,11 @@ module.exports = {
       const ctx = await buildContext(session);
 
       const score = scoreRisk(session, ctx);
-      emit("risk.session.scored", { sessionId: sid(session), score, ctx: minCtx(ctx) });
+      emit("risk.session.scored", {
+        sessionId: sid(session),
+        score,
+        ctx: minCtx(ctx),
+      });
 
       // Safety first: abort if actively unsafe and policy allows.
       if (score.flags.unsafe && cfg.allowAbortOnUnsafe) {
@@ -142,7 +161,7 @@ module.exports = {
         type: "risk.monitor.delta",
         ts: new Date().toISOString(),
         source: "runtime.controllers.RiskController",
-        data: summary
+        data: summary,
       });
     }
     return summary;
@@ -158,15 +177,18 @@ module.exports = {
     const id = a.sessionId;
     const action = String(a.action || "").toLowerCase();
     if (!id || !action) return { ok: false, error: "invalid-args" };
-    if (!LiveSessionStore || typeof LiveSessionStore.getById !== "function") return { ok: false, error: "missing-live-store" };
+    if (!LiveSessionStore || typeof LiveSessionStore.getById !== "function")
+      return { ok: false, error: "missing-live-store" };
 
     let s = null;
-    try { s = await LiveSessionStore.getById(id); } catch (_) {}
+    try {
+      s = await LiveSessionStore.getById(id);
+    } catch (_) {}
     if (!s) return { ok: false, error: "session-not-found" };
 
     const res = await applyAction(s, action, a.params || {});
     return res || { ok: false, error: "action-failed" };
-  }
+  },
 };
 
 // ---------- mitigation strategies ----------
@@ -175,22 +197,36 @@ async function mitigateHighRisk(session, ctx, cfg) {
   // Priority: pause (if safe), substitute risky steps, extend time, throttle concurrency, escalate.
   // Return true if *any* action was applied.
   // 1) Pause if equipment overheating or constraint breach
-  if (cfg.allowPause && (ctx.sensors.overheat || ctx.constraints.disallowedNow)) {
+  if (
+    cfg.allowPause &&
+    (ctx.sensors.overheat || ctx.constraints.disallowedNow)
+  ) {
     if (await safePause(session, "safety-pause")) return true;
   }
 
   // 2) Step substitution (simplify variant, e.g., lower-heat method)
   if (cfg.allowStepSubstitution) {
-    const sub = await trySimplify(session, { intent: "risk-reduce", maxReductionPercent: 0.4 });
+    const sub = await trySimplify(session, {
+      intent: "risk-reduce",
+      maxReductionPercent: 0.4,
+    });
     if (sub && sub.ok) return true;
   }
 
   // 3) Extend time buffers (if possible)
-  if (cfg.allowExtend && await safeExtend(session, ctx, 15, "extend-buffer-high-risk")) return true;
+  if (
+    cfg.allowExtend &&
+    (await safeExtend(session, ctx, 15, "extend-buffer-high-risk"))
+  )
+    return true;
 
   // 4) Throttle: pause a concurrent non-critical session (if any)
   if (cfg.allowThrottle) {
-    const throttled = await tryShedNonCritical(session, ctx, "throttle-concurrency");
+    const throttled = await tryShedNonCritical(
+      session,
+      ctx,
+      "throttle-concurrency"
+    );
     if (throttled) return true;
   }
 
@@ -201,9 +237,17 @@ async function mitigateHighRisk(session, ctx, cfg) {
 
 async function mitigateModerateRisk(session, ctx, cfg) {
   // Priority: extend time or soft-pause to regain buffer
-  if (cfg.allowExtend && await safeExtend(session, ctx, 10, "extend-buffer-moderate")) return true;
+  if (
+    cfg.allowExtend &&
+    (await safeExtend(session, ctx, 10, "extend-buffer-moderate"))
+  )
+    return true;
 
-  if (cfg.allowPause && ctx.buffers.preBeforeMs < 2 * MINUTE && ctx.progress.behindByMinutes > 5) {
+  if (
+    cfg.allowPause &&
+    ctx.buffers.preBeforeMs < 2 * MINUTE &&
+    ctx.progress.behindByMinutes > 5
+  ) {
     return await safePause(session, "stabilize");
   }
   return false;
@@ -213,88 +257,183 @@ async function mitigateModerateRisk(session, ctx, cfg) {
 
 async function applyAction(session, action, params) {
   switch (action) {
-    case "pause":   return await safePause(session, params && params.reason || "manual");
-    case "resume":  return await safeResume(session, params && params.reason || "manual");
-    case "extend":  return await safeExtend(session, await buildContext(session), Number(params && params.minutes || 10), params && params.reason || "manual-extend");
-    case "split":   return await safeSplit(session, Number(params && params.minutes || 15), params && params.reason || "manual-split");
-    case "abort":   return await safeAbort(session, params && params.reason || "manual");
+    case "pause":
+      return await safePause(session, (params && params.reason) || "manual");
+    case "resume":
+      return await safeResume(session, (params && params.reason) || "manual");
+    case "extend":
+      return await safeExtend(
+        session,
+        await buildContext(session),
+        Number((params && params.minutes) || 10),
+        (params && params.reason) || "manual-extend"
+      );
+    case "split":
+      return await safeSplit(
+        session,
+        Number((params && params.minutes) || 15),
+        (params && params.reason) || "manual-split"
+      );
+    case "abort":
+      return await safeAbort(session, (params && params.reason) || "manual");
     case "simplify": {
-      const res = await trySimplify(session, { intent: "manual", maxReductionPercent: Number(params && params.maxReductionPercent || 0.3) });
+      const res = await trySimplify(session, {
+        intent: "manual",
+        maxReductionPercent: Number(
+          (params && params.maxReductionPercent) || 0.3
+        ),
+      });
       return res || { ok: false, error: "simplify-failed" };
     }
-    default: return { ok: false, error: "unknown-action" };
+    default:
+      return { ok: false, error: "unknown-action" };
   }
 }
 
 async function safePause(session, reason) {
-  if (!SessionControl || typeof SessionControl.pause !== "function") return false;
+  if (!SessionControl || typeof SessionControl.pause !== "function")
+    return false;
   try {
     const ok = await SessionControl.pause({ id: sid(session), reason });
     if (ok) {
       const data = { sessionId: sid(session), action: "pause", reason };
       emit("risk.session.action.applied", data);
-      await exportToHubIfEnabled({ type: "risk.session.action.applied", ts: nowISO(), source: SRC, data });
+      await exportToHubIfEnabled({
+        type: "risk.session.action.applied",
+        ts: nowISO(),
+        source: SRC,
+        data,
+      });
     }
     return !!ok;
-  } catch (_) { return false; }
+  } catch (_) {
+    return false;
+  }
 }
 
 async function safeResume(session, reason) {
-  if (!SessionControl || typeof SessionControl.resume !== "function") return false;
+  if (!SessionControl || typeof SessionControl.resume !== "function")
+    return false;
   try {
     const ok = await SessionControl.resume({ id: sid(session), reason });
     if (ok) {
       const data = { sessionId: sid(session), action: "resume", reason };
       emit("risk.session.action.applied", data);
-      await exportToHubIfEnabled({ type: "risk.session.action.applied", ts: nowISO(), source: SRC, data });
+      await exportToHubIfEnabled({
+        type: "risk.session.action.applied",
+        ts: nowISO(),
+        source: SRC,
+        data,
+      });
     }
     return !!ok;
-  } catch (_) { return false; }
+  } catch (_) {
+    return false;
+  }
 }
 
 async function safeExtend(session, ctx, minutes, reason) {
-  if (!SessionControl || typeof SessionControl.extend !== "function") return false;
+  if (!SessionControl || typeof SessionControl.extend !== "function")
+    return false;
   const min = Math.max(1, Number(minutes || 0));
   // Respect constraints: ensure the new end time remains allowed
-  const newEndISO = addMinutesISO(session.live && session.live.expectedEndISO || session.plannedEndISO, min);
-  if (!(await allowedAtWindow(session, session.plannedStartISO || nowISO(), newEndISO))) return false;
+  const newEndISO = addMinutesISO(
+    (session.live && session.live.expectedEndISO) || session.plannedEndISO,
+    min
+  );
+  if (
+    !(await allowedAtWindow(
+      session,
+      session.plannedStartISO || nowISO(),
+      newEndISO
+    ))
+  )
+    return false;
 
   try {
-    const ok = await SessionControl.extend({ id: sid(session), minutes: min, reason });
+    const ok = await SessionControl.extend({
+      id: sid(session),
+      minutes: min,
+      reason,
+    });
     if (ok) {
-      const data = { sessionId: sid(session), action: "extend", minutes: min, reason };
+      const data = {
+        sessionId: sid(session),
+        action: "extend",
+        minutes: min,
+        reason,
+      };
       emit("risk.session.action.applied", data);
-      await exportToHubIfEnabled({ type: "risk.session.action.applied", ts: nowISO(), source: SRC, data });
+      await exportToHubIfEnabled({
+        type: "risk.session.action.applied",
+        ts: nowISO(),
+        source: SRC,
+        data,
+      });
     }
     return !!ok;
-  } catch (_) { return false; }
+  } catch (_) {
+    return false;
+  }
 }
 
 async function safeSplit(session, minutes, reason) {
-  if (!SessionControl || typeof SessionControl.split !== "function") return false;
+  if (!SessionControl || typeof SessionControl.split !== "function")
+    return false;
   const min = Math.max(5, Number(minutes || 0));
   try {
-    const ok = await SessionControl.split({ id: sid(session), remainingMinutes: min, reason });
+    const ok = await SessionControl.split({
+      id: sid(session),
+      remainingMinutes: min,
+      reason,
+    });
     if (ok) {
-      const data = { sessionId: sid(session), action: "split", remainingMinutes: min, reason };
+      const data = {
+        sessionId: sid(session),
+        action: "split",
+        remainingMinutes: min,
+        reason,
+      };
       emit("risk.session.action.applied", data);
-      await exportToHubIfEnabled({ type: "risk.session.action.applied", ts: nowISO(), source: SRC, data });
+      await exportToHubIfEnabled({
+        type: "risk.session.action.applied",
+        ts: nowISO(),
+        source: SRC,
+        data,
+      });
     }
     return !!ok;
-  } catch (_) { return false; }
+  } catch (_) {
+    return false;
+  }
 }
 
 async function safeAbort(session, reason) {
-  if (!SessionControl || typeof SessionControl.abort !== "function") return false;
+  if (!SessionControl || typeof SessionControl.abort !== "function")
+    return false;
   try {
-    const ok = await SessionControl.abort({ id: sid(session), reason: reason || "risk-abort" });
+    const ok = await SessionControl.abort({
+      id: sid(session),
+      reason: reason || "risk-abort",
+    });
     if (ok) {
-      const data = { sessionId: sid(session), action: "abort", reason: reason || "risk-abort" };
+      const data = {
+        sessionId: sid(session),
+        action: "abort",
+        reason: reason || "risk-abort",
+      };
       emit("risk.session.aborted", data);
-      await exportToHubIfEnabled({ type: "risk.session.aborted", ts: nowISO(), source: SRC, data });
+      await exportToHubIfEnabled({
+        type: "risk.session.aborted",
+        ts: nowISO(),
+        source: SRC,
+        data,
+      });
     }
     return !!ok;
-  } catch (_) { return false; }
+  } catch (_) {
+    return false;
+  }
 }
 
 async function trySimplify(session, opts) {
@@ -302,11 +441,26 @@ async function trySimplify(session, opts) {
   const fn = OptionsEngine.simplifyVariant || OptionsEngine.simplify || null;
   if (!fn) return null;
   try {
-    const res = await fn({ session, intent: opts.intent, maxReductionPercent: opts.maxReductionPercent, dryRun: false });
+    const res = await fn({
+      session,
+      intent: opts.intent,
+      maxReductionPercent: opts.maxReductionPercent,
+      dryRun: false,
+    });
     if (res && res.accepted) {
-      const data = { sessionId: sid(session), action: "simplify", variant: res.variant, intent: opts.intent };
+      const data = {
+        sessionId: sid(session),
+        action: "simplify",
+        variant: res.variant,
+        intent: opts.intent,
+      };
       emit("risk.session.action.applied", data);
-      await exportToHubIfEnabled({ type: "risk.session.action.applied", ts: nowISO(), source: SRC, data });
+      await exportToHubIfEnabled({
+        type: "risk.session.action.applied",
+        ts: nowISO(),
+        source: SRC,
+        data,
+      });
       return { ok: true, variant: res.variant };
     }
   } catch (_) {}
@@ -314,17 +468,32 @@ async function trySimplify(session, opts) {
 }
 
 async function tryShedNonCritical(session, ctx, reason) {
-  if (!priorities || typeof priorities.scoreSessions !== "function" || !LiveSessionStore) return false;
+  if (
+    !priorities ||
+    typeof priorities.scoreSessions !== "function" ||
+    !LiveSessionStore
+  )
+    return false;
   let others = [];
-  try { others = await LiveSessionStore.getActive(); } catch (_) {}
-  others = Array.isArray(others) ? others.filter(s => sid(s) !== sid(session)) : [];
+  try {
+    others = await LiveSessionStore.getActive();
+  } catch (_) {}
+  others = Array.isArray(others)
+    ? others.filter((s) => sid(s) !== sid(session))
+    : [];
   if (!others.length) return false;
 
   // Score and find lowest-priority non-hard session to pause
   let scored = [];
-  try { scored = await priorities.scoreSessions(others); } catch (_) { scored = others.map(s => ({ session: s, score: 0 })); }
+  try {
+    scored = await priorities.scoreSessions(others);
+  } catch (_) {
+    scored = others.map((s) => ({ session: s, score: 0 }));
+  }
   scored.sort((a, b) => a.score - b.score);
-  const candidate = scored.find(x => !(x.session && x.session.policy && x.session.policy.hard));
+  const candidate = scored.find(
+    (x) => !(x.session && x.session.policy && x.session.policy.hard)
+  );
   if (!candidate) return false;
 
   return await safePause(candidate.session, reason);
@@ -340,16 +509,36 @@ const SRC = "runtime.controllers.RiskController";
  */
 async function buildContext(session) {
   const now = Date.now();
-  const startT = Date.parse(session.live && session.live.startedAtISO || session.plannedStartISO || session.suggestedStartISO || session.deadlineISO || nowISO());
-  const expEndT = Date.parse(session.live && session.live.expectedEndISO || session.plannedEndISO || addMinutesISO(new Date(startT).toISOString(), Number(session.estimatedMinutes || 0)));
+  const startT = Date.parse(
+    (session.live && session.live.startedAtISO) ||
+      session.plannedStartISO ||
+      session.suggestedStartISO ||
+      session.deadlineISO ||
+      nowISO()
+  );
+  const expEndT = Date.parse(
+    (session.live && session.live.expectedEndISO) ||
+      session.plannedEndISO ||
+      addMinutesISO(
+        new Date(startT).toISOString(),
+        Number(session.estimatedMinutes || 0)
+      )
+  );
 
   // Buffers (policy-driven)
-  let beforeMs = 0, afterMs = 0;
+  let beforeMs = 0,
+    afterMs = 0;
   try {
-    if (buffersPolicy && typeof buffersPolicy.getRecommendedBuffer === "function") {
-      const rec = buffersPolicy.getRecommendedBuffer(session.domain || "general", session.meta && session.meta.kind);
-      beforeMs = Number(rec && rec.beforeMs || 0);
-      afterMs = Number(rec && rec.afterMs || 0);
+    if (
+      buffersPolicy &&
+      typeof buffersPolicy.getRecommendedBuffer === "function"
+    ) {
+      const rec = buffersPolicy.getRecommendedBuffer(
+        session.domain || "general",
+        session.meta && session.meta.kind
+      );
+      beforeMs = Number((rec && rec.beforeMs) || 0);
+      afterMs = Number((rec && rec.afterMs) || 0);
     }
   } catch (_) {}
 
@@ -357,7 +546,9 @@ async function buildContext(session) {
   let disallowedNow = false;
   try {
     if (constraints && typeof constraints.isAllowed === "function") {
-      disallowedNow = !(await constraints.isAllowed(session, { nowISO: nowISO() }));
+      disallowedNow = !(await constraints.isAllowed(session, {
+        nowISO: nowISO(),
+      }));
     }
   } catch (_) {}
 
@@ -375,7 +566,11 @@ async function buildContext(session) {
   let sensors = { overheat: false, offline: false };
   try {
     const eq = Array.isArray(session.equipment) ? session.equipment : [];
-    if (Storehouse && typeof Storehouse.sensorSnapshot === "function" && eq.length) {
+    if (
+      Storehouse &&
+      typeof Storehouse.sensorSnapshot === "function" &&
+      eq.length
+    ) {
       const snap = await Storehouse.sensorSnapshot(eq);
       sensors.overheat = !!(snap && snap.anyOverheat);
       sensors.offline = !!(snap && snap.anyOffline);
@@ -385,17 +580,34 @@ async function buildContext(session) {
   // Progress estimation
   const elapsedMin = Math.max(0, Math.round((now - startT) / MINUTE));
   const estMin = Number(session.estimatedMinutes || 0);
-  const expectedProgress = Math.min(100, estMin > 0 ? Math.round((elapsedMin / estMin) * 100) : 0);
-  const observedProgress = Number(session.live && session.live.progressPct || session.progressPct || 0);
-  const behindBy = Math.max(0, Math.round((expectedProgress - observedProgress) * estMin / 100));
+  const expectedProgress = Math.min(
+    100,
+    estMin > 0 ? Math.round((elapsedMin / estMin) * 100) : 0
+  );
+  const observedProgress = Number(
+    (session.live && session.live.progressPct) || session.progressPct || 0
+  );
+  const behindBy = Math.max(
+    0,
+    Math.round(((expectedProgress - observedProgress) * estMin) / 100)
+  );
 
   return {
-    time: { nowISO: nowISO(), startISO: new Date(startT).toISOString(), expEndISO: new Date(expEndT).toISOString() },
+    time: {
+      nowISO: nowISO(),
+      startISO: new Date(startT).toISOString(),
+      expEndISO: new Date(expEndT).toISOString(),
+    },
     buffers: { preBeforeMs: beforeMs, postAfterMs: afterMs },
     constraints: { disallowedNow },
     inventory: drift,
     sensors,
-    progress: { elapsedMin: elapsedMin, expectedProgressPct: expectedProgress, observedProgressPct: observedProgress, behindByMinutes: behindBy }
+    progress: {
+      elapsedMin: elapsedMin,
+      expectedProgressPct: expectedProgress,
+      observedProgressPct: observedProgress,
+      behindByMinutes: behindBy,
+    },
   };
 }
 
@@ -405,21 +617,25 @@ async function buildContext(session) {
 function scoreRisk(session, ctx) {
   // Base risk indicators
   const latenessMin = ctx.progress.behindByMinutes;
-  const inventoryRisk = ctx.inventory.missing ? 2 : (ctx.inventory.low ? 1 : 0);
-  const sensorRisk = ctx.sensors.overheat ? 2 : (ctx.sensors.offline ? 1 : 0);
+  const inventoryRisk = ctx.inventory.missing ? 2 : ctx.inventory.low ? 1 : 0;
+  const sensorRisk = ctx.sensors.overheat ? 2 : ctx.sensors.offline ? 1 : 0;
   const constraintRisk = ctx.constraints.disallowedNow ? 2 : 0;
 
   // Combine with buffers (less pre-buffer -> higher risk)
   const preMin = Math.round(ctx.buffers.preBeforeMs / MINUTE);
-  const bufferPenalty = preMin < 5 ? 2 : (preMin < 10 ? 1 : 0);
+  const bufferPenalty = preMin < 5 ? 2 : preMin < 10 ? 1 : 0;
 
-  const score = (latenessMin >= 15 ? 2 : (latenessMin >= 5 ? 1 : 0))
-              + inventoryRisk + sensorRisk + constraintRisk + bufferPenalty;
+  const score =
+    (latenessMin >= 15 ? 2 : latenessMin >= 5 ? 1 : 0) +
+    inventoryRisk +
+    sensorRisk +
+    constraintRisk +
+    bufferPenalty;
 
   const flags = {
-    unsafe: (ctx.sensors.overheat || constraintRisk >= 2),
+    unsafe: ctx.sensors.overheat || constraintRisk >= 2,
     lowInventory: ctx.inventory.low || ctx.inventory.missing,
-    behind: latenessMin >= 5
+    behind: latenessMin >= 5,
   };
 
   let level = "low";
@@ -434,27 +650,35 @@ function scoreRisk(session, ctx) {
 async function allowedAtWindow(session, startISO, endISO) {
   if (!constraints || typeof constraints.isAllowed !== "function") return true;
   try {
-    return !!(await constraints.isAllowed(session, { nowISO: nowISO(), startISO, endISO }));
+    return !!(await constraints.isAllowed(session, {
+      nowISO: nowISO(),
+      startISO,
+      endISO,
+    }));
   } catch (_) {
     return true;
   }
 }
 
-function sid(s){ return s && (s.id || s.sessionId); }
-function nowISO(){ return new Date().toISOString(); }
-function addMinutesISO(iso, min){
+function sid(s) {
+  return s && (s.id || s.sessionId);
+}
+function nowISO() {
+  return new Date().toISOString();
+}
+function addMinutesISO(iso, min) {
   const t = Date.parse(iso || "");
   if (!isFinite(t)) return null;
   return new Date(t + Math.max(0, Number(min) || 0) * MINUTE).toISOString();
 }
 
-function minCtx(ctx){
+function minCtx(ctx) {
   return {
     time: ctx.time,
     inv: ctx.inventory,
     sens: ctx.sensors,
     prog: { behindByMinutes: ctx.progress.behindByMinutes },
-    buf: { preBeforeMs: ctx.buffers.preBeforeMs }
+    buf: { preBeforeMs: ctx.buffers.preBeforeMs },
   };
 }
 
@@ -469,13 +693,15 @@ function normalizeArgs(args) {
     allowPause: flag(a.allowPause, true),
     allowAbortOnUnsafe: flag(a.allowAbortOnUnsafe, true),
     allowThrottle: flag(a.allowThrottle, true),
-    timezone: a.timezone || "America/Chicago"
+    timezone: a.timezone || "America/Chicago",
   };
 }
 
-function flag(v, def){ return (v != null) ? !!v : !!def; }
+function flag(v, def) {
+  return v != null ? !!v : !!def;
+}
 
-function pick(obj, keys){
+function pick(obj, keys) {
   const out = {};
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i];
@@ -495,7 +721,9 @@ function requireSafe(modulePath) {
     }
     // eslint-disable-next-line global-require, import/no-dynamic-require
     return require(modulePath);
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  }
 }
 
 function emit(type, data) {
@@ -508,7 +736,9 @@ async function exportToHubIfEnabled(payload) {
   if (!featureFlags || !featureFlags.familyFundMode) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
-    const packet = await (HubPacketFormatter.format ? HubPacketFormatter.format(payload) : payload);
+    const packet = await (HubPacketFormatter.format
+      ? HubPacketFormatter.format(payload)
+      : payload);
     if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
       await FamilyFundConnector.send(packet);
     }

@@ -20,10 +20,10 @@
 
 /* ---------------------------------- Imports ---------------------------------- */
 
-import { emitEvent } from "../eventBus";
-import { featureFlags } from "../featureFlags";
-import { HubPacketFormatter } from "../hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../hub/FamilyFundConnector";
+import { emitEvent } from "../events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* --------------------------------- Constants --------------------------------- */
 

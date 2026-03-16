@@ -1,0 +1,213 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "breads.crusty_rolls",
+    "slug": "crusty_rolls",
+    "name": "Crusty Sausage Rolls (for Brats and Sausages)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "breads",
+      "rolls",
+      "crusty",
+      "sausage-rolls",
+      "brats",
+      "sandwich",
+      "bbq",
+      "freezer-friendly",
+      "make-ahead",
+      "steam-bake"
+    ],
+    "allergens": ["wheat"],
+    "description": "Crusty, sturdy rolls designed to hold brats and sausages: crisp crust, chewy interior, and enough structure to handle juices and toppings. Uses a simple preferment (poolish) for flavor and a steam bake for crust. Includes commercial flour or fine fresh-milled flour guidance (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    {
+      "id": "baking_steel_or_stone",
+      "label": "Baking steel/stone (recommended) or heavy sheet pan"
+    },
+    { "id": "sheet_pan", "label": "Sheet pan" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "bench_scraper", "label": "Bench scraper" },
+    {
+      "id": "lame_or_razor",
+      "label": "Lame/razor or sharp knife (for scoring)"
+    },
+    {
+      "id": "spray_bottle",
+      "label": "Spray bottle (optional, for steam)",
+      "optional": true
+    },
+    {
+      "id": "cast_iron_pan",
+      "label": "Cast iron pan/tray (for steam)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "poolish_flour",
+      "label": "Bread flour (poolish)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "From your chosen flour option."
+    },
+    {
+      "id": "poolish_water",
+      "label": "Water, room temperature (poolish)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "1:1 by weight for poolish."
+    },
+    {
+      "id": "poolish_yeast",
+      "label": "Instant yeast (poolish)",
+      "amount": { "value": 0.3, "unit": "g" },
+      "notes": "Pinch (about 1/8 tsp)."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR fresh-milled option): bread flour",
+      "amount": { "value": 350, "unit": "g" },
+      "notes": "Use with poolish flour for total ~500 g flour. Bread flour gives the best chew/structure for sausage rolls."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR commercial option): fine-milled, sifted",
+      "amount": { "value": 350, "unit": "g" },
+      "notes": "Fine-mill and sift coarse bran for better gluten development. Fresh-milled absorbs more; you may need +10–30 g water."
+    },
+
+    {
+      "id": "water_main",
+      "label": "Water (main dough)",
+      "amount": { "value": 190, "unit": "g" },
+      "notes": "Adjust as needed; final hydration target is ~68–72% depending on flour."
+    },
+    {
+      "id": "water_adjustment_optional",
+      "label": "Extra water (fresh-milled adjustment)",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "Add as needed if dough is stiff/dry with fresh-milled flour.",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 1 3/4 tsp."
+    },
+    {
+      "id": "sugar_optional",
+      "label": "Sugar (optional, slight browning boost)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 2 tsp. Optional; improves color if your oven bakes pale.",
+      "optional": true
+    },
+    {
+      "id": "oil_optional",
+      "label": "Olive oil or neutral oil (optional, slightly softer bite)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 2 tsp. Optional; traditional crusty rolls can omit.",
+      "optional": true
+    },
+    {
+      "id": "yeast_main",
+      "label": "Instant yeast (main dough)",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 tsp. Poolish provides much of the fermentation."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_make_poolish",
+      "title": "Make poolish (8–16 hours)",
+      "body": "Mix poolish flour, poolish water, and a pinch of yeast until smooth. Cover and let ferment at room temperature 8–16 hours until bubbly and domed (just starting to recede)."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled option (not both). Fresh-milled should be fine-milled and sifted for best roll structure."
+    },
+    {
+      "id": "step_03_mix_autolyse",
+      "title": "Mix and autolyse (optional but recommended)",
+      "body": "In a large bowl, combine main flour and main water (hold back ~20 g water). Mix until no dry flour remains. Cover and rest 20 minutes. This improves extensibility and crust."
+    },
+    {
+      "id": "step_04_add_poolish_salt_yeast",
+      "title": "Add poolish, salt, and yeast",
+      "body": "Add the poolish, salt, and main yeast (and optional sugar/oil). Mix until well combined. If dough feels stiff, add the held-back water gradually. Goal: slightly tacky dough that can be shaped into rolls."
+    },
+    {
+      "id": "step_05_knead_or_folds",
+      "title": "Develop gluten",
+      "body": "Knead 6–10 minutes by hand (or 4–6 minutes in mixer on low) until dough is smoother and elastic. Alternatively: do 3 sets of stretch-and-folds every 20 minutes during the first hour of bulk."
+    },
+    {
+      "id": "step_06_bulk_ferment",
+      "title": "Bulk ferment",
+      "body": "Cover and ferment 60–90 minutes at room temperature until puffy and expanded ~50–75%. If using folds, perform them during the first hour."
+    },
+    {
+      "id": "step_07_divide_preshape",
+      "title": "Divide and pre-shape",
+      "body": "Turn dough out and divide into 8 pieces (~85–95 g each) for brat/sausage rolls. Pre-shape into tight balls. Rest 15 minutes covered."
+    },
+    {
+      "id": "step_08_shape_rolls",
+      "title": "Shape into sausage rolls",
+      "body": "Shape each piece into a tight oval/log about 15–18 cm (6–7 in) long, tapered slightly at ends for a classic brat roll. Place seam-side down on parchment-lined pan."
+    },
+    {
+      "id": "step_09_proof",
+      "title": "Proof",
+      "body": "Cover and proof 35–60 minutes until noticeably puffy and spring back slowly when gently pressed. Do not overproof (they’ll lose oven spring)."
+    },
+    {
+      "id": "step_10_preheat_with_steam_setup",
+      "title": "Preheat oven + steam setup",
+      "body": "Preheat to 475°F (245°C) with baking steel/stone inside. Place an empty cast iron pan/tray on a lower rack for steam (optional but recommended)."
+    },
+    {
+      "id": "step_11_score",
+      "title": "Score",
+      "body": "Score each roll with a single lengthwise slash (about 1 cm / 1/2 in deep). This controls expansion and creates a classic split top."
+    },
+    {
+      "id": "step_12_bake_with_steam",
+      "title": "Bake with steam",
+      "body": "Slide rolls onto hot stone/steel (or bake on a preheated sheet). Add steam: carefully pour 1 cup hot water into the steam pan (stand back from steam). Bake 10 minutes at 475°F (245°C)."
+    },
+    {
+      "id": "step_13_finish_bake_dry",
+      "title": "Finish bake (dry heat for crust)",
+      "body": "Reduce to 450°F (232°C), vent steam by removing the steam pan or cracking the door briefly, and bake 8–12 minutes more until deep golden. Rolls should feel light and sound hollow when tapped."
+    },
+    {
+      "id": "step_14_cool",
+      "title": "Cool before slicing",
+      "body": "Cool on a rack at least 20 minutes before slicing. Cutting too early compresses crumb."
+    }
+  ],
+  "notes": [
+    "Sausage-roll logic: slightly narrower, longer rolls fit brats better and hold toppings without collapsing.",
+    "Crust logic: steam in first part of bake enables expansion and blistered crust; dry heat finishes crispness.",
+    "Fresh-milled flour: sift coarse bran and be prepared to add a small amount of extra water; bulk may run slightly faster or slower depending on flour activity—watch the dough, not the clock.",
+    "Freezer logic: freeze fully cooled rolls. Re-crisp from frozen at 350°F (175°C) for 10–15 minutes."
+  ],
+  "storage": {
+    "roomTemp": "Best day-of. Store in paper bag or loosely covered up to 1 day (crust softens).",
+    "refrigerator": "Not recommended (stales faster).",
+    "freezer": "Freeze airtight up to 2 months. Reheat to restore crust."
+  }
+}

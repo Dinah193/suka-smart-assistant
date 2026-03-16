@@ -17,10 +17,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import MeatBreakdownCalculatorView from "@/features/calculators/storehouseMeals/MeatBreakdownCalculator.view";
+import MeatBreakdownCalculatorView from "@/features/calculators/storehouseMeals/MeatBreakdownCalculator/MeatBreakdownCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.meatBreakdown";
 
@@ -212,8 +212,8 @@ function MeatBreakdownSummaryCard({
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
             See how {animalLabel.toLowerCase()} converts into usable cuts,
-            bones, and trim so you can plan meals, storehouse space, and
-            future processing sessions.
+            bones, and trim so you can plan meals, storehouse space, and future
+            processing sessions.
           </p>
         </div>
         <span className="text-[10px] px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-slate-200 whitespace-nowrap">
@@ -262,12 +262,11 @@ function MeatBreakdownSummaryCard({
           <div className="flex flex-col">
             <span className="text-slate-400 mb-0.5">Key Cut Types (lb)</span>
             <span className="text-slate-50 font-semibold">
-              R {grouped.roast.toFixed(1)} · G{" "}
-              {grouped.ground.toFixed(1)} · S {grouped.steak.toFixed(1)}
+              R {grouped.roast.toFixed(1)} · G {grouped.ground.toFixed(1)} · S{" "}
+              {grouped.steak.toFixed(1)}
             </span>
             <span className="text-slate-500">
-              Stew {grouped.stew.toFixed(1)} · Offal{" "}
-              {grouped.offal.toFixed(1)}
+              Stew {grouped.stew.toFixed(1)} · Offal {grouped.offal.toFixed(1)}
             </span>
           </div>
         )}
@@ -300,7 +299,9 @@ function MeatBreakdownSummaryCard({
         <div className="flex flex-wrap gap-2 justify-end">
           <button
             type="button"
-            onClick={() => result && onStorehouseUpdate && onStorehouseUpdate(result)}
+            onClick={() =>
+              result && onStorehouseUpdate && onStorehouseUpdate(result)
+            }
             className="inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold bg-sky-400 hover:bg-sky-300 text-slate-950 shadow-md shadow-sky-500/30 transition"
           >
             Send to Storehouse
@@ -328,8 +329,7 @@ export default function MeatBreakdownCalculatorPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.title =
-      "Meat Breakdown Calculator | Suka Smart Assistant";
+    document.title = "Meat Breakdown Calculator | Suka Smart Assistant";
   }, []);
 
   /**
@@ -342,14 +342,10 @@ export default function MeatBreakdownCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.meat-breakdown",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.meat-breakdown",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -404,9 +400,7 @@ export default function MeatBreakdownCalculatorPage() {
             ? calcResult.totalTrimLossPercent
             : 0,
         cuts: Array.isArray(calcResult.cuts) ? calcResult.cuts : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };

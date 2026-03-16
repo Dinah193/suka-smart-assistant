@@ -1,0 +1,239 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.smoked_brisket",
+    "type": "recipe",
+    "name": "Smoked Brisket (Texas-Style)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Low-and-slow smoked whole packer brisket with simple salt + pepper rub.",
+        "Designed for SSA planners/adapters: clear equipment, methods, timers, and doneness guidance."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "main",
+    "mealArchetypes": ["dinner"],
+    "servingStyles": ["family_style", "bbq_plate"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "method.smoke",
+      "protein.beef",
+      "low_and_slow",
+      "batch_friendly",
+      "leftovers_good"
+    ]
+  },
+  "yield": {
+    "servings": 12,
+    "notes": "Servings vary widely by brisket size and slicing thickness (plan ~1/2 lb cooked per adult, more for hearty eaters)."
+  },
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 900,
+    "totalMins": 945
+  },
+  "difficulty": "advanced",
+  "equipment": {
+    "minimum": [
+      "equipment.smoker",
+      "equipment.instant_read_thermometer",
+      "equipment.probe_thermometer",
+      "equipment.foil"
+    ],
+    "recommended": [
+      "equipment.sheet_pan",
+      "equipment.spray_bottle",
+      "equipment.roasting_pan"
+    ],
+    "optional": ["equipment.dutch_oven"]
+  },
+  "allergens": [],
+  "dietFlags": ["gluten_free", "dairy_free"],
+  "ingredients": [
+    {
+      "id": "ingredients.beef_brisket",
+      "label": "Whole packer beef brisket (12–16 lb), preferably Choice+",
+      "qty": 1,
+      "unit": "each",
+      "notes": "Includes both point + flat. Smaller briskets cook faster but can be less forgiving.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt",
+      "qty": 2.5,
+      "unit": "tbsp",
+      "notes": "For a classic Texas rub, use equal parts salt and pepper by volume.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Coarse ground black pepper",
+      "qty": 2.5,
+      "unit": "tbsp",
+      "notes": "Coarse grind helps form bark.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.garlic_powder",
+      "label": "Garlic powder (optional)",
+      "qty": 1,
+      "unit": "tbsp",
+      "notes": "Optional for a slightly more aromatic rub; omit for strict salt/pepper.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.mustard_powder",
+      "label": "Mustard powder (optional)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Optional; adds a subtle tang in the bark.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.yellow_mustard",
+      "label": "Yellow mustard (binder, optional)",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Very thin layer to help rub adhere; flavor largely cooks off.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.wood_smoke",
+      "label": "Smoking wood (oak preferred; pecan/hickory optional)",
+      "qty": 4,
+      "unit": "cups",
+      "notes": "Amount depends on smoker type. Favor oak/pecan for a balanced smoke; use mesquite sparingly.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar (for spritz, optional)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "Mix 1:1 with water in a spray bottle for spritzing bark after it sets.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.water",
+      "label": "Water (for spritz, optional)",
+      "qty": 0.5,
+      "unit": "cup",
+      "notes": "For spritzing. Helps maintain surface moisture without washing off rub once bark is set.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.trim",
+      "title": "Trim brisket for even rendering",
+      "body": "Trim the fat cap to about 1/4 inch thickness. Remove hard, waxy fat and any thin/loose edges that will burn. Shape the brisket so airflow is smooth and the flat is protected (rounded corners help prevent drying). Save trimmings for tallow if desired.",
+      "timers": [{ "label": "Trim time (estimate)", "mins": 25 }]
+    },
+    {
+      "id": "step.season",
+      "title": "Season with Texas-style rub",
+      "body": "Mix kosher salt and coarse black pepper (add garlic powder/mustard powder if using). Optionally apply a very thin mustard binder. Season brisket evenly on all sides, pressing rub to adhere. Let sit 15–30 minutes while you prepare the smoker (or refrigerate uncovered 2–12 hours for a drier surface and better bark).",
+      "timers": [{ "label": "Season + rest (minimum)", "mins": 20 }]
+    },
+    {
+      "id": "step.preheat_smoker",
+      "title": "Preheat smoker and stabilize temperature",
+      "body": "Preheat smoker to 225–250°F (107–121°C). Add smoking wood according to your smoker type. Aim for clean smoke (thin blue), not billowing white smoke. Place a water pan if your smoker uses one to help temperature stability.",
+      "timers": [{ "label": "Preheat smoker (estimate)", "mins": 20 }]
+    },
+    {
+      "id": "step.smoke_start",
+      "title": "Start smoking (fat cap orientation as needed)",
+      "body": "Place brisket on smoker. Orientation depends on heat source: fat cap toward the hotter side to protect the flat. Insert a probe thermometer into the thickest part of the flat (center, not touching fat pockets). Close the lid and maintain 225–250°F.",
+      "timers": [{ "label": "First smoke phase (to bark set)", "mins": 240 }]
+    },
+    {
+      "id": "step.bark_set_spritz_optional",
+      "title": "Optional spritz after bark sets",
+      "body": "After 2–4 hours, when the surface looks dry and the rub has set into a bark (not wet/patchy), you may spritz lightly every 45–60 minutes with a 50/50 mix of water and apple cider vinegar. Do not spritz early or heavily, which can wash off rub and delay bark formation.",
+      "timers": [{ "label": "Spritz interval (optional)", "mins": 60 }]
+    },
+    {
+      "id": "step.wrap",
+      "title": "Wrap at the stall (Texas crutch)",
+      "body": "When bark is a deep mahogany and internal temp in the flat is roughly 165–175°F (74–79°C) and the brisket enters the stall (temp rise slows), wrap tightly in butcher paper (preferred) or foil. Return to smoker with the seam side down.",
+      "timers": [{ "label": "Wrap decision window", "mins": 30 }]
+    },
+    {
+      "id": "step.finish_cook",
+      "title": "Finish cooking until probe-tender",
+      "body": "Continue cooking at 250°F until the brisket is probe-tender in multiple spots, especially the flat—meaning a probe slides in with little resistance (like soft butter). This typically occurs around 195–205°F (90–96°C), but tenderness is the true finish line.",
+      "timers": [{ "label": "Post-wrap cook (estimate)", "mins": 360 }]
+    },
+    {
+      "id": "step.rest_hold",
+      "title": "Rest (critical for juiciness and slicing)",
+      "body": "Rest the wrapped brisket at least 1 hour. For best results, hold 2–4 hours in a warm cooler (towel-wrapped) or a low oven (150–170°F / 65–77°C) if available. Resting allows juices to redistribute and collagen to relax for tenderness.",
+      "timers": [
+        { "label": "Minimum rest", "mins": 60 },
+        { "label": "Preferred hold/rest", "mins": 180 }
+      ]
+    },
+    {
+      "id": "step.slice_serve",
+      "title": "Slice and serve",
+      "body": "Unwrap and separate point and flat if desired. Slice the flat across the grain into pencil-thick slices. The point can be sliced thicker or cubed for burnt ends. Serve with pickles/onions, optional sauce, and classic sides like slaw, beans, or potato salad.",
+      "timers": [{ "label": "Slice + plate (estimate)", "mins": 20 }]
+    },
+    {
+      "id": "step.storage",
+      "title": "Storage and reheating notes",
+      "body": "Cool leftovers quickly. Refrigerate sliced brisket with some juices/tallow, tightly covered, up to 4 days. Freeze portions up to 3 months. Reheat gently (covered) with a splash of broth/juices to prevent drying—low oven or sous-vide-style warm water bath works well.",
+      "timers": []
+    }
+  ],
+  "pairings": {
+    "sides": [
+      { "id": "dishes.bbq.cole_slaw", "label": "Cole Slaw" },
+      { "id": "dishes.bbq.baked_beans", "label": "Baked Beans" },
+      { "id": "dishes.bbq.potato_salad", "label": "Potato Salad" },
+      { "id": "dishes.bbq.pickles_onions", "label": "Pickles + Onions" }
+    ],
+    "sauces": [
+      {
+        "id": "dishes.bbq.tomato_based_bbq_sauce",
+        "label": "Tomato-Based BBQ Sauce (optional)"
+      },
+      {
+        "id": "dishes.bbq.vinegar_sauce_carolina",
+        "label": "Vinegar Sauce (optional)"
+      }
+    ]
+  },
+  "planner": {
+    "batchable": true,
+    "leftovers": {
+      "goodFor": ["sandwiches", "tacos", "hash", "beans"],
+      "notes": "Plan brisket day as a batch cook; schedule leftover uses over the next 2–3 days."
+    }
+  },
+  "adaptations": [
+    {
+      "kind": "equipment",
+      "notes": [
+        "If no smoker: use oven + liquid smoke cautiously, or slow-braise (not true BBQ but can be tasty).",
+        "If using a pellet smoker: stabilize temperature and avoid frequent lid opening."
+      ]
+    },
+    {
+      "kind": "doneness",
+      "notes": [
+        "Finish line is probe-tender, not a specific temperature.",
+        "Rest/hold is essential for tenderness and slice quality."
+      ]
+    }
+  ]
+}

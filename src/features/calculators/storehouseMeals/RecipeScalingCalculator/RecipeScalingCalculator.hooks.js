@@ -20,8 +20,8 @@
 
 import { useState, useCallback } from "react";
 import { calculateRecipeScaling } from "./RecipeScalingCalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 // Optional Hub helper: safe to import even if not wired yet.
 import { exportToHubIfEnabled } from "@/services/hub/exportToHubIfEnabled";
 
@@ -70,7 +70,7 @@ export function useRecipeScalingCalculator(params = {}) {
         const payload = buildScalingPayload({
           baseRecipe,
           householdId,
-          inputOverrides
+          inputOverrides,
         });
 
         const result = await calculateRecipeScaling(payload);
@@ -86,8 +86,8 @@ export function useRecipeScalingCalculator(params = {}) {
             baseServings: result.input.baseServings,
             scaledServings: result.output.scaledServings,
             appliedScaleFactor: result.output.appliedScaleFactor,
-            warnings: result.output.scalingWarnings
-          }
+            warnings: result.output.scalingWarnings,
+          },
         });
 
         if (familyFundMode) {
@@ -95,7 +95,7 @@ export function useRecipeScalingCalculator(params = {}) {
           exportToHubIfEnabled({
             kind: "calculator.scaling",
             createdAt: new Date().toISOString(),
-            payload: result
+            payload: result,
           }).catch(() => {
             // eslint-disable-next-line no-console
             console.warn(
@@ -125,7 +125,7 @@ export function useRecipeScalingCalculator(params = {}) {
     loading,
     error,
     lastResult,
-    scaleRecipe
+    scaleRecipe,
   };
 }
 
@@ -168,7 +168,12 @@ export function useScalingToBatchSession() {
 
     const {
       input: { recipeId, recipeName },
-      output: { scaledServings, appliedScaleFactor, ingredients, sessionsHints }
+      output: {
+        scaledServings,
+        appliedScaleFactor,
+        ingredients,
+        sessionsHints,
+      },
     } = scalingResult;
 
     const nowIso = new Date().toISOString();
@@ -182,27 +187,27 @@ export function useScalingToBatchSession() {
         `Cook: ${recipeName || "Batch"} x${appliedScaleFactor.toFixed(2)}`,
       source: {
         type: "recipe",
-        refId: recipeId || null
+        refId: recipeId || null,
       },
       steps: buildSessionStepsFromIngredients(ingredients, sessionsHints),
       prefs: {
         voiceGuidance: true,
         haptic: true,
-        autoAdvance: false
+        autoAdvance: false,
       },
       status: "pending",
       progress: {
         currentStepIndex: 0,
         elapsedSec: 0,
         startedAt: null,
-        pausedAt: null
+        pausedAt: null,
       },
       analytics: {
         skippedSteps: [],
-        adjustments: []
+        adjustments: [],
       },
       createdAt: nowIso,
-      updatedAt: nowIso
+      updatedAt: nowIso,
     };
 
     emitEvent({
@@ -216,8 +221,8 @@ export function useScalingToBatchSession() {
         recipeId,
         scaledServings,
         appliedScaleFactor,
-        estimatedSteps: sessionDraft.steps.length
-      }
+        estimatedSteps: sessionDraft.steps.length,
+      },
     });
 
     if (familyFundMode) {
@@ -226,8 +231,8 @@ export function useScalingToBatchSession() {
         createdAt: nowIso,
         payload: {
           session: sessionDraft,
-          scalingResult
-        }
+          scalingResult,
+        },
       }).catch(() => {
         // eslint-disable-next-line no-console
         console.warn(
@@ -240,7 +245,7 @@ export function useScalingToBatchSession() {
   }, []);
 
   return {
-    buildBatchSessionFromScaling
+    buildBatchSessionFromScaling,
   };
 }
 
@@ -294,7 +299,7 @@ export function useScalingToFreezerPlan() {
 
     const {
       input: { recipeId, recipeName },
-      output: { scaledServings }
+      output: { scaledServings },
     } = scalingResult;
 
     const nowIso = new Date().toISOString();
@@ -310,10 +315,7 @@ export function useScalingToFreezerPlan() {
       Math.ceil(portions / 4) // 4 servings per container as a default
     );
 
-    const labelBase =
-      options?.labelBase ||
-      recipeName ||
-      "Batch Meal";
+    const labelBase = options?.labelBase || recipeName || "Batch Meal";
 
     const suggestedLabel = `${labelBase} – ${portions} portions`;
 
@@ -326,7 +328,7 @@ export function useScalingToFreezerPlan() {
       portions,
       estimatedContainers,
       suggestedLabel,
-      createdAt: nowIso
+      createdAt: nowIso,
     };
 
     emitEvent({
@@ -339,15 +341,15 @@ export function useScalingToFreezerPlan() {
         recipeId: plan.recipeId,
         scaledServings: plan.scaledServings,
         portions: plan.portions,
-        estimatedContainers: plan.estimatedContainers
-      }
+        estimatedContainers: plan.estimatedContainers,
+      },
     });
 
     if (familyFundMode) {
       exportToHubIfEnabled({
         kind: "storehouse.freezer.plan",
         createdAt: nowIso,
-        payload: plan
+        payload: plan,
       }).catch(() => {
         // eslint-disable-next-line no-console
         console.warn(
@@ -360,7 +362,7 @@ export function useScalingToFreezerPlan() {
   }, []);
 
   return {
-    buildFreezerPlanFromScaling
+    buildFreezerPlanFromScaling,
   };
 }
 
@@ -432,7 +434,7 @@ function buildScalingPayload(params) {
     inventorySnapshot: inputOverrides.inventorySnapshot || null,
     equipmentConstraints: inputOverrides.equipmentConstraints || null,
     timeConstraints: inputOverrides.timeConstraints || null,
-    householdContext: householdId ? { householdId } : null
+    householdContext: householdId ? { householdId } : null,
   };
 
   return {
@@ -441,13 +443,13 @@ function buildScalingPayload(params) {
       ? {
           id: baseRecipe.id || null,
           name: baseRecipe.name || null,
-          ingredients: baseRecipe.ingredients || []
+          ingredients: baseRecipe.ingredients || [],
         }
       : undefined,
     meta: {
       householdId,
-      origin: "RecipeScalingCalculator.hooks"
-    }
+      origin: "RecipeScalingCalculator.hooks",
+    },
   };
 }
 
@@ -493,38 +495,36 @@ function buildSessionStepsFromIngredients(ingredients, sessionsHints) {
       tempTargetF: 0,
       donenessCue: "timer",
       cueNotes:
-        "Chop, measure, and pre-portion everything before you start cooking."
-    }
+        "Chop, measure, and pre-portion everything before you start cooking.",
+    },
   });
 
   steps.push({
     id: "cook",
     title: "Cook batch",
-    desc:
-      "Cook the scaled recipe according to your method, adjusting time and pan size as needed.",
+    desc: "Cook the scaled recipe according to your method, adjusting time and pan size as needed.",
     durationSec: cookDuration,
     blockers: ["equipment", "quietHours", "sabbath"],
     metadata: {
       tempTargetF: 0,
       donenessCue: "smell",
       cueNotes:
-        "Use the original recipe cues for doneness; watch color, texture, and aroma."
-    }
+        "Use the original recipe cues for doneness; watch color, texture, and aroma.",
+    },
   });
 
   steps.push({
     id: "portion",
     title: "Portion, cool, and store",
-    desc:
-      "Divide into freezer or fridge containers, label, and update your storehouse inventory.",
+    desc: "Divide into freezer or fridge containers, label, and update your storehouse inventory.",
     durationSec: portionDuration,
     blockers: ["inventory", "equipment"],
     metadata: {
       tempTargetF: 40,
       donenessCue: "probeTemp",
       cueNotes:
-        "Cool to safe temperature before placing in the fridge or freezer."
-    }
+        "Cool to safe temperature before placing in the fridge or freezer.",
+    },
   });
 
   return steps;

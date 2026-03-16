@@ -19,10 +19,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import GardenYieldCalculatorView from "@/features/calculators/gardenAnimal/GardenYieldCalculator.view";
+import GardenYieldCalculatorView from "@/features/calculators/gardenAnimal/GardenYieldCalculator/GardenYieldCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.yield";
 
@@ -195,7 +195,9 @@ function GardenYieldSummaryCard({ result, onStartSession, onStorehouseSync }) {
 
   const labelSeason = seasonLabel || "Season not set";
   const labelLocation =
-    locationLabel && zone ? `${locationLabel} · Zone ${zone}` : locationLabel || (zone ? `Zone ${zone}` : "Location not set");
+    locationLabel && zone
+      ? `${locationLabel} · Zone ${zone}`
+      : locationLabel || (zone ? `Zone ${zone}` : "Location not set");
 
   return (
     <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/75 px-4 py-4 space-y-3">
@@ -365,14 +367,10 @@ export default function GardenYieldCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.gardenAnimal.garden-yield",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.garden-yield",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -390,8 +388,7 @@ export default function GardenYieldCalculatorPage() {
           typeof calcResult.locationLabel === "string"
             ? calcResult.locationLabel
             : undefined,
-        zone:
-          typeof calcResult.zone === "string" ? calcResult.zone : undefined,
+        zone: typeof calcResult.zone === "string" ? calcResult.zone : undefined,
         totalAreaSqFt:
           typeof calcResult.totalAreaSqFt === "number"
             ? calcResult.totalAreaSqFt
@@ -413,9 +410,7 @@ export default function GardenYieldCalculatorPage() {
             ? calcResult.totalServings
             : undefined,
         crops: Array.isArray(calcResult.crops) ? calcResult.crops : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         suggestedSessionTitle:
           typeof calcResult.suggestedSessionTitle === "string"
@@ -428,10 +423,7 @@ export default function GardenYieldCalculatorPage() {
       emitGardenYieldCompleted(normalized);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(
-        "[garden-yield.jsx] Garden Yield calculator error",
-        err
-      );
+      console.error("[garden-yield.jsx] Garden Yield calculator error", err);
       setError(
         err && err.message
           ? err.message

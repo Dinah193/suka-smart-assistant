@@ -37,7 +37,7 @@
  * - It can be wired into `calculatorRunner` and/or individual shims.
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} CalculatorSchemaPair
@@ -242,8 +242,7 @@ async function validateCalculatorPayload(calculatorId, kind, data, options) {
   }
 
   const schemas = schemaRegistry.get(calculatorId) || {};
-  const schema =
-    kind === "input" ? schemas.inputSchema : schemas.outputSchema;
+  const schema = kind === "input" ? schemas.inputSchema : schemas.outputSchema;
 
   if (!schema || typeof schema !== "object") {
     // No schema registered → treat as valid (but log once).

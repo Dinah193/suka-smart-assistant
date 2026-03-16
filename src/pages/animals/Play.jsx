@@ -17,6 +17,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
 /* ----------------------- Soft/defensive shared imports ---------------------- */
 let eventBus = { emit: () => {}, on: () => () => {} };
@@ -42,7 +43,7 @@ try {
 } catch {
   try {
     // eslint-disable-next-line global-require
-    const ff2 = require("../../config/featureFlags.json");
+    const ff2 = require("@/config/featureFlags.json");
     featureFlags = ff2?.default || ff2 || featureFlags;
   } catch {
     // noop
@@ -839,6 +840,20 @@ export default function AnimalsPlayPage() {
       checkpointId: session?.checkpoints?.lastCheckpointId || null,
     });
 
+    emitCanonicalSignal({
+      type: "taskStarted",
+      sourceModule: "executor.animals.play",
+      urgency: "normal",
+      completionPct: 0,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: session.id,
+        name: session.title,
+        domain: DOMAIN,
+        action: "session.started",
+      },
+    });
+
     // ensure timer has value
     const dur = currentStep?.durationSec || 0;
     if ((timerRemainingSec || 0) <= 0 && dur > 0) setTimerRemainingSec(dur);
@@ -920,6 +935,20 @@ export default function AnimalsPlayPage() {
       checkpointId: session?.checkpoints?.lastCheckpointId || null,
     });
 
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.animals.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: session?.id,
+        name: session?.title || "animals session",
+        domain: DOMAIN,
+        action: "session.completed",
+      },
+    });
+
     try {
       if (wakeLockRef.current?.release) await wakeLockRef.current.release();
     } catch {
@@ -937,6 +966,24 @@ export default function AnimalsPlayPage() {
       if (arr.includes(stepId)) return arr;
       return [...arr, stepId];
     });
+
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.animals.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: `${session?.id || "session"}:${stepId}`,
+        sessionId: session?.id,
+        stepId,
+        stepIndex: currentStepIndex,
+        name: currentStep?.title || stepId,
+        domain: DOMAIN,
+        action: "step.completed",
+      },
+    });
+
     scheduleCheckpointSave("step.marked_done");
   }
 

@@ -23,7 +23,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -41,7 +41,8 @@ function emit(type, data = {}) {
   });
 }
 
-const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+const isBrowser =
+  typeof window !== "undefined" && typeof document !== "undefined";
 const hasNotification = isBrowser && "Notification" in window;
 
 /* -------------------------------------------------------------------------- */
@@ -82,7 +83,9 @@ export function setDefaultIcon(iconUrl, badgeUrl) {
 
 export function setNotificationEnabled(on) {
   defaults.notificationEnabled = !!on;
-  emit("notify.prefs.changed", { notificationEnabled: defaults.notificationEnabled });
+  emit("notify.prefs.changed", {
+    notificationEnabled: defaults.notificationEnabled,
+  });
 }
 
 export function setAudioEnabled(on) {
@@ -115,7 +118,10 @@ export async function ensureNotificationPermission() {
     emit("notify.permission.requested", { result: res });
     return res;
   } catch (err) {
-    emit("notify.error", { stage: "permission", message: err?.message || String(err) });
+    emit("notify.error", {
+      stage: "permission",
+      message: err?.message || String(err),
+    });
     return "default";
   }
 }
@@ -143,7 +149,8 @@ export async function beep(opts = {}) {
       emit("notify.audio.unsupported");
       return false;
     }
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx =
+      audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     // Some browsers require a user gesture; catch and no-op if blocked
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -166,7 +173,10 @@ export async function beep(opts = {}) {
     emit("notify.audio.beep", { durationMs, frequency });
     return true;
   } catch (err) {
-    emit("notify.error", { stage: "beep", message: err?.message || String(err) });
+    emit("notify.error", {
+      stage: "beep",
+      message: err?.message || String(err),
+    });
     return false;
   }
 }
@@ -226,12 +236,16 @@ export async function notifyRaw(options = {}) {
       } catch {}
     };
     n.onclose = () => emit("notify.close", { title, tag });
-    n.onerror = () => emit("notify.error", { stage: "notification.onerror", title, tag });
+    n.onerror = () =>
+      emit("notify.error", { stage: "notification.onerror", title, tag });
 
     emit("notify.raw.sent", { title, tag, requireInteraction });
     return n;
   } catch (err) {
-    emit("notify.error", { stage: "notifyRaw", message: err?.message || String(err) });
+    emit("notify.error", {
+      stage: "notifyRaw",
+      message: err?.message || String(err),
+    });
     return null;
   }
 }
@@ -361,7 +375,9 @@ try {
     if (evt.type === "garden.harvest.logged") {
       await notify({
         title: "Harvest logged",
-        body: evt?.data?.crop ? `Added: ${evt.data.crop}` : "Garden harvest recorded.",
+        body: evt?.data?.crop
+          ? `Added: ${evt.data.crop}`
+          : "Garden harvest recorded.",
         tag: "garden:harvest",
         preferBeep: true,
       });

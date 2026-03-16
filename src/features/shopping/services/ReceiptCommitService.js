@@ -25,7 +25,7 @@
 // If your repo uses different names, this service still runs and returns a structured commit report.
 
 import { db as defaultDb } from "@/services/db"; // adjust if your db export differs
-import { eventBus as defaultEventBus } from "@/services/eventBus"; // adjust if your event bus export differs
+import { eventBus as defaultEventBus } from "@/services/events/eventBus"; // adjust if your event bus export differs
 
 const EVT = {
   START: "shopping.receipt.commit.started",

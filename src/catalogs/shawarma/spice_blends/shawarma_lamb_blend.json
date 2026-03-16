@@ -1,0 +1,175 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.spice_blends.shawarma_lamb_blend",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Shawarma Lamb Spice Blend",
+    "tags": [
+      "spice_blend",
+      "shawarma",
+      "lamb",
+      "middle_eastern",
+      "pantry",
+      "make_ahead",
+      "batch_friendly",
+      "dry_mix"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Shawarma spice blend tuned for lamb: warm spices, pepper, and subtle herbal notes that pair naturally with lamb fat."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 16, "unit": "g" },
+      "notes": ["About 5 teaspoons (1 tablespoon + 2 teaspoons)."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": ["About 4 1/2 teaspoons (1 tablespoon + 1 1/2 teaspoons)."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": ["About 6 teaspoons (2 tablespoons)."]
+    },
+    {
+      "id": "ing.paprika_smoked",
+      "label": "Smoked paprika",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/3 teaspoons; optional but great with lamb."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": ["About 3 teaspoons (1 tablespoon)."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons; classic lamb shawarma note."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 1.6, "unit": "g" },
+      "notes": ["About 1/2 teaspoon."]
+    },
+    {
+      "id": "ing.clove_ground",
+      "label": "Ground cloves",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; strong—use lightly."]
+    },
+    {
+      "id": "ing.cardamom_ground",
+      "label": "Ground cardamom",
+      "amount": { "value": 1.2, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; optional but authentic."]
+    },
+    {
+      "id": "ing.nutmeg_ground",
+      "label": "Ground nutmeg",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/3 teaspoon; optional for round warmth."]
+    },
+    {
+      "id": "ing.ginger_ground",
+      "label": "Ground ginger",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 3/4 teaspoon; optional but adds lift."]
+    },
+    {
+      "id": "ing.garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": ["About 1 2/3 teaspoons."]
+    },
+    {
+      "id": "ing.oregano_dried",
+      "label": "Dried oregano",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional herbal backbone."]
+    },
+    {
+      "id": "ing.thyme_dried",
+      "label": "Dried thyme",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 3/4 teaspoon; optional."]
+    },
+    {
+      "id": "ing.mint_dried",
+      "label": "Dried mint",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": [
+        "About 3/4 teaspoon; optional but pairs beautifully with lamb.",
+        "Sub: omit and use fresh mint in sauce/condiments instead."
+      ]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["Optional heat (about 3/4 teaspoon)."]
+    },
+    {
+      "id": "ing.cayenne",
+      "label": "Cayenne pepper",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["Optional extra heat (about 1/4 teaspoon)."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Mix the blend",
+      "instructions": [
+        "Add all spices to a bowl or jar.",
+        "Whisk (or shake in a sealed jar) until evenly combined and uniform in color."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "How to use (application notes)",
+      "instructions": [
+        "Dry rub: use ~10–14 g (1–1 1/2 tbsp) per 450 g (1 lb) lamb, plus salt to taste; grill/roast/sear.",
+        "Marinade shortcut (per 900 g / 2 lb lamb): 20–28 g blend (2–3 tbsp) + 30 ml oil + 30–45 ml lemon juice/vinegar + garlic; optional 120 g yogurt for a clingy coating; marinate 4–24 hours.",
+        "Skewers: for cubes, use slightly more blend and cook hot for char."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Storage",
+      "instructions": [
+        "Store in an airtight jar away from heat and light.",
+        "Best flavor within 3–6 months; usable longer but aroma fades."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Batch notes",
+      "instructions": [
+        "This recipe yields about 90–105 g spice blend (varies by grind).",
+        "Scale up easily for bulk prep and catalog usage."
+      ]
+    }
+  ]
+}

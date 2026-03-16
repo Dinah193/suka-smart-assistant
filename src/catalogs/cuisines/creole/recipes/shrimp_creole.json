@@ -1,0 +1,123 @@
+{
+  "id": "creole_shrimp_creole",
+  "name": "Shrimp Creole",
+  "servings": 6,
+  "ingredients": [
+    { "item": "neutral oil", "amount": 2, "unit": "tbsp" },
+    { "item": "unsalted butter", "amount": 2, "unit": "tbsp" },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 2, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 4, "unit": "cloves", "prep": "minced" },
+
+    { "item": "tomato paste", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "diced tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz"
+    },
+    {
+      "item": "crushed tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz (or use another can of diced)"
+    },
+
+    {
+      "item": "chicken stock",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "or seafood stock"
+    },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "dried oregano", "amount": 0.5, "unit": "tsp" },
+    { "item": "paprika", "amount": 1, "unit": "tsp" },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.25,
+      "unit": "tsp",
+      "prep": "adjust to heat preference"
+    },
+    { "item": "black pepper", "amount": 0.75, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "adjust to taste"
+    },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+
+    {
+      "item": "shrimp",
+      "amount": 2,
+      "unit": "lb",
+      "prep": "peeled and deveined"
+    },
+
+    { "item": "lemon juice", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (reserve a little for garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (reserve a little for garnish)"
+    },
+
+    { "item": "cooked white rice", "amount": 6, "unit": "servings" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep: Dice onion, bell pepper, and celery. Mince garlic. Pat shrimp dry and lightly season with a pinch of salt and pepper."
+    },
+    {
+      "order": 2,
+      "text": "Sweat the trinity: Heat oil and butter in a large skillet or Dutch oven over medium heat. Add onion, bell pepper, and celery. Cook until softened and fragrant (avoid heavy browning). Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 3,
+      "text": "Bloom tomato paste: Stir in tomato paste and cook 1 minute to deepen flavor."
+    },
+    {
+      "order": 4,
+      "text": "Build the sauce: Add diced tomatoes, crushed tomatoes, stock, bay leaves, thyme, oregano, paprika, cayenne, black pepper, salt, Worcestershire, and optional hot sauce. Bring to a gentle simmer."
+    },
+    {
+      "order": 5,
+      "text": "Simmer and thicken: Simmer until the sauce thickens and flavors meld. Stir occasionally. If it gets too thick, add a splash more stock."
+    },
+    {
+      "order": 6,
+      "text": "Cook shrimp gently: Add shrimp and simmer just until pink and cooked through (avoid boiling hard so shrimp stay tender)."
+    },
+    {
+      "order": 7,
+      "text": "Finish: Stir in lemon juice, most of the green onions, and most of the parsley. Taste and adjust salt, pepper, and hot sauce."
+    },
+    {
+      "order": 8,
+      "text": "Serve: Spoon shrimp creole over hot cooked rice. Garnish with remaining green onions and parsley."
+    }
+  ]
+}

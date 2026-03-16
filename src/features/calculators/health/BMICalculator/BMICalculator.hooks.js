@@ -19,8 +19,11 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import BMICalculatorShim, { computeBMI, getBMIOnly as shimGetBMIOnly } from "./BMICalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
+import BMICalculatorShim, {
+  computeBMI,
+  getBMIOnly as shimGetBMIOnly,
+} from "./BMICalculator.shim";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./BMICalculator.shim").BMICalculatorInput} BMICalculatorInput
@@ -35,23 +38,23 @@ import { emit as emitEvent } from "@/services/eventBus";
 export const BMI_DEFAULT_INPUT = {
   height: {
     value: 66,
-    unit: "in"
+    unit: "in",
   },
   weight: {
     value: 180,
-    unit: "lb"
+    unit: "lb",
   },
   sex: "unspecified",
   ageYears: 35,
   unitSystem: "imperial",
   rounding: {
     bmiDecimals: 1,
-    weightDecimals: 1
+    weightDecimals: 1,
   },
   ssaIntegration: {
     autosaveProfile: true,
-    allowLinkToMacroCalculator: true
-  }
+    allowLinkToMacroCalculator: true,
+  },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -70,7 +73,7 @@ function emitBMIEvent(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/health/BMICalculator.hooks",
-      data
+      data,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -90,12 +93,12 @@ function normalizeFormToInput(form) {
     ...safe,
     height: {
       value: Number(safe.height?.value) || 0,
-      unit: safe.height?.unit === "cm" ? "cm" : "in"
+      unit: safe.height?.unit === "cm" ? "cm" : "in",
     },
     weight: {
       value: Number(safe.weight?.value) || 0,
-      unit: safe.weight?.unit === "kg" ? "kg" : "lb"
-    }
+      unit: safe.weight?.unit === "kg" ? "kg" : "lb",
+    },
   };
 }
 
@@ -129,7 +132,7 @@ export function useBMICalculator(options = {}) {
   const {
     initialInput = BMI_DEFAULT_INPUT,
     autoRecalcDefault = true,
-    emitEvents = true
+    emitEvents = true,
   } = options;
 
   /** @type {[BMICalculatorInput, Function]} */
@@ -154,7 +157,7 @@ export function useBMICalculator(options = {}) {
   const updateField = useCallback((field, value) => {
     setForm((prev) => ({
       ...(prev || {}),
-      [field]: value
+      [field]: value,
     }));
     setIsDirty(true);
   }, []);
@@ -214,8 +217,8 @@ export function useBMICalculator(options = {}) {
           output: res.output,
           uiContext: {
             autoRecalc: Boolean(fromAuto),
-            source: "BMICalculator.hook"
-          }
+            source: "BMICalculator.hook",
+          },
         });
       }
     },
@@ -258,8 +261,8 @@ export function useBMICalculator(options = {}) {
         uiContext: {
           nowClicked: true,
           source: "BMICalculator.hook",
-          computedJustInTime: true
-        }
+          computedJustInTime: true,
+        },
       });
       return;
     }
@@ -270,8 +273,8 @@ export function useBMICalculator(options = {}) {
       uiContext: {
         nowClicked: true,
         source: "BMICalculator.hook",
-        computedJustInTime: false
-      }
+        computedJustInTime: false,
+      },
     });
   }, [emitEvents, form, result]);
 
@@ -296,7 +299,7 @@ export function useBMICalculator(options = {}) {
 
     // Actions
     computeOnce,
-    applyNow
+    applyNow,
   };
 }
 
@@ -337,12 +340,12 @@ export function useBMIOnly(input, options = {}) {
       ...(input || {}),
       height: {
         ...(base.height || {}),
-        ...(input?.height || {})
+        ...(input?.height || {}),
       },
       weight: {
         ...(base.weight || {}),
-        ...(input?.weight || {})
-      }
+        ...(input?.weight || {}),
+      },
     });
   }, [baseInput, input]);
 
@@ -366,7 +369,7 @@ export function useBMIOnly(input, options = {}) {
 
 export const BMICalculatorHooks = {
   useBMICalculator,
-  useBMIOnly
+  useBMIOnly,
 };
 
 export default BMICalculatorHooks;
