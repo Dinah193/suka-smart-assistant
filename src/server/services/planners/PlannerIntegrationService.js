@@ -706,6 +706,73 @@ async function projectInventoryToNeo4j({ householdId, inventory = [] }) {
   }
 }
 
+async function projectHomesteadOutputsToNeo4j({
+  householdId,
+  planId = null,
+  seasonKey = null,
+  outputs = [],
+}) {
+  if (!neo4jDriver) return { ok: false, reason: "neo4j_driver_missing" };
+
+  const normalizedOutputs = Array.isArray(outputs)
+    ? outputs
+        .filter((x) => x && typeof x === "object")
+        .map((x) => ({
+          id: String(x.id || randomUUID()),
+          outputType: String(x.outputType || "unknown"),
+          outputName: String(x.outputName || "Unnamed output"),
+          qty: Number(x.qty || 0),
+          unit: String(x.unit || "unit"),
+          expectedHarvestAt: x.expectedHarvestAt || null,
+          preservationReady: !!x.preservationReady,
+          metadataJson: JSON.stringify(
+            x.metadata && typeof x.metadata === "object" ? x.metadata : {}
+          ),
+        }))
+    : [];
+
+  const session = neo4jDriver.session();
+  try {
+    await session.writeTransaction((tx) =>
+      tx.run(
+        `
+          MERGE (h:Household {id: $householdId})
+          MERGE (p:HomesteadPlan {id: $planId})
+          SET p.seasonKey = $seasonKey,
+              p.updatedAt = datetime()
+          MERGE (h)-[:HAS_HOMESTEAD_PLAN]->(p)
+          WITH h, p
+          UNWIND $outputs AS output
+          MERGE (o:HomesteadOutput {id: output.id})
+          SET o.outputType = output.outputType,
+              o.outputName = output.outputName,
+              o.qty = output.qty,
+              o.unit = output.unit,
+              o.expectedHarvestAt = output.expectedHarvestAt,
+              o.preservationReady = output.preservationReady,
+              o.metadataJson = output.metadataJson,
+              o.updatedAt = datetime()
+          MERGE (p)-[:PRODUCES]->(o)
+        `,
+        {
+          householdId: String(householdId || "default-household"),
+          planId: String(planId || `homestead-plan-${householdId || "default-household"}`),
+          seasonKey: seasonKey == null ? null : String(seasonKey),
+          outputs: normalizedOutputs,
+        }
+      )
+    );
+
+    return {
+      ok: true,
+      projected: normalizedOutputs.length,
+      reason: "homestead_projected",
+    };
+  } finally {
+    await session.close();
+  }
+}
+
 module.exports = {
   pgPool,
   neo4jDriver,
@@ -718,4 +785,5 @@ module.exports = {
   upsertHomesteadPlan,
   saveMealPlannerOutput,
   projectInventoryToNeo4j,
+  projectHomesteadOutputsToNeo4j,
 };

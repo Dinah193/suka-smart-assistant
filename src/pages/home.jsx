@@ -112,6 +112,54 @@ function LocalTightStyles() {
   .animal-chip--on{background:hsla(var(--suka-brand)/.12);border-color:hsla(var(--suka-brand-700)/.25);color:hsl(var(--suka-brand-700));font-weight:600}
   .animal-row{display:flex;flex-wrap:wrap;gap:8px}
   .animal-input{width:100%;border:1px solid hsl(var(--line));border-radius:12px;padding:10px 12px;background:hsl(var(--panel));}
+
+  .routine-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width: 1024px){ .routine-grid{grid-template-columns:1.05fr 1fr;} }
+  .routine-card{padding:14px;border-radius:16px;border:1px solid hsl(var(--line));background:hsl(var(--panel));box-shadow:var(--shadow-0)}
+  .routine-card h3{margin:0;font-size:16px;line-height:1.2}
+  .routine-sub{font-size:12px;color:hsl(var(--text-subtle));margin-top:4px}
+  .routine-kpi-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+  @media (min-width: 640px){ .routine-kpi-row{grid-template-columns:repeat(4,minmax(0,1fr));} }
+  .routine-kpi{border:1px solid hsl(var(--line));border-radius:12px;padding:8px 10px;background:hsl(var(--panel-2))}
+  .routine-kpi .label{display:block;font-size:11px;color:hsl(var(--text-subtle));margin-bottom:2px}
+  .routine-kpi .value{font-size:14px;font-weight:700}
+  .routine-chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .routine-chip{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:999px;border:1px solid hsl(var(--line));background:hsl(var(--panel-2));font-size:12px}
+  .routine-formula{margin-top:12px;display:grid;grid-template-columns:1fr;gap:8px}
+  @media (min-width: 640px){ .routine-formula{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  .routine-formula-item{border:1px dashed hsla(var(--suka-brand-700)/.35);border-radius:12px;padding:10px;background:hsla(var(--suka-brand)/.05)}
+  .routine-formula-item .title{font-size:12px;font-weight:700}
+  .routine-formula-item .copy{font-size:12px;color:hsl(var(--text-subtle));margin-top:3px}
+  .routine-summary{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
+  @media (min-width: 900px){ .routine-summary{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  .routine-summary-item{border:1px solid hsl(var(--line));border-radius:12px;padding:8px 10px;background:hsl(var(--panel-2));font-size:12px}
+  .routine-summary-item strong{display:block;font-size:13px}
+  .routine-editor{margin-top:10px;border:1px dashed hsl(var(--line));border-radius:12px;padding:10px;background:hsl(var(--panel-2))}
+  .routine-editor summary{cursor:pointer;font-weight:600;font-size:13px}
+  .routine-control{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+  @media (min-width: 900px){ .routine-control{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  .routine-field{display:flex;flex-direction:column;gap:4px}
+  .routine-field label{font-size:12px;color:hsl(var(--text-subtle))}
+  .routine-field input,.routine-field select{border:1px solid hsl(var(--line));border-radius:10px;background:hsl(var(--panel));padding:7px 10px;font-size:13px}
+  .routine-range-row{display:flex;align-items:center;gap:8px}
+  .routine-range-row input[type="range"]{flex:1;cursor:pointer;padding:0}
+  .routine-range-value{width:72px;text-align:right}
+  .routine-chip.is-selected{background:hsla(var(--suka-brand)/.15);border-color:hsla(var(--suka-brand-700)/.35);color:hsl(var(--suka-brand-700));font-weight:600}
+  button.routine-chip{cursor:pointer}
+  .routine-preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .routine-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .routine-group{margin-top:10px;padding-top:10px;border-top:1px solid hsl(var(--line))}
+  .routine-token-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;min-height:30px}
+  .routine-token{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:999px;border:1px solid hsla(var(--suka-brand-700)/.3);background:hsla(var(--suka-brand)/.10);font-size:12px;color:hsl(var(--suka-brand-700));cursor:pointer}
+  .routine-token.is-dragging{opacity:.55}
+  .routine-token.is-drop-target{outline:2px dashed hsla(var(--suka-brand-700)/.45);outline-offset:1px}
+  .routine-token-x{font-weight:700;line-height:1}
+  .routine-token-remove{border:none;background:transparent;color:inherit;cursor:pointer;padding:0;line-height:1}
+  .routine-add-row{display:flex;gap:8px;margin-top:8px}
+  .routine-add-input{flex:1;border:1px solid hsl(var(--line));border-radius:10px;background:hsl(var(--panel));padding:7px 10px;font-size:13px}
+  .routine-suggested{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .routine-suggested .routine-chip{height:26px;font-size:11px}
+  .routine-suggested-label{font-size:11px;color:hsl(var(--text-subtle));margin-top:6px}
   `;
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }
@@ -182,6 +230,143 @@ const writeAnimalPrefs = (next) => {
     localStorage.setItem(animalPrefKey, JSON.stringify(next));
   } catch {}
 };
+
+const MEAL_ROUTINE_GROUPS = {
+  animalMeats: ["Chicken", "Turkey", "Beef", "Lamb", "Goat", "Fish"],
+  vegetables: [
+    "Spinach",
+    "Kale",
+    "Onions",
+    "Tomatoes",
+    "Carrots",
+    "Peppers",
+  ],
+  fruits: ["Apples", "Berries", "Citrus", "Bananas", "Dates", "Grapes"],
+  grains: ["Oats", "Rice", "Quinoa", "Barley", "Millet", "Whole Wheat"],
+  herbsSpices: [
+    "Garlic",
+    "Ginger",
+    "Basil",
+    "Oregano",
+    "Thyme",
+    "Rosemary",
+    "Cumin",
+    "Paprika",
+    "Black Pepper",
+    "Turmeric",
+  ],
+};
+
+const HOME_NUTRITION_DEFAULTS = {
+  calories: 2250,
+  proteinPct: 30,
+  carbsPct: 40,
+  fatPct: 30,
+  goal: "maintain",
+  macroStyle: "usda",
+  units: "kcal",
+  patternLabel: "Balanced",
+};
+
+const ROUTINE_GROUP_META = [
+  { key: "animalMeats", label: "Animal meats" },
+  { key: "vegetables", label: "Vegetables" },
+  { key: "fruits", label: "Fruits" },
+  { key: "grains", label: "Grains" },
+  { key: "herbsSpices", label: "Household herbs and spices" },
+];
+
+const HOME_FOOD_GROUPS_KEY = "suka.home.foodGroups.v1";
+const HOME_FOOD_GROUPS_DEFAULT_KEY =
+  "suka.household.foodGroups.default.v1";
+const LEGACY_HOME_ROUTINE_KEY = "suka.home.mealRoutine.v1";
+const LEGACY_HOME_ROUTINE_DEFAULT_KEY =
+  "suka.household.mealRoutine.default.v1";
+
+const makeRoutineDefaults = () => ({
+  calories: HOME_NUTRITION_DEFAULTS.calories,
+  proteinPct: HOME_NUTRITION_DEFAULTS.proteinPct,
+  carbsPct: HOME_NUTRITION_DEFAULTS.carbsPct,
+  fatPct: HOME_NUTRITION_DEFAULTS.fatPct,
+  goal: HOME_NUTRITION_DEFAULTS.goal,
+  units: HOME_NUTRITION_DEFAULTS.units,
+  patternLabel: HOME_NUTRITION_DEFAULTS.patternLabel,
+  selectedGroups: {
+    animalMeats: [...MEAL_ROUTINE_GROUPS.animalMeats],
+    vegetables: [...MEAL_ROUTINE_GROUPS.vegetables],
+    fruits: [...MEAL_ROUTINE_GROUPS.fruits],
+    grains: [...MEAL_ROUTINE_GROUPS.grains],
+    herbsSpices: [...MEAL_ROUTINE_GROUPS.herbsSpices],
+  },
+});
+
+const readObjectFromStorage = (primaryKey, legacyKey = null) => {
+  try {
+    const rawPrimary = localStorage.getItem(primaryKey);
+    const parsedPrimary = rawPrimary ? JSON.parse(rawPrimary) : null;
+    if (parsedPrimary && typeof parsedPrimary === "object") return parsedPrimary;
+
+    if (!legacyKey) return null;
+
+    const rawLegacy = localStorage.getItem(legacyKey);
+    const parsedLegacy = rawLegacy ? JSON.parse(rawLegacy) : null;
+    if (!parsedLegacy || typeof parsedLegacy !== "object") return null;
+
+    // One-time migration path: read old key and persist under the new key.
+    localStorage.setItem(primaryKey, JSON.stringify(parsedLegacy));
+    // Cleanup only after successful write to the new key.
+    localStorage.removeItem(legacyKey);
+    return parsedLegacy;
+  } catch {
+    return null;
+  }
+};
+
+const readHouseholdRoutineDefault = () => {
+  return readObjectFromStorage(
+    HOME_FOOD_GROUPS_DEFAULT_KEY,
+    LEGACY_HOME_ROUTINE_DEFAULT_KEY
+  );
+};
+
+const writeHouseholdRoutineDefault = (next) => {
+  try {
+    localStorage.setItem(HOME_FOOD_GROUPS_DEFAULT_KEY, JSON.stringify(next));
+  } catch {}
+};
+
+const readHomeRoutine = () => {
+  try {
+    const parsed = readObjectFromStorage(
+      HOME_FOOD_GROUPS_KEY,
+      LEGACY_HOME_ROUTINE_KEY
+    );
+    const base = readHouseholdRoutineDefault() || makeRoutineDefaults();
+    if (!parsed || typeof parsed !== "object") return base;
+    return {
+      ...base,
+      ...parsed,
+      selectedGroups: {
+        ...base.selectedGroups,
+        ...(parsed.selectedGroups || {}),
+      },
+    };
+  } catch {
+    return makeRoutineDefaults();
+  }
+};
+
+const writeHomeRoutine = (next) => {
+  try {
+    localStorage.setItem(HOME_FOOD_GROUPS_KEY, JSON.stringify(next));
+  } catch {}
+};
+
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const normalizeToken = (s) =>
+  String(s || "")
+    .trim()
+    .replace(/\s+/g, " ");
 
 /* --------------------------------- UI bits -------------------------------- */
 function IconGlyph({ glyph }) {
@@ -310,6 +495,124 @@ export default function HomePage() {
   const [favSchedules, setFavSchedules] = useState(() =>
     readFav(favKey.schedules)
   );
+  const [showLivePanels, setShowLivePanels] = useState(false);
+
+  const [homeRoutine, setHomeRoutine] = useState(() => readHomeRoutine());
+  const [customInputs, setCustomInputs] = useState(() => ({
+    animalMeats: "",
+    vegetables: "",
+    fruits: "",
+    grains: "",
+    herbsSpices: "",
+  }));
+  const [draggedToken, setDraggedToken] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
+
+  useEffect(() => {
+    writeHomeRoutine(homeRoutine);
+  }, [homeRoutine]);
+
+  const toggleRoutineItem = (groupKey, item) => {
+    setHomeRoutine((prev) => {
+      const current = Array.isArray(prev?.selectedGroups?.[groupKey])
+        ? prev.selectedGroups[groupKey]
+        : [];
+      const set = new Set(current);
+      if (set.has(item)) set.delete(item);
+      else set.add(item);
+      return {
+        ...prev,
+        selectedGroups: {
+          ...(prev.selectedGroups || {}),
+          [groupKey]: Array.from(set),
+        },
+      };
+    });
+  };
+
+  const removeRoutineItem = (groupKey, item) => {
+    setHomeRoutine((prev) => {
+      const current = Array.isArray(prev?.selectedGroups?.[groupKey])
+        ? prev.selectedGroups[groupKey]
+        : [];
+      return {
+        ...prev,
+        selectedGroups: {
+          ...(prev.selectedGroups || {}),
+          [groupKey]: current.filter((x) => x !== item),
+        },
+      };
+    });
+  };
+
+  const addCustomRoutineItem = (groupKey) => {
+    const value = normalizeToken(customInputs?.[groupKey]);
+    if (!value) return;
+
+    setHomeRoutine((prev) => {
+      const current = Array.isArray(prev?.selectedGroups?.[groupKey])
+        ? prev.selectedGroups[groupKey]
+        : [];
+      const exists = current.some(
+        (x) => String(x).toLowerCase() === value.toLowerCase()
+      );
+      if (exists) return prev;
+      return {
+        ...prev,
+        selectedGroups: {
+          ...(prev.selectedGroups || {}),
+          [groupKey]: [...current, value],
+        },
+      };
+    });
+
+    setCustomInputs((prev) => ({ ...prev, [groupKey]: "" }));
+  };
+
+  const reorderRoutineItems = (groupKey, fromIndex, toIndex) => {
+    setHomeRoutine((prev) => {
+      const current = Array.isArray(prev?.selectedGroups?.[groupKey])
+        ? [...prev.selectedGroups[groupKey]]
+        : [];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= current.length ||
+        toIndex >= current.length ||
+        fromIndex === toIndex
+      ) {
+        return prev;
+      }
+      const [moved] = current.splice(fromIndex, 1);
+      current.splice(toIndex, 0, moved);
+      return {
+        ...prev,
+        selectedGroups: {
+          ...(prev.selectedGroups || {}),
+          [groupKey]: current,
+        },
+      };
+    });
+  };
+
+  const onTokenDragStart = (groupKey, index) => {
+    setDraggedToken({ groupKey, index });
+  };
+
+  const onTokenDrop = (groupKey, index) => {
+    if (!draggedToken || draggedToken.groupKey !== groupKey) return;
+    reorderRoutineItems(groupKey, draggedToken.index, index);
+    setDraggedToken(null);
+    setDropTarget(null);
+  };
+
+  const onTokenDropAtEnd = (groupKey, length) => {
+    if (!draggedToken || draggedToken.groupKey !== groupKey) return;
+    const toIndex = Math.max(0, length - 1);
+    reorderRoutineItems(groupKey, draggedToken.index, toIndex);
+    setDraggedToken(null);
+    setDropTarget(null);
+  };
 
   const addFavSessionLocal = (s) => {
     const next = [...readFav(favKey.sessions).filter((x) => x.id !== s.id), s];
@@ -1001,23 +1304,211 @@ export default function HomePage() {
         </DashboardSection>
 
         <DashboardSection
-          id="realtime-coordination"
-          title="Realtime Suggestions"
-          subtitle="Live coordination queue and report summary for your active household/family scope."
+          id="meal-routines"
+          title="Meal Routines"
+          subtitle="Build your routine food groups and seasoning list for household planning."
           dense
           tone="alt"
         >
-          <RealtimeCoordinationPanel />
+          <div className="routine-grid">
+            <div className="routine-card">
+              <h3>Routine Food Groups and Seasoning</h3>
+              <div className="routine-sub">
+                Build your own list. Add custom items, remove tokens, and keep only what your home uses.
+              </div>
+
+              {ROUTINE_GROUP_META.map((group) => {
+                const selected = homeRoutine.selectedGroups?.[group.key] || [];
+                const suggested = (MEAL_ROUTINE_GROUPS[group.key] || []).filter(
+                  (item) => !selected.includes(item)
+                );
+
+                return (
+                  <div className="routine-group" key={group.key}>
+                    <div className="routine-sub">{group.label}</div>
+
+                    <div className="routine-token-wrap">
+                      {selected.length ? (
+                        selected.map((item, index) => (
+                          <div
+                            key={`${group.key}-token-${item}`}
+                            className={`routine-token ${
+                              draggedToken?.groupKey === group.key &&
+                              draggedToken?.index === index
+                                ? "is-dragging"
+                                : ""
+                            } ${
+                              dropTarget?.groupKey === group.key &&
+                              dropTarget?.index === index
+                                ? "is-drop-target"
+                                : ""
+                            }`}
+                            draggable
+                            onDragStart={() => onTokenDragStart(group.key, index)}
+                            onDragOver={(e) => {
+                              if (draggedToken?.groupKey !== group.key) return;
+                              e.preventDefault();
+                              setDropTarget({ groupKey: group.key, index });
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              onTokenDrop(group.key, index);
+                            }}
+                            onDragEnd={() => {
+                              setDraggedToken(null);
+                              setDropTarget(null);
+                            }}
+                            title="Drag to reorder"
+                          >
+                            <span>{item}</span>
+                            <button
+                              type="button"
+                              className="routine-token-remove"
+                              onClick={() => removeRoutineItem(group.key, item)}
+                              title="Remove"
+                              aria-label={`Remove ${item}`}
+                            >
+                              <span className="routine-token-x" aria-hidden="true">
+                                x
+                              </span>
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="routine-sub">No items selected yet.</span>
+                      )}
+                    </div>
+
+                    {selected.length ? (
+                      <div
+                        className="routine-sub"
+                        onDragOver={(e) => {
+                          if (draggedToken?.groupKey !== group.key) return;
+                          e.preventDefault();
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          onTokenDropAtEnd(group.key, selected.length);
+                        }}
+                      >
+                        Drag tokens to set priority order.
+                      </div>
+                    ) : null}
+
+                    <div className="routine-add-row">
+                      <input
+                        type="text"
+                        className="routine-add-input"
+                        placeholder={`Add custom ${group.label.toLowerCase()}`}
+                        value={customInputs[group.key] || ""}
+                        onKeyDown={(e) => {
+                          swallowRoutineKey(e);
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addCustomRoutineItem(group.key);
+                          }
+                        }}
+                        onChange={(e) =>
+                          setCustomInputs((prev) => ({
+                            ...prev,
+                            [group.key]: e.target.value,
+                          }))
+                        }
+                      />
+                      <button
+                        type="button"
+                        className="btn btn--ghost btn--sm"
+                        onClick={() => addCustomRoutineItem(group.key)}
+                      >
+                        + Add Custom
+                      </button>
+                    </div>
+
+                    {suggested.length ? (
+                      <>
+                        <div className="routine-suggested-label">Suggested</div>
+                        <div className="routine-suggested">
+                          {suggested.map((item) => (
+                            <button
+                              key={`${group.key}-suggested-${item}`}
+                              type="button"
+                              className="routine-chip"
+                              onClick={() => toggleRoutineItem(group.key, item)}
+                            >
+                              {item}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                );
+              })}
+
+              <div className="routine-actions">
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={resetRoutineToDefaults}
+                >
+                  Reset groups
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--sm"
+                  onClick={saveRoutineAsHouseholdDefault}
+                >
+                  Save groups as household default
+                </button>
+              </div>
+            </div>
+          </div>
         </DashboardSection>
 
-        {/* BRING THINGS INTO YOUR HOUSEHOLD */}
         <DashboardSection
-          id="bring-into-household"
-          title="Bring Things Into Your Household"
-          subtitle="Scan products, turn seed packets into a plan, and import recipes — all of it can flow into Meals and Inventory."
+          id="live-tools-toggle"
+          title="Live Tools"
+          subtitle="Load realtime and scanner panels only when you need them."
           dense
           tone="alt"
         >
+          <div className="btn-bar">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setShowLivePanels((v) => !v)}
+            >
+              {showLivePanels ? "Hide Live Panels" : "Load Live Panels"}
+            </button>
+            <span className="chip">
+              {showLivePanels
+                ? "Live panels active"
+                : "Live panels paused for fast loading"}
+            </span>
+          </div>
+        </DashboardSection>
+
+        {showLivePanels ? (
+          <DashboardSection
+            id="realtime-coordination"
+            title="Realtime Suggestions"
+            subtitle="Live coordination queue and report summary for your active household/family scope."
+            dense
+            tone="alt"
+          >
+            <RealtimeCoordinationPanel />
+          </DashboardSection>
+        ) : null}
+
+        {/* BRING THINGS INTO YOUR HOUSEHOLD */}
+        {showLivePanels ? (
+          <DashboardSection
+            id="bring-into-household"
+            title="Bring Things Into Your Household"
+            subtitle="Scan products, turn seed packets into a plan, and import recipes — all of it can flow into Meals and Inventory."
+            dense
+            tone="alt"
+          >
           {/* Pair 1: Scan + Seed */}
           <section id="scan-seed-grid" className="section-grid half">
             {/* Card 1: Scan • Compare • Trust */}
@@ -1474,7 +1965,8 @@ export default function HomePage() {
               </div>
             </div>
           </section>
-        </DashboardSection>
+          </DashboardSection>
+        ) : null}
 
         {/* ACTIVITY (left below the paired cards, per request) */}
         <DashboardSection

@@ -52,3 +52,5 @@ data/battle-rhythm.json
 
 __pycache__/
 *.pyc
+.vercel
+.env*.local

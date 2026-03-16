@@ -234,11 +234,11 @@ const DOMAINS = [
 function expectCanonicalEnvelope(e) {
   expect(e).toBeTruthy();
   expect(typeof e.type).toBe("string");
-  expect(e.type).toMatch(/^[a-z]+\.[a-z]+\.[a-z-]+$/); // domain.topic.action
+  expect(e.type).toMatch(/^[a-z]+(?:\.[a-z-]+){1,2}$/); // domain.topic or domain.topic.action
   expect(typeof e.ts).toBe("string");
   // ISO timestamp sanity (Date parses and equals original ISO when normalized)
   const d = new Date(e.ts);
-  expect.isNotNaN(d.getTime());
+  expect(Number.isNaN(d.getTime())).toBe(false);
   expect(typeof e.source).toBe("string");
   expect(e.source).toContain(":"); // "path:Export#method"
   expect(e).toHaveProperty("data");

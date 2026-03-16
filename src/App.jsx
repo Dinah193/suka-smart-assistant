@@ -628,6 +628,14 @@ const MealPlanningPage = lazyPage(
   "MealPlanning",
 );
 
+const MealPlannerScaffoldPage = lazyPage(
+  [
+    "@/pages/mealplanner/PlannerScaffoldPage.jsx",
+    "./pages/mealplanner/PlannerScaffoldPage.jsx",
+  ],
+  "MealPlannerScaffold",
+);
+
 const JobsPage = lazyPage(["./pages/jobs.jsx", "./pages/jobs.jsx"], "Jobs");
 
 /* ✅ FIX: Roles route should use the real roles page (not jobs) */
@@ -654,6 +662,14 @@ const PreservationQueuePlanner = lazyPage(
     "./components/storehouse/PreservationQueuePlanner.jsx",
   ],
   "PreservationQueue",
+);
+
+const StorehousePlannerScaffoldPage = lazyPage(
+  [
+    "@/pages/storehouse/planner/StorehousePlanner.jsx",
+    "./pages/storehouse/planner/StorehousePlanner.jsx",
+  ],
+  "StorehousePlannerScaffold",
 );
 
 /** NEW: Homestead + Knowledge (and Knowledge panels) */
@@ -740,6 +756,14 @@ const HomesteadSkillsPage = lazyPage(
     "./pages/homesteadplanner/skills.jsx",
   ],
   "HomesteadSkills",
+);
+
+const HomesteadPlannerScaffoldPage = lazyPage(
+  [
+    "@/pages/homestead/planner/HomesteadPlanner.jsx",
+    "./pages/homestead/planner/HomesteadPlanner.jsx",
+  ],
+  "HomesteadPlannerScaffold",
 );
 
 // ✅ Put the RELATIVE path first so it works with @vite-ignore dynamic import
@@ -1937,6 +1961,10 @@ export default function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/badges" element={<BadgesPage />} />
           <Route path="/meal-planning" element={<MealPlanningPage />} />
+          <Route
+            path="/meal-planning/planner-dashboard"
+            element={<MealPlannerScaffoldPage />}
+          />
 
           {/* ✅ UPDATED: load the real household meals page first */}
           <Route
@@ -1954,6 +1982,10 @@ export default function App() {
 
           {/* Storehouse + tools */}
           <Route path="/storehouse" element={<StorehousePage />} />
+          <Route
+            path="/storehouse/planner"
+            element={<StorehousePlannerScaffoldPage />}
+          />
           <Route
             path="/storehouse/auto-fill"
             element={<StorehouseAutoFillPlanner />}
@@ -2002,6 +2034,10 @@ export default function App() {
             path="/homesteadplanner/skills"
             element={<HomesteadSkillsPage />}
           />
+          <Route
+            path="/homesteadplanner/planner"
+            element={<HomesteadPlannerScaffoldPage />}
+          />
 
           {/* ✅ Back-compat redirects to keep old links working, but NOT surface outputs elsewhere */}
           <Route
@@ -2044,6 +2080,10 @@ export default function App() {
             path="/homestead/skills"
             element={<Navigate to="/homesteadplanner/skills" replace />}
           />
+          <Route
+            path="/homestead/planner"
+            element={<Navigate to="/homesteadplanner/planner" replace />}
+          />
 
           <Route path="/knowledge" element={<KnowledgePage />} />
 
@@ -2080,8 +2120,8 @@ export default function App() {
             element={<Navigate to="/cleaning" replace />}
           />
           <Route
-            path="/storehouse/planner"
-            element={<Navigate to="/storehouse" replace />}
+            path="/storehouseplanner"
+            element={<Navigate to="/storehouse/planner" replace />}
           />
           <Route path="/kg" element={<Navigate to="/knowledge" replace />} />
 

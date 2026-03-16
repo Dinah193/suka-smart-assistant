@@ -21,10 +21,13 @@ export default function StorehouseAutoFillPlanner() {
     try {
       const base = summarizeIngredientsFromMealPlan(mealPlan) || [];
       return base.map((item) => ({
+        id: `${String(item.name || "").toLowerCase()}::${String(item.unit || "unit").toLowerCase()}`,
         name: item.name,
         unit: item.unit,
-        total: Number(item.total || 0),
-        preservation: suggestPreservationType(item.name),
+        qty: Number(item.total || item.qty || 0),
+        category: "meal-planner",
+        source: "meal-planner",
+        tags: ["meal-plan", "autofill"],
       }));
     } catch {
       return [];
@@ -32,7 +35,13 @@ export default function StorehouseAutoFillPlanner() {
   }, [mealPlan]);
 
   // ✅ Only write to the store when the computed summary actually changed
-  const needsSig = jsonSig(storehouseNeeds);
+  const needsSig = jsonSig(
+    (Array.isArray(storehouseNeeds) ? storehouseNeeds : []).map((item) => ({
+      name: item?.name,
+      unit: item?.unit,
+      qty: Number(item?.qty ?? item?.total ?? 0),
+    }))
+  );
   const summarizedSig = jsonSig(summarized);
 
   useEffect(() => {
@@ -65,9 +74,9 @@ export default function StorehouseAutoFillPlanner() {
               {storehouseNeeds.map((item, i) => (
                 <tr key={`${item.name}-${i}`} className="even:bg-green-50">
                   <td className="p-2 border">{item.name}</td>
-                  <td className="p-2 border">{Number(item.total ?? 0).toFixed(2)}</td>
+                  <td className="p-2 border">{Number(item.qty ?? item.total ?? 0).toFixed(2)}</td>
                   <td className="p-2 border">{item.unit}</td>
-                  <td className="p-2 border">{item.preservation}</td>
+                  <td className="p-2 border">{suggestPreservationType(item.name)}</td>
                 </tr>
               ))}
             </tbody>

@@ -182,7 +182,7 @@
       if (!map[c.key] || map[c.key].score < c.score) map[c.key] = c; // keep stronger
     }
     var out = [];
-    for (var k in map) if (map.hasOwnProperty(k)) out.push(map[k]);
+    for (var k in map) if (Object.prototype.hasOwnProperty.call(map, k)) out.push(map[k]);
     return out;
   }
 

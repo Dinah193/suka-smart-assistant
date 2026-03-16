@@ -10,6 +10,12 @@ const scriptPath = path.resolve(
   "scripts",
   "nutrition-mongo-adapter-contract.cjs"
 );
+const fallbackScriptPath = path.resolve(
+  repoRoot,
+  "tools",
+  "scripts",
+  "nutrition-mongo-fallback-contract.cjs"
+);
 
 const enabled =
   String(process.env.SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS || "false").toLowerCase() === "true";
@@ -22,6 +28,24 @@ describe("nutrition mongo adapter contract", () => {
   it("returns normalizedName_required for empty upsert payload", async () => {
     const result = await nutritionMongoAdapter.upsert({});
     expect(result).toEqual({ ok: false, error: "normalizedName_required" });
+  });
+
+  it("uses soft-read/hard-write fallback contract when Mongo is unavailable", () => {
+    const result = spawnSync(process.execPath, [fallbackScriptPath], {
+      cwd: repoRoot,
+      env: process.env,
+      shell: false,
+      encoding: "utf8",
+      timeout: 30000,
+    });
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    expect(result.status).toBe(0);
+    expect(String(result.stdout || "")).toContain('"ok":true');
+    expect(String(result.stdout || "")).toContain('"mongo_unavailable"');
   });
 
   run("passes adapter round-trip contract against configured Mongo", () => {

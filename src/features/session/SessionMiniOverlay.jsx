@@ -218,6 +218,15 @@ export default function SessionMiniOverlay({
   // Keyboard shortcuts (local to overlay when focused OR global listener)
   useEffect(() => {
     const onKey = (e) => {
+      const t = e.target;
+      const tag = String(t?.tagName || "").toUpperCase();
+      const isEditable =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        t?.isContentEditable;
+      if (isEditable || e.ctrlKey || e.metaKey || e.altKey) return;
+
       const key = e.key?.toLowerCase?.();
       if (key === " " || key === "spacebar") {
         e.preventDefault();

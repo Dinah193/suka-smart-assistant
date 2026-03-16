@@ -143,8 +143,15 @@ async function buildAuthPayload(userId, extraAuth = {}) {
   };
 }
 
-function createSocket(ioFn, url, auth) {
-  return ioFn(url, {
+function normalizeNamespace(ns) {
+  const raw = String(ns || "/core").trim();
+  if (!raw) return "/core";
+  return raw.startsWith("/") ? raw : `/${raw}`;
+}
+
+function createSocket(ioFn, url, auth, namespace = "/core") {
+  const ns = normalizeNamespace(namespace);
+  return ioFn(`${url}${ns}`, {
     transports: ["websocket"], // prefer ws for reliability
     autoConnect: false,
     reconnection: true,
@@ -193,7 +200,7 @@ function flushQueue() {
   }
 }
 
-async function ensureConnected({ userId, extraAuth } = {}) {
+async function ensureConnected({ userId, extraAuth, namespace = "/core" } = {}) {
   // If we are not in a browser, or socket.io-client isn't installed, no-op.
   const ioFn = await loadSocketIoClient();
   if (!ioFn) return null;
@@ -204,7 +211,7 @@ async function ensureConnected({ userId, extraAuth } = {}) {
   if (!socketSingleton.socket) {
     socketSingleton.url = url;
     socketSingleton.lastAuth = auth;
-    socketSingleton.socket = createSocket(ioFn, url, auth);
+    socketSingleton.socket = createSocket(ioFn, url, auth, namespace);
     // Wire core listeners once
     const s = socketSingleton.socket;
 
@@ -306,6 +313,7 @@ export function useSocket({
   extraAuth = {},
   autoJoinUserRoom = true,
   alsoJoinRooms = [],
+  namespace = "/core",
 } = {}) {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -326,7 +334,7 @@ export function useSocket({
     (async () => {
       setConnecting(true);
       try {
-        const s = await ensureConnected({ userId, extraAuth });
+        const s = await ensureConnected({ userId, extraAuth, namespace });
 
         // If sockets are unavailable (SSR or socket.io-client missing), stay idle/no-op.
         if (!s) {
@@ -348,14 +356,24 @@ export function useSocket({
           setConnecting(false);
           setError(null);
 
+          if (hasWindow()) {
+            window.__SUKA_SOCKET__ = s;
+            window.__suka = window.__suka || {};
+            window.__suka.socket = s;
+          }
+
           // Track auto-rooms for rejoin
           if (autoJoinUserRoom && userIdRef.current) {
-            socketSingleton.joinedRooms.add(userIdRef.current);
-            s.emit("ROOM:JOIN", { roomId: userIdRef.current });
+            const userRoom = `user:${userIdRef.current}`;
+            socketSingleton.joinedRooms.add(userRoom);
+            s.emit("join", userRoom);
+            // Legacy fallback for older socket handlers, harmless if ignored.
+            s.emit("ROOM:JOIN", { roomId: userRoom });
           }
           (alsoJoinRooms || []).forEach((r) => {
             if (r) {
               socketSingleton.joinedRooms.add(r);
+              s.emit("join", r);
               s.emit("ROOM:JOIN", { roomId: r });
             }
           });
@@ -440,6 +458,7 @@ export function useSocket({
     JSON.stringify(extraAuth),
     autoJoinUserRoom,
     JSON.stringify(alsoJoinRooms),
+    namespace,
   ]);
 
   /** Join a room (server should handle ROOM:JOIN) */
@@ -447,7 +466,10 @@ export function useSocket({
     const s = socketRef.current;
     if (!roomId) return;
     socketSingleton.joinedRooms.add(roomId);
-    if (s && s.connected) s.emit("ROOM:JOIN", { roomId });
+    if (s && s.connected) {
+      s.emit("join", roomId);
+      s.emit("ROOM:JOIN", { roomId });
+    }
     else {
       // ensure it joins on next connect
     }
@@ -457,7 +479,10 @@ export function useSocket({
   const leaveRoom = useCallback((roomId) => {
     const s = socketRef.current;
     socketSingleton.joinedRooms.delete(roomId);
-    if (s && s.connected) s.emit("ROOM:LEAVE", { roomId });
+    if (s && s.connected) {
+      s.emit("leave", roomId);
+      s.emit("ROOM:LEAVE", { roomId });
+    }
   }, []);
 
   /** Core emit with buffering if offline */
@@ -621,7 +646,7 @@ export function useCookingChannel({
   onStepReminder,
   onSessionEnded,
 } = {}) {
-  const sock = useSocket({ userId });
+  const sock = useSocket({ userId, namespace: "/meals" });
 
   useEffect(() => {
     const unsubs = [];
@@ -644,7 +669,7 @@ export function useCookingChannel({
  *  - MEALPLAN:NOTICE  { message }
  */
 export function useMealPlanChannel({ userId, onPlanUpdated, onNotice } = {}) {
-  const sock = useSocket({ userId });
+  const sock = useSocket({ userId, namespace: "/meals" });
   useEffect(() => {
     const unsubs = [];
     if (onPlanUpdated)
@@ -667,7 +692,7 @@ export function useBatchSessionChannel({
   onTasks,
   onLabels,
 } = {}) {
-  const sock = useSocket({ userId });
+  const sock = useSocket({ userId, namespace: "/meals" });
   useEffect(() => {
     const unsubs = [];
     if (onCreated)
@@ -685,7 +710,7 @@ export function useBatchSessionChannel({
  *  - GROCERY:SYNC_NOTICE  { message }
  */
 export function useGroceryChannel({ userId, onUpdated, onNotice } = {}) {
-  const sock = useSocket({ userId });
+  const sock = useSocket({ userId, namespace: "/core" });
   useEffect(() => {
     const unsubs = [];
     if (onUpdated)
@@ -706,7 +731,7 @@ export function useAutomationChannel({
   onAutomation,
   onTemplates,
 } = {}) {
-  const sock = useSocket({ userId });
+  const sock = useSocket({ userId, namespace: "/automations" });
   useEffect(() => {
     const unsubs = [];
     if (onAutomation)
@@ -722,7 +747,7 @@ export function useAutomationChannel({
    Optional: simple toast bridge
 ----------------------------------------------------------------------------- */
 export function useToastBridge({ userId, showToast } = {}) {
-  const sock = useSocket({ userId });
+  const sock = useSocket({ userId, namespace: "/core" });
   useEffect(() => {
     if (!showToast) return;
     const un1 = sock.subscribe("NOTICE", (msg) =>

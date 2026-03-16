@@ -1,4 +1,10 @@
 /* eslint-disable no-console */
+import eventBusModule from "@/services/events/eventBus";
+import * as pausePoliciesModule from "@/services/session/policies/pausePolicies";
+import * as inventoryGuardModule from "@/services/session/guards/inventoryGuard";
+import * as timeUtilModule from "@/utils/dateFormat";
+import * as prefsModule from "@/stores/scheduler/prefs";
+
 // src/utils/safetyEscalation.js
 // Safety Escalation: soft/hard deadline evaluators + guard-aware actions.
 //
@@ -27,30 +33,23 @@
 //
 
 (function () {
+  const pickModule = (mod) => {
+    if (!mod) return null;
+    return "default" in mod ? mod.default || mod : mod;
+  };
+
   /* ------------------------------- Optional deps ----------------------------- */
-  let eventBus = { emit() {}, on() {}, off() {} };
-  try {
-    const eb = require("@/services/events/eventBus");
-    eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
-  } catch (_e) {}
+  let eventBus = pickModule(eventBusModule) || { emit() {}, on() {}, off() {} };
+  eventBus = eventBus.eventBus || eventBus;
 
   // Pause policies (freeze/continue/safety). Defensive import.
-  let pausePolicies = null;
-  try {
-    pausePolicies = require("@/services/session/policies/pausePolicies");
-  } catch (_e) {}
+  const pausePolicies = pickModule(pausePoliciesModule);
 
   // Inventory guard (optional; for substitution hints when time is tight)
-  let inventoryGuard = null;
-  try {
-    inventoryGuard = require("@/services/session/guards/inventoryGuard");
-  } catch (_e) {}
+  const inventoryGuard = pickModule(inventoryGuardModule);
 
   // Time helpers
-  let timeUtil = null;
-  try {
-    timeUtil = require("@/utils/dateFormat");
-  } catch (_e) {}
+  const timeUtil = pickModule(timeUtilModule);
 
   // Scheduler/global settings (quiet hours, sabbath guard, safety thresholds)
   let getSchedulerPrefs = () => ({
@@ -68,12 +67,9 @@
     },
     user: { locale: null },
   });
-  try {
-    const prefMod = require("@/stores/scheduler/prefs");
-    if (prefMod && typeof prefMod.getSchedulerPrefs === "function") {
-      getSchedulerPrefs = prefMod.getSchedulerPrefs;
-    }
-  } catch (_e) {}
+  if (prefsModule && typeof prefsModule.getSchedulerPrefs === "function") {
+    getSchedulerPrefs = prefsModule.getSchedulerPrefs;
+  }
 
   /* -------------------------------- Mini utils ------------------------------- */
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));

@@ -25,6 +25,7 @@ const AnimalSettingsPage = React.lazy(() => import("./views/AnimalSettingsPage.j
 const CleaningSettingsPage = React.lazy(() => import("./views/CleaningSettingsPage.jsx"));
 const CalendarSettingsPage = React.lazy(() => import("./views/CalendarSettingsPage.jsx"));
 const AutomationSettingsPage = React.lazy(() => import("./views/AutomationSettingsPage.jsx"));
+const MealPlanningSettingsPage = React.lazy(() => import("./views/MealPlanningSettingsPage.jsx"));
 const AdvancedSettingsPage = React.lazy(() => import("./views/AdvancedSettingsPage.jsx"));
 
 // --------------------- soft imports ---------------------
@@ -125,6 +126,7 @@ export function SettingsLayout({ base = "/settings", route = null }) {
     if (pathname.startsWith(`${base}/animal`)) return "animal";
     if (pathname.startsWith(`${base}/cleaning`)) return "cleaning";
     if (pathname.startsWith(`${base}/calendar`)) return "calendar";
+    if (pathname.startsWith(`${base}/meal-planning`)) return "meal-planning";
     if (pathname.startsWith(`${base}/automation`)) return "automation";
     if (pathname.startsWith(`${base}/advanced`)) return "advanced";
     return "profile";
@@ -177,6 +179,7 @@ export function SettingsLayout({ base = "/settings", route = null }) {
         <TabLink to={`${base}/animal`}>Animal</TabLink>
         <TabLink to={`${base}/cleaning`}>Cleaning</TabLink>
         <TabLink to={`${base}/calendar`}>Calendar</TabLink>
+        <TabLink to={`${base}/meal-planning`}>Meal Planning</TabLink>
         <TabLink to={`${base}/automation`}>Automation</TabLink>
         <TabLink to={`${base}/advanced`}>Advanced</TabLink>
       </div>
@@ -247,6 +250,7 @@ export function getSettingsRoutes(base = "/settings") {
     { path: `${base}/animal`,    element: <Layout element={<ErrorBoundary><AnimalSettingsPage /></ErrorBoundary>} /> },
     { path: `${base}/cleaning`,  element: <Layout element={<ErrorBoundary><CleaningSettingsPage /></ErrorBoundary>} /> },
     { path: `${base}/calendar`,  element: <Layout element={<ErrorBoundary><CalendarSettingsPage /></ErrorBoundary>} /> },
+    { path: `${base}/meal-planning`, element: <Layout element={<ErrorBoundary><MealPlanningSettingsPage /></ErrorBoundary>} /> },
     { path: `${base}/automation`,element: <Layout element={<ErrorBoundary><AutomationSettingsPage /></ErrorBoundary>} /> },
     { path: `${base}/advanced`,  element: <Layout element={<ErrorBoundary><AdvancedSettingsPage /></ErrorBoundary>} /> },
 

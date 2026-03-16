@@ -177,6 +177,9 @@ export async function normalizeMany(items = [], options = {}) {
   const substitutions = await softImport(
     "@/agents/skills/cooking/substitutions"
   ); // local fallback table
+  const battleRhythmResolver = await softImport(
+    "@/services/recipes/battleRhythmResolver"
+  );
 
   for (const raw of items) {
     const res = { ok: false, warnings: [], errors: [] };
@@ -237,6 +240,74 @@ export async function normalizeMany(items = [], options = {}) {
       if (subTips.length) {
         canon.meta = canon.meta || {};
         canon.meta.substitutionTips = subTips;
+      }
+
+      // Optional non-destructive default resolved preview for battle rhythm.
+      if (
+        opts?.battleRhythm &&
+        opts.battleRhythm.enabled &&
+        typeof battleRhythmResolver?.applyBattleRhythm === "function"
+      ) {
+        const primaryIngredients = Array.isArray(canon.sections?.[0]?.ingredients)
+          ? canon.sections[0].ingredients
+          : [];
+
+        const resolverInput = {
+          id: canon.id,
+          title: canon.title,
+          ingredients: primaryIngredients.map((ing) => ({
+            name: ing?.name,
+            label: ing?.name,
+            qty: Number.isFinite(Number(ing?.qty)) ? Number(ing.qty) : null,
+            unit: ing?.unit || null,
+          })),
+          steps: Array.isArray(canon.steps) ? canon.steps : [],
+          totalTimeMin: Number.isFinite(Number(canon?.time?.totalSec))
+            ? Math.round(Number(canon.time.totalSec) / 60)
+            : null,
+          time: {
+            totalMins: Number.isFinite(Number(canon?.time?.totalSec))
+              ? Math.round(Number(canon.time.totalSec) / 60)
+              : null,
+            prepMins: Number.isFinite(Number(canon?.time?.prepSec))
+              ? Math.round(Number(canon.time.prepSec) / 60)
+              : null,
+            cookMins: Number.isFinite(Number(canon?.time?.cookSec))
+              ? Math.round(Number(canon.time.cookSec) / 60)
+              : null,
+          },
+        };
+
+        const previewResolved = await battleRhythmResolver.applyBattleRhythm(
+          resolverInput,
+          opts.battleRhythm,
+          opts.recipeOverride || {},
+          {
+            dayType: opts.dayType || null,
+            inventory: opts.inventory || null,
+            macroPattern: opts.macroPattern || null,
+            season: opts.season || null,
+            useCanonicalSubstitutions: opts.useCanonicalSubstitutions !== false,
+          }
+        );
+
+        canon.meta = canon.meta || {};
+        canon.meta.defaultResolvedPreview = {
+          battleRhythm: {
+            enabled: true,
+            recipe: previewResolved?.recipe || null,
+            warnings: Array.isArray(previewResolved?.warnings)
+              ? previewResolved.warnings
+              : [],
+            conflicts: Array.isArray(previewResolved?.conflicts)
+              ? previewResolved.conflicts
+              : [],
+            provenance: previewResolved?.provenance || null,
+            trace: Array.isArray(previewResolved?.trace)
+              ? previewResolved.trace
+              : [],
+          },
+        };
       }
 
       res.ok = true;

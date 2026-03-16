@@ -163,6 +163,15 @@ function useHotkeys(enabled, map) {
   useEffect(() => {
     if (!enabled) return;
     const onKey = (e) => {
+      const t = e.target;
+      const tag = String(t?.tagName || "").toUpperCase();
+      const isEditable =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        t?.isContentEditable;
+      if (isEditable || e.ctrlKey || e.metaKey || e.altKey) return;
+
       const k = e.key;
       if (k === " " || e.code === "Space") {
         e.preventDefault();

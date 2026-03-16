@@ -1,4 +1,14 @@
 /* eslint-disable no-console */
+import eventBusModule from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
+import * as scheduleHelpersModule from "@/services/scheduleHelpers";
+import * as estimateEngineModule from "@/services/estimateEngine";
+import * as automationRuntimeModule from "@/services/automation/runtime";
+import * as prefsModule from "@/stores/scheduler/prefs";
+import * as offsetParserModule from "@/services/session/utils/offsetParser";
+
 // RelativeScheduler.js — event-anchored scheduler (pause-aware, domain-aware, Sabbath/quiet-hours friendly)
 //
 // HOW THIS FITS IN SSA:
@@ -21,46 +31,46 @@
 //    schedule/anchor changes up to the Hub so SSA → SVFFH can keep storehouse / shared sessions in sync.
 
 (function () {
+  const pickModule = (mod) => {
+    if (!mod) return null;
+    return "default" in mod ? mod.default || mod : mod;
+  };
+
   // ------------------------------ Defensive deps ------------------------------
   const isBrowser = typeof window !== "undefined";
   const now = () => Date.now();
   const EVENT_SOURCE = "RelativeScheduler";
 
-  let eventBus = { on() {}, off() {}, emit() {} };
-  try {
-    const eb = require("@/services/events/eventBus");
-    eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
-  } catch (_e) {}
+  const eventBus =
+    (eventBusModule &&
+      (eventBusModule.default || eventBusModule.eventBus || eventBusModule)) ||
+    { on() {}, off() {}, emit() {} };
 
   // SSA → Hub export (optional; fails silently)
-  let featureFlags = { familyFundMode: false };
-  try {
-    // best-effort; if you keep feature flags in another file, this stays harmless
-    featureFlags = require("@/config/featureFlags.json") || featureFlags;
-  } catch (_e) {}
+  const schedulerFeatureFlags = featureFlags || { familyFundMode: false };
 
-  let HubPacketFormatter = null;
-  try {
-    HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
-  } catch (_e) {}
+  const hubPacketFormatter =
+    (HubPacketFormatter &&
+      (HubPacketFormatter.default || HubPacketFormatter)) ||
+    null;
 
-  let FamilyFundConnector = null;
-  try {
-    FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-  } catch (_e) {}
+  const familyFundConnector =
+    (FamilyFundConnector &&
+      (FamilyFundConnector.default || FamilyFundConnector)) ||
+    null;
 
   function exportToHubIfEnabled(payload) {
     // We only mirror household-ish data: created anchors, schedules, session-related updates.
-    if (!featureFlags?.familyFundMode) return;
+    if (!schedulerFeatureFlags?.familyFundMode) return;
     try {
-      const packet = HubPacketFormatter
-        ? HubPacketFormatter.format("scheduler", payload)
+      const packet = hubPacketFormatter
+        ? hubPacketFormatter.format("scheduler", payload)
         : { kind: "scheduler", payload };
       if (
-        FamilyFundConnector &&
-        typeof FamilyFundConnector.send === "function"
+        familyFundConnector &&
+        typeof familyFundConnector.send === "function"
       ) {
-        FamilyFundConnector.send(packet);
+        familyFundConnector.send(packet);
       }
     } catch (_err) {
       // silent fail — SSA must run by itself
@@ -69,7 +79,7 @@
 
   // unified event emitter for this file
   function emitEvent(type, data) {
-    const payload = {
+    const envelope = {
       type,
       ts: new Date().toISOString(),
       source: EVENT_SOURCE,
@@ -78,33 +88,25 @@
 
     // to shared bus
     try {
-      eventBus.emit(type, payload);
+      eventBus.emit(type, data || {});
     } catch (_e) {}
 
     // ALSO: if automation runtime is present (we load it defensively below),
     // let it hear the same event — this keeps SSA’s automation "listening" to the same shape.
     try {
       if (automation && typeof automation.emitEvent === "function") {
-        automation.emitEvent(type, payload);
+        automation.emitEvent(type, envelope);
       }
     } catch (_e) {}
   }
 
-  let scheduleHelpers = null; // optional: isSabbath(ts), inQuietHours(ts), nextUnquiet(ts), withholdsForDomain(domain)
-  try {
-    scheduleHelpers = require("@/services/scheduleHelpers");
-  } catch (_e) {}
+  const scheduleHelpers = pickModule(scheduleHelpersModule); // optional: isSabbath(ts), inQuietHours(ts), nextUnquiet(ts), withholdsForDomain(domain)
 
-  let estimateEngine = null; // optional: for ETA/window refinements
-  try {
-    estimateEngine = require("@/services/estimateEngine");
-  } catch (_e) {}
+  const estimateEngine = pickModule(estimateEngineModule); // optional: for ETA/window refinements
 
-  let automation = null; // optional: in-app notifications/toasts
-  try {
-    automation =
-      (require("@/services/automation/runtime") || {}).automation || null;
-  } catch (_e) {}
+  const automationRuntime = pickModule(automationRuntimeModule);
+  const automation =
+    (automationRuntime && automationRuntime.automation) || null; // optional: in-app notifications/toasts
 
   // NEW (DI-safe): prefs + offset parser for repeat engine
   let getSchedulerPrefs = () => ({
@@ -112,16 +114,11 @@
     quietHours: { enabled: false, start: "22:00", end: "06:00" },
     sabbathGuard: { enabled: false },
   });
-  try {
-    const p = require("@/stores/scheduler/prefs");
-    if (p && typeof p.getSchedulerPrefs === "function")
-      getSchedulerPrefs = p.getSchedulerPrefs;
-  } catch (_e) {}
+  if (prefsModule && typeof prefsModule.getSchedulerPrefs === "function") {
+    getSchedulerPrefs = prefsModule.getSchedulerPrefs;
+  }
 
-  let offsetParser = null; // { toMs(expr) }
-  try {
-    offsetParser = require("@/services/session/utils/offsetParser");
-  } catch (_e) {}
+  const offsetParser = pickModule(offsetParserModule); // { toMs(expr) }
 
   // ------------------------------ Small utils --------------------------------
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -373,6 +370,29 @@
         muted: true,
         mutedBecause: isSabbath(ts) ? "sabbath" : "quiet-hours",
       });
+      emitEvent("relative.reminder.unquietReady", {
+        ...basePayload,
+        queued: true,
+      });
+      it._pendingUnquiet = true;
+      it._wasMuted = true;
+      if (!it._unquietWatchdog) {
+        const poll = () => {
+          if (!it._pendingUnquiet || it._unquietEmitted) {
+            it._unquietWatchdog = null;
+            return;
+          }
+          if (!isSabbath(now()) && !inQuietHours(now())) {
+            it._pendingUnquiet = false;
+            it._unquietEmitted = true;
+            emitDue(anchor, it, "unquietReady");
+            it._unquietWatchdog = null;
+            return;
+          }
+          it._unquietWatchdog = setTimeout(poll, TICK_MS);
+        };
+        it._unquietWatchdog = setTimeout(poll, TICK_MS);
+      }
       const nextOk = nextUnquiet(ts);
       if (nextOk && automation?.notify) {
         automation.notify({
@@ -408,8 +428,12 @@
       return;
     }
 
-    // Standard due event
-    emitEvent("relative.reminder.due", basePayload);
+    // Standard due event (or a post-guard resurfacing event)
+    if (reason === "unquietReady") {
+      emitEvent("relative.reminder.unquietReady", basePayload);
+    } else {
+      emitEvent("relative.reminder.due", basePayload);
+    }
 
     if (automation?.notify) {
       automation.notify({
@@ -500,10 +524,13 @@
         } else if (
           !isSabbath(ts) &&
           !inQuietHours(ts) &&
-          it._mutedFlagged &&
+          (it._mutedFlagged || it._pendingUnquiet || it._wasMuted) &&
+          !it._unquietEmitted &&
           ts >= it.dueAt
         ) {
           it._mutedFlagged = false;
+          it._pendingUnquiet = false;
+          it._unquietEmitted = true;
           emitDue(anchor, it, "unquietReady");
           changed = true;
         }
@@ -662,6 +689,20 @@
 
       anchor.items.push(...enriched);
       computeDueTimes(anchor);
+
+      // Handle immediate offsets deterministically; fake-timer environments can
+      // otherwise miss the first tick window for due-now reminders.
+      const ts = now();
+      anchor.items.forEach((it) => {
+        if (it._emitted || typeof it.dueAt !== "number") return;
+        if (ts < it.dueAt) return;
+        it._emitted = true;
+        if (isSabbath(ts) || inQuietHours(ts)) {
+          it._mutedFlagged = true;
+        }
+        emitDue(anchor, it, "due");
+      });
+
       saveStore(store);
 
       emitEvent("relative.schedule.created", {

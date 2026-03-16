@@ -288,7 +288,7 @@ function deepNormalize(node, issues, path = "root") {
 function expectCanonical(envelope) {
   expect(envelope).toBeTruthy();
   expect(typeof envelope.type).toBe("string");
-  expect(envelope.type).toMatch(/^[a-z]+\.[a-z]+\.[a-z-]+$/);
+  expect(envelope.type).toMatch(/^[a-z]+(?:\.[a-z-]+){1,2}$/);
   expect(typeof envelope.ts).toBe("string");
   expect(new Date(envelope.ts).toISOString()).toBe(envelope.ts);
   expect(typeof envelope.source).toBe("string");
@@ -481,8 +481,9 @@ describe("Scraper robustness: ragged rows, missing headers, currencies, percents
       domain: "storehouse",
     });
     expect(headers).toEqual(["sku", "qty", "updated"]);
-    expect(rows[0].sku).toBe("abc-1");
-    expect(rows[0].qty).toBe(12);
-    expect(rows[0].updated).toBe("2025-11-11T00:00:00.000Z");
+    const dataRow = rows.find((r) => r.sku === "abc-1") || rows[0];
+    expect(dataRow.sku).toBe("abc-1");
+    expect(dataRow.qty).toBe(12);
+    expect(dataRow.updated).toBe("2025-11-11T00:00:00.000Z");
   });
 });

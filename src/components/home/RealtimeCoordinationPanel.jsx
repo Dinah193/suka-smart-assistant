@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
 function timeAgo(iso) {
   if (!iso) return "-";
@@ -20,6 +21,7 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
   const [assigningSuggestionId, setAssigningSuggestionId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [requestingReport, setRequestingReport] = useState(false);
+  const [signaling, setSignaling] = useState(false);
   const [domainFilter, setDomainFilter] = useState("all");
   const [assignDrafts, setAssignDrafts] = useState({});
 
@@ -92,6 +94,42 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
       await rt.requestReport();
     } finally {
       setRequestingReport(false);
+    }
+  };
+
+  const emitPlannerHandoff = async (kind) => {
+    setSignaling(true);
+    try {
+      if (kind === "storehouse") {
+        await emitCanonicalSignal({
+          type: "mealUpdated",
+          sourceModule: "planner.meal",
+          dependencies: ["storehouse", "sessions"],
+          urgency: "normal",
+          payload: { reason: "manual_handoff", handoffTo: "storehouse.planner" },
+        });
+      }
+      if (kind === "inventory") {
+        await emitCanonicalSignal({
+          type: "inventoryShortage",
+          sourceModule: "planner.meal",
+          dependencies: ["storehouse", "shopping", "tasks"],
+          urgency: "high",
+          payload: { reason: "manual_handoff", handoffTo: "storehouse.planner" },
+        });
+      }
+      if (kind === "prep") {
+        await emitCanonicalSignal({
+          type: "taskStarted",
+          sourceModule: "planner.meal",
+          dependencies: ["sessions", "cleaning"],
+          urgency: "normal",
+          payload: { reason: "manual_handoff", handoffTo: "task.sessions" },
+        });
+      }
+      await rt.refreshSuggestions();
+    } finally {
+      setSignaling(false);
     }
   };
 
@@ -189,6 +227,36 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
       </div>
 
       <div style={{ marginTop: 10 }}>
+        <div className="text-xs home-muted" style={{ marginBottom: 6 }}>
+          Planner Handoffs: send a coordination signal so other planners can pick up work.
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => emitPlannerHandoff("storehouse")}
+            disabled={signaling}
+          >
+            Handoff to Storehouse
+          </button>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => emitPlannerHandoff("inventory")}
+            disabled={signaling}
+          >
+            Flag Inventory Risk
+          </button>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => emitPlannerHandoff("prep")}
+            disabled={signaling}
+          >
+            Request Prep Session
+          </button>
+        </div>
+
         <div className="text-xs home-muted" style={{ marginBottom: 6 }}>
           Latest report: {timeAgo(rt.latestReport?.generatedAt)}
         </div>

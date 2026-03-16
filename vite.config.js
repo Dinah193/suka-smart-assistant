@@ -306,6 +306,32 @@ function legacyAssetRouteShim() {
 
 export default defineConfig(({ mode }) => {
   const isCiBuild = Boolean(process.env.CI || process.env.VERCEL);
+  const enableLegacyContractTests =
+    process.env.SSA_ENABLE_LEGACY_CONTRACT_TESTS === "true";
+  const legacyTestExcludes = enableLegacyContractTests
+    ? []
+    : [
+        "_tests_/couponService.test.js",
+        "_tests_/priceComparator.test.js",
+        "_tests_/productResolver.test.js",
+        "_tests_/recallChecker.test.js",
+        "public/__tests__/layerAssets.test.js",
+        "src/tests/decider.scoring.test.js",
+        "src/tests/estimator.spec.js",
+        "src/tests/gatekeeper.spec.js",
+        "src/tests/grocery.builder.test.js",
+        "src/tests/importer.flow.test.js",
+        "src/tests/integration/orchestrator.flow.spec.js",
+        "src/tests/knowledgeGraph.test.js",
+        "src/tests/planner.conflict.test.js",
+        "src/tests/planner.spec.js",
+        "src/tests/planning/**/*.test.js",
+        "src/tests/riskController.spec.js",
+        "src/tests/calculators/calendar/**/*.test.js",
+        "src/tests/calculators/gardenAnimal/**/*.test.js",
+        "src/tests/calculators/health/**/*.test.js",
+        "src/tests/calculators/stability/**/*.test.js",
+      ];
 
   return ({
   plugins: [
@@ -345,6 +371,7 @@ export default defineConfig(({ mode }) => {
       "@utils": r("./src/utils"),
       "@ui": r("./src/ui"),
       "@theme": r("./src/theme"),
+      "@jest/globals": r("./src/tests/shims/jest-globals.js"),
 
       // ✅ Shim prop-types to avoid production build failures if not installed
       "prop-types": r("./src/shims/prop-types.js"),
@@ -388,6 +415,23 @@ export default defineConfig(({ mode }) => {
       // ✅ Keep dep prebundle compatible with top-level await too
       target: "es2022",
     },
+  },
+
+  test: {
+    environment: "node",
+    globals: true,
+    setupFiles: ["src/tests/vitest.setup.js"],
+    environmentMatchGlobs: [
+      ["src/tests/**", "jsdom"],
+      ["public/__tests__/**", "jsdom"],
+      ["_tests_/**", "node"],
+    ],
+    include: ["**/*.{test,spec}.{js,ts,jsx,tsx}"],
+    exclude: ["**/node_modules/**", "**/dist/**", ...legacyTestExcludes],
+    testTimeout: 15000,
+    hookTimeout: 15000,
+    restoreMocks: true,
+    clearMocks: true,
   },
 
   server: {

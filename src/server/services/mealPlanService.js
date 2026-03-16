@@ -31,6 +31,8 @@ let cookingService = null;
 let inventoryService = null;
 let nutritionLookupService = null;
 let calendarService = null;
+let catalogSyncService = null;
+let sharedAllergenMap = null;
 
 async function getCookingService() {
   if (!cookingService) {
@@ -59,6 +61,37 @@ async function getCalendarService() {
     calendarService = mod ? (mod.default || mod) : null;
   }
   return calendarService;
+}
+
+async function getCatalogSyncService() {
+  if (!catalogSyncService) {
+    const mod = await import("./catalogSyncService.js").catch(() => null);
+    catalogSyncService = mod
+      ? mod.default || mod
+      : null;
+  }
+  return catalogSyncService;
+}
+
+async function getSharedAllergenMap() {
+  if (sharedAllergenMap) return sharedAllergenMap;
+  try {
+    const file = path.resolve(
+      process.cwd(),
+      "src/catalogs/cuisines_shared/allergens.map.json",
+    );
+    const raw = await fs.readFile(file, "utf-8");
+    const parsed = JSON.parse(raw || "{}");
+    sharedAllergenMap = {
+      termMap: parsed?.termMap || {},
+      ingredientTriggers: Array.isArray(parsed?.ingredientTriggers)
+        ? parsed.ingredientTriggers
+        : [],
+    };
+  } catch {
+    sharedAllergenMap = { termMap: {}, ingredientTriggers: [] };
+  }
+  return sharedAllergenMap;
 }
 
 // ---- Local JSON store --------------------------------------------------------
@@ -132,6 +165,137 @@ function roughPriceUSD(ing) {
   return 0.002 * (unit === "g" ? qty : 250);
 }
 
+function extractCatalogMeta(recipe = {}) {
+  const tags = asArray(recipe.tags).map((t) => String(t || "").toLowerCase());
+  const domainTag = tags.find((t) => t.startsWith("catalog:")) || null;
+  const domainFromTag = domainTag
+    ? domainTag.replace(/^catalog:/, "").split(":")[0]
+    : null;
+
+  return {
+    isCatalog:
+      String(recipe.origin || "").toLowerCase() === "catalog" ||
+      String(recipe.source || "").toLowerCase() === "catalog" ||
+      String(recipe.source || "").toLowerCase() === "cataloglibrary" ||
+      Boolean(recipe.catalogDomain) ||
+      Boolean(recipe.meta?.catalog?.catalogDomain),
+    catalogDomain:
+      recipe.catalogDomain ||
+      recipe.meta?.catalog?.catalogDomain ||
+      domainFromTag ||
+      null,
+    catalogId:
+      recipe.catalogId ||
+      recipe.meta?.catalog?.catalogId ||
+      recipe.meta?.id ||
+      recipe.id ||
+      null,
+    tags,
+  };
+}
+
+function normalizeText(v) {
+  return String(v || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[\u2019']/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeRecipeText(recipe = {}) {
+  const tokens = [];
+  for (const t of asArray(recipe.tags)) tokens.push(String(t || ""));
+  for (const a of asArray(recipe.allergens)) tokens.push(String(a || ""));
+  for (const ing of asArray(recipe.ingredients)) {
+    tokens.push(String(ing?.name || ""));
+    tokens.push(String(ing?.label || ""));
+  }
+  return tokens.map(normalizeText).filter(Boolean);
+}
+
+async function inferRecipeAllergenIds(recipe = {}) {
+  const out = new Set();
+  const tags = asArray(recipe.tags).map((x) => String(x || "").toLowerCase());
+  for (const t of tags) {
+    if (t.startsWith("allergen:")) out.add(t.replace(/^allergen:/, "").trim());
+  }
+
+  const dict = await getSharedAllergenMap();
+  const termMap = dict?.termMap || {};
+  const triggers = Array.isArray(dict?.ingredientTriggers)
+    ? dict.ingredientTriggers
+    : [];
+
+  const recipeText = tokenizeRecipeText(recipe);
+  const joined = ` ${recipeText.join(" ")} `;
+
+  for (const [term, ids] of Object.entries(termMap)) {
+    const key = normalizeText(term);
+    if (!key) continue;
+    if (joined.includes(` ${key} `) || joined.includes(key)) {
+      for (const id of asArray(ids)) out.add(String(id));
+    }
+  }
+
+  for (const trig of triggers) {
+    const aid = String(trig?.allergenId || "").trim();
+    if (!aid) continue;
+    const toks = asArray(trig?.tokens).map(normalizeText).filter(Boolean);
+    if (!toks.length) continue;
+    if (toks.some((tok) => joined.includes(` ${tok} `) || joined.includes(tok))) {
+      out.add(aid);
+    }
+  }
+
+  return out;
+}
+
+async function getCatalogRuleSignals() {
+  const service = await getCatalogSyncService();
+  const snap = service?.getCatalogRuleIndexSnapshot
+    ? await service.getCatalogRuleIndexSnapshot()
+    : { rules: [] };
+
+  const rules = Array.isArray(snap?.rules) ? snap.rules : [];
+  const recipeSourceDomains = new Set([
+    "bakery",
+    "breads",
+    "desserts",
+    "soups",
+    "shawarma",
+    "pastes",
+    "cuisines",
+  ]);
+  const ruleSourceDomains = new Set();
+
+  for (const r of rules) {
+    const domain = String(r?.domain || "").toLowerCase().trim();
+    if (!domain) continue;
+    if (recipeSourceDomains.has(domain)) continue;
+    ruleSourceDomains.add(domain);
+  }
+
+  return {
+    recipeSourceDomains,
+    ruleSourceDomains,
+    hasEstimatorRules:
+      ruleSourceDomains.has("estimators") ||
+      rules.some((r) => String(r?.type || "").toLowerCase().includes("estimator")),
+    hasSeasonalityRules:
+      ruleSourceDomains.has("farm-to-table") ||
+      ruleSourceDomains.has("homestead"),
+    hasCuisineRules:
+      ruleSourceDomains.has("cuisines") ||
+      rules.some((r) => String(r?.subdomain || "").toLowerCase().length > 0),
+  };
+}
+
+function asArray(v) {
+  return Array.isArray(v) ? v : v ? [v] : [];
+}
+
 // ---- Nutrition summary -------------------------------------------------------
 async function computeRecipeNutrition(recipe) {
   const ns = await getNutritionService();
@@ -191,6 +355,13 @@ export async function generatePlan(input = {}) {
     sabbathIsSaturday = false,
     season = null,                  // e.g., "Fall" (can bias towards soups/stews)
     planLeftovers = true,           // allow automatic leftover day if scoring fits
+    catalogPreferences = {
+      enableCatalogBoosts: true,
+      sourceBoost: 1,
+      preferredDomains: [],
+      preferredCatalogIds: [],
+      cuisineAffinity: [],
+    },
   } = input;
 
   const cook = await getCookingService();
@@ -198,6 +369,7 @@ export async function generatePlan(input = {}) {
 
   const inventory = pantryFirst && inv?.snapshot ? await inv.snapshot(input.userId) : { items: [] };
   const recipes = cook ? await cook.listRecipes() : [];
+  const catalogRuleSignals = await getCatalogRuleSignals();
 
   // rank recipes
   const ranked = [];
@@ -211,6 +383,8 @@ export async function generatePlan(input = {}) {
       season,
       pantryFirst,
       budgetPerDayUSD,
+      catalogPreferences,
+      catalogRuleSignals,
     });
     ranked.push({ recipe: r, score });
   }
@@ -305,13 +479,42 @@ export async function generatePlan(input = {}) {
  * scoreRecipe — higher is better
  * Factors: pantry availability, tag preferences, diet fit, macro proximity, seasonal bump, rough cost.
  */
-async function scoreRecipe(recipe, { inventory, preferTags, avoidTags, diet, macrosTarget, season, pantryFirst, budgetPerDayUSD }) {
+export async function scoreRecipe(
+  recipe,
+  {
+    inventory,
+    preferTags,
+    avoidTags,
+    diet,
+    macrosTarget,
+    season,
+    pantryFirst,
+    budgetPerDayUSD,
+    catalogPreferences,
+    catalogRuleSignals,
+  }
+) {
   let score = 0;
 
   const tags = (recipe.tags || []).map(t => t.toLowerCase());
 
-  if (avoidTags.some(t => tags.includes(t.toLowerCase()))) score -= 50;
+  const avoidSet = new Set(asArray(avoidTags).map((t) => String(t || "").toLowerCase()));
+  if (asArray(avoidTags).some(t => tags.includes(String(t || "").toLowerCase()))) score -= 50;
   if (preferTags.some(t => tags.includes(t.toLowerCase()))) score += 10;
+
+  // Stronger diet compatibility checks so non-compliant recipes sink in ranking.
+  const ingredientNames = asArray(recipe.ingredients)
+    .map((i) => normalizeText(i?.name || i?.label || ""))
+    .filter(Boolean);
+  if (diet?.vegetarian) {
+    const hasMeat = ingredientNames.some((n) => /(beef|lamb|goat|chicken|turkey|fish|shrimp|pork|bacon)/.test(n));
+    if (hasMeat) score -= 40;
+    else score += 8;
+  }
+  if (diet?.keto) {
+    const r = await recipeWithNutrition(recipe);
+    if (Number.isFinite(Number(r?.nutrition?.carbs)) && Number(r.nutrition.carbs) > 30) score -= 12;
+  }
 
   // Diet heuristics
   if (diet?.keto && tags.includes("keto")) score += 8;
@@ -327,11 +530,12 @@ async function scoreRecipe(recipe, { inventory, preferTags, avoidTags, diet, mac
     }
   }
 
-  // Seasonal bump (very light)
+  // Seasonal bump. Increased when farm-to-table/homestead rule sources are present.
   if (season) {
+    const seasonalWeight = catalogRuleSignals?.hasSeasonalityRules ? 3 : 2;
     const s = season.toLowerCase();
-    if (s === "fall" && tags.some(t => /soup|stew|roast/.test(t))) score += 2;
-    if (s === "summer" && tags.some(t => /salad|grill|cold/.test(t))) score += 2;
+    if (s === "fall" && tags.some(t => /soup|stew|roast/.test(t))) score += seasonalWeight;
+    if (s === "summer" && tags.some(t => /salad|grill|cold/.test(t))) score += seasonalWeight;
   }
 
   // Macro proximity (if nutrition present or computable)
@@ -345,14 +549,84 @@ async function scoreRecipe(recipe, { inventory, preferTags, avoidTags, diet, mac
   if (budgetPerDayUSD != null) {
     const roughCost = (await estimateRecipeCostUSD(recipe)) / Math.max(1, recipe.servings || 1);
     const ratio = roughCost / Math.max(1, budgetPerDayUSD);
-    if (ratio <= 0.8) score += 4;
-    else if (ratio <= 1.0) score += 2;
-    else score -= 1;
+    const budgetWeight = catalogRuleSignals?.hasEstimatorRules ? 1.5 : 1;
+    if (ratio <= 0.8) score += 4 * budgetWeight;
+    else if (ratio <= 1.0) score += 2 * budgetWeight;
+    else score -= 1 * budgetWeight;
   }
 
   // Prep time preference: shorter is slightly better
   const totalTime = recipe.time?.total || (recipe.time?.prep || 0) + (recipe.time?.cook || 0);
   if (totalTime) score += Math.max(0, 4 - Math.min(4, totalTime / 30));
+
+  // Catalog-aware boosts: domain/id affinity and source preference.
+  const cp = catalogPreferences || {};
+  const catalog = extractCatalogMeta(recipe);
+  if (cp?.enableCatalogBoosts !== false && catalog.isCatalog) {
+    score += Number.isFinite(Number(cp?.sourceBoost)) ? Number(cp.sourceBoost) : 1;
+
+    const prefDomains = new Set(
+      asArray(cp?.preferredDomains)
+        .map((x) => String(x || "").toLowerCase().trim())
+        .filter(Boolean)
+    );
+    const prefIds = new Set(
+      asArray(cp?.preferredCatalogIds)
+        .map((x) => String(x || "").trim())
+        .filter(Boolean)
+    );
+    const affinity = new Set(
+      asArray(cp?.cuisineAffinity)
+        .map((x) => String(x || "").toLowerCase().trim())
+        .filter(Boolean)
+    );
+
+    const domain = String(catalog.catalogDomain || "").toLowerCase();
+    if (domain && prefDomains.has(domain)) score += 4;
+    if (catalog.catalogId && prefIds.has(String(catalog.catalogId))) score += 5;
+
+    if (affinity.size) {
+      const affinityMatch = catalog.tags.some((t) => {
+        if (!t.startsWith("catalog:")) return false;
+        const suffix = t.replace(/^catalog:/, "");
+        return affinity.has(suffix) || affinity.has(suffix.split("/")[0]);
+      });
+      if (affinityMatch) score += 3;
+    }
+
+    if (catalogRuleSignals?.recipeSourceDomains?.size) {
+      const cd = String(catalog.catalogDomain || "").toLowerCase();
+      if (cd && catalogRuleSignals.recipeSourceDomains.has(cd)) score += 1;
+    }
+  }
+
+  // Avoid-tag allergen compatibility through shared dictionaries.
+  if (avoidSet.size) {
+    const allergenIds = await inferRecipeAllergenIds(recipe);
+    let allergenConflict = false;
+    for (const avoid of avoidSet) {
+      if (!avoid.startsWith("allergen:")) continue;
+      const aid = avoid.replace(/^allergen:/, "").trim();
+      if (allergenIds.has(aid)) {
+        allergenConflict = true;
+        break;
+      }
+    }
+    if (allergenConflict) score -= 60;
+  }
+
+  // Cuisine rules can reinforce explicit preference affinity even for non-catalog recipes.
+  if (catalogRuleSignals?.hasCuisineRules) {
+    const affinity = new Set(
+      asArray(catalogPreferences?.cuisineAffinity)
+        .map((x) => String(x || "").toLowerCase().trim())
+        .filter(Boolean)
+    );
+    if (affinity.size) {
+      const hasAffinity = tags.some((t) => affinity.has(String(t || "").toLowerCase()));
+      if (hasAffinity) score += 2;
+    }
+  }
 
   return score;
 }
@@ -617,6 +891,7 @@ export function buildN8nPayload(entity, opts = {}) {
 const MealPlanService = {
   // generation & summaries
   generatePlan,
+  scoreRecipe,
   summarizePlan,
 
   // grocery

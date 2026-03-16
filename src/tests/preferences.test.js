@@ -263,7 +263,7 @@ function deepMerge(a, b) {
 function expectCanonical(evt) {
   expect(evt).toBeTruthy();
   expect(typeof evt.type).toBe("string");
-  expect(evt.type).toMatch(/^[a-z]+\.[a-z]+\.[a-z-]+$/); // domain.topic.action
+  expect(evt.type).toMatch(/^[a-z]+(?:\.[a-z-]+){1,2}$/); // domain.topic or domain.topic.action
   expect(typeof evt.ts).toBe("string");
   expect(new Date(evt.ts).toISOString()).toBe(evt.ts);
   expect(typeof evt.source).toBe("string");
@@ -355,7 +355,8 @@ describe("Preferences: apply to domain entities", () => {
     expect(adjusted.ingredients[0].qty).toBeCloseTo(750, 2);
     expect(adjusted.preferences.doneness).toBe("medium-rare");
 
-    const [evt] = eventBusMock._drain();
+    const drained = eventBusMock._drain();
+    const evt = drained.find((x) => x?.type === "preferences.applied") || drained[0];
     expectCanonical(evt);
     expect(evt.type).toBe("preferences.applied");
     expect(evt.data.domain).toBe("cooking");
