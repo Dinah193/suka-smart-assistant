@@ -158,9 +158,9 @@ function deps() {
 // -----------------------------------------------------------------------------
 // Handler wiring (replace the three shims with your production handlers)
 // -----------------------------------------------------------------------------
-import { onMealplanDraftRequested } from './_shim.onMealplanDraftRequested';
-import { onGroceryListRequested } from './_shim.onGroceryListRequested';
-import { onPrepTasksRequested }    from './_shim.onPrepTasksRequested';
+const onMealplanDraftRequested = _shim_onMealplanDraftRequested;
+const onGroceryListRequested = _shim_onGroceryListRequested;
+const onPrepTasksRequested = _shim_onPrepTasksRequested;
 
 // Orchestrator: subscribes to events and routes to handlers
 function wireEvents(bus, baseDeps) {

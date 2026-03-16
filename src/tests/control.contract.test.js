@@ -79,6 +79,40 @@ const controlSchema = {
       ],
     },
   },
+  allOf: [
+    {
+      if: { properties: { type: { const: "control.command" } }, required: ["type"] },
+      then: {
+        properties: {
+          data: { $ref: "#/$defs/command" },
+        },
+      },
+    },
+    {
+      if: { properties: { type: { const: "control.reply" } }, required: ["type"] },
+      then: {
+        properties: {
+          data: { $ref: "#/$defs/reply" },
+        },
+      },
+    },
+    {
+      if: { properties: { type: { const: "control.error" } }, required: ["type"] },
+      then: {
+        properties: {
+          data: { $ref: "#/$defs/error" },
+        },
+      },
+    },
+    {
+      if: { properties: { type: { const: "control.heartbeat" } }, required: ["type"] },
+      then: {
+        properties: {
+          data: { $ref: "#/$defs/heartbeat" },
+        },
+      },
+    },
+  ],
   $defs: {
     // control.command
     command: {
