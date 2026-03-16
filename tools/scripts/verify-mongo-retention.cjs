@@ -145,7 +145,6 @@ async function main() {
     const db = client.db();
     const liveChecks = [];
     for (const check of checks) {
-      // eslint-disable-next-line no-await-in-loop
       liveChecks.push(await validateLiveTtlIndex(db, check));
     }
 
