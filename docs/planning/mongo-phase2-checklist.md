@@ -96,16 +96,22 @@ npm run typecheck:ci
 - Required action:
   - Define retention policy for raw collections (`nutrition_data`, `raw_recipes`, and snapshots).
   - Implement TTL indexes or archival job strategy.
-- Verification command (after TTL/index implementation):
+- Retention defaults (override with env as needed):
+  - `MONGO_RETENTION_NUTRITION_DAYS=365`
+  - `MONGO_RETENTION_RAW_RECIPES_DAYS=365`
+  - `MONGO_RETENTION_PRESERVATION_SNAPSHOT_DAYS=180`
+- Verification command:
 ```powershell
-# Example placeholder: replace with your TTL/index verification script when added
-npm run test:ci
+npm run verify:mongo:retention
 ```
 - Pass criteria:
+  - Command exits `0`.
+  - Output JSON has `"ok": true`.
+  - Each collection check reports `hasField=true` and `hasTtlIndex=true` for `expiresAt`.
   - Lifecycle policy documented and implemented.
   - Verification evidence attached to PR/release notes.
 - Fail criteria:
-  - No retention mechanism or no verifiable evidence.
+  - Any collection missing `expiresAt` TTL index or command exits non-zero.
 
 ## Gate 8: Rollback Readiness
 - Objective: make Mongo integration reversable without production outage.

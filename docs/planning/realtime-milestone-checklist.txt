@@ -1,0 +1,110 @@
+﻿Sprint To-Do List (Milestone by Milestone)
+
+Milestone 1 (Weeks 1-2): Contract Freeze + Ingress Hardening
+- [ ] Define canonical event envelope fields and required/optional matrix in team notes.
+- [ ] Add runtime validation helper usage in ingress path (socket + HTTP) behind flag.
+- [ ] Add idempotency key policy (eventId preferred, fallback correlationId+type+scope+scopeId).
+- [ ] Add explicit error mapping table for invalid_event, duplicate_event, forbidden_scope, unauthorized.
+- [ ] Keep existing response aliases (suggestions, suggestion) intact for UI compatibility.
+
+Tests to add in _tests_/realtimeCoordinator.test.js
+- [ ] ingest rejects signal missing required envelope fields
+- [ ] ingest accepts valid canonical envelope and preserves eventId/correlationId
+- [ ] ingest deduplicates duplicate eventId within dedupe window
+- [ ] ingest does not dedupe different eventId with same payload
+- [ ] ingest normalizes scope defaults to household when absent
+- [ ] ingest routes family-scoped signal to family queue only
+- [ ] audit history records validation failures with reason code
+- [ ] state counters include droppedDuplicate and droppedInvalid totals
+
+Tests to add in _tests_/realtimeController.runtime.contract.test.js
+- [ ] POST /api/realtime/signals returns 400 invalid_event for malformed payload
+- [ ] POST /api/realtime/signals returns 200 and includes signal id for valid payload
+- [ ] POST /api/realtime/signals returns 409 duplicate_event for repeated eventId
+- [ ] GET /api/realtime/suggestions still returns both items and suggestions aliases
+- [ ] cross-scope household query without elevated role returns 403 forbidden_scope
+- [ ] family scope request without familyId returns 403 family_scope_forbidden
+- [ ] household scope request without homeId returns 403 household_scope_missing
+
+Milestone 2 (Weeks 3-4): Durable Event Log + Replay
+- [ ] Introduce append-only log abstraction and wire ingress writes before projection.
+- [ ] Add boot-time replay path to rebuild coordinator read models.
+- [ ] Add replay checkpoint marker and replay idempotency guard.
+- [ ] Keep in-memory path as fallback behind feature flag for rollback safety.
+
+Tests to add in _tests_/realtimeCoordinator.test.js
+- [ ] replay rebuilds suggestion queue from persisted events in order
+- [ ] replay is idempotent when same event batch is applied twice
+- [ ] replay preserves consumed and assigned suggestion state transitions
+- [ ] replay restores latest report summary fields correctly
+- [ ] out-of-order events produce deterministic final queue ordering
+- [ ] expired suggestions remain pruned after replay
+- [ ] signal history cap still enforced during replay
+
+Tests to add in _tests_/realtimeController.runtime.contract.test.js
+- [ ] POST /signals appends event before coordinator mutation (observable via stub call order)
+- [ ] service restart simulation + replay restores /suggestions response consistency
+- [ ] service restart simulation + replay restores /reports/latest content
+- [ ] append store failure returns 503 with stable error contract
+- [ ] controller remains healthy when replay is disabled by feature flag
+
+Milestone 3 (Weeks 5-6): Projection Split + Readiness SLIs
+- [ ] Split ingest and projection responsibilities (coordinator becomes projector/read model).
+- [ ] Add readiness metrics counters and latency timing around ingest-to-queue update.
+- [ ] Add backlog/staleness calculation for high-priority unassigned suggestions.
+- [ ] Expose lightweight diagnostics endpoint or payload fields for test visibility.
+
+Tests to add in _tests_/realtimeCoordinator.test.js
+- [ ] projector updates queueDepth metric after each ingest
+- [ ] projector increments highPriorityPending for priority >= 80
+- [ ] assignSuggestion decreases unassignedPending and increases assignedPending
+- [ ] consumeSuggestion decreases pendingSuggestions and increases completedSuggestions
+- [ ] report generation includes signals24h and signalBreakdown accuracy
+- [ ] latency metric recorded for ingest-to-queue-update path
+- [ ] projector handles burst ingest without duplicate queue items
+
+Tests to add in _tests_/realtimeController.runtime.contract.test.js
+- [ ] GET /reports/latest includes readiness summary keys (pending, assigned, unassigned, highPriority)
+- [ ] POST /suggestions/:id/assign updates subsequent /suggestions listing
+- [ ] POST /suggestions/:id/consume updates subsequent /reports/latest summary
+- [ ] GET /audit returns bounded list honoring limit query param
+- [ ] GET /signals returns bounded list honoring limit query param
+- [ ] CSV export endpoint keeps required columns after projection refactor
+
+Milestone 4 (Weeks 7-8): Neo4j Graph Projection (Non-Blocking)
+- [ ] Add async graph projector subscriber from event log.
+- [ ] Keep core realtime behavior independent of Neo4j availability.
+- [ ] Add graph projection retry queue and dead-letter counter.
+- [ ] Add graph-enriched report field as optional extension, not required contract.
+
+Tests to add in _tests_/realtimeCoordinator.test.js
+- [ ] graph projection hook receives normalized relationship payload per signal
+- [ ] graph projection failure does not block suggestion creation
+- [ ] graph projection retry increments retry counter and preserves event
+- [ ] graph enrichment data merges into report without mutating base summary
+- [ ] coordinator behavior unchanged when graph projector disabled
+
+Tests to add in _tests_/realtimeController.runtime.contract.test.js
+- [ ] core endpoints remain 200 when graph service unavailable
+- [ ] optional graph fields absent or null without breaking base contract
+- [ ] optional graph fields present when graph projection enabled
+- [ ] scope authorization still enforced for graph-augmented report requests
+
+Definition of Done (Every Milestone)
+- [ ] New tests are deterministic and do not depend on wall-clock timing without fakes.
+- [ ] Feature flags have both enabled and disabled path coverage.
+- [ ] Existing compatibility aliases and status codes remain unchanged unless intentionally versioned.
+- [ ] No regression in existing tests for suggestions/report contracts.
+- [ ] Add one negative-path runtime contract test per new error code introduced.
+
+Pass Closure Update (2026-03-10)
+- Status: CLOSED for this repo-wide checklist pass.
+- Baseline verification: default full-suite run is green.
+	- Test files: 29 passed, 6 skipped, 0 failed.
+	- Tests: 284 passed, 56 skipped, 0 failed.
+	- Log: `.tmp/full-vitest-after-animal-default.log`
+- Re-enabled this pass:
+	- `src/tests/animal.plan.flow.test.js`
+	- `src/tests/calculators/storehouseMeals/BatchYieldCalculator.test.js`
+	- `src/tests/calculators/storehouseMeals/CostPerServingCalculator.test.js`
+	- `src/tests/calculators/storehouseMeals/FermentationDurationCalculator.test.js`
