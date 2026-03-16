@@ -15,7 +15,7 @@
     "ops:branch-protection": "node tools/scripts/configure-branch-protection.cjs",
     "lint:ci": "node tools/scripts/ci-lint.cjs",
     "typecheck:ci": "node tools/scripts/ci-typecheck.cjs",
-    "smoke:e2e": "vitest run _tests_/serverStartup.dbmode.contract.test.js _tests_/mealPlanningContext.battleRhythm.catalog.contract.test.js",
+    "smoke:e2e": "vitest run _tests_/envValidation.security.contract.test.js _tests_/loggingSanitizer.test.js",
     "server:start": "node ./src/server/index.js",
     "server:dev": "node --watch ./src/server/index.js",
     "server:healthcheck": "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 4000) + '/health').then(r => r.json()).then(j => { console.log(JSON.stringify(j, null, 2)); if (!j.ok) process.exit(1); }).catch(e => { console.error(e); process.exit(1); })\"",
