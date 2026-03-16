@@ -30,6 +30,9 @@
   var Events = {};
   try {
     EventsHub = require("@/automation/events") || {};
+    if (!EventsHub || !EventsHub.emit || !EventsHub.on) {
+      EventsHub = require("@/automation/events/index") || EventsHub;
+    }
     Events = (EventsHub && (EventsHub.Events || (EventsHub.default && EventsHub.default.Events))) || {};
   } catch (e) {}
 
@@ -267,7 +270,7 @@
     var shortageItems = inferShortagesFrom(items, options);
     if (shortageItems.length) {
       try {
-        emit("supply.shortage.detected", {
+        emit("inventory.shortage.detected", {
           items: shortageItems,
           options: {
             attemptSubstitutions: true,
@@ -276,7 +279,7 @@
           },
           sessionId: sessionId,
           planId: planId
-        }, { topic: "supply.shortage.detected" });
+        }, { topic: "inventory.shortage.detected" });
       } catch (e) {}
     }
 
@@ -312,6 +315,8 @@
   /* ------------------------------- Register ------------------------------- */
   function registerOn(hub){
     var api = hub && hub.on ? hub : { on: on };
+    if (api && api.on) on = api.on;
+    if (api && api.emit) emit = api.emit;
     try { api.on("animalplan.draft.requested", handleAnimalPlanDraftRequested); }
     catch(e){ try { on("animalplan.draft.requested", handleAnimalPlanDraftRequested); } catch(e2){} }
   }

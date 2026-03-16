@@ -48,6 +48,24 @@ function safeLower(s) {
   return String(s || "").toLowerCase();
 }
 
+function pickFirst(...vals) {
+  for (const v of vals) {
+    if (v !== undefined && v !== null) return v;
+  }
+  return undefined;
+}
+
+function pickPath(obj, path) {
+  if (!obj || !path) return undefined;
+  const parts = String(path).split(".");
+  let cur = obj;
+  for (const p of parts) {
+    if (!cur || typeof cur !== "object") return undefined;
+    cur = cur[p];
+  }
+  return cur;
+}
+
 function uniqBy(arr, keyFn) {
   const out = [];
   const seen = new Set();
@@ -175,6 +193,75 @@ function normalizeRecipe(r) {
   return { id, title, tags, macros, ingredients, raw: r };
 }
 
+function normalizeRecipeCandidate(r, source = "unknown") {
+  if (!r || typeof r !== "object") return null;
+  const id =
+    r.id ||
+    r.recipeId ||
+    r._id ||
+    r.key ||
+    r.slug ||
+    (r.sourceUrl ? `url:${r.sourceUrl}` : null);
+
+  const title =
+    r.title || r.name || r.recipeTitle || r.label || r.slug || "Untitled Recipe";
+
+  const tags = Array.isArray(r.tags)
+    ? r.tags
+    : typeof r.tags === "string"
+    ? r.tags
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean)
+    : [];
+
+  const macros =
+    r.macros || r.nutrition || r.macroTotals || r?.nutritionPacket || null;
+
+  return {
+    id: id ? String(id) : null,
+    title: String(title),
+    tags,
+    macros,
+    ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
+    source: r.source || source,
+    sourceUrl: r.sourceUrl || r.url || null,
+    origin: r.origin || null,
+    catalogDomain: r.catalogDomain || null,
+    catalogSubdomain: r.catalogSubdomain || null,
+    catalogId: r.catalogId || null,
+    catalogTags: Array.isArray(r.catalogTags) ? r.catalogTags : [],
+    raw: r,
+  };
+}
+
+function normalizeMacroPattern(pattern, fallbackId = "custom") {
+  if (!pattern || typeof pattern !== "object") return null;
+  const protein = toNum(pattern.protein ?? pattern.proteinPct, NaN);
+  const carbs = toNum(pattern.carbs ?? pattern.carbsPct, NaN);
+  const fat = toNum(pattern.fat ?? pattern.fatPct, NaN);
+
+  const normalized = {
+    id: pattern.id || fallbackId,
+    label: pattern.label || pattern.name || "Macro Pattern",
+    proteinPct: Number.isFinite(protein) ? protein : 0,
+    carbsPct: Number.isFinite(carbs) ? carbs : 0,
+    fatPct: Number.isFinite(fat) ? fat : 0,
+  };
+
+  const total = normalized.proteinPct + normalized.carbsPct + normalized.fatPct;
+  if (total > 0 && total !== 100) {
+    normalized.proteinPct = Math.round((normalized.proteinPct / total) * 100);
+    normalized.carbsPct = Math.round((normalized.carbsPct / total) * 100);
+    normalized.fatPct = Math.max(
+      0,
+      100 - normalized.proteinPct - normalized.carbsPct
+    );
+  }
+
+  return normalized;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Public selectors (Dexie-first)                                             */
 /* -------------------------------------------------------------------------- */
@@ -298,7 +385,7 @@ export async function selectRecipesForPlanEntries({ db, planEntries } = {}) {
     const nr = normalizeRecipe(r);
     if (!nr || !nr.id) continue;
     if (!want.has(String(nr.id))) continue;
-    byId.set(String(nr.id)), nr;
+    byId.set(String(nr.id), nr);
   }
 
   return byId;
@@ -498,6 +585,9 @@ export function selectMealPlanRangeFromState({
  * @returns {Promise<object>}
  */
 export async function selectMealPlanningContext({
+  intent,
+  input,
+  runtime,
   db,
   state,
   startDay,
@@ -507,13 +597,46 @@ export async function selectMealPlanningContext({
   includeSummary = true,
   includeIngredients = true,
 } = {}) {
+  const rt = runtime && typeof runtime === "object" ? runtime : {};
+  const inObj = input && typeof input === "object" ? input : {};
+
+  const dbRef =
+    db ||
+    pickFirst(
+      rt.db,
+      rt.dexie,
+      pickPath(rt, "stores.db"),
+      pickPath(rt, "context.db")
+    );
+
+  const stateRef =
+    state ||
+    pickFirst(rt.state, pickPath(rt, "stores.state"), pickPath(rt, "context.state"));
+
+  const includeUserSavedRecipes =
+    inObj.includeUserSavedRecipes !== false && rt.includeUserSavedRecipes !== false;
+  const includeImportedWebRecipes =
+    inObj.includeImportedWebRecipes !== false &&
+    rt.includeImportedWebRecipes !== false;
+  const includeAppRecipeLibrary =
+    inObj.includeAppRecipeLibrary !== false && rt.includeAppRecipeLibrary !== false;
+  const includeCatalogRecipes =
+    inObj.includeCatalogRecipes !== false && rt.includeCatalogRecipes !== false;
+  const includeBattleRhythmPreview =
+    inObj.includeBattleRhythmPreview === true || rt.includeBattleRhythmPreview === true;
+
   const start = startDay || isoDay(new Date());
   const end = endDay || start;
 
-  const planEntries = db
-    ? await selectMealPlanRange({ db, startDay: start, endDay: end, mealTypes })
+  const planEntries = dbRef
+    ? await selectMealPlanRange({
+        db: dbRef,
+        startDay: start,
+        endDay: end,
+        mealTypes,
+      })
     : selectMealPlanRangeFromState({
-        state,
+        state: stateRef,
         startDay: start,
         endDay: end,
         mealTypes,
@@ -531,8 +654,8 @@ export async function selectMealPlanningContext({
 
   if (includeRecipes) {
     try {
-      const recipesById = db
-        ? await selectRecipesForPlanEntries({ db, planEntries })
+      const recipesById = dbRef
+        ? await selectRecipesForPlanEntries({ db: dbRef, planEntries })
         : new Map();
       ctx.recipesById = recipesById;
       ctx.counts.uniqueRecipes =
@@ -545,6 +668,320 @@ export async function selectMealPlanningContext({
       ctx.counts.uniqueRecipes = 0;
     }
   }
+
+  // Extra recipe source pool for reasoner: user-saved, imported-from-web, and app library packs.
+  const recipeSources = {
+    userSaved: [],
+    importedWeb: [],
+    appLibrary: [],
+    catalogLibrary: [],
+  };
+
+  try {
+    if (includeUserSavedRecipes || includeImportedWebRecipes) {
+      const recipeStoreMod = await import("@/store/RecipeStore");
+      const getStore = recipeStoreMod?.useRecipeStore?.getState;
+      const storeState = typeof getStore === "function" ? getStore() : null;
+      const allSaved = Array.isArray(storeState?.recipes) ? storeState.recipes : [];
+      const battleRhythmOverrides =
+        storeState?.battleRhythmOverrides &&
+        typeof storeState.battleRhythmOverrides === "object"
+          ? storeState.battleRhythmOverrides
+          : { byRecipeId: {}, byFingerprint: {} };
+
+      ctx.recipeBattleRhythmOverrides = {
+        byRecipeId:
+          battleRhythmOverrides?.byRecipeId &&
+          typeof battleRhythmOverrides.byRecipeId === "object"
+            ? battleRhythmOverrides.byRecipeId
+            : {},
+        byFingerprint:
+          battleRhythmOverrides?.byFingerprint &&
+          typeof battleRhythmOverrides.byFingerprint === "object"
+            ? battleRhythmOverrides.byFingerprint
+            : {},
+      };
+
+      if (includeUserSavedRecipes) {
+        recipeSources.userSaved = allSaved
+          .map((r) => normalizeRecipeCandidate(r, "userSaved"))
+          .filter(Boolean);
+      }
+
+      if (includeImportedWebRecipes) {
+        recipeSources.importedWeb = allSaved
+          .filter((r) => r?.sourceUrl || r?.origin === "imported" || r?.origin === "scanned")
+          .map((r) => normalizeRecipeCandidate(r, "importedWeb"))
+          .filter(Boolean);
+      }
+    }
+  } catch (err) {
+    if (STRICT) throw err;
+  }
+
+  try {
+    if (includeAppRecipeLibrary) {
+      const packsMod = await import("@/data/recipe-packs/index.js");
+      const listPacks = packsMod?.listPacks;
+      const getPack = packsMod?.getPack;
+      if (typeof listPacks === "function" && typeof getPack === "function") {
+        const manifests = await listPacks({ vision: rt.vision || inObj.vision || null });
+        const requestedPackIds = Array.isArray(inObj.recipeLibraryPackIds)
+          ? inObj.recipeLibraryPackIds
+          : [];
+        const selectedIds = requestedPackIds.length
+          ? requestedPackIds
+          : manifests.slice(0, 6).map((m) => m.id).filter(Boolean);
+
+        const libRecipes = [];
+        for (const pid of selectedIds) {
+          const pack = await getPack(pid, {
+            vision: rt.vision || inObj.vision || null,
+            applyRhythm: true,
+          });
+          const items = Array.isArray(pack?.items)
+            ? pack.items
+            : Array.isArray(pack?.recipes)
+            ? pack.recipes
+            : [];
+          for (const it of items) {
+            const n = normalizeRecipeCandidate(it, "appLibrary");
+            if (n) libRecipes.push(n);
+          }
+        }
+
+        recipeSources.appLibrary = libRecipes;
+      }
+    }
+  } catch (err) {
+    if (STRICT) throw err;
+  }
+
+  try {
+    if (includeCatalogRecipes) {
+      const catalogMod = await import("@/services/catalogs/catalogResolver.js");
+      const listCatalogRecipes =
+        catalogMod?.listResolvedCatalogRecipes ||
+        catalogMod?.default?.listResolvedCatalogRecipes;
+
+      if (typeof listCatalogRecipes === "function") {
+        const catalogDomains = Array.isArray(inObj.catalogDomains)
+          ? inObj.catalogDomains
+          : Array.isArray(rt.catalogDomains)
+          ? rt.catalogDomains
+          : null;
+
+        const catalogRecipeIds = Array.isArray(inObj.catalogRecipeIds)
+          ? inObj.catalogRecipeIds
+          : Array.isArray(inObj.catalogIds)
+          ? inObj.catalogIds
+          : Array.isArray(rt.catalogRecipeIds)
+          ? rt.catalogRecipeIds
+          : Array.isArray(rt.catalogIds)
+          ? rt.catalogIds
+          : null;
+
+        const rawCatalogRecipes = await listCatalogRecipes({
+          domains: catalogDomains,
+          ids: catalogRecipeIds,
+          limit: inObj.catalogRecipeLimit || rt.catalogRecipeLimit || null,
+        });
+
+        recipeSources.catalogLibrary = rawCatalogRecipes
+          .map((r) => normalizeRecipeCandidate(r, r?.source || "catalogLibrary"))
+          .filter(Boolean);
+      }
+    }
+  } catch (err) {
+    if (STRICT) throw err;
+  }
+
+  const recipePool = uniqBy(
+    [
+      ...recipeSources.userSaved,
+      ...recipeSources.importedWeb,
+      ...recipeSources.appLibrary,
+      ...recipeSources.catalogLibrary,
+    ],
+    (r) => String(r?.id || r?.sourceUrl || r?.title || "")
+  ).filter(Boolean);
+
+  // Macro pattern preferences (protein/carbs/fat ratio presets + active preset)
+  let macroPatterns = [];
+  let activeMacroPattern = null;
+  let battleRhythm = null;
+  try {
+    const prefMod = await import("@/store/PreferencesStore");
+    const prefGet = prefMod?.usePreferencesStore?.getState;
+    const prefs = typeof prefGet === "function" ? prefGet() : {};
+    const nutrition = prefs?.nutrition || {};
+    const daily = nutrition?.dailyGoals || prefs?.foodTargets || {};
+
+    const storedPatterns = Array.isArray(nutrition?.macroPatterns)
+      ? nutrition.macroPatterns
+      : [];
+    macroPatterns = storedPatterns
+      .map((p, i) => normalizeMacroPattern(p, `stored-${i + 1}`))
+      .filter(Boolean);
+
+    const fallbackPattern = normalizeMacroPattern(
+      {
+        id: "daily-goals",
+        label: "Daily Goals Derived",
+        protein: daily?.protein,
+        carbs: daily?.carbs,
+        fat: daily?.fat,
+      },
+      "daily-goals"
+    );
+
+    if (fallbackPattern && !macroPatterns.some((p) => p.id === fallbackPattern.id)) {
+      macroPatterns.push(fallbackPattern);
+    }
+
+    const requestedMacroPattern = normalizeMacroPattern(
+      inObj.macroPattern || rt.macroPattern,
+      "requested"
+    );
+
+    const activeId =
+      inObj.activeMacroPatternId ||
+      rt.activeMacroPatternId ||
+      nutrition?.activeMacroPatternId ||
+      null;
+
+    activeMacroPattern =
+      requestedMacroPattern ||
+      (activeId ? macroPatterns.find((p) => String(p.id) === String(activeId)) : null) ||
+      macroPatterns[0] ||
+      null;
+
+    const requestedBattleRhythm =
+      inObj.battleRhythm && typeof inObj.battleRhythm === "object"
+        ? inObj.battleRhythm
+        : rt.battleRhythm && typeof rt.battleRhythm === "object"
+        ? rt.battleRhythm
+        : null;
+
+    battleRhythm = {
+      ...((prefs?.cooking?.battleRhythm && typeof prefs.cooking.battleRhythm === "object")
+        ? prefs.cooking.battleRhythm
+        : {}),
+      ...(requestedBattleRhythm || {}),
+    };
+  } catch (err) {
+    if (STRICT) throw err;
+  }
+
+  let resolvedRecipePool = recipePool;
+  let battleRhythmMeta = {
+    enabled: Boolean(battleRhythm?.enabled),
+    total: recipePool.length,
+    transformed: 0,
+  };
+
+  try {
+    if (battleRhythm?.enabled) {
+      const resolverMod = await import("@/services/recipes/battleRhythmResolver.js");
+      const resolvePool =
+        resolverMod?.resolveRecipePoolWithBattleRhythm ||
+        resolverMod?.default?.resolveRecipePoolWithBattleRhythm;
+
+      if (typeof resolvePool === "function") {
+        const resolved = await resolvePool(recipePool, {
+          battleRhythm,
+          dayKey: start,
+          mealType: Array.isArray(mealTypes) && mealTypes.length ? mealTypes[0] : null,
+          overridesByRecipeId: ctx?.recipeBattleRhythmOverrides?.byRecipeId || {},
+          overridesByFingerprint: ctx?.recipeBattleRhythmOverrides?.byFingerprint || {},
+          dayType: rt.dayType || inObj.dayType || null,
+          season: rt.season || inObj.season || null,
+          macroPattern: activeMacroPattern || null,
+          inventory: rt.inventory || inObj.inventory || null,
+          useCanonicalSubstitutions: inObj.useCanonicalSubstitutions !== false,
+        });
+        resolvedRecipePool = Array.isArray(resolved?.recipes)
+          ? resolved.recipes
+          : recipePool;
+        battleRhythmMeta = {
+          ...battleRhythmMeta,
+          ...(resolved?.meta || {}),
+          total: Array.isArray(resolvedRecipePool)
+            ? resolvedRecipePool.length
+            : recipePool.length,
+        };
+      }
+    }
+  } catch (err) {
+    if (STRICT) throw err;
+  }
+
+  let battleRhythmPreview = {
+    enabled: Boolean(battleRhythm?.enabled),
+    count: 0,
+    items: [],
+  };
+
+  try {
+    if (battleRhythm?.enabled && includeBattleRhythmPreview) {
+      const resolverMod = await import("@/services/recipes/battleRhythmResolver.js");
+      const buildPreviewList =
+        resolverMod?.buildBattleRhythmPreviewList ||
+        resolverMod?.default?.buildBattleRhythmPreviewList;
+
+      if (typeof buildPreviewList === "function") {
+        const previewSource = inObj.battleRhythmPreviewSource || rt.battleRhythmPreviewSource || "catalog";
+        const sourceRecipes =
+          previewSource === "pool"
+            ? recipePool
+            : recipeSources.catalogLibrary;
+
+        const maxPreviewItems = Number(inObj.battleRhythmPreviewLimit || rt.battleRhythmPreviewLimit || 8);
+        const limitedSource =
+          Number.isFinite(maxPreviewItems) && maxPreviewItems > 0
+            ? sourceRecipes.slice(0, maxPreviewItems)
+            : sourceRecipes;
+
+        const preview = buildPreviewList(limitedSource, {
+          battleRhythm,
+          dayKey: start,
+          mealType: Array.isArray(mealTypes) && mealTypes.length ? mealTypes[0] : null,
+        });
+
+        battleRhythmPreview = {
+          ...battleRhythmPreview,
+          ...(preview || {}),
+          source: previewSource,
+        };
+      }
+    }
+  } catch (err) {
+    if (STRICT) throw err;
+  }
+
+  ctx.intent = intent || null;
+  ctx.recipeSources = {
+    counts: {
+      userSaved: recipeSources.userSaved.length,
+      importedWeb: recipeSources.importedWeb.length,
+      appLibrary: recipeSources.appLibrary.length,
+      catalogLibrary: recipeSources.catalogLibrary.length,
+      totalPool: resolvedRecipePool.length,
+    },
+    items: recipeSources,
+    recipePool: resolvedRecipePool,
+  };
+
+  ctx.macroPlanning = {
+    activePattern: activeMacroPattern,
+    availablePatterns: macroPatterns,
+  };
+
+  ctx.battleRhythm = {
+    profile: battleRhythm,
+    ...battleRhythmMeta,
+    preview: battleRhythmPreview,
+  };
 
   if (includeSummary) {
     try {

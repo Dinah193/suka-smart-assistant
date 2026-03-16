@@ -41,6 +41,9 @@
   var Events = {};
   try {
     EventsHub = require("@/automation/events") || {};
+    if (!EventsHub || !EventsHub.emit || !EventsHub.on) {
+      EventsHub = require("@/automation/events/index") || EventsHub;
+    }
     Events = (EventsHub && (EventsHub.Events || (EventsHub.default && EventsHub.default.Events))) || {};
   } catch (e) {}
 
@@ -500,6 +503,8 @@
   // --------------------------- Registration ------------------------------
   function registerOn(hub){
     var api = hub && hub.on ? hub : { on:on };
+    if (api && api.on) on = api.on;
+    if (api && api.emit) emit = api.emit;
     try { api.on("inventory.shortage.detected", handleSupplyShortageDetected); }
     catch(e){ try { on("inventory.shortage.detected", handleSupplyShortageDetected); } catch(e2){} }
   }

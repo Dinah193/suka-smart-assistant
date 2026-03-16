@@ -41,6 +41,9 @@
   var EventsHub = {};
   try {
     EventsHub = require("@/automation/events") || {};
+    if (!EventsHub || !EventsHub.emit || !EventsHub.on) {
+      EventsHub = require("@/automation/events/index") || EventsHub;
+    }
     Events = (EventsHub && (EventsHub.Events || (EventsHub.default && EventsHub.default.Events))) || {};
   } catch (e) {}
 
@@ -469,6 +472,8 @@
   // ----------------------------- Registration -----------------------------
   function registerOn(hub) {
     var api = hub && hub.on ? hub : { on: on };
+    if (api && api.on) on = api.on;
+    if (api && api.emit) emit = api.emit;
     try { api.on("prep.tasks.requested", handlePrepTasksRequested); }
     catch (e) {
       try { on("prep.tasks.requested", handlePrepTasksRequested); } catch (e2) {}

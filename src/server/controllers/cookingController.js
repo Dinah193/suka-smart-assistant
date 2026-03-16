@@ -22,9 +22,6 @@ import express from "express";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
-// Reuse shared JSON Schemas from your automation module
-import cookingSchema from "@/automation/payloadSchemas/cooking.json" assert { type: "json" };
-
 // Optional: if you created a central validator already, you can swap in:
 //   import { validate } from "@/automation/validate";
 //
@@ -35,7 +32,7 @@ addFormats(ajv);
 const router = express.Router();
 
 // Socket.io instance (exported by src/server/socket.js)
-import { io } from "../socket.js";
+import socketModule from "../socket.js";
 
 /* -----------------------------------------------------------------------------
    Utilities
@@ -70,7 +67,13 @@ async function getCookingHistoryModel() {
 // Push to a user’s private room (room name == userId)
 function emitToUser(userId, event, payload) {
   if (!userId) return;
-  io.to(String(userId)).emit(event, payload);
+  try {
+    const io = socketModule?.getIO ? socketModule.getIO() : null;
+    if (!io) return;
+    io.to(String(userId)).emit(event, payload);
+  } catch {
+    // Socket server may not be initialized in some test/startup paths.
+  }
 }
 
 /* -----------------------------------------------------------------------------

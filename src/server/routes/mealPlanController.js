@@ -255,6 +255,20 @@ const prepTasksSchema = {
   additionalProperties: false
 };
 
+const resolveRecipeSchema = {
+  type: "object",
+  required: ["recipe"],
+  properties: {
+    userId: { type: "string" },
+    recipe: { type: "object" },
+    rhythm: { type: "object" },
+    override: { type: "object" },
+    context: { type: "object" },
+    resolveServerSide: { type: "boolean", default: true },
+  },
+  additionalProperties: true,
+};
+
 // compilers
 const validateUserOnly  = ajv.compile(userOnlySchema);
 const validateGenerate  = ajv.compile(generateSchema);
@@ -265,6 +279,7 @@ const validateSuggest   = ajv.compile(suggestSchema);
 const validateShopping  = ajv.compile(shoppingListSchema);
 const validateCalendar  = ajv.compile(calendarizeSchema);
 const validatePrepTasks = ajv.compile(prepTasksSchema);
+const validateResolveRecipe = ajv.compile(resolveRecipeSchema);
 
 /* -----------------------------------------------------------------------------
    Routes
@@ -519,6 +534,41 @@ router.post("/prepTasks", express.json(), async (req, res) => {
     } catch {}
   }
   return res.json({ ok: true, created });
+});
+
+/** Optional server-side resolver for contract consistency */
+router.post("/resolveRecipe", express.json(), async (req, res) => {
+  const body = req.body || {};
+  if (!validateResolveRecipe(body)) {
+    const msg = validateResolveRecipe.errors
+      ?.map((e) => `${e.instancePath || "/"} ${e.message}`)
+      .join("; ");
+    return badRequest(res, msg || "Invalid payload", validateResolveRecipe.errors);
+  }
+
+  const resolveServerSide = body.resolveServerSide !== false;
+  if (!resolveServerSide) {
+    return res.json({ ok: true, passthrough: true, recipe: body.recipe });
+  }
+
+  try {
+    const resolverMod = await import("../../services/recipes/battleRhythmResolver.js");
+    const applyBattleRhythm =
+      resolverMod?.applyBattleRhythm || resolverMod?.default?.applyBattleRhythm;
+    if (typeof applyBattleRhythm !== "function") {
+      return res.status(501).json({ ok: false, error: "battle rhythm resolver unavailable" });
+    }
+
+    const resolved = await applyBattleRhythm(
+      body.recipe,
+      body.rhythm || {},
+      body.override || {},
+      body.context || {}
+    );
+    return res.json({ ok: true, resolved });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: String(err?.message || err) });
+  }
 });
 
 export default router;
