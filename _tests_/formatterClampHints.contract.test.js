@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -23,6 +23,8 @@ import HomesteadplannerDraftFormatter from "../src/formatters/homesteadplanner/h
 import GardenDraftFormatter from "../src/formatters/garden/gardenDraftFormatter.jsx";
 import CookingDraftFormatter from "../src/formatters/cooking/cookingDraftFormatter.jsx";
 import CleaningDraftFormatter from "../src/formatters/cleaning/cleaningDraftFormatter.jsx";
+import AnimalDraftFormatter from "../src/formatters/animals/animalDraftFormatter.jsx";
+import StorehouseDraftFormatter from "../src/formatters/storehouse/storehouseDraftFormatter.jsx";
 import {
   CLAMP_HINT_TEXT,
   useNonNegativeClampHints,
@@ -30,6 +32,27 @@ import {
 
 function sourceOf(relPath) {
   return readFileSync(resolve(process.cwd(), relPath), "utf8");
+}
+
+function listLegacyDraftFormatterJsFiles(rootRel = "src/formatters") {
+  const rootAbs = resolve(process.cwd(), rootRel);
+  const out = [];
+  const walk = (dirAbs, relPrefix = "") => {
+    const entries = readdirSync(dirAbs, { withFileTypes: true });
+    entries.forEach((entry) => {
+      const rel = relPrefix ? `${relPrefix}/${entry.name}` : entry.name;
+      const abs = resolve(dirAbs, entry.name);
+      if (entry.isDirectory()) {
+        walk(abs, rel);
+        return;
+      }
+      if (/DraftFormatter\.js$/i.test(entry.name)) {
+        out.push(`${rootRel}/${rel}`);
+      }
+    });
+  };
+  walk(rootAbs);
+  return out;
 }
 
 function ClampHarness({ trackedPath = "inventoryAlerts[0].neededQty", expose }) {
@@ -188,5 +211,33 @@ describe("formatter non-negative clamp contract", () => {
     expect(source).toContain("inventoryAlerts[${i}].neededQty");
     expect(source).toContain('className="ssa-clamp-hint"');
     expect(source).toContain("min={0}");
+  });
+
+  it("animals formatter keeps non-negative contract on inventory alerts", async () => {
+    await act(async () => {
+      root.render(React.createElement(AnimalDraftFormatter, { editable: true }));
+    });
+    const source = sourceOf("src/formatters/animals/animalDraftFormatter.jsx");
+    expect(source).toContain("coerceNonNegativeNumber");
+    expect(source).toContain("inventoryAlerts[${i}].neededQty");
+    expect(source).toContain("min={0}");
+    expect(source).toContain("Negative values are not allowed. Value was clamped to 0.");
+  });
+
+  it("storehouse formatter keeps non-negative contract on inventory alerts", async () => {
+    await act(async () => {
+      root.render(React.createElement(StorehouseDraftFormatter, { editable: true }));
+    });
+    const source = sourceOf(
+      "src/formatters/storehouse/storehouseDraftFormatter.jsx"
+    );
+    expect(source).toContain("coerceNonNegativeNumber");
+    expect(source).toContain("inventoryAlerts[${i}].neededQty");
+    expect(source).toContain("min={0}");
+  });
+
+  it("contains no legacy draft formatter .js files", () => {
+    const legacyFiles = listLegacyDraftFormatterJsFiles();
+    expect(legacyFiles).toEqual([]);
   });
 });

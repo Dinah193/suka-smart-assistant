@@ -1,0 +1,8 @@
+# Default owner
+* @Dinah193
+
+# Planner formatter and contract guardrails
+/src/formatters/ @Dinah193
+/_tests_/formatterClampHints.contract.test.js @Dinah193
+/.github/workflows/ci.yml @Dinah193
+/tools/scripts/guard-formatter-jsx.cjs @Dinah193

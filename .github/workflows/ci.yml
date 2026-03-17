@@ -118,6 +118,9 @@ jobs:
       - name: Lint (scaffold)
         run: npm run lint:ci
 
+      - name: Guard formatter JSX extensions
+        run: npm run guard:formatter-jsx
+
   typecheck:
     runs-on: ubuntu-latest
     steps:
