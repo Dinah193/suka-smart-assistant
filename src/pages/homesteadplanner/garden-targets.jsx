@@ -1314,6 +1314,28 @@ export default function HomesteadPlannerGardenTargetsPage() {
     };
   }, [filteredRows]);
 
+  const journeyPlan = useMemo(() => {
+    const rows = filteredRows || [];
+    const early = rows
+      .filter((r) => /spring|late winter|early/i.test(String(r.window || "")))
+      .slice(0, 4)
+      .map((r) => r.cropName);
+    const succession = rows
+      .filter((r) => Number(r.succession || 1) > 1)
+      .slice(0, 4)
+      .map((r) => r.cropName);
+    const lowConfidence = rows
+      .filter((r) => Number(r.confidence || 0) < 0.6)
+      .slice(0, 4)
+      .map((r) => r.cropName);
+
+    return {
+      early,
+      succession,
+      lowConfidence,
+    };
+  }, [filteredRows]);
+
   const provisioningEmpty = provisioningTargets.length === 0;
 
   return (
@@ -1439,6 +1461,58 @@ export default function HomesteadPlannerGardenTargetsPage() {
             </div>
             <div className="text-xs opacity-70 mt-1">
               estimated packets to buy
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div className="lg:col-span-8 rounded-2xl border border-gray-200 p-4">
+            <div className="text-xs font-bold opacity-70">Garden journey milestones</div>
+            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+              <div className="rounded-xl border border-gray-200 p-3">
+                <div className="font-bold">Seed-starting now</div>
+                <div className="text-xs opacity-70 mt-1">
+                  {(journeyPlan.early || []).length
+                    ? journeyPlan.early.join(", ")
+                    : "No early window crops in current filter."}
+                </div>
+              </div>
+              <div className="rounded-xl border border-gray-200 p-3">
+                <div className="font-bold">Succession candidates</div>
+                <div className="text-xs opacity-70 mt-1">
+                  {(journeyPlan.succession || []).length
+                    ? journeyPlan.succession.join(", ")
+                    : "No succession rows detected."}
+                </div>
+              </div>
+              <div className="rounded-xl border border-gray-200 p-3">
+                <div className="font-bold">Needs assumption tune-up</div>
+                <div className="text-xs opacity-70 mt-1">
+                  {(journeyPlan.lowConfidence || []).length
+                    ? journeyPlan.lowConfidence.join(", ")
+                    : "No low-confidence crops in this view."}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-4 rounded-2xl border border-gray-200 p-4">
+            <div className="text-xs font-bold opacity-70">Next actions</div>
+            <div className="mt-2 flex flex-col gap-2">
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  emitSSAEvent("ssa.hp.gardenTargets.handoff", {
+                    source: PAGE_SOURCE,
+                    handoffTo: "preservation",
+                    rows: filteredRows.length,
+                  })
+                }
+              >
+                Send handoff to preservation
+              </Button>
+              <Button variant="ghost" onClick={() => setEditAssumptionsOpen(true)}>
+                Refine yield assumptions
+              </Button>
             </div>
           </div>
         </div>

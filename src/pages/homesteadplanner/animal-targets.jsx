@@ -1483,6 +1483,27 @@ export default function HomesteadPlannerAnimalTargetsPage() {
     };
   }, [filteredRows]);
 
+  const journeyPlan = useMemo(() => {
+    const rows = filteredRows || [];
+    const purchaseHeavy = rows
+      .filter((r) => r.strategy === "purchase")
+      .slice(0, 4)
+      .map((r) => r.animalName);
+    const breederFocus = rows
+      .filter((r) => r.strategy === "breed" || r.strategy === "mixed")
+      .slice(0, 4)
+      .map((r) => r.animalName);
+    const lowConfidence = rows
+      .filter((r) => Number(r.confidence || 0) < 0.6)
+      .slice(0, 4)
+      .map((r) => r.animalName);
+    return {
+      purchaseHeavy,
+      breederFocus,
+      lowConfidence,
+    };
+  }, [filteredRows]);
+
   const provisioningEmpty = provisioningTargets.length === 0;
 
   return (
@@ -1633,6 +1654,58 @@ export default function HomesteadPlannerAnimalTargetsPage() {
             </div>
             <div className="text-xs opacity-70 mt-1">
               market animals or producing females per year
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div className="lg:col-span-8 rounded-2xl border border-gray-200 p-4">
+            <div className="text-xs font-bold opacity-70">Animal journey milestones</div>
+            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+              <div className="rounded-xl border border-gray-200 p-3">
+                <div className="font-bold">Purchase planning</div>
+                <div className="text-xs opacity-70 mt-1">
+                  {(journeyPlan.purchaseHeavy || []).length
+                    ? journeyPlan.purchaseHeavy.join(", ")
+                    : "No purchase-first rows in this filter."}
+                </div>
+              </div>
+              <div className="rounded-xl border border-gray-200 p-3">
+                <div className="font-bold">Breeding calendar focus</div>
+                <div className="text-xs opacity-70 mt-1">
+                  {(journeyPlan.breederFocus || []).length
+                    ? journeyPlan.breederFocus.join(", ")
+                    : "No breed/mixed rows in this filter."}
+                </div>
+              </div>
+              <div className="rounded-xl border border-gray-200 p-3">
+                <div className="font-bold">Assumptions to verify</div>
+                <div className="text-xs opacity-70 mt-1">
+                  {(journeyPlan.lowConfidence || []).length
+                    ? journeyPlan.lowConfidence.join(", ")
+                    : "No low-confidence rows detected."}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-4 rounded-2xl border border-gray-200 p-4">
+            <div className="text-xs font-bold opacity-70">Next actions</div>
+            <div className="mt-2 flex flex-col gap-2">
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  emitSSAEvent("ssa.hp.animalTargets.handoff", {
+                    source: PAGE_SOURCE,
+                    handoffTo: "mealplanner",
+                    rows: filteredRows.length,
+                  })
+                }
+              >
+                Send handoff to meal planner
+              </Button>
+              <Button variant="ghost" onClick={() => setEditAssumptionsOpen(true)}>
+                Refine breeding assumptions
+              </Button>
             </div>
           </div>
         </div>
