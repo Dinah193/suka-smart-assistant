@@ -18,8 +18,8 @@ vi.mock("../src/ui/ux/feedback.js", () => ({
   notifyError: vi.fn(),
 }));
 
-import MealplannerDraftFormatter from "../src/formatters/mealplanner/mealplannerDraftFormatter.js";
-import HomesteadplannerDraftFormatter from "../src/formatters/homesteadplanner/homesteadplannerDraftFormatter.js";
+import MealplannerDraftFormatter from "../src/formatters/mealplanner/mealplannerDraftFormatter.jsx";
+import HomesteadplannerDraftFormatter from "../src/formatters/homesteadplanner/homesteadplannerDraftFormatter.jsx";
 import GardenDraftFormatter from "../src/formatters/garden/gardenDraftFormatter.js";
 import CookingDraftFormatter from "../src/formatters/cooking/cookingDraftFormatter.js";
 import CleaningDraftFormatter from "../src/formatters/cleaning/cleaningDraftFormatter.jsx";
@@ -130,7 +130,7 @@ describe("formatter non-negative clamp contract", () => {
     await act(async () => {
       root.render(React.createElement(MealplannerDraftFormatter, { editable: true }));
     });
-    const source = sourceOf("src/formatters/mealplanner/mealplannerDraftFormatter.js");
+    const source = sourceOf("src/formatters/mealplanner/mealplannerDraftFormatter.jsx");
     expect(source).toContain("useNonNegativeClampHints");
     expect(source).toContain("shoppingList[${i}].qty");
     expect(source).toContain("inventoryAlerts[${i}].neededQty");
@@ -145,7 +145,7 @@ describe("formatter non-negative clamp contract", () => {
       );
     });
     const source = sourceOf(
-      "src/formatters/homesteadplanner/homesteadplannerDraftFormatter.js"
+      "src/formatters/homesteadplanner/homesteadplannerDraftFormatter.jsx"
     );
     expect(source).toContain("useNonNegativeClampHints");
     expect(source).toContain("resources[${i}].qty");
