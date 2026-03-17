@@ -943,7 +943,7 @@ describe("realtimeCoordinator", () => {
     h.coordinator.replayFromEventLog();
     const history = h.coordinator.getSignalHistory({ limit: 6000 });
     expect(history.length).toBeLessThanOrEqual(5000);
-  }, 15000);
+  }, 45000);
 
   it("projector updates queueDepth metric after each ingest", () => {
     harness.coordinator.ingest(

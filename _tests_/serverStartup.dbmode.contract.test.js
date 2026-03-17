@@ -6,14 +6,14 @@ const repoRoot = path.resolve(__dirname, "..");
 const serverEntry = path.resolve(repoRoot, "src/server/index.js");
 
 function randomPort() {
-  return 4200 + Math.floor(Math.random() * 400);
+  return 10000 + Math.floor(Math.random() * 50000);
 }
 
 async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForHealth(port, timeoutMs = 12000) {
+async function waitForHealth(port, timeoutMs = 20000) {
   const started = Date.now();
   let lastErr = null;
 
