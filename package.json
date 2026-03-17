@@ -7,6 +7,7 @@
     "db:preflight": "node tools/scripts/db-preflight.cjs",
     "neo4j:preflight": "node tools/scripts/neo4j-preflight.cjs",
     "integration:preflight": "node tools/scripts/integration-preflight.cjs",
+    "prod:health:verify": "node tools/scripts/verify-production-health.cjs",
     "db:migrate": "node tools/scripts/db-migrate.cjs",
     "db:bootstrap": "node tools/scripts/check-planner-db-bootstrap.cjs",
     "db:verify": "node tools/scripts/verify-planner-db.cjs",

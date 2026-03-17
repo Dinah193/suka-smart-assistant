@@ -29,6 +29,9 @@ Core env vars:
 - PostgreSQL: DATABASE_URL (or PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE)
 - MongoDB: MONGODB_URI (or MONGO_URI/MONGO_URL)
 - Neo4j: NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD, NEO4J_ENABLED, NEO4J_REQUIRED
+- Production health automation:
+  - PRODUCTION_HEALTH_URL (for example, `https://<deployment-url>/health`)
+  - VERCEL_PROTECTION_BYPASS (Deployment Protection bypass secret)
 
 Example env blocks:
 - Local dev (degraded):
@@ -57,6 +60,26 @@ This runs, in order:
 Expected behavior:
 - Exit 0 only when all checks pass.
 - Fails fast when any required dependency is unavailable.
+
+Timeout tuning overrides:
+- db:preflight
+  - `DB_PREFLIGHT_TIMEOUT_MS`
+  - `DB_PREFLIGHT_MIGRATE_TIMEOUT_MS`
+  - `DB_PREFLIGHT_BOOTSTRAP_TIMEOUT_MS`
+  - `DB_PREFLIGHT_MONGO_TIMEOUT_MS`
+  - `DB_PREFLIGHT_SERVER_PROBE_TIMEOUT_MS`
+  - `DB_PREFLIGHT_HEALTH_TIMEOUT_MS`
+- integration:preflight
+  - `INTEGRATION_PREFLIGHT_TOTAL_TIMEOUT_MS`
+  - `INTEGRATION_PREFLIGHT_STEP_TIMEOUT_MS`
+
+Structured failure categories now emitted by preflight scripts:
+- `config`
+- `timeout`
+- `dependency`
+- `quality_gate`
+- `network`
+- `contract`
 
 Health payload contract (minimum):
 - `db` block exists and includes:
@@ -125,3 +148,16 @@ Escalation triggers:
 ## 7) Reliability Backlog
 
 Tracked in: `docs/planning/integration-reliability-backlog.md`
+
+## 8) Post-Merge Production Health Automation
+
+Main branch CI includes a protected production health verification step.
+
+Required repository secrets:
+- `PRODUCTION_HEALTH_URL`
+- `VERCEL_PROTECTION_BYPASS`
+
+Behavior:
+- CI calls `npm run prod:health:verify` after post-merge runtime smoke passes.
+- Script retries until `PRODUCTION_HEALTH_MAX_WAIT_MS` is reached.
+- Verification requires health payload contract fields (`db`, `mongo`, `postgres`, `neo4j`) with expected boolean values.
