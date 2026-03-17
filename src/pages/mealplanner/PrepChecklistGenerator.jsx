@@ -462,6 +462,18 @@ export default function PrepChecklistGenerator({ className }) {
     [baseTasks]
   );
 
+  const preservationOps = useMemo(() => {
+    const hits = baseTasks.filter((t) =>
+      /(label|cool|jar|canning|freeze|dehydrate|sauce|brine|preserve)/i.test(
+        `${t.title || ""} ${t.notes || ""} ${(t.tags || []).join(" ")}`
+      )
+    );
+    return {
+      count: hits.length,
+      titles: hits.slice(0, 4).map((t) => t.title),
+    };
+  }, [baseTasks]);
+
   const allChecked = useMemo(
     () => tasks.length > 0 && tasks.every((t) => checkState[t.id]),
     [tasks, checkState]
@@ -939,6 +951,50 @@ export default function PrepChecklistGenerator({ className }) {
                 Sabbath-aware agents (if enabled) will insert hands-off holds
                 when scheduling work.
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Preservation Link</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-xs text-muted-foreground">
+              <p>
+                Detected preservation opportunities: <b>{preservationOps.count}</b>
+              </p>
+              {preservationOps.titles.length ? (
+                <div className="rounded-md border p-2">
+                  {preservationOps.titles.join("; ")}
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    eventBus.emit("ui.open", {
+                      id: "BatchSessionLinker",
+                      params: { source: "prepChecklist", scope },
+                    })
+                  }
+                >
+                  Open Batch Session Linker
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    eventBus.emit("realtime.signal", {
+                      type: "preservationOpportunity",
+                      source: "prep.checklist",
+                      scope,
+                      count: preservationOps.count,
+                    })
+                  }
+                >
+                  Notify collaboration panel
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -850,6 +850,43 @@ export default function BatchSessionLinker({
                   </button>
                 </div>
               </div>
+
+              <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                <div className="text-sm font-semibold">Preservation + Collaboration</div>
+                <div className="mt-1 text-xs text-zinc-600">
+                  Push this draft to preservation prep and notify realtime coordination when a session is ready.
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    className="rounded-xl border px-3 py-2 text-xs hover:bg-white"
+                    onClick={() =>
+                      eventBus.emit("ui.open", {
+                        panel: "PrepChecklistGenerator",
+                        scope: { type: "batch", id: draft?.id || null },
+                        recipes: sourceRecipes,
+                      })
+                    }
+                  >
+                    Build preservation checklist
+                  </button>
+                  <button
+                    className="rounded-xl border px-3 py-2 text-xs hover:bg-white"
+                    onClick={() =>
+                      eventBus.emit("realtime.signal", {
+                        type: "batchReady",
+                        sourceModule: "meal.batchSessionLinker",
+                        payload: {
+                          planId: draft?.id || null,
+                          recipeCount: sourceRecipes.length,
+                          durationMin: totalMins,
+                        },
+                      })
+                    }
+                  >
+                    Notify realtime panel
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

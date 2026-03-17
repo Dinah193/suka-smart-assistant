@@ -237,6 +237,30 @@ const computeScore = (recipe, { prefs, pantry, filters }) => {
   return Math.round(s);
 };
 
+const computeScoreBreakdown = (recipe, { prefs, pantry, filters }) => {
+  const macro = Math.round(macroScore(recipe, prefs));
+  const pantryFit = Math.round(pantryScore(recipe, pantry));
+  const timeFit = Math.round(timeScore(recipe, filters.maxTime));
+  const tagFit = Math.round(tagScore(recipe, filters.tags));
+  const ratingFit = Math.round(ratingScore(recipe));
+
+  const reasons = [];
+  if (pantryFit >= 60) reasons.push(`inventory ${pantryFit}%`);
+  if (tagFit >= 50) reasons.push(`preference match ${tagFit}%`);
+  if (timeFit >= 70) reasons.push(`time fit ${timeFit}%`);
+  if (ratingFit >= 75) reasons.push(`favorite score ${ratingFit}%`);
+  if (macro >= 60) reasons.push(`nutrition fit ${macro}%`);
+
+  return {
+    macro,
+    pantryFit,
+    timeFit,
+    tagFit,
+    ratingFit,
+    reasons: reasons.slice(0, 3),
+  };
+};
+
 /* ---------------------------------- UI bits ---------------------------------- */
 const Button = ({
   variant = "default",
@@ -426,10 +450,15 @@ export default function RecipeDeciderPanel({
     }
 
     // score
-    const scored = list.map((r) => ({
-      ...r,
-      __score: computeScore(r, { prefs, pantry, filters }),
-    }));
+    const scored = list.map((r) => {
+      const breakdown = computeScoreBreakdown(r, { prefs, pantry, filters });
+      return {
+        ...r,
+        __score: computeScore(r, { prefs, pantry, filters }),
+        __scoreBreakdown: breakdown,
+        __reasons: breakdown.reasons,
+      };
+    });
     scored.sort((a, b) => b.__score - a.__score);
     return scored;
   }, [recipes, prefs, pantry, filters, query]);
@@ -702,6 +731,15 @@ export default function RecipeDeciderPanel({
             <div className="mt-1 text-[11px] text-zinc-500">
               {(r.tags || []).slice(0, 6).join(" • ") || "—"}
             </div>
+            {Array.isArray(r.__reasons) && r.__reasons.length ? (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {r.__reasons.map((reason) => (
+                  <Badge key={`${r.id}-${reason}`} tone="zinc">
+                    {reason}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
             <div className="mt-2">
               <MacroPill n={r.nutrition} />
             </div>
@@ -852,6 +890,15 @@ export default function RecipeDeciderPanel({
                 {topPick.time ? fmt.duration(topPick.time) : "—"} •{" "}
                 {topPick.rating ?? "—"}★ • Score {topPick.__score}
               </div>
+              {Array.isArray(topPick.__reasons) && topPick.__reasons.length ? (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {topPick.__reasons.map((reason) => (
+                    <Badge key={`top-${topPick.id}-${reason}`} tone="zinc">
+                      {reason}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
               <div className="mt-2">
                 <MacroPill n={topPick.nutrition} />
               </div>

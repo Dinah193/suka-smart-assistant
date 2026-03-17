@@ -38,11 +38,129 @@ export default function StorehousePlanner({ householdId = "default-household", n
   const [recommendations, setRecommendations] = useState([]);
   const [replenishingKey, setReplenishingKey] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchDelta, setBatchDelta] = useState(1);
 
   const lowStockRows = useMemo(
     () => rows.filter((row) => row && typeof row === "object" && isLowStock(row)),
     [rows]
   );
+
+  const zoneMap = useMemo(() => {
+    const zones = new Map();
+    for (const row of rows) {
+      const metadata = row?.metadata && typeof row.metadata === "object" ? row.metadata : {};
+      const zone =
+        String(metadata.location || metadata.zone || row?.state || "unassigned").trim() ||
+        "unassigned";
+      const existing = zones.get(zone) || { zone, count: 0, low: 0, items: [] };
+      existing.count += 1;
+      if (isLowStock(row)) existing.low += 1;
+      existing.items.push(row?.itemName || row?.sku || "item");
+      zones.set(zone, existing);
+    }
+    return Array.from(zones.values()).sort((a, b) => b.count - a.count);
+  }, [rows]);
+
+  async function persistSingleRow(updatedRow, changeReason = "storehouse_manual_adjust") {
+    const payload = {
+      householdId,
+      updatedBy: "storehouse.planner.ui",
+      changeReason,
+      inventory: [updatedRow],
+    };
+    await updateStorehouseInventory(payload);
+  }
+
+  async function handleQtyChange(row, nextQty) {
+    const safeQty = Math.max(0, Number(nextQty || 0));
+    const key = String(row?.id || row?.sku || row?.itemName || "");
+    if (!key) return;
+
+    const updated = { ...row, qty: safeQty };
+    setRows((prev) =>
+      prev.map((candidate) => {
+        const candidateKey = String(
+          candidate?.id || candidate?.sku || candidate?.itemName || ""
+        );
+        return candidateKey === key ? updated : candidate;
+      })
+    );
+
+    try {
+      await persistSingleRow(updated, "storehouse_qty_edit_ui");
+      setAlertMessage(
+        `Updated ${row?.itemName || row?.sku || "item"} to ${safeQty} ${row?.unit || "units"}.`
+      );
+    } catch {
+      setAlertMessage(`Unable to update ${row?.itemName || row?.sku || "item"}.`);
+    }
+  }
+
+  async function handleRemoveRow(row) {
+    const key = String(row?.id || row?.sku || row?.itemName || "");
+    if (!key) return;
+    setRows((prev) => prev.filter((candidate) => String(candidate?.id || candidate?.sku || candidate?.itemName || "") !== key));
+    try {
+      await persistSingleRow({ ...row, qty: 0 }, "storehouse_quick_remove_ui");
+      setAlertMessage(`Removed ${row?.itemName || row?.sku || "item"} from active stock.`);
+    } catch {
+      setAlertMessage(`Unable to remove ${row?.itemName || row?.sku || "item"}.`);
+    }
+  }
+
+  async function handleQuickAdd(item) {
+    const next = {
+      id: `quick_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      sku: `manual.${String(item.itemName || "item").toLowerCase().replace(/\s+/g, ".")}`,
+      itemName: item.itemName,
+      qty: Math.max(0, Number(item.qty || 0)),
+      unit: item.unit || "unit",
+      state: "raw",
+      method: null,
+      reservedQty: 0,
+      metadata: { location: "pantry", source: "quick_add" },
+    };
+    setRows((prev) => [next, ...prev]);
+    try {
+      await persistSingleRow(next, "storehouse_quick_add_ui");
+      setAlertMessage(`Added ${next.itemName} (${next.qty} ${next.unit}).`);
+    } catch {
+      setAlertMessage(`Unable to add ${next.itemName}.`);
+    }
+  }
+
+  async function handleBatchAdjust() {
+    const delta = Math.max(0, Number(batchDelta || 0));
+    const targets = lowStockRows;
+    if (!targets.length || delta <= 0) return;
+
+    const updatedRows = rows.map((row) => {
+      const key = String(row?.id || row?.sku || row?.itemName || "");
+      const match = targets.find(
+        (x) => String(x?.id || x?.sku || x?.itemName || "") === key
+      );
+      if (!match) return row;
+      return { ...row, qty: toFiniteNumber(row?.qty, 0) + delta };
+    });
+
+    setRows(updatedRows);
+    try {
+      await updateStorehouseInventory({
+        householdId,
+        updatedBy: "storehouse.planner.ui",
+        changeReason: "storehouse_batch_adjust_ui",
+        inventory: updatedRows.filter((row) =>
+          targets.some(
+            (x) => String(x?.id || x?.sku || x?.itemName || "") === String(row?.id || row?.sku || row?.itemName || "")
+          )
+        ),
+      });
+      setAlertMessage(`Batch updated ${targets.length} low-stock items by +${delta}.`);
+    } catch {
+      setAlertMessage("Unable to apply batch update.");
+    }
+  }
 
   async function handleReplenish(row) {
     const key = String(row?.id || row?.sku || row?.itemName || "");
@@ -105,9 +223,69 @@ export default function StorehousePlanner({ householdId = "default-household", n
       <h1 className="text-2xl font-bold text-amber-900">Storehouse Planner</h1>
 
       <PlannerDashboardCard
+        title="Visual inventory map"
+        subtitle="Zones show stock density and low-stock pressure at a glance."
+      >
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {zoneMap.map((zone) => (
+            <div key={zone.zone} className="rounded-md border border-amber-200 bg-white p-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-amber-900">{zone.zone}</div>
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-900">
+                  {zone.count} items
+                </span>
+              </div>
+              <div className="mt-1 text-xs text-amber-700">Low stock: {zone.low}</div>
+              <div className="mt-1 text-xs text-amber-700 truncate" title={zone.items.join(", ")}>
+                {zone.items.slice(0, 3).join(", ")}
+                {zone.items.length > 3 ? ` +${zone.items.length - 3}` : ""}
+              </div>
+            </div>
+          ))}
+          {!zoneMap.length ? (
+            <div className="rounded-md border border-amber-200 bg-white p-3 text-sm text-amber-900">
+              No inventory rows available yet.
+            </div>
+          ) : null}
+        </div>
+      </PlannerDashboardCard>
+
+      <PlannerDashboardCard
         title="Low-stock alert strip"
         subtitle="See urgent shortages and replenish with one click."
       >
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-amber-200 bg-white p-2">
+          <label className="inline-flex items-center gap-2 text-sm text-amber-900">
+            <input
+              type="checkbox"
+              checked={batchMode}
+              onChange={(e) => setBatchMode(e.target.checked)}
+            />
+            Batch quantity mode
+          </label>
+          {batchMode ? (
+            <>
+              <label className="inline-flex items-center gap-1 text-sm text-amber-900">
+                +
+                <input
+                  className="w-16 rounded border border-amber-300 px-2 py-1"
+                  type="number"
+                  min="1"
+                  value={batchDelta}
+                  onChange={(e) => setBatchDelta(e.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                className="rounded-md border border-amber-300 bg-white px-3 py-1 text-sm font-medium text-amber-900 hover:bg-amber-100"
+                onClick={handleBatchAdjust}
+              >
+                Apply to all low-stock
+              </button>
+            </>
+          ) : null}
+        </div>
+
         {lowStockRows.length ? (
           <div className="space-y-2">
             {lowStockRows.map((row) => {
@@ -154,7 +332,13 @@ export default function StorehousePlanner({ householdId = "default-household", n
         ) : null}
       </PlannerDashboardCard>
 
-      <StorehouseInventoryTable rows={rows} />
+      <StorehouseInventoryTable
+        rows={rows}
+        editable
+        onQtyChange={handleQtyChange}
+        onRemoveRow={handleRemoveRow}
+        onQuickAdd={handleQuickAdd}
+      />
 
       <PlannerDashboardCard title="Replenishment + Preservation Priorities" subtitle="Inventory-first graph reasoning">
         <ul className="space-y-2 text-sm text-amber-900">

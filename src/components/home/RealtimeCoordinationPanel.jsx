@@ -70,6 +70,25 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
     [filteredSuggestions]
   );
 
+  const readiness = useMemo(() => {
+    const pending = (rt.suggestions || []).filter((x) => !x.consumedAt);
+    const unassigned = pending.filter(
+      (x) => !x.assignedToUserId && !x.assignedRole
+    ).length;
+    const highPriority = pending.filter((x) => Number(x.priorityScore || 0) >= 80).length;
+    const staleAssigned = pending.filter((x) => {
+      if (!x.assignmentTs) return false;
+      const ts = Date.parse(x.assignmentTs);
+      return Number.isFinite(ts) ? Date.now() - ts > 6 * 60 * 60 * 1000 : false;
+    }).length;
+    return {
+      total: pending.length,
+      unassigned,
+      highPriority,
+      staleAssigned,
+    };
+  }, [rt.suggestions]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -266,6 +285,56 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
           <span className="chip">
             High priority: {rt.latestReport?.summary?.highPriorityPending ?? 0}
           </span>
+        </div>
+
+        <div style={{ marginTop: 10 }}>
+          <div className="text-xs home-muted" style={{ marginBottom: 6 }}>
+            Collaboration readiness
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+            <span className="chip">Unassigned: {readiness.unassigned}</span>
+            <span className="chip">Priority 80+: {readiness.highPriority}</span>
+            <span className="chip">Stale assigned: {readiness.staleAssigned}</span>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() =>
+                emitCanonicalSignal({
+                  type: "taskStarted",
+                  sourceModule: "realtime.coordination",
+                  dependencies: ["mealplanner", "storehouse", "homestead"],
+                  urgency: "normal",
+                  payload: {
+                    reason: "readiness_ping",
+                    totals: readiness,
+                  },
+                })
+              }
+            >
+              Broadcast readiness
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() =>
+                emitCanonicalSignal({
+                  type: "inventoryShortage",
+                  sourceModule: "realtime.coordination",
+                  dependencies: ["storehouse", "shopping"],
+                  urgency: "high",
+                  payload: {
+                    reason: "collaboration_conflict",
+                    unassigned: readiness.unassigned,
+                    staleAssigned: readiness.staleAssigned,
+                  },
+                })
+              }
+            >
+              Flag collaboration conflict
+            </button>
+          </div>
         </div>
       </div>
 
