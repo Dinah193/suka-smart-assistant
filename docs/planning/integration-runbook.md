@@ -100,3 +100,28 @@ No-Go:
 - Postgres bootstrap failure:
   - Re-run db:migrate and db:bootstrap
   - Confirm DATABASE_URL credentials and schema permissions
+
+## 6) Strict vs Degraded DB Policy
+
+Use this policy to avoid accidental strict-mode outages:
+- Production:
+  - Mode: strict
+  - Required flags: `NEO4J_REQUIRED=true`
+  - Deployment rule: no release when `integration:preflight` fails.
+- Staging:
+  - Mode: degraded-allowed during burn-in
+  - Required flags: `NEO4J_REQUIRED=false` unless explicit strict verification window is scheduled.
+  - Deployment rule: degraded mode is acceptable only for controlled verification windows.
+- Local development:
+  - Mode: degraded-allowed by default
+  - Required flags: `NEO4J_REQUIRED=false`
+  - Developer rule: switch to strict locally before promoting infra/config changes.
+
+Escalation triggers:
+- Any production strict-mode boot failure.
+- Repeated `db:preflight` health timeouts.
+- Repeated fallback activation outside approved staging windows.
+
+## 7) Reliability Backlog
+
+Tracked in: `docs/planning/integration-reliability-backlog.md`
