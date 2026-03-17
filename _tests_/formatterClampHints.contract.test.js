@@ -20,8 +20,8 @@ vi.mock("../src/ui/ux/feedback.js", () => ({
 
 import MealplannerDraftFormatter from "../src/formatters/mealplanner/mealplannerDraftFormatter.jsx";
 import HomesteadplannerDraftFormatter from "../src/formatters/homesteadplanner/homesteadplannerDraftFormatter.jsx";
-import GardenDraftFormatter from "../src/formatters/garden/gardenDraftFormatter.js";
-import CookingDraftFormatter from "../src/formatters/cooking/cookingDraftFormatter.js";
+import GardenDraftFormatter from "../src/formatters/garden/gardenDraftFormatter.jsx";
+import CookingDraftFormatter from "../src/formatters/cooking/cookingDraftFormatter.jsx";
 import CleaningDraftFormatter from "../src/formatters/cleaning/cleaningDraftFormatter.jsx";
 import {
   CLAMP_HINT_TEXT,
@@ -158,7 +158,7 @@ describe("formatter non-negative clamp contract", () => {
     await act(async () => {
       root.render(React.createElement(GardenDraftFormatter, { editable: true }));
     });
-    const source = sourceOf("src/formatters/garden/gardenDraftFormatter.js");
+    const source = sourceOf("src/formatters/garden/gardenDraftFormatter.jsx");
     expect(source).toContain("useNonNegativeClampHints");
     expect(source).toContain("harvestTargets[${i}].qty");
     expect(source).toContain("soilAmendments[${i}].qty");
@@ -171,7 +171,7 @@ describe("formatter non-negative clamp contract", () => {
     await act(async () => {
       root.render(React.createElement(CookingDraftFormatter, { editable: true }));
     });
-    const source = sourceOf("src/formatters/cooking/cookingDraftFormatter.js");
+    const source = sourceOf("src/formatters/cooking/cookingDraftFormatter.jsx");
     expect(source).toContain("useNonNegativeClampHints");
     expect(source).toContain("ingredients[${i}].qty");
     expect(source).toContain("inventoryAlerts[${i}].neededQty");
