@@ -586,6 +586,85 @@ function coerceToEnvelope(normalized) {
   };
 }
 
+function buildGenerateFailureMessage(res, normalized) {
+  const warnings = Array.isArray(res?.warnings) ? res.warnings : [];
+  const providerWarning = warnings.find((w) =>
+    String(w?.type || "").toLowerCase().includes("providernotconfigured")
+  );
+  if (providerWarning?.message) return providerWarning.message;
+
+  if (String(res?.data?.summary || "").trim()) {
+    return String(res.data.summary).trim();
+  }
+  if (String(res?.summary || "").trim()) {
+    return String(res.summary).trim();
+  }
+
+  const mealCount = Array.isArray(normalized?.meals) ? normalized.meals.length : 0;
+  if (mealCount === 0) {
+    return "Reasoner provider not configured. No meal recipes were generated.";
+  }
+
+  return "Meal plan generation failed.";
+}
+
+const EMERGENCY_PLAN_RECIPES = [
+  "Red Beans and Rice",
+  "Herb Roast Chicken",
+  "Garden Vegetable Stew",
+  "Skillet Salmon and Greens",
+  "Lentil Curry",
+  "Turkey Chili",
+  "Egg Fried Rice",
+];
+
+function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" } = {}) {
+  const daysByDuration = {
+    "1-day": 1,
+    "7-day": 7,
+    "14-day": 14,
+    "1-month": 30,
+    "3-month": 90,
+    "6-month": 180,
+  };
+  const totalDays = daysByDuration[duration] || 7;
+  const meals = [];
+  for (let i = 0; i < totalDays; i += 1) {
+    const title = EMERGENCY_PLAN_RECIPES[i % EMERGENCY_PLAN_RECIPES.length];
+    meals.push({
+      title,
+      slot: "dinner",
+      time: "dinner",
+      day: i + 1,
+    });
+  }
+
+  return {
+    title: "Meal Plan",
+    summary: reason
+      ? `${reason} Using local fallback recipes.`
+      : "Using local fallback recipes.",
+    meals,
+    shoppingList: [],
+    prepTasks: [],
+    budget: {},
+    macros: {},
+    _raw: {
+      title: "Meal Plan",
+      summary: reason
+        ? `${reason} Using local fallback recipes.`
+        : "Using local fallback recipes.",
+      plan: Array.from({ length: totalDays }, (_, idx) => ({
+        day: idx + 1,
+        meals: [{ title: EMERGENCY_PLAN_RECIPES[idx % EMERGENCY_PLAN_RECIPES.length], time: "dinner" }],
+      })),
+      groceryList: [],
+      prepSchedule: [],
+      _meta: { source: "mealplanner.emergencyFallback" },
+    },
+  };
+}
+
 function InlinePlanViewer({ envelope }) {
   if (!envelope) return null;
   const days = Array.isArray(envelope.plan) ? envelope.plan : [];
@@ -1854,13 +1933,39 @@ export default function MealPlanningPage() {
       }
 
       const normalized = normalizePlan(res);
-      setResult(normalized);
-      setOk(true);
+      const mealCount = Array.isArray(normalized?.meals) ? normalized.meals.length : 0;
+      if (!res?.ok || mealCount < 1) {
+        const reason = buildGenerateFailureMessage(res, normalized);
+        const fallback = buildEmergencyFallbackNormalizedPlan({ duration, reason });
+        const fallbackCount = Array.isArray(fallback?.meals) ? fallback.meals.length : 0;
+        if (fallbackCount > 0) {
+          setResult(fallback);
+          setOk(true);
+          window.dispatchEvent(
+            new CustomEvent("toast", {
+              detail: {
+                type: "warning",
+                message: `${reason} Using local recipe fallback.`,
+              },
+            })
+          );
+        } else {
+          throw new Error(reason);
+        }
+      } else {
+        setResult(normalized);
+        setOk(true);
+      }
+
+      const normalizedForDownstream =
+        Array.isArray(normalized?.meals) && normalized.meals.length
+          ? normalized
+          : buildEmergencyFallbackNormalizedPlan({ duration });
 
       // Auto-forward normalized generated plan into downstream estimate inputs.
       // This keeps animal/garden/preservation estimation grounded in final outputs.
       const estimateInputs = buildEstimateInputsFromNormalizedPlan({
-        normalizedPlan: normalized,
+        normalizedPlan: normalizedForDownstream,
         meta: {
           sessionId: res?.data?.draftId || null,
           horizonMonths,
@@ -1884,12 +1989,12 @@ export default function MealPlanningPage() {
       eventBus?.emit?.("planner.estimateInputs.updated", {
         source: "mealplanner:onGenerate",
         estimateInputs,
-        normalizedPlan: normalized,
+        normalizedPlan: normalizedForDownstream,
       });
 
       const gapsEmission = emitPlannerGapsUpdated({
         estimateInputs,
-        normalizedPlan: normalized,
+        normalizedPlan: normalizedForDownstream,
         meta: {
           sessionId: res?.data?.draftId || null,
           duration,
@@ -1901,7 +2006,7 @@ export default function MealPlanningPage() {
 
       buildCompanions({
         ...payload,
-        normalizedPlan: normalized,
+        normalizedPlan: normalizedForDownstream,
         estimateInputs,
       });
 
@@ -1916,7 +2021,7 @@ export default function MealPlanningPage() {
             res?.mealPlan ||
             res?.data?.mealPlan ||
             res?.data?.plan ||
-            coerceToEnvelope(normalized);
+            coerceToEnvelope(normalizedForDownstream);
 
           if (candidatePlan?.plan?.length) {
             ensuredDraftId = await saveDraftAPI(candidatePlan, {
@@ -1937,7 +2042,7 @@ export default function MealPlanningPage() {
       /* ✅ PATCH: always force the generated plan into the Current Plan store and switch to Dashboard */
       if (!saveAsDraft) {
         try {
-          const envelope = coerceToEnvelope(normalized);
+          const envelope = coerceToEnvelope(normalizedForDownstream);
           const setter =
             useMealPlanStore?.getState?.()?.setPlan ||
             (typeof setPlan === "function" ? setPlan : null);
@@ -1959,7 +2064,7 @@ export default function MealPlanningPage() {
         } catch (e) {
           console.warn("[MealPlanner] setPlan fallback failed", e);
           try {
-            const envelope = coerceToEnvelope(normalized);
+            const envelope = coerceToEnvelope(normalizedForDownstream);
             if (envelope) setInlineEnvelope(envelope);
           } catch {}
         }
@@ -1977,7 +2082,7 @@ export default function MealPlanningPage() {
       }
 
       automation?.emit?.("meal/planGenerated", {
-        res: normalized,
+        res: normalizedForDownstream,
         meta: { templateId, cuisines, presets: selectedPresets },
       });
 
@@ -1994,15 +2099,17 @@ export default function MealPlanningPage() {
           presets: selectedPresets,
           duration,
           saveAsDraft,
-          mealCount: Array.isArray(normalized?.meals) ? normalized.meals.length : 0,
-          shoppingCount: Array.isArray(normalized?.shoppingList)
-            ? normalized.shoppingList.length
+          mealCount: Array.isArray(normalizedForDownstream?.meals)
+            ? normalizedForDownstream.meals.length
+            : 0,
+          shoppingCount: Array.isArray(normalizedForDownstream?.shoppingList)
+            ? normalizedForDownstream.shoppingList.length
             : 0,
         },
       });
 
       emitHomesteadMealPlanGenerated({
-        normalizedPlan: normalized,
+        normalizedPlan: normalizedForDownstream,
         meta: {
           templateId,
           cuisines,

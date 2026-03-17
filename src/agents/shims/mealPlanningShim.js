@@ -197,6 +197,192 @@ function buildSummary(raw, defaultSummary) {
   return defaultSummary;
 }
 
+function parseDurationToDays(duration) {
+  const d = lower(duration);
+  if (d === "1-day" || d === "1d") return 1;
+  if (d === "7-day" || d === "1-week" || d === "7d") return 7;
+  if (d === "14-day" || d === "2-week" || d === "14d") return 14;
+  if (d === "1-month") return 30;
+  if (d === "3-month") return 90;
+  if (d === "6-month") return 180;
+  return 7;
+}
+
+function hasUsableMealPlan(mealPlan) {
+  return Boolean(
+    mealPlan &&
+      Array.isArray(mealPlan.plan) &&
+      mealPlan.plan.some((day) => Array.isArray(day?.meals) && day.meals.length > 0)
+  );
+}
+
+function normalizeRecipeName(recipe, idx) {
+  return (
+    recipe?.title ||
+    recipe?.name ||
+    recipe?.label ||
+    recipe?.recipeName ||
+    `Recipe ${idx + 1}`
+  );
+}
+
+function normalizeRecipeId(recipe, idx) {
+  return String(
+    recipe?.id || recipe?.recipeId || recipe?.slug || recipe?.uid || `recipe-${idx + 1}`
+  );
+}
+
+const EMERGENCY_RECIPE_LIBRARY = [
+  {
+    id: "fallback-red-beans-rice",
+    title: "Red Beans and Rice",
+    ingredients: [
+      { name: "red beans", qty: 2, unit: "cups" },
+      { name: "rice", qty: 2, unit: "cups" },
+      { name: "onion", qty: 1, unit: "unit" },
+      { name: "garlic", qty: 3, unit: "cloves" },
+    ],
+  },
+  {
+    id: "fallback-herb-roast-chicken",
+    title: "Herb Roast Chicken",
+    ingredients: [
+      { name: "chicken", qty: 1, unit: "whole" },
+      { name: "potatoes", qty: 4, unit: "units" },
+      { name: "olive oil", qty: 2, unit: "tbsp" },
+      { name: "mixed herbs", qty: 1, unit: "tbsp" },
+    ],
+  },
+  {
+    id: "fallback-vegetable-stew",
+    title: "Garden Vegetable Stew",
+    ingredients: [
+      { name: "carrots", qty: 3, unit: "units" },
+      { name: "celery", qty: 2, unit: "stalks" },
+      { name: "tomatoes", qty: 4, unit: "units" },
+      { name: "broth", qty: 4, unit: "cups" },
+    ],
+  },
+  {
+    id: "fallback-salmon-greens",
+    title: "Skillet Salmon and Greens",
+    ingredients: [
+      { name: "salmon", qty: 4, unit: "fillets" },
+      { name: "leafy greens", qty: 1, unit: "bag" },
+      { name: "lemon", qty: 1, unit: "unit" },
+      { name: "garlic", qty: 2, unit: "cloves" },
+    ],
+  },
+  {
+    id: "fallback-lentil-curry",
+    title: "Lentil Curry",
+    ingredients: [
+      { name: "lentils", qty: 2, unit: "cups" },
+      { name: "coconut milk", qty: 1, unit: "can" },
+      { name: "onion", qty: 1, unit: "unit" },
+      { name: "curry spice", qty: 1, unit: "tbsp" },
+    ],
+  },
+  {
+    id: "fallback-turkey-chili",
+    title: "Turkey Chili",
+    ingredients: [
+      { name: "ground turkey", qty: 1, unit: "lb" },
+      { name: "beans", qty: 2, unit: "cans" },
+      { name: "tomato sauce", qty: 1, unit: "jar" },
+      { name: "chili spice", qty: 1, unit: "tbsp" },
+    ],
+  },
+  {
+    id: "fallback-egg-fried-rice",
+    title: "Egg Fried Rice",
+    ingredients: [
+      { name: "rice", qty: 3, unit: "cups" },
+      { name: "eggs", qty: 4, unit: "units" },
+      { name: "peas", qty: 1, unit: "cup" },
+      { name: "soy sauce", qty: 2, unit: "tbsp" },
+    ],
+  },
+];
+
+function buildLocalRecipeFallbackMealPlan({ input = {}, context = {} } = {}) {
+  const poolFromContext = Array.isArray(context?.recipeSources?.recipePool)
+    ? context.recipeSources.recipePool
+    : [];
+  const recipePool = poolFromContext.length ? poolFromContext : EMERGENCY_RECIPE_LIBRARY;
+  if (!recipePool.length) return null;
+
+  const days = parseDurationToDays(input?.duration);
+  const slots = Array.isArray(input?.mealTypes) && input.mealTypes.length
+    ? input.mealTypes.map((s) => String(s || "").trim()).filter(Boolean)
+    : ["dinner"];
+  const startTs = Date.parse(input?.startDate || new Date().toISOString());
+  const start = Number.isFinite(startTs) ? startTs : Date.now();
+
+  const groceryMap = new Map();
+  const plan = [];
+
+  for (let d = 0; d < days; d += 1) {
+    const date = new Date(start + d * 86400000).toISOString().slice(0, 10);
+    const dayMeals = [];
+
+    for (let s = 0; s < slots.length; s += 1) {
+      const poolIdx = (d * slots.length + s) % recipePool.length;
+      const recipe = recipePool[poolIdx] || {};
+      const recipeTitle = normalizeRecipeName(recipe, poolIdx);
+      const recipeId = normalizeRecipeId(recipe, poolIdx);
+      const time = slots[s] || "dinner";
+
+      dayMeals.push({
+        recipeId,
+        title: recipeTitle,
+        time,
+      });
+
+      const ingredients = Array.isArray(recipe?.ingredients) ? recipe.ingredients : [];
+      for (const item of ingredients) {
+        const name = typeof item === "string" ? item : item?.name;
+        const key = String(name || "").trim().toLowerCase();
+        if (!key) continue;
+        if (!groceryMap.has(key)) {
+          groceryMap.set(key, {
+            name: String(name || "").trim(),
+            qty: typeof item === "object" ? item?.qty || item?.amount || 1 : 1,
+            unit: typeof item === "object" ? item?.unit || "unit" : "unit",
+          });
+        }
+      }
+    }
+
+    plan.push({
+      day: d + 1,
+      date,
+      meals: dayMeals,
+    });
+  }
+
+  const prepSchedule = plan
+    .slice(0, Math.min(plan.length, 7))
+    .map((day) => ({
+      title: `Prep for Day ${day.day}`,
+      when: day.date,
+      tasks: day.meals.map((m) => `Prep ${m.title}`),
+    }));
+
+  return {
+    title: "Meal Plan",
+    summary: `Generated fallback plan from local recipe library (${recipePool.length} recipes).`,
+    plan,
+    groceryList: Array.from(groceryMap.values()),
+    prepSchedule,
+    budget: {},
+    _meta: {
+      source: "mealPlanningShim.localFallback",
+      reason: "provider-not-configured",
+    },
+  };
+}
+
 /**
  * Normalize Reasoner raw output into SSA Meal Planning payload.
  *
@@ -694,6 +880,48 @@ export async function invokeShim(req) {
       if (w2?.length) warnings.push(...w2);
       if (d2?.length) debug.push(...d2);
 
+      if (intent === "mealPlanning.generatePlan" && !hasUsableMealPlan(data?.mealPlan)) {
+        const fallbackPlan = buildLocalRecipeFallbackMealPlan({
+          input,
+          context: freshContext,
+        });
+
+        if (hasUsableMealPlan(fallbackPlan)) {
+          data.mealPlan = fallbackPlan;
+          data.summary = fallbackPlan.summary || data.summary;
+          warnings.push({
+            type: "providerNotConfigured",
+            message:
+              "Reasoner provider not configured. Generated meal plan from local recipe library fallback.",
+          });
+          debug.push({
+            type: "mealPlanningShim.localFallback.used",
+            ts: isoNow(),
+            days: Array.isArray(fallbackPlan.plan) ? fallbackPlan.plan.length : 0,
+            cacheHit: true,
+          });
+        } else {
+          warnings.push({
+            type: "providerNotConfigured",
+            message:
+              "Reasoner provider not configured and no local recipes available to build a fallback meal plan.",
+          });
+
+          return withTopLevelPlan({
+            ok: false,
+            mode,
+            data: {
+              summary:
+                "Reasoner provider not configured. No meal recipes were generated.",
+              mealPlan: null,
+              calendarEvents: [],
+            },
+            warnings,
+            debug,
+          });
+        }
+      }
+
       // ✅ optionally persist to store if caller asked
       if (shouldSaveToStore(input) && (data?.mealPlan || null)) {
         const meta = getStoreMeta(input, intent, mode);
@@ -799,6 +1027,49 @@ export async function invokeShim(req) {
         data: { intent, mode, errors: validation.errors || [] },
       });
 
+      if (intent === "mealPlanning.generatePlan") {
+        const fallbackPlan = buildLocalRecipeFallbackMealPlan({
+          input,
+          context: freshContext,
+        });
+
+        if (hasUsableMealPlan(fallbackPlan)) {
+          const data = {
+            summary:
+              fallbackPlan.summary ||
+              "Reasoner provider not configured. Generated plan from local recipe fallback.",
+            mealPlan: fallbackPlan,
+            calendarEvents: [],
+            inventoryUpdates: [],
+            mealPlanningUpdates: [],
+            nutritionFlags: [],
+            macroSummary: null,
+            draftId: null,
+            persisted: false,
+          };
+
+          warnings.push({
+            type: "providerNotConfigured",
+            message:
+              "Reasoner provider not configured. Generated meal plan from local recipe library fallback.",
+          });
+          debug.push({
+            type: "mealPlanningShim.localFallback.used",
+            ts: isoNow(),
+            reason: "validation-failed",
+            days: Array.isArray(fallbackPlan.plan) ? fallbackPlan.plan.length : 0,
+          });
+
+          return withTopLevelPlan({
+            ok: true,
+            mode,
+            data,
+            warnings,
+            debug,
+          });
+        }
+      }
+
       return withTopLevelPlan({
         ok: false,
         mode,
@@ -832,6 +1103,47 @@ export async function invokeShim(req) {
     } = normalizeMealPlanningOutput(intent, guarded);
     if (w3?.length) warnings.push(...w3);
     if (d3?.length) debug.push(...d3);
+
+    if (intent === "mealPlanning.generatePlan" && !hasUsableMealPlan(data?.mealPlan)) {
+      const fallbackPlan = buildLocalRecipeFallbackMealPlan({
+        input,
+        context: freshContext,
+      });
+
+      if (hasUsableMealPlan(fallbackPlan)) {
+        data.mealPlan = fallbackPlan;
+        data.summary = fallbackPlan.summary || data.summary;
+        warnings.push({
+          type: "providerNotConfigured",
+          message:
+            "Reasoner provider not configured. Generated meal plan from local recipe library fallback.",
+        });
+        debug.push({
+          type: "mealPlanningShim.localFallback.used",
+          ts: isoNow(),
+          days: Array.isArray(fallbackPlan.plan) ? fallbackPlan.plan.length : 0,
+        });
+      } else {
+        warnings.push({
+          type: "providerNotConfigured",
+          message:
+            "Reasoner provider not configured and no local recipes available to build a fallback meal plan.",
+        });
+
+        return withTopLevelPlan({
+          ok: false,
+          mode,
+          data: {
+            summary:
+              "Reasoner provider not configured. No meal recipes were generated.",
+            mealPlan: null,
+            calendarEvents: [],
+          },
+          warnings,
+          debug,
+        });
+      }
+    }
 
     // Cache guarded result
     await setCachedResponse(cacheKey, guarded);
