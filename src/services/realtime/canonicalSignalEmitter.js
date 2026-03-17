@@ -66,6 +66,13 @@ export async function emitCanonicalSignal(input = {}) {
     // fallback to HTTP
   }
 
+  // Opt-in only: static frontends should not spam missing /api route requests.
+  const enableHttpFallback =
+    String(import.meta?.env?.VITE_ENABLE_REALTIME_HTTP_FALLBACK || "false").toLowerCase() === "true";
+  if (!enableHttpFallback) {
+    return { ok: false, via: "disabled-http-fallback", signal };
+  }
+
   try {
     const res = await fetch("/api/realtime/signals", {
       method: "POST",

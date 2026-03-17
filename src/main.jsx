@@ -5,6 +5,8 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
+import db, { db as namedDb } from "@/db";
+import { getConfig } from "@/config/index.js";
 
 /* ────────────────────────────────────────────────────────────────────────────
    0) Small utilities
@@ -269,18 +271,7 @@ async function bootDI() {
   //    Split-brain guard:
   //    - Prefer ONE canonical import path first
   //    - If a different DB instance is later returned, keep the first and warn in DEV
-  const dbMod = await safeImportMany([
-    // ✅ Prefer alias-based canonical module first
-    "@/db/index.js",
-    "@/db/index.js",
-    "@/db",
-
-    // Fallbacks (dev / older layouts)
-    "./db/index.js",
-    "./db/index.js",
-  ]);
-
-  const importedDb = dbMod?.default || dbMod?.db || null;
+  const importedDb = db || namedDb || null;
 
   if (isBrowser) {
     const existing = window.DexieDB;
@@ -302,20 +293,20 @@ async function bootDI() {
 
     // If your db module exports a readiness promise, expose it for consumers.
     // (We do NOT await it here to avoid blocking first paint.)
-    if (dbMod?.dbReady && !window.__suka.dbReady) {
-      window.__suka.dbReady = dbMod.dbReady;
+    if (importedDb?.dbReady && !window.__suka.dbReady) {
+      window.__suka.dbReady = importedDb.dbReady;
     }
-    if (dbMod?.db && !window.__suka.db) {
-      window.__suka.db = dbMod.db;
+    if (importedDb && !window.__suka.db) {
+      window.__suka.db = importedDb;
     }
   }
 
-  // 2. Config: merge featureFlags.json + .env hints into a tiny getter
-  const flagsMod = await safeImportMany([
-    "./config/featureFlags.json",
-    "@/config/featureFlags.json",
-  ]);
-  const flags = flagsMod?.default || {};
+  // 2. Config: use canonical config module (avoids runtime JSON module imports)
+  const appConfig =
+    typeof getConfig === "function"
+      ? getConfig({ env: import.meta?.env || {}, mode: import.meta?.env?.MODE })
+      : {};
+  const flags = appConfig?.featureFlags || appConfig?.flags || {};
   const env = import.meta?.env || {};
 
   const getFrom = (obj, path) => {
