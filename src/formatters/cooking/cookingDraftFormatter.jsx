@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-// C:\Users\larho\suka-smart-assistant\src\formatters\cooking\cookingDraftFormatter.js
+// C:\Users\larho\suka-smart-assistant\src\formatters\cooking\cookingDraftFormatter.jsx
 /**
  * Cooking Draft Formatter (CRUD-capable)
  * -----------------------------------------------------------------------------
@@ -21,6 +21,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CLAMP_HINT_TEXT,
+  useNonNegativeClampHints,
+} from "@/ui/ux/useNonNegativeClampHints";
 
 /* ------------------------- Soft/defensive eventBus -------------------------- */
 let eventBus = { emit: () => {}, on: () => () => {} };
@@ -375,7 +379,13 @@ function TextInput({ value, onChange, placeholder = "", disabled = false }) {
   );
 }
 
-function NumInput({ value, onChange, placeholder = "", disabled = false }) {
+function NumInput({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+  min,
+}) {
   const v = value === undefined || value === null ? "" : String(value);
   return (
     <input
@@ -384,6 +394,7 @@ function NumInput({ value, onChange, placeholder = "", disabled = false }) {
       value={v}
       placeholder={placeholder}
       disabled={disabled}
+      min={min}
       onChange={(e) => {
         const n = e.target.value;
         onChange?.(n === "" ? "" : Number(n));
@@ -433,6 +444,11 @@ function ConfirmDanger({ message }) {
   return window.confirm(message || "Are you sure?");
 }
 
+const NON_NEGATIVE_QTY_PATHS = [
+  /^ingredients\[\d+\]\.qty$/,
+  /^inventoryAlerts\[\d+\]\.neededQty$/,
+];
+
 /* --------------------------- Main formatter component ------------------------ */
 export default function CookingDraftFormatter({
   draft,
@@ -450,6 +466,12 @@ export default function CookingDraftFormatter({
   const initial = useMemo(() => normalizeDraftInput(draft), [draft]);
   const [state, setState] = useState(() => initial);
   const [debugOpen, setDebugOpen] = useState(false);
+  const { clampHints, sanitizeFieldValue } = useNonNegativeClampHints({
+    paths: NON_NEGATIVE_QTY_PATHS,
+    warningTitle: "Inventory quantity adjusted",
+    warningDescription:
+      "Negative values were clamped to zero for inventory-related fields.",
+  });
 
   const historyRef = useRef([]);
   const mountedRef = useRef(false);
@@ -538,7 +560,9 @@ export default function CookingDraftFormatter({
   const canEdit = !!editable;
   const canCRUD = !!editable && !!allowCRUD;
 
-  const setField = (path, value) => commitPatch(makePatch("set", path, value));
+  const setField = (path, value) => {
+    commitPatch(makePatch("set", path, sanitizeFieldValue(path, value)));
+  };
   const addItem = (path, value, kind) =>
     commitPatch(makePatch("add", path, value), { kind, createdValue: value });
   const removeItem = (path, confirmMsg) => {
@@ -862,10 +886,18 @@ export default function CookingDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={ing.qty ?? ""}
-                          onChange={(v) => setField(`ingredients[${i}].qty`, v)}
-                        />
+                        <>
+                          <NumInput
+                            value={ing.qty ?? ""}
+                            min={0}
+                            onChange={(v) => setField(`ingredients[${i}].qty`, v)}
+                          />
+                          {clampHints[`ingredients[${i}].qty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
                         String(ing.qty ?? "")
                       )}
@@ -1665,12 +1697,20 @@ export default function CookingDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={a.neededQty ?? ""}
-                          onChange={(v) =>
-                            setField(`inventoryAlerts[${i}].neededQty`, v)
-                          }
-                        />
+                        <>
+                          <NumInput
+                            value={a.neededQty ?? ""}
+                            min={0}
+                            onChange={(v) =>
+                              setField(`inventoryAlerts[${i}].neededQty`, v)
+                            }
+                          />
+                          {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
                         String(a.neededQty ?? "")
                       )}

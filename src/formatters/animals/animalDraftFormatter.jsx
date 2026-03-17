@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-// C:\Users\larho\suka-smart-assistant\src\formatters\animals\animalDraftFormatter.js
+// C:\Users\larho\suka-smart-assistant\src\formatters\animals\animalDraftFormatter.jsx
 /**
  * Animal Draft Formatter (CRUD-capable)
  * -----------------------------------------------------------------------------
@@ -20,6 +20,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { coerceNonNegativeNumber } from "@/ui/ux/validation";
 
 /* ------------------------- Soft/defensive eventBus -------------------------- */
 let eventBus = { emit: () => {}, on: () => () => {} };
@@ -316,7 +317,13 @@ function TextInput({ value, onChange, placeholder = "", disabled = false }) {
   );
 }
 
-function NumInput({ value, onChange, placeholder = "", disabled = false }) {
+function NumInput({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+  min,
+}) {
   const v = value === undefined || value === null ? "" : String(value);
   return (
     <input
@@ -325,6 +332,7 @@ function NumInput({ value, onChange, placeholder = "", disabled = false }) {
       value={v}
       placeholder={placeholder}
       disabled={disabled}
+      min={min}
       onChange={(e) => {
         const n = e.target.value;
         onChange?.(n === "" ? "" : Number(n));
@@ -375,6 +383,21 @@ function ConfirmDanger({ message }) {
   return window.confirm(message || "Are you sure?");
 }
 
+const NON_NEGATIVE_QTY_PATHS = [/^inventoryAlerts\[\d+\]\.neededQty$/];
+
+function isNonNegativeQtyPath(path) {
+  return NON_NEGATIVE_QTY_PATHS.some((pattern) => pattern.test(path));
+}
+
+function sanitizeInventoryNumericField(path, value) {
+  if (!isNonNegativeQtyPath(path)) return { value, clamped: false };
+  if (value === "") return { value: "", clamped: false };
+  const n = Number(value);
+  if (!Number.isFinite(n)) return { value: "", clamped: false };
+  const safe = coerceNonNegativeNumber(n, 0);
+  return { value: safe, clamped: safe !== n };
+}
+
 /* --------------------------- Main formatter component ------------------------ */
 /**
  * AnimalDraftFormatter(props)
@@ -396,6 +419,7 @@ export default function AnimalDraftFormatter({
 
   const initial = useMemo(() => normalizeDraftInput(draft), [draft]);
   const [state, setState] = useState(() => initial);
+  const [clampHints, setClampHints] = useState({});
   const [debugOpen, setDebugOpen] = useState(false);
 
   // history stack for undo (store patches + previous draft snapshot)
@@ -491,7 +515,22 @@ export default function AnimalDraftFormatter({
   const canCRUD = !!editable && !!allowCRUD;
 
   /* ------------------------------ CRUD helpers ------------------------------ */
-  const setField = (path, value) => commitPatch(makePatch("set", path, value));
+  const setField = (path, value) => {
+    const sanitized = sanitizeInventoryNumericField(path, value);
+    if (isNonNegativeQtyPath(path)) {
+      if (sanitized.clamped) {
+        setClampHints((prev) => ({ ...prev, [path]: true }));
+      } else {
+        setClampHints((prev) => {
+          if (!prev[path]) return prev;
+          const next = { ...prev };
+          delete next[path];
+          return next;
+        });
+      }
+    }
+    commitPatch(makePatch("set", path, sanitized.value));
+  };
   const addItem = (path, value, kind) =>
     commitPatch(makePatch("add", path, value), { kind, createdValue: value });
   const removeItem = (path, confirmMsg) => {
@@ -1029,13 +1068,19 @@ export default function AnimalDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={a.neededQty ?? ""}
+                          min={0}
                           onChange={(v) =>
-                            setField(
-                              `inventoryAlerts[${i}].neededQty`,
-                              v === "" ? "" : Number(v)
-                            )
+                            setField(`inventoryAlerts[${i}].neededQty`, v)
                           }
                         />
+                        {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
+                          <div
+                            style={{ marginTop: 4, fontSize: 12, color: "#a16207" }}
+                            role="note"
+                          >
+                            Negative values are not allowed. Value was clamped to 0.
+                          </div>
+                        ) : null}
                       ) : (
                         String(a.neededQty ?? "")
                       )}

@@ -259,6 +259,12 @@ h1 { font-size: clamp(24px, 2.2vw, 32px); line-height:1.1; margin: 0 0 8px; }
 }
 .chip .x { font-weight:700; cursor:pointer; line-height:1; }
 
+.ssa-clamp-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: hsl(var(--warn));
+}
+
 /* Stacks */
 .stack-sm, .stack-md, .stack-lg { display:flex; flex-direction:column; }
 .stack-sm { gap:8px; } .stack-md { gap:12px; } .stack-lg { gap:16px; }

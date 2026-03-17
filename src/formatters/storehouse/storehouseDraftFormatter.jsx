@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
-// C:\Users\larho\suka-smart-assistant\src\formatters\storehouse\storehouseDraftFormatter.js
+// C:\Users\larho\suka-smart-assistant\src\formatters\storehouse\storehouseDraftFormatter.jsx
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { coerceNonNegativeNumber } from "@/ui/ux/validation";
 
 /**
  * Storehouse Draft Formatter (CRUD-capable)
@@ -393,7 +394,13 @@ function TextInput({ value, onChange, placeholder = "", disabled = false }) {
     />
   );
 }
-function NumInput({ value, onChange, placeholder = "", disabled = false }) {
+function NumInput({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+  min,
+}) {
   const v = value === undefined || value === null ? "" : String(value);
   return (
     <input
@@ -402,10 +409,15 @@ function NumInput({ value, onChange, placeholder = "", disabled = false }) {
       value={v}
       placeholder={placeholder}
       disabled={disabled}
+      min={min}
       onChange={(e) => {
         const raw = e.target.value;
         if (raw === "") onChange?.("");
-        else onChange?.(Number(raw));
+        else {
+          const parsed = Number(raw);
+          if (!Number.isFinite(parsed)) return;
+          onChange?.(coerceNonNegativeNumber(parsed, 0));
+        }
       }}
     />
   );
@@ -447,6 +459,15 @@ function Select({ value, onChange, options = [], disabled = false }) {
 function confirmDanger(message) {
   // eslint-disable-next-line no-alert
   return window.confirm(message || "Are you sure?");
+}
+
+const NON_NEGATIVE_FIELD_PATH =
+  /\.(qty|minQty|reorderQty|neededQty|shelfLifeDays)$/i;
+
+function sanitizeFieldValue(path, value) {
+  if (!NON_NEGATIVE_FIELD_PATH.test(path)) return value;
+  if (value === "") return "";
+  return coerceNonNegativeNumber(value, 0);
 }
 
 /* ------------------------------ Empty state --------------------------------- */
@@ -573,7 +594,7 @@ export default function StorehouseDraftFormatter({
   }
 
   function setField(path, value) {
-    commitPatch(makePatch("set", path, value));
+    commitPatch(makePatch("set", path, sanitizeFieldValue(path, value)));
   }
   function addItem(path, value, kind) {
     commitPatch(makePatch("add", path, value), { kind, createdValue: value });
@@ -826,6 +847,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={t.qty ?? 0}
+                          min={0}
                           onChange={(v) => setField(`targets[${i}].qty`, v)}
                         />
                       ) : (
@@ -1060,6 +1082,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={s.qty ?? 0}
+                          min={0}
                           onChange={(v) => setField(`stockList[${i}].qty`, v)}
                         />
                       ) : (
@@ -1115,6 +1138,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={s.minQty ?? 0}
+                          min={0}
                           onChange={(v) =>
                             setField(`stockList[${i}].minQty`, v)
                           }
@@ -1127,6 +1151,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={s.reorderQty ?? 0}
+                          min={0}
                           onChange={(v) =>
                             setField(`stockList[${i}].reorderQty`, v)
                           }
@@ -1156,6 +1181,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={s.shelfLifeDays ?? 0}
+                          min={0}
                           onChange={(v) =>
                             setField(`stockList[${i}].shelfLifeDays`, v)
                           }
@@ -1273,6 +1299,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={r.shelfLifeDays ?? 0}
+                          min={0}
                           onChange={(v) =>
                             setField(`rotations[${i}].shelfLifeDays`, v)
                           }
@@ -1425,6 +1452,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={p.qty ?? 0}
+                          min={0}
                           onChange={(v) =>
                             setField(`preservationPlan[${i}].qty`, v)
                           }
@@ -1892,6 +1920,7 @@ export default function StorehouseDraftFormatter({
                       {canEdit ? (
                         <NumInput
                           value={a.neededQty ?? 0}
+                          min={0}
                           onChange={(v) =>
                             setField(`inventoryAlerts[${i}].neededQty`, v)
                           }
