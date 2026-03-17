@@ -25,4 +25,15 @@ describe("loggingSanitizer", () => {
     expect(out).not.toContain("abc123");
     expect(out).not.toContain("secret-value");
   });
+
+  it("redacts array values for sensitive keys", () => {
+    const input = {
+      refresh_token: ["tok-a", "tok-b", "tok-c"],
+      nested: { ok: true },
+    };
+
+    const out = redactObject(input);
+    expect(out.refresh_token).toEqual(["[REDACTED]", "[REDACTED]", "[REDACTED]"]);
+    expect(out.nested.ok).toBe(true);
+  });
 });

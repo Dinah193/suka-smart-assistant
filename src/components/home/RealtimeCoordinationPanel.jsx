@@ -284,7 +284,12 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
           ))}
         </div>
 
-        <div style={{ fontWeight: 600, marginBottom: 6 }}>Top Suggestions</div>
+        <div style={{ display: "flex", gap: 8, alignItems: "baseline", marginBottom: 6 }}>
+          <div style={{ fontWeight: 600 }}>Top Suggestions</div>
+          <div className="text-xs home-muted">
+            Showing {topSuggestions.length} of {filteredSuggestions.length} pending
+          </div>
+        </div>
         {!topSuggestions.length ? (
           <div className="text-xs home-muted">No pending suggestions for this filter.</div>
         ) : (

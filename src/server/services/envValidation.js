@@ -80,7 +80,7 @@ function validateStartupEnv({ nodeEnv = "development" } = {}) {
     errors.push("Production requires explicit CORS_ORIGIN (wildcard '*' is not allowed).");
   }
 
-  if (isProd && socketCorsRaw === "*") {
+  if (isProd && (!socketCorsRaw || socketCorsRaw === "*")) {
     errors.push("Production requires explicit SOCKET_CORS (wildcard '*' is not allowed).");
   }
 
