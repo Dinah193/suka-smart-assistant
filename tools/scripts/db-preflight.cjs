@@ -45,6 +45,16 @@ function resolveConnectionString() {
   return "";
 }
 
+function parseMsEnv(name, fallback, min = 1000) {
+  const raw = process.env[name];
+  if (raw == null || raw === "") return fallback;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < min) {
+    throw new Error(`invalid_${name}: must be a number >= ${min}`);
+  }
+  return Math.floor(value);
+}
+
 function terminateChild(child, graceMs = 1200) {
   return new Promise((resolve) => {
     if (!child || child.killed || child.exitCode != null) {
@@ -171,8 +181,25 @@ async function waitForHealth(port, timeoutMs = 12000) {
   throw new Error(`health_timeout:${String(lastError?.message || lastError || "unknown")}`);
 }
 
+function classifyDbPreflightError(error) {
+  const message = String(error?.message || error || "unknown_error");
+
+  if (message.startsWith("invalid_")) return { category: "config", reason: message };
+  if (message.includes("Missing DB connection")) return { category: "config", reason: "missing_database_connection" };
+  if (message.includes("mongo_uri_missing")) return { category: "config", reason: "missing_mongo_uri" };
+  if (message.includes("mongo_connect_failed")) return { category: "dependency", reason: "mongo_connect_failed" };
+  if (message.includes("mongo_check_timeout")) return { category: "timeout", reason: "mongo_check_timeout" };
+  if (message.includes("health_timeout")) return { category: "timeout", reason: "health_probe_timeout" };
+  if (message.startsWith("timeout:")) return { category: "timeout", reason: "script_timeout" };
+  if (message.startsWith("failed:")) return { category: "dependency", reason: "script_failed" };
+  if (message.startsWith("preflight_runtime_exceeded")) return { category: "timeout", reason: "runtime_exceeded" };
+
+  return { category: "unknown", reason: "unclassified" };
+}
+
 async function probeServerHealth(baseEnv, timeoutMs = 16000) {
   const port = await reserveEphemeralPort();
+  const healthTimeoutMs = Number(baseEnv.DB_PREFLIGHT_HEALTH_TIMEOUT_MS || Math.max(2000, timeoutMs - 1000));
   const env = {
     ...baseEnv,
     PORT: String(port),
@@ -203,7 +230,7 @@ async function probeServerHealth(baseEnv, timeoutMs = 16000) {
   }, timeoutMs);
 
   try {
-    const health = await waitForHealth(port, timeoutMs - 1000);
+    const health = await waitForHealth(port, healthTimeoutMs);
     return { port, health };
   } finally {
     clearTimeout(guard);
@@ -265,10 +292,12 @@ async function checkMongoConnectivity(baseEnv) {
 
 async function main() {
   const startedAt = Date.now();
-  const maxRuntimeMs = Number(process.env.DB_PREFLIGHT_TIMEOUT_MS || 55000);
-  if (!Number.isFinite(maxRuntimeMs) || maxRuntimeMs < 10000) {
-    throw new Error("invalid DB_PREFLIGHT_TIMEOUT_MS; must be >= 10000");
-  }
+  const maxRuntimeMs = parseMsEnv("DB_PREFLIGHT_TIMEOUT_MS", 55000, 10000);
+  const migrateTimeoutMs = parseMsEnv("DB_PREFLIGHT_MIGRATE_TIMEOUT_MS", 22000, 2000);
+  const bootstrapTimeoutMs = parseMsEnv("DB_PREFLIGHT_BOOTSTRAP_TIMEOUT_MS", 16000, 2000);
+  const mongoCheckTimeoutMs = parseMsEnv("DB_PREFLIGHT_MONGO_TIMEOUT_MS", 9000, 1000);
+  const serverProbeTimeoutMs = parseMsEnv("DB_PREFLIGHT_SERVER_PROBE_TIMEOUT_MS", 14000, 2000);
+  const healthPollTimeoutMs = parseMsEnv("DB_PREFLIGHT_HEALTH_TIMEOUT_MS", 12000, 2000);
 
   loadWorkspaceEnv();
 
@@ -290,6 +319,13 @@ async function main() {
     ok: false,
     maxRuntimeMs,
     totalMs: 0,
+    timeoutConfig: {
+      migrateTimeoutMs,
+      bootstrapTimeoutMs,
+      mongoCheckTimeoutMs,
+      serverProbeTimeoutMs,
+      healthPollTimeoutMs,
+    },
     checks: {},
   };
 
@@ -303,14 +339,14 @@ async function main() {
   const stepStartedMigrate = Date.now();
   await runNodeScript(migrateScript, {
     env: baseEnv,
-    timeoutMs: Math.min(22000, remainingMs()),
+    timeoutMs: Math.min(migrateTimeoutMs, remainingMs()),
   });
   out.checks.postgresMigrate = { ok: true, ms: Date.now() - stepStartedMigrate };
 
   const stepStartedBootstrap = Date.now();
   await runNodeScript(bootstrapScript, {
     env: baseEnv,
-    timeoutMs: Math.min(16000, remainingMs()),
+    timeoutMs: Math.min(bootstrapTimeoutMs, remainingMs()),
   });
   out.checks.postgresBootstrap = { ok: true, ms: Date.now() - stepStartedBootstrap };
 
@@ -318,7 +354,7 @@ async function main() {
   const mongo = await Promise.race([
     checkMongoConnectivity(baseEnv),
     new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("mongo_check_timeout")), Math.min(9000, remainingMs()));
+      setTimeout(() => reject(new Error("mongo_check_timeout")), Math.min(mongoCheckTimeoutMs, remainingMs()));
     }),
   ]);
   out.checks.mongo = {
@@ -330,7 +366,10 @@ async function main() {
   };
 
   const stepStartedHealth = Date.now();
-  const healthProbe = await probeServerHealth(baseEnv, Math.min(14000, remainingMs()));
+  const healthProbe = await probeServerHealth(
+    { ...baseEnv, DB_PREFLIGHT_HEALTH_TIMEOUT_MS: String(healthPollTimeoutMs) },
+    Math.min(serverProbeTimeoutMs, remainingMs())
+  );
   out.checks.healthProbe = {
     ok: true,
     ms: Date.now() - stepStartedHealth,
@@ -348,6 +387,17 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`[db:preflight] Failed: ${String(error?.message || error)}`);
+  const message = String(error?.message || error || "unknown_error");
+  const classification = classifyDbPreflightError(error);
+  console.error(
+    JSON.stringify({
+      ok: false,
+      script: "db:preflight",
+      category: classification.category,
+      reason: classification.reason,
+      error: message,
+      failedAt: new Date().toISOString(),
+    })
+  );
   process.exit(1);
 });
