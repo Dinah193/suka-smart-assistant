@@ -614,6 +614,34 @@ export default function HomePage() {
     setDropTarget(null);
   };
 
+  const resetRoutineToDefaults = () => {
+    const defaults = makeRoutineDefaults();
+    setHomeRoutine((prev) => ({
+      ...prev,
+      selectedGroups: defaults.selectedGroups,
+    }));
+    setCustomInputs({
+      animalMeats: "",
+      vegetables: "",
+      fruits: "",
+      grains: "",
+      herbsSpices: "",
+    });
+  };
+
+  const saveRoutineAsHouseholdDefault = () => {
+    const next = {
+      ...(readHouseholdRoutineDefault() || makeRoutineDefaults()),
+      ...(homeRoutine || {}),
+      selectedGroups: {
+        ...((readHouseholdRoutineDefault() || makeRoutineDefaults())
+          .selectedGroups || {}),
+        ...((homeRoutine && homeRoutine.selectedGroups) || {}),
+      },
+    };
+    writeHouseholdRoutineDefault(next);
+  };
+
   const addFavSessionLocal = (s) => {
     const next = [...readFav(favKey.sessions).filter((x) => x.id !== s.id), s];
     writeFav(favKey.sessions, next);
