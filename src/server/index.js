@@ -176,6 +176,14 @@ if (fs.existsSync(STATIC_DIR)) {
 
 // ---- Health & info ----
 const startedAt = new Date();
+let neo4jStartupStatus = {
+  checked: false,
+  checkedAt: null,
+  ok: null,
+  required: String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true",
+  skipped: false,
+  error: null,
+};
 function pkgVersion() {
   try {
     const pkg = require("../../package.json");
@@ -195,6 +203,7 @@ app.get("/health", (req, res) => {
     now: new Date().toISOString(),
     requestId: req.id,
     db: dbConnection.getStatus(),
+    neo4j: neo4jStartupStatus,
   });
 });
 
@@ -424,6 +433,12 @@ async function startServer() {
     if (plannerIntegration?.verifyNeo4jIntegration) {
       const required = String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true";
       const neo4jStatus = await plannerIntegration.verifyNeo4jIntegration({ required });
+      neo4jStartupStatus = {
+        checked: true,
+        checkedAt: new Date().toISOString(),
+        ...neo4jStatus,
+        required,
+      };
       if (!neo4jStatus.ok) {
         const message = `[boot] neo4j validation failed: ${neo4jStatus.error || "unknown"}`;
         if (neo4jStatus.required) {
@@ -437,6 +452,14 @@ async function startServer() {
       }
     }
   } catch (e) {
+    neo4jStartupStatus = {
+      checked: true,
+      checkedAt: new Date().toISOString(),
+      ok: false,
+      skipped: false,
+      required: String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true",
+      error: String(e?.message || e || "neo4j_validation_failed"),
+    };
     console.warn("[boot] neo4j validation warning:", e?.message || e);
     if (String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true") {
       throw e;
