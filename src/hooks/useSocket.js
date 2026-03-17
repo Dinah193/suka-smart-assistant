@@ -500,20 +500,47 @@ export function useSocket({
   const emitAck = useCallback((event, payload, { timeoutMs = 10000 } = {}) => {
     const s = socketRef.current;
     return new Promise((resolve, reject) => {
-      const ack = (res) => resolve(res);
-      if (s && s.connected) {
-        try {
-          s.timeout(timeoutMs).emit(event, payload, ack);
-        } catch (e) {
-          reject(e);
-        }
-      } else {
-        socketSingleton.queue.push({ event, payload, ack, timeoutMs });
+      if (!s || !s.connected) {
+        reject(new Error(`socket not connected for ack event: ${event}`));
+        return;
       }
-      // Safety timeout if queue never flushes
-      setTimeout(() => {
-        // If resolve already called, ignore
-      }, timeoutMs + 2000);
+
+      let settled = false;
+      const finishResolve = (value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(value);
+      };
+      const finishReject = (error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(error);
+      };
+
+      const timer = setTimeout(() => {
+        finishReject(new Error(`emitAck timeout for ${event}`));
+      }, timeoutMs + 200);
+
+      const ack = (...args) => {
+        if (args.length > 1) {
+          const [err, res] = args;
+          if (err) {
+            finishReject(err instanceof Error ? err : new Error(String(err)));
+            return;
+          }
+          finishResolve(res);
+          return;
+        }
+        finishResolve(args[0]);
+      };
+
+      try {
+        s.timeout(timeoutMs).emit(event, payload, ack);
+      } catch (e) {
+        finishReject(e);
+      }
     });
   }, []);
 
