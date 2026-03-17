@@ -5,6 +5,8 @@
     "dev": "vite",
     "test:ci": "vitest run",
     "db:preflight": "node tools/scripts/db-preflight.cjs",
+    "neo4j:preflight": "node tools/scripts/neo4j-preflight.cjs",
+    "integration:preflight": "npm run db:preflight && npm run neo4j:preflight && npm run gate:fast",
     "db:migrate": "node tools/scripts/db-migrate.cjs",
     "db:bootstrap": "node tools/scripts/check-planner-db-bootstrap.cjs",
     "db:verify": "node tools/scripts/verify-planner-db.cjs",
