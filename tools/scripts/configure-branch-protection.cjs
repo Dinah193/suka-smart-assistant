@@ -8,6 +8,7 @@ const path = require("path");
 
 const REQUIRED_CONTEXTS = [
   "build",
+  "runtime-contracts",
   "unit-tests",
   "lint",
   "typecheck",
