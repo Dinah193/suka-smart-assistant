@@ -30,6 +30,20 @@ Core env vars:
 - MongoDB: MONGODB_URI (or MONGO_URI/MONGO_URL)
 - Neo4j: NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD, NEO4J_ENABLED, NEO4J_REQUIRED
 
+Example env blocks:
+- Local dev (degraded):
+  - NEO4J_ENABLED=true
+  - NEO4J_REQUIRED=false
+  - MONGODB_URI=mongodb://127.0.0.1:27017/suka-dev
+- Staging burn-in:
+  - NEO4J_ENABLED=true
+  - NEO4J_REQUIRED=false
+  - DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/suka
+- Production strict:
+  - NEO4J_ENABLED=true
+  - NEO4J_REQUIRED=true
+  - NEO4J_URI=neo4j+s://<cluster-host>
+
 ## 3) One-Command Integration Preflight
 
 Command:
@@ -43,6 +57,24 @@ This runs, in order:
 Expected behavior:
 - Exit 0 only when all checks pass.
 - Fails fast when any required dependency is unavailable.
+
+Health payload contract (minimum):
+- `db` block exists and includes:
+  - `connected` (boolean)
+  - `fallbackFileMode` (boolean)
+  - `uriConfigured` (boolean)
+- `mongo` block exists and includes:
+  - `ok` (boolean)
+  - `required` (boolean)
+  - `connected` (boolean)
+- `postgres` block exists and includes:
+  - `ok` (boolean)
+  - `required` (boolean)
+  - `connected` (boolean)
+- `neo4j` block exists and includes:
+  - `ok` (boolean)
+  - `required` (boolean)
+  - `connected` (boolean)
 
 ## 4) Release Go/No-Go
 

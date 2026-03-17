@@ -74,6 +74,9 @@ jobs:
       - name: Nutrition Mongo adapter contract
         run: npx vitest run _tests_/nutritionMongoAdapter.contract.test.js --reporter=verbose
 
+      - name: Integration preflight Neo4j contract
+        run: npx vitest run _tests_/integrationPreflight.neo4j.contract.test.js --reporter=verbose
+
   unit-tests:
     runs-on: ubuntu-latest
     steps:

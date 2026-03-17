@@ -38,6 +38,7 @@ function startServerWithEnv(extraEnv = {}) {
     HOST: "127.0.0.1",
     NODE_ENV: "test",
     STRICT_STARTUP_ENV: "false",
+    NEO4J_REQUIRED: "false",
     MONGO_SERVER_SELECTION_TIMEOUT_MS: "100",
     ...extraEnv,
   };
@@ -102,6 +103,15 @@ describe("backend startup + db mode contract", () => {
         expect(health.db?.uriConfigured).toBe(false);
         expect(health.db?.connected).toBe(false);
         expect(health.db?.fallbackFileMode).toBe(true);
+        expect(typeof health.mongo?.ok).toBe("boolean");
+        expect(typeof health.mongo?.required).toBe("boolean");
+        expect(typeof health.mongo?.connected).toBe("boolean");
+        expect(typeof health.postgres?.ok).toBe("boolean");
+        expect(typeof health.postgres?.required).toBe("boolean");
+        expect(typeof health.postgres?.connected).toBe("boolean");
+        expect(typeof health.neo4j?.ok).toBe("boolean");
+        expect(typeof health.neo4j?.required).toBe("boolean");
+        expect(typeof health.neo4j?.connected).toBe("boolean");
       } finally {
         await stopServer(child);
       }
@@ -126,6 +136,15 @@ describe("backend startup + db mode contract", () => {
         expect(health.db?.uriConfigured).toBe(true);
         expect(health.db?.connected).toBe(false);
         expect(health.db?.fallbackFileMode).toBe(true);
+        expect(typeof health.mongo?.ok).toBe("boolean");
+        expect(typeof health.mongo?.required).toBe("boolean");
+        expect(typeof health.mongo?.connected).toBe("boolean");
+        expect(typeof health.postgres?.ok).toBe("boolean");
+        expect(typeof health.postgres?.required).toBe("boolean");
+        expect(typeof health.postgres?.connected).toBe("boolean");
+        expect(typeof health.neo4j?.ok).toBe("boolean");
+        expect(typeof health.neo4j?.required).toBe("boolean");
+        expect(typeof health.neo4j?.connected).toBe("boolean");
       } finally {
         await stopServer(child);
       }
