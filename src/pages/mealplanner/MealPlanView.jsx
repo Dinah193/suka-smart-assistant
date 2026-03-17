@@ -128,6 +128,78 @@ function buildTimeDiff(originalRecipe, variantRecipe) {
   return { before: b, after: a };
 }
 
+function textFromAlertValue(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number") return String(value);
+  if (typeof value === "object") {
+    const candidate =
+      value.name ||
+      value.item ||
+      value.from ||
+      value.to ||
+      value.label ||
+      value.title ||
+      value.ingredient;
+    return typeof candidate === "string" ? candidate.trim() : "";
+  }
+  return "";
+}
+
+function normalizeList(values) {
+  return asArr(values)
+    .map((v) => textFromAlertValue(v))
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function normalizeSubstitutions(values) {
+  return asArr(values)
+    .map((entry) => {
+      if (typeof entry === "string") return entry.trim();
+      if (!entry || typeof entry !== "object") return "";
+
+      const from = String(entry.from || entry.item || entry.name || "").trim();
+      const to = String(
+        entry.to || entry.alt || entry.alternative || entry.replacement || ""
+      ).trim();
+
+      if (from && to) return `${from} -> ${to}`;
+      return from || to || "";
+    })
+    .filter(Boolean);
+}
+
+function buildSlotIngredientAlerts(items) {
+  return asArr(items)
+    .map((it, idx) => {
+      if (it?.type === "note") return null;
+
+      const recipe = getRecipeById?.(it?.ref || it?.id || "") || null;
+      const missing = normalizeList(
+        it?.missingIngredients ||
+          it?.missing ||
+          it?.inventoryShortages ||
+          recipe?.missingIngredients
+      );
+      const substitutions = normalizeSubstitutions(
+        it?.substitutions ||
+          it?.suggestedSubstitutions ||
+          recipe?.substitutions ||
+          recipe?.ingredientSubstitutions
+      );
+
+      if (!missing.length && !substitutions.length) return null;
+      return {
+        id: String(it?.id || it?.ref || it?.title || `slot-alert-${idx}`),
+        title: it?.title || recipe?.title || it?.ref || "Recipe",
+        missing,
+        substitutions,
+      };
+    })
+    .filter(Boolean);
+}
+
 // Slot card for each meal time
 function SlotCard({
   day,
@@ -139,6 +211,7 @@ function SlotCard({
   onDecide,
 }) {
   const items = slot.items || [];
+  const slotAlerts = useMemo(() => buildSlotIngredientAlerts(items), [items]);
   return (
     <Card className="hover:shadow-sm transition">
       <CardHeader className="py-2">
@@ -231,6 +304,35 @@ function SlotCard({
             </DropdownMenu>
           </div>
         ))}
+
+        {slotAlerts.length ? (
+          <div
+            className="rounded-md border border-amber-200 bg-amber-50/60 p-2"
+            role="region"
+            aria-label={`${slot.name} missing ingredient and substitution alerts`}
+          >
+            <div className="text-[11px] font-semibold text-amber-900">
+              Missing ingredients & substitutions
+            </div>
+            <div className="mt-1 space-y-2">
+              {slotAlerts.map((row) => (
+                <div key={row.id} className="rounded border border-amber-100 bg-white/70 p-2">
+                  <div className="text-xs font-medium text-amber-900">{row.title}</div>
+                  {row.missing.length ? (
+                    <div className="mt-1 text-[11px] text-rose-700">
+                      Missing: {row.missing.join(", ")}
+                    </div>
+                  ) : null}
+                  {row.substitutions.length ? (
+                    <div className="mt-1 text-[11px] text-amber-800">
+                      Substitutions: {row.substitutions.join("; ")}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
