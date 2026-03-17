@@ -176,6 +176,26 @@ if (fs.existsSync(STATIC_DIR)) {
 
 // ---- Health & info ----
 const startedAt = new Date();
+let mongoStartupStatus = {
+  checked: false,
+  checkedAt: null,
+  ok: null,
+  required: String(process.env.MONGODB_REQUIRED || "false").toLowerCase() === "true",
+  configured: false,
+  connected: false,
+  fallbackFileMode: true,
+  error: null,
+};
+let postgresStartupStatus = {
+  checked: false,
+  checkedAt: null,
+  ok: null,
+  required: String(process.env.POSTGRES_REQUIRED || "false").toLowerCase() === "true",
+  configured: false,
+  connected: false,
+  skipped: false,
+  error: null,
+};
 let neo4jStartupStatus = {
   checked: false,
   checkedAt: null,
@@ -203,6 +223,8 @@ app.get("/health", (req, res) => {
     now: new Date().toISOString(),
     requestId: req.id,
     db: dbConnection.getStatus(),
+    mongo: mongoStartupStatus,
+    postgres: postgresStartupStatus,
     neo4j: neo4jStartupStatus,
   });
 });
@@ -420,10 +442,91 @@ const server = http.createServer(app);
 
 // ---- Start listening ----
 async function startServer() {
+  const postgresConfigured =
+    !!String(process.env.DATABASE_URL || "").trim() ||
+    (String(process.env.PGHOST || "").trim() !== "" &&
+      String(process.env.PGUSER || "").trim() !== "" &&
+      String(process.env.PGPASSWORD || "").trim() !== "" &&
+      String(process.env.PGDATABASE || "").trim() !== "");
+
   try {
     await dbConnection.init();
+    const db = dbConnection.getStatus();
+    const mongoRequired = String(process.env.MONGODB_REQUIRED || "false").toLowerCase() === "true";
+    mongoStartupStatus = {
+      checked: true,
+      checkedAt: new Date().toISOString(),
+      ok: db.connected || !mongoRequired,
+      required: mongoRequired,
+      configured: db.uriConfigured,
+      connected: db.connected,
+      fallbackFileMode: db.fallbackFileMode,
+      error: db.lastError,
+    };
   } catch (e) {
     console.warn("[boot] db connection init failed; continuing in file-fallback mode:", e?.message || e);
+    const mongoRequired = String(process.env.MONGODB_REQUIRED || "false").toLowerCase() === "true";
+    mongoStartupStatus = {
+      checked: true,
+      checkedAt: new Date().toISOString(),
+      ok: !mongoRequired,
+      required: mongoRequired,
+      configured: !!String(process.env.MONGODB_URI || process.env.MONGO_URI || process.env.MONGO_URL || "").trim(),
+      connected: false,
+      fallbackFileMode: true,
+      error: String(e?.message || e || "mongo_startup_check_failed"),
+    };
+    if (mongoRequired) {
+      throw e;
+    }
+  }
+
+  try {
+    const plannerIntegration = await loadAny("./services/planners/PlannerIntegrationService.js").catch(
+      () => null
+    );
+    if (plannerIntegration?.pgPool?.query) {
+      await plannerIntegration.pgPool.query("select 1 as ok");
+      const postgresRequired = String(process.env.POSTGRES_REQUIRED || "false").toLowerCase() === "true";
+      postgresStartupStatus = {
+        checked: true,
+        checkedAt: new Date().toISOString(),
+        ok: true,
+        required: postgresRequired,
+        configured: postgresConfigured,
+        connected: true,
+        skipped: false,
+        error: null,
+      };
+    } else {
+      const postgresRequired = String(process.env.POSTGRES_REQUIRED || "false").toLowerCase() === "true";
+      postgresStartupStatus = {
+        checked: true,
+        checkedAt: new Date().toISOString(),
+        ok: !postgresRequired,
+        required: postgresRequired,
+        configured: postgresConfigured,
+        connected: false,
+        skipped: true,
+        error: "postgres_pool_unavailable",
+      };
+    }
+  } catch (e) {
+    const postgresRequired = String(process.env.POSTGRES_REQUIRED || "false").toLowerCase() === "true";
+    postgresStartupStatus = {
+      checked: true,
+      checkedAt: new Date().toISOString(),
+      ok: !postgresRequired,
+      required: postgresRequired,
+      configured: postgresConfigured,
+      connected: false,
+      skipped: false,
+      error: String(e?.message || e || "postgres_startup_check_failed"),
+    };
+    console.warn("[boot] postgres startup check warning:", e?.message || e);
+    if (postgresRequired) {
+      throw e;
+    }
   }
 
   try {
