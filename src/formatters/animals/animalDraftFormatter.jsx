@@ -1066,21 +1066,23 @@ export default function AnimalDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={a.neededQty ?? ""}
-                          min={0}
-                          onChange={(v) =>
-                            setField(`inventoryAlerts[${i}].neededQty`, v)
-                          }
-                        />
-                        {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
-                          <div
-                            style={{ marginTop: 4, fontSize: 12, color: "#a16207" }}
-                            role="note"
-                          >
-                            Negative values are not allowed. Value was clamped to 0.
-                          </div>
-                        ) : null}
+                        <>
+                          <NumInput
+                            value={a.neededQty ?? ""}
+                            min={0}
+                            onChange={(v) =>
+                              setField(`inventoryAlerts[${i}].neededQty`, v)
+                            }
+                          />
+                          {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
+                            <div
+                              style={{ marginTop: 4, fontSize: 12, color: "#a16207" }}
+                              role="note"
+                            >
+                              Negative values are not allowed. Value was clamped to 0.
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
                         String(a.neededQty ?? "")
                       )}
