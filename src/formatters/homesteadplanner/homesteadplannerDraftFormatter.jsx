@@ -1,26 +1,30 @@
 /* eslint-disable no-console */
-// C:\Users\larho\suka-smart-assistant\src\formatters\cooking\cookingDraftFormatter.js
+// C:\Users\larho\suka-smart-assistant\src\formatters\homesteadplanner\homesteadplannerDraftFormatter.jsx
 /**
- * Cooking Draft Formatter (CRUD-capable)
+ * Homestead Planner Draft Formatter (CRUD-capable)
  * -----------------------------------------------------------------------------
- * NOTE: This file exports a React component (even though it is .js).
- * It renders a resolved Cooking draft in human-friendly form and supports
- * full CRUD editing (create/read/update/delete) with patch emission.
+ * Purpose:
+ *  - Human-friendly rendering of a resolved Homestead Planner draft
+ *  - Full CRUD editing with patch emission + undo history
+ *  - Defensive normalization for missing/null fields
  *
  * Input accepted:
- *  - resolved draft object, OR
- *  - wrapper { via, res } where res is the resolved draft
+ *  - resolved draft object, OR wrapper { via, res } where res is resolved draft
  *
- * Emitted events (soft eventBus):
+ * Events (soft eventBus):
  *  - "draft.read"    once on mount
- *  - "draft.created" on CREATE
- *  - "draft.updated" on UPDATE/CREATE/DELETE mutations
- *  - "draft.deleted" on DELETE
+ *  - "draft.created" on CREATE actions
+ *  - "draft.updated" on every mutation
+ *  - "draft.deleted" on DELETE actions
  *
- * No DB writes here. Pure UI + state + events/callbacks.
+ * No DB writes here.
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CLAMP_HINT_TEXT,
+  useNonNegativeClampHints,
+} from "@/ui/ux/useNonNegativeClampHints";
 
 /* ------------------------- Soft/defensive eventBus -------------------------- */
 let eventBus = { emit: () => {}, on: () => () => {} };
@@ -38,9 +42,9 @@ try {
 
 /* ----------------------------- Domain schema -------------------------------- */
 const SCHEMA = {
-  domain: "cooking",
+  domain: "homesteadplanner",
   labels: {
-    title: "Draft Cooking Session",
+    title: "Homestead Planner Draft",
     assumptions: "Assumptions",
     sections: "Sections",
     tasks: "Tasks",
@@ -48,25 +52,25 @@ const SCHEMA = {
     healthReminders: "Reminders",
     debug: "Debug Raw Draft JSON",
 
-    recipes: "Recipes",
-    consolidatedSteps: "Consolidated Steps (Runner Preview)",
-    timers: "Timers",
-    equipment: "Equipment",
-    ingredients: "Ingredients / Inputs",
+    // homestead-planner flavored blocks
+    goals: "Seasonal Goals",
+    domains: "Domain Sessions",
+    resources: "Resources & Supplies",
+    timeline: "Timeline",
+    risks: "Risks & Constraints",
+    exports: "Exports / Hub Packet Notes",
   },
   defaults: {
     sectionTitle: "New Section",
     bullet: "New bullet…",
     task: {
-      label: "New cooking task…",
+      label: "New task…",
       priority: "med",
-      durationMin: 10,
+      durationMin: 20,
       dueISO: "",
-      tags: ["cooking"],
-      station: "", // prep/cook/serve/cleanup
     },
     alert: {
-      item: "New ingredient/supply…",
+      item: "New item…",
       neededQty: 0,
       unit: "",
       severity: "low",
@@ -77,18 +81,43 @@ const SCHEMA = {
       cadence: "weekly",
       nextDueISO: "",
     },
-    recipe: { name: "New recipe", source: "", servings: "", notes: "" },
-    step: {
-      label: "New step…",
-      station: "prep",
-      durationMin: 5,
-      timerSec: 0,
-      recipe: "",
+
+    // homestead-specific
+    goal: {
+      label: "New seasonal goal…",
+      season: "spring", // spring/summer/fall/winter/all
+      targetISO: "",
       notes: "",
     },
-    timer: { label: "New timer", seconds: 300, startAtStepIndex: 0, notes: "" },
-    equipmentItem: { name: "New equipment", notes: "" },
-    ingredient: { name: "New ingredient", qty: 0, unit: "", notes: "" },
+    domainSession: {
+      domain: "garden", // cooking/cleaning/garden/animals/preservation/storehouse/homestead
+      label: "New session…",
+      cadence: "weekly",
+      estDurationMin: 45,
+      nextDueISO: "",
+      notes: "",
+    },
+    resource: {
+      item: "New resource…",
+      qty: 0,
+      unit: "",
+      where: "", // storehouse / shed / pantry / barn / etc.
+      notes: "",
+    },
+    timelineRow: {
+      label: "New milestone…",
+      startISO: "",
+      endISO: "",
+      owner: "",
+      status: "planned", // planned/in-progress/done/blocked
+      notes: "",
+    },
+    risk: {
+      label: "New risk/constraint…",
+      severity: "med",
+      mitigation: "",
+      owner: "",
+    },
   },
 };
 
@@ -121,10 +150,12 @@ function normalizeDraftInput(draftOrWrapper) {
   const base = d && typeof d === "object" ? d : {};
 
   const normalized = {
-    id: base.id || uid("cooking_draft"),
+    id: base.id || uid("homestead_draft"),
     domain: base.domain || SCHEMA.domain,
     title: base.title || SCHEMA.labels.title,
     summary: base.summary || "",
+
+    // common blocks (required by spec)
     assumptions: Array.isArray(base.assumptions) ? base.assumptions : [],
     sections: Array.isArray(base.sections) ? base.sections : [],
     tasks: Array.isArray(base.tasks) ? base.tasks : [],
@@ -135,14 +166,21 @@ function normalizeDraftInput(draftOrWrapper) {
       ? base.healthReminders
       : [],
 
-    // cooking-specific
-    recipes: Array.isArray(base.recipes) ? base.recipes : [],
-    consolidatedSteps: Array.isArray(base.consolidatedSteps)
-      ? base.consolidatedSteps
+    // homestead-planner blocks (optional, but useful)
+    seasonalGoals: Array.isArray(base.seasonalGoals)
+      ? base.seasonalGoals
+      : Array.isArray(base.goals)
+      ? base.goals
       : [],
-    timers: Array.isArray(base.timers) ? base.timers : [],
-    equipment: Array.isArray(base.equipment) ? base.equipment : [],
-    ingredients: Array.isArray(base.ingredients) ? base.ingredients : [],
+    domainSessions: Array.isArray(base.domainSessions)
+      ? base.domainSessions
+      : Array.isArray(base.sessions)
+      ? base.sessions
+      : [],
+    resources: Array.isArray(base.resources) ? base.resources : [],
+    timeline: Array.isArray(base.timeline) ? base.timeline : [],
+    risks: Array.isArray(base.risks) ? base.risks : [],
+    exportNotes: base.exportNotes || "",
 
     meta: base.meta || {},
   };
@@ -170,14 +208,11 @@ function normalizeDraftInput(draftOrWrapper) {
       ? Number(t.durationMin)
       : undefined,
     dueISO: t?.dueISO || "",
-    tags: Array.isArray(t?.tags) ? t.tags : ["cooking"],
-    station: t?.station || "",
   }));
 
   // Normalize alerts
   normalized.inventoryAlerts = normalized.inventoryAlerts.map((a) => ({
     id: a?.id || uid("alert"),
-    sku: a?.sku,
     item: String(a?.item ?? a?.name ?? ""),
     neededQty: a?.neededQty,
     unit: a?.unit || "",
@@ -193,53 +228,54 @@ function normalizeDraftInput(draftOrWrapper) {
     nextDueISO: r?.nextDueISO || "",
   }));
 
-  // Recipes
-  normalized.recipes = normalized.recipes.map((r) => ({
-    id: r?.id || uid("rcp"),
-    name: r?.name || r?.title || "Recipe",
-    source: r?.source || "",
-    servings: r?.servings ?? "",
-    notes: r?.notes || "",
+  // Homestead-specific
+  normalized.seasonalGoals = normalized.seasonalGoals.map((g) => ({
+    id: g?.id || uid("goal"),
+    label: g?.label || g?.title || "Goal",
+    season: g?.season || "spring",
+    targetISO: g?.targetISO || g?.dueISO || "",
+    notes: g?.notes || "",
   }));
 
-  // Consolidated steps (runner preview)
-  normalized.consolidatedSteps = normalized.consolidatedSteps.map((s) => ({
-    id: s?.id || uid("step"),
-    label: s?.label || s?.text || "",
-    station: s?.station || "prep",
-    durationMin: Number.isFinite(Number(s?.durationMin))
+  normalized.domainSessions = normalized.domainSessions.map((s) => ({
+    id: s?.id || uid("sess"),
+    domain: s?.domain || "garden",
+    label: s?.label || "Session",
+    cadence: s?.cadence || "weekly",
+    estDurationMin: Number.isFinite(Number(s?.estDurationMin))
+      ? Number(s.estDurationMin)
+      : Number.isFinite(Number(s?.durationMin))
       ? Number(s.durationMin)
-      : undefined,
-    timerSec: Number.isFinite(Number(s?.timerSec)) ? Number(s.timerSec) : 0,
-    recipe: s?.recipe || "",
+      : 45,
+    nextDueISO: s?.nextDueISO || s?.dueISO || "",
     notes: s?.notes || "",
   }));
 
-  // Timers
-  normalized.timers = normalized.timers.map((t) => ({
-    id: t?.id || uid("tmr"),
-    label: t?.label || "Timer",
-    seconds: Number.isFinite(Number(t?.seconds)) ? Number(t.seconds) : 0,
-    startAtStepIndex: Number.isFinite(Number(t?.startAtStepIndex))
-      ? Number(t.startAtStepIndex)
-      : 0,
+  normalized.resources = normalized.resources.map((r) => ({
+    id: r?.id || uid("res"),
+    item: r?.item || r?.name || "Resource",
+    qty: Number.isFinite(Number(r?.qty)) ? Number(r.qty) : r?.qty ?? "",
+    unit: r?.unit || "",
+    where: r?.where || r?.location || "",
+    notes: r?.notes || "",
+  }));
+
+  normalized.timeline = normalized.timeline.map((t) => ({
+    id: t?.id || uid("tl"),
+    label: t?.label || t?.title || "Milestone",
+    startISO: t?.startISO || "",
+    endISO: t?.endISO || "",
+    owner: t?.owner || "",
+    status: t?.status || "planned",
     notes: t?.notes || "",
   }));
 
-  // Equipment
-  normalized.equipment = normalized.equipment.map((e) => ({
-    id: e?.id || uid("eq"),
-    name: e?.name || String(e ?? ""),
-    notes: e?.notes || "",
-  }));
-
-  // Ingredients
-  normalized.ingredients = normalized.ingredients.map((ing) => ({
-    id: ing?.id || uid("ing"),
-    name: ing?.name || String(ing?.item ?? ""),
-    qty: Number.isFinite(Number(ing?.qty)) ? Number(ing.qty) : ing?.qty ?? "",
-    unit: ing?.unit || "",
-    notes: ing?.notes || "",
+  normalized.risks = normalized.risks.map((r) => ({
+    id: r?.id || uid("risk"),
+    label: r?.label || r?.title || "Risk",
+    severity: r?.severity || "med",
+    mitigation: r?.mitigation || "",
+    owner: r?.owner || "",
   }));
 
   return normalized;
@@ -375,7 +411,13 @@ function TextInput({ value, onChange, placeholder = "", disabled = false }) {
   );
 }
 
-function NumInput({ value, onChange, placeholder = "", disabled = false }) {
+function NumInput({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+  min,
+}) {
   const v = value === undefined || value === null ? "" : String(value);
   return (
     <input
@@ -384,6 +426,7 @@ function NumInput({ value, onChange, placeholder = "", disabled = false }) {
       value={v}
       placeholder={placeholder}
       disabled={disabled}
+      min={min}
       onChange={(e) => {
         const n = e.target.value;
         onChange?.(n === "" ? "" : Number(n));
@@ -433,8 +476,13 @@ function ConfirmDanger({ message }) {
   return window.confirm(message || "Are you sure?");
 }
 
-/* --------------------------- Main formatter component ------------------------ */
-export default function CookingDraftFormatter({
+const NON_NEGATIVE_QTY_PATHS = [
+  /^resources\[\d+\]\.qty$/,
+  /^inventoryAlerts\[\d+\]\.neededQty$/,
+];
+
+/* -------------------------- Main formatter component ------------------------- */
+export default function HomesteadplannerDraftFormatter({
   draft,
   editable = true,
   allowCRUD = true,
@@ -450,6 +498,12 @@ export default function CookingDraftFormatter({
   const initial = useMemo(() => normalizeDraftInput(draft), [draft]);
   const [state, setState] = useState(() => initial);
   const [debugOpen, setDebugOpen] = useState(false);
+  const { clampHints, sanitizeFieldValue } = useNonNegativeClampHints({
+    paths: NON_NEGATIVE_QTY_PATHS,
+    warningTitle: "Inventory quantity adjusted",
+    warningDescription:
+      "Negative values were clamped to zero for inventory-related fields.",
+  });
 
   const historyRef = useRef([]);
   const mountedRef = useRef(false);
@@ -538,7 +592,9 @@ export default function CookingDraftFormatter({
   const canEdit = !!editable;
   const canCRUD = !!editable && !!allowCRUD;
 
-  const setField = (path, value) => commitPatch(makePatch("set", path, value));
+  const setField = (path, value) => {
+    commitPatch(makePatch("set", path, sanitizeFieldValue(path, value)));
+  };
   const addItem = (path, value, kind) =>
     commitPatch(makePatch("add", path, value), { kind, createdValue: value });
   const removeItem = (path, confirmMsg) => {
@@ -580,7 +636,6 @@ export default function CookingDraftFormatter({
     bullets: [SCHEMA.defaults.bullet],
     table: null,
   });
-
   const newTask = () => ({
     id: uid("task"),
     ...deepClone(SCHEMA.defaults.task),
@@ -593,36 +648,37 @@ export default function CookingDraftFormatter({
     id: uid("rem"),
     ...deepClone(SCHEMA.defaults.reminder),
   });
-  const newRecipe = () => ({
-    id: uid("rcp"),
-    ...deepClone(SCHEMA.defaults.recipe),
+
+  const newGoal = () => ({
+    id: uid("goal"),
+    ...deepClone(SCHEMA.defaults.goal),
   });
-  const newStep = () => ({
-    id: uid("step"),
-    ...deepClone(SCHEMA.defaults.step),
+  const newDomainSession = () => ({
+    id: uid("sess"),
+    ...deepClone(SCHEMA.defaults.domainSession),
   });
-  const newTimer = () => ({
-    id: uid("tmr"),
-    ...deepClone(SCHEMA.defaults.timer),
+  const newResource = () => ({
+    id: uid("res"),
+    ...deepClone(SCHEMA.defaults.resource),
   });
-  const newEquipment = () => ({
-    id: uid("eq"),
-    ...deepClone(SCHEMA.defaults.equipmentItem),
+  const newTimelineRow = () => ({
+    id: uid("tl"),
+    ...deepClone(SCHEMA.defaults.timelineRow),
   });
-  const newIngredient = () => ({
-    id: uid("ing"),
-    ...deepClone(SCHEMA.defaults.ingredient),
+  const newRisk = () => ({
+    id: uid("risk"),
+    ...deepClone(SCHEMA.defaults.risk),
   });
 
   const ensureSectionTable = (sectionIndex) => {
     const basePath = `sections[${sectionIndex}].table`;
     const existing = getAtPath(state, basePath);
     if (existing) return;
-    const table = { columns: ["Step", "Notes"], rows: [["", ""]] };
+    const table = { columns: ["Item", "Qty", "Notes"], rows: [["", "", ""]] };
     commitPatch(makePatch("set", basePath, table));
   };
 
-  /* ------------------------------- Renderers -------------------------------- */
+  /* ------------------------------- UI helpers -------------------------------- */
   const EmptyState = ({ title, body, onAdd, addLabel = "Add" }) => (
     <div className="ssa-empty">
       <div className="ssa-empty-title">{title}</div>
@@ -637,6 +693,7 @@ export default function CookingDraftFormatter({
     </div>
   );
 
+  /* ------------------------------ Render blocks ------------------------------ */
   const renderAssumptions = () => {
     const list = Array.isArray(state.assumptions) ? state.assumptions : [];
     return (
@@ -660,7 +717,7 @@ export default function CookingDraftFormatter({
         {list.length === 0 ? (
           <EmptyState
             title="No assumptions yet."
-            body="Assumptions clarify timing, equipment, and batch constraints."
+            body="Assumptions document constraints (weather, time, budget, water, tools, help)."
             addLabel="Add assumption"
             onAdd={() =>
               addItem("assumptions", "New assumption…", "assumption")
@@ -696,203 +753,102 @@ export default function CookingDraftFormatter({
     );
   };
 
-  const renderRecipes = () => {
-    const recipes = Array.isArray(state.recipes) ? state.recipes : [];
+  const renderSeasonalGoals = () => {
+    const goals = Array.isArray(state.seasonalGoals) ? state.seasonalGoals : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.recipes}</div>
-          <div className="ssa-card-actions">
-            {canCRUD ? (
-              <Btn
-                kind="primary"
-                onClick={() => addItem("recipes", newRecipe(), "recipe")}
-              >
-                + Add Recipe
-              </Btn>
-            ) : null}
-          </div>
-        </div>
-
-        {recipes.length === 0 ? (
-          <EmptyState
-            title="No recipes in this session."
-            body="Add recipes that are included in the cooking session."
-            addLabel="Add recipe"
-            onAdd={() => addItem("recipes", newRecipe(), "recipe")}
-          />
-        ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Source</th>
-                  <th>Servings</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {recipes.map((r, i) => (
-                  <tr key={r?.id || `rcp_${i}`}>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={r.name}
-                          onChange={(v) => setField(`recipes[${i}].name`, v)}
-                        />
-                      ) : (
-                        r.name
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={r.source}
-                          onChange={(v) => setField(`recipes[${i}].source`, v)}
-                        />
-                      ) : (
-                        r.source
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={r.servings}
-                          onChange={(v) =>
-                            setField(`recipes[${i}].servings`, v)
-                          }
-                        />
-                      ) : (
-                        String(r.servings ?? "")
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={r.notes}
-                          onChange={(v) => setField(`recipes[${i}].notes`, v)}
-                        />
-                      ) : (
-                        r.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(
-                              `recipes[${i}]`,
-                              "Delete this recipe entry?"
-                            )
-                          }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderIngredients = () => {
-    const ingredients = Array.isArray(state.ingredients)
-      ? state.ingredients
-      : [];
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.ingredients}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.goals}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
                 onClick={() =>
-                  addItem("ingredients", newIngredient(), "ingredient")
+                  addItem("seasonalGoals", newGoal(), "seasonalGoal")
                 }
               >
-                + Add Ingredient
+                + Add Goal
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {ingredients.length === 0 ? (
+        {goals.length === 0 ? (
           <EmptyState
-            title="No ingredients listed."
-            body="If your generator outputs ingredients/inputs, you can edit them here."
-            addLabel="Add ingredient"
-            onAdd={() => addItem("ingredients", newIngredient(), "ingredient")}
+            title="No seasonal goals yet."
+            body="Add goals that drive domain sessions (garden, animals, preservation, cooking, cleaning)."
+            addLabel="Add goal"
+            onAdd={() => addItem("seasonalGoals", newGoal(), "seasonalGoal")}
           />
         ) : (
           <div className="ssa-table-wrap">
             <table className="ssa-table">
               <thead>
                 <tr>
-                  <th>Ingredient</th>
-                  <th>Qty</th>
-                  <th>Unit</th>
+                  <th>Goal</th>
+                  <th>Season</th>
+                  <th>Target ISO</th>
                   <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {ingredients.map((ing, i) => (
-                  <tr key={ing?.id || `ing_${i}`}>
+                {goals.map((g, i) => (
+                  <tr key={g?.id || `goal_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={ing.name}
+                          value={g.label}
                           onChange={(v) =>
-                            setField(`ingredients[${i}].name`, v)
+                            setField(`seasonalGoals[${i}].label`, v)
                           }
                         />
                       ) : (
-                        ing.name
+                        g.label
                       )}
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={ing.qty ?? ""}
-                          onChange={(v) => setField(`ingredients[${i}].qty`, v)}
+                        <Select
+                          value={g.season || "spring"}
+                          onChange={(v) =>
+                            setField(`seasonalGoals[${i}].season`, v)
+                          }
+                          options={[
+                            { value: "spring", label: "spring" },
+                            { value: "summer", label: "summer" },
+                            { value: "fall", label: "fall" },
+                            { value: "winter", label: "winter" },
+                            { value: "all", label: "all" },
+                          ]}
                         />
                       ) : (
-                        String(ing.qty ?? "")
+                        g.season
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={ing.unit}
+                          value={g.targetISO || ""}
                           onChange={(v) =>
-                            setField(`ingredients[${i}].unit`, v)
+                            setField(`seasonalGoals[${i}].targetISO`, v)
                           }
                         />
                       ) : (
-                        ing.unit
+                        g.targetISO
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextArea
                           rows={2}
-                          value={ing.notes}
+                          value={g.notes || ""}
                           onChange={(v) =>
-                            setField(`ingredients[${i}].notes`, v)
+                            setField(`seasonalGoals[${i}].notes`, v)
                           }
                         />
                       ) : (
-                        ing.notes
+                        g.notes
                       )}
                     </td>
                     {canCRUD ? (
@@ -901,8 +857,8 @@ export default function CookingDraftFormatter({
                           kind="danger"
                           onClick={() =>
                             removeItem(
-                              `ingredients[${i}]`,
-                              "Delete this ingredient?"
+                              `seasonalGoals[${i}]`,
+                              "Delete this goal?"
                             )
                           }
                         >
@@ -920,146 +876,81 @@ export default function CookingDraftFormatter({
     );
   };
 
-  const renderEquipment = () => {
-    const equipment = Array.isArray(state.equipment) ? state.equipment : [];
+  const renderDomainSessions = () => {
+    const sessions = Array.isArray(state.domainSessions)
+      ? state.domainSessions
+      : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.equipment}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.domains}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
                 onClick={() =>
-                  addItem("equipment", newEquipment(), "equipment")
+                  addItem("domainSessions", newDomainSession(), "domainSession")
                 }
               >
-                + Add Equipment
+                + Add Session
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {equipment.length === 0 ? (
+        {sessions.length === 0 ? (
           <EmptyState
-            title="No equipment listed."
-            body="List required tools (pots, pans, instant pot, mixer, etc.)."
-            addLabel="Add equipment"
-            onAdd={() => addItem("equipment", newEquipment(), "equipment")}
+            title="No domain sessions yet."
+            body="Domain sessions are the runnable chunks SSA can turn into guided sessions."
+            addLabel="Add domain session"
+            onAdd={() =>
+              addItem("domainSessions", newDomainSession(), "domainSession")
+            }
           />
         ) : (
           <div className="ssa-table-wrap">
             <table className="ssa-table">
               <thead>
                 <tr>
-                  <th>Equipment</th>
+                  <th>Domain</th>
+                  <th>Label</th>
+                  <th>Cadence</th>
+                  <th>Est. Duration</th>
+                  <th>Next Due ISO</th>
                   <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {equipment.map((e, i) => (
-                  <tr key={e?.id || `eq_${i}`}>
+                {sessions.map((s, i) => (
+                  <tr key={s?.id || `sess_${i}`}>
                     <td>
                       {canEdit ? (
-                        <TextInput
-                          value={e.name}
-                          onChange={(v) => setField(`equipment[${i}].name`, v)}
-                        />
-                      ) : (
-                        e.name
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={e.notes}
-                          onChange={(v) => setField(`equipment[${i}].notes`, v)}
-                        />
-                      ) : (
-                        e.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(
-                              `equipment[${i}]`,
-                              "Delete this equipment item?"
-                            )
+                        <Select
+                          value={s.domain || "garden"}
+                          onChange={(v) =>
+                            setField(`domainSessions[${i}].domain`, v)
                           }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderConsolidatedSteps = () => {
-    const steps = Array.isArray(state.consolidatedSteps)
-      ? state.consolidatedSteps
-      : [];
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">
-            {SCHEMA.labels.consolidatedSteps}
-          </div>
-          <div className="ssa-card-actions">
-            {canCRUD ? (
-              <Btn
-                kind="primary"
-                onClick={() => addItem("consolidatedSteps", newStep(), "step")}
-              >
-                + Add Step
-              </Btn>
-            ) : null}
-          </div>
-        </div>
-
-        {steps.length === 0 ? (
-          <EmptyState
-            title="No consolidated steps."
-            body="This is the step list your SessionRunner should play through. Add/edit steps and timers here."
-            addLabel="Add step"
-            onAdd={() => addItem("consolidatedSteps", newStep(), "step")}
-          />
-        ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Step</th>
-                  <th>Station</th>
-                  <th>Recipe</th>
-                  <th>Duration (min)</th>
-                  <th>Timer (sec)</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {steps.map((s, i) => (
-                  <tr key={s?.id || `step_${i}`}>
-                    <td style={{ opacity: 0.8 }}>{i + 1}</td>
+                          options={[
+                            { value: "homestead", label: "homestead" },
+                            { value: "garden", label: "garden" },
+                            { value: "animals", label: "animals" },
+                            { value: "preservation", label: "preservation" },
+                            { value: "storehouse", label: "storehouse" },
+                            { value: "cooking", label: "cooking" },
+                            { value: "cleaning", label: "cleaning" },
+                          ]}
+                        />
+                      ) : (
+                        s.domain
+                      )}
+                    </td>
                     <td>
                       {canEdit ? (
                         <TextInput
                           value={s.label}
                           onChange={(v) =>
-                            setField(`consolidatedSteps[${i}].label`, v)
+                            setField(`domainSessions[${i}].label`, v)
                           }
                         />
                       ) : (
@@ -1069,55 +960,45 @@ export default function CookingDraftFormatter({
                     <td>
                       {canEdit ? (
                         <Select
-                          value={s.station || "prep"}
+                          value={s.cadence || "weekly"}
                           onChange={(v) =>
-                            setField(`consolidatedSteps[${i}].station`, v)
+                            setField(`domainSessions[${i}].cadence`, v)
                           }
                           options={[
-                            { value: "prep", label: "prep" },
-                            { value: "cook", label: "cook" },
-                            { value: "serve", label: "serve" },
-                            { value: "cleanup", label: "cleanup" },
+                            { value: "daily", label: "daily" },
+                            { value: "weekly", label: "weekly" },
+                            { value: "biweekly", label: "biweekly" },
+                            { value: "monthly", label: "monthly" },
+                            { value: "seasonal", label: "seasonal" },
+                            { value: "as-needed", label: "as-needed" },
                           ]}
                         />
                       ) : (
-                        s.station
+                        s.cadence
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <NumInput
+                          value={s.estDurationMin ?? ""}
+                          onChange={(v) =>
+                            setField(`domainSessions[${i}].estDurationMin`, v)
+                          }
+                        />
+                      ) : (
+                        String(s.estDurationMin ?? "")
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={s.recipe || ""}
+                          value={s.nextDueISO || ""}
                           onChange={(v) =>
-                            setField(`consolidatedSteps[${i}].recipe`, v)
+                            setField(`domainSessions[${i}].nextDueISO`, v)
                           }
                         />
                       ) : (
-                        s.recipe
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.durationMin ?? ""}
-                          onChange={(v) =>
-                            setField(`consolidatedSteps[${i}].durationMin`, v)
-                          }
-                        />
-                      ) : (
-                        String(s.durationMin ?? "")
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.timerSec ?? 0}
-                          onChange={(v) =>
-                            setField(`consolidatedSteps[${i}].timerSec`, v)
-                          }
-                        />
-                      ) : (
-                        String(s.timerSec ?? 0)
+                        s.nextDueISO
                       )}
                     </td>
                     <td>
@@ -1126,7 +1007,7 @@ export default function CookingDraftFormatter({
                           rows={2}
                           value={s.notes || ""}
                           onChange={(v) =>
-                            setField(`consolidatedSteps[${i}].notes`, v)
+                            setField(`domainSessions[${i}].notes`, v)
                           }
                         />
                       ) : (
@@ -1139,8 +1020,8 @@ export default function CookingDraftFormatter({
                           kind="danger"
                           onClick={() =>
                             removeItem(
-                              `consolidatedSteps[${i}]`,
-                              "Delete this step?"
+                              `domainSessions[${i}]`,
+                              "Delete this domain session?"
                             )
                           }
                         >
@@ -1158,30 +1039,157 @@ export default function CookingDraftFormatter({
     );
   };
 
-  const renderTimers = () => {
-    const timers = Array.isArray(state.timers) ? state.timers : [];
+  const renderResources = () => {
+    const rows = Array.isArray(state.resources) ? state.resources : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.timers}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.resources}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
-                onClick={() => addItem("timers", newTimer(), "timer")}
+                onClick={() => addItem("resources", newResource(), "resource")}
               >
-                + Add Timer
+                + Add Resource
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {timers.length === 0 ? (
+        {rows.length === 0 ? (
           <EmptyState
-            title="No timers listed."
-            body="Timers can mirror multi-timer panel entries."
-            addLabel="Add timer"
-            onAdd={() => addItem("timers", newTimer(), "timer")}
+            title="No resources yet."
+            body="Track supplies, equipment, and materials needed across domain sessions."
+            addLabel="Add resource"
+            onAdd={() => addItem("resources", newResource(), "resource")}
+          />
+        ) : (
+          <div className="ssa-table-wrap">
+            <table className="ssa-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Where</th>
+                  <th>Notes</th>
+                  {canCRUD ? <th>Actions</th> : null}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={r?.id || `res_${i}`}>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={r.item}
+                          onChange={(v) => setField(`resources[${i}].item`, v)}
+                        />
+                      ) : (
+                        r.item
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <>
+                          <NumInput
+                            value={r.qty ?? ""}
+                            min={0}
+                            onChange={(v) => setField(`resources[${i}].qty`, v)}
+                          />
+                          {clampHints[`resources[${i}].qty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
+                      ) : (
+                        String(r.qty ?? "")
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={r.unit}
+                          onChange={(v) => setField(`resources[${i}].unit`, v)}
+                        />
+                      ) : (
+                        r.unit
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={r.where}
+                          onChange={(v) => setField(`resources[${i}].where`, v)}
+                        />
+                      ) : (
+                        r.where
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextArea
+                          rows={2}
+                          value={r.notes || ""}
+                          onChange={(v) => setField(`resources[${i}].notes`, v)}
+                        />
+                      ) : (
+                        r.notes
+                      )}
+                    </td>
+                    {canCRUD ? (
+                      <td>
+                        <Btn
+                          kind="danger"
+                          onClick={() =>
+                            removeItem(
+                              `resources[${i}]`,
+                              "Delete this resource?"
+                            )
+                          }
+                        >
+                          Delete
+                        </Btn>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderTimeline = () => {
+    const rows = Array.isArray(state.timeline) ? state.timeline : [];
+    return (
+      <div className="ssa-card">
+        <div className="ssa-card-header">
+          <div className="ssa-card-title">{SCHEMA.labels.timeline}</div>
+          <div className="ssa-card-actions">
+            {canCRUD ? (
+              <Btn
+                kind="primary"
+                onClick={() =>
+                  addItem("timeline", newTimelineRow(), "timelineRow")
+                }
+              >
+                + Add Milestone
+              </Btn>
+            ) : null}
+          </div>
+        </div>
+
+        {rows.length === 0 ? (
+          <EmptyState
+            title="No timeline milestones yet."
+            body="Add milestones to sequence work across seasons and domains."
+            addLabel="Add milestone"
+            onAdd={() => addItem("timeline", newTimelineRow(), "timelineRow")}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -1189,20 +1197,22 @@ export default function CookingDraftFormatter({
               <thead>
                 <tr>
                   <th>Label</th>
-                  <th>Seconds</th>
-                  <th>Start at Step #</th>
+                  <th>Start ISO</th>
+                  <th>End ISO</th>
+                  <th>Owner</th>
+                  <th>Status</th>
                   <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {timers.map((t, i) => (
-                  <tr key={t?.id || `tmr_${i}`}>
+                {rows.map((t, i) => (
+                  <tr key={t?.id || `tl_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
                           value={t.label}
-                          onChange={(v) => setField(`timers[${i}].label`, v)}
+                          onChange={(v) => setField(`timeline[${i}].label`, v)}
                         />
                       ) : (
                         t.label
@@ -1210,24 +1220,50 @@ export default function CookingDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={t.seconds ?? 0}
-                          onChange={(v) => setField(`timers[${i}].seconds`, v)}
+                        <TextInput
+                          value={t.startISO || ""}
+                          onChange={(v) =>
+                            setField(`timeline[${i}].startISO`, v)
+                          }
                         />
                       ) : (
-                        String(t.seconds ?? 0)
+                        t.startISO
                       )}
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={t.startAtStepIndex ?? 0}
-                          onChange={(v) =>
-                            setField(`timers[${i}].startAtStepIndex`, v)
-                          }
+                        <TextInput
+                          value={t.endISO || ""}
+                          onChange={(v) => setField(`timeline[${i}].endISO`, v)}
                         />
                       ) : (
-                        String(t.startAtStepIndex ?? 0)
+                        t.endISO
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={t.owner || ""}
+                          onChange={(v) => setField(`timeline[${i}].owner`, v)}
+                        />
+                      ) : (
+                        t.owner
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <Select
+                          value={t.status || "planned"}
+                          onChange={(v) => setField(`timeline[${i}].status`, v)}
+                          options={[
+                            { value: "planned", label: "planned" },
+                            { value: "in-progress", label: "in-progress" },
+                            { value: "done", label: "done" },
+                            { value: "blocked", label: "blocked" },
+                          ]}
+                        />
+                      ) : (
+                        t.status
                       )}
                     </td>
                     <td>
@@ -1235,7 +1271,7 @@ export default function CookingDraftFormatter({
                         <TextArea
                           rows={2}
                           value={t.notes || ""}
-                          onChange={(v) => setField(`timers[${i}].notes`, v)}
+                          onChange={(v) => setField(`timeline[${i}].notes`, v)}
                         />
                       ) : (
                         t.notes
@@ -1246,7 +1282,120 @@ export default function CookingDraftFormatter({
                         <Btn
                           kind="danger"
                           onClick={() =>
-                            removeItem(`timers[${i}]`, "Delete this timer?")
+                            removeItem(
+                              `timeline[${i}]`,
+                              "Delete this milestone?"
+                            )
+                          }
+                        >
+                          Delete
+                        </Btn>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderRisks = () => {
+    const rows = Array.isArray(state.risks) ? state.risks : [];
+    return (
+      <div className="ssa-card">
+        <div className="ssa-card-header">
+          <div className="ssa-card-title">{SCHEMA.labels.risks}</div>
+          <div className="ssa-card-actions">
+            {canCRUD ? (
+              <Btn
+                kind="primary"
+                onClick={() => addItem("risks", newRisk(), "risk")}
+              >
+                + Add Risk
+              </Btn>
+            ) : null}
+          </div>
+        </div>
+
+        {rows.length === 0 ? (
+          <EmptyState
+            title="No risks/constraints yet."
+            body="Track blockers (budget, time, weather, access, health, transportation) and mitigations."
+            addLabel="Add risk"
+            onAdd={() => addItem("risks", newRisk(), "risk")}
+          />
+        ) : (
+          <div className="ssa-table-wrap">
+            <table className="ssa-table">
+              <thead>
+                <tr>
+                  <th>Risk / Constraint</th>
+                  <th>Severity</th>
+                  <th>Mitigation</th>
+                  <th>Owner</th>
+                  {canCRUD ? <th>Actions</th> : null}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={r?.id || `risk_${i}`}>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={r.label}
+                          onChange={(v) => setField(`risks[${i}].label`, v)}
+                        />
+                      ) : (
+                        r.label
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <Select
+                          value={r.severity || "med"}
+                          onChange={(v) => setField(`risks[${i}].severity`, v)}
+                          options={[
+                            { value: "high", label: "high" },
+                            { value: "med", label: "med" },
+                            { value: "low", label: "low" },
+                          ]}
+                        />
+                      ) : (
+                        r.severity
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextArea
+                          rows={2}
+                          value={r.mitigation || ""}
+                          onChange={(v) =>
+                            setField(`risks[${i}].mitigation`, v)
+                          }
+                        />
+                      ) : (
+                        r.mitigation
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={r.owner || ""}
+                          onChange={(v) => setField(`risks[${i}].owner`, v)}
+                        />
+                      ) : (
+                        r.owner
+                      )}
+                    </td>
+                    {canCRUD ? (
+                      <td>
+                        <Btn
+                          kind="danger"
+                          onClick={() =>
+                            removeItem(`risks[${i}]`, "Delete this risk?")
                           }
                         >
                           Delete
@@ -1265,7 +1414,6 @@ export default function CookingDraftFormatter({
 
   const renderSections = () => {
     const sections = Array.isArray(state.sections) ? state.sections : [];
-
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
@@ -1285,7 +1433,7 @@ export default function CookingDraftFormatter({
         {sections.length === 0 ? (
           <EmptyState
             title="No sections yet."
-            body="Sections are narrative blocks (Prep, Cook, Serve, Cleanup) for human readability."
+            body="Sections explain the plan in narrative form (strategy, scope, steps, dependencies)."
             addLabel="Add section"
             onAdd={() => addItem("sections", newSection(), "section")}
           />
@@ -1351,7 +1499,7 @@ export default function CookingDraftFormatter({
                     {bullets.length === 0 ? (
                       <EmptyState
                         title="No bullets"
-                        body="Bullets can be prep notes, sequencing, or serving instructions."
+                        body="Bullets can be dependencies, checklists, or explanations."
                         addLabel="Add bullet"
                         onAdd={() =>
                           addItem(
@@ -1508,7 +1656,7 @@ export default function CookingDraftFormatter({
         {tasks.length === 0 ? (
           <EmptyState
             title="No tasks yet."
-            body="Tasks are actionable items that can be compiled into the session."
+            body="Tasks are the actionable units that can become sessions."
             addLabel="Add task"
             onAdd={() => addItem("tasks", newTask(), "task")}
           />
@@ -1518,7 +1666,6 @@ export default function CookingDraftFormatter({
               <thead>
                 <tr>
                   <th>Label</th>
-                  <th>Station</th>
                   <th>Priority</th>
                   <th>Duration (min)</th>
                   <th>Due ISO</th>
@@ -1536,16 +1683,6 @@ export default function CookingDraftFormatter({
                         />
                       ) : (
                         t.label
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={t.station || ""}
-                          onChange={(v) => setField(`tasks[${i}].station`, v)}
-                        />
-                      ) : (
-                        t.station
                       )}
                     </td>
                     <td>
@@ -1631,7 +1768,7 @@ export default function CookingDraftFormatter({
         {alerts.length === 0 ? (
           <EmptyState
             title="No inventory alerts yet."
-            body="Use this for missing ingredients/tools or substitutions."
+            body="Alerts highlight shortages that could block sessions."
             addLabel="Add alert"
             onAdd={() => addItem("inventoryAlerts", newAlert(), "alert")}
           />
@@ -1665,12 +1802,20 @@ export default function CookingDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={a.neededQty ?? ""}
-                          onChange={(v) =>
-                            setField(`inventoryAlerts[${i}].neededQty`, v)
-                          }
-                        />
+                        <>
+                          <NumInput
+                            value={a.neededQty ?? ""}
+                            min={0}
+                            onChange={(v) =>
+                              setField(`inventoryAlerts[${i}].neededQty`, v)
+                            }
+                          />
+                          {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
                         String(a.neededQty ?? "")
                       )}
@@ -1767,7 +1912,7 @@ export default function CookingDraftFormatter({
         {rems.length === 0 ? (
           <EmptyState
             title="No reminders yet."
-            body="Use this for recurring kitchen reminders (deep clean fridge, rotate pantry, sharpen knives)."
+            body="Reminders keep cadence (checks, ordering, planning, review cycles)."
             addLabel="Add reminder"
             onAdd={() => addItem("healthReminders", newReminder(), "reminder")}
           />
@@ -1853,11 +1998,31 @@ export default function CookingDraftFormatter({
     );
   };
 
+  const renderExports = () => (
+    <div className="ssa-card">
+      <div className="ssa-card-header">
+        <div className="ssa-card-title">{SCHEMA.labels.exports}</div>
+      </div>
+      <Field label="Export / Hub Packet Notes">
+        {canEdit ? (
+          <TextArea
+            rows={3}
+            value={state.exportNotes || ""}
+            onChange={(v) => setField("exportNotes", v)}
+          />
+        ) : (
+          <div>{state.exportNotes}</div>
+        )}
+      </Field>
+      {/* TODO: This is where you'd add a "Prepare Hub Packet" action that calls HubPacketFormatter, but DO NOT implement here. */}
+    </div>
+  );
+
   /* ------------------------------- Main UI ---------------------------------- */
   return (
     <div className={`ssa-draft ${className}`}>
       <style>{`
-        .ssa-draft{display:flex;flex-direction:column;gap:12px;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+        .ssa-draft{display:flex;flex-direction:column;gap:12px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
         .ssa-card{border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:12px;background:#fff}
         .ssa-subcard{border:1px solid rgba(0,0,0,.10);border-radius:12px;padding:10px;background:#fafafa}
         .ssa-card-header,.ssa-subcard-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
@@ -1883,7 +2048,7 @@ export default function CookingDraftFormatter({
         .ssa-empty-body{opacity:.85;font-size:13px;margin-bottom:10px}
         .ssa-empty-actions{display:flex;gap:8px}
         .ssa-table-wrap{overflow:auto}
-        .ssa-table{width:100%;border-collapse:separate;border-spacing:0;min-width:920px}
+        .ssa-table{width:100%;border-collapse:separate;border-spacing:0;min-width:980px}
         .ssa-table th,.ssa-table td{border-bottom:1px solid rgba(0,0,0,.10);padding:8px;vertical-align:top}
         .ssa-table th{font-size:12px;text-align:left;opacity:.85}
         .ssa-row-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
@@ -1912,8 +2077,8 @@ export default function CookingDraftFormatter({
                 Undo
               </Btn>
             ) : null}
-            {/* TODO: Dexie persistence */}
-            {/* TODO: Hub export */}
+            {/* TODO: Persist to Dexie */}
+            {/* TODO: Export to Hub */}
           </div>
         </div>
 
@@ -1927,7 +2092,6 @@ export default function CookingDraftFormatter({
             <div>{state.title}</div>
           )}
         </Field>
-
         <Field label="Summary">
           {canEdit ? (
             <TextArea
@@ -1941,17 +2105,18 @@ export default function CookingDraftFormatter({
         </Field>
       </div>
 
-      {renderRecipes()}
-      {renderIngredients()}
-      {renderEquipment()}
-      {renderConsolidatedSteps()}
-      {renderTimers()}
+      {renderSeasonalGoals()}
+      {renderDomainSessions()}
+      {renderResources()}
+      {renderTimeline()}
+      {renderRisks()}
 
       {renderAssumptions()}
       {renderSections()}
       {renderTasks()}
       {renderAlerts()}
       {renderReminders()}
+      {renderExports()}
 
       {editable ? (
         <div className="ssa-card ssa-debug">

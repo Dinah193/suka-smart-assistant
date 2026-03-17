@@ -1,23 +1,30 @@
 /* eslint-disable no-console */
-// C:\Users\larho\suka-smart-assistant\src\formatters\storehouse\storehouseDraftFormatter.js
+// C:\Users\larho\suka-smart-assistant\src\formatters\cooking\cookingDraftFormatter.jsx
+/**
+ * Cooking Draft Formatter (CRUD-capable)
+ * -----------------------------------------------------------------------------
+ * NOTE: This file exports a React component (even though it is .js).
+ * It renders a resolved Cooking draft in human-friendly form and supports
+ * full CRUD editing (create/read/update/delete) with patch emission.
+ *
+ * Input accepted:
+ *  - resolved draft object, OR
+ *  - wrapper { via, res } where res is the resolved draft
+ *
+ * Emitted events (soft eventBus):
+ *  - "draft.read"    once on mount
+ *  - "draft.created" on CREATE
+ *  - "draft.updated" on UPDATE/CREATE/DELETE mutations
+ *  - "draft.deleted" on DELETE
+ *
+ * No DB writes here. Pure UI + state + events/callbacks.
+ */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
-/**
- * Storehouse Draft Formatter (CRUD-capable)
- * -----------------------------------------------------------------------------
- * - Accepts resolved draft OR wrapper { via, res }
- * - Normalizes missing fields safely
- * - Full CRUD (create/read/update/delete) for all blocks
- * - Emits eventBus events on mount + every mutation
- * - Produces patch records for every change
- * - Undo last change (keeps at least 10 history entries)
- * - Debug Raw Draft JSON collapsible when editable===true
- *
- * NOTE:
- * - No DB writes here. Only local state updates + callbacks + event emit.
- * - TODO stubs included for Dexie/Hub persistence/export.
- */
+import {
+  CLAMP_HINT_TEXT,
+  useNonNegativeClampHints,
+} from "@/ui/ux/useNonNegativeClampHints";
 
 /* ------------------------- Soft/defensive eventBus -------------------------- */
 let eventBus = { emit: () => {}, on: () => () => {} };
@@ -35,9 +42,9 @@ try {
 
 /* ----------------------------- Domain schema -------------------------------- */
 const SCHEMA = {
-  domain: "storehouse",
+  domain: "cooking",
   labels: {
-    title: "Storehouse Draft",
+    title: "Draft Cooking Session",
     assumptions: "Assumptions",
     sections: "Sections",
     tasks: "Tasks",
@@ -45,71 +52,60 @@ const SCHEMA = {
     healthReminders: "Reminders",
     debug: "Debug Raw Draft JSON",
 
-    targets: "Targets",
-    stockList: "Stock List",
-    locations: "Storage Locations",
-    rotations: "Rotation & Shelf Life",
-    preservation: "Preservation Plan",
+    recipes: "Recipes",
+    consolidatedSteps: "Consolidated Steps (Runner Preview)",
+    timers: "Timers",
+    equipment: "Equipment",
+    ingredients: "Ingredients / Inputs",
   },
   defaults: {
     sectionTitle: "New Section",
     bullet: "New bullet…",
-    task: { label: "New task…", priority: "med", durationMin: 20, dueISO: "" },
+    task: {
+      label: "New cooking task…",
+      priority: "med",
+      durationMin: 10,
+      dueISO: "",
+      tags: ["cooking"],
+      station: "", // prep/cook/serve/cleanup
+    },
     alert: {
-      item: "New item…",
+      item: "New ingredient/supply…",
       neededQty: 0,
       unit: "",
       severity: "low",
       suggestion: "",
     },
-    reminder: { label: "New reminder…", cadence: "weekly", nextDueISO: "" },
-
-    target: {
-      label: "Target",
-      qty: 0,
-      unit: "",
-      timeframe: "month",
+    reminder: {
+      label: "New reminder…",
+      cadence: "weekly",
+      nextDueISO: "",
+    },
+    recipe: { name: "New recipe", source: "", servings: "", notes: "" },
+    step: {
+      label: "New step…",
+      station: "prep",
+      durationMin: 5,
+      timerSec: 0,
+      recipe: "",
       notes: "",
     },
-    stockItem: {
-      item: "Item",
-      qty: 0,
-      unit: "",
-      category: "dry",
-      location: "pantry",
-      minQty: 0,
-      reorderQty: 0,
-      rotation: "FIFO",
-      shelfLifeDays: 0,
-      notes: "",
-    },
-    location: { name: "Location", type: "pantry", notes: "" },
-    rotationRule: {
-      item: "Item",
-      rotation: "FIFO",
-      shelfLifeDays: 0,
-      checkCadence: "monthly",
-      notes: "",
-    },
-    preservationItem: {
-      item: "Item",
-      method: "canning",
-      qty: 0,
-      unit: "",
-      season: "",
-      notes: "",
-    },
+    timer: { label: "New timer", seconds: 300, startAtStepIndex: 0, notes: "" },
+    equipmentItem: { name: "New equipment", notes: "" },
+    ingredient: { name: "New ingredient", qty: 0, unit: "", notes: "" },
   },
 };
 
 function nowISO() {
   return new Date().toISOString();
 }
+
 function uid(prefix = "id") {
   return `${prefix}_${Math.random()
     .toString(16)
     .slice(2)}_${Date.now().toString(16)}`;
 }
+
 function deepClone(x) {
   try {
     return structuredClone(x);
@@ -117,11 +113,143 @@ function deepClone(x) {
     return JSON.parse(JSON.stringify(x ?? null));
   }
 }
+
 function isWrapperDraft(x) {
   return x && typeof x === "object" && "via" in x && "res" in x;
 }
 
-/* ---------------------------- Path helpers ---------------------------------- */
+function normalizeDraftInput(draftOrWrapper) {
+  const d = isWrapperDraft(draftOrWrapper)
+    ? draftOrWrapper?.res
+    : draftOrWrapper;
+  const base = d && typeof d === "object" ? d : {};
+
+  const normalized = {
+    id: base.id || uid("cooking_draft"),
+    domain: base.domain || SCHEMA.domain,
+    title: base.title || SCHEMA.labels.title,
+    summary: base.summary || "",
+    assumptions: Array.isArray(base.assumptions) ? base.assumptions : [],
+    sections: Array.isArray(base.sections) ? base.sections : [],
+    tasks: Array.isArray(base.tasks) ? base.tasks : [],
+    inventoryAlerts: Array.isArray(base.inventoryAlerts)
+      ? base.inventoryAlerts
+      : [],
+    healthReminders: Array.isArray(base.healthReminders)
+      ? base.healthReminders
+      : [],
+
+    // cooking-specific
+    recipes: Array.isArray(base.recipes) ? base.recipes : [],
+    consolidatedSteps: Array.isArray(base.consolidatedSteps)
+      ? base.consolidatedSteps
+      : [],
+    timers: Array.isArray(base.timers) ? base.timers : [],
+    equipment: Array.isArray(base.equipment) ? base.equipment : [],
+    ingredients: Array.isArray(base.ingredients) ? base.ingredients : [],
+
+    meta: base.meta || {},
+  };
+
+  // Normalize sections
+  normalized.sections = normalized.sections.map((s) => ({
+    id: s?.id || uid("sec"),
+    title: s?.title || "Section",
+    bullets: Array.isArray(s?.bullets) ? s.bullets : [],
+    table: s?.table && typeof s.table === "object" ? s.table : null,
+  }));
+  normalized.sections = normalized.sections.map((s) => {
+    if (!s.table) return s;
+    const columns = Array.isArray(s.table.columns) ? s.table.columns : [];
+    const rows = Array.isArray(s.table.rows) ? s.table.rows : [];
+    return { ...s, table: { ...s.table, columns, rows } };
+  });
+
+  // Normalize tasks
+  normalized.tasks = normalized.tasks.map((t) => ({
+    id: t?.id || uid("task"),
+    label: String(t?.label ?? ""),
+    priority: t?.priority || "med",
+    durationMin: Number.isFinite(Number(t?.durationMin))
+      ? Number(t.durationMin)
+      : undefined,
+    dueISO: t?.dueISO || "",
+    tags: Array.isArray(t?.tags) ? t.tags : ["cooking"],
+    station: t?.station || "",
+  }));
+
+  // Normalize alerts
+  normalized.inventoryAlerts = normalized.inventoryAlerts.map((a) => ({
+    id: a?.id || uid("alert"),
+    sku: a?.sku,
+    item: String(a?.item ?? a?.name ?? ""),
+    neededQty: a?.neededQty,
+    unit: a?.unit || "",
+    severity: a?.severity || "low",
+    suggestion: a?.suggestion || "",
+  }));
+
+  // Normalize reminders
+  normalized.healthReminders = normalized.healthReminders.map((r) => ({
+    id: r?.id || uid("rem"),
+    label: r?.label || "",
+    cadence: r?.cadence || "weekly",
+    nextDueISO: r?.nextDueISO || "",
+  }));
+
+  // Recipes
+  normalized.recipes = normalized.recipes.map((r) => ({
+    id: r?.id || uid("rcp"),
+    name: r?.name || r?.title || "Recipe",
+    source: r?.source || "",
+    servings: r?.servings ?? "",
+    notes: r?.notes || "",
+  }));
+
+  // Consolidated steps (runner preview)
+  normalized.consolidatedSteps = normalized.consolidatedSteps.map((s) => ({
+    id: s?.id || uid("step"),
+    label: s?.label || s?.text || "",
+    station: s?.station || "prep",
+    durationMin: Number.isFinite(Number(s?.durationMin))
+      ? Number(s.durationMin)
+      : undefined,
+    timerSec: Number.isFinite(Number(s?.timerSec)) ? Number(s.timerSec) : 0,
+    recipe: s?.recipe || "",
+    notes: s?.notes || "",
+  }));
+
+  // Timers
+  normalized.timers = normalized.timers.map((t) => ({
+    id: t?.id || uid("tmr"),
+    label: t?.label || "Timer",
+    seconds: Number.isFinite(Number(t?.seconds)) ? Number(t.seconds) : 0,
+    startAtStepIndex: Number.isFinite(Number(t?.startAtStepIndex))
+      ? Number(t.startAtStepIndex)
+      : 0,
+    notes: t?.notes || "",
+  }));
+
+  // Equipment
+  normalized.equipment = normalized.equipment.map((e) => ({
+    id: e?.id || uid("eq"),
+    name: e?.name || String(e ?? ""),
+    notes: e?.notes || "",
+  }));
+
+  // Ingredients
+  normalized.ingredients = normalized.ingredients.map((ing) => ({
+    id: ing?.id || uid("ing"),
+    name: ing?.name || String(ing?.item ?? ""),
+    qty: Number.isFinite(Number(ing?.qty)) ? Number(ing.qty) : ing?.qty ?? "",
+    unit: ing?.unit || "",
+    notes: ing?.notes || "",
+  }));
+
+  return normalized;
+}
+
+/* ------------------------ Path parsing + patching --------------------------- */
 function parsePath(path) {
   const p = String(path || "").trim();
   if (!p) return [];
@@ -136,6 +264,7 @@ function parsePath(path) {
   });
   return parts;
 }
+
 function getAtPath(obj, path) {
   const keys = Array.isArray(path) ? path : parsePath(path);
   let cur = obj;
@@ -145,6 +274,7 @@ function getAtPath(obj, path) {
   }
   return cur;
 }
+
 function setAtPath(obj, path, value) {
   const keys = Array.isArray(path) ? path : parsePath(path);
   if (!keys.length) return obj;
@@ -159,6 +289,7 @@ function setAtPath(obj, path, value) {
   cur[keys[keys.length - 1]] = value;
   return next;
 }
+
 function addAtPath(obj, path, value) {
   const keys = Array.isArray(path) ? path : parsePath(path);
   const arr = getAtPath(obj, keys);
@@ -171,6 +302,7 @@ function addAtPath(obj, path, value) {
   dest.push(value);
   return next;
 }
+
 function removeAtPath(obj, path) {
   const keys = Array.isArray(path) ? path : parsePath(path);
   if (!keys.length) return obj;
@@ -193,7 +325,7 @@ function removeAtPath(obj, path) {
   return next;
 }
 
-export function applyPatch(prevDraft, patch) {
+function applyPatch(prevDraft, patch) {
   const p = patch || {};
   if (!p.op || !p.path) return prevDraft;
   if (p.op === "set") return setAtPath(prevDraft, p.path, p.value);
@@ -202,169 +334,20 @@ export function applyPatch(prevDraft, patch) {
   return prevDraft;
 }
 
-/* ---------------------------- Normalization --------------------------------- */
-function normalizeDraftInput(draftOrWrapper) {
-  const d = isWrapperDraft(draftOrWrapper)
-    ? draftOrWrapper?.res
-    : draftOrWrapper;
-  const base = d && typeof d === "object" ? d : {};
-
-  const normalized = {
-    id: base.id || uid("storehouse_draft"),
-    domain: base.domain || SCHEMA.domain,
-    title: base.title || SCHEMA.labels.title,
-    summary: base.summary || "",
-
-    assumptions: Array.isArray(base.assumptions) ? base.assumptions : [],
-    sections: Array.isArray(base.sections) ? base.sections : [],
-    tasks: Array.isArray(base.tasks) ? base.tasks : [],
-    inventoryAlerts: Array.isArray(base.inventoryAlerts)
-      ? base.inventoryAlerts
-      : [],
-    healthReminders: Array.isArray(base.healthReminders)
-      ? base.healthReminders
-      : [],
-
-    // storehouse extras (optional)
-    targets: Array.isArray(base.targets)
-      ? base.targets
-      : Array.isArray(base.provisioningPlan?.targets)
-      ? base.provisioningPlan.targets
-      : [],
-    stockList: Array.isArray(base.stockList)
-      ? base.stockList
-      : Array.isArray(base.stock?.items)
-      ? base.stock.items
-      : [],
-    locations: Array.isArray(base.locations)
-      ? base.locations
-      : Array.isArray(base.storage?.locations)
-      ? base.storage.locations
-      : [],
-    rotations: Array.isArray(base.rotations)
-      ? base.rotations
-      : Array.isArray(base.rotationRules)
-      ? base.rotationRules
-      : [],
-    preservationPlan: Array.isArray(base.preservationPlan)
-      ? base.preservationPlan
-      : Array.isArray(base.preservation?.items)
-      ? base.preservation.items
-      : [],
-
-    meta: base.meta || {},
-  };
-
-  normalized.sections = normalized.sections.map((s) => ({
-    id: s?.id || uid("sec"),
-    title: s?.title || "Section",
-    bullets: Array.isArray(s?.bullets) ? s.bullets : [],
-    table: s?.table && typeof s.table === "object" ? s.table : null,
-  }));
-  normalized.sections = normalized.sections.map((s) => {
-    if (!s.table) return s;
-    const columns = Array.isArray(s.table.columns) ? s.table.columns : [];
-    const rows = Array.isArray(s.table.rows) ? s.table.rows : [];
-    return { ...s, table: { ...s.table, columns, rows } };
-  });
-
-  normalized.tasks = normalized.tasks.map((t) => ({
-    id: t?.id || uid("task"),
-    label: String(t?.label ?? ""),
-    priority: t?.priority || "med",
-    durationMin: Number.isFinite(Number(t?.durationMin))
-      ? Number(t.durationMin)
-      : "",
-    dueISO: t?.dueISO || "",
-  }));
-
-  normalized.inventoryAlerts = normalized.inventoryAlerts.map((a) => ({
-    id: a?.id || uid("alert"),
-    item: String(a?.item ?? a?.name ?? ""),
-    neededQty: a?.neededQty ?? 0,
-    unit: a?.unit || "",
-    severity: a?.severity || "low",
-    suggestion: a?.suggestion || "",
-  }));
-
-  normalized.healthReminders = normalized.healthReminders.map((r) => ({
-    id: r?.id || uid("rem"),
-    label: r?.label || "",
-    cadence: r?.cadence || "weekly",
-    nextDueISO: r?.nextDueISO || "",
-  }));
-
-  normalized.targets = normalized.targets.map((t) => ({
-    id: t?.id || uid("tgt"),
-    label: t?.label || "Target",
-    qty: Number.isFinite(Number(t?.qty)) ? Number(t.qty) : t?.qty ?? 0,
-    unit: t?.unit || "",
-    timeframe: t?.timeframe || "month",
-    notes: t?.notes || "",
-  }));
-
-  normalized.locations = normalized.locations.map((l) => ({
-    id: l?.id || uid("loc"),
-    name: l?.name || "Location",
-    type: l?.type || "pantry",
-    notes: l?.notes || "",
-  }));
-
-  normalized.stockList = normalized.stockList.map((s) => ({
-    id: s?.id || uid("stk"),
-    item: s?.item || s?.name || "Item",
-    qty: Number.isFinite(Number(s?.qty)) ? Number(s.qty) : s?.qty ?? 0,
-    unit: s?.unit || "",
-    category: s?.category || "dry",
-    location: s?.location || "pantry",
-    minQty: Number.isFinite(Number(s?.minQty))
-      ? Number(s.minQty)
-      : s?.minQty ?? 0,
-    reorderQty: Number.isFinite(Number(s?.reorderQty))
-      ? Number(s.reorderQty)
-      : s?.reorderQty ?? 0,
-    rotation: s?.rotation || "FIFO",
-    shelfLifeDays: Number.isFinite(Number(s?.shelfLifeDays))
-      ? Number(s.shelfLifeDays)
-      : s?.shelfLifeDays ?? 0,
-    notes: s?.notes || "",
-  }));
-
-  normalized.rotations = normalized.rotations.map((r) => ({
-    id: r?.id || uid("rot"),
-    item: r?.item || r?.name || "Item",
-    rotation: r?.rotation || "FIFO",
-    shelfLifeDays: Number.isFinite(Number(r?.shelfLifeDays))
-      ? Number(r.shelfLifeDays)
-      : r?.shelfLifeDays ?? 0,
-    checkCadence: r?.checkCadence || "monthly",
-    notes: r?.notes || "",
-  }));
-
-  normalized.preservationPlan = normalized.preservationPlan.map((p) => ({
-    id: p?.id || uid("pres"),
-    item: p?.item || p?.name || "Item",
-    method: p?.method || "canning",
-    qty: Number.isFinite(Number(p?.qty)) ? Number(p.qty) : p?.qty ?? 0,
-    unit: p?.unit || "",
-    season: p?.season || "",
-    notes: p?.notes || "",
-  }));
-
-  return normalized;
-}
-
-/* ----------------------------- UI helpers ----------------------------------- */
+/* ----------------------------- Small UI bits -------------------------------- */
 function Btn({ children, onClick, disabled, title, kind = "default" }) {
-  const cls =
-    "ssa-btn " +
-    (kind === "primary" ? "ssa-btn-primary " : "") +
-    (kind === "danger" ? "ssa-btn-danger " : "") +
-    (disabled ? "ssa-btn-disabled" : "");
+  const base =
+    "ssa-btn" +
+    (kind === "danger"
+      ? " ssa-btn-danger"
+      : kind === "primary"
+      ? " ssa-btn-primary"
+      : "") +
+    (disabled ? " ssa-btn-disabled" : "");
   return (
     <button
       type="button"
-      className={cls.trim()}
+      className={base}
       onClick={onClick}
       disabled={disabled}
       title={title}
@@ -373,6 +356,7 @@ function Btn({ children, onClick, disabled, title, kind = "default" }) {
     </button>
   );
 }
+
 function Field({ label, children }) {
   return (
     <div className="ssa-field">
@@ -381,6 +365,7 @@ function Field({ label, children }) {
     </div>
   );
 }
+
 function TextInput({ value, onChange, placeholder = "", disabled = false }) {
   return (
     <input
@@ -393,7 +378,14 @@ function TextInput({ value, onChange, placeholder = "", disabled = false }) {
     />
   );
 }
-function NumInput({ value, onChange, placeholder = "", disabled = false }) {
+
+function NumInput({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+  min,
+}) {
   const v = value === undefined || value === null ? "" : String(value);
   return (
     <input
@@ -402,14 +394,15 @@ function NumInput({ value, onChange, placeholder = "", disabled = false }) {
       value={v}
       placeholder={placeholder}
       disabled={disabled}
+      min={min}
       onChange={(e) => {
-        const raw = e.target.value;
-        if (raw === "") onChange?.("");
-        else onChange?.(Number(raw));
+        const n = e.target.value;
+        onChange?.(n === "" ? "" : Number(n));
       }}
     />
   );
 }
+
 function TextArea({
   value,
   onChange,
@@ -428,7 +421,8 @@ function TextArea({
     />
   );
 }
-function Select({ value, onChange, options = [], disabled = false }) {
+
+function Select({ value, onChange, options, disabled = false }) {
   return (
     <select
       className="ssa-select"
@@ -436,7 +430,7 @@ function Select({ value, onChange, options = [], disabled = false }) {
       disabled={disabled}
       onChange={(e) => onChange?.(e.target.value)}
     >
-      {options.map((o) => (
+      {(options || []).map((o) => (
         <option key={o.value} value={o.value}>
           {o.label}
         </option>
@@ -444,30 +438,19 @@ function Select({ value, onChange, options = [], disabled = false }) {
     </select>
   );
 }
-function confirmDanger(message) {
+
+function ConfirmDanger({ message }) {
   // eslint-disable-next-line no-alert
   return window.confirm(message || "Are you sure?");
 }
 
-/* ------------------------------ Empty state --------------------------------- */
-function EmptyState({ title, body, onAdd, addLabel = "Add", canCRUD }) {
-  return (
-    <div className="ssa-empty">
-      <div className="ssa-empty-title">{title}</div>
-      <div className="ssa-empty-body">{body}</div>
-      {canCRUD && onAdd ? (
-        <div className="ssa-empty-actions">
-          <Btn kind="primary" onClick={onAdd}>
-            {addLabel}
-          </Btn>
-        </div>
-      ) : null}
-    </div>
-  );
-}
+const NON_NEGATIVE_QTY_PATHS = [
+  /^ingredients\[\d+\]\.qty$/,
+  /^inventoryAlerts\[\d+\]\.neededQty$/,
+];
 
-/* ------------------------- Main formatter component ------------------------- */
-export default function StorehouseDraftFormatter({
+/* --------------------------- Main formatter component ------------------------ */
+export default function CookingDraftFormatter({
   draft,
   editable = true,
   allowCRUD = true,
@@ -482,13 +465,20 @@ export default function StorehouseDraftFormatter({
 
   const initial = useMemo(() => normalizeDraftInput(draft), [draft]);
   const [state, setState] = useState(() => initial);
-
   const [debugOpen, setDebugOpen] = useState(false);
+  const { clampHints, sanitizeFieldValue } = useNonNegativeClampHints({
+    paths: NON_NEGATIVE_QTY_PATHS,
+    warningTitle: "Inventory quantity adjusted",
+    warningDescription:
+      "Negative values were clamped to zero for inventory-related fields.",
+  });
+
   const historyRef = useRef([]);
   const mountedRef = useRef(false);
 
   useEffect(() => {
-    setState(normalizeDraftInput(draft));
+    const next = normalizeDraftInput(draft);
+    setState(next);
   }, [draft]);
 
   useEffect(() => {
@@ -499,34 +489,20 @@ export default function StorehouseDraftFormatter({
     } catch {}
   }, [DOMAIN, initial.id]);
 
-  const canEdit = !!editable;
-  const canCRUD = !!editable && !!allowCRUD;
-
-  function makePatch(op, path, value) {
-    return {
-      op,
-      path,
-      value,
-      ts: nowISO(),
-      domain: DOMAIN,
-      draftId: state?.id || initial?.id,
-    };
-  }
-
-  function emit(evt, payload) {
+  const emit = (evt, payload) => {
     try {
       eventBus.emit(evt, payload);
     } catch {}
-  }
+  };
 
-  function pushHistory(prevDraft, patch) {
+  const pushHistory = (prev, patch) => {
     const stack = historyRef.current || [];
-    stack.push({ prev: prevDraft, patch });
+    stack.push({ prev, patch });
     if (stack.length > 10) stack.splice(0, stack.length - 10);
     historyRef.current = stack;
-  }
+  };
 
-  function commitPatch(patch, meta = {}) {
+  const commitPatch = (patch, { kind, createdValue } = {}) => {
     setState((prev) => {
       const prevSnapshot = deepClone(prev);
       const nextDraft = applyPatch(prev, patch);
@@ -538,9 +514,9 @@ export default function StorehouseDraftFormatter({
 
       if (patch.op === "add") {
         onCreate?.({
-          kind: meta.kind,
+          kind,
           path: patch.path,
-          value: meta.createdValue ?? patch.value,
+          value: createdValue ?? patch.value,
           nextDraft,
         });
         emit("draft.created", {
@@ -570,26 +546,36 @@ export default function StorehouseDraftFormatter({
 
       return nextDraft;
     });
-  }
+  };
 
-  function setField(path, value) {
-    commitPatch(makePatch("set", path, value));
-  }
-  function addItem(path, value, kind) {
+  const makePatch = (op, path, value) => ({
+    op,
+    path,
+    value,
+    ts: nowISO(),
+    domain: DOMAIN,
+    draftId: state?.id || initial?.id,
+  });
+
+  const canEdit = !!editable;
+  const canCRUD = !!editable && !!allowCRUD;
+
+  const setField = (path, value) => {
+    commitPatch(makePatch("set", path, sanitizeFieldValue(path, value)));
+  };
+  const addItem = (path, value, kind) =>
     commitPatch(makePatch("add", path, value), { kind, createdValue: value });
-  }
-  function removeItem(path, message) {
+  const removeItem = (path, confirmMsg) => {
     if (!canCRUD) return;
-    if (!confirmDanger(message || "Delete this item?")) return;
+    if (!ConfirmDanger({ message: confirmMsg || "Delete this item?" })) return;
     commitPatch(makePatch("remove", path));
-  }
+  };
 
-  function undo() {
+  const undo = () => {
     const stack = historyRef.current || [];
     const last = stack.pop();
     if (!last) return;
     historyRef.current = stack;
-
     const prevDraft = last.prev;
     setState(prevDraft);
 
@@ -609,7 +595,7 @@ export default function StorehouseDraftFormatter({
       patch,
       nextDraft: prevDraft,
     });
-  }
+  };
 
   /* ---------------------------- Create defaults ----------------------------- */
   const newSection = () => ({
@@ -618,6 +604,7 @@ export default function StorehouseDraftFormatter({
     bullets: [SCHEMA.defaults.bullet],
     table: null,
   });
+
   const newTask = () => ({
     id: uid("task"),
     ...deepClone(SCHEMA.defaults.task),
@@ -630,87 +617,51 @@ export default function StorehouseDraftFormatter({
     id: uid("rem"),
     ...deepClone(SCHEMA.defaults.reminder),
   });
+  const newRecipe = () => ({
+    id: uid("rcp"),
+    ...deepClone(SCHEMA.defaults.recipe),
+  });
+  const newStep = () => ({
+    id: uid("step"),
+    ...deepClone(SCHEMA.defaults.step),
+  });
+  const newTimer = () => ({
+    id: uid("tmr"),
+    ...deepClone(SCHEMA.defaults.timer),
+  });
+  const newEquipment = () => ({
+    id: uid("eq"),
+    ...deepClone(SCHEMA.defaults.equipmentItem),
+  });
+  const newIngredient = () => ({
+    id: uid("ing"),
+    ...deepClone(SCHEMA.defaults.ingredient),
+  });
 
-  const newTarget = () => ({
-    id: uid("tgt"),
-    ...deepClone(SCHEMA.defaults.target),
-  });
-  const newLocation = () => ({
-    id: uid("loc"),
-    ...deepClone(SCHEMA.defaults.location),
-  });
-  const newStockItem = () => ({
-    id: uid("stk"),
-    ...deepClone(SCHEMA.defaults.stockItem),
-  });
-  const newRotation = () => ({
-    id: uid("rot"),
-    ...deepClone(SCHEMA.defaults.rotationRule),
-  });
-  const newPreservation = () => ({
-    id: uid("pres"),
-    ...deepClone(SCHEMA.defaults.preservationItem),
-  });
-
-  function ensureSectionTable(sectionIndex) {
+  const ensureSectionTable = (sectionIndex) => {
     const basePath = `sections[${sectionIndex}].table`;
     const existing = getAtPath(state, basePath);
     if (existing) return;
-    const table = { columns: ["Item", "Qty", "Notes"], rows: [["", "", ""]] };
+    const table = { columns: ["Step", "Notes"], rows: [["", ""]] };
     commitPatch(makePatch("set", basePath, table));
-  }
+  };
 
-  /* ------------------------------ Renderers -------------------------------- */
-  function renderHeader() {
-    return (
-      <div className="ssa-header">
-        <div className="ssa-header-top">
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div className="ssa-title">{SCHEMA.labels.title}</div>
-            <div className="ssa-pill">{state.id}</div>
-          </div>
-          <div className="ssa-actions">
-            {canEdit ? (
-              <Btn
-                onClick={undo}
-                disabled={(historyRef.current || []).length === 0}
-                title="Undo last change"
-              >
-                Undo
-              </Btn>
-            ) : null}
-            {/* TODO: Persist to Dexie */}
-            {/* TODO: Export to Hub */}
-          </div>
+  /* ------------------------------- Renderers -------------------------------- */
+  const EmptyState = ({ title, body, onAdd, addLabel = "Add" }) => (
+    <div className="ssa-empty">
+      <div className="ssa-empty-title">{title}</div>
+      <div className="ssa-empty-body">{body}</div>
+      {canCRUD && onAdd ? (
+        <div className="ssa-empty-actions">
+          <Btn kind="primary" onClick={onAdd}>
+            {addLabel}
+          </Btn>
         </div>
+      ) : null}
+    </div>
+  );
 
-        <Field label="Title">
-          {canEdit ? (
-            <TextInput
-              value={state.title}
-              onChange={(v) => setField("title", v)}
-            />
-          ) : (
-            <div>{state.title}</div>
-          )}
-        </Field>
-
-        <Field label="Summary">
-          {canEdit ? (
-            <TextArea
-              value={state.summary}
-              onChange={(v) => setField("summary", v)}
-              rows={3}
-            />
-          ) : (
-            <div>{state.summary}</div>
-          )}
-        </Field>
-      </div>
-    );
-  }
-
-  function renderAssumptions() {
+  const renderAssumptions = () => {
     const list = Array.isArray(state.assumptions) ? state.assumptions : [];
     return (
       <div className="ssa-card">
@@ -733,12 +684,11 @@ export default function StorehouseDraftFormatter({
         {list.length === 0 ? (
           <EmptyState
             title="No assumptions yet."
-            body="Assumptions capture constraints (budget, family size, storage limits, dietary rules)."
+            body="Assumptions clarify timing, equipment, and batch constraints."
             addLabel="Add assumption"
             onAdd={() =>
               addItem("assumptions", "New assumption…", "assumption")
             }
-            canCRUD={canCRUD}
           />
         ) : (
           <ul className="ssa-list">
@@ -768,156 +718,32 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderTargets() {
-    const list = Array.isArray(state.targets) ? state.targets : [];
+  const renderRecipes = () => {
+    const recipes = Array.isArray(state.recipes) ? state.recipes : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.targets}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.recipes}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
-                onClick={() => addItem("targets", newTarget(), "target")}
+                onClick={() => addItem("recipes", newRecipe(), "recipe")}
               >
-                + Add Target
+                + Add Recipe
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {list.length === 0 ? (
+        {recipes.length === 0 ? (
           <EmptyState
-            title="No targets yet."
-            body="Targets define how much you want on hand (weekly, monthly, seasonal, annual)."
-            addLabel="Add target"
-            onAdd={() => addItem("targets", newTarget(), "target")}
-            canCRUD={canCRUD}
-          />
-        ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>Label</th>
-                  <th>Qty</th>
-                  <th>Unit</th>
-                  <th>Timeframe</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((t, i) => (
-                  <tr key={t.id || `tgt_${i}`}>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={t.label}
-                          onChange={(v) => setField(`targets[${i}].label`, v)}
-                        />
-                      ) : (
-                        t.label
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={t.qty ?? 0}
-                          onChange={(v) => setField(`targets[${i}].qty`, v)}
-                        />
-                      ) : (
-                        String(t.qty ?? 0)
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={t.unit}
-                          onChange={(v) => setField(`targets[${i}].unit`, v)}
-                        />
-                      ) : (
-                        t.unit
-                      )}
-                    </td>
-                    <td style={{ minWidth: 160 }}>
-                      {canEdit ? (
-                        <Select
-                          value={t.timeframe || "month"}
-                          onChange={(v) =>
-                            setField(`targets[${i}].timeframe`, v)
-                          }
-                          options={[
-                            { value: "week", label: "week" },
-                            { value: "month", label: "month" },
-                            { value: "season", label: "season" },
-                            { value: "year", label: "year" },
-                          ]}
-                        />
-                      ) : (
-                        t.timeframe
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={t.notes || ""}
-                          onChange={(v) => setField(`targets[${i}].notes`, v)}
-                        />
-                      ) : (
-                        t.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(`targets[${i}]`, "Delete this target?")
-                          }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function renderLocations() {
-    const list = Array.isArray(state.locations) ? state.locations : [];
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.locations}</div>
-          <div className="ssa-card-actions">
-            {canCRUD ? (
-              <Btn
-                kind="primary"
-                onClick={() => addItem("locations", newLocation(), "location")}
-              >
-                + Add Location
-              </Btn>
-            ) : null}
-          </div>
-        </div>
-
-        {list.length === 0 ? (
-          <EmptyState
-            title="No locations yet."
-            body="Locations map real storage (pantry, freezer, root cellar, shed)."
-            addLabel="Add location"
-            onAdd={() => addItem("locations", newLocation(), "location")}
-            canCRUD={canCRUD}
+            title="No recipes in this session."
+            body="Add recipes that are included in the cooking session."
+            addLabel="Add recipe"
+            onAdd={() => addItem("recipes", newRecipe(), "recipe")}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -925,386 +751,53 @@ export default function StorehouseDraftFormatter({
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Type</th>
+                  <th>Source</th>
+                  <th>Servings</th>
                   <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {list.map((l, i) => (
-                  <tr key={l.id || `loc_${i}`}>
+                {recipes.map((r, i) => (
+                  <tr key={r?.id || `rcp_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={l.name}
-                          onChange={(v) => setField(`locations[${i}].name`, v)}
+                          value={r.name}
+                          onChange={(v) => setField(`recipes[${i}].name`, v)}
                         />
                       ) : (
-                        l.name
+                        r.name
                       )}
                     </td>
-                    <td style={{ minWidth: 180 }}>
+                    <td>
                       {canEdit ? (
-                        <Select
-                          value={l.type || "pantry"}
-                          onChange={(v) => setField(`locations[${i}].type`, v)}
-                          options={[
-                            { value: "pantry", label: "pantry" },
-                            { value: "freezer", label: "freezer" },
-                            { value: "fridge", label: "fridge" },
-                            { value: "root-cellar", label: "root-cellar" },
-                            { value: "shed", label: "shed" },
-                            { value: "other", label: "other" },
-                          ]}
+                        <TextInput
+                          value={r.source}
+                          onChange={(v) => setField(`recipes[${i}].source`, v)}
                         />
                       ) : (
-                        l.type
+                        r.source
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={r.servings}
+                          onChange={(v) =>
+                            setField(`recipes[${i}].servings`, v)
+                          }
+                        />
+                      ) : (
+                        String(r.servings ?? "")
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextArea
                           rows={2}
-                          value={l.notes || ""}
-                          onChange={(v) => setField(`locations[${i}].notes`, v)}
-                        />
-                      ) : (
-                        l.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(
-                              `locations[${i}]`,
-                              "Delete this location?"
-                            )
-                          }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function renderStockList() {
-    const list = Array.isArray(state.stockList) ? state.stockList : [];
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.stockList}</div>
-          <div className="ssa-card-actions">
-            {canCRUD ? (
-              <Btn
-                kind="primary"
-                onClick={() =>
-                  addItem("stockList", newStockItem(), "stockItem")
-                }
-              >
-                + Add Stock Item
-              </Btn>
-            ) : null}
-          </div>
-        </div>
-
-        {list.length === 0 ? (
-          <EmptyState
-            title="No stock items yet."
-            body="Stock list defines what should exist with min/reorder thresholds."
-            addLabel="Add stock item"
-            onAdd={() => addItem("stockList", newStockItem(), "stockItem")}
-            canCRUD={canCRUD}
-          />
-        ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Unit</th>
-                  <th>Category</th>
-                  <th>Location</th>
-                  <th>Min</th>
-                  <th>Reorder</th>
-                  <th>Rotation</th>
-                  <th>Shelf Life (days)</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((s, i) => (
-                  <tr key={s.id || `stk_${i}`}>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={s.item}
-                          onChange={(v) => setField(`stockList[${i}].item`, v)}
-                        />
-                      ) : (
-                        s.item
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.qty ?? 0}
-                          onChange={(v) => setField(`stockList[${i}].qty`, v)}
-                        />
-                      ) : (
-                        String(s.qty ?? 0)
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={s.unit}
-                          onChange={(v) => setField(`stockList[${i}].unit`, v)}
-                        />
-                      ) : (
-                        s.unit
-                      )}
-                    </td>
-                    <td style={{ minWidth: 140 }}>
-                      {canEdit ? (
-                        <Select
-                          value={s.category || "dry"}
-                          onChange={(v) =>
-                            setField(`stockList[${i}].category`, v)
-                          }
-                          options={[
-                            { value: "dry", label: "dry" },
-                            { value: "canned", label: "canned" },
-                            { value: "frozen", label: "frozen" },
-                            { value: "fresh", label: "fresh" },
-                            { value: "spices", label: "spices" },
-                            { value: "medical", label: "medical" },
-                            { value: "hygiene", label: "hygiene" },
-                            { value: "cleaning", label: "cleaning" },
-                            { value: "other", label: "other" },
-                          ]}
-                        />
-                      ) : (
-                        s.category
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={s.location}
-                          onChange={(v) =>
-                            setField(`stockList[${i}].location`, v)
-                          }
-                        />
-                      ) : (
-                        s.location
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.minQty ?? 0}
-                          onChange={(v) =>
-                            setField(`stockList[${i}].minQty`, v)
-                          }
-                        />
-                      ) : (
-                        String(s.minQty ?? 0)
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.reorderQty ?? 0}
-                          onChange={(v) =>
-                            setField(`stockList[${i}].reorderQty`, v)
-                          }
-                        />
-                      ) : (
-                        String(s.reorderQty ?? 0)
-                      )}
-                    </td>
-                    <td style={{ minWidth: 110 }}>
-                      {canEdit ? (
-                        <Select
-                          value={s.rotation || "FIFO"}
-                          onChange={(v) =>
-                            setField(`stockList[${i}].rotation`, v)
-                          }
-                          options={[
-                            { value: "FIFO", label: "FIFO" },
-                            { value: "FEFO", label: "FEFO" },
-                            { value: "LIFO", label: "LIFO" },
-                          ]}
-                        />
-                      ) : (
-                        s.rotation
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.shelfLifeDays ?? 0}
-                          onChange={(v) =>
-                            setField(`stockList[${i}].shelfLifeDays`, v)
-                          }
-                        />
-                      ) : (
-                        String(s.shelfLifeDays ?? 0)
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={s.notes || ""}
-                          onChange={(v) => setField(`stockList[${i}].notes`, v)}
-                        />
-                      ) : (
-                        s.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(
-                              `stockList[${i}]`,
-                              "Delete this stock item?"
-                            )
-                          }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function renderRotations() {
-    const list = Array.isArray(state.rotations) ? state.rotations : [];
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.rotations}</div>
-          <div className="ssa-card-actions">
-            {canCRUD ? (
-              <Btn
-                kind="primary"
-                onClick={() => addItem("rotations", newRotation(), "rotation")}
-              >
-                + Add Rule
-              </Btn>
-            ) : null}
-          </div>
-        </div>
-
-        {list.length === 0 ? (
-          <EmptyState
-            title="No rotation rules yet."
-            body="Rotation rules define how to use & check shelf life on a cadence."
-            addLabel="Add rotation rule"
-            onAdd={() => addItem("rotations", newRotation(), "rotation")}
-            canCRUD={canCRUD}
-          />
-        ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Rotation</th>
-                  <th>Shelf Life (days)</th>
-                  <th>Check Cadence</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((r, i) => (
-                  <tr key={r.id || `rot_${i}`}>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={r.item}
-                          onChange={(v) => setField(`rotations[${i}].item`, v)}
-                        />
-                      ) : (
-                        r.item
-                      )}
-                    </td>
-                    <td style={{ minWidth: 110 }}>
-                      {canEdit ? (
-                        <Select
-                          value={r.rotation || "FIFO"}
-                          onChange={(v) =>
-                            setField(`rotations[${i}].rotation`, v)
-                          }
-                          options={[
-                            { value: "FIFO", label: "FIFO" },
-                            { value: "FEFO", label: "FEFO" },
-                            { value: "LIFO", label: "LIFO" },
-                          ]}
-                        />
-                      ) : (
-                        r.rotation
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={r.shelfLifeDays ?? 0}
-                          onChange={(v) =>
-                            setField(`rotations[${i}].shelfLifeDays`, v)
-                          }
-                        />
-                      ) : (
-                        String(r.shelfLifeDays ?? 0)
-                      )}
-                    </td>
-                    <td style={{ minWidth: 140 }}>
-                      {canEdit ? (
-                        <Select
-                          value={r.checkCadence || "monthly"}
-                          onChange={(v) =>
-                            setField(`rotations[${i}].checkCadence`, v)
-                          }
-                          options={[
-                            { value: "weekly", label: "weekly" },
-                            { value: "monthly", label: "monthly" },
-                            { value: "quarterly", label: "quarterly" },
-                            { value: "seasonal", label: "seasonal" },
-                          ]}
-                        />
-                      ) : (
-                        r.checkCadence
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={r.notes || ""}
-                          onChange={(v) => setField(`rotations[${i}].notes`, v)}
+                          value={r.notes}
+                          onChange={(v) => setField(`recipes[${i}].notes`, v)}
                         />
                       ) : (
                         r.notes
@@ -1316,8 +809,8 @@ export default function StorehouseDraftFormatter({
                           kind="danger"
                           onClick={() =>
                             removeItem(
-                              `rotations[${i}]`,
-                              "Delete this rotation rule?"
+                              `recipes[${i}]`,
+                              "Delete this recipe entry?"
                             )
                           }
                         >
@@ -1333,142 +826,105 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderPreservationPlan() {
-    const list = Array.isArray(state.preservationPlan)
-      ? state.preservationPlan
+  const renderIngredients = () => {
+    const ingredients = Array.isArray(state.ingredients)
+      ? state.ingredients
       : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.preservation}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.ingredients}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
                 onClick={() =>
-                  addItem(
-                    "preservationPlan",
-                    newPreservation(),
-                    "preservationItem"
-                  )
+                  addItem("ingredients", newIngredient(), "ingredient")
                 }
               >
-                + Add Item
+                + Add Ingredient
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {list.length === 0 ? (
+        {ingredients.length === 0 ? (
           <EmptyState
-            title="No preservation plan items yet."
-            body="Track what to preserve and how (canning, dehydrating, freezing, curing, fermenting)."
-            addLabel="Add preservation item"
-            onAdd={() =>
-              addItem("preservationPlan", newPreservation(), "preservationItem")
-            }
-            canCRUD={canCRUD}
+            title="No ingredients listed."
+            body="If your generator outputs ingredients/inputs, you can edit them here."
+            addLabel="Add ingredient"
+            onAdd={() => addItem("ingredients", newIngredient(), "ingredient")}
           />
         ) : (
           <div className="ssa-table-wrap">
             <table className="ssa-table">
               <thead>
                 <tr>
-                  <th>Item</th>
-                  <th>Method</th>
+                  <th>Ingredient</th>
                   <th>Qty</th>
                   <th>Unit</th>
-                  <th>Season</th>
                   <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {list.map((p, i) => (
-                  <tr key={p.id || `pres_${i}`}>
+                {ingredients.map((ing, i) => (
+                  <tr key={ing?.id || `ing_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={p.item}
+                          value={ing.name}
                           onChange={(v) =>
-                            setField(`preservationPlan[${i}].item`, v)
+                            setField(`ingredients[${i}].name`, v)
                           }
                         />
                       ) : (
-                        p.item
-                      )}
-                    </td>
-                    <td style={{ minWidth: 160 }}>
-                      {canEdit ? (
-                        <Select
-                          value={p.method || "canning"}
-                          onChange={(v) =>
-                            setField(`preservationPlan[${i}].method`, v)
-                          }
-                          options={[
-                            { value: "canning", label: "canning" },
-                            { value: "dehydrating", label: "dehydrating" },
-                            { value: "freezing", label: "freezing" },
-                            { value: "curing", label: "curing" },
-                            { value: "fermenting", label: "fermenting" },
-                            { value: "smoking", label: "smoking" },
-                            { value: "other", label: "other" },
-                          ]}
-                        />
-                      ) : (
-                        p.method
+                        ing.name
                       )}
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={p.qty ?? 0}
-                          onChange={(v) =>
-                            setField(`preservationPlan[${i}].qty`, v)
-                          }
-                        />
+                        <>
+                          <NumInput
+                            value={ing.qty ?? ""}
+                            min={0}
+                            onChange={(v) => setField(`ingredients[${i}].qty`, v)}
+                          />
+                          {clampHints[`ingredients[${i}].qty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
-                        String(p.qty ?? 0)
+                        String(ing.qty ?? "")
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={p.unit}
+                          value={ing.unit}
                           onChange={(v) =>
-                            setField(`preservationPlan[${i}].unit`, v)
+                            setField(`ingredients[${i}].unit`, v)
                           }
                         />
                       ) : (
-                        p.unit
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={p.season || ""}
-                          placeholder="e.g. summer"
-                          onChange={(v) =>
-                            setField(`preservationPlan[${i}].season`, v)
-                          }
-                        />
-                      ) : (
-                        p.season
+                        ing.unit
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextArea
                           rows={2}
-                          value={p.notes || ""}
+                          value={ing.notes}
                           onChange={(v) =>
-                            setField(`preservationPlan[${i}].notes`, v)
+                            setField(`ingredients[${i}].notes`, v)
                           }
                         />
                       ) : (
-                        p.notes
+                        ing.notes
                       )}
                     </td>
                     {canCRUD ? (
@@ -1477,8 +933,8 @@ export default function StorehouseDraftFormatter({
                           kind="danger"
                           onClick={() =>
                             removeItem(
-                              `preservationPlan[${i}]`,
-                              "Delete this preservation item?"
+                              `ingredients[${i}]`,
+                              "Delete this ingredient?"
                             )
                           }
                         >
@@ -1494,10 +950,354 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderSections() {
+  const renderEquipment = () => {
+    const equipment = Array.isArray(state.equipment) ? state.equipment : [];
+    return (
+      <div className="ssa-card">
+        <div className="ssa-card-header">
+          <div className="ssa-card-title">{SCHEMA.labels.equipment}</div>
+          <div className="ssa-card-actions">
+            {canCRUD ? (
+              <Btn
+                kind="primary"
+                onClick={() =>
+                  addItem("equipment", newEquipment(), "equipment")
+                }
+              >
+                + Add Equipment
+              </Btn>
+            ) : null}
+          </div>
+        </div>
+
+        {equipment.length === 0 ? (
+          <EmptyState
+            title="No equipment listed."
+            body="List required tools (pots, pans, instant pot, mixer, etc.)."
+            addLabel="Add equipment"
+            onAdd={() => addItem("equipment", newEquipment(), "equipment")}
+          />
+        ) : (
+          <div className="ssa-table-wrap">
+            <table className="ssa-table">
+              <thead>
+                <tr>
+                  <th>Equipment</th>
+                  <th>Notes</th>
+                  {canCRUD ? <th>Actions</th> : null}
+                </tr>
+              </thead>
+              <tbody>
+                {equipment.map((e, i) => (
+                  <tr key={e?.id || `eq_${i}`}>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={e.name}
+                          onChange={(v) => setField(`equipment[${i}].name`, v)}
+                        />
+                      ) : (
+                        e.name
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextArea
+                          rows={2}
+                          value={e.notes}
+                          onChange={(v) => setField(`equipment[${i}].notes`, v)}
+                        />
+                      ) : (
+                        e.notes
+                      )}
+                    </td>
+                    {canCRUD ? (
+                      <td>
+                        <Btn
+                          kind="danger"
+                          onClick={() =>
+                            removeItem(
+                              `equipment[${i}]`,
+                              "Delete this equipment item?"
+                            )
+                          }
+                        >
+                          Delete
+                        </Btn>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderConsolidatedSteps = () => {
+    const steps = Array.isArray(state.consolidatedSteps)
+      ? state.consolidatedSteps
+      : [];
+    return (
+      <div className="ssa-card">
+        <div className="ssa-card-header">
+          <div className="ssa-card-title">
+            {SCHEMA.labels.consolidatedSteps}
+          </div>
+          <div className="ssa-card-actions">
+            {canCRUD ? (
+              <Btn
+                kind="primary"
+                onClick={() => addItem("consolidatedSteps", newStep(), "step")}
+              >
+                + Add Step
+              </Btn>
+            ) : null}
+          </div>
+        </div>
+
+        {steps.length === 0 ? (
+          <EmptyState
+            title="No consolidated steps."
+            body="This is the step list your SessionRunner should play through. Add/edit steps and timers here."
+            addLabel="Add step"
+            onAdd={() => addItem("consolidatedSteps", newStep(), "step")}
+          />
+        ) : (
+          <div className="ssa-table-wrap">
+            <table className="ssa-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Step</th>
+                  <th>Station</th>
+                  <th>Recipe</th>
+                  <th>Duration (min)</th>
+                  <th>Timer (sec)</th>
+                  <th>Notes</th>
+                  {canCRUD ? <th>Actions</th> : null}
+                </tr>
+              </thead>
+              <tbody>
+                {steps.map((s, i) => (
+                  <tr key={s?.id || `step_${i}`}>
+                    <td style={{ opacity: 0.8 }}>{i + 1}</td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={s.label}
+                          onChange={(v) =>
+                            setField(`consolidatedSteps[${i}].label`, v)
+                          }
+                        />
+                      ) : (
+                        s.label
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <Select
+                          value={s.station || "prep"}
+                          onChange={(v) =>
+                            setField(`consolidatedSteps[${i}].station`, v)
+                          }
+                          options={[
+                            { value: "prep", label: "prep" },
+                            { value: "cook", label: "cook" },
+                            { value: "serve", label: "serve" },
+                            { value: "cleanup", label: "cleanup" },
+                          ]}
+                        />
+                      ) : (
+                        s.station
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={s.recipe || ""}
+                          onChange={(v) =>
+                            setField(`consolidatedSteps[${i}].recipe`, v)
+                          }
+                        />
+                      ) : (
+                        s.recipe
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <NumInput
+                          value={s.durationMin ?? ""}
+                          onChange={(v) =>
+                            setField(`consolidatedSteps[${i}].durationMin`, v)
+                          }
+                        />
+                      ) : (
+                        String(s.durationMin ?? "")
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <NumInput
+                          value={s.timerSec ?? 0}
+                          onChange={(v) =>
+                            setField(`consolidatedSteps[${i}].timerSec`, v)
+                          }
+                        />
+                      ) : (
+                        String(s.timerSec ?? 0)
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextArea
+                          rows={2}
+                          value={s.notes || ""}
+                          onChange={(v) =>
+                            setField(`consolidatedSteps[${i}].notes`, v)
+                          }
+                        />
+                      ) : (
+                        s.notes
+                      )}
+                    </td>
+                    {canCRUD ? (
+                      <td>
+                        <Btn
+                          kind="danger"
+                          onClick={() =>
+                            removeItem(
+                              `consolidatedSteps[${i}]`,
+                              "Delete this step?"
+                            )
+                          }
+                        >
+                          Delete
+                        </Btn>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderTimers = () => {
+    const timers = Array.isArray(state.timers) ? state.timers : [];
+    return (
+      <div className="ssa-card">
+        <div className="ssa-card-header">
+          <div className="ssa-card-title">{SCHEMA.labels.timers}</div>
+          <div className="ssa-card-actions">
+            {canCRUD ? (
+              <Btn
+                kind="primary"
+                onClick={() => addItem("timers", newTimer(), "timer")}
+              >
+                + Add Timer
+              </Btn>
+            ) : null}
+          </div>
+        </div>
+
+        {timers.length === 0 ? (
+          <EmptyState
+            title="No timers listed."
+            body="Timers can mirror multi-timer panel entries."
+            addLabel="Add timer"
+            onAdd={() => addItem("timers", newTimer(), "timer")}
+          />
+        ) : (
+          <div className="ssa-table-wrap">
+            <table className="ssa-table">
+              <thead>
+                <tr>
+                  <th>Label</th>
+                  <th>Seconds</th>
+                  <th>Start at Step #</th>
+                  <th>Notes</th>
+                  {canCRUD ? <th>Actions</th> : null}
+                </tr>
+              </thead>
+              <tbody>
+                {timers.map((t, i) => (
+                  <tr key={t?.id || `tmr_${i}`}>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={t.label}
+                          onChange={(v) => setField(`timers[${i}].label`, v)}
+                        />
+                      ) : (
+                        t.label
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <NumInput
+                          value={t.seconds ?? 0}
+                          onChange={(v) => setField(`timers[${i}].seconds`, v)}
+                        />
+                      ) : (
+                        String(t.seconds ?? 0)
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <NumInput
+                          value={t.startAtStepIndex ?? 0}
+                          onChange={(v) =>
+                            setField(`timers[${i}].startAtStepIndex`, v)
+                          }
+                        />
+                      ) : (
+                        String(t.startAtStepIndex ?? 0)
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextArea
+                          rows={2}
+                          value={t.notes || ""}
+                          onChange={(v) => setField(`timers[${i}].notes`, v)}
+                        />
+                      ) : (
+                        t.notes
+                      )}
+                    </td>
+                    {canCRUD ? (
+                      <td>
+                        <Btn
+                          kind="danger"
+                          onClick={() =>
+                            removeItem(`timers[${i}]`, "Delete this timer?")
+                          }
+                        >
+                          Delete
+                        </Btn>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderSections = () => {
     const sections = Array.isArray(state.sections) ? state.sections : [];
+
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
@@ -1517,10 +1317,9 @@ export default function StorehouseDraftFormatter({
         {sections.length === 0 ? (
           <EmptyState
             title="No sections yet."
-            body="Sections can describe policies: stock rules, purchase cadence, emergency buffer, seasonal goals."
+            body="Sections are narrative blocks (Prep, Cook, Serve, Cleanup) for human readability."
             addLabel="Add section"
             onAdd={() => addItem("sections", newSection(), "section")}
-            canCRUD={canCRUD}
           />
         ) : (
           <div className="ssa-stack">
@@ -1584,7 +1383,7 @@ export default function StorehouseDraftFormatter({
                     {bullets.length === 0 ? (
                       <EmptyState
                         title="No bullets"
-                        body="Bullets can be rules, quick notes, or purchasing guidance."
+                        body="Bullets can be prep notes, sequencing, or serving instructions."
                         addLabel="Add bullet"
                         onAdd={() =>
                           addItem(
@@ -1593,7 +1392,6 @@ export default function StorehouseDraftFormatter({
                             "bullet"
                           )
                         }
-                        canCRUD={canCRUD}
                       />
                     ) : (
                       <ul className="ssa-list">
@@ -1719,9 +1517,9 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderTasks() {
+  const renderTasks = () => {
     const tasks = Array.isArray(state.tasks) ? state.tasks : [];
     return (
       <div className="ssa-card">
@@ -1742,10 +1540,9 @@ export default function StorehouseDraftFormatter({
         {tasks.length === 0 ? (
           <EmptyState
             title="No tasks yet."
-            body="Tasks are actionable items that can become sessions (audit, restock, rotate pantry, label freezer)."
+            body="Tasks are actionable items that can be compiled into the session."
             addLabel="Add task"
             onAdd={() => addItem("tasks", newTask(), "task")}
-            canCRUD={canCRUD}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -1753,6 +1550,7 @@ export default function StorehouseDraftFormatter({
               <thead>
                 <tr>
                   <th>Label</th>
+                  <th>Station</th>
                   <th>Priority</th>
                   <th>Duration (min)</th>
                   <th>Due ISO</th>
@@ -1772,7 +1570,17 @@ export default function StorehouseDraftFormatter({
                         t.label
                       )}
                     </td>
-                    <td style={{ minWidth: 110 }}>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={t.station || ""}
+                          onChange={(v) => setField(`tasks[${i}].station`, v)}
+                        />
+                      ) : (
+                        t.station
+                      )}
+                    </td>
+                    <td>
                       {canEdit ? (
                         <Select
                           value={t.priority || "med"}
@@ -1790,7 +1598,7 @@ export default function StorehouseDraftFormatter({
                     <td>
                       {canEdit ? (
                         <NumInput
-                          value={t.durationMin}
+                          value={t.durationMin ?? ""}
                           onChange={(v) =>
                             setField(`tasks[${i}].durationMin`, v)
                           }
@@ -1830,9 +1638,9 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderAlerts() {
+  const renderAlerts = () => {
     const alerts = Array.isArray(state.inventoryAlerts)
       ? state.inventoryAlerts
       : [];
@@ -1854,11 +1662,10 @@ export default function StorehouseDraftFormatter({
 
         {alerts.length === 0 ? (
           <EmptyState
-            title="No inventory alerts."
-            body="Alerts capture shortages and suggestions (what to buy / how much / substitute)."
+            title="No inventory alerts yet."
+            body="Use this for missing ingredients/tools or substitutions."
             addLabel="Add alert"
             onAdd={() => addItem("inventoryAlerts", newAlert(), "alert")}
-            canCRUD={canCRUD}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -1890,14 +1697,22 @@ export default function StorehouseDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={a.neededQty ?? 0}
-                          onChange={(v) =>
-                            setField(`inventoryAlerts[${i}].neededQty`, v)
-                          }
-                        />
+                        <>
+                          <NumInput
+                            value={a.neededQty ?? ""}
+                            min={0}
+                            onChange={(v) =>
+                              setField(`inventoryAlerts[${i}].neededQty`, v)
+                            }
+                          />
+                          {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
-                        String(a.neededQty ?? 0)
+                        String(a.neededQty ?? "")
                       )}
                     </td>
                     <td>
@@ -1912,7 +1727,7 @@ export default function StorehouseDraftFormatter({
                         a.unit
                       )}
                     </td>
-                    <td style={{ minWidth: 120 }}>
+                    <td>
                       {canEdit ? (
                         <Select
                           value={a.severity || "low"}
@@ -1965,10 +1780,10 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderReminders() {
-    const list = Array.isArray(state.healthReminders)
+  const renderReminders = () => {
+    const rems = Array.isArray(state.healthReminders)
       ? state.healthReminders
       : [];
     return (
@@ -1989,13 +1804,12 @@ export default function StorehouseDraftFormatter({
           </div>
         </div>
 
-        {list.length === 0 ? (
+        {rems.length === 0 ? (
           <EmptyState
-            title="No reminders."
-            body="Use reminders for rotation checks, audits, and recurring storehouse rhythms."
+            title="No reminders yet."
+            body="Use this for recurring kitchen reminders (deep clean fridge, rotate pantry, sharpen knives)."
             addLabel="Add reminder"
             onAdd={() => addItem("healthReminders", newReminder(), "reminder")}
-            canCRUD={canCRUD}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -2009,12 +1823,12 @@ export default function StorehouseDraftFormatter({
                 </tr>
               </thead>
               <tbody>
-                {list.map((r, i) => (
+                {rems.map((r, i) => (
                   <tr key={r?.id || `rem_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={r.label}
+                          value={r.label || ""}
                           onChange={(v) =>
                             setField(`healthReminders[${i}].label`, v)
                           }
@@ -2023,7 +1837,7 @@ export default function StorehouseDraftFormatter({
                         r.label
                       )}
                     </td>
-                    <td style={{ minWidth: 140 }}>
+                    <td>
                       {canEdit ? (
                         <Select
                           value={r.cadence || "weekly"}
@@ -2077,98 +1891,123 @@ export default function StorehouseDraftFormatter({
         )}
       </div>
     );
-  }
+  };
 
-  function renderDebug() {
-    if (!canEdit) return null;
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.debug}</div>
-          <div className="ssa-card-actions">
-            <Btn onClick={() => setDebugOpen((v) => !v)}>
-              {debugOpen ? "Hide" : "Show"}
-            </Btn>
-          </div>
-        </div>
-        {debugOpen ? (
-          <pre className="ssa-pre">{JSON.stringify(state, null, 2)}</pre>
-        ) : (
-          <div className="ssa-muted">
-            Toggle to view the raw draft JSON for troubleshooting.
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  /* ------------------------------ Main render ------------------------------- */
+  /* ------------------------------- Main UI ---------------------------------- */
   return (
-    <div className={`ssa-draft-root ${className || ""}`.trim()}>
-      {/* Minimal embedded styles (portable, no external libs) */}
+    <div className={`ssa-draft ${className}`}>
       <style>{`
-        .ssa-draft-root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.35; padding:12px; max-width:1100px}
-        .ssa-header{border:1px solid #ddd; border-radius:12px; padding:12px; margin-bottom:12px; background:#fff}
-        .ssa-header-top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px}
-        .ssa-title{font-weight:800; font-size:18px}
-        .ssa-pill{font-size:12px; padding:3px 8px; border:1px solid #ddd; border-radius:999px; color:#333; background:#fafafa}
-        .ssa-actions{display:flex; gap:8px; flex-wrap:wrap}
-        .ssa-card{border:1px solid #ddd; border-radius:12px; padding:12px; margin-bottom:12px; background:#fff}
-        .ssa-card-header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px}
-        .ssa-card-title{font-weight:800}
-        .ssa-card-actions{display:flex; gap:8px; flex-wrap:wrap}
-        .ssa-field{display:grid; grid-template-columns:140px 1fr; gap:10px; margin:8px 0}
-        .ssa-label{font-size:12px; color:#444; padding-top:8px}
-        .ssa-control{}
-        .ssa-input,.ssa-select,.ssa-textarea{width:100%; box-sizing:border-box; border:1px solid #ccc; border-radius:10px; padding:8px 10px; font-size:14px; background:#fff}
+        .ssa-draft{display:flex;flex-direction:column;gap:12px;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+        .ssa-card{border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:12px;background:#fff}
+        .ssa-subcard{border:1px solid rgba(0,0,0,.10);border-radius:12px;padding:10px;background:#fafafa}
+        .ssa-card-header,.ssa-subcard-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+        .ssa-card-title{font-weight:700;font-size:14px}
+        .ssa-subcard-title{font-weight:700;font-size:13px;min-width:240px;flex:1}
+        .ssa-card-actions,.ssa-subcard-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+        .ssa-field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+        .ssa-label{font-size:12px;opacity:.8}
+        .ssa-control{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .ssa-input,.ssa-textarea,.ssa-select{width:100%;max-width:100%;padding:8px 10px;border:1px solid rgba(0,0,0,.14);border-radius:10px;background:#fff}
         .ssa-textarea{resize:vertical}
-        .ssa-btn{border:1px solid #bbb; background:#fff; border-radius:10px; padding:7px 10px; cursor:pointer; font-size:13px}
-        .ssa-btn-primary{border-color:#2a6; background:#2a6; color:#fff}
-        .ssa-btn-danger{border-color:#c33; background:#c33; color:#fff}
-        .ssa-btn-disabled{opacity:.55; cursor:not-allowed}
-        .ssa-empty{border:1px dashed #ccc; border-radius:12px; padding:12px; background:#fafafa}
-        .ssa-empty-title{font-weight:800; margin-bottom:6px}
-        .ssa-empty-body{color:#555; margin-bottom:10px}
-        .ssa-empty-actions{display:flex; gap:8px}
-        .ssa-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px}
-        .ssa-list-item{display:flex; gap:8px; align-items:center}
-        .ssa-stack{display:flex; flex-direction:column; gap:10px}
-        .ssa-subcard{border:1px solid #eee; border-radius:12px; padding:10px; background:#fcfcfc}
-        .ssa-subcard-header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px}
-        .ssa-subcard-title{font-weight:700; flex:1}
-        .ssa-subcard-actions{display:flex; gap:8px; flex-wrap:wrap}
+        .ssa-btn{padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer}
+        .ssa-btn-primary{background:#111;color:#fff;border-color:#111}
+        .ssa-btn-danger{background:#b00020;color:#fff;border-color:#b00020}
+        .ssa-btn-disabled{opacity:.5;cursor:not-allowed}
+        .ssa-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+        .ssa-list-item{display:flex;align-items:center;gap:8px}
+        .ssa-stack{display:flex;flex-direction:column;gap:10px}
         .ssa-block{margin-top:10px}
-        .ssa-block-title{font-weight:800; margin-bottom:6px}
+        .ssa-block-title{font-weight:600;font-size:12px;opacity:.85;margin-bottom:6px}
+        .ssa-empty{border:1px dashed rgba(0,0,0,.18);border-radius:12px;padding:12px;background:#fff}
+        .ssa-empty-title{font-weight:700;margin-bottom:4px}
+        .ssa-empty-body{opacity:.85;font-size:13px;margin-bottom:10px}
+        .ssa-empty-actions{display:flex;gap:8px}
         .ssa-table-wrap{overflow:auto}
-        .ssa-table{width:100%; border-collapse:collapse; font-size:13px}
-        .ssa-table th,.ssa-table td{border:1px solid #e3e3e3; padding:8px; vertical-align:top}
-        .ssa-row-actions{display:flex; gap:8px; margin-top:8px}
-        .ssa-pre{border:1px solid #eee; border-radius:12px; padding:10px; overflow:auto; background:#0b0b0b; color:#f2f2f2; font-size:12px}
-        .ssa-muted{color:#666; font-size:13px}
-        @media (max-width: 720px){
-          .ssa-field{grid-template-columns:1fr; }
-          .ssa-label{padding-top:0}
-        }
+        .ssa-table{width:100%;border-collapse:separate;border-spacing:0;min-width:920px}
+        .ssa-table th,.ssa-table td{border-bottom:1px solid rgba(0,0,0,.10);padding:8px;vertical-align:top}
+        .ssa-table th{font-size:12px;text-align:left;opacity:.85}
+        .ssa-row-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+        .ssa-header{border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:12px;background:#fff}
+        .ssa-header-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+        .ssa-title{font-weight:800;font-size:16px}
+        .ssa-pill{font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:4px 10px;opacity:.85}
+        .ssa-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+        .ssa-debug{margin-top:10px}
+        .ssa-pre{white-space:pre-wrap;word-break:break-word;background:#0b1020;color:#e8e8e8;border-radius:12px;padding:10px;font-size:12px}
       `}</style>
 
-      {renderHeader()}
+      <div className="ssa-header">
+        <div className="ssa-header-top">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="ssa-title">{SCHEMA.labels.title}</div>
+            <div className="ssa-pill">{state.id}</div>
+          </div>
+          <div className="ssa-actions">
+            {canEdit ? (
+              <Btn
+                onClick={undo}
+                disabled={(historyRef.current || []).length === 0}
+                title="Undo last change"
+              >
+                Undo
+              </Btn>
+            ) : null}
+            {/* TODO: Dexie persistence */}
+            {/* TODO: Hub export */}
+          </div>
+        </div>
+
+        <Field label="Title">
+          {canEdit ? (
+            <TextInput
+              value={state.title}
+              onChange={(v) => setField("title", v)}
+            />
+          ) : (
+            <div>{state.title}</div>
+          )}
+        </Field>
+
+        <Field label="Summary">
+          {canEdit ? (
+            <TextArea
+              value={state.summary}
+              onChange={(v) => setField("summary", v)}
+              rows={3}
+            />
+          ) : (
+            <div>{state.summary}</div>
+          )}
+        </Field>
+      </div>
+
+      {renderRecipes()}
+      {renderIngredients()}
+      {renderEquipment()}
+      {renderConsolidatedSteps()}
+      {renderTimers()}
 
       {renderAssumptions()}
-
-      {/* Storehouse-specific blocks */}
-      {renderTargets()}
-      {renderLocations()}
-      {renderStockList()}
-      {renderRotations()}
-      {renderPreservationPlan()}
-
-      {/* Generic required blocks */}
       {renderSections()}
       {renderTasks()}
       {renderAlerts()}
       {renderReminders()}
 
-      {renderDebug()}
+      {editable ? (
+        <div className="ssa-card ssa-debug">
+          <div className="ssa-card-header">
+            <div className="ssa-card-title">{SCHEMA.labels.debug}</div>
+            <div className="ssa-card-actions">
+              <Btn onClick={() => setDebugOpen((v) => !v)}>
+                {debugOpen ? "Hide" : "Show"}
+              </Btn>
+            </div>
+          </div>
+          {debugOpen ? (
+            <pre className="ssa-pre">{JSON.stringify(state, null, 2)}</pre>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-// C:\Users\larho\suka-smart-assistant\src\formatters\homesteadplanner\homesteadplannerDraftFormatter.js
+// C:\Users\larho\suka-smart-assistant\src\formatters\mealplanner\mealplannerDraftFormatter.jsx
 /**
- * Homestead Planner Draft Formatter (CRUD-capable)
+ * Meal Planner Draft Formatter (CRUD-capable)
  * -----------------------------------------------------------------------------
  * Purpose:
- *  - Human-friendly rendering of a resolved Homestead Planner draft
+ *  - Human-friendly rendering of a resolved Meal Planner draft
  *  - Full CRUD editing with patch emission + undo history
  *  - Defensive normalization for missing/null fields
  *
@@ -21,6 +21,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CLAMP_HINT_TEXT,
+  useNonNegativeClampHints,
+} from "@/ui/ux/useNonNegativeClampHints";
 
 /* ------------------------- Soft/defensive eventBus -------------------------- */
 let eventBus = { emit: () => {}, on: () => () => {} };
@@ -38,9 +42,9 @@ try {
 
 /* ----------------------------- Domain schema -------------------------------- */
 const SCHEMA = {
-  domain: "homesteadplanner",
+  domain: "mealplanner",
   labels: {
-    title: "Homestead Planner Draft",
+    title: "Meal Planner Draft",
     assumptions: "Assumptions",
     sections: "Sections",
     tasks: "Tasks",
@@ -48,13 +52,14 @@ const SCHEMA = {
     healthReminders: "Reminders",
     debug: "Debug Raw Draft JSON",
 
-    // homestead-planner flavored blocks
-    goals: "Seasonal Goals",
-    domains: "Domain Sessions",
-    resources: "Resources & Supplies",
-    timeline: "Timeline",
-    risks: "Risks & Constraints",
-    exports: "Exports / Hub Packet Notes",
+    // mealplanner flavored blocks
+    mealPlan: "Meal Plan",
+    days: "Days",
+    meals: "Meals",
+    recipes: "Recipes",
+    shopping: "Shopping List",
+    prep: "Prep Plan",
+    nutrition: "Nutrition Notes",
   },
   defaults: {
     sectionTitle: "New Section",
@@ -78,41 +83,57 @@ const SCHEMA = {
       nextDueISO: "",
     },
 
-    // homestead-specific
-    goal: {
-      label: "New seasonal goal…",
-      season: "spring", // spring/summer/fall/winter/all
-      targetISO: "",
+    // meal planner specifics
+    day: {
+      dateISO: "", // YYYY-MM-DD
+      label: "Day",
+      notes: "",
+      meals: [
+        {
+          slot: "dinner", // breakfast/lunch/dinner/snack
+          label: "Dinner",
+          recipes: [
+            {
+              title: "Recipe",
+              servings: 4,
+              source: "", // url / vaultId / user
+              notes: "",
+            },
+          ],
+        },
+      ],
+    },
+    meal: {
+      slot: "dinner",
+      label: "Dinner",
+      recipes: [],
       notes: "",
     },
-    domainSession: {
-      domain: "garden", // cooking/cleaning/garden/animals/preservation/storehouse/homestead
-      label: "New session…",
-      cadence: "weekly",
-      estDurationMin: 45,
-      nextDueISO: "",
+    recipeRef: {
+      title: "Recipe",
+      servings: 4,
+      source: "",
       notes: "",
     },
-    resource: {
-      item: "New resource…",
+    shoppingItem: {
+      item: "Item",
       qty: 0,
       unit: "",
-      where: "", // storehouse / shed / pantry / barn / etc.
+      category: "general",
       notes: "",
+      acquired: false,
     },
-    timelineRow: {
-      label: "New milestone…",
-      startISO: "",
-      endISO: "",
-      owner: "",
-      status: "planned", // planned/in-progress/done/blocked
+    prepItem: {
+      label: "Prep task…",
+      when: "day-before", // now/day-before/morning-of/anytime
+      estDurationMin: 15,
       notes: "",
+      linkedTo: "", // recipe/title/id
     },
-    risk: {
-      label: "New risk/constraint…",
-      severity: "med",
-      mitigation: "",
-      owner: "",
+    nutritionNote: {
+      label: "Nutrition note…",
+      target: "household",
+      notes: "",
     },
   },
 };
@@ -146,12 +167,12 @@ function normalizeDraftInput(draftOrWrapper) {
   const base = d && typeof d === "object" ? d : {};
 
   const normalized = {
-    id: base.id || uid("homestead_draft"),
+    id: base.id || uid("mealplanner_draft"),
     domain: base.domain || SCHEMA.domain,
     title: base.title || SCHEMA.labels.title,
     summary: base.summary || "",
 
-    // common blocks (required by spec)
+    // required by spec
     assumptions: Array.isArray(base.assumptions) ? base.assumptions : [],
     sections: Array.isArray(base.sections) ? base.sections : [],
     tasks: Array.isArray(base.tasks) ? base.tasks : [],
@@ -162,21 +183,27 @@ function normalizeDraftInput(draftOrWrapper) {
       ? base.healthReminders
       : [],
 
-    // homestead-planner blocks (optional, but useful)
-    seasonalGoals: Array.isArray(base.seasonalGoals)
-      ? base.seasonalGoals
-      : Array.isArray(base.goals)
-      ? base.goals
+    // meal planner blocks
+    days: Array.isArray(base.days)
+      ? base.days
+      : Array.isArray(base.mealPlan?.days)
+      ? base.mealPlan.days
       : [],
-    domainSessions: Array.isArray(base.domainSessions)
-      ? base.domainSessions
-      : Array.isArray(base.sessions)
-      ? base.sessions
+    shoppingList: Array.isArray(base.shoppingList)
+      ? base.shoppingList
+      : Array.isArray(base.shopping?.items)
+      ? base.shopping.items
       : [],
-    resources: Array.isArray(base.resources) ? base.resources : [],
-    timeline: Array.isArray(base.timeline) ? base.timeline : [],
-    risks: Array.isArray(base.risks) ? base.risks : [],
-    exportNotes: base.exportNotes || "",
+    prepPlan: Array.isArray(base.prepPlan)
+      ? base.prepPlan
+      : Array.isArray(base.prep?.items)
+      ? base.prep.items
+      : [],
+    nutritionNotes: Array.isArray(base.nutritionNotes)
+      ? base.nutritionNotes
+      : Array.isArray(base.nutrition?.notes)
+      ? base.nutrition.notes
+      : [],
 
     meta: base.meta || {},
   };
@@ -224,54 +251,67 @@ function normalizeDraftInput(draftOrWrapper) {
     nextDueISO: r?.nextDueISO || "",
   }));
 
-  // Homestead-specific
-  normalized.seasonalGoals = normalized.seasonalGoals.map((g) => ({
-    id: g?.id || uid("goal"),
-    label: g?.label || g?.title || "Goal",
-    season: g?.season || "spring",
-    targetISO: g?.targetISO || g?.dueISO || "",
-    notes: g?.notes || "",
+  // Normalize days/meals/recipes
+  normalized.days = normalized.days.map((day) => ({
+    id: day?.id || uid("day"),
+    dateISO: day?.dateISO || day?.date || "",
+    label: day?.label || (day?.dateISO ? `Day ${day.dateISO}` : "Day"),
+    notes: day?.notes || "",
+    meals: Array.isArray(day?.meals) ? day.meals : [],
+  }));
+  normalized.days = normalized.days.map((day) => ({
+    ...day,
+    meals: day.meals.map((m) => ({
+      id: m?.id || uid("meal"),
+      slot: m?.slot || "dinner",
+      label: m?.label || (m?.slot ? String(m.slot).toUpperCase() : "Meal"),
+      notes: m?.notes || "",
+      recipes: Array.isArray(m?.recipes) ? m.recipes : [],
+    })),
+  }));
+  normalized.days = normalized.days.map((day) => ({
+    ...day,
+    meals: day.meals.map((m) => ({
+      ...m,
+      recipes: (m.recipes || []).map((r) => ({
+        id: r?.id || uid("recipe"),
+        title: r?.title || r?.name || "Recipe",
+        servings: Number.isFinite(Number(r?.servings)) ? Number(r.servings) : 4,
+        source: r?.source || r?.url || r?.vaultId || "",
+        notes: r?.notes || "",
+      })),
+    })),
   }));
 
-  normalized.domainSessions = normalized.domainSessions.map((s) => ({
-    id: s?.id || uid("sess"),
-    domain: s?.domain || "garden",
-    label: s?.label || "Session",
-    cadence: s?.cadence || "weekly",
-    estDurationMin: Number.isFinite(Number(s?.estDurationMin))
-      ? Number(s.estDurationMin)
-      : Number.isFinite(Number(s?.durationMin))
-      ? Number(s.durationMin)
-      : 45,
-    nextDueISO: s?.nextDueISO || s?.dueISO || "",
+  // shopping list
+  normalized.shoppingList = normalized.shoppingList.map((s) => ({
+    id: s?.id || uid("shop"),
+    item: s?.item || s?.name || "Item",
+    qty: Number.isFinite(Number(s?.qty)) ? Number(s.qty) : s?.qty ?? "",
+    unit: s?.unit || "",
+    category: s?.category || "general",
     notes: s?.notes || "",
+    acquired: !!s?.acquired,
   }));
 
-  normalized.resources = normalized.resources.map((r) => ({
-    id: r?.id || uid("res"),
-    item: r?.item || r?.name || "Resource",
-    qty: Number.isFinite(Number(r?.qty)) ? Number(r.qty) : r?.qty ?? "",
-    unit: r?.unit || "",
-    where: r?.where || r?.location || "",
-    notes: r?.notes || "",
+  // prep plan
+  normalized.prepPlan = normalized.prepPlan.map((p) => ({
+    id: p?.id || uid("prep"),
+    label: p?.label || "Prep task…",
+    when: p?.when || "day-before",
+    estDurationMin: Number.isFinite(Number(p?.estDurationMin))
+      ? Number(p.estDurationMin)
+      : 15,
+    notes: p?.notes || "",
+    linkedTo: p?.linkedTo || "",
   }));
 
-  normalized.timeline = normalized.timeline.map((t) => ({
-    id: t?.id || uid("tl"),
-    label: t?.label || t?.title || "Milestone",
-    startISO: t?.startISO || "",
-    endISO: t?.endISO || "",
-    owner: t?.owner || "",
-    status: t?.status || "planned",
-    notes: t?.notes || "",
-  }));
-
-  normalized.risks = normalized.risks.map((r) => ({
-    id: r?.id || uid("risk"),
-    label: r?.label || r?.title || "Risk",
-    severity: r?.severity || "med",
-    mitigation: r?.mitigation || "",
-    owner: r?.owner || "",
+  // nutrition notes
+  normalized.nutritionNotes = normalized.nutritionNotes.map((n) => ({
+    id: n?.id || uid("nut"),
+    label: n?.label || "Nutrition note…",
+    target: n?.target || "household",
+    notes: n?.notes || "",
   }));
 
   return normalized;
@@ -407,7 +447,13 @@ function TextInput({ value, onChange, placeholder = "", disabled = false }) {
   );
 }
 
-function NumInput({ value, onChange, placeholder = "", disabled = false }) {
+function NumInput({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+  min,
+}) {
   const v = value === undefined || value === null ? "" : String(value);
   return (
     <input
@@ -416,6 +462,7 @@ function NumInput({ value, onChange, placeholder = "", disabled = false }) {
       value={v}
       placeholder={placeholder}
       disabled={disabled}
+      min={min}
       onChange={(e) => {
         const n = e.target.value;
         onChange?.(n === "" ? "" : Number(n));
@@ -465,8 +512,13 @@ function ConfirmDanger({ message }) {
   return window.confirm(message || "Are you sure?");
 }
 
+const NON_NEGATIVE_QTY_PATHS = [
+  /^shoppingList\[\d+\]\.qty$/,
+  /^inventoryAlerts\[\d+\]\.neededQty$/,
+];
+
 /* -------------------------- Main formatter component ------------------------- */
-export default function HomesteadplannerDraftFormatter({
+export default function MealplannerDraftFormatter({
   draft,
   editable = true,
   allowCRUD = true,
@@ -482,6 +534,12 @@ export default function HomesteadplannerDraftFormatter({
   const initial = useMemo(() => normalizeDraftInput(draft), [draft]);
   const [state, setState] = useState(() => initial);
   const [debugOpen, setDebugOpen] = useState(false);
+  const { clampHints, sanitizeFieldValue } = useNonNegativeClampHints({
+    paths: NON_NEGATIVE_QTY_PATHS,
+    warningTitle: "Inventory quantity adjusted",
+    warningDescription:
+      "Negative values were clamped to zero for inventory-related fields.",
+  });
 
   const historyRef = useRef([]);
   const mountedRef = useRef(false);
@@ -570,7 +628,9 @@ export default function HomesteadplannerDraftFormatter({
   const canEdit = !!editable;
   const canCRUD = !!editable && !!allowCRUD;
 
-  const setField = (path, value) => commitPatch(makePatch("set", path, value));
+  const setField = (path, value) => {
+    commitPatch(makePatch("set", path, sanitizeFieldValue(path, value)));
+  };
   const addItem = (path, value, kind) =>
     commitPatch(makePatch("add", path, value), { kind, createdValue: value });
   const removeItem = (path, confirmMsg) => {
@@ -625,25 +685,26 @@ export default function HomesteadplannerDraftFormatter({
     ...deepClone(SCHEMA.defaults.reminder),
   });
 
-  const newGoal = () => ({
-    id: uid("goal"),
-    ...deepClone(SCHEMA.defaults.goal),
+  const newDay = () => ({ id: uid("day"), ...deepClone(SCHEMA.defaults.day) });
+  const newMeal = () => ({
+    id: uid("meal"),
+    ...deepClone(SCHEMA.defaults.meal),
   });
-  const newDomainSession = () => ({
-    id: uid("sess"),
-    ...deepClone(SCHEMA.defaults.domainSession),
+  const newRecipeRef = () => ({
+    id: uid("recipe"),
+    ...deepClone(SCHEMA.defaults.recipeRef),
   });
-  const newResource = () => ({
-    id: uid("res"),
-    ...deepClone(SCHEMA.defaults.resource),
+  const newShoppingItem = () => ({
+    id: uid("shop"),
+    ...deepClone(SCHEMA.defaults.shoppingItem),
   });
-  const newTimelineRow = () => ({
-    id: uid("tl"),
-    ...deepClone(SCHEMA.defaults.timelineRow),
+  const newPrepItem = () => ({
+    id: uid("prep"),
+    ...deepClone(SCHEMA.defaults.prepItem),
   });
-  const newRisk = () => ({
-    id: uid("risk"),
-    ...deepClone(SCHEMA.defaults.risk),
+  const newNutritionNote = () => ({
+    id: uid("nut"),
+    ...deepClone(SCHEMA.defaults.nutritionNote),
   });
 
   const ensureSectionTable = (sectionIndex) => {
@@ -693,7 +754,7 @@ export default function HomesteadplannerDraftFormatter({
         {list.length === 0 ? (
           <EmptyState
             title="No assumptions yet."
-            body="Assumptions document constraints (weather, time, budget, water, tools, help)."
+            body="Assumptions capture constraints (time, budget, diet rules, equipment, schedule)."
             addLabel="Add assumption"
             onAdd={() =>
               addItem("assumptions", "New assumption…", "assumption")
@@ -729,316 +790,378 @@ export default function HomesteadplannerDraftFormatter({
     );
   };
 
-  const renderSeasonalGoals = () => {
-    const goals = Array.isArray(state.seasonalGoals) ? state.seasonalGoals : [];
+  const renderDays = () => {
+    const days = Array.isArray(state.days) ? state.days : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.goals}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.mealPlan}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
-                onClick={() =>
-                  addItem("seasonalGoals", newGoal(), "seasonalGoal")
-                }
+                onClick={() => addItem("days", newDay(), "day")}
               >
-                + Add Goal
+                + Add Day
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {goals.length === 0 ? (
+        {days.length === 0 ? (
           <EmptyState
-            title="No seasonal goals yet."
-            body="Add goals that drive domain sessions (garden, animals, preservation, cooking, cleaning)."
-            addLabel="Add goal"
-            onAdd={() => addItem("seasonalGoals", newGoal(), "seasonalGoal")}
+            title="No days in the meal plan yet."
+            body="Add a day, then add meals (breakfast/lunch/dinner/snack) and recipe refs."
+            addLabel="Add day"
+            onAdd={() => addItem("days", newDay(), "day")}
           />
         ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>Goal</th>
-                  <th>Season</th>
-                  <th>Target ISO</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {goals.map((g, i) => (
-                  <tr key={g?.id || `goal_${i}`}>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={g.label}
-                          onChange={(v) =>
-                            setField(`seasonalGoals[${i}].label`, v)
-                          }
-                        />
-                      ) : (
-                        g.label
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <Select
-                          value={g.season || "spring"}
-                          onChange={(v) =>
-                            setField(`seasonalGoals[${i}].season`, v)
-                          }
-                          options={[
-                            { value: "spring", label: "spring" },
-                            { value: "summer", label: "summer" },
-                            { value: "fall", label: "fall" },
-                            { value: "winter", label: "winter" },
-                            { value: "all", label: "all" },
-                          ]}
-                        />
-                      ) : (
-                        g.season
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={g.targetISO || ""}
-                          onChange={(v) =>
-                            setField(`seasonalGoals[${i}].targetISO`, v)
-                          }
-                        />
-                      ) : (
-                        g.targetISO
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={g.notes || ""}
-                          onChange={(v) =>
-                            setField(`seasonalGoals[${i}].notes`, v)
-                          }
-                        />
-                      ) : (
-                        g.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(
-                              `seasonalGoals[${i}]`,
-                              "Delete this goal?"
-                            )
-                          }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="ssa-stack">
+            {days.map((day, di) => {
+              const meals = Array.isArray(day.meals) ? day.meals : [];
+              return (
+                <div key={day.id || `day_${di}`} className="ssa-subcard">
+                  <div className="ssa-subcard-header">
+                    <div className="ssa-subcard-title">
+                      <div
+                        style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+                      >
+                        <div style={{ minWidth: 220, flex: 1 }}>
+                          {canEdit ? (
+                            <TextInput
+                              value={day.label || ""}
+                              placeholder="Day label"
+                              onChange={(v) => setField(`days[${di}].label`, v)}
+                            />
+                          ) : (
+                            <strong>{day.label}</strong>
+                          )}
+                        </div>
+                        <div style={{ width: 220 }}>
+                          {canEdit ? (
+                            <TextInput
+                              value={day.dateISO || ""}
+                              placeholder="YYYY-MM-DD"
+                              onChange={(v) =>
+                                setField(`days[${di}].dateISO`, v)
+                              }
+                            />
+                          ) : (
+                            <span>{day.dateISO}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="ssa-subcard-actions">
+                      {canCRUD ? (
+                        <>
+                          <Btn
+                            onClick={() =>
+                              addItem(`days[${di}].meals`, newMeal(), "meal")
+                            }
+                          >
+                            + Meal
+                          </Btn>
+                          <Btn
+                            kind="danger"
+                            onClick={() =>
+                              removeItem(
+                                `days[${di}]`,
+                                "Delete this day and all meals?"
+                              )
+                            }
+                          >
+                            Delete Day
+                          </Btn>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <Field label="Day Notes">
+                    {canEdit ? (
+                      <TextArea
+                        rows={2}
+                        value={day.notes || ""}
+                        onChange={(v) => setField(`days[${di}].notes`, v)}
+                      />
+                    ) : (
+                      <div>{day.notes}</div>
+                    )}
+                  </Field>
+
+                  {meals.length === 0 ? (
+                    <EmptyState
+                      title="No meals yet."
+                      body="Add meals for this day (breakfast/lunch/dinner/snack)."
+                      addLabel="Add meal"
+                      onAdd={() =>
+                        addItem(`days[${di}].meals`, newMeal(), "meal")
+                      }
+                    />
+                  ) : (
+                    <div className="ssa-stack">
+                      {meals.map((m, mi) => {
+                        const recipes = Array.isArray(m.recipes)
+                          ? m.recipes
+                          : [];
+                        return (
+                          <div
+                            key={m.id || `meal_${di}_${mi}`}
+                            className="ssa-subcard"
+                            style={{ background: "#fff" }}
+                          >
+                            <div className="ssa-subcard-header">
+                              <div className="ssa-subcard-title">
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    gap: 8,
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <div style={{ width: 180 }}>
+                                    {canEdit ? (
+                                      <Select
+                                        value={m.slot || "dinner"}
+                                        onChange={(v) =>
+                                          setField(
+                                            `days[${di}].meals[${mi}].slot`,
+                                            v
+                                          )
+                                        }
+                                        options={[
+                                          {
+                                            value: "breakfast",
+                                            label: "breakfast",
+                                          },
+                                          { value: "lunch", label: "lunch" },
+                                          { value: "dinner", label: "dinner" },
+                                          { value: "snack", label: "snack" },
+                                        ]}
+                                      />
+                                    ) : (
+                                      <span>{m.slot}</span>
+                                    )}
+                                  </div>
+                                  <div style={{ minWidth: 240, flex: 1 }}>
+                                    {canEdit ? (
+                                      <TextInput
+                                        value={m.label || ""}
+                                        placeholder="Meal label"
+                                        onChange={(v) =>
+                                          setField(
+                                            `days[${di}].meals[${mi}].label`,
+                                            v
+                                          )
+                                        }
+                                      />
+                                    ) : (
+                                      <strong>{m.label}</strong>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="ssa-subcard-actions">
+                                {canCRUD ? (
+                                  <>
+                                    <Btn
+                                      onClick={() =>
+                                        addItem(
+                                          `days[${di}].meals[${mi}].recipes`,
+                                          newRecipeRef(),
+                                          "recipeRef"
+                                        )
+                                      }
+                                    >
+                                      + Recipe
+                                    </Btn>
+                                    <Btn
+                                      kind="danger"
+                                      onClick={() =>
+                                        removeItem(
+                                          `days[${di}].meals[${mi}]`,
+                                          "Delete this meal?"
+                                        )
+                                      }
+                                    >
+                                      Delete Meal
+                                    </Btn>
+                                  </>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            <Field label="Meal Notes">
+                              {canEdit ? (
+                                <TextArea
+                                  rows={2}
+                                  value={m.notes || ""}
+                                  onChange={(v) =>
+                                    setField(
+                                      `days[${di}].meals[${mi}].notes`,
+                                      v
+                                    )
+                                  }
+                                />
+                              ) : (
+                                <div>{m.notes}</div>
+                              )}
+                            </Field>
+
+                            {recipes.length === 0 ? (
+                              <EmptyState
+                                title="No recipes yet."
+                                body="Add recipe references (from Recipe Vault or URL)."
+                                addLabel="Add recipe"
+                                onAdd={() =>
+                                  addItem(
+                                    `days[${di}].meals[${mi}].recipes`,
+                                    newRecipeRef(),
+                                    "recipeRef"
+                                  )
+                                }
+                              />
+                            ) : (
+                              <div className="ssa-table-wrap">
+                                <table className="ssa-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Recipe</th>
+                                      <th>Servings</th>
+                                      <th>Source (URL / vaultId)</th>
+                                      <th>Notes</th>
+                                      {canCRUD ? <th>Actions</th> : null}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {recipes.map((r, ri) => (
+                                      <tr key={r.id || `r_${di}_${mi}_${ri}`}>
+                                        <td>
+                                          {canEdit ? (
+                                            <TextInput
+                                              value={r.title || ""}
+                                              onChange={(v) =>
+                                                setField(
+                                                  `days[${di}].meals[${mi}].recipes[${ri}].title`,
+                                                  v
+                                                )
+                                              }
+                                            />
+                                          ) : (
+                                            r.title
+                                          )}
+                                        </td>
+                                        <td>
+                                          {canEdit ? (
+                                            <NumInput
+                                              value={r.servings ?? 4}
+                                              onChange={(v) =>
+                                                setField(
+                                                  `days[${di}].meals[${mi}].recipes[${ri}].servings`,
+                                                  v
+                                                )
+                                              }
+                                            />
+                                          ) : (
+                                            String(r.servings ?? 4)
+                                          )}
+                                        </td>
+                                        <td>
+                                          {canEdit ? (
+                                            <TextInput
+                                              value={r.source || ""}
+                                              placeholder="https://... or vaultId"
+                                              onChange={(v) =>
+                                                setField(
+                                                  `days[${di}].meals[${mi}].recipes[${ri}].source`,
+                                                  v
+                                                )
+                                              }
+                                            />
+                                          ) : (
+                                            r.source
+                                          )}
+                                        </td>
+                                        <td>
+                                          {canEdit ? (
+                                            <TextArea
+                                              rows={2}
+                                              value={r.notes || ""}
+                                              onChange={(v) =>
+                                                setField(
+                                                  `days[${di}].meals[${mi}].recipes[${ri}].notes`,
+                                                  v
+                                                )
+                                              }
+                                            />
+                                          ) : (
+                                            r.notes
+                                          )}
+                                        </td>
+                                        {canCRUD ? (
+                                          <td>
+                                            <Btn
+                                              kind="danger"
+                                              onClick={() =>
+                                                removeItem(
+                                                  `days[${di}].meals[${mi}].recipes[${ri}]`,
+                                                  "Delete this recipe reference?"
+                                                )
+                                              }
+                                            >
+                                              Delete
+                                            </Btn>
+                                          </td>
+                                        ) : null}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
     );
   };
 
-  const renderDomainSessions = () => {
-    const sessions = Array.isArray(state.domainSessions)
-      ? state.domainSessions
-      : [];
+  const renderShopping = () => {
+    const items = Array.isArray(state.shoppingList) ? state.shoppingList : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.domains}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.shopping}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
                 onClick={() =>
-                  addItem("domainSessions", newDomainSession(), "domainSession")
+                  addItem("shoppingList", newShoppingItem(), "shoppingItem")
                 }
               >
-                + Add Session
+                + Add Item
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {sessions.length === 0 ? (
+        {items.length === 0 ? (
           <EmptyState
-            title="No domain sessions yet."
-            body="Domain sessions are the runnable chunks SSA can turn into guided sessions."
-            addLabel="Add domain session"
+            title="No shopping items yet."
+            body="Add items manually or generate elsewhere and pass the resolved draft here."
+            addLabel="Add shopping item"
             onAdd={() =>
-              addItem("domainSessions", newDomainSession(), "domainSession")
+              addItem("shoppingList", newShoppingItem(), "shoppingItem")
             }
-          />
-        ) : (
-          <div className="ssa-table-wrap">
-            <table className="ssa-table">
-              <thead>
-                <tr>
-                  <th>Domain</th>
-                  <th>Label</th>
-                  <th>Cadence</th>
-                  <th>Est. Duration</th>
-                  <th>Next Due ISO</th>
-                  <th>Notes</th>
-                  {canCRUD ? <th>Actions</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map((s, i) => (
-                  <tr key={s?.id || `sess_${i}`}>
-                    <td>
-                      {canEdit ? (
-                        <Select
-                          value={s.domain || "garden"}
-                          onChange={(v) =>
-                            setField(`domainSessions[${i}].domain`, v)
-                          }
-                          options={[
-                            { value: "homestead", label: "homestead" },
-                            { value: "garden", label: "garden" },
-                            { value: "animals", label: "animals" },
-                            { value: "preservation", label: "preservation" },
-                            { value: "storehouse", label: "storehouse" },
-                            { value: "cooking", label: "cooking" },
-                            { value: "cleaning", label: "cleaning" },
-                          ]}
-                        />
-                      ) : (
-                        s.domain
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={s.label}
-                          onChange={(v) =>
-                            setField(`domainSessions[${i}].label`, v)
-                          }
-                        />
-                      ) : (
-                        s.label
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <Select
-                          value={s.cadence || "weekly"}
-                          onChange={(v) =>
-                            setField(`domainSessions[${i}].cadence`, v)
-                          }
-                          options={[
-                            { value: "daily", label: "daily" },
-                            { value: "weekly", label: "weekly" },
-                            { value: "biweekly", label: "biweekly" },
-                            { value: "monthly", label: "monthly" },
-                            { value: "seasonal", label: "seasonal" },
-                            { value: "as-needed", label: "as-needed" },
-                          ]}
-                        />
-                      ) : (
-                        s.cadence
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <NumInput
-                          value={s.estDurationMin ?? ""}
-                          onChange={(v) =>
-                            setField(`domainSessions[${i}].estDurationMin`, v)
-                          }
-                        />
-                      ) : (
-                        String(s.estDurationMin ?? "")
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={s.nextDueISO || ""}
-                          onChange={(v) =>
-                            setField(`domainSessions[${i}].nextDueISO`, v)
-                          }
-                        />
-                      ) : (
-                        s.nextDueISO
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextArea
-                          rows={2}
-                          value={s.notes || ""}
-                          onChange={(v) =>
-                            setField(`domainSessions[${i}].notes`, v)
-                          }
-                        />
-                      ) : (
-                        s.notes
-                      )}
-                    </td>
-                    {canCRUD ? (
-                      <td>
-                        <Btn
-                          kind="danger"
-                          onClick={() =>
-                            removeItem(
-                              `domainSessions[${i}]`,
-                              "Delete this domain session?"
-                            )
-                          }
-                        >
-                          Delete
-                        </Btn>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderResources = () => {
-    const rows = Array.isArray(state.resources) ? state.resources : [];
-    return (
-      <div className="ssa-card">
-        <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.resources}</div>
-          <div className="ssa-card-actions">
-            {canCRUD ? (
-              <Btn
-                kind="primary"
-                onClick={() => addItem("resources", newResource(), "resource")}
-              >
-                + Add Resource
-              </Btn>
-            ) : null}
-          </div>
-        </div>
-
-        {rows.length === 0 ? (
-          <EmptyState
-            title="No resources yet."
-            body="Track supplies, equipment, and materials needed across domain sessions."
-            addLabel="Add resource"
-            onAdd={() => addItem("resources", newResource(), "resource")}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -1048,63 +1171,107 @@ export default function HomesteadplannerDraftFormatter({
                   <th>Item</th>
                   <th>Qty</th>
                   <th>Unit</th>
-                  <th>Where</th>
+                  <th>Category</th>
                   <th>Notes</th>
+                  <th>Acquired</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r, i) => (
-                  <tr key={r?.id || `res_${i}`}>
+                {items.map((it, i) => (
+                  <tr key={it.id || `shop_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={r.item}
-                          onChange={(v) => setField(`resources[${i}].item`, v)}
+                          value={it.item || ""}
+                          onChange={(v) =>
+                            setField(`shoppingList[${i}].item`, v)
+                          }
                         />
                       ) : (
-                        r.item
+                        it.item
                       )}
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={r.qty ?? ""}
-                          onChange={(v) => setField(`resources[${i}].qty`, v)}
-                        />
+                        <>
+                          <NumInput
+                            value={it.qty ?? ""}
+                            min={0}
+                            onChange={(v) =>
+                              setField(`shoppingList[${i}].qty`, v)
+                            }
+                          />
+                          {clampHints[`shoppingList[${i}].qty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
-                        String(r.qty ?? "")
+                        String(it.qty ?? "")
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={r.unit}
-                          onChange={(v) => setField(`resources[${i}].unit`, v)}
+                          value={it.unit || ""}
+                          onChange={(v) =>
+                            setField(`shoppingList[${i}].unit`, v)
+                          }
                         />
                       ) : (
-                        r.unit
+                        it.unit
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={r.where}
-                          onChange={(v) => setField(`resources[${i}].where`, v)}
+                          value={it.category || "general"}
+                          onChange={(v) =>
+                            setField(`shoppingList[${i}].category`, v)
+                          }
                         />
                       ) : (
-                        r.where
+                        it.category
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextArea
                           rows={2}
-                          value={r.notes || ""}
-                          onChange={(v) => setField(`resources[${i}].notes`, v)}
+                          value={it.notes || ""}
+                          onChange={(v) =>
+                            setField(`shoppingList[${i}].notes`, v)
+                          }
                         />
                       ) : (
-                        r.notes
+                        it.notes
+                      )}
+                    </td>
+                    <td style={{ minWidth: 110 }}>
+                      {canEdit ? (
+                        <label
+                          style={{
+                            display: "flex",
+                            gap: 8,
+                            alignItems: "center",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!it.acquired}
+                            onChange={(e) =>
+                              setField(
+                                `shoppingList[${i}].acquired`,
+                                !!e.target.checked
+                              )
+                            }
+                          />
+                          <span>{it.acquired ? "Yes" : "No"}</span>
+                        </label>
+                      ) : (
+                        <span>{it.acquired ? "Yes" : "No"}</span>
                       )}
                     </td>
                     {canCRUD ? (
@@ -1113,8 +1280,8 @@ export default function HomesteadplannerDraftFormatter({
                           kind="danger"
                           onClick={() =>
                             removeItem(
-                              `resources[${i}]`,
-                              "Delete this resource?"
+                              `shoppingList[${i}]`,
+                              "Delete this shopping item?"
                             )
                           }
                         >
@@ -1132,32 +1299,30 @@ export default function HomesteadplannerDraftFormatter({
     );
   };
 
-  const renderTimeline = () => {
-    const rows = Array.isArray(state.timeline) ? state.timeline : [];
+  const renderPrep = () => {
+    const items = Array.isArray(state.prepPlan) ? state.prepPlan : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.timeline}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.prep}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
-                onClick={() =>
-                  addItem("timeline", newTimelineRow(), "timelineRow")
-                }
+                onClick={() => addItem("prepPlan", newPrepItem(), "prepItem")}
               >
-                + Add Milestone
+                + Add Prep Item
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {rows.length === 0 ? (
+        {items.length === 0 ? (
           <EmptyState
-            title="No timeline milestones yet."
-            body="Add milestones to sequence work across seasons and domains."
-            addLabel="Add milestone"
-            onAdd={() => addItem("timeline", newTimelineRow(), "timelineRow")}
+            title="No prep items yet."
+            body="Prep items are the choreography that makes the plan feasible (thaw, chop, marinate, batch cook)."
+            addLabel="Add prep item"
+            onAdd={() => addItem("prepPlan", newPrepItem(), "prepItem")}
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -1165,84 +1330,75 @@ export default function HomesteadplannerDraftFormatter({
               <thead>
                 <tr>
                   <th>Label</th>
-                  <th>Start ISO</th>
-                  <th>End ISO</th>
-                  <th>Owner</th>
-                  <th>Status</th>
+                  <th>When</th>
+                  <th>Est. Duration</th>
+                  <th>Linked To</th>
                   <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((t, i) => (
-                  <tr key={t?.id || `tl_${i}`}>
+                {items.map((p, i) => (
+                  <tr key={p.id || `prep_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={t.label}
-                          onChange={(v) => setField(`timeline[${i}].label`, v)}
+                          value={p.label || ""}
+                          onChange={(v) => setField(`prepPlan[${i}].label`, v)}
                         />
                       ) : (
-                        t.label
+                        p.label
                       )}
                     </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={t.startISO || ""}
-                          onChange={(v) =>
-                            setField(`timeline[${i}].startISO`, v)
-                          }
-                        />
-                      ) : (
-                        t.startISO
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={t.endISO || ""}
-                          onChange={(v) => setField(`timeline[${i}].endISO`, v)}
-                        />
-                      ) : (
-                        t.endISO
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={t.owner || ""}
-                          onChange={(v) => setField(`timeline[${i}].owner`, v)}
-                        />
-                      ) : (
-                        t.owner
-                      )}
-                    </td>
-                    <td>
+                    <td style={{ minWidth: 160 }}>
                       {canEdit ? (
                         <Select
-                          value={t.status || "planned"}
-                          onChange={(v) => setField(`timeline[${i}].status`, v)}
+                          value={p.when || "day-before"}
+                          onChange={(v) => setField(`prepPlan[${i}].when`, v)}
                           options={[
-                            { value: "planned", label: "planned" },
-                            { value: "in-progress", label: "in-progress" },
-                            { value: "done", label: "done" },
-                            { value: "blocked", label: "blocked" },
+                            { value: "now", label: "now" },
+                            { value: "anytime", label: "anytime" },
+                            { value: "day-before", label: "day-before" },
+                            { value: "morning-of", label: "morning-of" },
                           ]}
                         />
                       ) : (
-                        t.status
+                        p.when
+                      )}
+                    </td>
+                    <td style={{ minWidth: 140 }}>
+                      {canEdit ? (
+                        <NumInput
+                          value={p.estDurationMin ?? 15}
+                          onChange={(v) =>
+                            setField(`prepPlan[${i}].estDurationMin`, v)
+                          }
+                        />
+                      ) : (
+                        String(p.estDurationMin ?? 15)
+                      )}
+                    </td>
+                    <td>
+                      {canEdit ? (
+                        <TextInput
+                          value={p.linkedTo || ""}
+                          onChange={(v) =>
+                            setField(`prepPlan[${i}].linkedTo`, v)
+                          }
+                        />
+                      ) : (
+                        p.linkedTo
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextArea
                           rows={2}
-                          value={t.notes || ""}
-                          onChange={(v) => setField(`timeline[${i}].notes`, v)}
+                          value={p.notes || ""}
+                          onChange={(v) => setField(`prepPlan[${i}].notes`, v)}
                         />
                       ) : (
-                        t.notes
+                        p.notes
                       )}
                     </td>
                     {canCRUD ? (
@@ -1251,8 +1407,8 @@ export default function HomesteadplannerDraftFormatter({
                           kind="danger"
                           onClick={() =>
                             removeItem(
-                              `timeline[${i}]`,
-                              "Delete this milestone?"
+                              `prepPlan[${i}]`,
+                              "Delete this prep item?"
                             )
                           }
                         >
@@ -1270,92 +1426,93 @@ export default function HomesteadplannerDraftFormatter({
     );
   };
 
-  const renderRisks = () => {
-    const rows = Array.isArray(state.risks) ? state.risks : [];
+  const renderNutritionNotes = () => {
+    const items = Array.isArray(state.nutritionNotes)
+      ? state.nutritionNotes
+      : [];
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
-          <div className="ssa-card-title">{SCHEMA.labels.risks}</div>
+          <div className="ssa-card-title">{SCHEMA.labels.nutrition}</div>
           <div className="ssa-card-actions">
             {canCRUD ? (
               <Btn
                 kind="primary"
-                onClick={() => addItem("risks", newRisk(), "risk")}
+                onClick={() =>
+                  addItem("nutritionNotes", newNutritionNote(), "nutritionNote")
+                }
               >
-                + Add Risk
+                + Add Note
               </Btn>
             ) : null}
           </div>
         </div>
 
-        {rows.length === 0 ? (
+        {items.length === 0 ? (
           <EmptyState
-            title="No risks/constraints yet."
-            body="Track blockers (budget, time, weather, access, health, transportation) and mitigations."
-            addLabel="Add risk"
-            onAdd={() => addItem("risks", newRisk(), "risk")}
+            title="No nutrition notes yet."
+            body="Optional notes for macros, restrictions, substitutions, and targets."
+            addLabel="Add nutrition note"
+            onAdd={() =>
+              addItem("nutritionNotes", newNutritionNote(), "nutritionNote")
+            }
           />
         ) : (
           <div className="ssa-table-wrap">
             <table className="ssa-table">
               <thead>
                 <tr>
-                  <th>Risk / Constraint</th>
-                  <th>Severity</th>
-                  <th>Mitigation</th>
-                  <th>Owner</th>
+                  <th>Label</th>
+                  <th>Target</th>
+                  <th>Notes</th>
                   {canCRUD ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r, i) => (
-                  <tr key={r?.id || `risk_${i}`}>
+                {items.map((n, i) => (
+                  <tr key={n.id || `nut_${i}`}>
                     <td>
                       {canEdit ? (
                         <TextInput
-                          value={r.label}
-                          onChange={(v) => setField(`risks[${i}].label`, v)}
+                          value={n.label || ""}
+                          onChange={(v) =>
+                            setField(`nutritionNotes[${i}].label`, v)
+                          }
                         />
                       ) : (
-                        r.label
+                        n.label
                       )}
                     </td>
-                    <td>
+                    <td style={{ minWidth: 180 }}>
                       {canEdit ? (
                         <Select
-                          value={r.severity || "med"}
-                          onChange={(v) => setField(`risks[${i}].severity`, v)}
+                          value={n.target || "household"}
+                          onChange={(v) =>
+                            setField(`nutritionNotes[${i}].target`, v)
+                          }
                           options={[
-                            { value: "high", label: "high" },
-                            { value: "med", label: "med" },
-                            { value: "low", label: "low" },
+                            { value: "household", label: "household" },
+                            { value: "adult", label: "adult" },
+                            { value: "child", label: "child" },
+                            { value: "athlete", label: "athlete" },
+                            { value: "medical", label: "medical" },
                           ]}
                         />
                       ) : (
-                        r.severity
+                        n.target
                       )}
                     </td>
                     <td>
                       {canEdit ? (
                         <TextArea
                           rows={2}
-                          value={r.mitigation || ""}
+                          value={n.notes || ""}
                           onChange={(v) =>
-                            setField(`risks[${i}].mitigation`, v)
+                            setField(`nutritionNotes[${i}].notes`, v)
                           }
                         />
                       ) : (
-                        r.mitigation
-                      )}
-                    </td>
-                    <td>
-                      {canEdit ? (
-                        <TextInput
-                          value={r.owner || ""}
-                          onChange={(v) => setField(`risks[${i}].owner`, v)}
-                        />
-                      ) : (
-                        r.owner
+                        n.notes
                       )}
                     </td>
                     {canCRUD ? (
@@ -1363,7 +1520,10 @@ export default function HomesteadplannerDraftFormatter({
                         <Btn
                           kind="danger"
                           onClick={() =>
-                            removeItem(`risks[${i}]`, "Delete this risk?")
+                            removeItem(
+                              `nutritionNotes[${i}]`,
+                              "Delete this nutrition note?"
+                            )
                           }
                         >
                           Delete
@@ -1401,7 +1561,7 @@ export default function HomesteadplannerDraftFormatter({
         {sections.length === 0 ? (
           <EmptyState
             title="No sections yet."
-            body="Sections explain the plan in narrative form (strategy, scope, steps, dependencies)."
+            body="Sections can explain the plan (themes, rotation, leftovers strategy, batch days)."
             addLabel="Add section"
             onAdd={() => addItem("sections", newSection(), "section")}
           />
@@ -1467,7 +1627,7 @@ export default function HomesteadplannerDraftFormatter({
                     {bullets.length === 0 ? (
                       <EmptyState
                         title="No bullets"
-                        body="Bullets can be dependencies, checklists, or explanations."
+                        body="Bullets can be rules (no pork), swap ideas, or rotation notes."
                         addLabel="Add bullet"
                         onAdd={() =>
                           addItem(
@@ -1613,7 +1773,13 @@ export default function HomesteadplannerDraftFormatter({
             {canCRUD ? (
               <Btn
                 kind="primary"
-                onClick={() => addItem("tasks", newTask(), "task")}
+                onClick={() =>
+                  addItem(
+                    "tasks",
+                    { id: uid("task"), ...deepClone(SCHEMA.defaults.task) },
+                    "task"
+                  )
+                }
               >
                 + Add Task
               </Btn>
@@ -1624,9 +1790,15 @@ export default function HomesteadplannerDraftFormatter({
         {tasks.length === 0 ? (
           <EmptyState
             title="No tasks yet."
-            body="Tasks are the actionable units that can become sessions."
+            body="Tasks are actionable items that can become sessions (batch cooking, pantry reset, order groceries)."
             addLabel="Add task"
-            onAdd={() => addItem("tasks", newTask(), "task")}
+            onAdd={() =>
+              addItem(
+                "tasks",
+                { id: uid("task"), ...deepClone(SCHEMA.defaults.task) },
+                "task"
+              )
+            }
           />
         ) : (
           <div className="ssa-table-wrap">
@@ -1717,6 +1889,11 @@ export default function HomesteadplannerDraftFormatter({
     const alerts = Array.isArray(state.inventoryAlerts)
       ? state.inventoryAlerts
       : [];
+    const newAlert = () => ({
+      id: uid("alert"),
+      ...deepClone(SCHEMA.defaults.alert),
+    });
+
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
@@ -1736,7 +1913,7 @@ export default function HomesteadplannerDraftFormatter({
         {alerts.length === 0 ? (
           <EmptyState
             title="No inventory alerts yet."
-            body="Alerts highlight shortages that could block sessions."
+            body="Alerts highlight shortages that could block the meal plan."
             addLabel="Add alert"
             onAdd={() => addItem("inventoryAlerts", newAlert(), "alert")}
           />
@@ -1770,12 +1947,20 @@ export default function HomesteadplannerDraftFormatter({
                     </td>
                     <td>
                       {canEdit ? (
-                        <NumInput
-                          value={a.neededQty ?? ""}
-                          onChange={(v) =>
-                            setField(`inventoryAlerts[${i}].neededQty`, v)
-                          }
-                        />
+                        <>
+                          <NumInput
+                            value={a.neededQty ?? ""}
+                            min={0}
+                            onChange={(v) =>
+                              setField(`inventoryAlerts[${i}].neededQty`, v)
+                            }
+                          />
+                          {clampHints[`inventoryAlerts[${i}].neededQty`] ? (
+                            <div className="ssa-clamp-hint" role="note">
+                              {CLAMP_HINT_TEXT}
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
                         String(a.neededQty ?? "")
                       )}
@@ -1851,6 +2036,11 @@ export default function HomesteadplannerDraftFormatter({
     const rems = Array.isArray(state.healthReminders)
       ? state.healthReminders
       : [];
+    const newReminder = () => ({
+      id: uid("rem"),
+      ...deepClone(SCHEMA.defaults.reminder),
+    });
+
     return (
       <div className="ssa-card">
         <div className="ssa-card-header">
@@ -1872,7 +2062,7 @@ export default function HomesteadplannerDraftFormatter({
         {rems.length === 0 ? (
           <EmptyState
             title="No reminders yet."
-            body="Reminders keep cadence (checks, ordering, planning, review cycles)."
+            body="Reminders keep cadence (review plan, thaw, inventory check, prep run)."
             addLabel="Add reminder"
             onAdd={() => addItem("healthReminders", newReminder(), "reminder")}
           />
@@ -1957,26 +2147,6 @@ export default function HomesteadplannerDraftFormatter({
       </div>
     );
   };
-
-  const renderExports = () => (
-    <div className="ssa-card">
-      <div className="ssa-card-header">
-        <div className="ssa-card-title">{SCHEMA.labels.exports}</div>
-      </div>
-      <Field label="Export / Hub Packet Notes">
-        {canEdit ? (
-          <TextArea
-            rows={3}
-            value={state.exportNotes || ""}
-            onChange={(v) => setField("exportNotes", v)}
-          />
-        ) : (
-          <div>{state.exportNotes}</div>
-        )}
-      </Field>
-      {/* TODO: This is where you'd add a "Prepare Hub Packet" action that calls HubPacketFormatter, but DO NOT implement here. */}
-    </div>
-  );
 
   /* ------------------------------- Main UI ---------------------------------- */
   return (
@@ -2065,18 +2235,16 @@ export default function HomesteadplannerDraftFormatter({
         </Field>
       </div>
 
-      {renderSeasonalGoals()}
-      {renderDomainSessions()}
-      {renderResources()}
-      {renderTimeline()}
-      {renderRisks()}
+      {renderDays()}
+      {renderShopping()}
+      {renderPrep()}
+      {renderNutritionNotes()}
 
       {renderAssumptions()}
       {renderSections()}
       {renderTasks()}
       {renderAlerts()}
       {renderReminders()}
-      {renderExports()}
 
       {editable ? (
         <div className="ssa-card ssa-debug">

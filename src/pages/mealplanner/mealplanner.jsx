@@ -609,13 +609,62 @@ function buildGenerateFailureMessage(res, normalized) {
 }
 
 const EMERGENCY_PLAN_RECIPES = [
-  "Red Beans and Rice",
-  "Herb Roast Chicken",
-  "Garden Vegetable Stew",
-  "Skillet Salmon and Greens",
-  "Lentil Curry",
-  "Turkey Chili",
-  "Egg Fried Rice",
+  {
+    title: "Red Beans and Rice",
+    ingredients: [
+      { name: "red beans", qty: 2, unit: "cups" },
+      { name: "rice", qty: 2, unit: "cups" },
+      { name: "onion", qty: 1, unit: "unit" },
+    ],
+  },
+  {
+    title: "Herb Roast Chicken",
+    ingredients: [
+      { name: "chicken", qty: 1, unit: "whole" },
+      { name: "potatoes", qty: 4, unit: "units" },
+      { name: "mixed herbs", qty: 1, unit: "tbsp" },
+    ],
+  },
+  {
+    title: "Garden Vegetable Stew",
+    ingredients: [
+      { name: "carrots", qty: 3, unit: "units" },
+      { name: "celery", qty: 2, unit: "stalks" },
+      { name: "broth", qty: 4, unit: "cups" },
+    ],
+  },
+  {
+    title: "Skillet Salmon and Greens",
+    ingredients: [
+      { name: "salmon", qty: 4, unit: "fillets" },
+      { name: "leafy greens", qty: 1, unit: "bag" },
+      { name: "lemon", qty: 1, unit: "unit" },
+    ],
+  },
+  {
+    title: "Lentil Curry",
+    ingredients: [
+      { name: "lentils", qty: 2, unit: "cups" },
+      { name: "coconut milk", qty: 1, unit: "can" },
+      { name: "curry spice", qty: 1, unit: "tbsp" },
+    ],
+  },
+  {
+    title: "Turkey Chili",
+    ingredients: [
+      { name: "ground turkey", qty: 1, unit: "lb" },
+      { name: "beans", qty: 2, unit: "cans" },
+      { name: "tomato sauce", qty: 1, unit: "jar" },
+    ],
+  },
+  {
+    title: "Egg Fried Rice",
+    ingredients: [
+      { name: "rice", qty: 3, unit: "cups" },
+      { name: "eggs", qty: 4, unit: "units" },
+      { name: "peas", qty: 1, unit: "cup" },
+    ],
+  },
 ];
 
 function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" } = {}) {
@@ -629,15 +678,35 @@ function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" 
   };
   const totalDays = daysByDuration[duration] || 7;
   const meals = [];
+  const groceryMap = new Map();
   for (let i = 0; i < totalDays; i += 1) {
-    const title = EMERGENCY_PLAN_RECIPES[i % EMERGENCY_PLAN_RECIPES.length];
+    const recipe = EMERGENCY_PLAN_RECIPES[i % EMERGENCY_PLAN_RECIPES.length];
+    const title = recipe.title;
     meals.push({
       title,
       slot: "dinner",
       time: "dinner",
       day: i + 1,
     });
+
+    for (const ing of recipe.ingredients || []) {
+      const key = String(ing?.name || "").trim().toLowerCase();
+      if (!key) continue;
+      const current = groceryMap.get(key);
+      const qty = Number(ing?.qty || 0) || 0;
+      if (!current) {
+        groceryMap.set(key, {
+          name: String(ing.name),
+          qty,
+          unit: ing.unit || "unit",
+        });
+      } else {
+        current.qty += qty;
+      }
+    }
   }
+
+  const groceryList = Array.from(groceryMap.values());
 
   return {
     title: "Meal Plan",
@@ -645,7 +714,7 @@ function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" 
       ? `${reason} Using local fallback recipes.`
       : "Using local fallback recipes.",
     meals,
-    shoppingList: [],
+    shoppingList: groceryList,
     prepTasks: [],
     budget: {},
     macros: {},
@@ -656,9 +725,9 @@ function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" 
         : "Using local fallback recipes.",
       plan: Array.from({ length: totalDays }, (_, idx) => ({
         day: idx + 1,
-        meals: [{ title: EMERGENCY_PLAN_RECIPES[idx % EMERGENCY_PLAN_RECIPES.length], time: "dinner" }],
+        meals: [{ title: EMERGENCY_PLAN_RECIPES[idx % EMERGENCY_PLAN_RECIPES.length].title, time: "dinner" }],
       })),
-      groceryList: [],
+      groceryList,
       prepSchedule: [],
       _meta: { source: "mealplanner.emergencyFallback" },
     },
