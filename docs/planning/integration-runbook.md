@@ -161,3 +161,7 @@ Behavior:
 - CI calls `npm run prod:health:verify` after post-merge runtime smoke passes.
 - Script retries until `PRODUCTION_HEALTH_MAX_WAIT_MS` is reached.
 - Verification requires health payload contract fields (`db`, `mongo`, `postgres`, `neo4j`) with expected boolean values.
+
+CI ops note (2026-03-18):
+- If `PRODUCTION_HEALTH_URL` is not set, the `post-merge-production-health` job fails fast with `missing_health_url` (config gate) before any endpoint retries.
+- Ensure `PRODUCTION_HEALTH_URL` points to a reachable deployment health endpoint before enabling or re-running this required gate.
