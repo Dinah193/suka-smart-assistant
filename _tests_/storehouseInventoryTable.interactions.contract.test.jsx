@@ -112,4 +112,59 @@ describe("storehouse inventory table interaction contract", () => {
 
     expect(onRemoveRow).toHaveBeenCalledWith(expect.objectContaining({ id: "lot-1" }));
   });
+
+  it("shows row status chip and emits retry/undo callbacks", async () => {
+    const onRetryRow = vi.fn();
+    const onUndoRow = vi.fn();
+
+    const rows = [
+      {
+        id: "lot-2",
+        itemName: "Lentils",
+        qty: 0,
+        unit: "bag",
+        state: "raw",
+        method: null,
+        prepTimeReductionPct: 0,
+      },
+    ];
+
+    const rowActionStates = {
+      "lot-2": {
+        status: "error",
+        undo: {
+          type: "restore_row",
+        },
+      },
+    };
+
+    await act(async () => {
+      root.render(
+        React.createElement(StorehouseInventoryTable, {
+          rows,
+          editable: true,
+          rowActionStates,
+          onRetryRow,
+          onUndoRow,
+        })
+      );
+    });
+
+    const text = String(container.textContent || "");
+    expect(text).toContain("Save failed");
+
+    const retryButton = container.querySelector('button[aria-label="Retry Lentils"]');
+    const undoButton = container.querySelector('button[aria-label="Undo Lentils"]');
+
+    expect(retryButton).toBeTruthy();
+    expect(undoButton).toBeTruthy();
+
+    await act(async () => {
+      retryButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      undoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onRetryRow).toHaveBeenCalledWith(expect.objectContaining({ id: "lot-2" }));
+    expect(onUndoRow).toHaveBeenCalledWith(expect.objectContaining({ id: "lot-2" }));
+  });
 });

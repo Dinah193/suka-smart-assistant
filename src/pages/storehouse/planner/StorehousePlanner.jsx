@@ -38,8 +38,21 @@ export default function StorehousePlanner({ householdId = "default-household", n
   const [recommendations, setRecommendations] = useState([]);
   const [replenishingKey, setReplenishingKey] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [rowActionStates, setRowActionStates] = useState({});
   const [batchMode, setBatchMode] = useState(false);
   const [batchDelta, setBatchDelta] = useState(1);
+
+  const rowKey = (row) => String(row?.id || row?.sku || row?.itemName || "");
+  const setRowAction = (key, next) => {
+    if (!key) return;
+    setRowActionStates((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        ...(next || {}),
+      },
+    }));
+  };
 
   const lowStockRows = useMemo(
     () => rows.filter((row) => row && typeof row === "object" && isLowStock(row)),
@@ -74,37 +87,91 @@ export default function StorehousePlanner({ householdId = "default-household", n
 
   async function handleQtyChange(row, nextQty) {
     const safeQty = Math.max(0, Number(nextQty || 0));
-    const key = String(row?.id || row?.sku || row?.itemName || "");
+    const key = rowKey(row);
     if (!key) return;
+    const previousRow = { ...row };
 
     const updated = { ...row, qty: safeQty };
+    setRowAction(key, {
+      status: "pending",
+      message: "Saving quantity update...",
+      retry: {
+        type: "persist_row",
+        row: updated,
+        reason: "storehouse_qty_edit_ui",
+      },
+      undo: {
+        type: "restore_row",
+        row: previousRow,
+        reason: "storehouse_qty_edit_undo_ui",
+      },
+    });
     setRows((prev) =>
       prev.map((candidate) => {
-        const candidateKey = String(
-          candidate?.id || candidate?.sku || candidate?.itemName || ""
-        );
+        const candidateKey = rowKey(candidate);
         return candidateKey === key ? updated : candidate;
       })
     );
 
     try {
       await persistSingleRow(updated, "storehouse_qty_edit_ui");
+      setRowAction(key, {
+        status: "success",
+        message: "Saved quantity update.",
+      });
       setAlertMessage(
         `Updated ${row?.itemName || row?.sku || "item"} to ${safeQty} ${row?.unit || "units"}.`
       );
     } catch {
+      setRowAction(key, {
+        status: "error",
+        message: "Unable to save quantity update.",
+      });
       setAlertMessage(`Unable to update ${row?.itemName || row?.sku || "item"}.`);
     }
   }
 
   async function handleRemoveRow(row) {
-    const key = String(row?.id || row?.sku || row?.itemName || "");
+    const key = rowKey(row);
     if (!key) return;
-    setRows((prev) => prev.filter((candidate) => String(candidate?.id || candidate?.sku || candidate?.itemName || "") !== key));
+    const previousRow = { ...row };
+    const updated = {
+      ...row,
+      qty: 0,
+      metadata: {
+        ...(row?.metadata || {}),
+        removedByUi: true,
+      },
+    };
+    setRowAction(key, {
+      status: "pending",
+      message: "Saving remove action...",
+      retry: {
+        type: "persist_row",
+        row: updated,
+        reason: "storehouse_quick_remove_ui",
+      },
+      undo: {
+        type: "restore_row",
+        row: previousRow,
+        reason: "storehouse_quick_remove_undo_ui",
+      },
+    });
+    setRows((prev) =>
+      prev.map((candidate) => (rowKey(candidate) === key ? updated : candidate))
+    );
     try {
-      await persistSingleRow({ ...row, qty: 0 }, "storehouse_quick_remove_ui");
+      await persistSingleRow(updated, "storehouse_quick_remove_ui");
+      setRowAction(key, {
+        status: "success",
+        message: "Removed from active stock.",
+      });
       setAlertMessage(`Removed ${row?.itemName || row?.sku || "item"} from active stock.`);
     } catch {
+      setRowAction(key, {
+        status: "error",
+        message: "Unable to remove item.",
+      });
       setAlertMessage(`Unable to remove ${row?.itemName || row?.sku || "item"}.`);
     }
   }
@@ -121,11 +188,34 @@ export default function StorehousePlanner({ householdId = "default-household", n
       reservedQty: 0,
       metadata: { location: "pantry", source: "quick_add" },
     };
+    const key = rowKey(next);
+    setRowAction(key, {
+      status: "pending",
+      message: "Saving new row...",
+      retry: {
+        type: "persist_row",
+        row: next,
+        reason: "storehouse_quick_add_ui",
+      },
+      undo: {
+        type: "remove_row",
+        row: next,
+        reason: "storehouse_quick_add_undo_ui",
+      },
+    });
     setRows((prev) => [next, ...prev]);
     try {
       await persistSingleRow(next, "storehouse_quick_add_ui");
+      setRowAction(key, {
+        status: "success",
+        message: "Added and saved.",
+      });
       setAlertMessage(`Added ${next.itemName} (${next.qty} ${next.unit}).`);
     } catch {
+      setRowAction(key, {
+        status: "error",
+        message: "Unable to save new row.",
+      });
       setAlertMessage(`Unable to add ${next.itemName}.`);
     }
   }
@@ -163,21 +253,37 @@ export default function StorehousePlanner({ householdId = "default-household", n
   }
 
   async function handleReplenish(row) {
-    const key = String(row?.id || row?.sku || row?.itemName || "");
+    const key = rowKey(row);
     if (!key) return;
     setReplenishingKey(key);
     setAlertMessage("");
 
     const nextQty = getReplenishTarget(row);
+    const previousRow = { ...row };
+    const updated = {
+      ...row,
+      qty: nextQty,
+    };
+    setRowAction(key, {
+      status: "pending",
+      message: "Saving replenish action...",
+      retry: {
+        type: "persist_row",
+        row: updated,
+        reason: "low_stock_replenish_ui",
+      },
+      undo: {
+        type: "restore_row",
+        row: previousRow,
+        reason: "low_stock_replenish_undo_ui",
+      },
+    });
     const payload = {
       householdId,
       updatedBy: "storehouse.planner.ui",
       changeReason: "low_stock_replenish_ui",
       inventory: [
-        {
-          ...row,
-          qty: nextQty,
-        },
+        updated,
       ],
     };
 
@@ -185,21 +291,123 @@ export default function StorehousePlanner({ householdId = "default-household", n
       await updateStorehouseInventory(payload);
       setRows((prev) =>
         prev.map((candidate) => {
-          const candidateKey = String(
-            candidate?.id || candidate?.sku || candidate?.itemName || ""
-          );
+          const candidateKey = rowKey(candidate);
           if (candidateKey !== key) return candidate;
-          return {
-            ...candidate,
-            qty: nextQty,
-          };
+          return updated;
         })
       );
+      setRowAction(key, {
+        status: "success",
+        message: "Replenish saved.",
+      });
       setAlertMessage(`Replenished ${row?.itemName || row?.sku || "item"} to ${nextQty} ${row?.unit || "units"}.`);
     } catch {
+      setRowAction(key, {
+        status: "error",
+        message: "Unable to save replenish action.",
+      });
       setAlertMessage(`Unable to replenish ${row?.itemName || row?.sku || "item"}. Please retry.`);
     } finally {
       setReplenishingKey("");
+    }
+  }
+
+  async function onRetryRow(row) {
+    const key = rowKey(row);
+    const retry = rowActionStates?.[key]?.retry;
+    if (!key || !retry || retry.type !== "persist_row") return;
+
+    setRowAction(key, {
+      status: "pending",
+      message: "Retrying save...",
+    });
+    try {
+      await persistSingleRow(retry.row, retry.reason || "storehouse_retry_ui");
+      setRowAction(key, {
+        status: "success",
+        message: "Retry succeeded.",
+      });
+      setAlertMessage(`Saved ${retry.row?.itemName || "item"} after retry.`);
+    } catch {
+      setRowAction(key, {
+        status: "error",
+        message: "Retry failed.",
+      });
+      setAlertMessage(`Retry failed for ${retry.row?.itemName || "item"}.`);
+    }
+  }
+
+  async function onUndoRow(row) {
+    const key = rowKey(row);
+    const undo = rowActionStates?.[key]?.undo;
+    if (!key || !undo) return;
+
+    setRowAction(key, {
+      status: "pending",
+      message: "Undoing...",
+    });
+
+    if (undo.type === "restore_row" && undo.row) {
+      setRows((prev) =>
+        prev.map((candidate) => (rowKey(candidate) === key ? undo.row : candidate))
+      );
+      try {
+        await persistSingleRow(undo.row, undo.reason || "storehouse_undo_ui");
+        setRowAction(key, {
+          status: "success",
+          message: "Undo applied.",
+          retry: null,
+          undo: null,
+        });
+        setAlertMessage(`Undid latest change for ${undo.row?.itemName || "item"}.`);
+      } catch {
+        setRowAction(key, {
+          status: "error",
+          message: "Undo failed.",
+          retry: {
+            type: "persist_row",
+            row: undo.row,
+            reason: undo.reason || "storehouse_undo_ui",
+          },
+        });
+        setAlertMessage(`Undo failed for ${undo.row?.itemName || "item"}.`);
+      }
+      return;
+    }
+
+    if (undo.type === "remove_row" && undo.row) {
+      setRows((prev) => prev.filter((candidate) => rowKey(candidate) !== key));
+      try {
+        await persistSingleRow(
+          {
+            ...undo.row,
+            qty: 0,
+          },
+          undo.reason || "storehouse_undo_remove_ui"
+        );
+        setRowAction(key, {
+          status: "success",
+          message: "Undo applied.",
+          retry: null,
+          undo: null,
+        });
+        setAlertMessage(`Removed ${undo.row?.itemName || "item"} after undo.`);
+      } catch {
+        setRows((prev) => [undo.row, ...prev]);
+        setRowAction(key, {
+          status: "error",
+          message: "Undo failed.",
+          retry: {
+            type: "persist_row",
+            row: {
+              ...undo.row,
+              qty: 0,
+            },
+            reason: undo.reason || "storehouse_undo_remove_ui",
+          },
+        });
+        setAlertMessage(`Undo failed for ${undo.row?.itemName || "item"}.`);
+      }
     }
   }
 
@@ -338,6 +546,9 @@ export default function StorehousePlanner({ householdId = "default-household", n
         onQtyChange={handleQtyChange}
         onRemoveRow={handleRemoveRow}
         onQuickAdd={handleQuickAdd}
+        rowActionStates={rowActionStates}
+        onRetryRow={onRetryRow}
+        onUndoRow={onUndoRow}
       />
 
       <PlannerDashboardCard title="Replenishment + Preservation Priorities" subtitle="Inventory-first graph reasoning">
