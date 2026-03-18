@@ -669,7 +669,7 @@ export default function PrepChecklistGenerator({ className }) {
       {/* Header */}
       <Card className="sticky top-0 z-10">
         <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row">
             <div>
               <CardTitle className="flex items-center gap-2">
                 Prep Checklist Generator
@@ -683,9 +683,9 @@ export default function PrepChecklistGenerator({ className }) {
                 session. Check off, export, or spin up multi-timers.
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
               <Select value={source} onValueChange={setSource}>
-                <SelectTrigger className="h-8 w-[160px]">
+                <SelectTrigger className="h-8 w-full sm:w-[160px]" aria-label="Checklist source">
                   <SelectValue placeholder="Source" />
                 </SelectTrigger>
                 <SelectContent align="end">
@@ -694,7 +694,8 @@ export default function PrepChecklistGenerator({ className }) {
                 </SelectContent>
               </Select>
               <Input
-                className="h-8 w-56"
+                className="h-8 w-full sm:w-56"
+                aria-label="Search prep tasks"
                 placeholder="Search tasks…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -706,7 +707,7 @@ export default function PrepChecklistGenerator({ className }) {
         <div className="px-6 py-2 flex flex-wrap items-center gap-2">
           <Label className="text-xs text-muted-foreground">Station</Label>
           <Select value={stationFilter} onValueChange={setStationFilter}>
-            <SelectTrigger className="h-8 w-[140px]">
+            <SelectTrigger className="h-8 w-[140px]" aria-label="Filter by station">
               <SelectValue placeholder="All stations" />
             </SelectTrigger>
             <SelectContent>
@@ -720,7 +721,7 @@ export default function PrepChecklistGenerator({ className }) {
 
           <Label className="text-xs text-muted-foreground ml-2">Sort</Label>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="h-8 w-[140px]">
+            <SelectTrigger className="h-8 w-[140px]" aria-label="Sort prep tasks">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
