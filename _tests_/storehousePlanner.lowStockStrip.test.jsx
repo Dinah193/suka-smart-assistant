@@ -36,6 +36,7 @@ describe("storehouse low-stock alert strip UX", () => {
   let root;
 
   beforeEach(() => {
+    globalThis.IS_REACT_ACT_ENVIRONMENT = true;
     fetchMock.mockReset();
     updateMock.mockReset();
     recsMock.mockReset();
@@ -81,6 +82,7 @@ describe("storehouse low-stock alert strip UX", () => {
     }
     container = null;
     root = null;
+    globalThis.IS_REACT_ACT_ENVIRONMENT = false;
   });
 
   it("shows low-stock items and sends one-click replenish update", async () => {

@@ -227,7 +227,7 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
         <span className="chip">Scope: {rt.scope}</span>
         <span className="chip">ID: {rt.scopeId}</span>
         <span className="chip">Queue: {rt.queueDepth}</span>
-        <span className={`chip ${rt.connected ? "chip--brand" : ""}`}>
+        <span className={`chip ${rt.connected ? "chip--brand" : ""}`} role="status" aria-live="polite">
           {rt.connected ? "Live" : rt.connecting ? "Connecting" : "Offline"}
         </span>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
@@ -291,7 +291,7 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
           <div className="text-xs home-muted" style={{ marginBottom: 6 }}>
             Collaboration readiness
           </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }} aria-live="polite">
             <span className="chip">Unassigned: {readiness.unassigned}</span>
             <span className="chip">Priority 80+: {readiness.highPriority}</span>
             <span className="chip">Stale assigned: {readiness.staleAssigned}</span>
@@ -396,6 +396,7 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
                     type="text"
                     className="animal-input"
                     style={{ maxWidth: 220, height: 32, padding: "6px 10px" }}
+                    aria-label="Assign user id"
                     placeholder="Assign user id"
                     value={assignDraftFor(item.id).userId}
                     onChange={(e) => onAssignDraftChange(item.id, { userId: e.target.value })}
@@ -403,6 +404,7 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
                   <select
                     className="animal-input"
                     style={{ maxWidth: 170, height: 32, padding: "4px 8px" }}
+                    aria-label="Assign role"
                     value={assignDraftFor(item.id).role}
                     onChange={(e) => onAssignDraftChange(item.id, { role: e.target.value })}
                   >
