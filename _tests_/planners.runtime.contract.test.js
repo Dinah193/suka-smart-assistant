@@ -12,7 +12,10 @@ const bootstrapCheckEntry = path.resolve(
   "tools/scripts/check-planner-db-bootstrap.cjs"
 );
 const runtimeFlag = String(process.env.SSA_ENABLE_RUNTIME_CONTRACT_TESTS || "").toLowerCase();
-const runtimeEnabled = runtimeFlag === "1" || runtimeFlag === "true" || runtimeFlag === "yes";
+const hasRuntimeDatabase = Boolean(String(process.env.DATABASE_URL || "").trim());
+const runtimeEnabled =
+  (runtimeFlag === "1" || runtimeFlag === "true" || runtimeFlag === "yes") &&
+  hasRuntimeDatabase;
 const runtimeDescribe = runtimeEnabled ? describe : describe.skip;
 const dbRuntimeFlag = String(process.env.SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS || "").toLowerCase();
 const dbRuntimeEnabled = dbRuntimeFlag === "1" || dbRuntimeFlag === "true" || dbRuntimeFlag === "yes";
