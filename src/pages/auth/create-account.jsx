@@ -116,7 +116,7 @@ export default function CreateAccountPage() {
         setToken(accessToken, { kind: "access", source: "auth.create_account" });
       }
 
-      const identity = {
+      let identity = {
         id: user.id || user.userId || null,
         userId: user.userId || user.id || null,
         email: user.email || email.trim(),
@@ -124,6 +124,30 @@ export default function CreateAccountPage() {
         roles: Array.isArray(user.roles) ? user.roles : [],
         authProvider: user.authProvider || "native",
       };
+
+      if (!identity.householdId && accessToken) {
+        const bootstrapRes = await fetch("/api/auth/household/bootstrap", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({ householdName: "My Household" }),
+        });
+        const bootstrapPayload = await bootstrapRes.json().catch(() => ({}));
+        if (bootstrapRes.ok && bootstrapPayload?.ok) {
+          const nextUser = bootstrapPayload.user || {};
+          identity = {
+            ...identity,
+            householdId: nextUser.householdId || identity.householdId,
+          };
+          const refreshed = bootstrapPayload?.session?.accessToken || "";
+          if (refreshed) {
+            setToken(refreshed, { kind: "access", source: "auth.household.bootstrap" });
+          }
+        }
+      }
 
       try {
         window.localStorage?.setItem("suka.user", JSON.stringify(identity));

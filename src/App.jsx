@@ -1859,6 +1859,55 @@ function AppChrome({ children }) {
   );
 }
 
+function AuthRouteGuard({ children }) {
+  const location = useLocation();
+  const [state, setState] = React.useState({ loading: true, allowed: false });
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        let token = "";
+        try {
+          token = String(window.localStorage?.getItem("ssa.auth.token.access") || "").trim();
+        } catch {
+          token = "";
+        }
+
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch("/api/auth/me", {
+          method: "GET",
+          headers,
+          credentials: "include",
+          signal: controller.signal,
+        });
+
+        if (!controller.signal.aborted) {
+          setState({ loading: false, allowed: res.ok });
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setState({ loading: false, allowed: false });
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, [location.pathname, location.search]);
+
+  if (state.loading) {
+    return <Loader />;
+  }
+
+  if (!state.allowed) {
+    const returnTo = `${location.pathname || "/"}${location.search || ""}`;
+    return <Navigate to={`/login?returnTo=${encodeURIComponent(returnTo)}`} replace />;
+  }
+
+  return children;
+}
+
 /* ------------------------ PWA Service Worker (prod) ------------------------ */
 /**
  * ✅ FIX: The "MIME type text/html" module errors on localhost preview are
@@ -1996,7 +2045,14 @@ export default function App() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/badges" element={<BadgesPage />} />
-          <Route path="/meal-planning" element={<MealPlanningPage />} />
+          <Route
+            path="/meal-planning"
+            element={
+              <AuthRouteGuard>
+                <MealPlanningPage />
+              </AuthRouteGuard>
+            }
+          />
           <Route
             path="/meal-planning/prep"
             element={<Navigate to="/meal-planning?tool=prep" replace />}
@@ -2019,7 +2075,11 @@ export default function App() {
           />
           <Route
             path="/meal-planning/planner-dashboard"
-            element={<MealPlannerScaffoldPage />}
+            element={
+              <AuthRouteGuard>
+                <MealPlannerScaffoldPage />
+              </AuthRouteGuard>
+            }
           />
 
           {/* ✅ UPDATED: load the real household meals page first */}
@@ -2037,62 +2097,128 @@ export default function App() {
           ))}
 
           {/* Storehouse + tools */}
-          <Route path="/storehouse" element={<StorehousePage />} />
+          <Route
+            path="/storehouse"
+            element={
+              <AuthRouteGuard>
+                <StorehousePage />
+              </AuthRouteGuard>
+            }
+          />
           <Route
             path="/storehouse/planner"
-            element={<StorehousePlannerScaffoldPage />}
+            element={
+              <AuthRouteGuard>
+                <StorehousePlannerScaffoldPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/storehouse/auto-fill"
-            element={<StorehouseAutoFillPlanner />}
+            element={
+              <AuthRouteGuard>
+                <StorehouseAutoFillPlanner />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/storehouse/preserve-queue"
-            element={<PreservationQueuePlanner />}
+            element={
+              <AuthRouteGuard>
+                <PreservationQueuePlanner />
+              </AuthRouteGuard>
+            }
           />
 
           {/* NEW sections */}
           {/* ✅ Homestead Planner ONLY surfaces here: /homesteadplanner/** */}
-          <Route path="/homesteadplanner" element={<HomesteadPage />} />
+          <Route
+            path="/homesteadplanner"
+            element={
+              <AuthRouteGuard>
+                <HomesteadPage />
+              </AuthRouteGuard>
+            }
+          />
           <Route
             path="/homesteadplanner/targets"
-            element={<HomesteadTargetsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadTargetsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/components"
-            element={<HomesteadComponentsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadComponentsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/inventory"
-            element={<HomesteadInventoryPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadInventoryPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/batches"
-            element={<HomesteadBatchesPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadBatchesPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/garden-targets"
-            element={<HomesteadGardenTargetsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadGardenTargetsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/animal-targets"
-            element={<HomesteadAnimalTargetsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadAnimalTargetsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/cuisines"
-            element={<HomesteadCuisinesPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadCuisinesPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/preferences"
-            element={<HomesteadPreferencesPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadPreferencesPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/skills"
-            element={<HomesteadSkillsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadSkillsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/planner"
-            element={<HomesteadPlannerScaffoldPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadPlannerScaffoldPage />
+              </AuthRouteGuard>
+            }
           />
 
           {/* ✅ Back-compat redirects to keep old links working, but NOT surface outputs elsewhere */}

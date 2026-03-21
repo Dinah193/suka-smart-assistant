@@ -1,6 +1,9 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import crypto from "node:crypto";
 
 const TOKEN_PREFIX = "ssa_dev_";
+const STORE_FILE = path.resolve(process.cwd(), "data", "auth-state.json");
 const resetRequests = new Map();
 const revokedTokens = new Set();
 
@@ -10,6 +13,10 @@ function nowIso() {
 
 function normalizeEmail(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function sanitizeName(value) {
+  return String(value || "").trim();
 }
 
 function toBase64Url(text) {
@@ -31,6 +38,74 @@ function sanitizeReturnTo(value, fallback = "/") {
   return input;
 }
 
+function hashPassword(value) {
+  return crypto.createHash("sha256").update(String(value || ""), "utf8").digest("hex");
+}
+
+function defaultStore() {
+  return {
+    version: 1,
+    accountsByEmail: {},
+    userHouseholdMap: {},
+    householdsById: {},
+    updatedAt: nowIso(),
+  };
+}
+
+async function ensureStoreDir() {
+  await fs.mkdir(path.dirname(STORE_FILE), { recursive: true });
+}
+
+async function readStore() {
+  await ensureStoreDir();
+  try {
+    const raw = await fs.readFile(STORE_FILE, "utf8");
+    const parsed = JSON.parse(raw || "{}");
+    return {
+      ...defaultStore(),
+      ...parsed,
+      accountsByEmail: parsed?.accountsByEmail && typeof parsed.accountsByEmail === "object" ? parsed.accountsByEmail : {},
+      userHouseholdMap: parsed?.userHouseholdMap && typeof parsed.userHouseholdMap === "object" ? parsed.userHouseholdMap : {},
+      householdsById: parsed?.householdsById && typeof parsed.householdsById === "object" ? parsed.householdsById : {},
+    };
+  } catch {
+    return defaultStore();
+  }
+}
+
+async function writeStore(store) {
+  await ensureStoreDir();
+  const payload = {
+    ...defaultStore(),
+    ...store,
+    updatedAt: nowIso(),
+  };
+  await fs.writeFile(STORE_FILE, JSON.stringify(payload, null, 2), "utf8");
+  return payload;
+}
+
+function accountToUser(account) {
+  if (!account || typeof account !== "object") return null;
+  return {
+    id: account.id || account.userId,
+    userId: account.userId || account.id,
+    email: account.email || null,
+    firstName: account.firstName || "",
+    lastName: account.lastName || "",
+    householdId: account.householdId || null,
+    roles: Array.isArray(account.roles) ? account.roles : ["member"],
+    authProvider: account.authProvider || "native",
+  };
+}
+
+function buildSession(user) {
+  return {
+    accessToken: buildDevToken(user),
+    tokenType: "Bearer",
+    issuedAt: nowIso(),
+  };
+}
+
 function buildDevToken(user) {
   return `${TOKEN_PREFIX}${toBase64Url(JSON.stringify(user || {}))}`;
 }
@@ -48,65 +123,88 @@ function parseDevToken(token) {
   }
 }
 
-export function createNativeAccount({ firstName = "", lastName = "", email = "" } = {}) {
+async function getAccountByEmail(email) {
+  const store = await readStore();
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) return null;
+  return store.accountsByEmail[normalizedEmail] || null;
+}
+
+async function getAccountByUserId(userId) {
+  const store = await readStore();
+  const needle = String(userId || "").trim();
+  if (!needle) return null;
+  const account = Object.values(store.accountsByEmail).find((candidate) => {
+    return candidate?.userId === needle || candidate?.id === needle;
+  });
+  return account || null;
+}
+
+export async function createNativeAccount({ firstName = "", lastName = "", email = "", password = "" } = {}) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) {
     throw new Error("email_required");
   }
+  if (String(password || "").length < 10) {
+    throw new Error("weak_password");
+  }
 
-  const user = {
-    id: `native_${crypto.randomUUID()}`,
-    userId: `native_${crypto.randomUUID()}`,
-    householdId: null,
+  const store = await readStore();
+  if (store.accountsByEmail[normalizedEmail]) {
+    throw new Error("account_exists");
+  }
+
+  const userId = `native_${crypto.randomUUID()}`;
+  const account = {
+    id: userId,
+    userId,
     email: normalizedEmail,
-    firstName: String(firstName || "").trim(),
-    lastName: String(lastName || "").trim(),
+    firstName: sanitizeName(firstName),
+    lastName: sanitizeName(lastName),
+    passwordHash: hashPassword(password),
+    householdId: null,
     roles: ["member"],
     authProvider: "native",
     createdAt: nowIso(),
+    updatedAt: nowIso(),
   };
 
+  store.accountsByEmail[normalizedEmail] = account;
+  await writeStore(store);
+
+  const user = accountToUser(account);
   return {
     ok: true,
     user,
-    session: {
-      accessToken: buildDevToken(user),
-      tokenType: "Bearer",
-      issuedAt: nowIso(),
-    },
+    session: buildSession(user),
     scaffold: true,
   };
 }
 
-export function signInNative({ email = "" } = {}) {
+export async function signInNative({ email = "", password = "" } = {}) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) {
     throw new Error("email_required");
   }
 
-  const user = {
-    id: `native_${toBase64Url(normalizedEmail).slice(0, 16)}`,
-    userId: `native_${toBase64Url(normalizedEmail).slice(0, 16)}`,
-    householdId: null,
-    email: normalizedEmail,
-    roles: ["member"],
-    authProvider: "native",
-    signedInAt: nowIso(),
-  };
+  const account = await getAccountByEmail(normalizedEmail);
+  if (!account) {
+    throw new Error("invalid_credentials");
+  }
+  if (hashPassword(password) !== account.passwordHash) {
+    throw new Error("invalid_credentials");
+  }
 
+  const user = accountToUser(account);
   return {
     ok: true,
     user,
-    session: {
-      accessToken: buildDevToken(user),
-      tokenType: "Bearer",
-      issuedAt: nowIso(),
-    },
+    session: buildSession(user),
     scaffold: true,
   };
 }
 
-export function requestPasswordReset({ email = "" } = {}) {
+export async function requestPasswordReset({ email = "" } = {}) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) {
     throw new Error("email_required");
@@ -127,7 +225,7 @@ export function requestPasswordReset({ email = "" } = {}) {
   };
 }
 
-export function resetPassword({ token = "" } = {}) {
+export async function resetPassword({ token = "", password = "" } = {}) {
   const key = String(token || "").trim();
   const record = key ? resetRequests.get(key) : null;
   if (!record) {
@@ -137,10 +235,20 @@ export function resetPassword({ token = "" } = {}) {
     };
   }
 
+  const normalizedEmail = normalizeEmail(record.email);
+  const store = await readStore();
+  const account = store.accountsByEmail[normalizedEmail];
+  if (account && String(password || "").length >= 10) {
+    account.passwordHash = hashPassword(password);
+    account.updatedAt = nowIso();
+    store.accountsByEmail[normalizedEmail] = account;
+    await writeStore(store);
+  }
+
   resetRequests.delete(key);
   return {
     ok: true,
-    email: record.email,
+    email: normalizedEmail,
     scaffold: true,
     message: "Password reset accepted in scaffold mode.",
   };
@@ -216,13 +324,17 @@ export async function verifyHttpRequest({ token = "", sessionToken = "" } = {}) 
   const parsed = parseDevToken(bearer) || parseDevToken(cookieToken);
   if (!parsed) return { ok: false };
 
+  const account = await getAccountByUserId(parsed.userId || parsed.id);
+  if (!account) return { ok: false };
+  const user = accountToUser(account);
+
   return {
     ok: true,
-    userId: parsed.userId || parsed.id,
-    homeId: parsed.householdId || null,
-    familyId: parsed.familyId || null,
-    roles: Array.isArray(parsed.roles) ? parsed.roles : [],
-    provider: parsed.authProvider || "native",
+    userId: user.userId || user.id,
+    homeId: user.householdId || null,
+    familyId: null,
+    roles: Array.isArray(user.roles) ? user.roles : [],
+    provider: user.authProvider || "native",
   };
 }
 
@@ -230,7 +342,7 @@ export async function verifySocketToken(token) {
   return verifyHttpRequest({ token });
 }
 
-export function getCurrentSession({ token = "", sessionToken = "" } = {}) {
+export async function getCurrentSession({ token = "", sessionToken = "" } = {}) {
   const raw = String(token || "").trim() || String(sessionToken || "").trim();
   if (!raw || revokedTokens.has(raw)) {
     return { ok: false, error: "unauthorized" };
@@ -241,22 +353,22 @@ export function getCurrentSession({ token = "", sessionToken = "" } = {}) {
     return { ok: false, error: "unauthorized" };
   }
 
+  const account = await getAccountByUserId(parsed.userId || parsed.id);
+  if (!account) {
+    return { ok: false, error: "unauthorized" };
+  }
+
+  const user = accountToUser(account);
+
   return {
     ok: true,
-    user: {
-      id: parsed.id || parsed.userId,
-      userId: parsed.userId || parsed.id,
-      email: parsed.email || null,
-      householdId: parsed.householdId || null,
-      roles: Array.isArray(parsed.roles) ? parsed.roles : [],
-      authProvider: parsed.authProvider || "native",
-    },
+    user,
     scaffold: true,
   };
 }
 
-export function refreshSession({ token = "", sessionToken = "" } = {}) {
-  const current = getCurrentSession({ token, sessionToken });
+export async function refreshSession({ token = "", sessionToken = "" } = {}) {
+  const current = await getCurrentSession({ token, sessionToken });
   if (!current.ok) {
     return current;
   }
@@ -286,6 +398,57 @@ export function revokeSession({ token = "", sessionToken = "" } = {}) {
   };
 }
 
+export async function bootstrapHouseholdMembership({ token = "", sessionToken = "", householdId = "", householdName = "" } = {}) {
+  const current = await getCurrentSession({ token, sessionToken });
+  if (!current.ok) return current;
+
+  const existingUser = current.user || {};
+  const userId = existingUser.userId || existingUser.id;
+  if (!userId) return { ok: false, error: "unauthorized" };
+
+  const requested = String(householdId || "").trim();
+  const resolvedHouseholdId = requested || `house_${crypto.randomUUID()}`;
+  const resolvedHouseholdName = String(householdName || "My Household").trim() || "My Household";
+
+  const store = await readStore();
+  const account = Object.values(store.accountsByEmail).find((candidate) => {
+    return candidate?.userId === userId || candidate?.id === userId;
+  });
+  if (!account) return { ok: false, error: "unauthorized" };
+
+  const currentHouseholdId = String(account.householdId || "").trim();
+  if (currentHouseholdId && currentHouseholdId !== resolvedHouseholdId) {
+    return {
+      ok: false,
+      error: "household_membership_locked",
+      userId,
+      householdId: currentHouseholdId,
+    };
+  }
+
+  account.householdId = currentHouseholdId || resolvedHouseholdId;
+  account.updatedAt = nowIso();
+  store.accountsByEmail[normalizeEmail(account.email)] = account;
+  store.userHouseholdMap[userId] = account.householdId;
+  store.householdsById[account.householdId] = {
+    id: account.householdId,
+    name: resolvedHouseholdName,
+    createdByUserId: userId,
+    createdAt: store.householdsById[account.householdId]?.createdAt || nowIso(),
+    updatedAt: nowIso(),
+  };
+  await writeStore(store);
+
+  const user = accountToUser(account);
+  return {
+    ok: true,
+    user,
+    household: store.householdsById[account.householdId],
+    session: buildSession(user),
+    scaffold: true,
+  };
+}
+
 export default {
   createNativeAccount,
   signInNative,
@@ -298,4 +461,5 @@ export default {
   getCurrentSession,
   refreshSession,
   revokeSession,
+  bootstrapHouseholdMembership,
 };

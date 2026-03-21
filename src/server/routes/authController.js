@@ -12,6 +12,7 @@ import {
   getCurrentSession,
   refreshSession,
   revokeSession,
+  bootstrapHouseholdMembership,
 } from "../services/authService.js";
 
 const router = express.Router();
@@ -99,10 +100,14 @@ async function handleLogin(req, res) {
   }
 
   try {
-    const result = signInNative(body);
+    const result = await signInNative(body);
     return res.status(200).json(result);
   } catch (err) {
-    return res.status(400).json({ ok: false, error: String(err?.message || err) });
+    const error = String(err?.message || err);
+    if (error === "invalid_credentials") {
+      return res.status(401).json({ ok: false, error });
+    }
+    return res.status(400).json({ ok: false, error });
   }
 }
 
@@ -123,10 +128,14 @@ async function handleRegister(req, res) {
   }
 
   try {
-    const result = createNativeAccount(body);
+    const result = await createNativeAccount(body);
     return res.status(201).json(result);
   } catch (err) {
-    return res.status(400).json({ ok: false, error: String(err?.message || err) });
+    const error = String(err?.message || err);
+    if (error === "account_exists") {
+      return res.status(409).json({ ok: false, error });
+    }
+    return res.status(400).json({ ok: false, error });
   }
 }
 
@@ -134,7 +143,7 @@ router.post("/register", express.json(), handleRegister);
 router.post("/signup", express.json(), handleRegister);
 
 router.get("/me", async (req, res) => {
-  const result = getCurrentSession(readAuthTokens(req));
+  const result = await getCurrentSession(readAuthTokens(req));
   if (!result.ok) {
     return res.status(401).json(result);
   }
@@ -142,7 +151,7 @@ router.get("/me", async (req, res) => {
 });
 
 router.post("/session/refresh", async (req, res) => {
-  const result = refreshSession(readAuthTokens(req));
+  const result = await refreshSession(readAuthTokens(req));
   if (!result.ok) {
     return res.status(401).json(result);
   }
@@ -157,6 +166,22 @@ router.post("/logout", async (req, res) => {
   return res.status(200).json(result);
 });
 
+router.post("/household/bootstrap", express.json(), async (req, res) => {
+  const body = req.body || {};
+  const result = await bootstrapHouseholdMembership({
+    ...readAuthTokens(req),
+    householdId: body.householdId,
+    householdName: body.householdName,
+  });
+  if (!result.ok) {
+    if (result.error === "household_membership_locked") {
+      return res.status(409).json(result);
+    }
+    return res.status(401).json(result);
+  }
+  return res.status(200).json(result);
+});
+
 router.post("/forgot-password", express.json(), async (req, res) => {
   const body = req.body || {};
   if (!validateForgotPassword(body)) {
@@ -164,7 +189,7 @@ router.post("/forgot-password", express.json(), async (req, res) => {
   }
 
   try {
-    const result = requestPasswordReset(body);
+    const result = await requestPasswordReset(body);
     return res.status(200).json(result);
   } catch (err) {
     return res.status(400).json({ ok: false, error: String(err?.message || err) });
@@ -181,7 +206,7 @@ router.post("/reset-password", express.json(), async (req, res) => {
     return res.status(400).json({ ok: false, error: "password_mismatch" });
   }
 
-  const result = resetPassword(body);
+  const result = await resetPassword(body);
   if (!result.ok) {
     return res.status(400).json(result);
   }
