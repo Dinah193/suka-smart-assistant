@@ -50,6 +50,10 @@ data/preferences.bak.json
 data/catalog-index-cache.json
 data/battle-rhythm.json
 
+# --- consolidated smoke artifacts ---
+docs/qa/consolidated-smoke-contract-report-*.json
+!docs/qa/consolidated-smoke-contract-report-latest.json
+
 __pycache__/
 *.pyc
 .vercel
