@@ -3,9 +3,9 @@
 const express = require("express");
 const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
 const {
-  requireHouseholdAccessStub,
-  requireCollaborationStub,
-  requireEntitlementStub,
+  requireHouseholdAccessPolicy,
+  requireCollaborationPolicy,
+  requireEntitlementPolicy,
 } = require("../middleware/accessPolicy.js");
 
 function loadPlannerIntegrationService() {
@@ -59,9 +59,9 @@ function loadOperationalOutboxObservability() {
 const router = express.Router();
 
 router.use(authenticateRequest);
-router.use(requireHouseholdAccessStub());
-router.use(requireCollaborationStub({ moduleKey: "planners" }));
-router.use(requireEntitlementStub({ feature: "planner.base" }));
+router.use(requireHouseholdAccessPolicy());
+router.use(requireCollaborationPolicy({ moduleKey: "planners" }));
+router.use(requireEntitlementPolicy({ feature: "planner.base" }));
 
 router.get("/meal", async (req, res) => {
   try {

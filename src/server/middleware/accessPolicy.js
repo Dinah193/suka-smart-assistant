@@ -1,5 +1,12 @@
 "use strict";
 
+const {
+  methodToAction,
+  resolveHouseholdAccess,
+  hasCollaborationGrant,
+  hasEntitlement,
+} = require("../services/accessPolicyService.js");
+
 function readRequestedHouseholdId(req) {
   const fromParams = req?.params?.householdId;
   const fromQuery = req?.query?.householdId || req?.query?.householdKey;
@@ -12,72 +19,123 @@ function ensureRequestHousehold(req, householdId) {
   if (req?.query && !req.query.householdId) {
     req.query.householdId = householdId;
   }
-  if (req?.body && typeof req.body === "object" && !Array.isArray(req.body) && !req.body.householdId) {
+  if (
+    req?.body &&
+    typeof req.body === "object" &&
+    !Array.isArray(req.body) &&
+    !req.body.householdId
+  ) {
     req.body.householdId = householdId;
   }
 }
 
-function requireHouseholdAccessStub() {
-  return (req, res, next) => {
-    const userHouseholdId = String(req?.user?.homeId || req?.user?.householdId || "").trim() || null;
-    if (!userHouseholdId) {
-      return res.status(403).json({ ok: false, error: "household_membership_required" });
-    }
+function requireHouseholdAccessPolicy() {
+  return async (req, res, next) => {
+    try {
+      const userId = String(req?.user?.id || req?.user?.userId || "").trim();
+      if (!userId) {
+        return res.status(401).json({ ok: false, error: "unauthorized" });
+      }
 
-    const requestedHouseholdId = readRequestedHouseholdId(req);
-    if (requestedHouseholdId && requestedHouseholdId !== userHouseholdId) {
-      return res.status(403).json({ ok: false, error: "household_scope_forbidden" });
-    }
+      const requestedHouseholdId = readRequestedHouseholdId(req);
+      const access = await resolveHouseholdAccess({
+        userId,
+        requestedHouseholdId,
+      });
 
-    ensureRequestHousehold(req, requestedHouseholdId || userHouseholdId);
-    req.accessContext = {
-      ...(req.accessContext || {}),
-      householdId: userHouseholdId,
-      requestedHouseholdId: requestedHouseholdId || userHouseholdId,
-      collaborationGranted: false,
-      entitlementGranted: true,
-    };
-    return next();
+      if (!access.ownHouseholdId) {
+        return res.status(403).json({ ok: false, error: "household_membership_required" });
+      }
+
+      if (!access.requestedHouseholdId) {
+        return res.status(403).json({ ok: false, error: "household_scope_required" });
+      }
+
+      ensureRequestHousehold(req, access.requestedHouseholdId);
+      req.accessContext = {
+        ...(req.accessContext || {}),
+        userId,
+        action: methodToAction(req.method),
+        ownHouseholdId: access.ownHouseholdId,
+        householdId: access.requestedHouseholdId,
+        requestedHouseholdId: access.requestedHouseholdId,
+        sameHousehold: access.sameHousehold,
+        role: access.role || null,
+      };
+
+      return next();
+    } catch (error) {
+      return next(error);
+    }
   };
 }
 
-function requireCollaborationStub({ moduleKey = "unknown" } = {}) {
-  return (req, _res, next) => {
-    const collaborationToken = String(req?.headers?.["x-collaboration-grant"] || "").trim();
-    const collaborationGranted = Boolean(collaborationToken);
+function requireCollaborationPolicy({ moduleKey = "unknown" } = {}) {
+  return async (req, res, next) => {
+    try {
+      const ctx = req.accessContext || {};
+      if (ctx.sameHousehold) {
+        req.accessContext = {
+          ...ctx,
+          moduleKey,
+          collaborationGranted: true,
+          collaborationDecision: "same_household",
+        };
+        return next();
+      }
 
-    req.accessContext = {
-      ...(req.accessContext || {}),
-      moduleKey,
-      collaborationGranted,
-      collaborationDecision: collaborationGranted ? "header_grant" : "household_only",
-    };
-    return next();
+      const granted = await hasCollaborationGrant({
+        userId: ctx.userId,
+        moduleKey,
+        householdId: ctx.householdId,
+        action: ctx.action || methodToAction(req.method),
+      });
+
+      if (!granted) {
+        return res.status(403).json({ ok: false, error: "collaboration_required" });
+      }
+
+      req.accessContext = {
+        ...ctx,
+        moduleKey,
+        collaborationGranted: true,
+        collaborationDecision: "policy_grant",
+      };
+
+      return next();
+    } catch (error) {
+      return next(error);
+    }
   };
 }
 
-function requireEntitlementStub({ feature = "planner.base" } = {}) {
-  return (req, _res, next) => {
-    const entitlementToken = String(req?.headers?.["x-entitlements"] || "")
-      .split(",")
-      .map((value) => String(value || "").trim())
-      .filter(Boolean);
+function requireEntitlementPolicy({ feature = "planner.base" } = {}) {
+  return async (req, res, next) => {
+    try {
+      const ctx = req.accessContext || {};
+      const granted = await hasEntitlement({
+        userId: ctx.userId,
+        feature,
+      });
 
-    const entitlementGranted =
-      entitlementToken.includes("all") || entitlementToken.includes(feature) || entitlementToken.length === 0;
+      if (!granted) {
+        return res.status(403).json({ ok: false, error: "entitlement_required", feature });
+      }
 
-    req.accessContext = {
-      ...(req.accessContext || {}),
-      entitlementFeature: feature,
-      entitlementGranted,
-      entitlementToken,
-    };
-    return next();
+      req.accessContext = {
+        ...ctx,
+        entitlementFeature: feature,
+        entitlementGranted: true,
+      };
+      return next();
+    } catch (error) {
+      return next(error);
+    }
   };
 }
 
 module.exports = {
-  requireHouseholdAccessStub,
-  requireCollaborationStub,
-  requireEntitlementStub,
+  requireHouseholdAccessPolicy,
+  requireCollaborationPolicy,
+  requireEntitlementPolicy,
 };
