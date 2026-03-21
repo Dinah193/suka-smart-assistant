@@ -32,7 +32,7 @@ export default function Card({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-bold tracking-tight text-slate-900" style={{ fontFamily: "Merriweather, Georgia, serif" }}>
+          <h3 className="font-display text-lg font-bold tracking-tight text-slate-900">
             {title}
           </h3>
           {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
@@ -46,7 +46,7 @@ export default function Card({
 
       {(value != null || delta != null) && (
         <div className="mt-4 flex items-end justify-between">
-          <p className="text-3xl font-black text-slate-900" style={{ fontFamily: "Inter, ui-sans-serif, system-ui" }}>
+          <p className="font-sans text-3xl font-black text-slate-900">
             {value}
           </p>
           {delta != null ? (

@@ -60,7 +60,7 @@ export default function Avatar({
       </div>
       {(name || subtitle) && (
         <div className="leading-tight">
-          <p className="font-semibold text-slate-800" style={{ fontFamily: "Inter, ui-sans-serif, system-ui" }}>
+          <p className="font-sans font-semibold text-slate-800">
             {name}
           </p>
           {subtitle ? <p className="text-xs text-slate-500">{subtitle}</p> : null}

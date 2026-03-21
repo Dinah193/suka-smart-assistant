@@ -46,7 +46,7 @@ export default function FeedPost({
         />
       </div>
 
-      <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-700" style={{ fontFamily: "Inter, ui-sans-serif, system-ui" }}>
+      <p className="font-sans mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
         {content}
       </p>
 

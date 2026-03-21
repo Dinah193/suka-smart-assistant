@@ -50,7 +50,7 @@ export default function Notification({
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold" style={{ fontFamily: "Merriweather, Georgia, serif" }}>
+          <p className="font-display font-semibold">
             {title}
           </p>
           <p className="mt-1 text-sm leading-relaxed opacity-90">{message}</p>
