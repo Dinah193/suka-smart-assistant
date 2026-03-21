@@ -106,6 +106,7 @@ router.post("/collaboration-grants/upsert", express.json(), async (req, res, nex
       actions: body.actions,
       startsAt: body.startsAt,
       expiresAt: body.expiresAt,
+      payload: body,
       ok: true,
     });
     return res.json({ ok: true, grant });
@@ -115,6 +116,7 @@ router.post("/collaboration-grants/upsert", express.json(), async (req, res, nex
         userId: req.body?.userId,
         householdId: req.body?.householdId,
         moduleKey: req.body?.moduleKey,
+        payload: req.body || {},
         ok: false,
         error: "invalid_collaboration_grant",
       });
@@ -136,6 +138,7 @@ router.delete("/collaboration-grants", express.json(), async (req, res, next) =>
       userId: body.userId,
       householdId: body.householdId,
       moduleKey: body.moduleKey,
+      payload: body,
       removed: Boolean(result?.removed),
       ok: true,
     });
@@ -146,6 +149,7 @@ router.delete("/collaboration-grants", express.json(), async (req, res, next) =>
         userId: req.body?.userId,
         householdId: req.body?.householdId,
         moduleKey: req.body?.moduleKey,
+        payload: req.body || {},
         ok: false,
         error: "invalid_collaboration_grant",
       });
@@ -164,6 +168,7 @@ router.put("/entitlements/:userId", express.json(), async (req, res, next) => {
     await emitPolicyAudit(req, "entitlement.set", {
       userId: req.params.userId,
       entitlements: req.body?.entitlements,
+      payload: req.body || {},
       ok: true,
     });
     return res.json({ ok: true, ...result });
@@ -172,6 +177,7 @@ router.put("/entitlements/:userId", express.json(), async (req, res, next) => {
       await emitPolicyAudit(req, "entitlement.set", {
         userId: req.params?.userId,
         entitlements: req.body?.entitlements,
+        payload: req.body || {},
         ok: false,
         error: "invalid_user_id",
       });
