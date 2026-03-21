@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 
 const TOKEN_PREFIX = "ssa_dev_";
 const resetRequests = new Map();
+const revokedTokens = new Set();
 
 function nowIso() {
   return new Date().toISOString();
@@ -206,7 +207,13 @@ export function handleHubCallback({ code = "", state = "" } = {}) {
 }
 
 export async function verifyHttpRequest({ token = "", sessionToken = "" } = {}) {
-  const parsed = parseDevToken(token) || parseDevToken(sessionToken);
+  const bearer = String(token || "").trim();
+  const cookieToken = String(sessionToken || "").trim();
+  if ((bearer && revokedTokens.has(bearer)) || (cookieToken && revokedTokens.has(cookieToken))) {
+    return { ok: false };
+  }
+
+  const parsed = parseDevToken(bearer) || parseDevToken(cookieToken);
   if (!parsed) return { ok: false };
 
   return {
@@ -223,6 +230,62 @@ export async function verifySocketToken(token) {
   return verifyHttpRequest({ token });
 }
 
+export function getCurrentSession({ token = "", sessionToken = "" } = {}) {
+  const raw = String(token || "").trim() || String(sessionToken || "").trim();
+  if (!raw || revokedTokens.has(raw)) {
+    return { ok: false, error: "unauthorized" };
+  }
+
+  const parsed = parseDevToken(raw);
+  if (!parsed) {
+    return { ok: false, error: "unauthorized" };
+  }
+
+  return {
+    ok: true,
+    user: {
+      id: parsed.id || parsed.userId,
+      userId: parsed.userId || parsed.id,
+      email: parsed.email || null,
+      householdId: parsed.householdId || null,
+      roles: Array.isArray(parsed.roles) ? parsed.roles : [],
+      authProvider: parsed.authProvider || "native",
+    },
+    scaffold: true,
+  };
+}
+
+export function refreshSession({ token = "", sessionToken = "" } = {}) {
+  const current = getCurrentSession({ token, sessionToken });
+  if (!current.ok) {
+    return current;
+  }
+
+  return {
+    ok: true,
+    user: current.user,
+    session: {
+      accessToken: buildDevToken(current.user),
+      tokenType: "Bearer",
+      issuedAt: nowIso(),
+    },
+    scaffold: true,
+  };
+}
+
+export function revokeSession({ token = "", sessionToken = "" } = {}) {
+  const bearer = String(token || "").trim();
+  const cookieToken = String(sessionToken || "").trim();
+  if (bearer) revokedTokens.add(bearer);
+  if (cookieToken) revokedTokens.add(cookieToken);
+
+  return {
+    ok: true,
+    revoked: Boolean(bearer || cookieToken),
+    scaffold: true,
+  };
+}
+
 export default {
   createNativeAccount,
   signInNative,
@@ -232,4 +295,7 @@ export default {
   handleHubCallback,
   verifyHttpRequest,
   verifySocketToken,
+  getCurrentSession,
+  refreshSession,
+  revokeSession,
 };

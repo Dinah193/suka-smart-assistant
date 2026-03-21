@@ -9,6 +9,9 @@ import {
   resetPassword,
   getHubAuthorizationUrl,
   handleHubCallback,
+  getCurrentSession,
+  refreshSession,
+  revokeSession,
 } from "../services/authService.js";
 
 const router = express.Router();
@@ -78,6 +81,13 @@ function validationError(validate) {
   };
 }
 
+function readAuthTokens(req) {
+  const tokenHeader = req.headers.authorization || req.headers["x-auth-token"] || "";
+  const token = String(tokenHeader).replace(/^Bearer\s+/i, "").trim();
+  const sessionToken = req.cookies?.session || "";
+  return { token, sessionToken };
+}
+
 router.get("/health", (_req, res) => {
   res.json({ ok: true, service: "authController", scaffold: true });
 });
@@ -122,6 +132,30 @@ async function handleRegister(req, res) {
 
 router.post("/register", express.json(), handleRegister);
 router.post("/signup", express.json(), handleRegister);
+
+router.get("/me", async (req, res) => {
+  const result = getCurrentSession(readAuthTokens(req));
+  if (!result.ok) {
+    return res.status(401).json(result);
+  }
+  return res.status(200).json(result);
+});
+
+router.post("/session/refresh", async (req, res) => {
+  const result = refreshSession(readAuthTokens(req));
+  if (!result.ok) {
+    return res.status(401).json(result);
+  }
+  return res.status(200).json(result);
+});
+
+router.post("/logout", async (req, res) => {
+  const result = revokeSession(readAuthTokens(req));
+  if (typeof res.clearCookie === "function") {
+    res.clearCookie("session", { path: "/" });
+  }
+  return res.status(200).json(result);
+});
 
 router.post("/forgot-password", express.json(), async (req, res) => {
   const body = req.body || {};
