@@ -30,18 +30,41 @@ async function waitForHealth(port, timeoutMs = 12000) {
   throw new Error("health_timeout");
 }
 
-async function waitForRoute(url, timeoutMs = 12000) {
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    try {
-      const res = await fetch(url);
-      if (res.status === 200) return;
-    } catch {
-      // retry
-    }
-    await sleep(150);
-  }
-  throw new Error("route_timeout");
+async function registerAndBootstrap(baseUrl, suffix) {
+  const email = `battle-rhythm-${suffix}-${Date.now()}@example.com`;
+  const password = "Password1234";
+
+  const registerRes = await fetch(`${baseUrl}/api/auth/register`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      firstName: "Battle",
+      lastName: "Rhythm",
+      email,
+      password,
+      confirmPassword: password,
+      consent: true,
+    }),
+  });
+  const registerJson = await registerRes.json();
+  expect(registerRes.status).toBe(201);
+
+  const token = String(registerJson?.session?.accessToken || "");
+  const bootstrapRes = await fetch(`${baseUrl}/api/auth/household/bootstrap`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ householdName: "Battle Rhythm Contract" }),
+  });
+  const bootstrapJson = await bootstrapRes.json();
+  expect(bootstrapRes.status).toBe(200);
+
+  return {
+    token: String(bootstrapJson?.session?.accessToken || token),
+    householdId: String(bootstrapJson?.user?.householdId || ""),
+  };
 }
 
 function startServer(extraEnv = {}) {
@@ -96,14 +119,21 @@ runtimeDescribe("battleRhythmController runtime contract", () => {
 
     try {
       await waitForHealth(port);
-      await waitForRoute(`${baseUrl}/api/battle-rhythm/health`);
+      const session = await registerAndBootstrap(baseUrl, "runtime");
+      const auth = { authorization: `Bearer ${session.token}` };
 
-      const healthRes = await fetch(`${baseUrl}/api/battle-rhythm/health`);
+      const healthRes = await fetch(
+        `${baseUrl}/api/battle-rhythm/health?householdId=${encodeURIComponent(session.householdId)}`,
+        { headers: auth }
+      );
       const health = await healthRes.json();
       expect(healthRes.status).toBe(200);
       expect(health.ok).toBe(true);
 
-      const profileGetRes = await fetch(`${baseUrl}/api/battle-rhythm/profile?userId=u-test`);
+      const profileGetRes = await fetch(
+        `${baseUrl}/api/battle-rhythm/profile?userId=u-test&householdId=${encodeURIComponent(session.householdId)}`,
+        { headers: auth }
+      );
       const profileGet = await profileGetRes.json();
       expect(profileGetRes.status).toBe(200);
       expect(profileGet.ok).toBe(true);
@@ -111,9 +141,10 @@ runtimeDescribe("battleRhythmController runtime contract", () => {
 
       const profilePostRes = await fetch(`${baseUrl}/api/battle-rhythm/profile`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...auth },
         body: JSON.stringify({
           userId: "u-test",
+          householdId: session.householdId,
           profile: { enabled: true, seasoning: { saltFactor: 0.8 } },
         }),
       });
@@ -122,7 +153,10 @@ runtimeDescribe("battleRhythmController runtime contract", () => {
       expect(profilePost.ok).toBe(true);
       expect(profilePost.profile.enabled).toBe(true);
 
-      const customListRes = await fetch(`${baseUrl}/api/battle-rhythm/customizations?userId=u-test`);
+      const customListRes = await fetch(
+        `${baseUrl}/api/battle-rhythm/customizations?userId=u-test&householdId=${encodeURIComponent(session.householdId)}`,
+        { headers: auth }
+      );
       const customList = await customListRes.json();
       expect(customListRes.status).toBe(200);
       expect(customList.ok).toBe(true);
@@ -130,9 +164,10 @@ runtimeDescribe("battleRhythmController runtime contract", () => {
 
       const customUpsertRes = await fetch(`${baseUrl}/api/battle-rhythm/customizations`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...auth },
         body: JSON.stringify({
           userId: "u-test",
+          householdId: session.householdId,
           recipeId: "r-test",
           override: { timing: { quickNightMaxMins: 30 } },
         }),
@@ -143,8 +178,9 @@ runtimeDescribe("battleRhythmController runtime contract", () => {
 
       const resolvePassRes = await fetch(`${baseUrl}/api/battle-rhythm/resolve`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...auth },
         body: JSON.stringify({
+          householdId: session.householdId,
           recipe: { id: "r-test", ingredients: [{ name: "salt", qty: 2 }], time: { totalMins: 30 } },
           resolveServerSide: false,
         }),

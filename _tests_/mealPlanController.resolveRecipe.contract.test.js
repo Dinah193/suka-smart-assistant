@@ -30,18 +30,41 @@ async function waitForHealth(port, timeoutMs = 12000) {
   throw new Error("health_timeout");
 }
 
-async function waitForRoute(url, timeoutMs = 12000) {
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    try {
-      const res = await fetch(url);
-      if (res.status === 200) return;
-    } catch {
-      // retry
-    }
-    await sleep(150);
-  }
-  throw new Error("route_timeout");
+async function registerAndBootstrap(baseUrl, suffix) {
+  const email = `mealplan-${suffix}-${Date.now()}@example.com`;
+  const password = "Password1234";
+
+  const registerRes = await fetch(`${baseUrl}/api/auth/register`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      firstName: "Meal",
+      lastName: "Planner",
+      email,
+      password,
+      confirmPassword: password,
+      consent: true,
+    }),
+  });
+  const registerJson = await registerRes.json();
+  expect(registerRes.status).toBe(201);
+
+  const token = String(registerJson?.session?.accessToken || "");
+  const bootstrapRes = await fetch(`${baseUrl}/api/auth/household/bootstrap`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ householdName: "Meal Plan Contract" }),
+  });
+  const bootstrapJson = await bootstrapRes.json();
+  expect(bootstrapRes.status).toBe(200);
+
+  return {
+    token: String(bootstrapJson?.session?.accessToken || token),
+    householdId: String(bootstrapJson?.user?.householdId || ""),
+  };
 }
 
 function startServer(extraEnv = {}) {
@@ -95,7 +118,14 @@ runtimeDescribe("mealPlanController /resolveRecipe runtime contract", () => {
 
     try {
       await waitForHealth(port);
-      await waitForRoute(`${baseUrl}/api/mealplan/health`);
+      const session = await registerAndBootstrap(baseUrl, "runtime");
+      const auth = { authorization: `Bearer ${session.token}` };
+
+      const healthRes = await fetch(
+        `${baseUrl}/api/mealplan/health?householdId=${encodeURIComponent(session.householdId)}`,
+        { headers: auth }
+      );
+      expect(healthRes.status).toBe(200);
 
       const recipe = {
         id: "r101",
@@ -109,8 +139,8 @@ runtimeDescribe("mealPlanController /resolveRecipe runtime contract", () => {
 
       const passRes = await fetch(`${baseUrl}/api/mealplan/resolveRecipe`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ recipe, resolveServerSide: false }),
+        headers: { "content-type": "application/json", ...auth },
+        body: JSON.stringify({ recipe, householdId: session.householdId, resolveServerSide: false }),
       });
       const passBody = await passRes.json();
       expect(passRes.status).toBe(200);
@@ -120,9 +150,10 @@ runtimeDescribe("mealPlanController /resolveRecipe runtime contract", () => {
 
       const resolveRes = await fetch(`${baseUrl}/api/mealplan/resolveRecipe`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...auth },
         body: JSON.stringify({
           recipe,
+          householdId: session.householdId,
           rhythm: {
             enabled: true,
             seasoning: { saltFactor: 0.5 },
@@ -149,8 +180,8 @@ runtimeDescribe("mealPlanController /resolveRecipe runtime contract", () => {
 
       const invalidRes = await fetch(`${baseUrl}/api/mealplan/resolveRecipe`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ resolveServerSide: true }),
+        headers: { "content-type": "application/json", ...auth },
+        body: JSON.stringify({ householdId: session.householdId, resolveServerSide: true }),
       });
       const invalidBody = await invalidRes.json();
       expect(invalidRes.status).toBe(400);
