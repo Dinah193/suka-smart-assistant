@@ -9,6 +9,10 @@ const AUDIT_FILE = path.resolve(
   process.cwd(),
   String(process.env.ACCESS_POLICY_AUDIT_FILE || "data/access-policy-audit.json")
 );
+const AUDIT_ROLLOVER_FILE = path.resolve(
+  process.cwd(),
+  String(process.env.ACCESS_POLICY_AUDIT_ROLLOVER_FILE || "data/access-policy-audit-rollover.ndjson")
+);
 
 function nowIso() {
   return new Date().toISOString();
@@ -59,6 +63,121 @@ function asNumber(value, fallback) {
   return n;
 }
 
+function asBoolean(value, fallback) {
+  if (typeof value === "boolean") return value;
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) return true;
+  if (["0", "false", "no", "off"].includes(normalized)) return false;
+  return fallback;
+}
+
+function asPositiveInteger(value, fallback, floor = 1) {
+  const n = Math.floor(asNumber(value, fallback));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(floor, n);
+}
+
+async function appendRolloverEvents(entries = []) {
+  if (!Array.isArray(entries) || entries.length < 1) return 0;
+  await ensureDataDir();
+  await fs.mkdir(path.dirname(AUDIT_ROLLOVER_FILE), { recursive: true });
+  const payload = entries.map((row) => JSON.stringify(row)).join("\n") + "\n";
+  await fs.appendFile(AUDIT_ROLLOVER_FILE, payload, "utf8");
+  return entries.length;
+}
+
+function applyRetentionRules(store, {
+  nowMs = Date.now(),
+  maxEvents = process.env.ACCESS_POLICY_AUDIT_MAX_EVENTS,
+  retentionMs = process.env.ACCESS_POLICY_AUDIT_RETENTION_MS,
+} = {}) {
+  const items = Array.isArray(store?.events) ? store.events.slice() : [];
+  const hasExplicitMaxEvents = maxEvents !== undefined && maxEvents !== null && String(maxEvents).trim() !== "";
+  const safeMaxEvents = hasExplicitMaxEvents
+    ? asPositiveInteger(maxEvents, 5000, 1)
+    : asPositiveInteger(maxEvents, 5000, 500);
+  const safeRetentionMs = Math.max(60_000, asNumber(retentionMs, 30 * 24 * 60 * 60 * 1000));
+  const floorMs = nowMs - safeRetentionMs;
+
+  const kept = [];
+  const pruned = [];
+  for (const evt of items) {
+    const atMs = parseIsoToMs(evt?.at);
+    if (atMs != null && atMs < floorMs) {
+      pruned.push({ reason: "retention_age", event: evt });
+      continue;
+    }
+    kept.push(evt);
+  }
+
+  if (kept.length > safeMaxEvents) {
+    const overflow = kept.length - safeMaxEvents;
+    const overflowItems = kept.slice(0, overflow);
+    for (const evt of overflowItems) {
+      pruned.push({ reason: "max_events", event: evt });
+    }
+    kept.splice(0, overflow);
+  }
+
+  return {
+    kept,
+    pruned,
+    config: {
+      maxEvents: safeMaxEvents,
+      retentionMs: safeRetentionMs,
+    },
+  };
+}
+
+async function applyAuditMaintenance(store, {
+  nowMs = Date.now(),
+  maxEvents = process.env.ACCESS_POLICY_AUDIT_MAX_EVENTS,
+  retentionMs = process.env.ACCESS_POLICY_AUDIT_RETENTION_MS,
+  rolloverEnabled = process.env.ACCESS_POLICY_AUDIT_ROLLOVER_ENABLED,
+} = {}) {
+  const retention = applyRetentionRules(store, { nowMs, maxEvents, retentionMs });
+  const nextStore = {
+    ...defaultStore(),
+    ...(store && typeof store === "object" ? store : {}),
+    events: retention.kept,
+  };
+
+  const shouldRollover = asBoolean(rolloverEnabled, true);
+  const rolledAt = nowIso();
+  let rolledCount = 0;
+  if (shouldRollover && retention.pruned.length > 0) {
+    rolledCount = await appendRolloverEvents(
+      retention.pruned.map((entry) => ({
+        rolledAt,
+        reason: entry.reason,
+        event: entry.event,
+      }))
+    );
+  }
+
+  const prunedByReason = retention.pruned.reduce((acc, row) => {
+    const key = String(row?.reason || "unknown");
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  return {
+    nextStore,
+    result: {
+      ok: true,
+      config: {
+        ...retention.config,
+        rolloverEnabled: shouldRollover,
+      },
+      totalBefore: Array.isArray(store?.events) ? store.events.length : 0,
+      totalAfter: retention.kept.length,
+      prunedCount: retention.pruned.length,
+      rolledCount,
+      prunedByReason,
+    },
+  };
+}
+
 async function appendAuditEvent({
   type = "access_policy_admin",
   action = "unknown",
@@ -81,13 +200,16 @@ async function appendAuditEvent({
   };
   store.events.push(event);
 
-  const maxEvents = Math.max(500, asNumber(process.env.ACCESS_POLICY_AUDIT_MAX_EVENTS, 5000));
-  if (store.events.length > maxEvents) {
-    store.events = store.events.slice(store.events.length - maxEvents);
-  }
-
-  await writeAuditStore(store);
+  const maintenance = await applyAuditMaintenance(store);
+  await writeAuditStore(maintenance.nextStore);
   return event;
+}
+
+async function runAuditMaintenance(options = {}) {
+  const store = await readAuditStore();
+  const maintenance = await applyAuditMaintenance(store, options);
+  await writeAuditStore(maintenance.nextStore);
+  return maintenance.result;
 }
 
 function parseIsoToMs(input) {
@@ -231,5 +353,6 @@ module.exports = {
   appendAuditEvent,
   listAuditEvents,
   listAuditAlerts,
+  runAuditMaintenance,
   summarizeAuditEvents,
 };

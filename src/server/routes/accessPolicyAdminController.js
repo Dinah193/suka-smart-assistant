@@ -7,6 +7,7 @@ const {
   appendAuditEvent,
   listAuditAlerts,
   listAuditEvents,
+  runAuditMaintenance,
   summarizeAuditEvents,
 } = require("../services/accessPolicyAuditService.js");
 const {
@@ -130,6 +131,26 @@ router.get("/audit-events/alerts", async (req, res, next) => {
       highRiskActionThreshold: req.query?.highRiskActionThreshold || null,
       highRiskActions: req.query?.highRiskActions || null,
       alertCount: Array.isArray(out?.alerts) ? out.alerts.length : 0,
+    });
+    return res.json(out);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post("/audit-events/maintenance", express.json(), async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const out = await runAuditMaintenance({
+      maxEvents: body.maxEvents ?? req.query?.maxEvents,
+      retentionMs: body.retentionMs ?? req.query?.retentionMs,
+      rolloverEnabled: body.rolloverEnabled ?? req.query?.rolloverEnabled,
+    });
+    await emitPolicyAudit(req, "policy.audit_events.maintenance.run", {
+      maxEvents: body.maxEvents ?? req.query?.maxEvents ?? null,
+      retentionMs: body.retentionMs ?? req.query?.retentionMs ?? null,
+      rolloverEnabled: body.rolloverEnabled ?? req.query?.rolloverEnabled ?? null,
+      result: out,
     });
     return res.json(out);
   } catch (error) {

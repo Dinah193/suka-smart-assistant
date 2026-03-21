@@ -179,3 +179,34 @@ Summary response includes:
 - `totalInWindow`
 - `failuresInWindow`
 - `countsByAction`
+
+Read threshold-based alerts:
+
+```bash
+curl -sS \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  "http://127.0.0.1:4000/api/access-policies/audit-events/alerts?windowMs=3600000&failureRateThreshold=0.25&minEvents=10&highRiskActionThreshold=5"
+```
+
+Run retention/rollover maintenance:
+
+```bash
+curl -sS -X POST \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  -H "content-type: application/json" \
+  -d '{
+    "maxEvents": 5000,
+    "retentionMs": 2592000000,
+    "rolloverEnabled": true
+  }' \
+  "http://127.0.0.1:4000/api/access-policies/audit-events/maintenance"
+```
+
+Maintenance controls are also configurable via env:
+
+- `ACCESS_POLICY_AUDIT_MAX_EVENTS`
+- `ACCESS_POLICY_AUDIT_RETENTION_MS`
+- `ACCESS_POLICY_AUDIT_ROLLOVER_ENABLED`
+- `ACCESS_POLICY_AUDIT_ROLLOVER_FILE`
