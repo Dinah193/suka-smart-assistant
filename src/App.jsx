@@ -14,6 +14,7 @@ import {
 
 import RightSidebar from "@/components/layout/RightSidebar";
 import { VisionProvider } from "@/context/VisionContext";
+import { resolveSession } from "./services/auth/sessionClient.js";
 import "./index.css";
 
 /* -------------------------------------------------------------------------- */
@@ -1868,23 +1869,10 @@ function AuthRouteGuard({ children }) {
 
     (async () => {
       try {
-        let token = "";
-        try {
-          token = String(window.localStorage?.getItem("ssa.auth.token.access") || "").trim();
-        } catch {
-          token = "";
-        }
-
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch("/api/auth/me", {
-          method: "GET",
-          headers,
-          credentials: "include",
-          signal: controller.signal,
-        });
+        const session = await resolveSession();
 
         if (!controller.signal.aborted) {
-          setState({ loading: false, allowed: res.ok });
+          setState({ loading: false, allowed: Boolean(session?.ok && session?.user) });
         }
       } catch {
         if (!controller.signal.aborted) {
