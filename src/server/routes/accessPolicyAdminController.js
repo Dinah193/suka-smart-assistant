@@ -4,6 +4,10 @@ const express = require("express");
 const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
 const { redactObject } = require("../services/loggingSanitizer.js");
 const {
+  appendAuditEvent,
+  listAuditEvents,
+} = require("../services/accessPolicyAuditService.js");
+const {
   readAccessPolicyState,
   upsertCollaborationGrant,
   removeCollaborationGrant,
@@ -13,7 +17,7 @@ const {
 const router = express.Router();
 const basePath = "/api/access-policies";
 
-function emitPolicyAudit(req, action, details = {}) {
+async function emitPolicyAudit(req, action, details = {}) {
   const actorUserId = String(req?.user?.id || req?.user?.userId || "").trim() || "unknown";
   const event = {
     type: "access_policy_admin",
@@ -23,6 +27,11 @@ function emitPolicyAudit(req, action, details = {}) {
     at: new Date().toISOString(),
     details: redactObject(details),
   };
+  try {
+    await appendAuditEvent(event);
+  } catch {
+    // keep admin routes functional even if audit persistence fails
+  }
   console.info("[audit:access-policy]", JSON.stringify(event));
 }
 
@@ -46,13 +55,34 @@ router.use(requireOpsToken);
 router.get("/", async (_req, res, next) => {
   try {
     const policy = await readAccessPolicyState();
-    emitPolicyAudit(_req, "policy.read", {
+    await emitPolicyAudit(_req, "policy.read", {
       collaborationGrantCount: Array.isArray(policy?.collaborationGrants)
         ? policy.collaborationGrants.length
         : 0,
       entitlementUserCount: Object.keys(policy?.entitlementGrantsByUserId || {}).length,
     });
     return res.json({ ok: true, policy });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/audit-events", async (req, res, next) => {
+  try {
+    const out = await listAuditEvents({
+      action: req.query?.action,
+      actorUserId: req.query?.actorUserId,
+      since: req.query?.since,
+      limit: req.query?.limit,
+    });
+    await emitPolicyAudit(req, "policy.audit_events.read", {
+      action: req.query?.action || null,
+      actorUserId: req.query?.actorUserId || null,
+      since: req.query?.since || null,
+      limit: req.query?.limit || null,
+      resultCount: out.count,
+    });
+    return res.json(out);
   } catch (error) {
     return next(error);
   }
@@ -69,7 +99,7 @@ router.post("/collaboration-grants/upsert", express.json(), async (req, res, nex
       startsAt: body.startsAt,
       expiresAt: body.expiresAt,
     });
-    emitPolicyAudit(req, "collaboration_grant.upsert", {
+    await emitPolicyAudit(req, "collaboration_grant.upsert", {
       userId: body.userId,
       householdId: body.householdId,
       moduleKey: body.moduleKey,
@@ -81,7 +111,7 @@ router.post("/collaboration-grants/upsert", express.json(), async (req, res, nex
     return res.json({ ok: true, grant });
   } catch (error) {
     if (String(error?.message || "") === "invalid_collaboration_grant") {
-      emitPolicyAudit(req, "collaboration_grant.upsert", {
+      await emitPolicyAudit(req, "collaboration_grant.upsert", {
         userId: req.body?.userId,
         householdId: req.body?.householdId,
         moduleKey: req.body?.moduleKey,
@@ -102,7 +132,7 @@ router.delete("/collaboration-grants", express.json(), async (req, res, next) =>
       householdId: body.householdId,
       moduleKey: body.moduleKey,
     });
-    emitPolicyAudit(req, "collaboration_grant.delete", {
+    await emitPolicyAudit(req, "collaboration_grant.delete", {
       userId: body.userId,
       householdId: body.householdId,
       moduleKey: body.moduleKey,
@@ -112,7 +142,7 @@ router.delete("/collaboration-grants", express.json(), async (req, res, next) =>
     return res.json({ ok: true, ...result });
   } catch (error) {
     if (String(error?.message || "") === "invalid_collaboration_grant") {
-      emitPolicyAudit(req, "collaboration_grant.delete", {
+      await emitPolicyAudit(req, "collaboration_grant.delete", {
         userId: req.body?.userId,
         householdId: req.body?.householdId,
         moduleKey: req.body?.moduleKey,
@@ -131,7 +161,7 @@ router.put("/entitlements/:userId", express.json(), async (req, res, next) => {
       userId: req.params.userId,
       entitlements: req.body?.entitlements,
     });
-    emitPolicyAudit(req, "entitlement.set", {
+    await emitPolicyAudit(req, "entitlement.set", {
       userId: req.params.userId,
       entitlements: req.body?.entitlements,
       ok: true,
@@ -139,7 +169,7 @@ router.put("/entitlements/:userId", express.json(), async (req, res, next) => {
     return res.json({ ok: true, ...result });
   } catch (error) {
     if (String(error?.message || "") === "invalid_user_id") {
-      emitPolicyAudit(req, "entitlement.set", {
+      await emitPolicyAudit(req, "entitlement.set", {
         userId: req.params?.userId,
         entitlements: req.body?.entitlements,
         ok: false,
