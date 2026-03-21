@@ -118,30 +118,6 @@ export default function LoginPage() {
         authProvider: user.authProvider || "native",
       };
 
-      if (!identity.householdId && accessToken) {
-        const bootstrapRes = await fetch("/api/auth/household/bootstrap", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({ householdName: "My Household" }),
-        });
-        const bootstrapPayload = await bootstrapRes.json().catch(() => ({}));
-        if (bootstrapRes.ok && bootstrapPayload?.ok) {
-          const nextUser = bootstrapPayload.user || {};
-          identity = {
-            ...identity,
-            householdId: nextUser.householdId || identity.householdId,
-          };
-          const refreshed = bootstrapPayload?.session?.accessToken || "";
-          if (refreshed) {
-            setToken(refreshed, { kind: "access", source: "auth.household.bootstrap" });
-          }
-        }
-      }
-
       try {
         if (rememberMe) {
           window.localStorage?.setItem("ssa.auth.rememberEmail", email.trim());
@@ -159,7 +135,11 @@ export default function LoginPage() {
       window.__suka.profile = identity;
 
       trackAuthEvent("auth_success_native", { page_type: "sign_in" });
-      navigate("/");
+      if (!identity.householdId) {
+        navigate(`/onboarding/household?returnTo=${encodeURIComponent("/")}`);
+      } else {
+        navigate("/");
+      }
     } catch {
       setFormError("We could not sign you in with that email and password.");
       trackAuthEvent("auth_failure_native", {
