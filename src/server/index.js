@@ -360,6 +360,7 @@ const candidates = [
   { file: "./routes/planners.js", basePath: "/api/planners" },
   "./routes/labelsController.js",
   "./routes/preferencesController.js",
+  { file: "./routes/authController.js", basePath: "/api/auth" },
   { file: "./routes/battleRhythmController.js", basePath: "/api/battle-rhythm" },
   "./routes/automationsController.js",
   "./routes/realtimeController.js",
