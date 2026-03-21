@@ -19,7 +19,10 @@ try {
 }
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
-const DB_FILE = path.join(DATA_DIR, "battle-rhythm.json");
+const DB_FILE = path.resolve(
+  process.cwd(),
+  String(process.env.BATTLE_RHYTHM_DB_FILE || path.join("data", "battle-rhythm.json"))
+);
 
 let UserBattleRhythmModel = null;
 let RecipeCustomizationModel = null;
@@ -33,7 +36,7 @@ function normKey(v) {
 }
 
 async function ensureDataDir() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.mkdir(path.dirname(DB_FILE), { recursive: true });
 }
 
 async function readFileStore() {

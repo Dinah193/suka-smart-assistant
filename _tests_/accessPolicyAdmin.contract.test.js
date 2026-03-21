@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(__dirname, "..");
@@ -29,6 +30,12 @@ async function waitForHealth(port, timeoutMs = 20000) {
 
 function startServer(extraEnv = {}) {
   const port = randomPort();
+  const testDataDir = path.resolve(
+    repoRoot,
+    ".tmp",
+    "test-data",
+    `access-policy-admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
   const child = spawn(process.execPath, [serverEntry], {
     cwd: repoRoot,
     env: {
@@ -42,12 +49,15 @@ function startServer(extraEnv = {}) {
       MONGODB_REQUIRED: "false",
       MONGO_SERVER_SELECTION_TIMEOUT_MS: "100",
       ACCESS_POLICY_ADMIN_TOKEN: "ops-contract-token",
+      AUTH_STATE_FILE: path.join(testDataDir, "auth-state.json"),
+      ACCESS_POLICY_FILE: path.join(testDataDir, "access-policies.json"),
+      BATTLE_RHYTHM_DB_FILE: path.join(testDataDir, "battle-rhythm.json"),
       ...extraEnv,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-  return { child, port };
+  return { child, port, testDataDir };
 }
 
 async function stopServer(child) {
@@ -115,7 +125,7 @@ async function registerAndBootstrap(baseUrl, suffix) {
 
 describe("access policy admin contract", () => {
   it("supports read/update workflows behind auth plus ops token", async () => {
-    const { child, port } = startServer();
+    const { child, port, testDataDir } = startServer();
     const baseUrl = `http://127.0.0.1:${port}`;
 
     try {
@@ -194,6 +204,7 @@ describe("access policy admin contract", () => {
       expect(typeof deleteBody.removed).toBe("boolean");
     } finally {
       await stopServer(child);
+      await fs.rm(testDataDir, { recursive: true, force: true }).catch(() => {});
     }
   }, 30000);
 });

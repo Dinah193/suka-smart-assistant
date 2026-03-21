@@ -3,7 +3,10 @@ import path from "node:path";
 import crypto from "node:crypto";
 
 const TOKEN_PREFIX = "ssa_at_";
-const STORE_FILE = path.resolve(process.cwd(), "data", "auth-state.json");
+const STORE_FILE = path.resolve(
+  process.cwd(),
+  String(process.env.AUTH_STATE_FILE || "data/auth-state.json")
+);
 const SESSION_COOKIE_NAME = String(process.env.AUTH_SESSION_COOKIE_NAME || "ssa_session").trim();
 const ACCESS_TOKEN_SECRETS = (() => {
   const csv = String(process.env.AUTH_ACCESS_TOKEN_SECRETS || "").trim();

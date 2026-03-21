@@ -3,8 +3,14 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
-const AUTH_STATE_FILE = path.resolve(process.cwd(), "data", "auth-state.json");
-const ACCESS_POLICY_FILE = path.resolve(process.cwd(), "data", "access-policies.json");
+const AUTH_STATE_FILE = path.resolve(
+  process.cwd(),
+  String(process.env.AUTH_STATE_FILE || "data/auth-state.json")
+);
+const ACCESS_POLICY_FILE = path.resolve(
+  process.cwd(),
+  String(process.env.ACCESS_POLICY_FILE || "data/access-policies.json")
+);
 
 function nowIso() {
   return new Date().toISOString();

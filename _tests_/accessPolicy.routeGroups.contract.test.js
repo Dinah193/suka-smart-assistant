@@ -5,7 +5,21 @@ import path from "node:path";
 
 const repoRoot = path.resolve(__dirname, "..");
 const serverEntry = path.resolve(repoRoot, "src/server/index.js");
-const accessPolicyFile = path.resolve(repoRoot, "data/access-policies.json");
+
+function createTestDataPaths(tag = "route-groups") {
+  const testDataDir = path.resolve(
+    repoRoot,
+    ".tmp",
+    "test-data",
+    `${tag}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
+  return {
+    testDataDir,
+    authStateFile: path.join(testDataDir, "auth-state.json"),
+    accessPolicyFile: path.join(testDataDir, "access-policies.json"),
+    battleRhythmFile: path.join(testDataDir, "battle-rhythm.json"),
+  };
+}
 
 function randomPort() {
   return 13000 + Math.floor(Math.random() * 10000);
@@ -29,7 +43,7 @@ async function waitForHealth(port, timeoutMs = 20000) {
   throw new Error("health_timeout");
 }
 
-function startServer(extraEnv = {}) {
+function startServer(extraEnv = {}, testDataPaths = createTestDataPaths()) {
   const port = randomPort();
   const child = spawn(process.execPath, [serverEntry], {
     cwd: repoRoot,
@@ -43,12 +57,15 @@ function startServer(extraEnv = {}) {
       POSTGRES_REQUIRED: "false",
       MONGODB_REQUIRED: "false",
       MONGO_SERVER_SELECTION_TIMEOUT_MS: "100",
+      AUTH_STATE_FILE: testDataPaths.authStateFile,
+      ACCESS_POLICY_FILE: testDataPaths.accessPolicyFile,
+      BATTLE_RHYTHM_DB_FILE: testDataPaths.battleRhythmFile,
       ...extraEnv,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-  return { child, port };
+  return { child, port, testDataPaths };
 }
 
 async function stopServer(child) {
@@ -87,7 +104,7 @@ function defaultPolicyStore() {
   };
 }
 
-async function readPolicyBackup() {
+async function readPolicyBackup(accessPolicyFile) {
   try {
     return await fs.readFile(accessPolicyFile, "utf8");
   } catch {
@@ -95,7 +112,7 @@ async function readPolicyBackup() {
   }
 }
 
-async function restorePolicyBackup(backup) {
+async function restorePolicyBackup(backup, accessPolicyFile) {
   if (backup === null) {
     try {
       await fs.unlink(accessPolicyFile);
@@ -107,7 +124,7 @@ async function restorePolicyBackup(backup) {
   await fs.writeFile(accessPolicyFile, backup, "utf8");
 }
 
-async function grantReadCollaboration({ userId, householdId, moduleKey }) {
+async function grantReadCollaboration({ userId, householdId, moduleKey, accessPolicyFile }) {
   let parsed = defaultPolicyStore();
   try {
     const raw = await fs.readFile(accessPolicyFile, "utf8");
@@ -210,8 +227,9 @@ const routeGroups = [
 describe("access policy protected route groups contract", () => {
   for (const group of routeGroups) {
     it(`enforces unauthenticated, no-policy, and granted-policy flows for ${group.name}`, async () => {
-      const backup = await readPolicyBackup();
-      const { child, port } = startServer();
+      const testDataPaths = createTestDataPaths(group.name);
+      const backup = await readPolicyBackup(testDataPaths.accessPolicyFile);
+      const { child, port } = startServer({}, testDataPaths);
       const baseUrl = `http://127.0.0.1:${port}`;
 
       try {
@@ -234,6 +252,7 @@ describe("access policy protected route groups contract", () => {
           userId: collaborator.userId,
           householdId: owner.householdId,
           moduleKey: group.moduleKey,
+          accessPolicyFile: testDataPaths.accessPolicyFile,
         });
 
         const grantedRes = await fetch(group.buildUrl(baseUrl, owner.householdId), {
@@ -244,7 +263,8 @@ describe("access policy protected route groups contract", () => {
         expect(grantedBody.ok).toBe(true);
       } finally {
         await stopServer(child);
-        await restorePolicyBackup(backup);
+        await restorePolicyBackup(backup, testDataPaths.accessPolicyFile);
+        await fs.rm(testDataPaths.testDataDir, { recursive: true, force: true }).catch(() => {});
       }
     }, 30000);
   }

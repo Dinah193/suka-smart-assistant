@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(__dirname, "..");
@@ -69,6 +70,12 @@ async function registerAndBootstrap(baseUrl, suffix) {
 
 function startServer(extraEnv = {}) {
   const port = randomPort();
+  const testDataDir = path.resolve(
+    repoRoot,
+    ".tmp",
+    "test-data",
+    `battle-rhythm-contract-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
   const child = spawn(process.execPath, [serverEntry], {
     cwd: repoRoot,
     env: {
@@ -78,12 +85,15 @@ function startServer(extraEnv = {}) {
       PORT: String(port),
       STRICT_STARTUP_ENV: "false",
       MONGO_SERVER_SELECTION_TIMEOUT_MS: "100",
+      AUTH_STATE_FILE: path.join(testDataDir, "auth-state.json"),
+      ACCESS_POLICY_FILE: path.join(testDataDir, "access-policies.json"),
+      BATTLE_RHYTHM_DB_FILE: path.join(testDataDir, "battle-rhythm.json"),
       ...extraEnv,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-  return { child, port };
+  return { child, port, testDataDir };
 }
 
 async function stopServer(child) {
@@ -114,7 +124,7 @@ async function stopServer(child) {
 
 runtimeDescribe("battleRhythmController runtime contract", () => {
   it("serves profile/customizations/resolve endpoints under /api/battle-rhythm", async () => {
-    const { child, port } = startServer();
+    const { child, port, testDataDir } = startServer();
     const baseUrl = `http://127.0.0.1:${port}`;
 
     try {
@@ -191,6 +201,7 @@ runtimeDescribe("battleRhythmController runtime contract", () => {
       expect(resolvePass.passthrough).toBe(true);
     } finally {
       await stopServer(child);
+      await fs.rm(testDataDir, { recursive: true, force: true }).catch(() => {});
     }
   }, 25000);
 });
