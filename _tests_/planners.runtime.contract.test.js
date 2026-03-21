@@ -429,6 +429,71 @@ runtimeDescribe("planners endpoints runtime smoke", () => {
       await stopServer(child);
     }
   }, 25000);
+
+  it("enforces auth and household scope on /api/planners endpoints", async () => {
+    const { child, port } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const email = `planner-guard-${Date.now()}@example.com`;
+    const password = "Password1234";
+
+    try {
+      await waitForHealth(port);
+
+      const unauthRes = await fetch(`${baseUrl}/api/planners/meal?householdId=guard-home`);
+      expect(unauthRes.status).toBe(401);
+
+      const registerRes = await fetch(`${baseUrl}/api/auth/register`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          firstName: "Planner",
+          lastName: "Guard",
+          email,
+          password,
+          confirmPassword: password,
+          consent: true,
+        }),
+      });
+      const registerJson = await registerRes.json();
+      expect(registerRes.status).toBe(201);
+      const accessToken = String(registerJson?.session?.accessToken || "");
+      expect(accessToken.length).toBeGreaterThan(0);
+
+      const noHouseholdRes = await fetch(`${baseUrl}/api/planners/meal?householdId=guard-home`, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      const noHouseholdJson = await noHouseholdRes.json();
+      expect(noHouseholdRes.status).toBe(403);
+      expect(noHouseholdJson.error).toBe("household_membership_required");
+
+      const bootstrapRes = await fetch(`${baseUrl}/api/auth/household/bootstrap`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ householdName: "Guard Household" }),
+      });
+      const bootstrapJson = await bootstrapRes.json();
+      expect(bootstrapRes.status).toBe(200);
+      expect(bootstrapJson.ok).toBe(true);
+      const householdId = String(bootstrapJson?.user?.householdId || "");
+      expect(householdId.length).toBeGreaterThan(0);
+
+      const householdToken = String(bootstrapJson?.session?.accessToken || accessToken);
+      const scopedRes = await fetch(
+        `${baseUrl}/api/planners/meal?householdId=${encodeURIComponent(householdId)}`,
+        {
+          headers: { authorization: `Bearer ${householdToken}` },
+        }
+      );
+      const scopedJson = await scopedRes.json();
+      expect(scopedRes.status).toBe(200);
+      expect(typeof scopedJson.ok).toBe("boolean");
+    } finally {
+      await stopServer(child);
+    }
+  }, 25000);
 });
 
 runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
