@@ -222,6 +222,19 @@ const routeGroups = [
     buildUrl: (baseUrl, householdId) =>
       `${baseUrl}/api/battle-rhythm/health?householdId=${encodeURIComponent(householdId)}`,
   },
+  {
+    name: "realtime",
+    moduleKey: "realtime",
+    buildUrl: (baseUrl, householdId) =>
+      `${baseUrl}/api/realtime/suggestions?householdId=${encodeURIComponent(
+        householdId
+      )}&scope=household&scopeId=${encodeURIComponent(householdId)}`,
+    assertGranted: (res, body) => {
+      expect([200, 400, 503]).toContain(res.status);
+      expect(String(body?.error || "")).not.toBe("collaboration_required");
+      expect(String(body?.error || "")).not.toBe("entitlement_required");
+    },
+  },
 ];
 
 describe("access policy protected route groups contract", () => {
@@ -259,8 +272,12 @@ describe("access policy protected route groups contract", () => {
           headers: { authorization: `Bearer ${collaborator.token}` },
         });
         const grantedBody = await grantedRes.json();
-        expect(grantedRes.status).toBe(200);
-        expect(grantedBody.ok).toBe(true);
+        if (typeof group.assertGranted === "function") {
+          group.assertGranted(grantedRes, grantedBody);
+        } else {
+          expect(grantedRes.status).toBe(200);
+          expect(grantedBody.ok).toBe(true);
+        }
       } finally {
         await stopServer(child);
         await restorePolicyBackup(backup, testDataPaths.accessPolicyFile);

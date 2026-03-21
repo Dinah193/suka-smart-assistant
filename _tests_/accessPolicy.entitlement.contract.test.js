@@ -221,6 +221,14 @@ const groups = [
     buildUrl: (baseUrl, householdId) =>
       `${baseUrl}/api/battle-rhythm/health?householdId=${encodeURIComponent(householdId)}`,
   },
+  {
+    name: "realtime",
+    moduleKey: "realtime",
+    buildUrl: (baseUrl, householdId) =>
+      `${baseUrl}/api/realtime/suggestions?householdId=${encodeURIComponent(
+        householdId
+      )}&scope=household&scopeId=${encodeURIComponent(householdId)}`,
+  },
 ];
 
 describe("access policy entitlement gating contract", () => {
@@ -263,6 +271,9 @@ describe("access policy entitlement gating contract", () => {
         const allowed = await allowedRes.json();
         if (group.name === "planners") {
           expect([200, 500]).toContain(allowedRes.status);
+          expect(String(allowed?.error || "")).not.toBe("entitlement_required");
+        } else if (group.name === "realtime") {
+          expect([200, 400, 503]).toContain(allowedRes.status);
           expect(String(allowed?.error || "")).not.toBe("entitlement_required");
         } else {
           expect(allowedRes.status).toBe(200);

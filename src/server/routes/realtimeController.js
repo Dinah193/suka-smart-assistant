@@ -10,6 +10,11 @@
 const express = require("express");
 const { correlationContext } = require("../middleware/realtime/correlationContext.js");
 const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
+const {
+  requireHouseholdAccessPolicy,
+  requireCollaborationPolicy,
+  requireEntitlementPolicy,
+} = require("../middleware/accessPolicy.js");
 const { authorizeScope } = require("../middleware/realtime/authorizeScope.js");
 const { validateRealtimeEnvelope } = require("../middleware/realtime/validateRealtimeEnvelope.js");
 const { mapRealtimeErrorMiddleware } = require("../middleware/realtime/mapRealtimeError.js");
@@ -86,7 +91,16 @@ router.get("/health", (req, res) => {
 });
 
 // Deterministic realtime middleware ordering for all non-health routes.
-router.use(realtimeRateLimit, correlationContext, authenticateRequest, authorizeScope, validateRealtimeEnvelope);
+router.use(
+  realtimeRateLimit,
+  correlationContext,
+  authenticateRequest,
+  requireHouseholdAccessPolicy(),
+  requireCollaborationPolicy({ moduleKey: "realtime" }),
+  requireEntitlementPolicy({ feature: "planner.base" }),
+  authorizeScope,
+  validateRealtimeEnvelope
+);
 
 router.post("/signals", (req, res) => {
   const c = getCoordinator();
