@@ -274,7 +274,10 @@ async function hasCollaborationGrant({ userId, moduleKey, householdId, action })
 }
 
 async function hasEntitlement({ userId, feature }) {
-  if (!feature || feature === "planner.base") return true;
+  const strictPlannerBase =
+    String(process.env.STRICT_PLANNER_BASE_ENTITLEMENT || "false").toLowerCase() === "true";
+  if (!feature) return true;
+  if (feature === "planner.base" && !strictPlannerBase) return true;
 
   const policyState = await readAccessPolicyState();
   const userEntitlements = Array.isArray(policyState?.entitlementGrantsByUserId?.[String(userId || "")])
