@@ -602,10 +602,6 @@ const AnimalsRemote = lazyPage(
 );
 
 /** General nav */
-const CustomLocations = lazyPage(
-  ["./pages/custom-locations.jsx", "./pages/custom-locations.jsx"],
-  "CustomLocations",
-);
 const CalendarPage = lazyPage(
   ["@/pages/calendar.jsx", "./pages/calendar.jsx"],
   "Calendar",
@@ -979,7 +975,6 @@ async function prewarmAllRoutesDev() {
       "./components/storehouse/PreservationQueuePlanner.jsx",
     ],
 
-    ["./pages/custom-locations.jsx", "./pages/custom-locations.jsx"],
     ["./pages/roles.jsx", "@/pages/roles.jsx"],
     ["./pages/jobs.jsx", "./pages/jobs.jsx"],
 
@@ -1761,11 +1756,6 @@ function AppChrome({ children }) {
             <NavItem to="/cleaning" icon="🧼" label="Cleaning" />
             <NavItem to="/garden" icon="🌿" label="Garden" />
             <NavItem to="/animals" icon="🐓" label="Animal Care" />
-            <NavItem
-              to="/custom-locations"
-              icon="📍"
-              label="Custom Locations"
-            />
             <NavItem to="/roles" icon="🗂️" label="Roles & Tasks" />
             <NavItem to="/knowledge" icon="📚" label="Knowledge Base" />
           </ul>
@@ -1934,7 +1924,6 @@ export default function App() {
           <Route path="/cleaning" element={<Cleaning />} />
           <Route path="/garden" element={<Garden />} />
           <Route path="/animals" element={<Animals />} />
-          <Route path="/custom-locations" element={<CustomLocations />} />
 
           {/* ✅ FIX: roles route uses RolesPage (not JobsPage) */}
           <Route path="/roles" element={<RolesPage />} />
@@ -1961,6 +1950,26 @@ export default function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/badges" element={<BadgesPage />} />
           <Route path="/meal-planning" element={<MealPlanningPage />} />
+          <Route
+            path="/meal-planning/prep"
+            element={<Navigate to="/meal-planning?tool=prep" replace />}
+          />
+          <Route
+            path="/meal-planning/batch"
+            element={<Navigate to="/meal-planning?tool=cycle" replace />}
+          />
+          <Route
+            path="/meal-planning/batches"
+            element={<Navigate to="/meal-planning?tool=cycle" replace />}
+          />
+          <Route
+            path="/meal-planning/batch-collab"
+            element={<Navigate to="/meal-planning?tool=cycle" replace />}
+          />
+          <Route
+            path="/meal-planning/collaboration"
+            element={<Navigate to="/meal-planning?tool=prep" replace />}
+          />
           <Route
             path="/meal-planning/planner-dashboard"
             element={<MealPlannerScaffoldPage />}

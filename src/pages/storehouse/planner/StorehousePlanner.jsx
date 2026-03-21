@@ -6,6 +6,7 @@ import {
   updateStorehouseInventory,
 } from "./InventoryEstimatorService";
 import { getStorehouseRecommendations } from "./Neo4jStorehouseGraphService";
+import { eventBus } from "@/services/events/eventBus";
 
 function toFiniteNumber(value, fallback = 0) {
   const n = Number(value);
@@ -52,6 +53,25 @@ export default function StorehousePlanner({ householdId = "default-household", n
         ...(next || {}),
       },
     }));
+  };
+
+  const trackRowAction = (action, status, row, extra = {}) => {
+    try {
+      eventBus.emit("storehouse:row-action", {
+        action,
+        status,
+        householdId,
+        rowKey: rowKey(row),
+        itemId: row?.id || null,
+        sku: row?.sku || null,
+        itemName: row?.itemName || null,
+        qty: toFiniteNumber(row?.qty, 0),
+        unit: row?.unit || null,
+        ...extra,
+      });
+    } catch {
+      // Telemetry should never block row actions.
+    }
   };
 
   const lowStockRows = useMemo(
@@ -317,18 +337,28 @@ export default function StorehousePlanner({ householdId = "default-household", n
     const retry = rowActionStates?.[key]?.retry;
     if (!key || !retry || retry.type !== "persist_row") return;
 
+    trackRowAction("retry", "attempt", retry.row || row, {
+      reason: retry.reason || "storehouse_retry_ui",
+    });
+
     setRowAction(key, {
       status: "pending",
       message: "Retrying save...",
     });
     try {
       await persistSingleRow(retry.row, retry.reason || "storehouse_retry_ui");
+      trackRowAction("retry", "success", retry.row || row, {
+        reason: retry.reason || "storehouse_retry_ui",
+      });
       setRowAction(key, {
         status: "success",
         message: "Retry succeeded.",
       });
       setAlertMessage(`Saved ${retry.row?.itemName || "item"} after retry.`);
     } catch {
+      trackRowAction("retry", "failure", retry.row || row, {
+        reason: retry.reason || "storehouse_retry_ui",
+      });
       setRowAction(key, {
         status: "error",
         message: "Retry failed.",
@@ -342,6 +372,11 @@ export default function StorehousePlanner({ householdId = "default-household", n
     const undo = rowActionStates?.[key]?.undo;
     if (!key || !undo) return;
 
+    trackRowAction("undo", "attempt", undo.row || row, {
+      undoType: undo.type || null,
+      reason: undo.reason || "storehouse_undo_ui",
+    });
+
     setRowAction(key, {
       status: "pending",
       message: "Undoing...",
@@ -353,6 +388,10 @@ export default function StorehousePlanner({ householdId = "default-household", n
       );
       try {
         await persistSingleRow(undo.row, undo.reason || "storehouse_undo_ui");
+        trackRowAction("undo", "success", undo.row || row, {
+          undoType: undo.type || null,
+          reason: undo.reason || "storehouse_undo_ui",
+        });
         setRowAction(key, {
           status: "success",
           message: "Undo applied.",
@@ -361,6 +400,10 @@ export default function StorehousePlanner({ householdId = "default-household", n
         });
         setAlertMessage(`Undid latest change for ${undo.row?.itemName || "item"}.`);
       } catch {
+        trackRowAction("undo", "failure", undo.row || row, {
+          undoType: undo.type || null,
+          reason: undo.reason || "storehouse_undo_ui",
+        });
         setRowAction(key, {
           status: "error",
           message: "Undo failed.",
@@ -385,6 +428,10 @@ export default function StorehousePlanner({ householdId = "default-household", n
           },
           undo.reason || "storehouse_undo_remove_ui"
         );
+        trackRowAction("undo", "success", undo.row || row, {
+          undoType: undo.type || null,
+          reason: undo.reason || "storehouse_undo_remove_ui",
+        });
         setRowAction(key, {
           status: "success",
           message: "Undo applied.",
@@ -393,6 +440,10 @@ export default function StorehousePlanner({ householdId = "default-household", n
         });
         setAlertMessage(`Removed ${undo.row?.itemName || "item"} after undo.`);
       } catch {
+        trackRowAction("undo", "failure", undo.row || row, {
+          undoType: undo.type || null,
+          reason: undo.reason || "storehouse_undo_remove_ui",
+        });
         setRows((prev) => [undo.row, ...prev]);
         setRowAction(key, {
           status: "error",

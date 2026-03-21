@@ -1,5 +1,11 @@
 // src/pages/mealplanner.jsx
-import React, { useMemo, useState, useEffect, Suspense, useRef } from "react";
+import React, { useMemo, useState, useEffect, Suspense, useRef, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  buildMealPlannerProbeText,
+  normalizeMealPlannerTool,
+  resolveToolFromSearch,
+} from "./toolProbe";
 
 // SV (Sacred Village) shared styling used by Cooking/Cleaning/Garden pages
 import "@/styles/household.css";
@@ -1724,7 +1730,45 @@ function MyAssignmentsStrip({ onOpenCoordination }) {
 /* ---------------- Main page ---------------- */
 export default function MealPlanningPage() {
   const coordinationRef = useRef(null);
-  const [activeTool, setActiveTool] = useState("dashboard");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const knownToolIds = useMemo(
+    () => new Set([...TOOL_REGISTRY.map((tool) => tool.id), "drafts"]),
+    []
+  );
+
+  const normalizeToolParam = useCallback(
+    (raw) => normalizeMealPlannerTool(raw, knownToolIds),
+    [knownToolIds]
+  );
+
+  const toolFromQuery = useMemo(() => {
+    return resolveToolFromSearch(location.search || "", knownToolIds);
+  }, [location.search, knownToolIds]);
+
+  const [activeTool, setActiveTool] = useState(() => toolFromQuery || "dashboard");
+  const probeText = useMemo(
+    () => buildMealPlannerProbeText(activeTool),
+    [activeTool]
+  );
+
+  useEffect(() => {
+    if (toolFromQuery && toolFromQuery !== activeTool) {
+      setActiveTool(toolFromQuery);
+    }
+  }, [toolFromQuery, activeTool]);
+
+  useEffect(() => {
+    if (location.pathname !== "/meal-planning") return;
+    // If URL query has a different valid tool, wait for state to catch up first.
+    if (toolFromQuery && toolFromQuery !== activeTool) return;
+    const params = new URLSearchParams(location.search || "");
+    const current = normalizeToolParam(params.get("tool"));
+    if (current === activeTool) return;
+    params.set("tool", activeTool);
+    navigate({ pathname: "/meal-planning", search: `?${params.toString()}` }, { replace: true });
+  }, [activeTool, location.pathname, location.search, navigate, normalizeToolParam, toolFromQuery]);
 
   /* Form state */
   const [duration, setDuration] = useState("7-day");
@@ -2323,6 +2367,21 @@ export default function MealPlanningPage() {
   /* ---------------------------- Render ---------------------------- */
   return (
     <div className="sv-container">
+      <div
+        data-testid="meal-planner-content-probe"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clipPath: "inset(50%)",
+          whiteSpace: "nowrap",
+        }}
+        aria-live="polite"
+      >
+        {probeText}
+      </div>
+
       <div className="sv-hero sv-pad">
         <div
           className="sv-row sv-wrap"

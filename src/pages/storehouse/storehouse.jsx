@@ -13,6 +13,7 @@ import { automation } from "@/services/automation/runtime";
 import { useVision } from "@/context/VisionContext";
 import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
 import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
+import AutomationPanel from "@/ui/AutomationPanel";
 
 /* ────────────────────────────────────────────────────────────────────────────
   Safe imports & helpers (avoid hard crashes if a module isn't present)
@@ -60,7 +61,7 @@ function JsonBlock({ data }) {
 async function getAnimalQueueSafe() {
   const mod =
     (await safeImport("@/managers/AnimalQueueManager")) ||
-    (await safeImport("../managers/AnimalQueueManager")) ||
+    (await safeImport("../../managers/AnimalQueueManager")) ||
     null;
   const api = mod?.default || mod || {};
   const q =
@@ -71,7 +72,7 @@ async function getAnimalQueueSafe() {
 async function getGardenQueueSafe() {
   const mod =
     (await safeImport("@/managers/GardenQueueManager")) ||
-    (await safeImport("../managers/GardenQueueManager")) ||
+    (await safeImport("../../managers/GardenQueueManager")) ||
     null;
   const api = mod?.default || mod || {};
   const q =
@@ -422,10 +423,14 @@ export default function StorehousePage() {
           gardens: inputs?.gardens ?? gardenQueue,
         };
         // Prefer template if registered
-        const res =
-          (await automation
-            .runTemplate?.("storehouse.projections", payload)
-            .catch(() => null)) || null;
+        const canRunProjectionTemplate =
+          typeof automation?.hasTemplate === "function" &&
+          automation.hasTemplate("storehouse.projections");
+        const res = canRunProjectionTemplate
+          ? (await automation
+              .runTemplate?.("storehouse.projections", payload)
+              .catch(() => null)) || null
+          : null;
 
         if (res && typeof res === "object" && res.weekly) {
           setProject(res);
@@ -662,6 +667,12 @@ export default function StorehousePage() {
 
       {/* Inline Custom Locations */}
       <CustomLocationsInline />
+
+      <AutomationPanel
+        title="Shopping Automation Templates"
+        agents={[]}
+        defaultTemplateFilter="shopping"
+      />
 
       {/* Optional tools (hidden until opened) */}
       <div

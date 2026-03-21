@@ -194,6 +194,15 @@ export default function useRealtimeCoordination(overrides = {}) {
     [identity.scope, identity.scopeId, sock]
   );
 
+  const reconnect = useCallback(() => {
+    try {
+      sock.socket?.connect?.();
+      return true;
+    } catch {
+      return false;
+    }
+  }, [sock]);
+
   useEffect(() => {
     if (!sock.connected) return;
     let cancelled = false;
@@ -288,6 +297,8 @@ export default function useRealtimeCoordination(overrides = {}) {
     queueDepth,
     suggestions,
     latestReport,
+    socket: sock.socket,
+    reconnect,
     refreshSuggestions,
     requestReport,
     consumeSuggestion,
