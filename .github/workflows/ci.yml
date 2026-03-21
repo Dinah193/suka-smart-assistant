@@ -130,6 +130,43 @@ jobs:
       - name: Realtime and planners runtime contracts
         run: npx vitest run _tests_/planners.runtime.contract.test.js _tests_/realtimeController.runtime.contract.test.js --reporter=verbose
 
+  auth-contracts-windows:
+    runs-on: windows-latest
+    env:
+      NEO4J_REQUIRED: "false"
+      POSTGRES_REQUIRED: "false"
+      MONGODB_REQUIRED: "false"
+      STRICT_STARTUP_ENV: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Auth contract on Windows with explicit artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .artifacts | Out-Null
+          node .\node_modules\vitest\vitest.mjs run _tests_/authController.contract.test.js --reporter=verbose --reporter=json --outputFile=.artifacts\auth-controller-contract-vitest.json 2>&1 | Tee-Object -FilePath .artifacts\auth-controller-contract-vitest.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload auth contract artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-controller-contract-windows
+          path: |
+            .artifacts/auth-controller-contract-vitest.log
+            .artifacts/auth-controller-contract-vitest.json
+          if-no-files-found: error
+
   unit-tests:
     runs-on: ubuntu-latest
     steps:
@@ -255,6 +292,7 @@ jobs:
       - build
       - db-runtime-contracts
       - runtime-contracts
+      - auth-contracts-windows
       - unit-tests
       - lint
       - typecheck
