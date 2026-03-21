@@ -28,8 +28,21 @@
 import express from "express";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
+const {
+  requireHouseholdAccessPolicy,
+  requireCollaborationPolicy,
+  requireEntitlementPolicy,
+} = require("../middleware/accessPolicy.js");
 
 const router = express.Router();
+router.use(authenticateRequest);
+router.use(requireHouseholdAccessPolicy());
+router.use(requireCollaborationPolicy({ moduleKey: "meal-planning" }));
+router.use(requireEntitlementPolicy({ feature: "planner.base" }));
 
 const ajv = new Ajv({ allErrors: true, removeAdditional: "failing", strict: false });
 addFormats(ajv);
