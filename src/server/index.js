@@ -361,6 +361,7 @@ const candidates = [
   "./routes/labelsController.js",
   "./routes/preferencesController.js",
   { file: "./routes/authController.js", basePath: "/api/auth" },
+  { file: "./routes/accessPolicyAdminController.js", basePath: "/api/access-policies" },
   { file: "./routes/battleRhythmController.js", basePath: "/api/battle-rhythm" },
   "./routes/automationsController.js",
   "./routes/realtimeController.js",

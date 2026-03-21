@@ -61,6 +61,145 @@ async function readAccessPolicyState() {
   };
 }
 
+async function writeAccessPolicyState(nextState) {
+  await ensureDataDir();
+  const payload = {
+    ...defaultPolicyStore(),
+    ...(nextState && typeof nextState === "object" ? nextState : {}),
+    collaborationGrants: Array.isArray(nextState?.collaborationGrants)
+      ? nextState.collaborationGrants
+      : [],
+    entitlementGrantsByUserId:
+      nextState?.entitlementGrantsByUserId && typeof nextState.entitlementGrantsByUserId === "object"
+        ? nextState.entitlementGrantsByUserId
+        : {},
+    householdRolesByHouseholdId:
+      nextState?.householdRolesByHouseholdId && typeof nextState.householdRolesByHouseholdId === "object"
+        ? nextState.householdRolesByHouseholdId
+        : {},
+    updatedAt: nowIso(),
+  };
+  await fs.writeFile(ACCESS_POLICY_FILE, JSON.stringify(payload, null, 2), "utf8");
+  return payload;
+}
+
+function normalizeGrantAction(action) {
+  const normalized = String(action || "").trim().toLowerCase();
+  if (["read", "create", "update", "delete", "*"].includes(normalized)) return normalized;
+  return "read";
+}
+
+function normalizeIso(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return null;
+  const at = Date.parse(raw);
+  if (!Number.isFinite(at)) return null;
+  return new Date(at).toISOString();
+}
+
+async function upsertCollaborationGrant({
+  userId,
+  householdId,
+  moduleKey,
+  actions = ["read"],
+  startsAt = null,
+  expiresAt = null,
+} = {}) {
+  const nextUserId = String(userId || "").trim();
+  const nextHouseholdId = String(householdId || "").trim();
+  const nextModuleKey = String(moduleKey || "").trim();
+  if (!nextUserId || !nextHouseholdId || !nextModuleKey) {
+    throw new Error("invalid_collaboration_grant");
+  }
+
+  const policyState = await readAccessPolicyState();
+  const cleaned = Array.isArray(policyState.collaborationGrants)
+    ? policyState.collaborationGrants.filter((grant) => {
+        return !(
+          String(grant?.userId || "") === nextUserId &&
+          String(grant?.householdId || "") === nextHouseholdId &&
+          String(grant?.moduleKey || "") === nextModuleKey
+        );
+      })
+    : [];
+
+  const normalizedActions = Array.from(
+    new Set((Array.isArray(actions) ? actions : [actions]).map(normalizeGrantAction))
+  );
+
+  cleaned.push({
+    userId: nextUserId,
+    householdId: nextHouseholdId,
+    moduleKey: nextModuleKey,
+    actions: normalizedActions,
+    startsAt: normalizeIso(startsAt),
+    expiresAt: normalizeIso(expiresAt),
+  });
+
+  const saved = await writeAccessPolicyState({
+    ...policyState,
+    collaborationGrants: cleaned,
+  });
+
+  return saved.collaborationGrants.find((grant) => {
+    return (
+      String(grant?.userId || "") === nextUserId &&
+      String(grant?.householdId || "") === nextHouseholdId &&
+      String(grant?.moduleKey || "") === nextModuleKey
+    );
+  });
+}
+
+async function removeCollaborationGrant({ userId, householdId, moduleKey } = {}) {
+  const nextUserId = String(userId || "").trim();
+  const nextHouseholdId = String(householdId || "").trim();
+  const nextModuleKey = String(moduleKey || "").trim();
+  if (!nextUserId || !nextHouseholdId || !nextModuleKey) {
+    throw new Error("invalid_collaboration_grant");
+  }
+
+  const policyState = await readAccessPolicyState();
+  const before = Array.isArray(policyState.collaborationGrants) ? policyState.collaborationGrants : [];
+  const after = before.filter((grant) => {
+    return !(
+      String(grant?.userId || "") === nextUserId &&
+      String(grant?.householdId || "") === nextHouseholdId &&
+      String(grant?.moduleKey || "") === nextModuleKey
+    );
+  });
+
+  await writeAccessPolicyState({
+    ...policyState,
+    collaborationGrants: after,
+  });
+
+  return { removed: after.length !== before.length };
+}
+
+async function setUserEntitlements({ userId, entitlements = [] } = {}) {
+  const nextUserId = String(userId || "").trim();
+  if (!nextUserId) {
+    throw new Error("invalid_user_id");
+  }
+
+  const nextEntitlements = Array.from(
+    new Set((Array.isArray(entitlements) ? entitlements : []).map((item) => String(item || "").trim()).filter(Boolean))
+  );
+
+  const policyState = await readAccessPolicyState();
+  const nextMap = {
+    ...(policyState.entitlementGrantsByUserId || {}),
+    [nextUserId]: nextEntitlements,
+  };
+
+  await writeAccessPolicyState({
+    ...policyState,
+    entitlementGrantsByUserId: nextMap,
+  });
+
+  return { userId: nextUserId, entitlements: nextEntitlements };
+}
+
 function methodToAction(method) {
   const normalized = String(method || "GET").toUpperCase();
   if (normalized === "GET" || normalized === "HEAD") return "read";
@@ -141,7 +280,12 @@ async function hasEntitlement({ userId, feature }) {
 
 module.exports = {
   methodToAction,
+  readAccessPolicyState,
+  writeAccessPolicyState,
   resolveHouseholdAccess,
   hasCollaborationGrant,
   hasEntitlement,
+  upsertCollaborationGrant,
+  removeCollaborationGrant,
+  setUserEntitlements,
 };
