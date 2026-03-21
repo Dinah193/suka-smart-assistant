@@ -130,6 +130,26 @@ jobs:
       - name: Realtime and planners runtime contracts
         run: npx vitest run _tests_/planners.runtime.contract.test.js _tests_/realtimeController.runtime.contract.test.js --reporter=verbose
 
+  runtime-contracts-strict-entitlement:
+    runs-on: ubuntu-latest
+    env:
+      STRICT_PLANNER_BASE_ENTITLEMENT: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Strict entitlement contract suite
+        run: npx vitest run _tests_/accessPolicy.entitlement.contract.test.js --reporter=verbose
+
   auth-contracts-windows:
     runs-on: windows-latest
     env:
@@ -310,6 +330,7 @@ jobs:
       - build
       - db-runtime-contracts
       - runtime-contracts
+      - runtime-contracts-strict-entitlement
       - auth-contracts-windows
       - auth-env-readiness
       - unit-tests
