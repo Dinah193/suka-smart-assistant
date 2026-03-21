@@ -645,6 +645,14 @@ const CreateAccountPage = lazyPage(
   "CreateAccount",
 );
 
+const ForgotPasswordPage = lazyPage(
+  [
+    "@/pages/auth/forgot-password.jsx",
+    "./pages/auth/forgot-password.jsx",
+  ],
+  "ForgotPassword",
+);
+
 const JobsPage = lazyPage(["./pages/jobs.jsx", "./pages/jobs.jsx"], "Jobs");
 
 /* ✅ FIX: Roles route should use the real roles page (not jobs) */
@@ -1673,6 +1681,7 @@ function AppChrome({ children }) {
   const isAuthRoute =
     pathname === "/login" ||
     pathname === "/create-account" ||
+    pathname === "/forgot-password" ||
     pathname === "/signup" ||
     pathname === "/register";
 
@@ -1928,6 +1937,7 @@ export default function App() {
           {/* Auth */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/create-account" element={<CreateAccountPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/signup" element={<Navigate to="/create-account" replace />} />
           <Route path="/register" element={<Navigate to="/create-account" replace />} />
 

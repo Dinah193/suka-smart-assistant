@@ -82,7 +82,7 @@ router.get("/health", (_req, res) => {
   res.json({ ok: true, service: "authController", scaffold: true });
 });
 
-router.post("/login", express.json(), async (req, res) => {
+async function handleLogin(req, res) {
   const body = req.body || {};
   if (!validateLogin(body)) {
     return res.status(400).json(validationError(validateLogin));
@@ -94,9 +94,12 @@ router.post("/login", express.json(), async (req, res) => {
   } catch (err) {
     return res.status(400).json({ ok: false, error: String(err?.message || err) });
   }
-});
+}
 
-router.post("/register", express.json(), async (req, res) => {
+router.post("/login", express.json(), handleLogin);
+router.post("/signin", express.json(), handleLogin);
+
+async function handleRegister(req, res) {
   const body = req.body || {};
   if (!validateRegister(body)) {
     return res.status(400).json(validationError(validateRegister));
@@ -115,7 +118,10 @@ router.post("/register", express.json(), async (req, res) => {
   } catch (err) {
     return res.status(400).json({ ok: false, error: String(err?.message || err) });
   }
-});
+}
+
+router.post("/register", express.json(), handleRegister);
+router.post("/signup", express.json(), handleRegister);
 
 router.post("/forgot-password", express.json(), async (req, res) => {
   const body = req.body || {};

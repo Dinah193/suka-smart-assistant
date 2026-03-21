@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthShell from "./AuthShell";
+import { setToken } from "../../services/auth/tokenProvider.js";
 
 function trackAuthEvent(eventName, payload = {}) {
   try {
@@ -33,6 +34,7 @@ export default function CreateAccountPage() {
   const [consent, setConsent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
 
@@ -59,7 +61,7 @@ export default function CreateAccountPage() {
     return Object.keys(next).length === 0;
   }
 
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
     setFormError("");
     trackAuthEvent("auth_submit_native_clicked", { page_type: "create_account" });
@@ -72,8 +74,79 @@ export default function CreateAccountPage() {
       return;
     }
 
-    trackAuthEvent("auth_success_native", { page_type: "create_account" });
-    navigate("/");
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          password,
+          confirmPassword,
+          consent,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.ok) {
+        const errorText = String(payload?.error || "").toLowerCase();
+        if (errorText.includes("exist") || errorText.includes("duplicate")) {
+          setFormError("An account already exists for this email. Try signing in instead.");
+        } else if (errorText.includes("password") || errorText.includes("weak")) {
+          setFormError("Password must be at least 10 characters and include one number.");
+        } else if (errorText.includes("consent")) {
+          setFormError("You must accept the terms and privacy policy to create an account.");
+        } else {
+          setFormError("An account already exists for this email. Try signing in instead.");
+        }
+
+        trackAuthEvent("auth_failure_native", {
+          page_type: "create_account",
+          reason: errorText || "register_failed",
+        });
+        return;
+      }
+
+      const user = payload?.user || {};
+      const accessToken = payload?.session?.accessToken || "";
+      if (accessToken) {
+        setToken(accessToken, { kind: "access", source: "auth.create_account" });
+      }
+
+      const identity = {
+        id: user.id || user.userId || null,
+        userId: user.userId || user.id || null,
+        email: user.email || email.trim(),
+        householdId: user.householdId || null,
+        roles: Array.isArray(user.roles) ? user.roles : [],
+        authProvider: user.authProvider || "native",
+      };
+
+      try {
+        window.localStorage?.setItem("suka.user", JSON.stringify(identity));
+        window.localStorage?.setItem("suka.profile", JSON.stringify(identity));
+      } catch {
+        // no-op
+      }
+
+      window.__suka = window.__suka || {};
+      window.__suka.userId = identity.userId;
+      window.__suka.profile = identity;
+
+      trackAuthEvent("auth_success_native", { page_type: "create_account" });
+      navigate("/");
+    } catch {
+      setFormError("An account already exists for this email. Try signing in instead.");
+      trackAuthEvent("auth_failure_native", {
+        page_type: "create_account",
+        reason: "network_error",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function onHubSignIn() {
@@ -266,9 +339,10 @@ export default function CreateAccountPage() {
         <div className="space-y-3 pt-1">
           <button
             type="submit"
+            disabled={submitting}
             className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-700"
           >
-            Create free account
+            {submitting ? "Creating account..." : "Create free account"}
           </button>
 
           <button

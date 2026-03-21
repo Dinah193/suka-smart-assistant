@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "./AuthShell";
+import { setToken } from "../../services/auth/tokenProvider.js";
 
 function trackAuthEvent(eventName, payload = {}) {
   try {
@@ -19,11 +20,13 @@ function isValidEmail(email) {
 }
 
 export default function LoginPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
 
@@ -34,7 +37,21 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     trackAuthEvent("auth_viewed", { page_type: "sign_in" });
-  }, []);
+
+    try {
+      const remembered = window.localStorage?.getItem("ssa.auth.rememberEmail") || "";
+      if (remembered) setEmail(String(remembered));
+    } catch {
+      // no-op
+    }
+
+    const params = new URLSearchParams(location.search || "");
+    const hubState = String(params.get("hub") || "").trim();
+    if (hubState) {
+      setFormError("Hub sign-in is temporarily unavailable. You can still sign in with your Suka account.");
+      trackAuthEvent("auth_failure_hub", { page_type: "sign_in", reason: hubState });
+    }
+  }, [location.search]);
 
   function validate() {
     const next = {};
@@ -44,7 +61,7 @@ export default function LoginPage() {
     return Object.keys(next).length === 0;
   }
 
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
     setFormError("");
     trackAuthEvent("auth_submit_native_clicked", { page_type: "sign_in" });
@@ -57,16 +74,77 @@ export default function LoginPage() {
       return;
     }
 
+    setSubmitting(true);
     try {
-      if (rememberMe) {
-        window.localStorage?.setItem("ssa.auth.rememberEmail", email.trim());
-      }
-    } catch {
-      // no-op
-    }
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          rememberMe,
+        }),
+      });
 
-    trackAuthEvent("auth_success_native", { page_type: "sign_in" });
-    navigate("/");
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.ok) {
+        const errorText = String(payload?.error || "").toLowerCase();
+        const locked = errorText.includes("lock");
+        setFormError(
+          locked
+            ? "Your account is temporarily locked. Try again in 15 minutes or reset your password."
+            : "We could not sign you in with that email and password."
+        );
+        trackAuthEvent("auth_failure_native", {
+          page_type: "sign_in",
+          reason: errorText || "invalid_credentials",
+        });
+        return;
+      }
+
+      const user = payload?.user || {};
+      const accessToken = payload?.session?.accessToken || "";
+      if (accessToken) {
+        setToken(accessToken, { kind: "access", source: "auth.login" });
+      }
+
+      const identity = {
+        id: user.id || user.userId || null,
+        userId: user.userId || user.id || null,
+        email: user.email || email.trim(),
+        householdId: user.householdId || null,
+        roles: Array.isArray(user.roles) ? user.roles : [],
+        authProvider: user.authProvider || "native",
+      };
+
+      try {
+        if (rememberMe) {
+          window.localStorage?.setItem("ssa.auth.rememberEmail", email.trim());
+        } else {
+          window.localStorage?.removeItem("ssa.auth.rememberEmail");
+        }
+        window.localStorage?.setItem("suka.user", JSON.stringify(identity));
+        window.localStorage?.setItem("suka.profile", JSON.stringify(identity));
+      } catch {
+        // no-op
+      }
+
+      window.__suka = window.__suka || {};
+      window.__suka.userId = identity.userId;
+      window.__suka.profile = identity;
+
+      trackAuthEvent("auth_success_native", { page_type: "sign_in" });
+      navigate("/");
+    } catch {
+      setFormError("We could not sign you in with that email and password.");
+      trackAuthEvent("auth_failure_native", {
+        page_type: "sign_in",
+        reason: "network_error",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function onHubSignIn() {
@@ -204,9 +282,10 @@ export default function LoginPage() {
         <div className="space-y-3 pt-1">
           <button
             type="submit"
+            disabled={submitting}
             className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-700"
           >
-            Sign in
+            {submitting ? "Signing in..." : "Sign in"}
           </button>
 
           <button
