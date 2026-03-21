@@ -138,10 +138,21 @@
   };
 
   // ------------------------------ Forecast cache ------------------------------
-  let cache = load(K.CACHE, { coords: null, forecast: null, at: 0 });
+  function normalizeCacheShape(raw) {
+    if (!raw || typeof raw !== "object") {
+      return { coords: null, forecast: null, at: 0 };
+    }
+    return {
+      coords: raw.coords || null,
+      forecast: raw.forecast || null,
+      at: Number.isFinite(Number(raw.at)) ? Number(raw.at) : 0,
+    };
+  }
+
+  let cache = normalizeCacheShape(load(K.CACHE, { coords: null, forecast: null, at: 0 }));
 
   function setCache(next) {
-    cache = next;
+    cache = normalizeCacheShape(next);
     save(K.CACHE, cache);
     eventBus.emit("weather.forecast.cached", {
       at: cache.at,
@@ -484,7 +495,7 @@
     e = normalizeEventPayload(e, "relative.schedule.created");
     // e: { anchorId, sessionId, domain, items:[{id,title,dueAt, ...}] }
     if (!prefs.enabled || e.domain !== "garden") return;
-    const coords = cache.coords;
+    const coords = cache?.coords || null;
     const fc = await getForecast({ coords, horizonHours: 48 });
     const ts = now();
 

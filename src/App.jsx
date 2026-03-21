@@ -632,6 +632,19 @@ const MealPlannerScaffoldPage = lazyPage(
   "MealPlannerScaffold",
 );
 
+const LoginPage = lazyPage(
+  ["@/pages/auth/login.jsx", "./pages/auth/login.jsx"],
+  "Login",
+);
+
+const CreateAccountPage = lazyPage(
+  [
+    "@/pages/auth/create-account.jsx",
+    "./pages/auth/create-account.jsx",
+  ],
+  "CreateAccount",
+);
+
 const JobsPage = lazyPage(["./pages/jobs.jsx", "./pages/jobs.jsx"], "Jobs");
 
 /* ✅ FIX: Roles route should use the real roles page (not jobs) */
@@ -1655,7 +1668,25 @@ function GlobalSessionRunnerHost() {
 function AppChrome({ children }) {
   // ✅ NEW: only mount the Session Builder (GlobalSessionRunnerHost) on Home
   const location = useLocation();
-  const isHome = (location?.pathname || "/") === "/";
+  const pathname = location?.pathname || "/";
+  const isHome = pathname === "/";
+  const isAuthRoute =
+    pathname === "/login" ||
+    pathname === "/create-account" ||
+    pathname === "/signup" ||
+    pathname === "/register";
+
+  if (isAuthRoute) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen overflow-auto">
+          <ErrorBoundary>
+            <Suspense fallback={<Loader />}>{children}</Suspense>
+          </ErrorBoundary>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen grid bg-background text-foreground">
@@ -1894,6 +1925,12 @@ export default function App() {
 
       <AppChrome>
         <Routes>
+          {/* Auth */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/create-account" element={<CreateAccountPage />} />
+          <Route path="/signup" element={<Navigate to="/create-account" replace />} />
+          <Route path="/register" element={<Navigate to="/create-account" replace />} />
+
           {/* Core */}
           <Route
             path="/"
