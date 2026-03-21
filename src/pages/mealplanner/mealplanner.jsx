@@ -1,6 +1,7 @@
 // src/pages/mealplanner.jsx
 import React, { useMemo, useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { CalendarDays, Leaf, ShoppingBasket } from "lucide-react";
 import {
   buildMealPlannerProbeText,
   normalizeMealPlannerTool,
@@ -25,6 +26,14 @@ import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPan
 import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
 import { useFoodSecurityEstimator } from "@/hooks/estimators/useFoodSecurityEstimator";
 import { useCostDeltaEstimator } from "@/hooks/estimators/useCostDeltaEstimator";
+import {
+  Avatar as SacredAvatar,
+  Button as SacredButton,
+  Card as SacredCard,
+  DashboardGrid,
+  FeedPost,
+  Notification,
+} from "@/components/sacred";
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -1752,6 +1761,55 @@ export default function MealPlanningPage() {
     () => buildMealPlannerProbeText(activeTool),
     [activeTool]
   );
+  const [sacredMealAlerts, setSacredMealAlerts] = useState([
+    {
+      id: "meal-alert-1",
+      type: "info",
+      title: "Planning context synced",
+      message:
+        "Meal Planner now shares a unified Sacred visual language with Home and Storehouse.",
+      timestamp: "Now",
+    },
+    {
+      id: "meal-alert-2",
+      type: "success",
+      title: "Draft workflow ready",
+      message:
+        "Use Generate -> Draft to capture scenarios without overwriting current plan.",
+      timestamp: "5m ago",
+    },
+  ]);
+
+  const mealFeed = useMemo(
+    () => [
+      {
+        id: "meal-feed-1",
+        author: "Meal Planning Team",
+        content:
+          "Cycle planning now aligns prep, procurement, and storehouse signals in one weekly rhythm.",
+        timestamp: "Today 08:21",
+        likes: 17,
+        comments: 4,
+        shares: 2,
+      },
+      {
+        id: "meal-feed-2",
+        author: "Homestead Coordinator",
+        household: true,
+        content:
+          "Seasonal produce constraints were applied to this cycle to reduce procurement drift.",
+        timestamp: "Today 07:09",
+        likes: 10,
+        comments: 3,
+        shares: 1,
+      },
+    ],
+    []
+  );
+
+  const dismissMealAlert = (id) => {
+    setSacredMealAlerts((prev) => prev.filter((item) => item.id !== id));
+  };
 
   useEffect(() => {
     if (toolFromQuery && toolFromQuery !== activeTool) {
@@ -2444,6 +2502,94 @@ export default function MealPlanningPage() {
                 ✓ Done
               </span>
             ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+          <SacredAvatar
+            name="Meal Planner Module"
+            type="household"
+            subtitle="Sacred Agrarian visual system"
+            online
+          />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <SacredButton size="sm" onClick={() => onGenerate(false)} loading={busy}>
+              Generate Plan
+            </SacredButton>
+            <SacredButton size="sm" tone="secondary" onClick={() => onGenerate(true)}>
+              Generate to Draft
+            </SacredButton>
+            <SacredButton size="sm" tone="accent" onClick={onSaveCurrentAsDraft}>
+              Save Current Draft
+            </SacredButton>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <DashboardGrid columns={3}>
+            <SacredCard
+              kind="dashboard"
+              title="Planner Mode"
+              subtitle="Active tool"
+              value={activeTool || "dashboard"}
+              delta={3}
+              icon={<CalendarDays className="h-5 w-5" />}
+              footer="Driven by URL tool param"
+            >
+              Keep focus between dashboard, cycle, prep, and procurement tools.
+            </SacredCard>
+            <SacredCard
+              kind="meal"
+              title="Food Security"
+              subtitle="Garden utilization proxy"
+              value={
+                estimates.gardenUsePct != null
+                  ? `${Math.round(Number(estimates.gardenUsePct))}%`
+                  : "--"
+              }
+              delta={2}
+              icon={<Leaf className="h-5 w-5" />}
+              footer="Current cycle confidence"
+            >
+              Uses planning context and household inputs to estimate resilience.
+            </SacredCard>
+            <SacredCard
+              kind="storehouse"
+              title="Cost Delta"
+              subtitle="Projected shopping cost"
+              value={
+                estimates.shoppingCost != null
+                  ? `$${Number(estimates.shoppingCost).toFixed(2)}`
+                  : "--"
+              }
+              delta={1}
+              icon={<ShoppingBasket className="h-5 w-5" />}
+              footer="Compared to baseline"
+            >
+              Watch this to keep budget drift visible before purchase runs.
+            </SacredCard>
+          </DashboardGrid>
+        </div>
+
+        <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+          <div style={{ display: "grid", gap: 10 }}>
+            {mealFeed.map((item) => (
+              <FeedPost key={item.id} {...item} />
+            ))}
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {sacredMealAlerts.map((item) => (
+              <Notification
+                key={item.id}
+                type={item.type}
+                title={item.title}
+                message={item.message}
+                timestamp={item.timestamp}
+                onDismiss={() => dismissMealAlert(item.id)}
+              />
+            ))}
           </div>
         </div>
       </div>
