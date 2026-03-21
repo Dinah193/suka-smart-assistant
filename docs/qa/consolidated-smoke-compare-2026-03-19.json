@@ -1,0 +1,41 @@
+{
+  "comparisonName": "consolidated-smoke-stability-compare",
+  "generatedAt": "2026-03-21T11:55:00.000Z",
+  "baselineReport": "docs/qa/consolidated-smoke-report-2026-03-19.json",
+  "rerunReport": "docs/qa/consolidated-smoke-report-rerun-latest.json",
+  "delta": {
+    "deepLink": {
+      "routeResolutionChanged": false,
+      "routeResolutionStillPassing": true,
+      "uiContentProbeStableBaseline": false,
+      "uiContentProbeStableRerun": true,
+      "uiContentSignal": "stabilized",
+      "details": "Automated rerun pipeline confirms meal-planner probe marker detection across all deep-link aliases."
+    },
+    "queueReconnect": {
+      "queueIncrementsOnOfflineSignal": {
+        "baseline": true,
+        "rerun": true
+      },
+      "queuePersistsOrFlushesAfterReconnect": {
+        "baseline": true,
+        "rerun": true
+      },
+      "reconnectStatusVisible": {
+        "baseline": true,
+        "rerun": true
+      },
+      "status": "stable-pass"
+    },
+    "storehouseSuccessPath": {
+      "baselinePass": true,
+      "rerunPass": true,
+      "status": "stable-pass"
+    }
+  },
+  "conclusion": {
+    "correctness": "stable",
+    "runtimeStability": "stable",
+    "recommendedNextAction": "keep automated rerun + schema guard in CI and flip strict policy variable when release owners approve"
+  }
+}

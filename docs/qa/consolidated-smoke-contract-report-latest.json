@@ -1,0 +1,20 @@
+{
+  "reportName": "consolidated-smoke-contracts",
+  "generatedAt": "2026-03-21T17:00:40.258Z",
+  "command": "npm.cmd run test:ci -- _tests_/realtimeCoordinationPanel.readiness.contract.test.jsx _tests_/realtimeController.runtime.contract.test.js _tests_/realtimeSocket.runtime.contract.test.js _tests_/mealPlannerBridge.ui.integration.test.js _tests_/storehousePlanner.quickAddLowStockFlow.contract.test.jsx",
+  "tests": {
+    "files": [
+      "_tests_/realtimeCoordinationPanel.readiness.contract.test.jsx",
+      "_tests_/realtimeController.runtime.contract.test.js",
+      "_tests_/realtimeSocket.runtime.contract.test.js",
+      "_tests_/mealPlannerBridge.ui.integration.test.js",
+      "_tests_/storehousePlanner.quickAddLowStockFlow.contract.test.jsx"
+    ],
+    "success": true
+  },
+  "references": {
+    "browserCheckpointArtifact": "docs/qa/consolidated-smoke-report-2026-03-19.json",
+    "browserRerunArtifact": "docs/qa/consolidated-smoke-report-2026-03-19-rerun.json",
+    "browserComparisonArtifact": "docs/qa/consolidated-smoke-compare-2026-03-19.json"
+  }
+}
