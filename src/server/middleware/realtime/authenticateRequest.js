@@ -33,7 +33,7 @@ async function authenticateRequest(req, res, next) {
 
     const tokenHeader = req.headers.authorization || req.headers["x-auth-token"] || "";
     const token = String(tokenHeader).replace(/^Bearer\s+/i, "").trim();
-    const sessionToken = req.cookies?.session || null;
+    const sessionToken = req.cookies?.ssa_session || req.cookies?.session || null;
 
     try {
       const auth = await loadAny("../../services/authService.js");

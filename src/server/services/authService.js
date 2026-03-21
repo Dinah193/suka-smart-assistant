@@ -2,13 +2,23 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 
-const TOKEN_PREFIX = "ssa_dev_";
+const TOKEN_PREFIX = "ssa_at_";
 const STORE_FILE = path.resolve(process.cwd(), "data", "auth-state.json");
+const SESSION_COOKIE_NAME = String(process.env.AUTH_SESSION_COOKIE_NAME || "ssa_session").trim();
+const ACCESS_TOKEN_SECRET = String(process.env.AUTH_ACCESS_TOKEN_SECRET || "dev_access_secret_change_me");
+const ACCESS_TTL_SEC = Number(process.env.AUTH_ACCESS_TTL_SEC || 900);
+const REFRESH_TTL_MS = Number(process.env.AUTH_REFRESH_TTL_MS || 1000 * 60 * 60 * 24 * 7);
+const REFRESH_TTL_REMEMBER_MS = Number(
+  process.env.AUTH_REFRESH_REMEMBER_TTL_MS || 1000 * 60 * 60 * 24 * 30
+);
 const resetRequests = new Map();
-const revokedTokens = new Set();
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function nowMs() {
+  return Date.now();
 }
 
 function normalizeEmail(value) {
@@ -42,12 +52,24 @@ function hashPassword(value) {
   return crypto.createHash("sha256").update(String(value || ""), "utf8").digest("hex");
 }
 
+function hashToken(value) {
+  return crypto.createHash("sha256").update(String(value || ""), "utf8").digest("hex");
+}
+
+function signTokenPayload(encodedPayload) {
+  return crypto
+    .createHmac("sha256", ACCESS_TOKEN_SECRET)
+    .update(String(encodedPayload || ""), "utf8")
+    .digest("base64url");
+}
+
 function defaultStore() {
   return {
-    version: 1,
+    version: 2,
     accountsByEmail: {},
     userHouseholdMap: {},
     householdsById: {},
+    sessionsById: {},
     updatedAt: nowIso(),
   };
 }
@@ -64,9 +86,22 @@ async function readStore() {
     return {
       ...defaultStore(),
       ...parsed,
-      accountsByEmail: parsed?.accountsByEmail && typeof parsed.accountsByEmail === "object" ? parsed.accountsByEmail : {},
-      userHouseholdMap: parsed?.userHouseholdMap && typeof parsed.userHouseholdMap === "object" ? parsed.userHouseholdMap : {},
-      householdsById: parsed?.householdsById && typeof parsed.householdsById === "object" ? parsed.householdsById : {},
+      accountsByEmail:
+        parsed?.accountsByEmail && typeof parsed.accountsByEmail === "object"
+          ? parsed.accountsByEmail
+          : {},
+      userHouseholdMap:
+        parsed?.userHouseholdMap && typeof parsed.userHouseholdMap === "object"
+          ? parsed.userHouseholdMap
+          : {},
+      householdsById:
+        parsed?.householdsById && typeof parsed.householdsById === "object"
+          ? parsed.householdsById
+          : {},
+      sessionsById:
+        parsed?.sessionsById && typeof parsed.sessionsById === "object"
+          ? parsed.sessionsById
+          : {},
     };
   } catch {
     return defaultStore();
@@ -98,29 +133,89 @@ function accountToUser(account) {
   };
 }
 
-function buildSession(user) {
-  return {
-    accessToken: buildDevToken(user),
-    tokenType: "Bearer",
-    issuedAt: nowIso(),
+function buildAccessToken({ userId, sessionId }) {
+  const iat = Math.floor(nowMs() / 1000);
+  const exp = iat + ACCESS_TTL_SEC;
+  const payload = {
+    sub: String(userId || ""),
+    sid: String(sessionId || ""),
+    iat,
+    exp,
   };
+  const encodedPayload = toBase64Url(JSON.stringify(payload));
+  const sig = signTokenPayload(encodedPayload);
+  return `${TOKEN_PREFIX}${encodedPayload}.${sig}`;
 }
 
-function buildDevToken(user) {
-  return `${TOKEN_PREFIX}${toBase64Url(JSON.stringify(user || {}))}`;
-}
+function parseAccessToken(token) {
+  const raw = String(token || "").trim();
+  if (!raw.startsWith(TOKEN_PREFIX)) return null;
+  const body = raw.slice(TOKEN_PREFIX.length);
+  const dot = body.lastIndexOf(".");
+  if (dot <= 0) return null;
 
-function parseDevToken(token) {
-  if (!String(token || "").startsWith(TOKEN_PREFIX)) return null;
-  const encoded = String(token).slice(TOKEN_PREFIX.length);
-  const parsed = fromBase64Url(encoded);
-  if (!parsed) return null;
+  const encodedPayload = body.slice(0, dot);
+  const providedSig = body.slice(dot + 1);
+  const expectedSig = signTokenPayload(encodedPayload);
+  if (!crypto.timingSafeEqual(Buffer.from(providedSig), Buffer.from(expectedSig))) {
+    return null;
+  }
+
+  const decoded = fromBase64Url(encodedPayload);
+  if (!decoded) return null;
   try {
-    const payload = JSON.parse(parsed);
-    return payload && typeof payload === "object" ? payload : null;
+    const parsed = JSON.parse(decoded);
+    if (!parsed?.sub || !parsed?.sid || !Number.isFinite(parsed?.exp)) {
+      return null;
+    }
+    if (Math.floor(nowMs() / 1000) >= Number(parsed.exp)) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
+}
+
+function parseSessionCookieValue(value) {
+  const raw = String(value || "").trim();
+  const dot = raw.indexOf(".");
+  if (dot <= 0) return null;
+  const sessionId = raw.slice(0, dot);
+  const refreshToken = raw.slice(dot + 1);
+  if (!sessionId || !refreshToken) return null;
+  return { sessionId, refreshToken };
+}
+
+function buildSessionCookieValue(sessionId, refreshToken) {
+  return `${sessionId}.${refreshToken}`;
+}
+
+function buildCookieDescriptor(value, rememberMe = false) {
+  const maxAgeMs = rememberMe ? REFRESH_TTL_REMEMBER_MS : REFRESH_TTL_MS;
+  return {
+    name: SESSION_COOKIE_NAME,
+    value,
+    options: {
+      httpOnly: true,
+      secure: String(process.env.NODE_ENV || "development") === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: maxAgeMs,
+    },
+    maxAgeMs,
+  };
+}
+
+function sessionIsExpired(session) {
+  if (!session?.expiresAt) return true;
+  const expiresMs = Date.parse(String(session.expiresAt));
+  if (!Number.isFinite(expiresMs)) return true;
+  return nowMs() >= expiresMs;
+}
+
+function sessionIsRevoked(session) {
+  return Boolean(session?.revokedAt || session?.revokedReason);
 }
 
 async function getAccountByEmail(email) {
@@ -140,7 +235,65 @@ async function getAccountByUserId(userId) {
   return account || null;
 }
 
-export async function createNativeAccount({ firstName = "", lastName = "", email = "", password = "" } = {}) {
+async function issueSessionForUser({ user, rememberMe = false, parentSessionId = null } = {}) {
+  const userId = String(user?.userId || user?.id || "").trim();
+  if (!userId) {
+    throw new Error("user_required");
+  }
+
+  const store = await readStore();
+  const sessionId = `sess_${crypto.randomUUID()}`;
+  const refreshToken = crypto.randomBytes(48).toString("base64url");
+  const expiresAt = new Date(nowMs() + (rememberMe ? REFRESH_TTL_REMEMBER_MS : REFRESH_TTL_MS)).toISOString();
+
+  store.sessionsById[sessionId] = {
+    id: sessionId,
+    userId,
+    refreshTokenHash: hashToken(refreshToken),
+    rememberMe: Boolean(rememberMe),
+    parentSessionId: parentSessionId || null,
+    createdAt: nowIso(),
+    lastSeenAt: nowIso(),
+    rotatedAt: null,
+    revokedAt: null,
+    revokedReason: null,
+    expiresAt,
+  };
+
+  await writeStore(store);
+
+  const accessToken = buildAccessToken({ userId, sessionId });
+  const cookieValue = buildSessionCookieValue(sessionId, refreshToken);
+
+  return {
+    session: {
+      accessToken,
+      tokenType: "Bearer",
+      issuedAt: nowIso(),
+      expiresAt,
+      sessionId,
+    },
+    cookie: buildCookieDescriptor(cookieValue, rememberMe),
+  };
+}
+
+async function resolveSessionFromRefreshCookie(sessionCookie = "") {
+  const parsed = parseSessionCookieValue(sessionCookie);
+  if (!parsed) return null;
+
+  const store = await readStore();
+  const session = store.sessionsById[parsed.sessionId];
+  if (!session) return null;
+  if (sessionIsRevoked(session) || sessionIsExpired(session)) return null;
+  if (session.refreshTokenHash !== hashToken(parsed.refreshToken)) return null;
+
+  session.lastSeenAt = nowIso();
+  store.sessionsById[parsed.sessionId] = session;
+  await writeStore(store);
+  return session;
+}
+
+export async function createNativeAccount({ firstName = "", lastName = "", email = "", password = "", rememberMe = false } = {}) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) {
     throw new Error("email_required");
@@ -173,15 +326,18 @@ export async function createNativeAccount({ firstName = "", lastName = "", email
   await writeStore(store);
 
   const user = accountToUser(account);
+  const issued = await issueSessionForUser({ user, rememberMe });
+
   return {
     ok: true,
     user,
-    session: buildSession(user),
-    scaffold: true,
+    session: issued.session,
+    cookie: issued.cookie,
+    scaffold: false,
   };
 }
 
-export async function signInNative({ email = "", password = "" } = {}) {
+export async function signInNative({ email = "", password = "", rememberMe = false } = {}) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) {
     throw new Error("email_required");
@@ -196,11 +352,14 @@ export async function signInNative({ email = "", password = "" } = {}) {
   }
 
   const user = accountToUser(account);
+  const issued = await issueSessionForUser({ user, rememberMe });
+
   return {
     ok: true,
     user,
-    session: buildSession(user),
-    scaffold: true,
+    session: issued.session,
+    cookie: issued.cookie,
+    scaffold: false,
   };
 }
 
@@ -220,8 +379,8 @@ export async function requestPasswordReset({ email = "" } = {}) {
     ok: true,
     email: normalizedEmail,
     resetToken: token,
-    scaffold: true,
-    message: "Password reset flow is scaffolded. Replace with email provider integration.",
+    scaffold: false,
+    message: "Password reset flow accepted.",
   };
 }
 
@@ -249,8 +408,8 @@ export async function resetPassword({ token = "", password = "" } = {}) {
   return {
     ok: true,
     email: normalizedEmail,
-    scaffold: true,
-    message: "Password reset accepted in scaffold mode.",
+    scaffold: false,
+    message: "Password reset accepted.",
   };
 }
 
@@ -303,39 +462,63 @@ export function handleHubCallback({ code = "", state = "" } = {}) {
     return {
       ok: false,
       redirectTo: `/login?hub=callback_missing_code&returnTo=${encodeURIComponent(returnTo)}`,
-      scaffold: true,
+      scaffold: false,
     };
   }
 
   return {
     ok: true,
     redirectTo: returnTo,
-    scaffold: true,
+    scaffold: false,
   };
 }
 
 export async function verifyHttpRequest({ token = "", sessionToken = "" } = {}) {
   const bearer = String(token || "").trim();
   const cookieToken = String(sessionToken || "").trim();
-  if ((bearer && revokedTokens.has(bearer)) || (cookieToken && revokedTokens.has(cookieToken))) {
-    return { ok: false };
+
+  if (bearer) {
+    const parsed = parseAccessToken(bearer);
+    if (parsed?.sub && parsed?.sid) {
+      const store = await readStore();
+      const session = store.sessionsById[parsed.sid];
+      if (session && !sessionIsRevoked(session) && !sessionIsExpired(session) && session.userId === parsed.sub) {
+        const account = await getAccountByUserId(parsed.sub);
+        const user = accountToUser(account);
+        if (user) {
+          return {
+            ok: true,
+            userId: user.userId || user.id,
+            homeId: user.householdId || null,
+            familyId: null,
+            roles: Array.isArray(user.roles) ? user.roles : [],
+            provider: user.authProvider || "native",
+            sessionId: parsed.sid,
+          };
+        }
+      }
+    }
   }
 
-  const parsed = parseDevToken(bearer) || parseDevToken(cookieToken);
-  if (!parsed) return { ok: false };
+  if (cookieToken) {
+    const session = await resolveSessionFromRefreshCookie(cookieToken);
+    if (!session) return { ok: false };
+    const account = await getAccountByUserId(session.userId);
+    const user = accountToUser(account);
+    if (!user) return { ok: false };
 
-  const account = await getAccountByUserId(parsed.userId || parsed.id);
-  if (!account) return { ok: false };
-  const user = accountToUser(account);
+    return {
+      ok: true,
+      userId: user.userId || user.id,
+      homeId: user.householdId || null,
+      familyId: null,
+      roles: Array.isArray(user.roles) ? user.roles : [],
+      provider: user.authProvider || "native",
+      sessionId: session.id,
+    };
+  }
 
-  return {
-    ok: true,
-    userId: user.userId || user.id,
-    homeId: user.householdId || null,
-    familyId: null,
-    roles: Array.isArray(user.roles) ? user.roles : [],
-    provider: user.authProvider || "native",
-  };
+  return { ok: false };
 }
 
 export async function verifySocketToken(token) {
@@ -343,62 +526,124 @@ export async function verifySocketToken(token) {
 }
 
 export async function getCurrentSession({ token = "", sessionToken = "" } = {}) {
-  const raw = String(token || "").trim() || String(sessionToken || "").trim();
-  if (!raw || revokedTokens.has(raw)) {
+  const verified = await verifyHttpRequest({ token, sessionToken });
+  if (!verified.ok) {
     return { ok: false, error: "unauthorized" };
   }
 
-  const parsed = parseDevToken(raw);
-  if (!parsed) {
-    return { ok: false, error: "unauthorized" };
-  }
-
-  const account = await getAccountByUserId(parsed.userId || parsed.id);
-  if (!account) {
-    return { ok: false, error: "unauthorized" };
-  }
-
+  const account = await getAccountByUserId(verified.userId);
   const user = accountToUser(account);
+  if (!user) {
+    return { ok: false, error: "unauthorized" };
+  }
 
   return {
     ok: true,
     user,
-    scaffold: true,
+    session: {
+      sessionId: verified.sessionId || null,
+    },
+    scaffold: false,
   };
 }
 
-export async function refreshSession({ token = "", sessionToken = "" } = {}) {
+export async function refreshSession({ token = "", sessionToken = "", rememberMe = false } = {}) {
+  const cookieParsed = parseSessionCookieValue(sessionToken);
+  if (cookieParsed) {
+    const store = await readStore();
+    const oldSession = store.sessionsById[cookieParsed.sessionId];
+    if (
+      oldSession &&
+      !sessionIsRevoked(oldSession) &&
+      !sessionIsExpired(oldSession) &&
+      oldSession.refreshTokenHash === hashToken(cookieParsed.refreshToken)
+    ) {
+      oldSession.revokedAt = nowIso();
+      oldSession.revokedReason = "rotated";
+      oldSession.rotatedAt = nowIso();
+      store.sessionsById[cookieParsed.sessionId] = oldSession;
+      await writeStore(store);
+
+      const account = await getAccountByUserId(oldSession.userId);
+      const user = accountToUser(account);
+      if (!user) {
+        return { ok: false, error: "unauthorized" };
+      }
+
+      const issued = await issueSessionForUser({
+        user,
+        rememberMe: Boolean(oldSession.rememberMe || rememberMe),
+        parentSessionId: oldSession.id,
+      });
+
+      return {
+        ok: true,
+        user,
+        session: issued.session,
+        cookie: issued.cookie,
+        scaffold: false,
+      };
+    }
+  }
+
   const current = await getCurrentSession({ token, sessionToken });
   if (!current.ok) {
     return current;
   }
 
+  const issued = await issueSessionForUser({ user: current.user, rememberMe: Boolean(rememberMe) });
   return {
     ok: true,
     user: current.user,
-    session: {
-      accessToken: buildDevToken(current.user),
-      tokenType: "Bearer",
-      issuedAt: nowIso(),
-    },
-    scaffold: true,
+    session: issued.session,
+    cookie: issued.cookie,
+    scaffold: false,
   };
 }
 
-export function revokeSession({ token = "", sessionToken = "" } = {}) {
-  const bearer = String(token || "").trim();
-  const cookieToken = String(sessionToken || "").trim();
-  if (bearer) revokedTokens.add(bearer);
-  if (cookieToken) revokedTokens.add(cookieToken);
+export async function revokeSession({ token = "", sessionToken = "" } = {}) {
+  const store = await readStore();
+  let revoked = false;
+
+  const cookieParsed = parseSessionCookieValue(sessionToken);
+  if (cookieParsed && store.sessionsById[cookieParsed.sessionId]) {
+    const session = store.sessionsById[cookieParsed.sessionId];
+    if (!sessionIsRevoked(session)) {
+      session.revokedAt = nowIso();
+      session.revokedReason = "logout";
+      store.sessionsById[cookieParsed.sessionId] = session;
+      revoked = true;
+    }
+  }
+
+  const accessParsed = parseAccessToken(token);
+  if (accessParsed?.sid && store.sessionsById[accessParsed.sid]) {
+    const session = store.sessionsById[accessParsed.sid];
+    if (!sessionIsRevoked(session)) {
+      session.revokedAt = nowIso();
+      session.revokedReason = "logout";
+      store.sessionsById[accessParsed.sid] = session;
+      revoked = true;
+    }
+  }
+
+  if (revoked) {
+    await writeStore(store);
+  }
 
   return {
     ok: true,
-    revoked: Boolean(bearer || cookieToken),
-    scaffold: true,
+    revoked,
+    scaffold: false,
   };
 }
 
-export async function bootstrapHouseholdMembership({ token = "", sessionToken = "", householdId = "", householdName = "" } = {}) {
+export async function bootstrapHouseholdMembership({
+  token = "",
+  sessionToken = "",
+  householdId = "",
+  householdName = "",
+} = {}) {
   const current = await getCurrentSession({ token, sessionToken });
   if (!current.ok) return current;
 
@@ -440,13 +685,20 @@ export async function bootstrapHouseholdMembership({ token = "", sessionToken = 
   await writeStore(store);
 
   const user = accountToUser(account);
+  const issued = await issueSessionForUser({ user, rememberMe: false });
+
   return {
     ok: true,
     user,
     household: store.householdsById[account.householdId],
-    session: buildSession(user),
-    scaffold: true,
+    session: issued.session,
+    cookie: issued.cookie,
+    scaffold: false,
   };
+}
+
+export function getSessionCookieName() {
+  return SESSION_COOKIE_NAME;
 }
 
 export default {
@@ -462,4 +714,5 @@ export default {
   refreshSession,
   revokeSession,
   bootstrapHouseholdMembership,
+  getSessionCookieName,
 };

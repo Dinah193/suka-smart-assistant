@@ -13,6 +13,7 @@ import {
   refreshSession,
   revokeSession,
   bootstrapHouseholdMembership,
+  getSessionCookieName,
 } from "../services/authService.js";
 
 const router = express.Router();
@@ -85,8 +86,18 @@ function validationError(validate) {
 function readAuthTokens(req) {
   const tokenHeader = req.headers.authorization || req.headers["x-auth-token"] || "";
   const token = String(tokenHeader).replace(/^Bearer\s+/i, "").trim();
-  const sessionToken = req.cookies?.session || "";
+  const cookieName = getSessionCookieName();
+  const sessionToken = req.cookies?.[cookieName] || req.cookies?.session || "";
   return { token, sessionToken };
+}
+
+function applySessionCookie(res, cookieDescriptor) {
+  if (!cookieDescriptor || typeof res.cookie !== "function") return;
+  try {
+    res.cookie(cookieDescriptor.name, cookieDescriptor.value, cookieDescriptor.options || {});
+  } catch {
+    // no-op
+  }
 }
 
 router.get("/health", (_req, res) => {
@@ -101,6 +112,7 @@ async function handleLogin(req, res) {
 
   try {
     const result = await signInNative(body);
+    applySessionCookie(res, result.cookie);
     return res.status(200).json(result);
   } catch (err) {
     const error = String(err?.message || err);
@@ -129,6 +141,7 @@ async function handleRegister(req, res) {
 
   try {
     const result = await createNativeAccount(body);
+    applySessionCookie(res, result.cookie);
     return res.status(201).json(result);
   } catch (err) {
     const error = String(err?.message || err);
@@ -155,12 +168,15 @@ router.post("/session/refresh", async (req, res) => {
   if (!result.ok) {
     return res.status(401).json(result);
   }
+  applySessionCookie(res, result.cookie);
   return res.status(200).json(result);
 });
 
 router.post("/logout", async (req, res) => {
-  const result = revokeSession(readAuthTokens(req));
+  const result = await revokeSession(readAuthTokens(req));
+  const cookieName = getSessionCookieName();
   if (typeof res.clearCookie === "function") {
+    res.clearCookie(cookieName, { path: "/" });
     res.clearCookie("session", { path: "/" });
   }
   return res.status(200).json(result);
@@ -179,6 +195,7 @@ router.post("/household/bootstrap", express.json(), async (req, res) => {
     }
     return res.status(401).json(result);
   }
+  applySessionCookie(res, result.cookie);
   return res.status(200).json(result);
 });
 
