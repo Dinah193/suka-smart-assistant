@@ -5,6 +5,7 @@ const { authenticateRequest } = require("../middleware/realtime/authenticateRequ
 const { redactObject } = require("../services/loggingSanitizer.js");
 const {
   appendAuditEvent,
+  listAuditAlerts,
   listAuditEvents,
   summarizeAuditEvents,
 } = require("../services/accessPolicyAuditService.js");
@@ -20,11 +21,18 @@ const basePath = "/api/access-policies";
 
 async function emitPolicyAudit(req, action, details = {}) {
   const actorUserId = String(req?.user?.id || req?.user?.userId || "").trim() || "unknown";
+  const isOk =
+    typeof details?.ok === "boolean"
+      ? details.ok
+      : typeof details?.result?.ok === "boolean"
+      ? details.result.ok
+      : true;
   const event = {
     type: "access_policy_admin",
     action,
     actorUserId,
     requestId: req?.id || null,
+    ok: isOk,
     at: new Date().toISOString(),
     details: redactObject(details),
   };
@@ -99,6 +107,29 @@ router.get("/audit-events/summary", async (req, res, next) => {
       totalEvents: out.totalEvents,
       totalInWindow: out.totalInWindow,
       failuresInWindow: out.failuresInWindow,
+    });
+    return res.json(out);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/audit-events/alerts", async (req, res, next) => {
+  try {
+    const out = await listAuditAlerts({
+      windowMs: req.query?.windowMs,
+      failureRateThreshold: req.query?.failureRateThreshold,
+      minEvents: req.query?.minEvents,
+      highRiskActionThreshold: req.query?.highRiskActionThreshold,
+      highRiskActions: req.query?.highRiskActions,
+    });
+    await emitPolicyAudit(req, "policy.audit_events.alerts.read", {
+      windowMs: req.query?.windowMs || null,
+      failureRateThreshold: req.query?.failureRateThreshold || null,
+      minEvents: req.query?.minEvents || null,
+      highRiskActionThreshold: req.query?.highRiskActionThreshold || null,
+      highRiskActions: req.query?.highRiskActions || null,
+      alertCount: Array.isArray(out?.alerts) ? out.alerts.length : 0,
     });
     return res.json(out);
   } catch (error) {

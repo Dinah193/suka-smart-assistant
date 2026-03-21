@@ -96,6 +96,15 @@ function parseIsoToMs(input) {
   return ms;
 }
 
+function parseCsvSet(raw) {
+  return new Set(
+    String(raw || "")
+      .split(",")
+      .map((x) => String(x || "").trim())
+      .filter(Boolean)
+  );
+}
+
 async function listAuditEvents({ action, actorUserId, since, limit = 100 } = {}) {
   const store = await readAuditStore();
   const normalizedAction = String(action || "").trim();
@@ -164,8 +173,63 @@ async function summarizeAuditEvents({ windowMs = 24 * 60 * 60 * 1000 } = {}) {
   };
 }
 
+async function listAuditAlerts({
+  windowMs = 60 * 60 * 1000,
+  failureRateThreshold = process.env.ACCESS_POLICY_AUDIT_ALERT_FAILURE_RATE_THRESHOLD,
+  minEvents = process.env.ACCESS_POLICY_AUDIT_ALERT_MIN_EVENTS,
+  highRiskActionThreshold = process.env.ACCESS_POLICY_AUDIT_ALERT_HIGH_RISK_ACTION_THRESHOLD,
+  highRiskActions = process.env.ACCESS_POLICY_AUDIT_ALERT_HIGH_RISK_ACTIONS,
+} = {}) {
+  const summary = await summarizeAuditEvents({ windowMs });
+  const thresholdRate = Math.max(0, Math.min(1, Number(failureRateThreshold ?? 0.25)));
+  const thresholdMinEvents = Math.max(1, asNumber(minEvents, 10));
+  const thresholdHighRisk = Math.max(1, asNumber(highRiskActionThreshold, 5));
+  const highRiskSet = parseCsvSet(
+    highRiskActions || "entitlement.set,collaboration_grant.delete,collaboration_grant.upsert"
+  );
+
+  const alerts = [];
+  const failureRate = summary.totalInWindow > 0 ? summary.failuresInWindow / summary.totalInWindow : 0;
+  if (summary.totalInWindow >= thresholdMinEvents && failureRate >= thresholdRate) {
+    alerts.push({
+      id: "failure_rate_exceeded",
+      severity: "warn",
+      message: "Audit failure rate exceeded configured threshold",
+      metric: {
+        failureRate,
+        failuresInWindow: summary.failuresInWindow,
+        totalInWindow: summary.totalInWindow,
+      },
+      threshold: {
+        failureRateThreshold: thresholdRate,
+        minEvents: thresholdMinEvents,
+      },
+    });
+  }
+
+  for (const [action, count] of Object.entries(summary.countsByAction || {})) {
+    if (!highRiskSet.has(action)) continue;
+    if (Number(count || 0) < thresholdHighRisk) continue;
+    alerts.push({
+      id: `high_risk_action_spike:${action}`,
+      severity: "warn",
+      message: "High-risk action volume exceeded configured threshold",
+      metric: { action, count: Number(count || 0) },
+      threshold: { highRiskActionThreshold: thresholdHighRisk },
+    });
+  }
+
+  return {
+    ok: true,
+    windowMs: summary.windowMs,
+    alerts,
+    summary,
+  };
+}
+
 module.exports = {
   appendAuditEvent,
   listAuditEvents,
+  listAuditAlerts,
   summarizeAuditEvents,
 };
