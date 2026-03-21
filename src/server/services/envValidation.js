@@ -35,6 +35,7 @@ function validateStartupEnv({ nodeEnv = "development" } = {}) {
     mongoUriConfigured: hasAny(["MONGODB_URI", "MONGO_URI", "MONGO_URL"]),
     n8nSecretConfigured: hasAny(["N8N_INBOUND_SECRET", "N8N_SHARED_SECRET"]),
     jwtSecretConfigured: hasAny(["JWT_SECRET"]),
+    authAccessSecretConfigured: hasAny(["AUTH_ACCESS_TOKEN_SECRETS", "AUTH_ACCESS_TOKEN_SECRET"]),
     corsOriginConfigured: hasAny(["CORS_ORIGIN"]),
     neo4jEnabled:
       String(process.env.NEO4J_ENABLED || "false").toLowerCase() === "true" ||
@@ -47,6 +48,10 @@ function validateStartupEnv({ nodeEnv = "development" } = {}) {
   const allowInsecureHeaderAuth =
     String(process.env.ALLOW_INSECURE_HEADER_AUTH || "false").toLowerCase() === "true";
   const neo4jRequired = String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true";
+  const authSecretsCsv = String(process.env.AUTH_ACCESS_TOKEN_SECRETS || "").trim();
+  const authSecretSingle = String(process.env.AUTH_ACCESS_TOKEN_SECRET || "").trim();
+  const authCookieSecure = String(process.env.AUTH_COOKIE_SECURE || "").trim();
+  const authCookieSameSite = String(process.env.AUTH_COOKIE_SAME_SITE || "lax").trim().toLowerCase();
 
   if (!checks.mongoUriConfigured) {
     warnings.push("Mongo URI is not configured (MONGODB_URI/MONGO_URI/MONGO_URL); backend will run in file-fallback mode.");
@@ -74,6 +79,36 @@ function validateStartupEnv({ nodeEnv = "development" } = {}) {
 
   if (isProd && !checks.jwtSecretConfigured) {
     warnings.push("JWT_SECRET is not configured; auth integrations may be weaker than expected.");
+  }
+
+  if (!checks.authAccessSecretConfigured) {
+    warnings.push("AUTH_ACCESS_TOKEN_SECRET(S) is not configured; a development fallback secret will be used.");
+  }
+
+  if (isProd && !checks.authAccessSecretConfigured) {
+    errors.push("Production requires AUTH_ACCESS_TOKEN_SECRETS or AUTH_ACCESS_TOKEN_SECRET.");
+  }
+
+  if (isProd && authSecretSingle === "dev_access_secret_change_me") {
+    errors.push("AUTH_ACCESS_TOKEN_SECRET cannot use the development default in production.");
+  }
+
+  if (isProd && authSecretsCsv) {
+    const parts = authSecretsCsv
+      .split(",")
+      .map((x) => String(x || "").trim())
+      .filter(Boolean);
+    if (parts.length < 2) {
+      warnings.push("AUTH_ACCESS_TOKEN_SECRETS has only one key; configure at least two keys to support rotation.");
+    }
+  }
+
+  if (isProd && authCookieSecure === "false") {
+    errors.push("AUTH_COOKIE_SECURE=false is forbidden in production.");
+  }
+
+  if (authCookieSameSite === "none" && authCookieSecure === "false") {
+    errors.push("AUTH_COOKIE_SAME_SITE=none requires AUTH_COOKIE_SECURE=true.");
   }
 
   if (isProd && (!checks.corsOriginConfigured || corsOriginRaw === "*")) {

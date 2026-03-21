@@ -5,12 +5,33 @@ import crypto from "node:crypto";
 const TOKEN_PREFIX = "ssa_at_";
 const STORE_FILE = path.resolve(process.cwd(), "data", "auth-state.json");
 const SESSION_COOKIE_NAME = String(process.env.AUTH_SESSION_COOKIE_NAME || "ssa_session").trim();
-const ACCESS_TOKEN_SECRET = String(process.env.AUTH_ACCESS_TOKEN_SECRET || "dev_access_secret_change_me");
+const ACCESS_TOKEN_SECRETS = (() => {
+  const csv = String(process.env.AUTH_ACCESS_TOKEN_SECRETS || "").trim();
+  const fallback = String(process.env.AUTH_ACCESS_TOKEN_SECRET || "dev_access_secret_change_me").trim();
+  const list = csv
+    ? csv
+        .split(",")
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+    : [];
+  if (fallback) list.push(fallback);
+  return Array.from(new Set(list));
+})();
 const ACCESS_TTL_SEC = Number(process.env.AUTH_ACCESS_TTL_SEC || 900);
 const REFRESH_TTL_MS = Number(process.env.AUTH_REFRESH_TTL_MS || 1000 * 60 * 60 * 24 * 7);
 const REFRESH_TTL_REMEMBER_MS = Number(
   process.env.AUTH_REFRESH_REMEMBER_TTL_MS || 1000 * 60 * 60 * 24 * 30
 );
+const NODE_ENV = String(process.env.NODE_ENV || "development").toLowerCase();
+const IS_PROD = NODE_ENV === "production";
+const COOKIE_SECURE = String(process.env.AUTH_COOKIE_SECURE || (IS_PROD ? "true" : "false")).toLowerCase() === "true";
+const COOKIE_DOMAIN = String(process.env.AUTH_COOKIE_DOMAIN || "").trim() || undefined;
+const COOKIE_PATH = String(process.env.AUTH_COOKIE_PATH || "/").trim() || "/";
+const COOKIE_SAME_SITE = (() => {
+  const configured = String(process.env.AUTH_COOKIE_SAME_SITE || "lax").trim().toLowerCase();
+  if (["strict", "lax", "none"].includes(configured)) return configured;
+  return "lax";
+})();
 const resetRequests = new Map();
 
 function nowIso() {
@@ -57,10 +78,30 @@ function hashToken(value) {
 }
 
 function signTokenPayload(encodedPayload) {
+  const signingSecret = ACCESS_TOKEN_SECRETS[0] || "dev_access_secret_change_me";
   return crypto
-    .createHmac("sha256", ACCESS_TOKEN_SECRET)
+    .createHmac("sha256", signingSecret)
     .update(String(encodedPayload || ""), "utf8")
     .digest("base64url");
+}
+
+function verifyTokenPayloadSignature(encodedPayload, providedSig) {
+  const normalized = String(providedSig || "");
+  for (const secret of ACCESS_TOKEN_SECRETS) {
+    try {
+      const expectedSig = crypto
+        .createHmac("sha256", secret)
+        .update(String(encodedPayload || ""), "utf8")
+        .digest("base64url");
+      if (expectedSig.length !== normalized.length) continue;
+      if (crypto.timingSafeEqual(Buffer.from(normalized), Buffer.from(expectedSig))) {
+        return true;
+      }
+    } catch {
+      // try next secret
+    }
+  }
+  return false;
 }
 
 function defaultStore() {
@@ -156,8 +197,7 @@ function parseAccessToken(token) {
 
   const encodedPayload = body.slice(0, dot);
   const providedSig = body.slice(dot + 1);
-  const expectedSig = signTokenPayload(encodedPayload);
-  if (!crypto.timingSafeEqual(Buffer.from(providedSig), Buffer.from(expectedSig))) {
+  if (!verifyTokenPayloadSignature(encodedPayload, providedSig)) {
     return null;
   }
 
@@ -193,14 +233,16 @@ function buildSessionCookieValue(sessionId, refreshToken) {
 
 function buildCookieDescriptor(value, rememberMe = false) {
   const maxAgeMs = rememberMe ? REFRESH_TTL_REMEMBER_MS : REFRESH_TTL_MS;
+  const sameSite = COOKIE_SAME_SITE === "none" && !COOKIE_SECURE ? "lax" : COOKIE_SAME_SITE;
   return {
     name: SESSION_COOKIE_NAME,
     value,
     options: {
       httpOnly: true,
-      secure: String(process.env.NODE_ENV || "development") === "production",
-      sameSite: "lax",
-      path: "/",
+      secure: COOKIE_SECURE,
+      sameSite,
+      path: COOKIE_PATH,
+      domain: COOKIE_DOMAIN,
       maxAge: maxAgeMs,
     },
     maxAgeMs,
