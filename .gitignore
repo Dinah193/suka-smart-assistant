@@ -45,6 +45,8 @@ Thumbs.db
 .netlify/
 
 # --- runtime data artifacts ---
+data/auth-state.json
+data/access-policies.json
 data/preferences.json
 data/preferences.bak.json
 data/catalog-index-cache.json
