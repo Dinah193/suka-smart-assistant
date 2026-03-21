@@ -131,7 +131,41 @@ async function listAuditEvents({ action, actorUserId, since, limit = 100 } = {})
   };
 }
 
+async function summarizeAuditEvents({ windowMs = 24 * 60 * 60 * 1000 } = {}) {
+  const store = await readAuditStore();
+  const safeWindowMs = Math.max(60_000, asNumber(windowMs, 24 * 60 * 60 * 1000));
+  const floorMs = Date.now() - safeWindowMs;
+  const items = Array.isArray(store.events) ? store.events.slice() : [];
+
+  const countsByAction = {};
+  let failuresInWindow = 0;
+  let totalInWindow = 0;
+
+  for (const evt of items) {
+    const action = String(evt?.action || "unknown");
+    countsByAction[action] = (countsByAction[action] || 0) + 1;
+
+    const atMs = parseIsoToMs(evt?.at) || 0;
+    if (atMs >= floorMs) {
+      totalInWindow += 1;
+      if (evt?.ok === false) {
+        failuresInWindow += 1;
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    windowMs: safeWindowMs,
+    totalEvents: items.length,
+    totalInWindow,
+    failuresInWindow,
+    countsByAction,
+  };
+}
+
 module.exports = {
   appendAuditEvent,
   listAuditEvents,
+  summarizeAuditEvents,
 };

@@ -6,6 +6,7 @@ const { redactObject } = require("../services/loggingSanitizer.js");
 const {
   appendAuditEvent,
   listAuditEvents,
+  summarizeAuditEvents,
 } = require("../services/accessPolicyAuditService.js");
 const {
   readAccessPolicyState,
@@ -81,6 +82,23 @@ router.get("/audit-events", async (req, res, next) => {
       since: req.query?.since || null,
       limit: req.query?.limit || null,
       resultCount: out.count,
+    });
+    return res.json(out);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/audit-events/summary", async (req, res, next) => {
+  try {
+    const out = await summarizeAuditEvents({
+      windowMs: req.query?.windowMs,
+    });
+    await emitPolicyAudit(req, "policy.audit_events.summary.read", {
+      windowMs: req.query?.windowMs || null,
+      totalEvents: out.totalEvents,
+      totalInWindow: out.totalInWindow,
+      failuresInWindow: out.failuresInWindow,
     });
     return res.json(out);
   } catch (error) {

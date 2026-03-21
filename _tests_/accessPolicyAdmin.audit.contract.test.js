@@ -244,6 +244,27 @@ describe("access policy admin audit contract", () => {
       expect(Array.isArray(sinceBody.items)).toBe(true);
       expect(sinceBody.items.length).toBe(0);
 
+      const summaryRes = await fetch(
+        `${baseUrl}/api/access-policies/audit-events/summary?windowMs=86400000`,
+        {
+          headers: {
+            authorization: `Bearer ${session.token}`,
+            "x-ops-token": "ops-contract-token",
+          },
+        }
+      );
+      const summaryBody = await summaryRes.json();
+      expect(summaryRes.status).toBe(200);
+      expect(summaryBody.ok).toBe(true);
+      expect(typeof summaryBody.totalEvents).toBe("number");
+      expect(typeof summaryBody.totalInWindow).toBe("number");
+      expect(typeof summaryBody.failuresInWindow).toBe("number");
+      expect(summaryBody.totalEvents).toBeGreaterThanOrEqual(2);
+      expect(summaryBody.totalInWindow).toBeGreaterThanOrEqual(2);
+      expect(summaryBody.failuresInWindow).toBeGreaterThanOrEqual(0);
+      expect(typeof summaryBody.countsByAction).toBe("object");
+      expect(Number(summaryBody.countsByAction["collaboration_grant.upsert"] || 0)).toBeGreaterThanOrEqual(1);
+
       const rawAudit = JSON.parse(await fs.readFile(testDataPaths.auditFile, "utf8"));
       expect(Array.isArray(rawAudit.events)).toBe(true);
       expect(rawAudit.events.length).toBeGreaterThanOrEqual(2);

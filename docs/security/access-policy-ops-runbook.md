@@ -134,3 +134,48 @@ Access-policy admin endpoints emit sanitized audit events to server logs with:
 Log prefix:
 
 - `[audit:access-policy]`
+
+## 8) Audit Retrieval Endpoints
+
+List recent audit events:
+
+```bash
+curl -sS \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  "http://127.0.0.1:4000/api/access-policies/audit-events?limit=50"
+```
+
+Filter by action and actor:
+
+```bash
+curl -sS \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  "http://127.0.0.1:4000/api/access-policies/audit-events?action=entitlement.set&actorUserId=<ACTOR_USER_ID>&limit=20"
+```
+
+Filter by time window start (`since` ISO):
+
+```bash
+curl -sS \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  "http://127.0.0.1:4000/api/access-policies/audit-events?since=2026-03-21T00:00:00.000Z"
+```
+
+Read summary metrics for dashboard tiles:
+
+```bash
+curl -sS \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  "http://127.0.0.1:4000/api/access-policies/audit-events/summary?windowMs=86400000"
+```
+
+Summary response includes:
+
+- `totalEvents`
+- `totalInWindow`
+- `failuresInWindow`
+- `countsByAction`

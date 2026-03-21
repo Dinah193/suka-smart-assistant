@@ -205,6 +205,24 @@ jobs:
       - name: Auth production env readiness checks
         run: node tools/scripts/check-auth-env-readiness.cjs
 
+  policy-audit-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Access policy audit contracts
+        run: npx vitest run _tests_/accessPolicyAdmin.audit.contract.test.js --reporter=verbose
+
   unit-tests:
     runs-on: ubuntu-latest
     steps:
@@ -333,6 +351,7 @@ jobs:
       - runtime-contracts-strict-entitlement
       - auth-contracts-windows
       - auth-env-readiness
+      - policy-audit-contracts
       - unit-tests
       - lint
       - typecheck
