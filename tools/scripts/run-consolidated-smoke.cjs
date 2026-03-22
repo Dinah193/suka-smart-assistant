@@ -19,15 +19,24 @@ function run() {
   ];
 
   const npmArgs = ["run", "test:ci", "--", ...testFiles];
-  const cmdLine = `npm.cmd ${npmArgs.join(" ")}`;
+  const isWindows = process.platform === "win32";
+  const npmCommand = isWindows ? "npm.cmd" : "npm";
+  const cmdLine = `${npmCommand} ${npmArgs.join(" ")}`;
 
   console.log("[consolidated-smoke] Running targeted contracts...");
-  const res = spawnSync("cmd.exe", ["/c", cmdLine], {
-    cwd: repoRoot,
-    stdio: "inherit",
-    shell: false,
-    env: process.env,
-  });
+  const res = isWindows
+    ? spawnSync("cmd.exe", ["/d", "/s", "/c", cmdLine], {
+        cwd: repoRoot,
+        stdio: "inherit",
+        shell: false,
+        env: process.env,
+      })
+    : spawnSync(npmCommand, npmArgs, {
+        cwd: repoRoot,
+        stdio: "inherit",
+        shell: false,
+        env: process.env,
+      });
 
   const success = res.status === 0;
 

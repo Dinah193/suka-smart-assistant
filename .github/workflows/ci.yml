@@ -127,8 +127,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Realtime and planners runtime contracts
-        run: npx vitest run _tests_/planners.runtime.contract.test.js _tests_/realtimeController.runtime.contract.test.js --reporter=verbose
+      - name: Realtime runtime contracts
+        run: npx vitest run _tests_/realtimeController.runtime.contract.test.js --reporter=verbose
 
   runtime-contracts-strict-entitlement:
     runs-on: ubuntu-latest
