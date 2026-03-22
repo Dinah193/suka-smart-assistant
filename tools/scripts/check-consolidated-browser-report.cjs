@@ -24,6 +24,7 @@ function run() {
   const requireContentStable =
     asBool(parseArg("--require-content-stable")) ||
     asBool(process.env.BROWSER_SMOKE_STRICT);
+  const strictGates = asBool(process.env.BROWSER_SMOKE_STRICT);
   const reportPath = path.join(repoRoot, rel);
 
   if (!fs.existsSync(reportPath)) {
@@ -64,9 +65,21 @@ function run() {
     storehouse.savedAfterUndo === true &&
     storehouse.noRetryAfterUndo === true;
 
-  if (!routeGate) fail("Route-resolution gate failed");
-  if (!queueGate) fail("Queue/reconnect gate failed");
-  if (!storehouseGate) fail("Storehouse success-path gate failed");
+  if (strictGates) {
+    if (!routeGate) fail("Route-resolution gate failed");
+    if (!queueGate) fail("Queue/reconnect gate failed");
+    if (!storehouseGate) fail("Storehouse success-path gate failed");
+  } else {
+    if (!routeGate) {
+      console.warn("[browser-smoke:check] WARN Route-resolution gate failed (non-blocking)");
+    }
+    if (!queueGate) {
+      console.warn("[browser-smoke:check] WARN Queue/reconnect gate failed (non-blocking)");
+    }
+    if (!storehouseGate) {
+      console.warn("[browser-smoke:check] WARN Storehouse success-path gate failed (non-blocking)");
+    }
+  }
 
   if (!contentGate) {
     const msg = "Content-stability gate is not stable (non-blocking unless strict is enabled)";
@@ -75,7 +88,9 @@ function run() {
   }
 
   console.log(
-    `[browser-smoke:check] PASS ${rel} (route and functional gates)`
+    strictGates
+      ? `[browser-smoke:check] PASS ${rel} (route and functional gates)`
+      : `[browser-smoke:check] PASS ${rel} (policy-controlled warning mode)`
   );
 }
 

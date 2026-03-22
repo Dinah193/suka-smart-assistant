@@ -29,6 +29,12 @@ import "./index.css";
 /* -------------------------------------------------------------------------- */
 (() => {
   try {
+    const smokeHarnessRun =
+      typeof window !== "undefined" &&
+      (window.__SSA_SMOKE_AUTH_BYPASS__ === true ||
+        window.__SSA_SMOKE_SKIP_SW_PURGE__ === true);
+    if (smokeHarnessRun) return;
+
     const host = window?.location?.hostname;
     const isLocal =
       host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
@@ -1872,8 +1878,16 @@ function AppChrome({ children }) {
 function AuthRouteGuard({ children }) {
   const location = useLocation();
   const [state, setState] = React.useState({ loading: true, allowed: false });
+  const smokeAuthBypass =
+    import.meta.env.VITE_SSA_SMOKE_AUTH_BYPASS === "1" ||
+    (typeof window !== "undefined" && window.__SSA_SMOKE_AUTH_BYPASS__ === true);
 
   React.useEffect(() => {
+    if (smokeAuthBypass) {
+      setState({ loading: false, allowed: true });
+      return () => {};
+    }
+
     const controller = new AbortController();
 
     (async () => {
@@ -1891,7 +1905,7 @@ function AuthRouteGuard({ children }) {
     })();
 
     return () => controller.abort();
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, smokeAuthBypass]);
 
   if (state.loading) {
     return <Loader />;
