@@ -531,6 +531,53 @@ async function syncHomesteadUpdate({ payload = {}, saved = {}, snapshot = {} } =
   return contract;
 }
 
+async function syncMealPlannerFanoutContracts({
+  mealPlanId = null,
+  householdId = null,
+  contracts = [],
+  plannerGaps = {},
+  storehouseIngest = {},
+} = {}) {
+  const safeContracts = Array.isArray(contracts) ? contracts : [];
+
+  const contract = normalizeProjectionContract({
+    planner: "meal",
+    householdId: householdId || "default-household",
+    updateType: "meal.fanout",
+    projection: {
+      ok: true,
+      projected: safeContracts.length,
+      reason: "meal_fanout_contracts_published",
+    },
+    counts: {
+      inventoryItems: Number(storehouseIngest?.count || 0),
+      outputItems: Number(plannerGaps?.summary?.hardGapCount || 0),
+    },
+    queue: {
+      jobId: mealPlanId || null,
+      status: "processed",
+      attempts: 1,
+      accepted: true,
+      durable: true,
+    },
+  });
+
+  publishPlannerEvent(PlannerEvents.PLANNER_RECOMMENDATIONS_UPDATED, contract, {
+    source: "PlannerProjectionSync.syncMealPlannerFanoutContracts",
+  });
+
+  bridgeProjectionRealtimeEvent({
+    eventType: "planner.recommendations.updated",
+    contract,
+  });
+
+  return {
+    ok: true,
+    contract,
+    processedContracts: safeContracts.length,
+  };
+}
+
 module.exports = {
   ensureProjectionTables,
   processProjectionBacklog,
@@ -541,4 +588,5 @@ module.exports = {
   stopProjectionWorker,
   syncStorehouseUpdate,
   syncHomesteadUpdate,
+  syncMealPlannerFanoutContracts,
 };
