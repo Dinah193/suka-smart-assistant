@@ -441,6 +441,7 @@ async function run() {
     const context = await browser.newContext();
     await context.addInitScript(() => {
       window.__SSA_SMOKE_AUTH_BYPASS__ = true;
+      window.__SSA_SMOKE_SKIP_SW_PURGE__ = true;
     });
     const page = await context.newPage();
 

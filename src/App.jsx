@@ -29,6 +29,12 @@ import "./index.css";
 /* -------------------------------------------------------------------------- */
 (() => {
   try {
+    const smokeHarnessRun =
+      typeof window !== "undefined" &&
+      (window.__SSA_SMOKE_AUTH_BYPASS__ === true ||
+        window.__SSA_SMOKE_SKIP_SW_PURGE__ === true);
+    if (smokeHarnessRun) return;
+
     const host = window?.location?.hostname;
     const isLocal =
       host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
