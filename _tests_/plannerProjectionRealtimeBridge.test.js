@@ -1,11 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   buildProjectionRealtimeEnvelope,
   bridgeProjectionRealtimeEvent,
+  getProjectionDeliveryCounters,
+  resetProjectionDeliveryCounters,
 } = require("../src/server/services/planners/PlannerRealtimeBridge.js");
 
 describe("PlannerProjectionSync realtime bridge", () => {
+  beforeEach(() => {
+    resetProjectionDeliveryCounters();
+  });
+
   it("builds a projection realtime envelope", () => {
     const envelope = buildProjectionRealtimeEnvelope({
       eventType: "planner.storehouse.inventory.updated",
@@ -67,5 +73,9 @@ describe("PlannerProjectionSync realtime bridge", () => {
       payload: envelope,
       room: "home:home-77",
     });
+
+    const counters = getProjectionDeliveryCounters();
+    expect(counters.projection_emitted.total).toBe(1);
+    expect(counters.projection_emitted.byPlannerHousehold["homestead::home-77"]).toBe(1);
   });
 });
