@@ -29,6 +29,7 @@
     "smoke:browser:rerun:verify": "npm run smoke:browser:rerun && node tools/scripts/check-consolidated-browser-report.cjs && node tools/scripts/check-consolidated-browser-report.cjs --require-content-stable=1",
     "smoke:browser:check": "node tools/scripts/check-consolidated-browser-report.cjs",
     "smoke:browser:check:strict": "node tools/scripts/check-consolidated-browser-report.cjs --require-content-stable=1",
+    "test:planner:stability": "vitest run _tests_/plannerEndToEndRegression.integration.test.jsx _tests_/plannerProjectionRealtimeBridge.test.js _tests_/mealPlannerPersistence.test.js --reporter=dot",
     "gate:fast": "npm run smoke:e2e && npm run lint:ci && npm run guard:formatter-jsx && npm audit --audit-level=high",
     "server:start": "node ./src/server/index.js",
     "server:dev": "node --watch ./src/server/index.js",
