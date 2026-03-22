@@ -568,7 +568,20 @@ runtimeDescribe("planners endpoints runtime smoke", () => {
   }, 25000);
 
   it("returns backend meal fanout orchestration metadata on meal save", async () => {
-    const { child, port } = startServer();
+    const connectionString =
+      process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
+    const bootstrap = spawnSync(process.execPath, [bootstrapCheckEntry], {
+      cwd: repoRoot,
+      env: {
+        ...process.env,
+        DATABASE_URL: connectionString,
+      },
+      encoding: "utf8",
+      shell: false,
+    });
+    expect(bootstrap.status).toBe(0);
+
+    const { child, port } = startServer({ DATABASE_URL: connectionString });
     const baseUrl = `http://127.0.0.1:${port}`;
 
     try {
