@@ -131,6 +131,71 @@ function startServer(extraEnv = {}) {
   return { child, port };
 }
 
+async function createPlannerAuthContext(baseUrl) {
+  const email = `planner-runtime-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
+  const password = "Password1234";
+
+  const registerRes = await fetch(`${baseUrl}/api/auth/register`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      firstName: "Planner",
+      lastName: "Runtime",
+      email,
+      password,
+      confirmPassword: password,
+      consent: true,
+    }),
+  });
+  const registerJson = await registerRes.json();
+  if (registerRes.status !== 201) {
+    throw new Error(`planner_runtime_register_failed:${registerRes.status}:${registerJson?.error || "unknown"}`);
+  }
+
+  const accessToken = String(registerJson?.session?.accessToken || "").trim();
+  if (!accessToken) {
+    throw new Error("planner_runtime_register_missing_access_token");
+  }
+
+  const bootstrapRes = await fetch(`${baseUrl}/api/auth/household/bootstrap`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ householdName: `Planner Runtime ${Date.now()}` }),
+  });
+  const bootstrapJson = await bootstrapRes.json();
+  if (bootstrapRes.status !== 200) {
+    throw new Error(
+      `planner_runtime_household_bootstrap_failed:${bootstrapRes.status}:${bootstrapJson?.error || "unknown"}`
+    );
+  }
+
+  const householdId = String(bootstrapJson?.user?.householdId || "").trim();
+  const householdToken = String(bootstrapJson?.session?.accessToken || accessToken).trim();
+  if (!householdId) {
+    throw new Error("planner_runtime_household_bootstrap_missing_household");
+  }
+  if (!householdToken) {
+    throw new Error("planner_runtime_household_bootstrap_missing_access_token");
+  }
+
+  const authFetch = async (url, init = {}) => {
+    const headers = {
+      ...(init.headers || {}),
+      authorization: `Bearer ${householdToken}`,
+    };
+    return fetch(url, { ...init, headers });
+  };
+
+  return {
+    householdId,
+    accessToken: householdToken,
+    authFetch,
+  };
+}
+
 async function stopServer(child) {
   if (!child || child.killed) return;
   await new Promise((resolve) => {
@@ -537,16 +602,18 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
   it("returns seeded PostgreSQL content for storehouse and homestead snapshots", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-${Date.now()}`;
-    const ids = await seedPlannerDb(connectionString, householdId);
     const { child, port } = startServer({ DATABASE_URL: connectionString });
     const baseUrl = `http://127.0.0.1:${port}`;
+    let ids = null;
 
     try {
       await waitForHealth(port);
+      const { householdId, authFetch } = await createPlannerAuthContext(baseUrl);
+      ids = await seedPlannerDb(connectionString, householdId);
+
       await waitForRoute(`${baseUrl}/api/planners/storehouse?householdId=${encodeURIComponent(householdId)}`);
 
-      const storehouseRes = await fetch(
+      const storehouseRes = await authFetch(
         `${baseUrl}/api/planners/storehouse?householdId=${encodeURIComponent(householdId)}`
       );
       const storehouse = await storehouseRes.json();
@@ -567,7 +634,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(seededPreserved).toBeTruthy();
       expect(seededPreserved.state).toBe("preserved");
 
-      const homesteadRes = await fetch(
+      const homesteadRes = await authFetch(
         `${baseUrl}/api/planners/homestead?householdId=${encodeURIComponent(householdId)}`
       );
       const homestead = await homesteadRes.json();
@@ -589,14 +656,15 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(seededOutput.preservationReady).toBe(true);
     } finally {
       await stopServer(child);
-      await cleanupPlannerDb(connectionString, ids).catch(() => {});
+      if (ids) {
+        await cleanupPlannerDb(connectionString, ids).catch(() => {});
+      }
     }
   }, 30000);
 
   it("applies storehouse and homestead mutations and reflects them in subsequent reads", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-mutation-${Date.now()}`;
     const ids = {
       lotId: null,
       preservedId: null,
@@ -613,8 +681,9 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
 
     try {
       await waitForHealth(port);
+      const { householdId, authFetch } = await createPlannerAuthContext(baseUrl);
 
-      const storehouseMutationRes = await fetch(`${baseUrl}/api/planners/storehouse/inventory`, {
+      const storehouseMutationRes = await authFetch(`${baseUrl}/api/planners/storehouse/inventory`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -649,7 +718,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(typeof storehouseMutation.projection?.queue?.jobId).toBe("string");
       expect(Array.isArray(storehouseMutation.projection?.warnings)).toBe(true);
 
-      const storehouseAfterRes = await fetch(
+      const storehouseAfterRes = await authFetch(
         `${baseUrl}/api/planners/storehouse?householdId=${encodeURIComponent(householdId)}`
       );
       const storehouseAfter = await storehouseAfterRes.json();
@@ -660,7 +729,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(mutatedLot.qty).toBe(7);
       expect(mutatedLot.reservedQty).toBe(2);
 
-      const homesteadMutationRes = await fetch(`${baseUrl}/api/planners/homestead`, {
+      const homesteadMutationRes = await authFetch(`${baseUrl}/api/planners/homestead`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -702,7 +771,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(typeof homesteadMutation.projection?.queue?.jobId).toBe("string");
       expect(Array.isArray(homesteadMutation.projection?.warnings)).toBe(true);
 
-      const homesteadAfterRes = await fetch(
+      const homesteadAfterRes = await authFetch(
         `${baseUrl}/api/planners/homestead?householdId=${encodeURIComponent(householdId)}`
       );
       const homesteadAfter = await homesteadAfterRes.json();
@@ -728,7 +797,6 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
   it("supports projection status, replay, and reconcile flows for consistency checks", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-p2-${Date.now()}`;
     const ids = {
       lotId: null,
       preservedId: null,
@@ -745,8 +813,9 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
 
     try {
       await waitForHealth(port);
+      const { householdId, authFetch } = await createPlannerAuthContext(baseUrl);
 
-      const storehouseMutationRes = await fetch(`${baseUrl}/api/planners/storehouse/inventory`, {
+      const storehouseMutationRes = await authFetch(`${baseUrl}/api/planners/storehouse/inventory`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -767,7 +836,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       });
       expect(storehouseMutationRes.status).toBe(200);
 
-      const statusRes = await fetch(`${baseUrl}/api/planners/projection/status`);
+      const statusRes = await authFetch(`${baseUrl}/api/planners/projection/status`);
       const status = await statusRes.json();
       expect(statusRes.status).toBe(200);
       expect(status.ok).toBe(true);
@@ -775,7 +844,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(typeof status.queue.total).toBe("number");
       expect(typeof status.worker.running).toBe("boolean");
 
-      const reconcileRes = await fetch(`${baseUrl}/api/planners/projection/reconcile`, {
+      const reconcileRes = await authFetch(`${baseUrl}/api/planners/projection/reconcile`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -790,7 +859,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(Array.isArray(reconcile.queued)).toBe(true);
       expect(reconcile.queued.length).toBeGreaterThanOrEqual(2);
 
-      const replayRes = await fetch(`${baseUrl}/api/planners/projection/replay`, {
+      const replayRes = await authFetch(`${baseUrl}/api/planners/projection/replay`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -813,14 +882,14 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
   it("serves operational readiness endpoints", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-readiness-${Date.now()}`;
     const { child, port } = startServer({ DATABASE_URL: connectionString });
     const baseUrl = `http://127.0.0.1:${port}`;
 
     try {
       await waitForHealth(port);
+      const { householdId, authFetch } = await createPlannerAuthContext(baseUrl);
 
-      const aggregateRes = await fetch(
+      const aggregateRes = await authFetch(
         `${baseUrl}/api/planners/operational/readiness?householdId=${encodeURIComponent(householdId)}`
       );
       const aggregate = await aggregateRes.json();
@@ -831,7 +900,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(aggregate.readiness.storehouse).toBeTruthy();
       expect(aggregate.readiness.homestead).toBeTruthy();
 
-      const mealRes = await fetch(
+      const mealRes = await authFetch(
         `${baseUrl}/api/planners/operational/readiness/meal?householdId=${encodeURIComponent(householdId)}`
       );
       const meal = await mealRes.json();
@@ -839,7 +908,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(meal.ok).toBe(true);
       expect(meal.readiness).toBeTruthy();
 
-      const storehouseRes = await fetch(
+      const storehouseRes = await authFetch(
         `${baseUrl}/api/planners/operational/readiness/storehouse?householdId=${encodeURIComponent(
           householdId
         )}`
@@ -849,7 +918,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(storehouse.ok).toBe(true);
       expect(storehouse.readiness).toBeTruthy();
 
-      const homesteadRes = await fetch(
+      const homesteadRes = await authFetch(
         `${baseUrl}/api/planners/operational/readiness/homestead?householdId=${encodeURIComponent(
           householdId
         )}`
@@ -859,7 +928,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(homestead.ok).toBe(true);
       expect(homestead.readiness).toBeTruthy();
 
-      const searchRes = await fetch(
+      const searchRes = await authFetch(
         `${baseUrl}/api/planners/operational/saved-recipes/search?householdId=${encodeURIComponent(
           householdId
         )}&q=beans&limit=5`
@@ -876,7 +945,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
   it("emits outbox events and supports claim/retry semantics", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-outbox-${Date.now()}`;
+    let householdId = null;
     const ids = {
       lotId: null,
       preservedId: null,
@@ -896,8 +965,11 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
 
     try {
       await waitForHealth(port);
+      const auth = await createPlannerAuthContext(baseUrl);
+      householdId = auth.householdId;
+      const authFetch = auth.authFetch;
 
-      const mutationRes = await fetch(`${baseUrl}/api/planners/storehouse/inventory`, {
+      const mutationRes = await authFetch(`${baseUrl}/api/planners/storehouse/inventory`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -921,7 +993,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(mutation.ok).toBe(true);
       expect(typeof mutation.upsert?.outboxEvent?.id).toBe("string");
 
-      const statusRes = await fetch(
+      const statusRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/status?householdId=${encodeURIComponent(
           householdId
         )}`
@@ -931,7 +1003,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(status.ok).toBe(true);
       expect(status.summary.total).toBeGreaterThanOrEqual(1);
 
-      const claimRes = await fetch(`${baseUrl}/api/planners/operational/outbox/claim`, {
+      const claimRes = await authFetch(`${baseUrl}/api/planners/operational/outbox/claim`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ householdId, limit: 10 }),
@@ -945,7 +1017,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       const picked = claim.items.find((x) => x.household_id === householdId) || claim.items[0];
       expect(picked).toBeTruthy();
 
-      const retryRes = await fetch(`${baseUrl}/api/planners/operational/outbox/retry`, {
+      const retryRes = await authFetch(`${baseUrl}/api/planners/operational/outbox/retry`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -962,14 +1034,16 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
     } finally {
       await stopServer(child);
       await cleanupPlannerDb(connectionString, ids).catch(() => {});
-      await cleanupOperationalOutboxForHousehold(connectionString, householdId).catch(() => {});
+      if (householdId) {
+        await cleanupOperationalOutboxForHousehold(connectionString, householdId).catch(() => {});
+      }
     }
   }, 30000);
 
   it("serves outbox observability endpoints and supports threshold override/reset", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-observe-${Date.now()}`;
+    let householdId = null;
     const ids = {
       lotId: null,
       preservedId: null,
@@ -989,8 +1063,11 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
 
     try {
       await waitForHealth(port);
+      const auth = await createPlannerAuthContext(baseUrl);
+      householdId = auth.householdId;
+      const authFetch = auth.authFetch;
 
-      const seedRes = await fetch(`${baseUrl}/api/planners/storehouse/inventory`, {
+      const seedRes = await authFetch(`${baseUrl}/api/planners/storehouse/inventory`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -1011,7 +1088,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       });
       expect(seedRes.status).toBe(200);
 
-      const thresholdsBeforeRes = await fetch(
+      const thresholdsBeforeRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-thresholds`
       );
       const thresholdsBefore = await thresholdsBeforeRes.json();
@@ -1019,7 +1096,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(thresholdsBefore.ok).toBe(true);
       expect(typeof thresholdsBefore.thresholds.pendingAgeWarnMs).toBe("number");
 
-      const overrideRes = await fetch(
+      const overrideRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-thresholds`,
         {
           method: "POST",
@@ -1042,7 +1119,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(override.thresholds.retryRateWarn).toBe(0);
       expect(override.thresholds.retryRateCrit).toBe(0);
 
-      const metricsRes = await fetch(
+      const metricsRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/metrics?householdId=${encodeURIComponent(
           householdId
         )}&windowMs=60000`
@@ -1055,7 +1132,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(typeof metrics.outbox.total).toBe("number");
       expect(metrics.health).toBeTruthy();
 
-      const alertsRes = await fetch(
+      const alertsRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alerts?householdId=${encodeURIComponent(
           householdId
         )}&windowMs=60000`
@@ -1066,7 +1143,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(Array.isArray(alerts.alerts)).toBe(true);
       expect(alerts.thresholds.pendingAgeWarnMs).toBe(1);
 
-      const eventsRes = await fetch(
+      const eventsRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/events?limit=20`
       );
       const events = await eventsRes.json();
@@ -1076,7 +1153,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(events.count).toBeGreaterThanOrEqual(1);
       expect(events.items.some((x) => x.type === "thresholds.updated")).toBe(true);
 
-      const observeRes = await fetch(
+      const observeRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/observability?householdId=${encodeURIComponent(
           householdId
         )}&windowMs=60000&eventsLimit=20`
@@ -1089,7 +1166,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(Array.isArray(observe.recentEvents)).toBe(true);
       expect(observe.thresholds.pendingAgeWarnMs).toBe(1);
 
-      const resetRes = await fetch(
+      const resetRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-thresholds`,
         {
           method: "POST",
@@ -1107,7 +1184,9 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
     } finally {
       await stopServer(child);
       await cleanupPlannerDb(connectionString, ids).catch(() => {});
-      await cleanupOperationalOutboxForHousehold(connectionString, householdId).catch(() => {});
+      if (householdId) {
+        await cleanupOperationalOutboxForHousehold(connectionString, householdId).catch(() => {});
+      }
     }
   }, 30000);
 
@@ -1124,8 +1203,9 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
 
     try {
       await waitForHealth(server.port);
+      const { authFetch } = await createPlannerAuthContext(baseUrl);
 
-      const overrideRes = await fetch(
+      const overrideRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-thresholds`,
         {
           method: "POST",
@@ -1149,8 +1229,10 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       server = startServer({ DATABASE_URL: connectionString });
       baseUrl = `http://127.0.0.1:${server.port}`;
       await waitForHealth(server.port);
+      const restartedAuth = await createPlannerAuthContext(baseUrl);
+      const restartedFetch = restartedAuth.authFetch;
 
-      const thresholdsRes = await fetch(
+      const thresholdsRes = await restartedFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-thresholds`
       );
       const thresholds = await thresholdsRes.json();
@@ -1167,7 +1249,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
   it("dispatches outbox alerts to configured delivery hooks", async () => {
     const connectionString =
       process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/suka";
-    const householdId = `seed-home-alert-hook-${Date.now()}`;
+    let householdId = null;
     const ids = {
       lotId: null,
       preservedId: null,
@@ -1192,8 +1274,11 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
 
     try {
       await waitForHealth(port);
+      const auth = await createPlannerAuthContext(baseUrl);
+      householdId = auth.householdId;
+      const authFetch = auth.authFetch;
 
-      const seedRes = await fetch(`${baseUrl}/api/planners/storehouse/inventory`, {
+      const seedRes = await authFetch(`${baseUrl}/api/planners/storehouse/inventory`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -1214,7 +1299,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       });
       expect(seedRes.status).toBe(200);
 
-      const overrideRes = await fetch(
+      const overrideRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-thresholds`,
         {
           method: "POST",
@@ -1229,7 +1314,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       );
       expect(overrideRes.status).toBe(200);
 
-      const dispatchRes = await fetch(
+      const dispatchRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alerts/dispatch`,
         {
           method: "POST",
@@ -1251,7 +1336,7 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       expect(payload.alerts.length).toBeGreaterThanOrEqual(1);
       expect(payload.householdId).toBe(householdId);
 
-      const deliveriesRes = await fetch(
+      const deliveriesRes = await authFetch(
         `${baseUrl}/api/planners/operational/outbox/alert-deliveries?limit=5`
       );
       const deliveries = await deliveriesRes.json();
@@ -1264,7 +1349,9 @@ runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {
       await stopServer(child);
       await sink.stop().catch(() => {});
       await cleanupPlannerDb(connectionString, ids).catch(() => {});
-      await cleanupOperationalOutboxForHousehold(connectionString, householdId).catch(() => {});
+      if (householdId) {
+        await cleanupOperationalOutboxForHousehold(connectionString, householdId).catch(() => {});
+      }
       await resetOutboxObservabilityThresholdOverrides(connectionString).catch(() => {});
     }
   }, 45000);
