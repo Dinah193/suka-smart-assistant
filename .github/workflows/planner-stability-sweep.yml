@@ -1,0 +1,49 @@
+name: Planner Stability Sweep
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * *"
+
+jobs:
+  planner-stability-sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ssa_planner
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ssa_planner"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Targeted planner regression suite
+        run: npm run test:planner:stability
+
+      - name: Planner runtime contracts
+        env:
+          DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/ssa_planner
+          SSA_ENABLE_RUNTIME_CONTRACT_TESTS: "1"
+          SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS: "1"
+        run: npx vitest run _tests_/planners.runtime.contract.test.js --reporter=dot
