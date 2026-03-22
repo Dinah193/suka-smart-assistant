@@ -2,6 +2,10 @@
 // C:\Users\larho\suka-smart-assistant\src\pages\homestead.jsx
 import React, { useCallback, useEffect, useMemo, useState, useId } from "react";
 import "@/styles/bridge.scan.css";
+import {
+  loadHomesteadPlannerPlan,
+  saveHomesteadPlannerPlan,
+} from "./HomesteadPlannerService";
 
 /**
  * Homestead Planner — seasonal goals → domain sessions
@@ -287,6 +291,16 @@ export default function HomesteadPlannerPage() {
     let alive = true;
     (async () => {
       try {
+        const remote = await loadHomesteadPlannerPlan({
+          fallbackPlan: plan,
+        });
+        if (alive && remote?.plan) {
+          setPlan((p) => ({ ...p, ...remote.plan }));
+          return;
+        }
+      } catch {}
+
+      try {
         const last = await loadLastPlan();
         if (alive && last) setPlan((p) => ({ ...p, ...last }));
       } catch {}
@@ -338,7 +352,11 @@ export default function HomesteadPlannerPage() {
   const onCommit = useCallback(async () => {
     try {
       const record = { ...plan, updatedAt: NOW_ISO() };
-      await savePlan(record);
+      try {
+        await saveHomesteadPlannerPlan(record);
+      } catch {
+        await savePlan(record);
+      }
       setPlan(record);
 
       const payload = emit("homestead.plan.updated", "HomesteadPlanner", {
