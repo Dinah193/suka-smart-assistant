@@ -211,6 +211,23 @@ Maintenance controls are also configurable via env:
 - `ACCESS_POLICY_AUDIT_ROLLOVER_ENABLED`
 - `ACCESS_POLICY_AUDIT_ROLLOVER_FILE`
 
+Rollback switch (fast disable for rollover writes):
+
+1. Set `ACCESS_POLICY_AUDIT_ROLLOVER_ENABLED=false` in the runtime environment.
+2. Restart/redeploy the service so the env change is active.
+3. Run one maintenance pass to confirm behavior:
+
+```bash
+curl -sS -X POST \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  -H "content-type: application/json" \
+  -d '{ "maxEvents": 5000, "retentionMs": 2592000000, "rolloverEnabled": false }' \
+  "http://127.0.0.1:4000/api/access-policies/audit-events/maintenance"
+```
+
+Expected: `rolledCount` remains `0` while pruning can still occur.
+
 Read actor anomaly triage payload:
 
 ```bash
