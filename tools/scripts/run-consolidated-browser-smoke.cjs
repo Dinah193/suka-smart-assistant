@@ -96,7 +96,21 @@ async function waitForMealPlannerProbe(page, timeoutMs = 60000) {
     }
   }
 
-  throw new Error("meal_planner_probe_missing");
+  let diagnosticUrl = "unknown";
+  let diagnosticBody = "";
+  try {
+    diagnosticUrl = page.url();
+    diagnosticBody = ((await page.textContent("body")) || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 240);
+  } catch {
+    // Ignore probe diagnostics errors.
+  }
+
+  throw new Error(
+    `meal_planner_probe_missing url=${diagnosticUrl} body=${JSON.stringify(diagnosticBody)}`
+  );
 }
 
 async function runDeepLinkCapture(page, baseUrl) {
