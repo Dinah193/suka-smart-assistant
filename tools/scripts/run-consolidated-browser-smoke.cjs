@@ -348,7 +348,11 @@ async function run() {
       cwd: repoRoot,
       stdio: ["ignore", "pipe", "pipe"],
       shell: false,
-      env: process.env,
+      env: {
+        ...process.env,
+        SSA_DISABLE_OPTIMIZE_DEPS:
+          process.env.SSA_DISABLE_OPTIMIZE_DEPS || "1",
+      },
     });
     devProc.stdout.on("data", (d) => {
       const line = String(d || "").trim();
