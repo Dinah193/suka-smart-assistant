@@ -425,6 +425,9 @@ async function run() {
   const browser = await chromium.launch({ headless: true });
   try {
     const context = await browser.newContext();
+    await context.addInitScript(() => {
+      window.__SSA_SMOKE_AUTH_BYPASS__ = true;
+    });
     const page = await context.newPage();
 
     try {
