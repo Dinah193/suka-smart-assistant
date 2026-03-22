@@ -343,6 +343,14 @@ jobs:
           path: docs/qa/consolidated-smoke-browser-report-latest.json
           if-no-files-found: error
 
+      - name: Upload browser check summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consolidated-smoke-browser-check-summary
+          path: docs/qa/consolidated-smoke-browser-check-summary-latest.json
+          if-no-files-found: error
+
       - name: Upload browser rerun report artifact
         if: always()
         uses: actions/upload-artifact@v4

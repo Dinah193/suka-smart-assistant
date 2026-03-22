@@ -88,7 +88,7 @@ async function waitForMealPlannerProbe(page, timeoutMs = 60000) {
         state: "attached",
         timeout: perAttemptTimeout,
       });
-      return true;
+      return;
     } catch (err) {
       if (attempt === maxAttempts - 1) break;
       await page.reload({ waitUntil: "domcontentloaded" });
@@ -96,17 +96,7 @@ async function waitForMealPlannerProbe(page, timeoutMs = 60000) {
     }
   }
 
-  // Fall back to a visible heading signal to avoid hard-failing on probe-only flakes.
-  try {
-    const bodyText = (await page.textContent("body")) || "";
-    if (/Meal Planner/i.test(bodyText)) {
-      return false;
-    }
-  } catch {
-    // Ignore and let caller continue with conservative defaults.
-  }
-
-  return false;
+  throw new Error("meal_planner_probe_missing");
 }
 
 async function runDeepLinkCapture(page, baseUrl) {
@@ -125,29 +115,20 @@ async function runDeepLinkCapture(page, baseUrl) {
 
   for (const request of requests) {
     await page.goto(`${baseUrl}${request}`, { waitUntil: "domcontentloaded" });
-    const probeReady = await waitForMealPlannerProbe(page);
+    await waitForMealPlannerProbe(page);
     await page.waitForTimeout(400);
 
     const full = page.url();
     const resolvedRoute = full.replace(/^https?:\/\/[^/]+/i, "") || "/";
     const bodyText = (await page.textContent("body")) || "";
-    let probeText = "";
-    if (probeReady) {
-      try {
-        const probe = page.getByTestId("meal-planner-content-probe").first();
-        probeText = (await probe.textContent()) || "";
-      } catch {
-        probeText = "";
-      }
-    }
+    const probe = page.getByTestId("meal-planner-content-probe").first();
+    const probeText = (await probe.textContent()) || "";
     const combined = `${bodyText} ${probeText}`;
 
     observed.push({
       request,
       resolvedRoute,
-      routeMatch:
-        resolvedRoute === expectedResolution[request] ||
-        resolvedRoute === request,
+      routeMatch: resolvedRoute === expectedResolution[request],
       hasMealPlannerText: /Meal Planner/i.test(combined),
       hasPrepOrBatchText: /(prep|batch|cycle)/i.test(combined),
     });
@@ -209,8 +190,7 @@ async function runQueueReconnectCapture(page, baseUrl) {
     /Reconnect requested\./i.test(
       `${beforeText}\n${afterSignalText}\n${afterReconnectText}`
     ) ||
-    (await reconnectBtn.count()) > 0 ||
-    /\/meal-planning(\?|$)/i.test(page.url());
+    (await reconnectBtn.count()) > 0;
 
   return {
     queuedBefore,
@@ -239,46 +219,8 @@ function hasAny(text, needles) {
 async function runStorehouseCapture(page, baseUrl) {
   const startedAt = toIsoNow();
 
-  const skipped = (reason) => ({
-    startedAt,
-    finishedAt: toIsoNow(),
-    item: `storehouse-skip-${Date.now()}`,
-    checks: {
-      savedAfterAdd: true,
-      noRetryAfterAdd: true,
-      savedAfterEdit: true,
-      noRetryAfterEdit: true,
-      savedAfterRemove: true,
-      noRetryAfterRemove: true,
-      undoVisible: true,
-      savedAfterUndo: true,
-      noRetryAfterUndo: true,
-    },
-    statuses: {
-      statusAfterAdd: `Skipped (${reason})`,
-      statusAfterEdit: `Skipped (${reason})`,
-      statusAfterRemove: `Skipped (${reason})`,
-      statusAfterUndo: `Skipped (${reason})`,
-    },
-  });
-
-  const storehouseRoutes = ["/storehouse/planner", "/storehouse", "/storehouse/inventory"];
-  let storehouseReady = false;
-
-  for (const route of storehouseRoutes) {
-    try {
-      await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
-      await page.getByLabel("Quick add item name").first().waitFor({ timeout: 12000 });
-      storehouseReady = true;
-      break;
-    } catch {
-      // Try next route candidate.
-    }
-  }
-
-  if (!storehouseReady) {
-    return skipped("storehouse quick-add controls not found");
-  }
+  await page.goto(`${baseUrl}/storehouse/planner`, { waitUntil: "domcontentloaded" });
+  await page.getByLabel("Quick add item name").first().waitFor({ timeout: 30000 });
 
   const item = `Storehouse Rerun ${Date.now()}`;
 
@@ -385,6 +327,51 @@ function buildReport(baseUrl, deepLink, queueReconnect, storehouseSuccessPath) {
   };
 }
 
+function buildCheckSummary(report) {
+  const deepObserved = Array.isArray(report?.deepLink?.observed)
+    ? report.deepLink.observed
+    : [];
+  const firstRouteMismatch = deepObserved.find((x) => x.routeMatch !== true) || null;
+  const firstContentMismatch = deepObserved.find(
+    (x) => x.hasMealPlannerText !== true || x.hasPrepOrBatchText !== true
+  ) || null;
+
+  const gates = {
+    routeResolution: report?.deepLink?.checks?.allRouteResolutionsMatchExpected === true,
+    contentProbeStable: report?.deepLink?.checks?.uiContentProbeStable === true,
+    queueIncrementsOnOfflineSignal:
+      report?.queueReconnect?.checks?.queueIncrementsOnOfflineSignal === true,
+    queuePersistsOrFlushesAfterReconnect:
+      report?.queueReconnect?.checks?.queuePersistsOrFlushesAfterReconnect === true,
+    reconnectStatusVisible: report?.queueReconnect?.checks?.reconnectStatusVisible === true,
+    storehouseSavedAfterAdd: report?.storehouseSuccessPath?.checks?.savedAfterAdd === true,
+    storehouseSavedAfterEdit: report?.storehouseSuccessPath?.checks?.savedAfterEdit === true,
+    storehouseSavedAfterRemove:
+      report?.storehouseSuccessPath?.checks?.savedAfterRemove === true,
+    storehouseSavedAfterUndo: report?.storehouseSuccessPath?.checks?.savedAfterUndo === true,
+  };
+
+  const failingGates = Object.entries(gates)
+    .filter(([, pass]) => pass !== true)
+    .map(([key]) => key);
+
+  return {
+    generatedAt: toIsoNow(),
+    reportPath: "docs/qa/consolidated-smoke-report-rerun-latest.json",
+    overallPass: report?.overall?.pass === true,
+    failingGates,
+    gates,
+    firstRouteMismatch,
+    firstContentMismatch,
+    queueSnapshot: {
+      queuedBefore: report?.queueReconnect?.queuedBefore || "",
+      queuedAfterSignal: report?.queueReconnect?.queuedAfterSignal || "",
+      queuedAfterReconnect: report?.queueReconnect?.queuedAfterReconnect || "",
+    },
+    storehouseStatuses: report?.storehouseSuccessPath?.statuses || {},
+  };
+}
+
 async function run() {
   const repoRoot = process.cwd();
   const qaDir = path.join(repoRoot, "docs", "qa");
@@ -443,11 +430,21 @@ async function run() {
     const storehouseSuccessPath = await runStorehouseCapture(page, baseUrl);
 
     const report = buildReport(baseUrl, deepLink, queueReconnect, storehouseSuccessPath);
+    const summary = buildCheckSummary(report);
 
     const latestPath = path.join(repoRoot, relLatest);
     fs.mkdirSync(path.dirname(latestPath), { recursive: true });
     fs.writeFileSync(latestPath, JSON.stringify(report, null, 2));
     console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, latestPath)}`);
+
+    const summaryPath = path.join(
+      repoRoot,
+      "docs",
+      "qa",
+      "consolidated-smoke-browser-check-summary-latest.json"
+    );
+    fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
+    console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, summaryPath)}`);
 
     if (writeDated) {
       const datedName = `consolidated-smoke-report-${toDateStamp()}-rerun.json`;
@@ -458,7 +455,12 @@ async function run() {
 
     if (!report.overall.pass) {
       process.exitCode = 1;
-      console.error("[consolidated-browser-smoke] Report generated but one or more checks failed.");
+      const failing = summary.failingGates.length
+        ? summary.failingGates.join(", ")
+        : "unknown_gate";
+      console.error(
+        `[consolidated-browser-smoke] Report generated but checks failed: ${failing}`
+      );
     }
   } finally {
     await browser.close();
