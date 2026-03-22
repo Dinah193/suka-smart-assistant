@@ -400,6 +400,8 @@ async function run() {
         ...process.env,
         SSA_DISABLE_OPTIMIZE_DEPS:
           process.env.SSA_DISABLE_OPTIMIZE_DEPS || "1",
+        VITE_SSA_SMOKE_AUTH_BYPASS:
+          process.env.VITE_SSA_SMOKE_AUTH_BYPASS || "1",
       },
     });
     devProc.stdout.on("data", (d) => {
@@ -425,42 +427,62 @@ async function run() {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    const deepLink = await runDeepLinkCapture(page, baseUrl);
-    const queueReconnect = await runQueueReconnectCapture(page, baseUrl);
-    const storehouseSuccessPath = await runStorehouseCapture(page, baseUrl);
+    try {
+      const deepLink = await runDeepLinkCapture(page, baseUrl);
+      const queueReconnect = await runQueueReconnectCapture(page, baseUrl);
+      const storehouseSuccessPath = await runStorehouseCapture(page, baseUrl);
 
-    const report = buildReport(baseUrl, deepLink, queueReconnect, storehouseSuccessPath);
-    const summary = buildCheckSummary(report);
+      const report = buildReport(baseUrl, deepLink, queueReconnect, storehouseSuccessPath);
+      const summary = buildCheckSummary(report);
 
-    const latestPath = path.join(repoRoot, relLatest);
-    fs.mkdirSync(path.dirname(latestPath), { recursive: true });
-    fs.writeFileSync(latestPath, JSON.stringify(report, null, 2));
-    console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, latestPath)}`);
+      const latestPath = path.join(repoRoot, relLatest);
+      fs.mkdirSync(path.dirname(latestPath), { recursive: true });
+      fs.writeFileSync(latestPath, JSON.stringify(report, null, 2));
+      console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, latestPath)}`);
 
-    const summaryPath = path.join(
-      repoRoot,
-      "docs",
-      "qa",
-      "consolidated-smoke-browser-check-summary-latest.json"
-    );
-    fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
-    console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, summaryPath)}`);
-
-    if (writeDated) {
-      const datedName = `consolidated-smoke-report-${toDateStamp()}-rerun.json`;
-      const datedPath = path.join(qaDir, datedName);
-      fs.writeFileSync(datedPath, JSON.stringify(report, null, 2));
-      console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, datedPath)}`);
-    }
-
-    if (!report.overall.pass) {
-      process.exitCode = 1;
-      const failing = summary.failingGates.length
-        ? summary.failingGates.join(", ")
-        : "unknown_gate";
-      console.error(
-        `[consolidated-browser-smoke] Report generated but checks failed: ${failing}`
+      const summaryPath = path.join(
+        repoRoot,
+        "docs",
+        "qa",
+        "consolidated-smoke-browser-check-summary-latest.json"
       );
+      fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
+      console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, summaryPath)}`);
+
+      if (writeDated) {
+        const datedName = `consolidated-smoke-report-${toDateStamp()}-rerun.json`;
+        const datedPath = path.join(qaDir, datedName);
+        fs.writeFileSync(datedPath, JSON.stringify(report, null, 2));
+        console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, datedPath)}`);
+      }
+
+      if (!report.overall.pass) {
+        process.exitCode = 1;
+        const failing = summary.failingGates.length
+          ? summary.failingGates.join(", ")
+          : "unknown_gate";
+        console.error(
+          `[consolidated-browser-smoke] Report generated but checks failed: ${failing}`
+        );
+      }
+    } catch (err) {
+      const summaryPath = path.join(
+        repoRoot,
+        "docs",
+        "qa",
+        "consolidated-smoke-browser-check-summary-latest.json"
+      );
+      const fallbackSummary = {
+        generatedAt: toIsoNow(),
+        reportPath: "docs/qa/consolidated-smoke-report-rerun-latest.json",
+        overallPass: false,
+        failingGates: ["runtimeError"],
+        gates: {},
+        runtimeError: String(err?.message || err),
+      };
+      fs.writeFileSync(summaryPath, JSON.stringify(fallbackSummary, null, 2));
+      console.log(`[consolidated-browser-smoke] Wrote ${path.relative(repoRoot, summaryPath)}`);
+      throw err;
     }
   } finally {
     await browser.close();
