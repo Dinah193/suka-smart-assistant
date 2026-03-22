@@ -94,11 +94,16 @@ router.post("/meal", express.json(), async (req, res) => {
     } = loadPlannerIntegrationService();
     const { orchestrateMealPlanFanout } = loadMealPlannerOrchestrationService();
     const { syncMealPlannerFanoutContracts } = loadPlannerProjectionSync();
+    const warnings = [];
     if (typeof saveMealPlannerOutput !== "function") {
       return res.status(503).json({ ok: false, error: "planner_integration_unavailable" });
     }
     if (typeof ensureMongoConnected === "function") {
-      await ensureMongoConnected();
+      try {
+        await ensureMongoConnected();
+      } catch (error) {
+        warnings.push(`mongo_connect_failed:${String(error?.message || error || "unknown")}`);
+      }
     }
     const payload = req.body || {};
     const out = await saveMealPlannerOutput(payload);
@@ -116,16 +121,11 @@ router.post("/meal", express.json(), async (req, res) => {
           id: out.id || payload.id,
           householdId: payload.householdId,
         },
-          const warnings = [];
         persistContracts:
           typeof persistMealPlannerFanoutContracts === "function"
             ? ({ mealPlanId, householdId, contracts }) =>
                 persistMealPlannerFanoutContracts({
-            try {
-              await ensureMongoConnected();
-            } catch (error) {
-              warnings.push(`mongo_connect_failed:${String(error?.message || error || "unknown")}`);
-            }
+                  mealPlanId,
                   householdId,
                   contracts,
                   updatedBy: String(payload.updatedBy || payload.userId || "mealplanner:backendOrchestration"),
@@ -139,7 +139,7 @@ router.post("/meal", express.json(), async (req, res) => {
       });
     }
 
-    return res.json({ ok: true, ...out, orchestration });
+    return res.json({ ok: true, ...out, orchestration, warnings });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
@@ -157,7 +157,7 @@ router.get("/storehouse", async (req, res) => {
         summary: { totalItems: 0, preservedItems: 0, lowStockItems: 0 },
         warnings: ["planner_integration_unavailable"],
       });
-          return res.json({ ok: true, ...out, orchestration, warnings });
+    }
 
     const snapshot = await getStorehousePlannerSnapshot(householdId);
     return res.json({
