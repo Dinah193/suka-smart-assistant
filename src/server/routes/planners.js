@@ -1,6 +1,12 @@
 "use strict";
 
 const express = require("express");
+const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
+const {
+  requireHouseholdAccessPolicy,
+  requireCollaborationPolicy,
+  requireEntitlementPolicy,
+} = require("../middleware/accessPolicy.js");
 
 function loadPlannerIntegrationService() {
   try {
@@ -51,6 +57,11 @@ function loadOperationalOutboxObservability() {
 }
 
 const router = express.Router();
+
+router.use(authenticateRequest);
+router.use(requireHouseholdAccessPolicy());
+router.use(requireCollaborationPolicy({ moduleKey: "planners" }));
+router.use(requireEntitlementPolicy({ feature: "planner.base" }));
 
 router.get("/meal", async (req, res) => {
   try {

@@ -1,10 +1,19 @@
 // src/pages/home.jsx
 import React, { useEffect, useMemo, useState, Suspense } from "react";
+import { CookingPot, House, Sprout, Warehouse } from "lucide-react";
 import DashboardSection from "@/components/layout/DashboardSection";
 import RecipeConsolidatorCard from "@/components/home/RecipeConsolidatorCard";
 import HouseholdProfile from "@/components/home/HouseholdProfile";
 import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
 import CuisineProfileCard from "@/components/cuisine/CuisineProfileCard";
+import {
+  Avatar as SacredAvatar,
+  Button as SacredButton,
+  Card as SacredCard,
+  DashboardGrid,
+  FeedPost,
+  Notification,
+} from "@/components/sacred";
 import { getFeatureFlag } from "@/config";
 import { automation } from "@/services/automation/runtime"; // shared automation runtime
 
@@ -496,6 +505,55 @@ export default function HomePage() {
     readFav(favKey.schedules)
   );
   const [showLivePanels, setShowLivePanels] = useState(false);
+  const [sacredNotifications, setSacredNotifications] = useState(() => [
+    {
+      id: "home-n1",
+      type: "info",
+      title: "Village coordination active",
+      message:
+        "Meal planning, storehouse, and homestead signals are synced for this household.",
+      timestamp: "Just now",
+    },
+    {
+      id: "home-n2",
+      type: "warning",
+      title: "Low stock risk",
+      message:
+        "Projected grains may fall under threshold within 3 days. Review Storehouse Planner.",
+      timestamp: "7m ago",
+    },
+  ]);
+
+  const sacredFeed = useMemo(
+    () => [
+      {
+        id: "home-f1",
+        author: "Household Lead",
+        content:
+          "Meal cycle is balanced and prep sessions now align with cleaning windows for weekdays.",
+        timestamp: "Today 08:42",
+        likes: 14,
+        comments: 3,
+        shares: 1,
+      },
+      {
+        id: "home-f2",
+        author: "Willow Household",
+        household: true,
+        content:
+          "Homestead batch targets updated; storehouse demand smoothing improved for this week.",
+        timestamp: "Today 07:11",
+        likes: 9,
+        comments: 2,
+        shares: 0,
+      },
+    ],
+    []
+  );
+
+  const dismissSacredNotification = (id) => {
+    setSacredNotifications((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const [homeRoutine, setHomeRoutine] = useState(() => readHomeRoutine());
   const [customInputs, setCustomInputs] = useState(() => ({
@@ -1327,6 +1385,109 @@ export default function HomePage() {
                 icon="🐾"
                 hint="This week"
               />
+            </div>
+          </div>
+        </DashboardSection>
+
+        <DashboardSection
+          id="sacred-village-overview"
+          title="Sacred Agrarian Village"
+          subtitle="A modern, cohesive household command surface across your existing modules."
+          dense
+          tone="alt"
+        >
+          <div className="space-y-4">
+            <div className="card p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <SacredAvatar
+                  name="Suka Household"
+                  type="household"
+                  subtitle="Home command center"
+                  online
+                />
+                <div className="flex flex-wrap gap-2">
+                  <SacredButton size="sm" onClick={startMealPlanning}>
+                    Open Meal Planner
+                  </SacredButton>
+                  <SacredButton
+                    size="sm"
+                    tone="secondary"
+                    onClick={() => navigateTo("/storehouse")}
+                  >
+                    Open Storehouse
+                  </SacredButton>
+                  <SacredButton size="sm" tone="accent" onClick={openGarden}>
+                    Open Garden
+                  </SacredButton>
+                </div>
+              </div>
+            </div>
+
+            <DashboardGrid columns={3}>
+              <SacredCard
+                kind="dashboard"
+                title="Home Readiness"
+                subtitle="Cross-module status"
+                value={`${Math.min(100, 70 + Number(kpis.tasksToday || 0))}%`}
+                delta={5}
+                icon={<House className="h-5 w-5" />}
+                footer="Derived from your active household queues"
+              >
+                Keep flow balanced across meals, chores, and planning routines.
+              </SacredCard>
+              <SacredCard
+                kind="meal"
+                title="Meal Planner"
+                subtitle="Weekly orchestration"
+                value={kpis.mealsThisWeek}
+                delta={4}
+                icon={<CookingPot className="h-5 w-5" />}
+                footer="Recipes this week"
+              >
+                Preserve-first planning is active and prep windows are aligned.
+              </SacredCard>
+              <SacredCard
+                kind="storehouse"
+                title="Storehouse"
+                subtitle="Inventory pressure"
+                value={Math.max(0, 10 - Number(kpis.mealsThisWeek || 0))}
+                delta={-2}
+                icon={<Warehouse className="h-5 w-5" />}
+                footer="Items near threshold"
+              >
+                Review replenishment suggestions before the next meal cycle.
+              </SacredCard>
+            </DashboardGrid>
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <div className="space-y-3 xl:col-span-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-semibold">Village Activity Feed</h3>
+                  <SacredButton size="sm" tone="accent" onClick={openAnimals}>
+                    <span className="inline-flex items-center gap-1">
+                      <Sprout className="h-4 w-4" />
+                      Open Animal Care
+                    </span>
+                  </SacredButton>
+                </div>
+                {sacredFeed.map((item) => (
+                  <FeedPost key={item.id} {...item} />
+                ))}
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-base font-semibold">Notifications</h3>
+                {sacredNotifications.map((item) => (
+                  <Notification
+                    key={item.id}
+                    type={item.type}
+                    title={item.title}
+                    message={item.message}
+                    timestamp={item.timestamp}
+                    onDismiss={() => dismissSacredNotification(item.id)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </DashboardSection>

@@ -306,6 +306,7 @@ function legacyAssetRouteShim() {
 
 export default defineConfig(({ mode }) => {
   const isCiBuild = Boolean(process.env.CI || process.env.VERCEL);
+  const disableDepOptimization = process.env.SSA_DISABLE_OPTIMIZE_DEPS === "1";
   const enableLegacyContractTests =
     process.env.SSA_ENABLE_LEGACY_CONTRACT_TESTS === "true";
   const legacyTestExcludes = enableLegacyContractTests
@@ -403,6 +404,11 @@ export default defineConfig(({ mode }) => {
   },
 
   optimizeDeps: {
+    // Browser smoke reruns can hit legacy require() + top-level await dep-scan traps.
+    // Disable auto-discovery only when explicitly requested by the smoke harness.
+    noDiscovery: disableDepOptimization,
+    include: disableDepOptimization ? [] : undefined,
+
     // Don’t try to prebundle Node core. Our alias handles 'crypto' already.
     exclude: ["crypto"],
     esbuildOptions: {

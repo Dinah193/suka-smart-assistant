@@ -1,5 +1,12 @@
 // src/pages/mealplanner.jsx
-import React, { useMemo, useState, useEffect, Suspense, useRef } from "react";
+import React, { useMemo, useState, useEffect, Suspense, useRef, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { CalendarDays, Leaf, ShoppingBasket } from "lucide-react";
+import {
+  buildMealPlannerProbeText,
+  normalizeMealPlannerTool,
+  resolveToolFromSearch,
+} from "./toolProbe";
 
 // SV (Sacred Village) shared styling used by Cooking/Cleaning/Garden pages
 import "@/styles/household.css";
@@ -19,6 +26,14 @@ import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPan
 import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
 import { useFoodSecurityEstimator } from "@/hooks/estimators/useFoodSecurityEstimator";
 import { useCostDeltaEstimator } from "@/hooks/estimators/useCostDeltaEstimator";
+import {
+  Avatar as SacredAvatar,
+  Button as SacredButton,
+  Card as SacredCard,
+  DashboardGrid,
+  FeedPost,
+  Notification,
+} from "@/components/sacred";
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -1724,7 +1739,94 @@ function MyAssignmentsStrip({ onOpenCoordination }) {
 /* ---------------- Main page ---------------- */
 export default function MealPlanningPage() {
   const coordinationRef = useRef(null);
-  const [activeTool, setActiveTool] = useState("dashboard");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const knownToolIds = useMemo(
+    () => new Set([...TOOL_REGISTRY.map((tool) => tool.id), "drafts"]),
+    []
+  );
+
+  const normalizeToolParam = useCallback(
+    (raw) => normalizeMealPlannerTool(raw, knownToolIds),
+    [knownToolIds]
+  );
+
+  const toolFromQuery = useMemo(() => {
+    return resolveToolFromSearch(location.search || "", knownToolIds);
+  }, [location.search, knownToolIds]);
+
+  const [activeTool, setActiveTool] = useState(() => toolFromQuery || "dashboard");
+  const probeText = useMemo(
+    () => buildMealPlannerProbeText(activeTool),
+    [activeTool]
+  );
+  const [sacredMealAlerts, setSacredMealAlerts] = useState([
+    {
+      id: "meal-alert-1",
+      type: "info",
+      title: "Planning context synced",
+      message:
+        "Meal Planner now shares a unified Sacred visual language with Home and Storehouse.",
+      timestamp: "Now",
+    },
+    {
+      id: "meal-alert-2",
+      type: "success",
+      title: "Draft workflow ready",
+      message:
+        "Use Generate -> Draft to capture scenarios without overwriting current plan.",
+      timestamp: "5m ago",
+    },
+  ]);
+
+  const mealFeed = useMemo(
+    () => [
+      {
+        id: "meal-feed-1",
+        author: "Meal Planning Team",
+        content:
+          "Cycle planning now aligns prep, procurement, and storehouse signals in one weekly rhythm.",
+        timestamp: "Today 08:21",
+        likes: 17,
+        comments: 4,
+        shares: 2,
+      },
+      {
+        id: "meal-feed-2",
+        author: "Homestead Coordinator",
+        household: true,
+        content:
+          "Seasonal produce constraints were applied to this cycle to reduce procurement drift.",
+        timestamp: "Today 07:09",
+        likes: 10,
+        comments: 3,
+        shares: 1,
+      },
+    ],
+    []
+  );
+
+  const dismissMealAlert = (id) => {
+    setSacredMealAlerts((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  useEffect(() => {
+    if (toolFromQuery && toolFromQuery !== activeTool) {
+      setActiveTool(toolFromQuery);
+    }
+  }, [toolFromQuery, activeTool]);
+
+  useEffect(() => {
+    if (location.pathname !== "/meal-planning") return;
+    // If URL query has a different valid tool, wait for state to catch up first.
+    if (toolFromQuery && toolFromQuery !== activeTool) return;
+    const params = new URLSearchParams(location.search || "");
+    const current = normalizeToolParam(params.get("tool"));
+    if (current === activeTool) return;
+    params.set("tool", activeTool);
+    navigate({ pathname: "/meal-planning", search: `?${params.toString()}` }, { replace: true });
+  }, [activeTool, location.pathname, location.search, navigate, normalizeToolParam, toolFromQuery]);
 
   /* Form state */
   const [duration, setDuration] = useState("7-day");
@@ -2323,6 +2425,21 @@ export default function MealPlanningPage() {
   /* ---------------------------- Render ---------------------------- */
   return (
     <div className="sv-container">
+      <div
+        data-testid="meal-planner-content-probe"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clipPath: "inset(50%)",
+          whiteSpace: "nowrap",
+        }}
+        aria-live="polite"
+      >
+        {probeText}
+      </div>
+
       <div className="sv-hero sv-pad">
         <div
           className="sv-row sv-wrap"
@@ -2385,6 +2502,94 @@ export default function MealPlanningPage() {
                 ✓ Done
               </span>
             ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+          <SacredAvatar
+            name="Meal Planner Module"
+            type="household"
+            subtitle="Sacred Agrarian visual system"
+            online
+          />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <SacredButton size="sm" onClick={() => onGenerate(false)} loading={busy}>
+              Generate Plan
+            </SacredButton>
+            <SacredButton size="sm" tone="secondary" onClick={() => onGenerate(true)}>
+              Generate to Draft
+            </SacredButton>
+            <SacredButton size="sm" tone="accent" onClick={onSaveCurrentAsDraft}>
+              Save Current Draft
+            </SacredButton>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <DashboardGrid columns={3}>
+            <SacredCard
+              kind="dashboard"
+              title="Planner Mode"
+              subtitle="Active tool"
+              value={activeTool || "dashboard"}
+              delta={3}
+              icon={<CalendarDays className="h-5 w-5" />}
+              footer="Driven by URL tool param"
+            >
+              Keep focus between dashboard, cycle, prep, and procurement tools.
+            </SacredCard>
+            <SacredCard
+              kind="meal"
+              title="Food Security"
+              subtitle="Garden utilization proxy"
+              value={
+                estimates.gardenUsePct != null
+                  ? `${Math.round(Number(estimates.gardenUsePct))}%`
+                  : "--"
+              }
+              delta={2}
+              icon={<Leaf className="h-5 w-5" />}
+              footer="Current cycle confidence"
+            >
+              Uses planning context and household inputs to estimate resilience.
+            </SacredCard>
+            <SacredCard
+              kind="storehouse"
+              title="Cost Delta"
+              subtitle="Projected shopping cost"
+              value={
+                estimates.shoppingCost != null
+                  ? `$${Number(estimates.shoppingCost).toFixed(2)}`
+                  : "--"
+              }
+              delta={1}
+              icon={<ShoppingBasket className="h-5 w-5" />}
+              footer="Compared to baseline"
+            >
+              Watch this to keep budget drift visible before purchase runs.
+            </SacredCard>
+          </DashboardGrid>
+        </div>
+
+        <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+          <div style={{ display: "grid", gap: 10 }}>
+            {mealFeed.map((item) => (
+              <FeedPost key={item.id} {...item} />
+            ))}
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {sacredMealAlerts.map((item) => (
+              <Notification
+                key={item.id}
+                type={item.type}
+                title={item.title}
+                message={item.message}
+                timestamp={item.timestamp}
+                onDismiss={() => dismissMealAlert(item.id)}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -45,10 +45,16 @@ Thumbs.db
 .netlify/
 
 # --- runtime data artifacts ---
+data/auth-state.json
+data/access-policies.json
 data/preferences.json
 data/preferences.bak.json
 data/catalog-index-cache.json
 data/battle-rhythm.json
+
+# --- consolidated smoke artifacts ---
+docs/qa/consolidated-smoke-contract-report-*.json
+!docs/qa/consolidated-smoke-contract-report-latest.json
 
 __pycache__/
 *.pyc

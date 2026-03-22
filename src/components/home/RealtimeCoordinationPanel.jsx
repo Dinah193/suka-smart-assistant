@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
 import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
@@ -22,8 +22,144 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
   const [refreshing, setRefreshing] = useState(false);
   const [requestingReport, setRequestingReport] = useState(false);
   const [signaling, setSignaling] = useState(false);
+  const [flushBusy, setFlushBusy] = useState(false);
   const [domainFilter, setDomainFilter] = useState("all");
   const [assignDrafts, setAssignDrafts] = useState({});
+  const [queuedSignals, setQueuedSignals] = useState([]);
+  const [queueNotice, setQueueNotice] = useState("");
+
+  const queueDepth = queuedSignals.length;
+
+  const readiness = useMemo(() => {
+    const pending = (rt.suggestions || []).filter((x) => !x.consumedAt);
+    const unassigned = pending.filter(
+      (x) => !x.assignedToUserId && !x.assignedRole
+    ).length;
+    const highPriority = pending.filter((x) => Number(x.priorityScore || 0) >= 80).length;
+    const staleAssigned = pending.filter((x) => {
+      if (!x.assignmentTs) return false;
+      const ts = Date.parse(x.assignmentTs);
+      return Number.isFinite(ts) ? Date.now() - ts > 6 * 60 * 60 * 1000 : false;
+    }).length;
+    return {
+      total: pending.length,
+      unassigned,
+      highPriority,
+      staleAssigned,
+    };
+  }, [rt.suggestions]);
+
+  const handoffSignalFor = (kind) => {
+    if (kind === "storehouse") {
+      return {
+        type: "mealUpdated",
+        sourceModule: "planner.meal",
+        dependencies: ["storehouse", "sessions"],
+        urgency: "normal",
+        payload: { reason: "manual_handoff", handoffTo: "storehouse.planner" },
+      };
+    }
+    if (kind === "inventory") {
+      return {
+        type: "inventoryShortage",
+        sourceModule: "planner.meal",
+        dependencies: ["storehouse", "shopping", "tasks"],
+        urgency: "high",
+        payload: { reason: "manual_handoff", handoffTo: "storehouse.planner" },
+      };
+    }
+    return {
+      type: "taskStarted",
+      sourceModule: "planner.meal",
+      dependencies: ["sessions", "cleaning"],
+      urgency: "normal",
+      payload: { reason: "manual_handoff", handoffTo: "task.sessions" },
+    };
+  };
+
+  const readinessSignal = {
+    type: "taskStarted",
+    sourceModule: "realtime.coordination",
+    dependencies: ["mealplanner", "storehouse", "homestead"],
+    urgency: "normal",
+    payload: {
+      reason: "readiness_ping",
+      totals: readiness,
+    },
+  };
+
+  const conflictSignal = {
+    type: "inventoryShortage",
+    sourceModule: "realtime.coordination",
+    dependencies: ["storehouse", "shopping"],
+    urgency: "high",
+    payload: {
+      reason: "collaboration_conflict",
+      unassigned: readiness.unassigned,
+      staleAssigned: readiness.staleAssigned,
+    },
+  };
+
+  const queueSignal = (label, signal) => {
+    setQueuedSignals((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        label,
+        signal,
+        queuedAt: new Date().toISOString(),
+      },
+    ]);
+    setQueueNotice(`${label} queued and will send on reconnect.`);
+  };
+
+  const emitOrQueueSignal = async (label, signal, { refresh = false } = {}) => {
+    if (!rt.connected) {
+      queueSignal(label, signal);
+      return { queued: true };
+    }
+
+    const res = await emitCanonicalSignal(signal);
+    if (refresh) await rt.refreshSuggestions();
+    if (res?.ok) {
+      setQueueNotice(`${label} sent.`);
+      return { queued: false, ok: true };
+    }
+
+    queueSignal(label, signal);
+    return { queued: true, ok: false };
+  };
+
+  useEffect(() => {
+    if (!rt.connected || !queuedSignals.length || flushBusy) return;
+    let cancelled = false;
+
+    (async () => {
+      setFlushBusy(true);
+      const pending = queuedSignals;
+      let delivered = 0;
+      for (const item of pending) {
+        if (cancelled) break;
+        const res = await emitCanonicalSignal(item.signal);
+        if (res?.ok) {
+          delivered += 1;
+        }
+      }
+
+      if (!cancelled) {
+        if (delivered > 0) {
+          setQueuedSignals((prev) => prev.slice(delivered));
+          setQueueNotice(`Sent ${delivered} queued signal${delivered === 1 ? "" : "s"} after reconnect.`);
+          await rt.refreshSuggestions();
+        }
+        setFlushBusy(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rt.connected, queuedSignals, rt.refreshSuggestions]);
 
   const domainOf = (item) => {
     const target = String(item?.target || "").trim();
@@ -70,25 +206,6 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
     [filteredSuggestions]
   );
 
-  const readiness = useMemo(() => {
-    const pending = (rt.suggestions || []).filter((x) => !x.consumedAt);
-    const unassigned = pending.filter(
-      (x) => !x.assignedToUserId && !x.assignedRole
-    ).length;
-    const highPriority = pending.filter((x) => Number(x.priorityScore || 0) >= 80).length;
-    const staleAssigned = pending.filter((x) => {
-      if (!x.assignmentTs) return false;
-      const ts = Date.parse(x.assignmentTs);
-      return Number.isFinite(ts) ? Date.now() - ts > 6 * 60 * 60 * 1000 : false;
-    }).length;
-    return {
-      total: pending.length,
-      unassigned,
-      highPriority,
-      staleAssigned,
-    };
-  }, [rt.suggestions]);
-
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -119,34 +236,13 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
   const emitPlannerHandoff = async (kind) => {
     setSignaling(true);
     try {
-      if (kind === "storehouse") {
-        await emitCanonicalSignal({
-          type: "mealUpdated",
-          sourceModule: "planner.meal",
-          dependencies: ["storehouse", "sessions"],
-          urgency: "normal",
-          payload: { reason: "manual_handoff", handoffTo: "storehouse.planner" },
-        });
-      }
-      if (kind === "inventory") {
-        await emitCanonicalSignal({
-          type: "inventoryShortage",
-          sourceModule: "planner.meal",
-          dependencies: ["storehouse", "shopping", "tasks"],
-          urgency: "high",
-          payload: { reason: "manual_handoff", handoffTo: "storehouse.planner" },
-        });
-      }
-      if (kind === "prep") {
-        await emitCanonicalSignal({
-          type: "taskStarted",
-          sourceModule: "planner.meal",
-          dependencies: ["sessions", "cleaning"],
-          urgency: "normal",
-          payload: { reason: "manual_handoff", handoffTo: "task.sessions" },
-        });
-      }
-      await rt.refreshSuggestions();
+      const label =
+        kind === "storehouse"
+          ? "Storehouse handoff"
+          : kind === "inventory"
+            ? "Inventory risk signal"
+            : "Prep session signal";
+      await emitOrQueueSignal(label, handoffSignalFor(kind), { refresh: true });
     } finally {
       setSignaling(false);
     }
@@ -230,7 +326,21 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
         <span className={`chip ${rt.connected ? "chip--brand" : ""}`} role="status" aria-live="polite">
           {rt.connected ? "Live" : rt.connecting ? "Connecting" : "Offline"}
         </span>
+        <span className={`chip ${queueDepth ? "chip--brand" : ""}`} role="status" aria-live="polite">
+          Queued: {queueDepth}
+        </span>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => {
+              rt.reconnect?.();
+              setQueueNotice("Reconnect requested.");
+            }}
+            disabled={rt.connected || rt.connecting}
+          >
+            Reconnect
+          </button>
           <button type="button" className="btn btn--ghost" onClick={onRefresh} disabled={refreshing}>
             {refreshing ? "Refreshing..." : "Refresh"}
           </button>
@@ -300,43 +410,27 @@ export default function RealtimeCoordinationPanel({ scopeOverrides = {} }) {
             <button
               type="button"
               className="btn btn--ghost"
-              onClick={() =>
-                emitCanonicalSignal({
-                  type: "taskStarted",
-                  sourceModule: "realtime.coordination",
-                  dependencies: ["mealplanner", "storehouse", "homestead"],
-                  urgency: "normal",
-                  payload: {
-                    reason: "readiness_ping",
-                    totals: readiness,
-                  },
-                })
-              }
+              onClick={() => emitOrQueueSignal("Readiness broadcast", readinessSignal)}
             >
               Broadcast readiness
             </button>
             <button
               type="button"
               className="btn btn--ghost"
-              onClick={() =>
-                emitCanonicalSignal({
-                  type: "inventoryShortage",
-                  sourceModule: "realtime.coordination",
-                  dependencies: ["storehouse", "shopping"],
-                  urgency: "high",
-                  payload: {
-                    reason: "collaboration_conflict",
-                    unassigned: readiness.unassigned,
-                    staleAssigned: readiness.staleAssigned,
-                  },
-                })
-              }
+              onClick={() => emitOrQueueSignal("Collaboration conflict", conflictSignal)}
             >
               Flag collaboration conflict
             </button>
           </div>
         </div>
       </div>
+
+      {queueNotice ? (
+        <div className="text-xs home-muted" style={{ marginTop: 8 }} role="status" aria-live="polite">
+          {queueNotice}
+          {flushBusy ? " Flushing queued signals..." : ""}
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 12 }}>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>

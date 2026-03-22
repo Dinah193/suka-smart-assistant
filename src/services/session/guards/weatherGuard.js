@@ -138,15 +138,45 @@
   };
 
   // ------------------------------ Forecast cache ------------------------------
-  let cache = load(K.CACHE, { coords: null, forecast: null, at: 0 });
+  function normalizeCacheShape(raw) {
+    if (!raw || typeof raw !== "object") {
+      return { coords: null, forecast: null, at: 0 };
+    }
+    return {
+      coords: raw.coords || null,
+      forecast: raw.forecast || null,
+      at: Number.isFinite(Number(raw.at)) ? Number(raw.at) : 0,
+    };
+  }
+
+  let cache = normalizeCacheShape(load(K.CACHE, { coords: null, forecast: null, at: 0 }));
 
   function setCache(next) {
-    cache = next;
+    cache = normalizeCacheShape(next);
     save(K.CACHE, cache);
     eventBus.emit("weather.forecast.cached", {
       at: cache.at,
       coords: cache.coords,
     });
+  }
+
+  const warningThrottleMs = 30000;
+  const warningLastAtByChannel = new Map();
+
+  function normalizeEventPayload(payload, channel) {
+    if (payload && typeof payload === "object") return payload;
+    if (payload !== undefined) {
+      const ts = now();
+      const lastAt = warningLastAtByChannel.get(channel) || 0;
+      if (ts - lastAt >= warningThrottleMs) {
+        warningLastAtByChannel.set(channel, ts);
+        console.warn(
+          `[weatherGuard] Non-object payload received on ${channel}; coercing to empty object.`,
+          payload
+        );
+      }
+    }
+    return {};
   }
 
   // ------------------------------ Utility: Units ------------------------------
@@ -400,6 +430,7 @@
   // ------------------------------ Event wiring --------------------------------
   // We treat any "garden" action request or schedule creation as an opportunity to pre-check weather.
   async function handleActionRequested(e = {}) {
+    e = normalizeEventPayload(e, "garden.action.requested");
     // e: { domain, kind, sessionId?, anchorId?, at?, payload?, coords? }
     if (!prefs.enabled) return;
     const verdict = await guardAction(
@@ -461,9 +492,10 @@
 
   // When a relative schedule is created (e.g., garden session), scan the items and pre-mark withholds
   async function handleScheduleCreated(e = {}) {
+    e = normalizeEventPayload(e, "relative.schedule.created");
     // e: { anchorId, sessionId, domain, items:[{id,title,dueAt, ...}] }
     if (!prefs.enabled || e.domain !== "garden") return;
-    const coords = cache.coords;
+    const coords = cache?.coords || null;
     const fc = await getForecast({ coords, horizonHours: 48 });
     const ts = now();
 
@@ -524,8 +556,9 @@
 
       // Allow UI to push current coordinates (from settings or geolocation)
       eventBus.on("weather.coords.set", (e = {}) => {
+        e = normalizeEventPayload(e, "weather.coords.set");
         // e: { lat, lon }
-        if (e.lat && e.lon) {
+        if (Number.isFinite(e.lat) && Number.isFinite(e.lon)) {
           setCache({
             coords: { lat: e.lat, lon: e.lon },
             forecast: cache.forecast,
@@ -536,6 +569,7 @@
 
       // Manual refresh
       eventBus.on("weather.refresh.requested", async (e = {}) => {
+        e = normalizeEventPayload(e, "weather.refresh.requested");
         const coords = e.coords || cache.coords || null;
         await getForecast({ coords, horizonHours: e.horizonHours || 48 });
       });
@@ -551,6 +585,7 @@
 
       // Example: simple “skip watering” hook whenever a watering modal tries to open
       eventBus.on("ui.modal.open", async (m = {}) => {
+        m = normalizeEventPayload(m, "ui.modal.open");
         if (!prefs.enabled) return;
         if (m.domain === "garden" && /water/i.test(m.title || m.id || "")) {
           const verdict = await guardAction(

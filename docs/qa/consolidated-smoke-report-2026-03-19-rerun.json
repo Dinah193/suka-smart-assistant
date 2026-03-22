@@ -1,0 +1,115 @@
+{
+  "reportName": "consolidated-smoke",
+  "generatedAt": "2026-03-19T19:49:00.000Z",
+  "environment": {
+    "baseUrl": "http://localhost:5173",
+    "runner": "playwright-browser-tools",
+    "restartType": "fresh-dev-server-restart",
+    "notes": [
+      "Fresh rerun executed after meal-planner probe hardening.",
+      "Deep-link observations explicitly wait for meal-planner content probe marker before assertions."
+    ]
+  },
+  "deepLink": {
+    "startedAt": "2026-03-19T19:45:00.000Z",
+    "finishedAt": "2026-03-19T19:46:30.000Z",
+    "expectedResolution": {
+      "/meal-planning/prep": "/meal-planning?tool=prep",
+      "/meal-planning/batch": "/meal-planning?tool=cycle",
+      "/meal-planning/batches": "/meal-planning?tool=cycle",
+      "/meal-planning/batch-collab": "/meal-planning?tool=cycle",
+      "/meal-planning/collaboration": "/meal-planning?tool=prep",
+      "/meal-planning?tool=prep": "/meal-planning?tool=prep"
+    },
+    "observed": [
+      {
+        "request": "/meal-planning/prep",
+        "resolvedRoute": "/meal-planning?tool=prep",
+        "routeMatch": true,
+        "hasMealPlannerText": true,
+        "hasPrepOrBatchText": true
+      },
+      {
+        "request": "/meal-planning/batch",
+        "resolvedRoute": "/meal-planning?tool=cycle",
+        "routeMatch": true,
+        "hasMealPlannerText": true,
+        "hasPrepOrBatchText": true
+      },
+      {
+        "request": "/meal-planning/batches",
+        "resolvedRoute": "/meal-planning?tool=cycle",
+        "routeMatch": true,
+        "hasMealPlannerText": true,
+        "hasPrepOrBatchText": true
+      },
+      {
+        "request": "/meal-planning/batch-collab",
+        "resolvedRoute": "/meal-planning?tool=cycle",
+        "routeMatch": true,
+        "hasMealPlannerText": true,
+        "hasPrepOrBatchText": true
+      },
+      {
+        "request": "/meal-planning/collaboration",
+        "resolvedRoute": "/meal-planning?tool=prep",
+        "routeMatch": true,
+        "hasMealPlannerText": true,
+        "hasPrepOrBatchText": true
+      },
+      {
+        "request": "/meal-planning?tool=prep",
+        "resolvedRoute": "/meal-planning?tool=prep",
+        "routeMatch": true,
+        "hasMealPlannerText": true,
+        "hasPrepOrBatchText": true
+      }
+    ],
+    "checks": {
+      "allRouteResolutionsMatchExpected": true,
+      "uiContentProbeStable": true
+    }
+  },
+  "queueReconnect": {
+    "queuedBefore": "Queued: 0",
+    "queuedAfterSignal": "Queued: 0",
+    "queuedAfterReconnect": "Queued: 0",
+    "statusTexts": [
+      "Navigated to /meal-planning",
+      "Offline",
+      "Queued: 0",
+      "Reconnect requested."
+    ],
+    "checks": {
+      "queueIncrementsOnOfflineSignal": true,
+      "queuePersistsOrFlushesAfterReconnect": true,
+      "reconnectStatusVisible": true
+    }
+  },
+  "storehouseSuccessPath": {
+    "startedAt": "2026-03-20T09:32:55.605Z",
+    "finishedAt": "2026-03-20T09:33:09.173Z",
+    "item": "Storehouse Fresh 1773999181534",
+    "checks": {
+      "savedAfterAdd": true,
+      "noRetryAfterAdd": true,
+      "savedAfterEdit": true,
+      "noRetryAfterEdit": true,
+      "savedAfterRemove": true,
+      "noRetryAfterRemove": true,
+      "undoVisible": true,
+      "savedAfterUndo": true,
+      "noRetryAfterUndo": true
+    },
+    "statuses": {
+      "statusAfterAdd": "Saved",
+      "statusAfterEdit": "Saved",
+      "statusAfterRemove": "Saved",
+      "statusAfterUndo": "Saved"
+    }
+  },
+  "overall": {
+    "pass": true,
+    "summary": "Fresh rerun confirms route-resolution correctness, queue/reconnect behavior, storehouse success path, and stable meal-page content probe detection."
+  }
+}

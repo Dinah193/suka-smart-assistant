@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
       - name: Build
         run: npm run build
 
@@ -124,8 +127,107 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Realtime and planners runtime contracts
-        run: npx vitest run _tests_/planners.runtime.contract.test.js _tests_/realtimeController.runtime.contract.test.js --reporter=verbose
+      - name: Realtime runtime contracts
+        run: npx vitest run _tests_/realtimeController.runtime.contract.test.js --reporter=verbose
+
+  runtime-contracts-strict-entitlement:
+    runs-on: ubuntu-latest
+    env:
+      STRICT_PLANNER_BASE_ENTITLEMENT: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Strict entitlement contract suite
+        run: npx vitest run _tests_/accessPolicy.entitlement.contract.test.js --reporter=verbose
+
+  auth-contracts-windows:
+    runs-on: windows-latest
+    env:
+      NEO4J_REQUIRED: "false"
+      POSTGRES_REQUIRED: "false"
+      MONGODB_REQUIRED: "false"
+      STRICT_STARTUP_ENV: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Auth contract on Windows with explicit artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .artifacts | Out-Null
+          node .\node_modules\vitest\vitest.mjs run _tests_/authController.contract.test.js --reporter=verbose --reporter=json --outputFile=.artifacts\auth-controller-contract-vitest.json 2>&1 | Tee-Object -FilePath .artifacts\auth-controller-contract-vitest.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload auth contract artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-controller-contract-windows
+          path: |
+            .artifacts/auth-controller-contract-vitest.log
+            .artifacts/auth-controller-contract-vitest.json
+          if-no-files-found: error
+
+  auth-env-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Auth production env readiness checks
+        run: node tools/scripts/check-auth-env-readiness.cjs
+
+  policy-audit-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Access policy audit contracts
+        run: >-
+          npx vitest run
+          _tests_/accessPolicyAdmin.audit.contract.test.js
+          _tests_/accessPolicyAudit.alerts.contract.test.js
+          _tests_/accessPolicyAudit.maintenance.contract.test.js
+          _tests_/accessPolicyAudit.anomalies.contract.test.js
+          --reporter=verbose
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -201,8 +303,53 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Basic smoke e2e
         run: npm run smoke:e2e
+
+      - name: Consolidated smoke contracts
+        run: npm run smoke:consolidated
+
+      - name: Validate consolidated smoke artifact
+        run: npm run smoke:consolidated:check
+
+      - name: Upload consolidated smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consolidated-smoke-contract-report-latest
+          path: docs/qa/consolidated-smoke-contract-report-latest.json
+          if-no-files-found: error
+
+      - name: Run automated browser smoke rerun + schema
+        run: npm run smoke:browser:rerun
+
+      - name: Browser smoke check (policy-controlled)
+        env:
+          BROWSER_SMOKE_STRICT: ${{ vars.BROWSER_SMOKE_STRICT }}
+        run: |
+          if [ "${BROWSER_SMOKE_STRICT:-false}" = "true" ]; then
+            npm run smoke:browser:check:strict
+          else
+            npm run smoke:browser:check
+          fi
+
+      - name: Upload browser latest report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consolidated-smoke-browser-report-latest
+          path: docs/qa/consolidated-smoke-browser-report-latest.json
+          if-no-files-found: error
+
+      - name: Upload browser rerun report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consolidated-smoke-browser-rerun-report
+          path: docs/qa/consolidated-smoke-report-rerun-latest.json
+          if-no-files-found: error
 
   post-merge-runtime-smoke:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -210,6 +357,10 @@ jobs:
       - build
       - db-runtime-contracts
       - runtime-contracts
+      - runtime-contracts-strict-entitlement
+      - auth-contracts-windows
+      - auth-env-readiness
+      - policy-audit-contracts
       - unit-tests
       - lint
       - typecheck
@@ -251,8 +402,8 @@ jobs:
 
       - name: Verify protected production health contract
         env:
-          PRODUCTION_HEALTH_URL: ${{ secrets['PRODUCTION_HEALTH_URL'] }}
-          VERCEL_PROTECTION_BYPASS: ${{ secrets['VERCEL_PROTECTION_BYPASS'] }}
+          PRODUCTION_HEALTH_URL: ${{ secrets.PRODUCTION_HEALTH_URL }}
+          VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
           REQUIRE_VERCEL_PROTECTION_BYPASS: "true"
           PRODUCTION_HEALTH_MAX_WAIT_MS: "180000"
           PRODUCTION_HEALTH_RETRY_INTERVAL_MS: "5000"

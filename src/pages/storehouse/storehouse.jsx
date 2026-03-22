@@ -13,6 +13,15 @@ import { automation } from "@/services/automation/runtime";
 import { useVision } from "@/context/VisionContext";
 import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
 import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
+import AutomationPanel from "@/ui/AutomationPanel";
+import {
+  Avatar as SacredAvatar,
+  Button as SacredButton,
+  Card as SacredCard,
+  DashboardGrid,
+  FeedPost,
+  Notification,
+} from "@/components/sacred";
 
 /* ────────────────────────────────────────────────────────────────────────────
   Safe imports & helpers (avoid hard crashes if a module isn't present)
@@ -60,7 +69,7 @@ function JsonBlock({ data }) {
 async function getAnimalQueueSafe() {
   const mod =
     (await safeImport("@/managers/AnimalQueueManager")) ||
-    (await safeImport("../managers/AnimalQueueManager")) ||
+    (await safeImport("../../managers/AnimalQueueManager")) ||
     null;
   const api = mod?.default || mod || {};
   const q =
@@ -71,7 +80,7 @@ async function getAnimalQueueSafe() {
 async function getGardenQueueSafe() {
   const mod =
     (await safeImport("@/managers/GardenQueueManager")) ||
-    (await safeImport("../managers/GardenQueueManager")) ||
+    (await safeImport("../../managers/GardenQueueManager")) ||
     null;
   const api = mod?.default || mod || {};
   const q =
@@ -351,6 +360,55 @@ export default function StorehousePage() {
   const [autoForecast, setAutoForecast] = useState(true);
   const runningRef = useRef(false);
   const [lastRun, setLastRun] = useState(null);
+  const [sacredStorehouseAlerts, setSacredStorehouseAlerts] = useState([
+    {
+      id: "store-alert-1",
+      type: "info",
+      title: "Forecast loop active",
+      message:
+        "Storehouse projections are synced with current household profile inputs.",
+      timestamp: "Now",
+    },
+    {
+      id: "store-alert-2",
+      type: "warning",
+      title: "Replenishment watch",
+      message:
+        "Review low-stock items before next batch-cooking window for smoother flow.",
+      timestamp: "12m ago",
+    },
+  ]);
+
+  const storehouseFeed = useMemo(
+    () => [
+      {
+        id: "store-feed-1",
+        author: "Storehouse Coordinator",
+        content:
+          "Weekly projection updated from garden + animal queues. Prioritize grain and legumes procurement.",
+        timestamp: "Today 07:50",
+        likes: 11,
+        comments: 2,
+        shares: 1,
+      },
+      {
+        id: "store-feed-2",
+        author: "Willow Household",
+        household: true,
+        content:
+          "Preservation queue aligned with incoming produce peaks for this cycle.",
+        timestamp: "Today 06:35",
+        likes: 8,
+        comments: 1,
+        shares: 0,
+      },
+    ],
+    []
+  );
+
+  const dismissStorehouseAlert = (id) => {
+    setSacredStorehouseAlerts((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const emitForecastSignals = useCallback((forecast) => {
     const weekly = forecast?.weekly || {};
@@ -422,10 +480,14 @@ export default function StorehousePage() {
           gardens: inputs?.gardens ?? gardenQueue,
         };
         // Prefer template if registered
-        const res =
-          (await automation
-            .runTemplate?.("storehouse.projections", payload)
-            .catch(() => null)) || null;
+        const canRunProjectionTemplate =
+          typeof automation?.hasTemplate === "function" &&
+          automation.hasTemplate("storehouse.projections");
+        const res = canRunProjectionTemplate
+          ? (await automation
+              .runTemplate?.("storehouse.projections", payload)
+              .catch(() => null)) || null
+          : null;
 
         if (res && typeof res === "object" && res.weekly) {
           setProject(res);
@@ -492,6 +554,81 @@ export default function StorehousePage() {
         See upcoming inputs from animals and gardens, and forecast what flows
         into your storehouse. Automations run quietly based on your Home setup.
       </p>
+
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+          <SacredAvatar
+            name="Storehouse Module"
+            type="household"
+            subtitle="Sacred Agrarian visual layer"
+            online
+          />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <SacredButton size="sm" onClick={refreshNow} loading={busy}>
+              Refresh Projections
+            </SacredButton>
+            <SacredButton size="sm" tone="secondary" onClick={() => setActiveTool("auto-fill")}>Auto-Fill</SacredButton>
+            <SacredButton size="sm" tone="accent" onClick={() => setActiveTool("preserve-queue")}>Preservation Queue</SacredButton>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <DashboardGrid columns={3}>
+            <SacredCard
+              kind="storehouse"
+              title="Forecast Health"
+              subtitle="Weekly projection confidence"
+              value={project?.weekly ? "Stable" : "Pending"}
+              delta={project?.weekly ? 5 : -3}
+              footer={lastRun ? `Last run ${new Date(lastRun).toLocaleTimeString()}` : "Awaiting run"}
+            >
+              {debug?.via === "template"
+                ? "Template projection active with runtime signals emitted."
+                : "Fallback heuristics active until richer runtime template output is available."}
+            </SacredCard>
+            <SacredCard
+              kind="meal"
+              title="Eggs + Milk"
+              subtitle="Animal-derived output"
+              value={`${Number(project?.weekly?.eggs || 0).toFixed(0)} / ${Number(project?.weekly?.milkLiters || 0).toFixed(1)}L`}
+              delta={2}
+              footer="Eggs / Milk liters per week"
+            >
+              Animal queue signals are mapped to storehouse inflow expectations.
+            </SacredCard>
+            <SacredCard
+              kind="dashboard"
+              title="Produce + Meat"
+              subtitle="Garden and harvest output"
+              value={`${Number(project?.weekly?.produceKg || 0).toFixed(1)}kg / ${Number(project?.weekly?.meatKg || 0).toFixed(1)}kg`}
+              delta={1}
+              footer="Produce / Meat per week"
+            >
+              Use this to align batch planning and preservation decisions.
+            </SacredCard>
+          </DashboardGrid>
+        </div>
+
+        <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+          <div style={{ display: "grid", gap: 10 }}>
+            {storehouseFeed.map((item) => (
+              <FeedPost key={item.id} {...item} />
+            ))}
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {sacredStorehouseAlerts.map((item) => (
+              <Notification
+                key={item.id}
+                type={item.type}
+                title={item.title}
+                message={item.message}
+                timestamp={item.timestamp}
+                onDismiss={() => dismissStorehouseAlert(item.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div style={{ marginBottom: 12 }}>
         <RealtimeCoordinationPanel scopeOverrides={{ scope: "household" }} />
@@ -662,6 +799,12 @@ export default function StorehousePage() {
 
       {/* Inline Custom Locations */}
       <CustomLocationsInline />
+
+      <AutomationPanel
+        title="Shopping Automation Templates"
+        agents={[]}
+        defaultTemplateFilter="shopping"
+      />
 
       {/* Optional tools (hidden until opened) */}
       <div

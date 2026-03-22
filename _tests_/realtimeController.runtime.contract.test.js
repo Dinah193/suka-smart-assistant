@@ -211,11 +211,59 @@ runtimeDescribe("realtimeController runtime contract", () => {
   let server;
   let req;
   let socketMod;
+  let accessPolicyPath;
+  let originalAccessPolicyModule;
   let restoreCoordinator;
   let currentCoordinator;
 
   beforeAll(async () => {
     const express = require("express");
+
+    accessPolicyPath = require.resolve("../src/server/middleware/accessPolicy.js");
+    originalAccessPolicyModule = require.cache[accessPolicyPath];
+    require.cache[accessPolicyPath] = {
+      id: accessPolicyPath,
+      filename: accessPolicyPath,
+      loaded: true,
+      exports: {
+        requireHouseholdAccessPolicy: () => (req, res, next) => {
+          const userId = String(req?.user?.id || req?.user?.userId || "").trim();
+          if (!userId) {
+            return res.status(401).json({ ok: false, error: "unauthorized" });
+          }
+          const householdId =
+            req?.query?.householdId || req?.body?.householdId || req?.headers?.["x-home-id"] || null;
+          req.accessContext = {
+            ...(req.accessContext || {}),
+            userId,
+            action: String(req.method || "GET").toUpperCase() === "GET" ? "read" : "update",
+            ownHouseholdId: householdId || null,
+            householdId: householdId || null,
+            requestedHouseholdId: householdId || null,
+            sameHousehold: Boolean(householdId),
+            role: householdId ? "owner" : null,
+          };
+          return next();
+        },
+        requireCollaborationPolicy: () => (req, _res, next) => {
+          req.accessContext = {
+            ...(req.accessContext || {}),
+            collaborationGranted: true,
+            collaborationDecision: "runtime_test_stub",
+          };
+          return next();
+        },
+        requireEntitlementPolicy: () => (req, _res, next) => {
+          req.accessContext = {
+            ...(req.accessContext || {}),
+            entitlementGranted: true,
+            entitlementFeature: "planner.base",
+          };
+          return next();
+        },
+      },
+    };
+
     const controller = require("../src/server/routes/realtimeController.js");
 
     socketMod = require("../src/server/socket.js");
@@ -235,27 +283,55 @@ runtimeDescribe("realtimeController runtime contract", () => {
     });
 
     const origin = `http://127.0.0.1:${server.address().port}`;
+    const withHouseholdScope = (inputPath, method, headers, body) => {
+      const nextHeaders = { ...(headers || {}) };
+      const householdId = String(nextHeaders["x-home-id"] || "").trim();
+      if (!householdId) {
+        return { path: inputPath, body };
+      }
+
+      let scopedPath = inputPath;
+      const hasHouseholdInPath = /([?&])householdId=/.test(scopedPath);
+      if (!hasHouseholdInPath) {
+        scopedPath += scopedPath.includes("?") ? `&householdId=${encodeURIComponent(householdId)}` : `?householdId=${encodeURIComponent(householdId)}`;
+      }
+
+      const upperMethod = String(method || "GET").toUpperCase();
+      let scopedBody = body;
+      if (upperMethod !== "GET" && upperMethod !== "HEAD") {
+        if (scopedBody && typeof scopedBody === "object" && !Array.isArray(scopedBody)) {
+          if (!scopedBody.householdId) {
+            scopedBody = { ...scopedBody, householdId };
+          }
+        }
+      }
+
+      return { path: scopedPath, body: scopedBody };
+    };
+
     req = async (path, { method = "GET", headers = {}, body } = {}) => {
-      const res = await fetch(`${origin}${path}`, {
+      const scoped = withHouseholdScope(path, method, headers, body);
+      const res = await fetch(`${origin}${scoped.path}`, {
         method,
         headers: {
-          ...(body ? { "content-type": "application/json" } : {}),
+          ...(scoped.body ? { "content-type": "application/json" } : {}),
           ...headers,
         },
-        body: body ? JSON.stringify(body) : undefined,
+        body: scoped.body ? JSON.stringify(scoped.body) : undefined,
       });
       const json = await res.json();
       return { status: res.status, body: json };
     };
 
     req.text = async (path, { method = "GET", headers = {}, body } = {}) => {
-      const res = await fetch(`${origin}${path}`, {
+      const scoped = withHouseholdScope(path, method, headers, body);
+      const res = await fetch(`${origin}${scoped.path}`, {
         method,
         headers: {
-          ...(body ? { "content-type": "application/json" } : {}),
+          ...(scoped.body ? { "content-type": "application/json" } : {}),
           ...headers,
         },
-        body: body ? JSON.stringify(body) : undefined,
+        body: scoped.body ? JSON.stringify(scoped.body) : undefined,
       });
       const text = await res.text();
       return { status: res.status, text, headers: res.headers };
@@ -270,6 +346,14 @@ runtimeDescribe("realtimeController runtime contract", () => {
   afterAll(async () => {
     try {
       restoreCoordinator?.();
+    } catch {
+      // ignore
+    }
+    try {
+      delete require.cache[accessPolicyPath];
+      if (originalAccessPolicyModule) {
+        require.cache[accessPolicyPath] = originalAccessPolicyModule;
+      }
     } catch {
       // ignore
     }

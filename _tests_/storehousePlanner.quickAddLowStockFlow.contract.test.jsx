@@ -9,6 +9,10 @@ const { fetchMock, updateMock, recsMock } = vi.hoisted(() => ({
   recsMock: vi.fn(),
 }));
 
+const { eventBusEmitMock } = vi.hoisted(() => ({
+  eventBusEmitMock: vi.fn(),
+}));
+
 vi.mock("../src/pages/storehouse/planner/InventoryEstimatorService", () => ({
   fetchStorehousePlannerData: (...args) => fetchMock(...args),
   updateStorehouseInventory: (...args) => updateMock(...args),
@@ -16,6 +20,12 @@ vi.mock("../src/pages/storehouse/planner/InventoryEstimatorService", () => ({
 
 vi.mock("../src/pages/storehouse/planner/Neo4jStorehouseGraphService", () => ({
   getStorehouseRecommendations: (...args) => recsMock(...args),
+}));
+
+vi.mock("../src/services/events/eventBus", () => ({
+  eventBus: {
+    emit: (...args) => eventBusEmitMock(...args),
+  },
 }));
 
 vi.mock("../src/components/planners/PlannerDashboardCard", () => ({
@@ -50,6 +60,7 @@ describe("storehouse planner quick-add low-stock flow contract", () => {
     fetchMock.mockReset();
     updateMock.mockReset();
     recsMock.mockReset();
+    eventBusEmitMock.mockReset();
 
     fetchMock.mockResolvedValue({ inventory: [] });
     recsMock.mockResolvedValue([]);
@@ -171,5 +182,100 @@ describe("storehouse planner quick-add low-stock flow contract", () => {
       qty: 1,
       unit: "bag",
     });
+  });
+
+  it("emits row-level telemetry for retry and undo usage", async () => {
+    fetchMock.mockResolvedValue({
+      inventory: [
+        {
+          id: "telemetry-1",
+          itemName: "Telemetry Beans",
+          qty: 4,
+          unit: "bag",
+          state: "raw",
+          method: null,
+          prepTimeReductionPct: 0,
+        },
+      ],
+    });
+    updateMock
+      .mockRejectedValueOnce(new Error("save failed"))
+      .mockResolvedValueOnce({ ok: true })
+      .mockResolvedValueOnce({ ok: true });
+
+    await act(async () => {
+      root.render(
+        React.createElement(StorehousePlanner, {
+          householdId: "hh-telemetry",
+        })
+      );
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const qtyInput = container.querySelector('input[aria-label="Quantity for Telemetry Beans"]');
+    expect(qtyInput).toBeTruthy();
+
+    await act(async () => {
+      setInputValue(qtyInput, "1");
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const retryButton = container.querySelector('button[aria-label="Retry Telemetry Beans"]');
+    const undoButton = container.querySelector('button[aria-label="Undo Telemetry Beans"]');
+    expect(retryButton).toBeTruthy();
+    expect(undoButton).toBeTruthy();
+
+    await act(async () => {
+      retryButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      undoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(eventBusEmitMock).toHaveBeenCalledWith(
+      "storehouse:row-action",
+      expect.objectContaining({
+        action: "retry",
+        status: "attempt",
+        householdId: "hh-telemetry",
+        itemName: "Telemetry Beans",
+      })
+    );
+    expect(eventBusEmitMock).toHaveBeenCalledWith(
+      "storehouse:row-action",
+      expect.objectContaining({
+        action: "retry",
+        status: "success",
+        householdId: "hh-telemetry",
+        itemName: "Telemetry Beans",
+      })
+    );
+    expect(eventBusEmitMock).toHaveBeenCalledWith(
+      "storehouse:row-action",
+      expect.objectContaining({
+        action: "undo",
+        status: "attempt",
+        householdId: "hh-telemetry",
+        itemName: "Telemetry Beans",
+      })
+    );
+    expect(eventBusEmitMock).toHaveBeenCalledWith(
+      "storehouse:row-action",
+      expect.objectContaining({
+        action: "undo",
+        status: "success",
+        householdId: "hh-telemetry",
+        itemName: "Telemetry Beans",
+      })
+    );
   });
 });

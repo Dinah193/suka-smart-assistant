@@ -14,6 +14,7 @@ import {
 
 import RightSidebar from "@/components/layout/RightSidebar";
 import { VisionProvider } from "@/context/VisionContext";
+import { resolveSession } from "./services/auth/sessionClient.js";
 import "./index.css";
 
 /* -------------------------------------------------------------------------- */
@@ -602,10 +603,6 @@ const AnimalsRemote = lazyPage(
 );
 
 /** General nav */
-const CustomLocations = lazyPage(
-  ["./pages/custom-locations.jsx", "./pages/custom-locations.jsx"],
-  "CustomLocations",
-);
 const CalendarPage = lazyPage(
   ["@/pages/calendar.jsx", "./pages/calendar.jsx"],
   "Calendar",
@@ -634,6 +631,35 @@ const MealPlannerScaffoldPage = lazyPage(
     "./pages/mealplanner/PlannerScaffoldPage.jsx",
   ],
   "MealPlannerScaffold",
+);
+
+const LoginPage = lazyPage(
+  ["@/pages/auth/login.jsx", "./pages/auth/login.jsx"],
+  "Login",
+);
+
+const CreateAccountPage = lazyPage(
+  [
+    "@/pages/auth/create-account.jsx",
+    "./pages/auth/create-account.jsx",
+  ],
+  "CreateAccount",
+);
+
+const ForgotPasswordPage = lazyPage(
+  [
+    "@/pages/auth/forgot-password.jsx",
+    "./pages/auth/forgot-password.jsx",
+  ],
+  "ForgotPassword",
+);
+
+const HouseholdOnboardingPage = lazyPage(
+  [
+    "@/pages/auth/household-onboarding.jsx",
+    "./pages/auth/household-onboarding.jsx",
+  ],
+  "HouseholdOnboarding",
 );
 
 const JobsPage = lazyPage(["./pages/jobs.jsx", "./pages/jobs.jsx"], "Jobs");
@@ -979,7 +1005,6 @@ async function prewarmAllRoutesDev() {
       "./components/storehouse/PreservationQueuePlanner.jsx",
     ],
 
-    ["./pages/custom-locations.jsx", "./pages/custom-locations.jsx"],
     ["./pages/roles.jsx", "@/pages/roles.jsx"],
     ["./pages/jobs.jsx", "./pages/jobs.jsx"],
 
@@ -1660,7 +1685,27 @@ function GlobalSessionRunnerHost() {
 function AppChrome({ children }) {
   // ✅ NEW: only mount the Session Builder (GlobalSessionRunnerHost) on Home
   const location = useLocation();
-  const isHome = (location?.pathname || "/") === "/";
+  const pathname = location?.pathname || "/";
+  const isHome = pathname === "/";
+  const isAuthRoute =
+    pathname === "/login" ||
+    pathname === "/create-account" ||
+    pathname === "/forgot-password" ||
+    pathname === "/onboarding/household" ||
+    pathname === "/signup" ||
+    pathname === "/register";
+
+  if (isAuthRoute) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen overflow-auto">
+          <ErrorBoundary>
+            <Suspense fallback={<Loader />}>{children}</Suspense>
+          </ErrorBoundary>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen grid bg-background text-foreground">
@@ -1761,11 +1806,6 @@ function AppChrome({ children }) {
             <NavItem to="/cleaning" icon="🧼" label="Cleaning" />
             <NavItem to="/garden" icon="🌿" label="Garden" />
             <NavItem to="/animals" icon="🐓" label="Animal Care" />
-            <NavItem
-              to="/custom-locations"
-              icon="📍"
-              label="Custom Locations"
-            />
             <NavItem to="/roles" icon="🗂️" label="Roles & Tasks" />
             <NavItem to="/knowledge" icon="📚" label="Knowledge Base" />
           </ul>
@@ -1827,6 +1867,42 @@ function AppChrome({ children }) {
       <FloatingAutomationPanel />
     </div>
   );
+}
+
+function AuthRouteGuard({ children }) {
+  const location = useLocation();
+  const [state, setState] = React.useState({ loading: true, allowed: false });
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const session = await resolveSession();
+
+        if (!controller.signal.aborted) {
+          setState({ loading: false, allowed: Boolean(session?.ok && session?.user) });
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setState({ loading: false, allowed: false });
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, [location.pathname, location.search]);
+
+  if (state.loading) {
+    return <Loader />;
+  }
+
+  if (!state.allowed) {
+    const returnTo = `${location.pathname || "/"}${location.search || ""}`;
+    return <Navigate to={`/login?returnTo=${encodeURIComponent(returnTo)}`} replace />;
+  }
+
+  return children;
 }
 
 /* ------------------------ PWA Service Worker (prod) ------------------------ */
@@ -1904,6 +1980,14 @@ export default function App() {
 
       <AppChrome>
         <Routes>
+          {/* Auth */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/create-account" element={<CreateAccountPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/onboarding/household" element={<HouseholdOnboardingPage />} />
+          <Route path="/signup" element={<Navigate to="/create-account" replace />} />
+          <Route path="/register" element={<Navigate to="/create-account" replace />} />
+
           {/* Core */}
           <Route
             path="/"
@@ -1934,7 +2018,6 @@ export default function App() {
           <Route path="/cleaning" element={<Cleaning />} />
           <Route path="/garden" element={<Garden />} />
           <Route path="/animals" element={<Animals />} />
-          <Route path="/custom-locations" element={<CustomLocations />} />
 
           {/* ✅ FIX: roles route uses RolesPage (not JobsPage) */}
           <Route path="/roles" element={<RolesPage />} />
@@ -1960,10 +2043,41 @@ export default function App() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/badges" element={<BadgesPage />} />
-          <Route path="/meal-planning" element={<MealPlanningPage />} />
+          <Route
+            path="/meal-planning"
+            element={
+              <AuthRouteGuard>
+                <MealPlanningPage />
+              </AuthRouteGuard>
+            }
+          />
+          <Route
+            path="/meal-planning/prep"
+            element={<Navigate to="/meal-planning?tool=prep" replace />}
+          />
+          <Route
+            path="/meal-planning/batch"
+            element={<Navigate to="/meal-planning?tool=cycle" replace />}
+          />
+          <Route
+            path="/meal-planning/batches"
+            element={<Navigate to="/meal-planning?tool=cycle" replace />}
+          />
+          <Route
+            path="/meal-planning/batch-collab"
+            element={<Navigate to="/meal-planning?tool=cycle" replace />}
+          />
+          <Route
+            path="/meal-planning/collaboration"
+            element={<Navigate to="/meal-planning?tool=prep" replace />}
+          />
           <Route
             path="/meal-planning/planner-dashboard"
-            element={<MealPlannerScaffoldPage />}
+            element={
+              <AuthRouteGuard>
+                <MealPlannerScaffoldPage />
+              </AuthRouteGuard>
+            }
           />
 
           {/* ✅ UPDATED: load the real household meals page first */}
@@ -1981,62 +2095,128 @@ export default function App() {
           ))}
 
           {/* Storehouse + tools */}
-          <Route path="/storehouse" element={<StorehousePage />} />
+          <Route
+            path="/storehouse"
+            element={
+              <AuthRouteGuard>
+                <StorehousePage />
+              </AuthRouteGuard>
+            }
+          />
           <Route
             path="/storehouse/planner"
-            element={<StorehousePlannerScaffoldPage />}
+            element={
+              <AuthRouteGuard>
+                <StorehousePlannerScaffoldPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/storehouse/auto-fill"
-            element={<StorehouseAutoFillPlanner />}
+            element={
+              <AuthRouteGuard>
+                <StorehouseAutoFillPlanner />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/storehouse/preserve-queue"
-            element={<PreservationQueuePlanner />}
+            element={
+              <AuthRouteGuard>
+                <PreservationQueuePlanner />
+              </AuthRouteGuard>
+            }
           />
 
           {/* NEW sections */}
           {/* ✅ Homestead Planner ONLY surfaces here: /homesteadplanner/** */}
-          <Route path="/homesteadplanner" element={<HomesteadPage />} />
+          <Route
+            path="/homesteadplanner"
+            element={
+              <AuthRouteGuard>
+                <HomesteadPage />
+              </AuthRouteGuard>
+            }
+          />
           <Route
             path="/homesteadplanner/targets"
-            element={<HomesteadTargetsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadTargetsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/components"
-            element={<HomesteadComponentsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadComponentsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/inventory"
-            element={<HomesteadInventoryPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadInventoryPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/batches"
-            element={<HomesteadBatchesPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadBatchesPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/garden-targets"
-            element={<HomesteadGardenTargetsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadGardenTargetsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/animal-targets"
-            element={<HomesteadAnimalTargetsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadAnimalTargetsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/cuisines"
-            element={<HomesteadCuisinesPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadCuisinesPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/preferences"
-            element={<HomesteadPreferencesPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadPreferencesPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/skills"
-            element={<HomesteadSkillsPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadSkillsPage />
+              </AuthRouteGuard>
+            }
           />
           <Route
             path="/homesteadplanner/planner"
-            element={<HomesteadPlannerScaffoldPage />}
+            element={
+              <AuthRouteGuard>
+                <HomesteadPlannerScaffoldPage />
+              </AuthRouteGuard>
+            }
           />
 
           {/* ✅ Back-compat redirects to keep old links working, but NOT surface outputs elsewhere */}
