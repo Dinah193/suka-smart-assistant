@@ -116,11 +116,16 @@ router.post("/meal", express.json(), async (req, res) => {
           id: out.id || payload.id,
           householdId: payload.householdId,
         },
+          const warnings = [];
         persistContracts:
           typeof persistMealPlannerFanoutContracts === "function"
             ? ({ mealPlanId, householdId, contracts }) =>
                 persistMealPlannerFanoutContracts({
-                  mealPlanId,
+            try {
+              await ensureMongoConnected();
+            } catch (error) {
+              warnings.push(`mongo_connect_failed:${String(error?.message || error || "unknown")}`);
+            }
                   householdId,
                   contracts,
                   updatedBy: String(payload.updatedBy || payload.userId || "mealplanner:backendOrchestration"),
@@ -152,7 +157,7 @@ router.get("/storehouse", async (req, res) => {
         summary: { totalItems: 0, preservedItems: 0, lowStockItems: 0 },
         warnings: ["planner_integration_unavailable"],
       });
-    }
+          return res.json({ ok: true, ...out, orchestration, warnings });
 
     const snapshot = await getStorehousePlannerSnapshot(householdId);
     return res.json({
