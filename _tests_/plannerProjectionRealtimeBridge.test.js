@@ -78,4 +78,37 @@ describe("PlannerProjectionSync realtime bridge", () => {
     expect(counters.projection_emitted.total).toBe(1);
     expect(counters.projection_emitted.byPlannerHousehold["homestead::home-77"]).toBe(1);
   });
+
+  it("supports backend meal fanout recommendation events", () => {
+    const namespaceEmit = vi.fn();
+    const bridgeEmit = vi.fn();
+
+    const envelope = bridgeProjectionRealtimeEvent({
+      eventType: "planner.recommendations.updated",
+      contract: {
+        planner: "meal",
+        householdId: "home-pr1",
+        updateType: "meal.fanout",
+      },
+      namespaceEmit,
+      bridgeEmit,
+    });
+
+    expect(namespaceEmit).toHaveBeenCalledWith(
+      "/core",
+      "planner.recommendations.updated",
+      envelope,
+      "home:home-pr1"
+    );
+    expect(bridgeEmit).toHaveBeenCalledWith({
+      ns: "/core",
+      event: "planner.recommendations.updated",
+      payload: envelope,
+      room: "home:home-pr1",
+    });
+
+    const counters = getProjectionDeliveryCounters();
+    expect(counters.projection_emitted.total).toBe(1);
+    expect(counters.projection_emitted.byPlannerHousehold["meal::home-pr1"]).toBe(1);
+  });
 });

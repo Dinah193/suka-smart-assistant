@@ -566,6 +566,51 @@ runtimeDescribe("planners endpoints runtime smoke", () => {
       await stopServer(child);
     }
   }, 25000);
+
+  it("returns backend meal fanout orchestration metadata on meal save", async () => {
+    const { child, port } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+
+    try {
+      await waitForHealth(port);
+      const { householdId, authFetch } = await createPlannerAuthContext(baseUrl);
+
+      const mealSaveRes = await authFetch(`${baseUrl}/api/planners/meal`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          id: `meal-runtime-${Date.now()}`,
+          householdId,
+          userId: "runtime-contract",
+          title: "Runtime fanout meal plan",
+          startDate: "2026-03-01",
+          endDate: "2026-03-07",
+          plannerOutput: {
+            summary: "Runtime orchestration check",
+            meals: [{ title: "Stew" }],
+            shoppingList: [
+              { name: "Tomatoes", qty: 4, unit: "lb" },
+              { name: "Chicken", qty: 2, unit: "lb" },
+            ],
+            prepTasks: [{ title: "Can tomatoes" }],
+          },
+          recommendationScore: { score: 0.9 },
+        }),
+      });
+
+      const mealSave = await mealSaveRes.json();
+      expect(mealSaveRes.status).toBe(200);
+      expect(mealSave.ok).toBe(true);
+      expect(typeof mealSave.id).toBe("string");
+      expect(mealSave.orchestration?.ok).toBe(true);
+      expect(Array.isArray(mealSave.orchestration?.contracts)).toBe(true);
+      expect(mealSave.orchestration.contracts.length).toBeGreaterThanOrEqual(4);
+      expect(mealSave.orchestration?.durable?.queuedCount).toBeGreaterThanOrEqual(4);
+      expect(mealSave.orchestration?.projectionSync?.ok).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 30000);
 });
 
 runtimeDbDescribe("planners endpoints DB-seeded runtime contract", () => {

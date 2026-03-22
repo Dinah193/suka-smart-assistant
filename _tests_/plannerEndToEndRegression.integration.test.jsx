@@ -250,4 +250,63 @@ describe("planner end-to-end regression", () => {
     offProjection?.();
     offHomestead?.();
   });
+
+  it("rebroadcasts backend meal fanout recommendation updates", async () => {
+    const projectionUpdatedSpy = vi.fn();
+    const recommendationUpdatedSpy = vi.fn();
+
+    const offProjection = eventBus.on("planner.projection.updated", projectionUpdatedSpy);
+    const offRecommendation = eventBus.on(
+      "planner.recommendations.updated",
+      recommendationUpdatedSpy
+    );
+
+    await act(async () => {
+      root.render(React.createElement(PlannerClientHarness));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const recommendationContract = {
+      planner: "meal",
+      householdId: "home-e2e",
+      updateType: "meal.fanout",
+      queue: {
+        jobId: "job-meal-fanout-e2e",
+      },
+      counts: {
+        inventoryItems: 2,
+      },
+    };
+
+    await act(async () => {
+      bridgeProjectionRealtimeEvent({
+        eventType: "planner.recommendations.updated",
+        contract: recommendationContract,
+        namespaceEmit: (_ns, event, payload) => {
+          const handler = socketSubscribers.get(String(event));
+          if (typeof handler === "function") {
+            handler(payload);
+          }
+        },
+        bridgeEmit: vi.fn(),
+      });
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(socketSubscribers.has("planner:projection:update")).toBe(true);
+    expect(projectionUpdatedSpy).toHaveBeenCalledTimes(1);
+    expect(recommendationUpdatedSpy).toHaveBeenCalledTimes(1);
+    expect(recommendationUpdatedSpy.mock.calls[0][0]?.data?.contract?.queue?.jobId).toBe(
+      recommendationContract.queue.jobId
+    );
+
+    offProjection?.();
+    offRecommendation?.();
+  });
 });

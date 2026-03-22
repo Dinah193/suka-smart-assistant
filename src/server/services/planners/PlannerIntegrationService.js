@@ -679,6 +679,58 @@ async function saveMealPlannerOutput(payload = {}) {
   });
 }
 
+async function persistMealPlannerFanoutContracts({
+  mealPlanId,
+  householdId,
+  contracts = [],
+  updatedBy = "mealplanner:backendOrchestration",
+  changeReason = "meal_plan_fanout",
+} = {}) {
+  const safeContracts = Array.isArray(contracts)
+    ? contracts.filter((item) => item && typeof item === "object" && item.eventType)
+    : [];
+
+  if (!safeContracts.length) {
+    return { queuedCount: 0, queuedContracts: [] };
+  }
+
+  return withPgTransaction(async (client) => {
+    const queuedContracts = [];
+    for (const item of safeContracts) {
+      const eventType = String(item.eventType || "planner.contract.unknown");
+      const contract = item.contract && typeof item.contract === "object" ? item.contract : {};
+      const queuedOutboxEvent = await enqueueOperationalOutboxEventInTransaction(client, {
+        householdId,
+        aggregateType: "meal_plan_fanout",
+        aggregateId: String(mealPlanId || "unknown"),
+        eventType,
+        payload: {
+          mealPlanId: String(mealPlanId || ""),
+          householdId: String(householdId || ""),
+          contract,
+        },
+        eventMeta: {
+          source: "PlannerIntegrationService.persistMealPlannerFanoutContracts",
+          contractVersion: contract.contractVersion || null,
+        },
+        updatedBy: String(updatedBy || "mealplanner:backendOrchestration"),
+        changeReason: String(changeReason || "meal_plan_fanout"),
+      });
+
+      queuedContracts.push({
+        eventType,
+        id: queuedOutboxEvent.id,
+        status: queuedOutboxEvent.status,
+      });
+    }
+
+    return {
+      queuedCount: queuedContracts.length,
+      queuedContracts,
+    };
+  });
+}
+
 async function projectInventoryToNeo4j({ householdId, inventory = [] }) {
   if (!neo4jDriver) return { ok: false, reason: "neo4j_driver_missing" };
   const session = neo4jDriver.session();
@@ -784,6 +836,7 @@ module.exports = {
   upsertStorehouseInventory,
   upsertHomesteadPlan,
   saveMealPlannerOutput,
+  persistMealPlannerFanoutContracts,
   projectInventoryToNeo4j,
   projectHomesteadOutputsToNeo4j,
 };

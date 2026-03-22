@@ -24,6 +24,14 @@ function loadPlannerProjectionSync() {
   }
 }
 
+function loadMealPlannerOrchestrationService() {
+  try {
+    return require("../services/planners/MealPlannerOrchestrationService");
+  } catch {
+    return {};
+  }
+}
+
 function loadOperationalReadinessService() {
   try {
     return require("../services/planners/HouseholdOperationalReadinessService");
@@ -79,15 +87,54 @@ router.get("/meal", async (req, res) => {
 
 router.post("/meal", express.json(), async (req, res) => {
   try {
-    const { ensureMongoConnected, saveMealPlannerOutput } = loadPlannerIntegrationService();
+    const {
+      ensureMongoConnected,
+      saveMealPlannerOutput,
+      persistMealPlannerFanoutContracts,
+    } = loadPlannerIntegrationService();
+    const { orchestrateMealPlanFanout } = loadMealPlannerOrchestrationService();
+    const { syncMealPlannerFanoutContracts } = loadPlannerProjectionSync();
     if (typeof saveMealPlannerOutput !== "function") {
       return res.status(503).json({ ok: false, error: "planner_integration_unavailable" });
     }
     if (typeof ensureMongoConnected === "function") {
       await ensureMongoConnected();
     }
-    const out = await saveMealPlannerOutput(req.body || {});
-    return res.json({ ok: true, ...out });
+    const payload = req.body || {};
+    const out = await saveMealPlannerOutput(payload);
+
+    let orchestration = {
+      ok: false,
+      skipped: true,
+      reason: "meal_planner_orchestration_unavailable",
+    };
+
+    if (typeof orchestrateMealPlanFanout === "function") {
+      orchestration = await orchestrateMealPlanFanout({
+        mealPayload: payload,
+        mealSaveResult: {
+          id: out.id || payload.id,
+          householdId: payload.householdId,
+        },
+        persistContracts:
+          typeof persistMealPlannerFanoutContracts === "function"
+            ? ({ mealPlanId, householdId, contracts }) =>
+                persistMealPlannerFanoutContracts({
+                  mealPlanId,
+                  householdId,
+                  contracts,
+                  updatedBy: String(payload.updatedBy || payload.userId || "mealplanner:backendOrchestration"),
+                  changeReason: "meal_plan_backend_fanout",
+                })
+            : null,
+        syncProjection:
+          typeof syncMealPlannerFanoutContracts === "function"
+            ? (args) => syncMealPlannerFanoutContracts(args)
+            : null,
+      });
+    }
+
+    return res.json({ ok: true, ...out, orchestration });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
