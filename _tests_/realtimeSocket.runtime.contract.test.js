@@ -16,8 +16,11 @@ function hasModule(id) {
 
 const runtimeFlag = String(process.env.SSA_ENABLE_RUNTIME_CONTRACT_TESTS || "").toLowerCase();
 const runtimeEnabled = runtimeFlag === "1" || runtimeFlag === "true" || runtimeFlag === "yes";
+const socketRuntimeFlag = String(process.env.SSA_ENABLE_SOCKET_RUNTIME_CONTRACT_TESTS || "").toLowerCase();
+const socketRuntimeEnabled =
+  socketRuntimeFlag === "1" || socketRuntimeFlag === "true" || socketRuntimeFlag === "yes";
 const depsReady = hasModule("socket.io") && hasModule("socket.io-client");
-const canRun = runtimeEnabled && depsReady;
+const canRun = runtimeEnabled && socketRuntimeEnabled && depsReady;
 const runtimeDescribe = canRun ? describe : describe.skip;
 
 runtimeDescribe("realtime socket runtime contract", () => {

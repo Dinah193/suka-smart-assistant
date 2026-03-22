@@ -41,7 +41,15 @@ describe("realtimeController contract guards", () => {
   it("mounts deterministic middleware layering for realtime routes", () => {
     const src = readController();
 
-    expect(src).toMatch(/router\.use\(realtimeRateLimit, correlationContext, authenticateRequest, authorizeScope, validateRealtimeEnvelope\)/);
+    expect(src).toMatch(/router\.use\(/);
+    expect(src).toMatch(/realtimeRateLimit/);
+    expect(src).toMatch(/correlationContext/);
+    expect(src).toMatch(/authenticateRequest/);
+    expect(src).toMatch(/requireHouseholdAccessPolicy\(\)/);
+    expect(src).toMatch(/requireCollaborationPolicy\(\{ moduleKey: "realtime" \}\)/);
+    expect(src).toMatch(/requireEntitlementPolicy\(\{ feature: "planner\.base" \}\)/);
+    expect(src).toMatch(/authorizeScope/);
+    expect(src).toMatch(/validateRealtimeEnvelope/);
     expect(src).toMatch(/router\.use\(mapRealtimeErrorMiddleware\)/);
   });
 
