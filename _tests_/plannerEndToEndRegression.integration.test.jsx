@@ -166,4 +166,88 @@ describe("planner end-to-end regression", () => {
     offProjection?.();
     offPlanner?.();
   });
+
+  it("rebroadcasts homestead projection updates to planner listeners", async () => {
+    const projectionUpdatedSpy = vi.fn();
+    const homesteadUpdatedSpy = vi.fn();
+
+    const offProjection = eventBus.on("planner.projection.updated", projectionUpdatedSpy);
+    const offHomestead = eventBus.on(
+      "planner.homestead.production.updated",
+      homesteadUpdatedSpy
+    );
+
+    await act(async () => {
+      root.render(React.createElement(PlannerClientHarness));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const saveFn = vi.fn(async (payload) => ({
+      ok: true,
+      id: payload.id,
+      householdId: payload.householdId,
+    }));
+
+    const persisted = await persistMealPlannerGeneration({
+      normalizedPlan: {
+        title: "E2E meal plan homestead path",
+        summary: "Persistence + homestead projection + client update",
+        meals: [{ title: "Stew" }],
+        shoppingList: [{ name: "Onions", qty: 3, unit: "lb" }],
+        prepTasks: [{ title: "Dry herbs" }],
+      },
+      saveAsDraft: false,
+      duration: "7-day",
+      templateId: "balanced-week",
+      cuisines: ["Mediterranean"],
+      presets: ["batch-friendly"],
+      saveFn,
+    });
+
+    const homesteadContract = {
+      planner: "homestead",
+      householdId: persisted.payload.householdId,
+      updateType: "production.upsert",
+      queue: {
+        jobId: `job-homestead-${persisted.payload.id}`,
+      },
+      counts: {
+        outputItems: 2,
+      },
+    };
+
+    await act(async () => {
+      bridgeProjectionRealtimeEvent({
+        eventType: "planner.homestead.production.updated",
+        contract: homesteadContract,
+        namespaceEmit: (_ns, event, payload) => {
+          const handler = socketSubscribers.get(String(event));
+          if (typeof handler === "function") {
+            handler(payload);
+          }
+        },
+        bridgeEmit: vi.fn(),
+      });
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(socketSubscribers.has("planner:projection:update")).toBe(true);
+    expect(projectionUpdatedSpy).toHaveBeenCalledTimes(1);
+    expect(homesteadUpdatedSpy).toHaveBeenCalledTimes(1);
+    expect(projectionUpdatedSpy.mock.calls[0][0]?.data?.contract?.queue?.jobId).toBe(
+      homesteadContract.queue.jobId
+    );
+    expect(homesteadUpdatedSpy.mock.calls[0][0]?.data?.contract?.queue?.jobId).toBe(
+      homesteadContract.queue.jobId
+    );
+
+    offProjection?.();
+    offHomestead?.();
+  });
 });
