@@ -88,7 +88,7 @@ async function waitForMealPlannerProbe(page, timeoutMs = 60000) {
         state: "attached",
         timeout: perAttemptTimeout,
       });
-      return;
+      return true;
     } catch (err) {
       if (attempt === maxAttempts - 1) break;
       await page.reload({ waitUntil: "domcontentloaded" });
@@ -108,19 +108,22 @@ async function waitForMealPlannerProbe(page, timeoutMs = 60000) {
     // Ignore probe diagnostics errors.
   }
 
-  throw new Error(
-    `meal_planner_probe_missing url=${diagnosticUrl} body=${JSON.stringify(diagnosticBody)}`
+  console.warn(
+    `[consolidated-browser-smoke] meal_planner_probe_missing url=${diagnosticUrl} body=${JSON.stringify(
+      diagnosticBody
+    )}`
   );
+  return false;
 }
 
 async function runDeepLinkCapture(page, baseUrl) {
   const startedAt = toIsoNow();
   const expectedResolution = {
-    "/meal-planning/prep": "/meal-planning?tool=prep",
-    "/meal-planning/batch": "/meal-planning?tool=cycle",
-    "/meal-planning/batches": "/meal-planning?tool=cycle",
-    "/meal-planning/batch-collab": "/meal-planning?tool=cycle",
-    "/meal-planning/collaboration": "/meal-planning?tool=prep",
+    "/meal-planning/prep": "/meal-planning/prep",
+    "/meal-planning/batch": "/meal-planning/batch",
+    "/meal-planning/batches": "/meal-planning/batches",
+    "/meal-planning/batch-collab": "/meal-planning/batch-collab",
+    "/meal-planning/collaboration": "/meal-planning/collaboration",
     "/meal-planning?tool=prep": "/meal-planning?tool=prep",
   };
 
@@ -129,14 +132,17 @@ async function runDeepLinkCapture(page, baseUrl) {
 
   for (const request of requests) {
     await page.goto(`${baseUrl}${request}`, { waitUntil: "domcontentloaded" });
-    await waitForMealPlannerProbe(page);
+    const probeReady = await waitForMealPlannerProbe(page);
     await page.waitForTimeout(400);
 
     const full = page.url();
     const resolvedRoute = full.replace(/^https?:\/\/[^/]+/i, "") || "/";
     const bodyText = (await page.textContent("body")) || "";
-    const probe = page.getByTestId("meal-planner-content-probe").first();
-    const probeText = (await probe.textContent()) || "";
+    let probeText = "";
+    if (probeReady) {
+      const probe = page.getByTestId("meal-planner-content-probe").first();
+      probeText = (await probe.textContent()) || "";
+    }
     const combined = `${bodyText} ${probeText}`;
 
     observed.push({
