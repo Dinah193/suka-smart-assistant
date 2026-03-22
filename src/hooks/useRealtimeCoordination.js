@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { eventBus } from "@/services/events/eventBus";
+import { recordProjectionReceivedClient } from "@/services/realtime/projectionDeliveryMetrics";
 
 function readJsonStorage(key) {
   if (typeof window === "undefined") return null;
@@ -285,6 +286,11 @@ export default function useRealtimeCoordination(overrides = {}) {
       if (!evt || !evt.contract) return;
       const householdId = String(evt.contract.householdId || "default");
       if (householdId !== String(identity.scopeId || "default")) return;
+
+      recordProjectionReceivedClient({
+        planner: evt.contract.planner,
+        householdId,
+      });
 
       try {
         eventBus.emit("planner.projection.updated", evt);

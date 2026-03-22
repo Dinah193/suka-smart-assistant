@@ -1,5 +1,34 @@
 "use strict";
 
+const emittedByPlannerHousehold = new Map();
+let projectionEmittedTotal = 0;
+
+function makeCounterKey(planner, householdId) {
+  return `${String(planner || "unknown")}::${String(householdId || "default")}`;
+}
+
+function recordProjectionEmitted({ planner, householdId } = {}) {
+  const key = makeCounterKey(planner, householdId);
+  const next = Number(emittedByPlannerHousehold.get(key) || 0) + 1;
+  emittedByPlannerHousehold.set(key, next);
+  projectionEmittedTotal += 1;
+  return next;
+}
+
+function getProjectionDeliveryCounters() {
+  return {
+    projection_emitted: {
+      total: projectionEmittedTotal,
+      byPlannerHousehold: Object.fromEntries(emittedByPlannerHousehold.entries()),
+    },
+  };
+}
+
+function resetProjectionDeliveryCounters() {
+  emittedByPlannerHousehold.clear();
+  projectionEmittedTotal = 0;
+}
+
 function buildProjectionRealtimeEnvelope({ eventType, contract }) {
   return {
     eventType: String(eventType || "planner.projection.updated"),
@@ -14,6 +43,7 @@ function buildProjectionRealtimeEnvelope({ eventType, contract }) {
 function bridgeProjectionRealtimeEvent({ eventType, contract, namespaceEmit, bridgeEmit } = {}) {
   const envelope = buildProjectionRealtimeEnvelope({ eventType, contract });
   const room = `home:${envelope.householdId}`;
+  recordProjectionEmitted({ planner: envelope.planner, householdId: envelope.householdId });
 
   let emitNs = namespaceEmit;
   let emitBridge = bridgeEmit;
@@ -47,4 +77,6 @@ function bridgeProjectionRealtimeEvent({ eventType, contract, namespaceEmit, bri
 module.exports = {
   buildProjectionRealtimeEnvelope,
   bridgeProjectionRealtimeEvent,
+  getProjectionDeliveryCounters,
+  resetProjectionDeliveryCounters,
 };
