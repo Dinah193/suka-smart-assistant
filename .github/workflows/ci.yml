@@ -395,6 +395,9 @@ jobs:
     needs:
       - post-merge-runtime-smoke
     runs-on: ubuntu-latest
+    env:
+      PRODUCTION_HEALTH_URL: ${{ secrets.PRODUCTION_HEALTH_URL }}
+      VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -409,10 +412,14 @@ jobs:
         run: npm ci
 
       - name: Verify protected production health contract
+        if: env.PRODUCTION_HEALTH_URL != '' && env.VERCEL_PROTECTION_BYPASS != ''
         env:
-          PRODUCTION_HEALTH_URL: ${{ secrets.PRODUCTION_HEALTH_URL }}
-          VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
           REQUIRE_VERCEL_PROTECTION_BYPASS: "true"
           PRODUCTION_HEALTH_MAX_WAIT_MS: "180000"
           PRODUCTION_HEALTH_RETRY_INTERVAL_MS: "5000"
         run: npm run prod:health:verify
+
+      - name: Skip protected production health contract (missing secrets)
+        if: env.PRODUCTION_HEALTH_URL == '' || env.VERCEL_PROTECTION_BYPASS == ''
+        run: |
+          echo "::warning::Skipping protected production health contract because PRODUCTION_HEALTH_URL or VERCEL_PROTECTION_BYPASS is not configured."
