@@ -94,11 +94,16 @@ router.post("/meal", express.json(), async (req, res) => {
     } = loadPlannerIntegrationService();
     const { orchestrateMealPlanFanout } = loadMealPlannerOrchestrationService();
     const { syncMealPlannerFanoutContracts } = loadPlannerProjectionSync();
+    const warnings = [];
     if (typeof saveMealPlannerOutput !== "function") {
       return res.status(503).json({ ok: false, error: "planner_integration_unavailable" });
     }
     if (typeof ensureMongoConnected === "function") {
-      await ensureMongoConnected();
+      try {
+        await ensureMongoConnected();
+      } catch (error) {
+        warnings.push(`mongo_connect_failed:${String(error?.message || error || "unknown")}`);
+      }
     }
     const payload = req.body || {};
     const out = await saveMealPlannerOutput(payload);
@@ -134,7 +139,7 @@ router.post("/meal", express.json(), async (req, res) => {
       });
     }
 
-    return res.json({ ok: true, ...out, orchestration });
+    return res.json({ ok: true, ...out, orchestration, warnings });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
