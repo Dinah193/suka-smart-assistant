@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "id": "audit_e1d74654-89d6-45fa-87f8-4b5d563b5c45",
+      "type": "access_policy_admin",
+      "action": "policy.read",
+      "actorUserId": "native_664a4d41-88b1-4634-9f14-017431f04ed0",
+      "requestId": "19c3087a-a4b8-4449-beac-b667fc86e012",
+      "ok": true,
+      "at": "2026-03-22T12:39:55.600Z",
+      "details": {
+        "collaborationGrantCount": 0,
+        "entitlementUserCount": 0
+      }
+    },
+    {
+      "id": "audit_4a08e139-1fdc-4b00-a7a4-69b946e6fdc7",
+      "type": "access_policy_admin",
+      "action": "collaboration_grant.upsert",
+      "actorUserId": "native_664a4d41-88b1-4634-9f14-017431f04ed0",
+      "requestId": "04f01b38-168b-4ae9-b7bf-0e592bb022b8",
+      "ok": true,
+      "at": "2026-03-22T12:39:55.697Z",
+      "details": {
+        "userId": "user-contract-1",
+        "householdId": "house_90c835e1-d2a7-477b-a423-afc722edf439",
+        "moduleKey": "meal-planning",
+        "actions": [
+          "read",
+          "update"
+        ],
+        "payload": {
+          "userId": "user-contract-1",
+          "householdId": "house_90c835e1-d2a7-477b-a423-afc722edf439",
+          "moduleKey": "meal-planning",
+          "actions": [
+            "read",
+            "update"
+          ]
+        },
+        "ok": true
+      }
+    },
+    {
+      "id": "audit_9c0d46a0-d9c1-437c-977a-24b4ea340e11",
+      "type": "access_policy_admin",
+      "action": "entitlement.set",
+      "actorUserId": "native_664a4d41-88b1-4634-9f14-017431f04ed0",
+      "requestId": "aabcec48-11b7-44e8-8307-0916f356ab8e",
+      "ok": true,
+      "at": "2026-03-22T12:39:55.774Z",
+      "details": {
+        "userId": "user-contract-1",
+        "entitlements": [
+          "planner.base",
+          "planner.advanced"
+        ],
+        "payload": {
+          "entitlements": [
+            "planner.base",
+            "planner.advanced"
+          ]
+        },
+        "ok": true
+      }
+    },
+    {
+      "id": "audit_a1ee552f-4d34-427d-bc9c-61e73da828e2",
+      "type": "access_policy_admin",
+      "action": "collaboration_grant.delete",
+      "actorUserId": "native_664a4d41-88b1-4634-9f14-017431f04ed0",
+      "requestId": "16af04f3-b613-4f9d-a53d-89d4cfa6881c",
+      "ok": true,
+      "at": "2026-03-22T12:39:55.831Z",
+      "details": {
+        "userId": "user-contract-1",
+        "householdId": "house_90c835e1-d2a7-477b-a423-afc722edf439",
+        "moduleKey": "meal-planning",
+        "payload": {
+          "userId": "user-contract-1",
+          "householdId": "house_90c835e1-d2a7-477b-a423-afc722edf439",
+          "moduleKey": "meal-planning"
+        },
+        "removed": true,
+        "ok": true
+      }
+    }
+  ],
+  "updatedAt": "2026-03-22T12:39:55.832Z"
+}

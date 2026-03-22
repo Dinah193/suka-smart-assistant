@@ -173,6 +173,7 @@ import {
   buildEstimateInputsFromNormalizedPlan,
   emitPlannerGapsUpdated,
 } from "@/services/planners/mealPlannerBridge";
+import { persistMealPlannerGeneration } from "./mealPlannerPersistence";
 import { useStorehousePlannerStore } from "@/store/StorehousePlannerStore";
 import { useHomesteadPlannerStore } from "@/store/homesteadPlannerStore";
 
@@ -2208,6 +2209,26 @@ export default function MealPlanningPage() {
             usedLocalDraftFallback = true;
           }
         }
+      }
+
+      const persistenceResult = await persistMealPlannerGeneration({
+        normalizedPlan: normalizedForDownstream,
+        saveAsDraft,
+        duration,
+        templateId,
+        cuisines,
+        presets: selectedPresets,
+        horizonMonths,
+        plannerGaps,
+        estimateInputs,
+        currentPlanId: currentPlan?.id || null,
+        fallbackPlanId: ensuredDraftId || res?.data?.draftId || null,
+      });
+      if (!persistenceResult?.ok && !persistenceResult?.skipped) {
+        console.warn(
+          "[MealPlanner] planner API save failed (non-blocking)",
+          persistenceResult?.error || persistenceResult
+        );
       }
 
       /* ✅ PATCH: always force the generated plan into the Current Plan store and switch to Dashboard */
