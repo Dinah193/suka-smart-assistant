@@ -349,8 +349,131 @@ async function listAuditAlerts({
   };
 }
 
+async function listAuditAnomalies({
+  windowMs = 24 * 60 * 60 * 1000,
+  minActorEvents = process.env.ACCESS_POLICY_AUDIT_ANOMALY_MIN_ACTOR_EVENTS,
+  failureRateThreshold = process.env.ACCESS_POLICY_AUDIT_ANOMALY_FAILURE_RATE_THRESHOLD,
+  highRiskActionThreshold = process.env.ACCESS_POLICY_AUDIT_ANOMALY_HIGH_RISK_ACTION_THRESHOLD,
+  highRiskActions = process.env.ACCESS_POLICY_AUDIT_ALERT_HIGH_RISK_ACTIONS,
+  maxActors = 25,
+  sampleLimit = 5,
+} = {}) {
+  const store = await readAuditStore();
+  const safeWindowMs = Math.max(60_000, asNumber(windowMs, 24 * 60 * 60 * 1000));
+  const floorMs = Date.now() - safeWindowMs;
+  const thresholdMinActorEvents = Math.max(1, asNumber(minActorEvents, 5));
+  const thresholdFailureRate = Math.max(0, Math.min(1, Number(failureRateThreshold ?? 0.4)));
+  const thresholdHighRiskAction = Math.max(1, asNumber(highRiskActionThreshold, 3));
+  const limitActors = Math.max(1, asNumber(maxActors, 25));
+  const limitSamples = Math.max(1, asNumber(sampleLimit, 5));
+  const highRiskSet = parseCsvSet(
+    highRiskActions || "entitlement.set,collaboration_grant.delete,collaboration_grant.upsert"
+  );
+
+  const actorStats = new Map();
+  const events = Array.isArray(store?.events) ? store.events : [];
+  for (const evt of events) {
+    const atMs = parseIsoToMs(evt?.at);
+    if (atMs == null || atMs < floorMs) continue;
+
+    const actorUserId = String(evt?.actorUserId || "unknown");
+    const action = String(evt?.action || "unknown");
+    const ok = evt?.ok !== false;
+
+    if (!actorStats.has(actorUserId)) {
+      actorStats.set(actorUserId, {
+        actorUserId,
+        total: 0,
+        failures: 0,
+        countsByAction: {},
+        sampleEventIds: [],
+      });
+    }
+    const stat = actorStats.get(actorUserId);
+    stat.total += 1;
+    if (!ok) stat.failures += 1;
+    stat.countsByAction[action] = (stat.countsByAction[action] || 0) + 1;
+    if (stat.sampleEventIds.length < limitSamples && evt?.id) {
+      stat.sampleEventIds.push(String(evt.id));
+    }
+  }
+
+  const orderedActors = Array.from(actorStats.values())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limitActors);
+
+  const anomalies = [];
+  for (const stat of orderedActors) {
+    if (stat.total < thresholdMinActorEvents) continue;
+
+    const failureRate = stat.total > 0 ? stat.failures / stat.total : 0;
+    if (failureRate >= thresholdFailureRate) {
+      anomalies.push({
+        id: `actor_failure_rate_high:${stat.actorUserId}`,
+        type: "actor_failure_rate_high",
+        severity: "warn",
+        actorUserId: stat.actorUserId,
+        message: "Actor failure rate exceeded threshold in audit window",
+        metric: {
+          failureRate,
+          failures: stat.failures,
+          total: stat.total,
+        },
+        threshold: {
+          minActorEvents: thresholdMinActorEvents,
+          failureRateThreshold: thresholdFailureRate,
+        },
+        triage: {
+          suggestedActions: [
+            "review_recent_admin_requests",
+            "confirm_ops_token_handling",
+            "verify_actor_permissions",
+          ],
+          sampleEventIds: stat.sampleEventIds,
+        },
+      });
+    }
+
+    for (const [action, count] of Object.entries(stat.countsByAction || {})) {
+      if (!highRiskSet.has(action)) continue;
+      if (Number(count || 0) < thresholdHighRiskAction) continue;
+      anomalies.push({
+        id: `actor_high_risk_action_spike:${stat.actorUserId}:${action}`,
+        type: "actor_high_risk_action_spike",
+        severity: "warn",
+        actorUserId: stat.actorUserId,
+        message: "Actor performed high-risk action above threshold",
+        metric: {
+          action,
+          count: Number(count || 0),
+          total: stat.total,
+        },
+        threshold: {
+          highRiskActionThreshold: thresholdHighRiskAction,
+        },
+        triage: {
+          suggestedActions: [
+            "validate_change_ticket",
+            "confirm_dual_control_requirements",
+            "review_actor_activity_window",
+          ],
+          sampleEventIds: stat.sampleEventIds,
+        },
+      });
+    }
+  }
+
+  return {
+    ok: true,
+    generatedAt: nowIso(),
+    windowMs: safeWindowMs,
+    anomalies,
+  };
+}
+
 module.exports = {
   appendAuditEvent,
+  listAuditAnomalies,
   listAuditEvents,
   listAuditAlerts,
   runAuditMaintenance,

@@ -210,3 +210,21 @@ Maintenance controls are also configurable via env:
 - `ACCESS_POLICY_AUDIT_RETENTION_MS`
 - `ACCESS_POLICY_AUDIT_ROLLOVER_ENABLED`
 - `ACCESS_POLICY_AUDIT_ROLLOVER_FILE`
+
+Read actor anomaly triage payload:
+
+```bash
+curl -sS \
+  -H "authorization: Bearer <ACCESS_TOKEN>" \
+  -H "x-ops-token: <ACCESS_POLICY_ADMIN_TOKEN>" \
+  "http://127.0.0.1:4000/api/access-policies/audit-events/anomalies?windowMs=86400000&minActorEvents=5&failureRateThreshold=0.4&highRiskActionThreshold=3"
+```
+
+Anomaly response items include:
+
+- `type`
+- `actorUserId`
+- `metric`
+- `threshold`
+- `triage.suggestedActions`
+- `triage.sampleEventIds`

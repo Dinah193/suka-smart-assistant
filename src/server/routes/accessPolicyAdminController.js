@@ -5,6 +5,7 @@ const { authenticateRequest } = require("../middleware/realtime/authenticateRequ
 const { redactObject } = require("../services/loggingSanitizer.js");
 const {
   appendAuditEvent,
+  listAuditAnomalies,
   listAuditAlerts,
   listAuditEvents,
   runAuditMaintenance,
@@ -131,6 +132,33 @@ router.get("/audit-events/alerts", async (req, res, next) => {
       highRiskActionThreshold: req.query?.highRiskActionThreshold || null,
       highRiskActions: req.query?.highRiskActions || null,
       alertCount: Array.isArray(out?.alerts) ? out.alerts.length : 0,
+    });
+    return res.json(out);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/audit-events/anomalies", async (req, res, next) => {
+  try {
+    const out = await listAuditAnomalies({
+      windowMs: req.query?.windowMs,
+      minActorEvents: req.query?.minActorEvents,
+      failureRateThreshold: req.query?.failureRateThreshold,
+      highRiskActionThreshold: req.query?.highRiskActionThreshold,
+      highRiskActions: req.query?.highRiskActions,
+      maxActors: req.query?.maxActors,
+      sampleLimit: req.query?.sampleLimit,
+    });
+    await emitPolicyAudit(req, "policy.audit_events.anomalies.read", {
+      windowMs: req.query?.windowMs || null,
+      minActorEvents: req.query?.minActorEvents || null,
+      failureRateThreshold: req.query?.failureRateThreshold || null,
+      highRiskActionThreshold: req.query?.highRiskActionThreshold || null,
+      highRiskActions: req.query?.highRiskActions || null,
+      maxActors: req.query?.maxActors || null,
+      sampleLimit: req.query?.sampleLimit || null,
+      anomalyCount: Array.isArray(out?.anomalies) ? out.anomalies.length : 0,
     });
     return res.json(out);
   } catch (error) {
