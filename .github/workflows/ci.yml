@@ -221,7 +221,13 @@ jobs:
         run: npm ci
 
       - name: Access policy audit contracts
-        run: npx vitest run _tests_/accessPolicyAdmin.audit.contract.test.js --reporter=verbose
+        run: >-
+          npx vitest run
+          _tests_/accessPolicyAdmin.audit.contract.test.js
+          _tests_/accessPolicyAudit.alerts.contract.test.js
+          _tests_/accessPolicyAudit.maintenance.contract.test.js
+          _tests_/accessPolicyAudit.anomalies.contract.test.js
+          --reporter=verbose
 
   unit-tests:
     runs-on: ubuntu-latest
