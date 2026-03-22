@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSocket } from "@/hooks/useSocket";
+import { eventBus } from "@/services/events/eventBus";
 
 function readJsonStorage(key) {
   if (typeof window === "undefined") return null;
@@ -280,11 +281,27 @@ export default function useRealtimeCoordination(overrides = {}) {
       );
     });
 
+    const offPlannerProjection = sock.subscribe("planner:projection:update", (evt) => {
+      if (!evt || !evt.contract) return;
+      const householdId = String(evt.contract.householdId || "default");
+      if (householdId !== String(identity.scopeId || "default")) return;
+
+      try {
+        eventBus.emit("planner.projection.updated", evt);
+        if (evt.eventType) {
+          eventBus.emit(evt.eventType, evt);
+        }
+      } catch {
+        // Keep realtime listeners non-blocking.
+      }
+    });
+
     return () => {
       offQueueUpdate?.();
       offConsumed?.();
       offReport?.();
       offAssigned?.();
+      offPlannerProjection?.();
     };
   }, [identity.scope, identity.scopeId, sock]);
 
