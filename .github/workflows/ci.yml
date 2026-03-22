@@ -71,9 +71,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
       - name: DB preflight gate
         run: npm run db:preflight
 
@@ -305,6 +302,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
 
       - name: Basic smoke e2e
         run: npm run smoke:e2e
