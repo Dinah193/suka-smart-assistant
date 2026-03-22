@@ -3,6 +3,10 @@
 const { randomUUID } = require("node:crypto");
 const { publishPlannerEvent, PlannerEvents } = require("../../../eventBus/plannerEventBus");
 const {
+  buildProjectionRealtimeEnvelope,
+  bridgeProjectionRealtimeEvent,
+} = require("./PlannerRealtimeBridge");
+const {
   pgPool,
   projectInventoryToNeo4j,
   projectHomesteadOutputsToNeo4j,
@@ -463,6 +467,10 @@ async function syncStorehouseUpdate(payload = {}) {
   publishPlannerEvent(PlannerEvents.PLANNER_RECOMMENDATIONS_UPDATED, contract, {
     source: "PlannerProjectionSync.syncStorehouseUpdate",
   });
+  bridgeProjectionRealtimeEvent({
+    eventType: "planner.storehouse.inventory.updated",
+    contract,
+  });
 
   return contract;
 }
@@ -514,6 +522,10 @@ async function syncHomesteadUpdate({ payload = {}, saved = {}, snapshot = {} } =
   });
   publishPlannerEvent(PlannerEvents.PLANNER_RECOMMENDATIONS_UPDATED, contract, {
     source: "PlannerProjectionSync.syncHomesteadUpdate",
+  });
+  bridgeProjectionRealtimeEvent({
+    eventType: "planner.homestead.production.updated",
+    contract,
   });
 
   return contract;
