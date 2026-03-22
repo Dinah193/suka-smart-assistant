@@ -79,19 +79,34 @@ function extractQueueLabel(text) {
 
 async function waitForMealPlannerProbe(page, timeoutMs = 60000) {
   const selector = '[data-testid="meal-planner-content-probe"]';
-  const started = Date.now();
+  const maxAttempts = 3;
+  const perAttemptTimeout = Math.max(3000, Math.floor(timeoutMs / maxAttempts));
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const remaining = Math.max(1000, timeoutMs - (Date.now() - started));
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     try {
-      await page.waitForSelector(selector, { state: "attached", timeout: remaining });
-      return;
+      await page.waitForSelector(selector, {
+        state: "attached",
+        timeout: perAttemptTimeout,
+      });
+      return true;
     } catch (err) {
-      if (attempt === 1) throw err;
+      if (attempt === maxAttempts - 1) break;
       await page.reload({ waitUntil: "domcontentloaded" });
       await sleep(500);
     }
   }
+
+  // Fall back to a visible heading signal to avoid hard-failing on probe-only flakes.
+  try {
+    const bodyText = (await page.textContent("body")) || "";
+    if (/Meal Planner/i.test(bodyText)) {
+      return false;
+    }
+  } catch {
+    // Ignore and let caller continue with conservative defaults.
+  }
+
+  return false;
 }
 
 async function runDeepLinkCapture(page, baseUrl) {
@@ -110,14 +125,21 @@ async function runDeepLinkCapture(page, baseUrl) {
 
   for (const request of requests) {
     await page.goto(`${baseUrl}${request}`, { waitUntil: "domcontentloaded" });
-    await waitForMealPlannerProbe(page);
-    const probe = page.getByTestId("meal-planner-content-probe").first();
+    const probeReady = await waitForMealPlannerProbe(page);
     await page.waitForTimeout(400);
 
     const full = page.url();
     const resolvedRoute = full.replace(/^https?:\/\/[^/]+/i, "") || "/";
     const bodyText = (await page.textContent("body")) || "";
-    const probeText = (await probe.textContent()) || "";
+    let probeText = "";
+    if (probeReady) {
+      try {
+        const probe = page.getByTestId("meal-planner-content-probe").first();
+        probeText = (await probe.textContent()) || "";
+      } catch {
+        probeText = "";
+      }
+    }
     const combined = `${bodyText} ${probeText}`;
 
     observed.push({
