@@ -18,6 +18,7 @@ import {
   SSAModal,
   SSATabs,
   SSATextarea,
+  SSAToastHost,
   SSAToggle,
   SSAGrowthOverlay,
 } from "@/components/ssa";
@@ -104,6 +105,72 @@ const HOUSEHOLDS = [
   { id: "h2", name: "Oak and Hearth", animal: "goats", status: "request" },
   { id: "h3", name: "Stonefield Home", animal: "ducks", status: "complete" },
   { id: "h4", name: "Meadow Keep", animal: "sheep", status: "assigned" },
+];
+
+const MODULE_NOTIFICATIONS = [
+  {
+    id: "notif-meals-1",
+    module: "meals",
+    moduleLabel: "Meals and Batch Cooking",
+    title: "Seasonal menu reminder",
+    message: "Spring herb menu closes in 4 hours. Confirm batch prep portions.",
+    seasonalContext: "Seasonal recipe focus: nettle omelet and root broth",
+    severity: "warning",
+    progress: 58,
+    household: "Willow Collective",
+    animal: "chickens",
+    unread: true,
+    collaborativeSignal: "2 households requested shared prep window",
+  },
+  {
+    id: "notif-storehouse-1",
+    module: "storehouse",
+    moduleLabel: "Storehouse Inventory and Replenishment",
+    title: "Seasonal stock tracking",
+    message: "Berry preserve jars below target threshold for early summer demand.",
+    seasonalContext: "Replenishment target: +18 jars before heat wave",
+    severity: "warning",
+    progress: 46,
+    household: "Oak and Hearth",
+    animal: "goats",
+    unread: true,
+    collaborativeSignal: "Shared stock transfer offered by Meadow Keep",
+  },
+  {
+    id: "notif-garden-1",
+    module: "gardens",
+    moduleLabel: "Gardens and Orchards",
+    title: "Seasonal crop milestone",
+    message: "Orchard thinning milestone reached. Next pass due by sunset.",
+    seasonalContext: "Current crops: peas, spinach, early strawberries",
+    severity: "info",
+    progress: 71,
+    household: "Stonefield Home",
+    animal: "deer",
+    unread: false,
+    collaborativeSignal: "1 household joined orchard relay",
+  },
+  {
+    id: "notif-animals-1",
+    module: "animals",
+    moduleLabel: "Animal Husbandry",
+    title: "Seasonal husbandry task",
+    message: "Milking and butchery handoff sequence queued for evening round.",
+    seasonalContext: "Care lane: milking checks + feed rotation + butchery prep",
+    severity: "warning",
+    progress: 63,
+    household: "Meadow Keep",
+    animal: "cows",
+    unread: true,
+    collaborativeSignal: "3 households aligned care roster",
+  },
+];
+
+const MODULE_TASKS = [
+  { id: "mod-task-1", title: "Confirm spring batch menu", done: false, household: "Meals" },
+  { id: "mod-task-2", title: "Replenish preserve shelf lane", done: false, household: "Storehouse" },
+  { id: "mod-task-3", title: "Log orchard thinning checkpoint", done: true, household: "Gardens" },
+  { id: "mod-task-4", title: "Assign milking and butchery handoff", done: false, household: "Husbandry" },
 ];
 
 const MEDIA_STORIES = [
@@ -486,39 +553,11 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
           </div>
 
           <aside className="space-y-4" aria-label="Alerts and collaboration sidebar">
-            <div className="ssa-hero-wrap p-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="ssa-hero-title text-base">Alerts</h2>
-                <SSAToggle
-                  checked={!alertsMuted}
-                  onChange={(next) => setAlertsMuted(!next)}
-                  label={alertsMuted ? "Muted" : "Live"}
-                />
-              </div>
-              <div className="space-y-2">
-                <SSAInlineAlert tone="warning">Canning queue enters high urgency in 6 hours.</SSAInlineAlert>
-                <SSAInlineAlert tone="info">Willow and Stonefield synced irrigation rota.</SSAInlineAlert>
-                <SSAInlineAlert tone="success">Barn lane checklist completed by all assigned households.</SSAInlineAlert>
-              </div>
-            </div>
-
-            <div className="ssa-hero-wrap p-4">
-              <h2 className="ssa-hero-title text-base">Participating Households</h2>
-              <ul className="mt-3 space-y-2">
-                {HOUSEHOLDS.map((household) => (
-                  <li
-                    key={household.id}
-                    className="flex items-center justify-between gap-2 rounded-[var(--ssa-radius-chip)] border border-[var(--ssa-border-subtle)] p-2 transition hover:bg-[var(--ssa-surface-1)] focus-within:ring-2 focus-within:ring-[var(--ssa-focus-ring-color)]"
-                  >
-                    <div className="flex items-center gap-2">
-                      <SSAAnimalAvatar animal={household.animal} label={household.name} size="sm" />
-                      <span className="text-sm text-[var(--ssa-text-primary)]">{household.name}</span>
-                    </div>
-                    <SSABadge tone={household.status}>{household.status}</SSABadge>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <NotificationsPanel
+              alertsMuted={alertsMuted}
+              setAlertsMuted={setAlertsMuted}
+              seasonLabel={seasonLabel}
+            />
           </aside>
         </motion.section>
       </AnimatePresence>
@@ -928,6 +967,210 @@ function StoryDepthMedia({ story, onExpand, compact = false }) {
         </SSAButton>
       </div>
     </div>
+  );
+}
+
+function NotificationsPanel({ alertsMuted, setAlertsMuted, seasonLabel }) {
+  const [activeAlerts, setActiveAlerts] = useState(MODULE_NOTIFICATIONS);
+  const [selectedAlertId, setSelectedAlertId] = useState(null);
+  const [toastSeed, setToastSeed] = useState(0);
+
+  const unreadCount = useMemo(
+    () => activeAlerts.filter((alert) => alert.unread).length,
+    [activeAlerts]
+  );
+
+  const overallProgress = useMemo(() => {
+    if (!activeAlerts.length) return 0;
+    const sum = activeAlerts.reduce((acc, alert) => acc + Number(alert.progress || 0), 0);
+    return Math.round(sum / activeAlerts.length);
+  }, [activeAlerts]);
+
+  const toastItems = useMemo(
+    () =>
+      activeAlerts
+        .filter((alert) => alert.unread)
+        .slice(0, 3)
+        .map((alert) => ({
+          id: `toast-${alert.id}-${toastSeed}`,
+          message: `${alert.moduleLabel}: ${alert.title}`,
+        })),
+    [activeAlerts, toastSeed]
+  );
+
+  const selectedAlert =
+    activeAlerts.find((alert) => alert.id === selectedAlertId) || null;
+
+  function markRead(alertId) {
+    setActiveAlerts((prev) =>
+      prev.map((alert) =>
+        alert.id === alertId
+          ? {
+              ...alert,
+              unread: false,
+            }
+          : alert
+      )
+    );
+    setToastSeed((prev) => prev + 1);
+  }
+
+  function markUnread(alertId) {
+    setActiveAlerts((prev) =>
+      prev.map((alert) =>
+        alert.id === alertId
+          ? {
+              ...alert,
+              unread: true,
+            }
+          : alert
+      )
+    );
+    setToastSeed((prev) => prev + 1);
+  }
+
+  return (
+    <>
+      <section className="ssa-hero-wrap p-4" aria-label="Notifications panel">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="ssa-hero-title text-base">Module Notifications</h2>
+            <p className="text-xs text-[var(--ssa-text-secondary)]">
+              {seasonLabel} context is embedded in each household module update.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <SSABadge tone={unreadCount > 0 ? "request" : "complete"}>
+              Unread {unreadCount}
+            </SSABadge>
+            <SSAToggle
+              checked={!alertsMuted}
+              onChange={(next) => setAlertsMuted(!next)}
+              label={alertsMuted ? "Muted" : "Live"}
+            />
+          </div>
+        </div>
+
+        <div className="mb-3 grid grid-cols-[88px_minmax(0,1fr)] gap-3 rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-subtle)] p-3">
+          <div className="flex items-center justify-center">
+            <SSAProgressRing value={overallProgress} />
+          </div>
+          <div className="space-y-2">
+            <SSAInlineAlert tone="info">
+              Cross-module readiness is at {overallProgress}% with {unreadCount} unread collaboration signals.
+            </SSAInlineAlert>
+            <SSAGrowthOverlay label="Notification Resolution" value={overallProgress} />
+          </div>
+        </div>
+
+        <div className="space-y-2" aria-label="Stacked notifications">
+          <AnimatePresence initial={false}>
+            {activeAlerts.map((alert, index) => (
+              <motion.div
+                key={alert.id}
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: Math.min(index * 0.04, 0.16), duration: 0.2 }}
+                className="rounded-[var(--ssa-radius-card)]"
+              >
+                <SSACard
+                  title={alert.title}
+                  subtitle={alert.moduleLabel}
+                  household={alert.household}
+                  collaborationStatus={alert.unread ? "request" : "complete"}
+                  variant="feed"
+                  meta={alert.collaborativeSignal}
+                  actions={
+                    <>
+                      <SSAButton
+                        variant="secondary"
+                        onClick={() => setSelectedAlertId(alert.id)}
+                      >
+                        View
+                      </SSAButton>
+                      {alert.unread ? (
+                        <SSAButton
+                          variant="primary"
+                          onClick={() => markRead(alert.id)}
+                        >
+                          Mark Read
+                        </SSAButton>
+                      ) : (
+                        <SSAButton
+                          variant="secondary"
+                          onClick={() => markUnread(alert.id)}
+                        >
+                          Mark Unread
+                        </SSAButton>
+                      )}
+                    </>
+                  }
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <SSAAnimalAvatar animal={alert.animal} size="sm" label={alert.household} />
+                      <SSABadge>{alert.seasonalContext}</SSABadge>
+                    </div>
+                    <p>{alert.message}</p>
+                    <SSAGrowthOverlay
+                      label={`${alert.moduleLabel} progress`}
+                      value={alert.progress}
+                    />
+                    <div className="rounded-[var(--ssa-radius-chip)] border border-[var(--ssa-border-subtle)] p-2 text-xs text-[var(--ssa-text-secondary)]">
+                      {alert.module === "meals" && "Seasonal menu reminders: prep windows + recipe handoff active."}
+                      {alert.module === "storehouse" && "Seasonal stock tracking: replenish preserves before next cycle."}
+                      {alert.module === "gardens" && "Seasonal crops: orchard and bed milestones aligned to weather window."}
+                      {alert.module === "animals" && "Seasonal care: milking, butchering, and feed rotations synchronized."}
+                    </div>
+                  </div>
+                </SSACard>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      <section className="ssa-hero-wrap p-4" aria-label="Module task queue">
+        <h3 className="ssa-hero-title text-base">Interactive Module To-Do</h3>
+        <p className="mb-2 text-xs text-[var(--ssa-text-secondary)]">
+          Mark participation, assign task lanes, and log module activity in one queue.
+        </p>
+        <SSAInteractiveTaskList tasks={MODULE_TASKS} />
+      </section>
+
+      <SSAModal
+        open={!!selectedAlert}
+        title={selectedAlert ? selectedAlert.title : "Notification"}
+        onClose={() => setSelectedAlertId(null)}
+      >
+        {selectedAlert && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <SSAAnimalAvatar
+                animal={selectedAlert.animal}
+                size="sm"
+                label={selectedAlert.household}
+              />
+              <span className="text-sm text-[var(--ssa-text-primary)]">{selectedAlert.household}</span>
+              <SSABadge>{selectedAlert.moduleLabel}</SSABadge>
+            </div>
+            <SSAInlineAlert tone={selectedAlert.severity}>{selectedAlert.message}</SSAInlineAlert>
+            <SSAGrowthOverlay
+              label="Resolution progress"
+              value={selectedAlert.progress}
+            />
+            <div className="rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-subtle)] p-3">
+              <h4 className="ssa-hero-title text-sm">Seasonal context</h4>
+              <p className="mt-1 text-sm text-[var(--ssa-text-secondary)]">{selectedAlert.seasonalContext}</p>
+              <p className="mt-2 text-xs text-[var(--ssa-text-secondary)]">{selectedAlert.collaborativeSignal}</p>
+            </div>
+          </div>
+        )}
+      </SSAModal>
+
+      <SSAToastHost initial={toastItems} />
+    </>
   );
 }
 
