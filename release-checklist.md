@@ -83,6 +83,7 @@ Go/No-Go:
 - Notes:
 
 ## 8. Recent Release Log
+- 2026-04-04: Re-ran `gate:fast:logged`; PASSED and archived latest evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-04.log`.
 - 2026-04-03: Closed SSA rollout hardening phase (Cleaning/Animals/Home snapshot + contract coverage, fast-gate wiring, deterministic gate logging); `gate:fast:logged` PASSED with archived evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-03.log`.
 - 2026-03-17: Merged PR #13 (formatter .jsx migration + CI timing stabilization), merge commit `3c2c933db6f3236a6a45638a6b4cab99428e5261`.
 - 2026-03-17: Merged PR #14 (CODEOWNERS + formatter JSX regression guardrails), merge commit `7e4ce4bf24454df0059675203aa694103327b3ad`.
