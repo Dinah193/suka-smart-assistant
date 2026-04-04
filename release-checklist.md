@@ -83,6 +83,7 @@ Go/No-Go:
 - Notes:
 
 ## 8. Recent Release Log
+- 2026-04-04: Closed DM persistence and cross-module thread integration phase (assign action task/notification persistence + deep-link/open-thread/unread/retry integration coverage); `test:ssa:rollout:gate` PASSED (14 files, 27 tests), broader CI checks PASSED (`lint:ci`, `typecheck:ci`, `smoke:e2e` 5/5), and consolidated smoke artifact validation PASSED at `docs/qa/consolidated-smoke-contract-report-latest.json`.
 - 2026-04-04: Closed SSA notifications panel phase (module-wide seasonal alert/task integration + notifications contract/snapshot gate coverage); `gate:fast:logged` PASSED with archived evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-04-notifications.log`.
 - 2026-04-04: Re-ran `gate:fast:logged`; PASSED and archived latest evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-04.log`.
 - 2026-04-03: Closed SSA rollout hardening phase (Cleaning/Animals/Home snapshot + contract coverage, fast-gate wiring, deterministic gate logging); `gate:fast:logged` PASSED with archived evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-03.log`.
