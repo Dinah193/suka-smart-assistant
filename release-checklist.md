@@ -8,6 +8,7 @@ Use this checklist before promoting a build to public launch. A release is `GO` 
 - [ ] `build` check is green on the release commit.
 - [ ] `db-runtime-contracts` check is green (Postgres + Mongo service lane, includes nutrition Mongo adapter contract).
 - [ ] `unit-tests` check is green (`vitest` default mode).
+- [ ] `test:ssa:rollout:gate` check is green (cleaning + animals SSA migration contract/visual suites).
 - [ ] `lint` check is green.
 - [ ] `typecheck` check is green (when TS config is present).
 - [ ] `smoke-e2e` check is green.
@@ -82,6 +83,7 @@ Go/No-Go:
 - Notes:
 
 ## 8. Recent Release Log
+- 2026-04-03: Closed SSA rollout hardening phase (Cleaning/Animals/Home snapshot + contract coverage, fast-gate wiring, deterministic gate logging); `gate:fast:logged` PASSED with archived evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-03.log`.
 - 2026-03-17: Merged PR #13 (formatter .jsx migration + CI timing stabilization), merge commit `3c2c933db6f3236a6a45638a6b4cab99428e5261`.
 - 2026-03-17: Merged PR #14 (CODEOWNERS + formatter JSX regression guardrails), merge commit `7e4ce4bf24454df0059675203aa694103327b3ad`.
 - 2026-03-17: Merged PR #15 (Storehouse low-stock alert strip + one-click replenish UX), merge commit `81a3e08633ee68897938123a09f6bb137274c707`.
