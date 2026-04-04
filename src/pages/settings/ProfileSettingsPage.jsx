@@ -1,725 +1,1184 @@
-// src/pages/settings/ProfileSettingsPage.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import * as Icons from "lucide-react";
-import { automation } from "@/services/automation/runtime";
-import SettingToggle from "@/components/settings/SettingToggle.jsx";
-import SettingMultiCheck from "@/components/settings/SettingMultiCheck.jsx";
+import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Link } from "react-router-dom";
+import * as ProfileService from "@/services/profile/householdProfileService";
+import {
+  SSAAnimalAvatar,
+  SSABadge,
+  SSAButton,
+  SSACard,
+  SSAField,
+  SSAHouseholdParticipation,
+  SSAInlineAlert,
+  SSAInput,
+  SSAInteractiveTaskList,
+  SSAProgressRing,
+  SSASeasonalTaskHighlight,
+  SSASelect,
+  SSAModal,
+  SSATabs,
+  SSATextarea,
+  SSAToggle,
+  SSAGrowthOverlay,
+} from "@/components/ssa";
+import { getSeasonKey, getSeasonLabel } from "@/utils/season";
 
-/* -------------------------------- soft imports -------------------------------- */
-let SafeIcon = (p) => <span {...p}>{p.children}</span>;
-try { SafeIcon = require("@/components/icons/SafeIcon.jsx").default; } catch {}
+const TAB_POSTS = "posts";
+const TAB_MEDIA = "media";
+const TAB_SAVED = "saved";
+const TAB_TASKS = "tasks";
+const TAB_JOBS = "jobs";
+const TAB_SETTINGS = "settings";
 
-let Profile = null;
-try { Profile = require("@/services/profile/householdProfileService"); }
-catch { Profile = { getProfile: async () => ({}), subscribe: () => () => {}, setAtPath: () => {} }; }
-
-let Jobs = null;
-try { Jobs = require("@/services/jobs/engine"); }
-catch { Jobs = { on: () => () => {}, emit: () => {} }; }
-
-/* -------------------------------- helpers ------------------------------------ */
-const cls = (...xs) => xs.filter(Boolean).join(" ");
-const uid = () => Math.random().toString(36).slice(2, 9);
-const detectTimezone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "UTC"; } };
-const isTimeLike = (s) => /^\d{1,2}:\d{2}$/.test(String(s || ""));
-const clampNumber = (n, a, b) => Math.max(a, Math.min(b, Number(n || 0)));
-
-/* --------------------------------- data -------------------------------------- */
-const AREA_OPTIONS = [
-  { id: "cooking",   label: "Cooking & Meals",        iconKey: "ChefHat" },
-  { id: "cleaning",  label: "Household Cleaning",     iconKey: "Sparkles" },
-  { id: "inventory", label: "Inventory/Storehouse",   iconKey: "Database" },
-  { id: "garden",    label: "Garden",                 iconKey: "Leaf" },
-  { id: "animal",    label: "Animal Care",            iconKey: "PawPrint" },
-  { id: "errand",    label: "Errands/Shopping",       iconKey: "Bell" },
+const TAB_ITEMS = [
+  { key: TAB_POSTS, label: "Posts" },
+  { key: TAB_MEDIA, label: "Media" },
+  { key: TAB_SAVED, label: "Saved" },
+  { key: TAB_TASKS, label: "Collaborative Tasks" },
+  { key: TAB_JOBS, label: "Seasonal Work" },
+  { key: TAB_SETTINGS, label: "Settings" },
 ];
 
-const CUISINES_GROUPED = [
-  { group: "Americas", items: [
-    { id:"american", label:"American" }, { id:"african_american", label:"African American / Soul Food" },
-    { id:"texmex", label:"Tex-Mex" }, { id:"cajun", label:"Cajun" }, { id:"creole", label:"Creole" },
-    { id:"jamaican", label:"Jamaican" }, { id:"trinidadian", label:"Trinidadian" }, { id:"mexican", label:"Mexican" },
-    { id:"peruvian", label:"Peruvian" }, { id:"brazilian", label:"Brazilian" }, { id:"argentinian", label:"Argentinian" },
-    { id:"colombian", label:"Colombian" }, { id:"british", label:"British / Irish" },
-  ]},
-  { group: "Europe & Mediterranean", items: [
-    { id:"italian", label:"Italian" }, { id:"sicilian", label:"Sicilian" }, { id:"french", label:"French" },
-    { id:"spanish", label:"Spanish" }, { id:"portuguese", label:"Portuguese" }, { id:"greek", label:"Greek" },
-    { id:"mediterranean", label:"Mediterranean (general)" }, { id:"german", label:"German" },
-    { id:"polish", label:"Polish" }, { id:"russian", label:"Russian" }, { id:"ukrainian", label:"Ukrainian" },
-    { id:"nordic", label:"Nordic / Scandinavian" },
-  ]},
-  { group: "Middle East & North Africa", items: [
-    { id:"turkish", label:"Turkish" }, { id:"lebanese", label:"Lebanese" }, { id:"syrian", label:"Syrian" },
-    { id:"palestinian", label:"Palestinian" }, { id:"israeli", label:"Israeli" }, { id:"iraqi", label:"Iraqi" },
-    { id:"persian", label:"Persian (Iranian)" }, { id:"egyptian", label:"Egyptian" }, { id:"moroccan", label:"Moroccan" },
-    { id:"tunisian", label:"Tunisian" },
-  ]},
-  { group: "Sub-Saharan Africa", items: [
-    { id:"ethiopian", label:"Ethiopian" }, { id:"eritrean", label:"Eritrean" }, { id:"somali", label:"Somali" },
-    { id:"nigerian", label:"Nigerian" }, { id:"ghanaian", label:"Ghanaian" }, { id:"kenyan", label:"Kenyan" },
-    { id:"south_african", label:"South African" },
-  ]},
-  { group: "South Asia", items: [
-    { id:"indian_north", label:"Indian (North)" }, { id:"indian_south", label:"Indian (South)" },
-    { id:"pakistani", label:"Pakistani" }, { id:"bangladeshi", label:"Bangladeshi" }, { id:"sri_lankan", label:"Sri Lankan" },
-    { id:"nepali", label:"Nepali" }, { id:"tibetan", label:"Tibetan" },
-  ]},
-  { group: "East Asia", items: [
-    { id:"chinese_cantonese", label:"Chinese (Cantonese)" },
-    { id:"chinese_sichuan", label:"Chinese (Sichuan)" },
-    { id:"chinese_hunan", label:"Chinese (Hunan)" },
-    { id:"chinese_shanghai", label:"Chinese (Shanghai)" },
-    { id:"taiwanese", label:"Taiwanese" }, { id:"japanese", label:"Japanese" },
-    { id:"korean", label:"Korean" }, { id:"mongolian", label:"Mongolian" },
-  ]},
-  { group: "Southeast Asia", items: [
-    { id:"thai", label:"Thai" }, { id:"vietnamese", label:"Vietnamese" }, { id:"filipino", label:"Filipino" },
-    { id:"malaysian", label:"Malaysian" }, { id:"indonesian", label:"Indonesian" }, { id:"singaporean", label:"Singaporean" },
-    { id:"khmer", label:"Cambodian (Khmer)" }, { id:"laotian", label:"Laotian" }, { id:"burmese", label:"Burmese" },
-  ]},
-  { group: "Central Asia", items: [ { id:"uzbek", label:"Central Asian (Uzbek)" } ]},
+const FEED_ITEMS = [
+  {
+    id: "post-1",
+    title: "Spring sowing window confirmed",
+    subtitle: "Two households synced seed trays and irrigation prep.",
+    season: "spring",
+    household: "Willow Collective",
+    status: "assigned",
+    animal: "chickens",
+    meta: "12m ago",
+    body:
+      "Seedling transfer starts at dusk. We aligned meal prep and coop checks to avoid overlap.",
+    tags: ["#sowing", "#householdsync", "#seasonalwork"],
+    participation: [
+      { name: "Willow", value: 5 },
+      { name: "Oak", value: 3 },
+      { name: "Stonefield", value: 2 },
+    ],
+    progress: 63,
+  },
+  {
+    id: "post-2",
+    title: "Preservation relay organized",
+    subtitle: "Batch canning and labeling split across allies.",
+    season: "autumn",
+    household: "Oak and Hearth",
+    status: "request",
+    animal: "goats",
+    meta: "46m ago",
+    body:
+      "Four jars per household this evening. Shared checklist now mapped to next-day meal cycle.",
+    tags: ["#preserving", "#taskrelay", "#agrarianfeed"],
+    participation: [
+      { name: "Oak", value: 4 },
+      { name: "Willow", value: 3 },
+      { name: "Brook", value: 1 },
+    ],
+    progress: 48,
+  },
+  {
+    id: "post-3",
+    title: "Livestock lane maintenance closed",
+    subtitle: "Water, feed, and bedding checkpoints complete.",
+    season: "summer",
+    household: "Stonefield Home",
+    status: "complete",
+    animal: "ducks",
+    meta: "1h ago",
+    body:
+      "Shared maintenance closed early so the household can start market prep before sunset.",
+    tags: ["#livestock", "#maintenance", "#collaboration"],
+    participation: [
+      { name: "Stonefield", value: 6 },
+      { name: "Willow", value: 2 },
+      { name: "Oak", value: 2 },
+    ],
+    progress: 91,
+  },
 ];
 
-/* ------------------------------ UI primitives ------------------------------ */
-const WIDTH_MIN = 96, WIDTH_MAX = 192, WIDTH_DEFAULT = 160;
+const HOUSEHOLDS = [
+  { id: "h1", name: "Willow Collective", animal: "chickens", status: "assigned" },
+  { id: "h2", name: "Oak and Hearth", animal: "goats", status: "request" },
+  { id: "h3", name: "Stonefield Home", animal: "ducks", status: "complete" },
+  { id: "h4", name: "Meadow Keep", animal: "sheep", status: "assigned" },
+];
 
-function FieldInput({ label, value, onChange, type="text", placeholder, id, width = WIDTH_DEFAULT }) {
-  const w = Math.max(WIDTH_MIN, Math.min(WIDTH_MAX, width));
-  const wrapStyle = { display:"inline-block", width:w, minWidth:w, maxWidth:w, flex:`0 0 ${w}px`, verticalAlign:"top", marginBottom:10 };
-  return (
-    <label className="space-y-1" title={label} style={wrapStyle}>
-      <div className="text-xs font-semibold opacity-80">{label}</div>
-      <input id={id} type={type} className="btn" value={value} onChange={(e)=>onChange(e.target.value)} placeholder={placeholder} style={{ width:"100%", paddingBlock:6 }} />
-    </label>
-  );
+const MEDIA_STORIES = [
+  {
+    id: "story-1",
+    title: "Dawn irrigation relay",
+    subtitle: "Shared garden lanes watered before sun-rise heat.",
+    season: "spring",
+    household: "Willow Collective",
+    status: "assigned",
+    animal: "chickens",
+    meta: "Today · 05:42",
+    preview: "Hover to preview moisture, labor, and handoff status.",
+    body:
+      "Garden rows 2-5 were split across two households so breakfast prep stayed uninterrupted.",
+    progress: 68,
+    layers: { meals: 62, storehouse: 54, gardens: 84, livestock: 36 },
+    participants: [
+      { name: "Willow", animal: "chickens", value: 4 },
+      { name: "Oak", animal: "goats", value: 3 },
+      { name: "Stonefield", animal: "deer", value: 2 },
+    ],
+    activities: ["Water Relay", "Mulch Handoff", "Gate Check"],
+    modules: [
+      {
+        key: "meals",
+        title: "Meals and Batch Cooking",
+        detail: "Breakfast-prep overlap reduced with shared dawn task windows and spring timing.",
+        participation: 61,
+        seasonalTag: "Spring recipe highlight",
+        seasonalItems: ["Nettle omelet", "Herb porridge", "Radish pickle side"],
+      },
+      {
+        key: "storehouse",
+        title: "Storehouse and Preservation",
+        detail: "Freezer labels and canning queue staged for post-irrigation handoff in current season.",
+        participation: 54,
+        seasonalTag: "Seasonal stock alert",
+        stockAlert: "Low spring jam jars: 6 remaining",
+      },
+      {
+        key: "gardens",
+        title: "Gardens and Orchards",
+        detail: "Irrigation and mulch pass completed across high-priority beds for spring growth.",
+        participation: 84,
+        seasonalTag: "Seasonal crops",
+        seasonalItems: ["Peas", "Spinach", "Early strawberries"],
+      },
+      {
+        key: "animals",
+        title: "Animal Husbandry",
+        detail: "Morning feed and milking check integrated before seasonal field tasks.",
+        participation: 48,
+        seasonalTag: "Seasonal husbandry tasks",
+        seasonalItems: ["Goat milking rota", "Chick brooder checks", "Pasture fence walkthrough"],
+      },
+    ],
+  },
+  {
+    id: "story-2",
+    title: "Orchard ladder chain",
+    subtitle: "Rotating ladder and crate flow for safe fruit harvest.",
+    season: "summer",
+    household: "Oak and Hearth",
+    status: "request",
+    animal: "goats",
+    meta: "Today · 12:16",
+    preview: "Tap to expand full harvest sequence and participation map.",
+    body:
+      "Crate transfer points were synchronized with midday shade windows to reduce drop loss.",
+    progress: 52,
+    layers: { meals: 46, storehouse: 58, gardens: 62, livestock: 29 },
+    participants: [
+      { name: "Oak", animal: "goats", value: 5 },
+      { name: "Willow", animal: "chickens", value: 3 },
+      { name: "Meadow", animal: "turkeys", value: 2 },
+    ],
+    activities: ["Crate Relay", "Sorting Table", "Wash Line"],
+    modules: [
+      {
+        key: "meals",
+        title: "Meals and Batch Cooking",
+        detail: "Harvest timing aligned to evening batch roasting for summer workload balancing.",
+        participation: 46,
+        seasonalTag: "Summer recipe highlight",
+        seasonalItems: ["Stone-fruit cobbler", "Tomato skillet", "Zucchini bake"],
+      },
+      {
+        key: "storehouse",
+        title: "Storehouse and Preservation",
+        detail: "Fruit batches split into fresh-use and preserve lanes for summer shelf planning.",
+        participation: 58,
+        seasonalTag: "Seasonal stock alert",
+        stockAlert: "Fermentation crock near capacity (92%)",
+      },
+      {
+        key: "gardens",
+        title: "Gardens and Orchards",
+        detail: "Orchard ladder zones rotated for safer picking cadence during high-heat windows.",
+        participation: 62,
+        seasonalTag: "Seasonal crops",
+        seasonalItems: ["Plums", "Summer squash", "Runner beans"],
+      },
+      {
+        key: "animals",
+        title: "Animal Husbandry",
+        detail: "Livestock checks performed between crate relay rounds and seasonal heat protocol.",
+        participation: 43,
+        seasonalTag: "Seasonal husbandry tasks",
+        seasonalItems: ["Cooling trough refill", "Milking shade shifts", "Poultry hydration checks"],
+      },
+    ],
+  },
+  {
+    id: "story-3",
+    title: "Barn-to-cellar preserve run",
+    subtitle: "Livestock outputs and pantry prep merged in one cycle.",
+    season: "autumn",
+    household: "Stonefield Home",
+    status: "complete",
+    animal: "cows",
+    meta: "Yesterday · 18:08",
+    preview: "Open story to replay canning and labeling timeline.",
+    body:
+      "Evening batching finished early, leaving extra time for feed checks and morning meal setup.",
+    progress: 93,
+    layers: { meals: 86, storehouse: 94, gardens: 77, livestock: 88 },
+    participants: [
+      { name: "Stonefield", animal: "cows", value: 6 },
+      { name: "Willow", animal: "chickens", value: 2 },
+      { name: "Oak", animal: "turkeys", value: 2 },
+    ],
+    activities: ["Canning Sprint", "Label Pass", "Feed Round"],
+    modules: [
+      {
+        key: "meals",
+        title: "Meals and Batch Cooking",
+        detail: "Butchering and milking outputs converted to meal-ready batches for autumn demand.",
+        participation: 86,
+        seasonalTag: "Autumn recipe highlight",
+        seasonalItems: ["Root stew", "Cider braise", "Pumpkin mash"],
+      },
+      {
+        key: "storehouse",
+        title: "Storehouse and Preservation",
+        detail: "Canning, cooling, and shelf indexing completed as part of autumn preservation sprint.",
+        participation: 94,
+        seasonalTag: "Seasonal stock alert",
+        stockAlert: "Apple preserves low for winter target (43% complete)",
+      },
+      {
+        key: "gardens",
+        title: "Gardens and Orchards",
+        detail: "Root crop wash and orchard cull integrated into preserve sequence for seasonal turnover.",
+        participation: 77,
+        seasonalTag: "Seasonal crops",
+        seasonalItems: ["Pumpkins", "Beets", "Late apples"],
+      },
+      {
+        key: "animals",
+        title: "Animal Husbandry",
+        detail: "Livestock care, milking, and butchery handoff closed before dusk in peak preserve window.",
+        participation: 88,
+        seasonalTag: "Seasonal husbandry tasks",
+        seasonalItems: ["Butchery prep", "Winter feed batching", "Milking parity checks"],
+      },
+    ],
+  },
+];
+
+const DEFAULT_PROFILE_SETTINGS = Object.freeze({
+  displayName: "Mara of Willow Collective",
+  primaryRole: "coordinator",
+  bio: "Focused on household meal cycles, preservation, and seasonal task harmonization.",
+  receiveSeasonalAlerts: true,
+  allowTaskInvitations: true,
+  autoSharePlaybooks: false,
+});
+
+function toBoolean(value, fallback) {
+  if (typeof value === "boolean") return value;
+  return fallback;
 }
 
-function FieldSelect({ label, value, onChange, options, id, width = WIDTH_DEFAULT, showLabel = true, srLabel }) {
-  const w = Math.max(WIDTH_MIN, Math.min(WIDTH_MAX, width));
-  const wrapStyle = { display:"inline-block", width:w, minWidth:w, maxWidth:w, flex:`0 0 ${w}px`, verticalAlign:"top", marginBottom:10 };
-  return (
-    <label className="space-y-1" title={label} style={wrapStyle}>
-      {showLabel && <div className="text-xs font-semibold opacity-80">{label}</div>}
-      <select id={id} className="btn" value={value} onChange={(e)=>onChange(e.target.value)} aria-label={!showLabel ? (srLabel || label || id || "Select") : undefined} style={{ width:"100%", paddingBlock:6 }}>
-        {options.map((o, i) => (<option key={`${o.value}-${o.label}-${i}`} value={o.value}>{o.label}</option>))}
-      </select>
-    </label>
-  );
-}
-
-function SwitchTiny({ label, checked, onChange, hint }) {
-  return (
-    <label className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 bg-white"
-      title={hint || label} style={{ boxShadow:"0 1px 0 rgba(0,0,0,.04)" }}>
-      <span className="text-sm">{label}</span>
-      <input type="checkbox" className="h-4 w-4" checked={checked} onChange={(e)=>onChange(e.target.checked)} />
-    </label>
-  );
-}
-
-function DropdownMulti({ label, value = [], onChange, groups, placeholder = "Select…" }) {
-  const [open, setOpen] = useState(false); const [q, setQ] = useState(""); const ref = useRef(null); const selected = new Set(value);
-  useEffect(() => { const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }; document.addEventListener("mousedown", onDoc); return () => document.removeEventListener("mousedown", onDoc); }, []);
-  const allOptions = useMemo(() => groups.flatMap(g => g.items), [groups]);
-  const filtered = useMemo(() => { const s = q.toLowerCase(); if (!s) return null; return allOptions.filter(o => o.label.toLowerCase().includes(s)); }, [q, allOptions]);
-  const toggle = (id) => { const next = new Set(selected); next.has(id) ? next.delete(id) : next.add(id); onChange(Array.from(next)); };
-  const summary = value.length === 0 ? placeholder : value.length <= 2 ? value.map(v => allOptions.find(o => o.id === v)?.label || v).join(", ") : `${value.length} selected`;
-  const wrapStyle = { display:"inline-block", width:WIDTH_MAX, minWidth:WIDTH_MAX, maxWidth:WIDTH_MAX, flex:`0 0 ${WIDTH_MAX}px`, verticalAlign:"top", position:"relative", marginBottom:10 };
-  return (
-    <div ref={ref} style={wrapStyle}>
-      <div className="space-y-1">
-        <div className="text-xs font-semibold opacity-80">{label}</div>
-        <button type="button" className="btn" onClick={() => setOpen(v => !v)} aria-expanded={open} style={{ width:"100%", justifyContent:"space-between" }}>
-          <span className="label">{summary}</span><Icons.ChevronDown className="w-4 h-4" />
-        </button>
-      </div>
-      {open && (
-        <div className="card" style={{ position:"absolute", zIndex:50, marginTop:6, right:0, width:WIDTH_MAX, maxHeight:320, overflow:"hidden", padding:8 }}>
-          <input className="btn" placeholder="Search…" value={q} onChange={(e)=>setQ(e.target.value)} style={{ width:"100%", marginBottom:6, paddingBlock:6 }} />
-          <div style={{ maxHeight:250, overflowY:"auto" }}>
-            {filtered ? (filtered.length ? filtered.map(o => (
-              <label key={o.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded hover:bg-stone-50 cursor-pointer">
-                <span className="text-sm">{o.label}</span><input type="checkbox" checked={selected.has(o.id)} onChange={() => toggle(o.id)} />
-              </label>
-            )) : <div className="subtitle text-sm px-2 py-1">No matches</div>) : (
-              groups.map(g => (
-                <div key={g.group} className="mb-2">
-                  <div className="text-xs font-semibold opacity-70 px-2 py-1">{g.group}</div>
-                  {g.items.map(o => (
-                    <label key={o.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded hover:bg-stone-50 cursor-pointer">
-                      <span className="text-sm">{o.label}</span><input type="checkbox" checked={selected.has(o.id)} onChange={() => toggle(o.id)} />
-                    </label>
-                  ))}
-                </div>
-              ))
-            )}
-          </div>
-          <div className="flex justify-end gap-2 mt-2">
-            <button className="btn sm" onClick={() => { onChange([]); setQ(""); }}>Clear</button>
-            <button className="btn sm primary" onClick={() => setOpen(false)}>Done</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ---------------------- Favorite Dishes (chip input) ----------------------- */
-function DishesInput({ label = "Favorite Dishes", value = [], onChange, cuisines = [] }) {
-  // Normalize to objects to support tagging with cuisine
-  const normalized = Array.isArray(value)
-    ? value.map((v) => (typeof v === "string" ? { name: v } : v))
-    : [];
-
-  const [text, setText] = useState("");
-  const [dishCuisine, setDishCuisine] = useState("");
-
-  const cuisineOptions = useMemo(
-    () => [{ id: "", label: "Any cuisine" }].concat(
-      cuisines.map((c) => ({ id: c.id, label: c.label }))
+function profileToSettings(profile) {
+  const household = profile?.household || {};
+  const notifications = profile?.notifications || {};
+  return {
+    displayName: String(household?.profileDisplayName || DEFAULT_PROFILE_SETTINGS.displayName),
+    primaryRole: String(household?.profileRole || DEFAULT_PROFILE_SETTINGS.primaryRole),
+    bio: String(household?.profileBio || DEFAULT_PROFILE_SETTINGS.bio),
+    receiveSeasonalAlerts: toBoolean(
+      notifications?.profileSeasonalAlerts,
+      DEFAULT_PROFILE_SETTINGS.receiveSeasonalAlerts
     ),
-    [cuisines]
-  );
-
-  const addDish = (raw) => {
-    const name = (raw || text || "").trim();
-    if (!name) return;
-    const next = [...normalized, { name, cuisineId: dishCuisine || undefined }];
-    onChange(next);
-    setText("");
+    allowTaskInvitations: toBoolean(
+      notifications?.profileTaskInvitations,
+      DEFAULT_PROFILE_SETTINGS.allowTaskInvitations
+    ),
+    autoSharePlaybooks: toBoolean(
+      household?.profileAutoSharePlaybooks,
+      DEFAULT_PROFILE_SETTINGS.autoSharePlaybooks
+    ),
   };
-
-  const removeDish = (idx) => {
-    const next = normalized.slice();
-    next.splice(idx, 1);
-    onChange(next);
-  };
-
-  const onKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addDish();
-    } else if (e.key === "Backspace" && !text && normalized.length) {
-      removeDish(normalized.length - 1);
-    }
-  };
-
-  const cuisineLabel = (id) => {
-    if (!id) return "";
-    const all = CUISINES_GROUPED.flatMap((g) => g.items);
-    return all.find((x) => x.id === id)?.label || "";
-  };
-
-  return (
-    <div className="space-y-1" style={{ minWidth: 280 }}>
-      <div className="text-xs font-semibold opacity-80">{label}</div>
-
-      <div className="rounded-xl border bg-white px-2 py-2" style={{ boxShadow:"0 1px 0 rgba(0,0,0,.04)" }}>
-        {/* chips */}
-        <div className="flex flex-wrap gap-2 mb-2">
-          {normalized.length === 0 && (
-            <span className="text-xs opacity-60">Add a few dishes you love (e.g., “pho”, “chicken tikka masala”).</span>
-          )}
-          {normalized.map((d, i) => (
-            <span key={`${d.name}-${i}`} className="inline-flex items-center gap-2 px-2 py-1 rounded-full border bg-white text-sm"
-                  title={d.cuisineId ? cuisineLabel(d.cuisineId) : "Any cuisine"}>
-              <Icons.Heart className="w-3 h-3" />
-              <span>{d.name}</span>
-              {d.cuisineId && <span className="opacity-60 text-xs">• {cuisineLabel(d.cuisineId)}</span>}
-              <button type="button" className="btn sm" onClick={() => removeDish(i)} aria-label={`Remove ${d.name}`}>
-                <Icons.X className="w-3 h-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-
-        {/* input row */}
-        <div className="flex items-center gap-2">
-          <input
-            className="btn"
-            placeholder="Type a dish and press Enter…"
-            value={text}
-            onChange={(e)=>setText(e.target.value)}
-            onKeyDown={onKeyDown}
-            style={{ flex: 1, paddingBlock: 6 }}
-          />
-          <select
-            className="btn"
-            value={dishCuisine}
-            onChange={(e)=>setDishCuisine(e.target.value)}
-            style={{ minWidth: 160 }}
-            title="Optional: tag the dish with a cuisine"
-          >
-            {cuisineOptions.map((c) => (
-              <option key={c.id || "any"} value={c.id}>{c.label}</option>
-            ))}
-          </select>
-          <button className="btn primary sm" onClick={()=>addDish()}>
-            <Icons.Plus className="w-4 h-4" />
-            <span className="label">Add</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="text-xs opacity-70">
-        Tip: these help our agents bias recipes and suggestions toward your exact tastes.
-      </div>
-    </div>
-  );
 }
 
-/* ---------------------------- collapsible section -------------------------- */
-function Collapsible({ title, icon: Icon = Icons.ChevronDown, defaultOpen = false, children, hint }) {
-  return (
-    <details className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl" open={defaultOpen}>
-      <summary className="card-body py-3 cursor-pointer select-none flex items-center gap-2">
-        <Icon className="w-4 h-4 opacity-70" />
-        <span className="font-semibold">{title}</span>
-        {hint && <span className="text-xs opacity-70">• {hint}</span>}
-      </summary>
-      <div className="px-4 pb-4">
-        <div className="grid gap-3">{children}</div>
-      </div>
-    </details>
-  );
+function settingsToPatch(settings) {
+  return {
+    household: {
+      profileDisplayName: settings.displayName.trim(),
+      profileRole: settings.primaryRole,
+      profileBio: settings.bio.trim(),
+      profileAutoSharePlaybooks: !!settings.autoSharePlaybooks,
+    },
+    notifications: {
+      profileSeasonalAlerts: !!settings.receiveSeasonalAlerts,
+      profileTaskInvitations: !!settings.allowTaskInvitations,
+    },
+  };
 }
 
-/* --------------------------- defaults (system) ----------------------------- */
-const DEFAULTS = {
-  darkMode: false, compactMode: true, use24hClock: false, reduceMotion: false, highContrast: false, showTooltips: true,
-  timezone: "America/Chicago", measurementUnit: "imperial", homeName: "", householdName: "",
-  areas: AREA_OPTIONS.map(a => a.id), members: [],
-  dietary: { torahCompliant: false, cuisineBias: ["american","african_american","mediterranean"], favoriteDishes: [] },
-  sabbath: { aware: true, fridayCutoffSource: "calendar.sunset", fixedFridayCutoff: "17:00", finishMinutesBeforeSunset: 30 },
-  meals: { breakfastTime:"08:00", lunchTime:"12:30", dinnerTime:"18:30", prepLeadMinutes:30 },
-  budgetWeeklyUSD: 125, weeklyHrsCapacity: 10, lowStockDefault: 1,
-  scheduling: { defaultTaskMinutes:25, cleaningRotationDays:3, maxParallelTasks:2, errandsBatchWindowDays:7, weekStartsOn:1 },
-  autos: { mealPlanWeekly:true, gardenCalendar:true, cleaningRotation:true, sabbathMealPrep:true },
-  notifications: { emailEnabled:false, smsEnabled:false, smsNumber:"" }
-};
+export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [alertsMuted, setAlertsMuted] = useState(false);
+  const [settingsDraft, setSettingsDraft] = useState(DEFAULT_PROFILE_SETTINGS);
+  const [savedSettings, setSavedSettings] = useState(DEFAULT_PROFILE_SETTINGS);
+  const [saveState, setSaveState] = useState("idle");
 
-/* =============================== Page ===================================== */
-export default function ProfileSettingsPage() {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [savedAt, setSavedAt] = useState(null);
-  const lastSnapshot = useRef(null);
+  const seasonKey = useMemo(() => getSeasonKey(new Date()), []);
+  const seasonLabel = useMemo(() => getSeasonLabel(seasonKey), [seasonKey]);
+  const isDirty = useMemo(
+    () => JSON.stringify(settingsDraft) !== JSON.stringify(savedSettings),
+    [settingsDraft, savedSettings]
+  );
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const p = (await Profile.getProfile()) || {};
-        if (!mounted) return;
-        setProfile(p);
-        lastSnapshot.current = JSON.stringify(p);
-      } finally { mounted && setLoading(false); }
-    })();
-    const unsub = Profile.subscribe?.((p) => {
-      setProfile(p || {}); setSavedAt(Date.now());
+    if (!ProfileService?.loadProfile) return;
+
+    const loaded = ProfileService.loadProfile();
+    const mapped = profileToSettings(loaded);
+    setSettingsDraft(mapped);
+    setSavedSettings(mapped);
+
+    if (!ProfileService?.subscribe) return;
+    const unsubscribe = ProfileService.subscribe((profile) => {
+      const next = profileToSettings(profile);
+      setSettingsDraft(next);
+      setSavedSettings(next);
+      setSaveState("idle");
     });
-    return () => { mounted = false; unsub && unsub(); };
+
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
   }, []);
 
-  /* Hide shell breadcrumbs/back/title while this page is mounted */
-  useEffect(() => {
-    document.body.dataset.hideShellChrome = "1";
-    return () => { delete document.body.dataset.hideShellChrome; };
-  }, []);
+  async function handleSaveSettings() {
+    if (!ProfileService?.patchProfile) return;
+    setSaveState("saving");
 
-  const [settings, setSettings] = useState(DEFAULTS);
-  const [busy, setBusy] = useState(false);
-  const [ok, setOk] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const mergeSettings = (saved = {}) => ({
-    ...DEFAULTS, ...saved,
-    dietary: { ...DEFAULTS.dietary, ...(saved.dietary || {}) },
-    sabbath: { ...DEFAULTS.sabbath, ...(saved.sabbath || {}) },
-    meals: { ...DEFAULTS.meals, ...(saved.meals || {}) },
-    scheduling: { ...DEFAULTS.scheduling, ...(saved.scheduling || {}) },
-    autos: { ...DEFAULTS.autos, ...(saved.autos || {}) },
-    notifications: { ...DEFAULTS.notifications, ...(saved.notifications || {}) },
-    members: Array.isArray(saved.members) ? saved.members : DEFAULTS.members,
-    areas: Array.isArray(saved.areas) ? saved.areas : DEFAULTS.areas,
-  });
-
-  useEffect(() => {
     try {
-      const raw = localStorage.getItem("householdSettings");
-      if (raw) setSettings(mergeSettings(JSON.parse(raw)));
-      else setSettings(s => ({ ...s, timezone: detectTimezone() || s.timezone }));
-    } catch { setSettings(DEFAULTS); }
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", !!settings.darkMode);
-    root.dataset.theme = settings.darkMode ? "dark" : "light";
-    root.style.setProperty("--density", settings.compactMode ? "8px" : "12px");
-  }, [settings.darkMode, settings.compactMode]);
-
-  const meals = settings.meals || DEFAULTS.meals;
-  const sab = settings.sabbath || DEFAULTS.sabbath;
-  const sched = settings.scheduling || DEFAULTS.scheduling;
-  const notif = settings.notifications || DEFAULTS.notifications;
-
-  const handleSave = async () => {
-    if (![meals.breakfastTime, meals.lunchTime, meals.dinnerTime].every(isTimeLike)) { alert("Use HH:MM for meal times."); return; }
-    if (sab.fridayCutoffSource === "fixed" && !isTimeLike(sab.fixedFridayCutoff)) { alert("Set HH:MM for Friday cutoff."); return; }
-    setBusy(true);
-    try {
-      localStorage.setItem("householdSettings", JSON.stringify(settings));
-      automation?.emit?.("settings/saved", settings);
-      automation?.emit?.("automation/toggles_updated", settings.autos);
-      setOk(true); setTimeout(()=>setOk(false), 900);
-    } finally { setBusy(false); }
-  };
-
-  const handleExport = () => {
-    const dump = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      dump[k] = localStorage.getItem(k);
+      ProfileService.patchProfile(settingsToPatch(settingsDraft));
+      setSavedSettings(settingsDraft);
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
     }
-    const blob = new Blob([JSON.stringify(dump, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `suka-settings-export-${new Date().toISOString().slice(0,10)}.json`; a.click();
-    URL.revokeObjectURL(url);
-  };
-  const handleImportClick = () => fileInputRef.current?.click();
-  const handleImport = async (e) => {
-    const file = e.target.files?.[0]; if (!file) return;
+  }
+
+  function handleResetSettings() {
+    if (!ProfileService?.patchProfile) {
+      setSettingsDraft(savedSettings);
+      setSaveState("idle");
+      return;
+    }
+
+    setSaveState("saving");
     try {
-      const data = JSON.parse(await file.text());
-      Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v)));
-      const raw = localStorage.getItem("householdSettings");
-      setSettings(raw ? mergeSettings(JSON.parse(raw)) : DEFAULTS);
-      alert("✅ Import complete.");
-    } catch { alert("⚠️ Import failed."); } finally { e.target.value = ""; }
-  };
-  const handleReset = () => {
-    if (!window.confirm("Clear ALL app data in this browser?")) return;
-    localStorage.clear(); setSettings(DEFAULTS); alert("🧹 Data cleared.");
-  };
-
-  const setMeals  = (patch) => setSettings(s => ({ ...s, meals: { ...(s.meals||DEFAULTS.meals), ...patch } }));
-  const setSab    = (patch) => setSettings(s => ({ ...s, sabbath: { ...(s.sabbath||DEFAULTS.sabbath), ...patch } }));
-  const setSched  = (patch) => setSettings(s => ({ ...s, scheduling: { ...(s.scheduling||DEFAULTS.scheduling), ...patch } }));
-  const setNotif  = (patch) => setSettings(s => ({ ...s, notifications: { ...(s.notifications||DEFAULTS.notifications), ...patch } }));
-  const setDietary = (patch) => setSettings(s => ({ ...s, dietary: { ...(s.dietary || DEFAULTS.dietary), ...patch } }));
-
-  const toggleArea = (id) => {
-    setSettings(s => {
-      const cur = Array.isArray(s.areas) ? s.areas : [];
-      const next = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
-      automation?.emit?.("home/areas_updated", next);
-      return { ...s, areas: next };
-    });
-  };
-  const addMember = () => setSettings(s => ({ ...s, members: [...(s.members||[]), { id: uid(), name: "", age: "", rooms: [] }] }));
-  const updateMember = (id, patch) => setSettings(s => ({ ...s, members: (s.members||[]).map(m => m.id === id ? { ...m, ...patch } : m) }));
-  const removeMember = (id) => setSettings(s => ({ ...s, members: (s.members||[]).filter(m => m.id !== id) }));
-  const addRoomToMember = (id, type) => setSettings(s => ({ ...s, members: (s.members||[]).map(m => m.id === id ? { ...m, rooms: [...(m.rooms||[]), { type, name: "" }] } : m) }));
-  const updateRoom = (mid, idx, patch) => setSettings(s => ({ ...s, members: (s.members||[]).map(m => (m.id !== mid ? m : { ...m, rooms: Object.assign([...(m.rooms||[])], { [idx]: { ...(m.rooms?.[idx]||{}), ...patch } }) })) }));
-  const removeRoom = (mid, idx) => setSettings(s => ({ ...s, members: (s.members||[]).map(m => (m.id !== mid ? m : { ...m, rooms: (m.rooms||[]).filter((_, i) => i !== idx) })) }));
-
-  if (loading) {
-    return (
-      <div className="p-6 max-w-6xl mx-auto">
-        <div className="animate-pulse h-8 w-72 bg-base-200 rounded-2xl mb-4" />
-        <div className="animate-pulse h-24 bg-base-200 rounded-2xl mb-3" />
-        <div className="animate-pulse h-24 bg-base-200 rounded-2xl mb-3" />
-        <div className="animate-pulse h-24 bg-base-200 rounded-2xl" />
-      </div>
-    );
+      ProfileService.patchProfile(settingsToPatch(savedSettings));
+      setSettingsDraft(savedSettings);
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
+    }
   }
 
   return (
-    <div id="settings-root" className="p-4 md:p-6 w-full max-w-6xl mx-auto space-y-4">
-      {/* global style gated by body[data-hide-shell-chrome] so only this page is affected */}
-      <style>{`
-        body[data-hide-shell-chrome="1"] .breadcrumbs,
-        body[data-hide-shell-chrome="1"] nav[aria-label="Breadcrumb"],
-        body[data-hide-shell-chrome="1"] .page-breadcrumbs,
-        body[data-hide-shell-chrome="1"] .route-tabs,
-        body[data-hide-shell-chrome="1"] .settings-tabbar,
-        body[data-hide-shell-chrome="1"] .btn-back,
-        body[data-hide-shell-chrome="1"] a[aria-label="Back"],
-        body[data-hide-shell-chrome="1"] button[aria-label="Back"],
-        body[data-hide-shell-chrome="1"] .page-title,
-        body[data-hide-shell-chrome="1"] header .title,
-        body[data-hide-shell-chrome="1"] h1,
-        body[data-hide-shell-chrome="1"] h2 { display: none !important; }
-        #settings-root h1,
-        #settings-root h2 { display: initial !important; }
-      `}</style>
+    <div className="mx-auto max-w-7xl space-y-4 px-3 pb-10 pt-4 sm:px-4">
+      <section className="ssa-hero-wrap overflow-hidden p-4 sm:p-5" aria-label="Profile header">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <SSAAnimalAvatar animal="cows" size="lg" label="Household profile avatar" />
+              <div>
+                <h1 className="ssa-hero-title text-2xl">{settingsDraft.displayName}</h1>
+                <p className="ssa-hero-subtitle">
+                  {settingsDraft.bio}
+                </p>
+              </div>
+            </div>
 
-      {/* Header moved to the very top */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
-        <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
-        <div className="flex items-center gap-2">
-          <button
-            className="btn btn-ghost btn-sm rounded-2xl"
-            onClick={() => {
-              try {
-                const blob = new Blob([JSON.stringify(profile || {}, null, 2)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a"); a.href = url; a.download = "household-profile.json"; a.click(); URL.revokeObjectURL(url);
-              } catch {}
-            }}
-          >
-            <SafeIcon className="mr-1">⬇</SafeIcon> Export Profile
-          </button>
-          <label className="btn btn-ghost btn-sm rounded-2xl cursor-pointer">
-            <input
-              type="file"
-              accept="application/json"
-              style={{ display: "none" }}
-              onChange={async (e) => {
-                const f = e.target.files?.[0]; if (!f) return;
-                try {
-                  const text = await f.text(); const json = JSON.parse(text);
-                  for (const [k, v] of Object.entries(json || {})) Profile.setAtPath(k, v);
-                } catch {}
-              }}
-            />
-            <SafeIcon className="mr-1">⬆</SafeIcon> Import Profile
-          </label>
-        </div>
-      </div>
+            <div className="flex flex-wrap gap-2" aria-label="Profile stats">
+              <SSABadge tone="assigned">128 posts</SSABadge>
+              <SSABadge tone="complete">42 shared completions</SSABadge>
+              <SSABadge tone="request">9 open collaboration requests</SSABadge>
+              <SSABadge>Streak: 18 days</SSABadge>
+            </div>
 
-      {/* Saved toast (now below the header) */}
-      <div className={cls("transition-all duration-200", ok ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2")}>
-        {ok && (
-          <div className="rounded-2xl border border-success/20 bg-success/10 px-3 py-2 inline-flex items-center gap-2">
-            <span className="badge badge-success rounded-full">Saved</span>
-            <span className="text-sm">Settings updated</span>
+            <div className="ssa-hero-actions">
+              <SSAButton variant="primary">Follow Household</SSAButton>
+              <SSAButton variant="secondary">Invite to Collaboration</SSAButton>
+              <SSAButton variant="secondary">Message</SSAButton>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Essentials */}
-      <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
-        {/* Profile basics */}
-        <div className="card" style={{ padding: 10 }}>
-          <h3 className="text-sm font-semibold flex items-center gap-2"><Icons.User className="w-4 h-4" /> Profile Basics</h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <FieldInput label="Home Name" value={settings.homeName} onChange={(v)=>setSettings(s=>({...s, homeName:v}))} />
-            <FieldInput label="Household Name" value={settings.householdName} onChange={(v)=>setSettings(s=>({...s, householdName:v}))} />
-            <FieldSelect label="Time Zone" value={settings.timezone} onChange={(v)=>setSettings(s=>({...s, timezone:v}))} options={[
-              { value: detectTimezone(), label: `Auto: ${detectTimezone()}` },
-              { value:"America/New_York", label:"US Eastern" },
-              { value:"America/Chicago", label:"US Central" },
-              { value:"America/Denver", label:"US Mountain" },
-              { value:"America/Los_Angeles", label:"US Pacific" },
-              { value:"UTC", label:"UTC" },
-            ]} />
-            <FieldSelect label="Units" value={settings.measurementUnit} onChange={(v)=>setSettings(s=>({...s, measurementUnit:v}))}
-              options={[{ value:"imperial", label:"US (cups, lbs)" },{ value:"metric", label:"Metric (L, g)" }]} />
-          </div>
-          <div className="mt-2 grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
-            <SwitchTiny label="Dark Mode" checked={!!settings.darkMode} onChange={(v)=>setSettings(s=>({...s, darkMode:v}))} />
-            <SwitchTiny label="Compact Mode" checked={!!settings.compactMode} onChange={(v)=>setSettings(s=>({...s, compactMode:v}))} />
-            <SwitchTiny label="24-Hour Clock" checked={!!settings.use24hClock} onChange={(v)=>setSettings(s=>({...s, use24hClock:v}))} />
+          <div className="space-y-3">
+            <SSAGrowthOverlay label={`${seasonLabel} streak`} value={78} className="ssa-seasonal-card" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="ssa-hero-wrap p-3 text-center">
+                <SSAProgressRing value={74} />
+                <p className="mt-2 text-xs text-[var(--ssa-text-secondary)]">Household Growth</p>
+              </div>
+              <div className="ssa-hero-wrap p-3 text-center">
+                <SSAProgressRing value={59} />
+                <p className="mt-2 text-xs text-[var(--ssa-text-secondary)]">Seasonal Workload</p>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Notifications */}
-        <div className="card" style={{ padding: 10 }}>
-          <h3 className="text-sm font-semibold flex items-center gap-2"><Icons.Bell className="w-4 h-4" /> Notifications</h3>
-          <div className="mt-2 grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-            <SwitchTiny label="Desktop alerts" checked={true} onChange={()=>{}} />
-            <SwitchTiny label="Email summaries" checked={!!notif.emailEnabled} onChange={(v)=>setNotif({ emailEnabled: v })} />
-            <SwitchTiny label="Text messages" checked={!!notif.smsEnabled} onChange={(v)=>setNotif({ smsEnabled: v })} />
-            {notif.smsEnabled && (
-              <FieldInput label="Phone Number" value={notif.smsNumber} onChange={(v)=>setNotif({ smsNumber: v })} placeholder="+1 555 555 5555" width={180} />
+      <section className="ssa-hero-wrap p-3" aria-label="Profile tabs">
+        <SSATabs
+          tabs={TAB_ITEMS}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
+      </section>
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.section
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"
+        >
+          <div className="space-y-4">
+            {activeTab === TAB_POSTS && (
+              <PostsPane seasonLabel={seasonLabel} seasonKey={seasonKey} />
             )}
-          </div>
-          <div className="mt-2" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-            <button className="btn sm" onClick={()=>automation?.emit?.("notifications/test",{at:Date.now()})}>Send Test</button>
-            {notif.smsEnabled && (
-              <button className="btn sm" onClick={()=>automation?.emit?.("notifications/test_sms",{to:notif.smsNumber, at:Date.now()})}>Send Test SMS</button>
-            )}
-          </div>
-        </div>
 
-        {/* Automations */}
-        <div className="card" style={{ padding: 10 }}>
-          <h3 className="text-sm font-semibold flex items-center gap-2"><Icons.Timer className="w-4 h-4" /> Automations</h3>
-          <div className="mt-2 grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
-            {[
-              ["mealPlanWeekly","Weekly Meal Plan","Generate a week of meals & groceries."],
-              ["gardenCalendar","Garden Calendar","Seed/plant/harvest reminders."],
-              ["cleaningRotation","Cleaning Rotation","Light 15–30m rotations."],
-              ["sabbathMealPrep","Sabbath Meal Prep","Prep/reheats before Friday sunset."],
-            ].map(([key, label, hint]) => (
-              <SwitchTiny
-                key={key}
-                label={label}
-                hint={hint}
-                checked={!!(settings.autos?.[key])}
-                onChange={(v)=>{ setSettings(s=>({ ...s, autos:{ ...(s.autos||DEFAULTS.autos), [key]:v } })); automation?.emit?.("automation/toggle",{key,enabled:v}); }}
+            {activeTab === TAB_MEDIA && (
+              <MediaPane />
+            )}
+
+            {activeTab === TAB_SAVED && (
+              <SavedPane />
+            )}
+
+            {activeTab === TAB_TASKS && (
+              <TasksPane />
+            )}
+
+            {activeTab === TAB_JOBS && (
+              <JobsPane seasonLabel={seasonLabel} />
+            )}
+
+            {activeTab === TAB_SETTINGS && (
+              <SettingsPane
+                settingsDraft={settingsDraft}
+                setSettingsDraft={setSettingsDraft}
+                onSave={handleSaveSettings}
+                onReset={handleResetSettings}
+                isDirty={isDirty}
+                saveState={saveState}
               />
-            ))}
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* COLLAPSIBLES */}
-      <Collapsible title="Reminder & Meal Times" icon={Icons.Calendar} defaultOpen={false}>
-        <div className="flex flex-wrap gap-2">
-          <FieldInput label="Breakfast" value={meals.breakfastTime} onChange={(v)=>setMeals({ breakfastTime:v })} width={120} />
-          <FieldInput label="Lunch" value={meals.lunchTime} onChange={(v)=>setMeals({ lunchTime:v })} width={120} />
-          <FieldInput label="Dinner" value={meals.dinnerTime} onChange={(v)=>setMeals({ dinnerTime:v })} width={120} />
-          <FieldInput label="Prep Lead (min)" type="number" value={meals.prepLeadMinutes} onChange={(v)=>setMeals({ prepLeadMinutes: clampNumber(v,0,240) })} width={140} />
-        </div>
-        <div className="mt-1">
-          <SwitchTiny label="Sabbath Aware" checked={!!sab.aware} onChange={(v)=>setSab({ aware:v })} />
-        </div>
-        <div className="flex flex-wrap items-end gap-2">
-          {sab.fridayCutoffSource === "fixed" ? (
-            <FieldInput label="Fixed (HH:MM)" value={sab.fixedFridayCutoff} onChange={(v)=>setSab({ fixedFridayCutoff:v })} width={120} />
-          ) : (
-            <FieldInput label="Finish before (min)" type="number" value={sab.finishMinutesBeforeSunset} onChange={(v)=>setSab({ finishMinutesBeforeSunset: clampNumber(v,0,180) })} width={160} />
-          )}
-          <FieldSelect
-            label="Sunset/Fixed Time"
-            value={sab.fridayCutoffSource}
-            onChange={(v)=>setSab({ fridayCutoffSource:v })}
-            options={[{ value:"calendar.sunset", label:"Calendar Sunset (auto)" }, { value:"fixed", label:"Fixed Time" }]}
-            width={180}
+          <aside className="space-y-4" aria-label="Alerts and collaboration sidebar">
+            <div className="ssa-hero-wrap p-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="ssa-hero-title text-base">Alerts</h2>
+                <SSAToggle
+                  checked={!alertsMuted}
+                  onChange={(next) => setAlertsMuted(!next)}
+                  label={alertsMuted ? "Muted" : "Live"}
+                />
+              </div>
+              <div className="space-y-2">
+                <SSAInlineAlert tone="warning">Canning queue enters high urgency in 6 hours.</SSAInlineAlert>
+                <SSAInlineAlert tone="info">Willow and Stonefield synced irrigation rota.</SSAInlineAlert>
+                <SSAInlineAlert tone="success">Barn lane checklist completed by all assigned households.</SSAInlineAlert>
+              </div>
+            </div>
+
+            <div className="ssa-hero-wrap p-4">
+              <h2 className="ssa-hero-title text-base">Participating Households</h2>
+              <ul className="mt-3 space-y-2">
+                {HOUSEHOLDS.map((household) => (
+                  <li
+                    key={household.id}
+                    className="flex items-center justify-between gap-2 rounded-[var(--ssa-radius-chip)] border border-[var(--ssa-border-subtle)] p-2 transition hover:bg-[var(--ssa-surface-1)] focus-within:ring-2 focus-within:ring-[var(--ssa-focus-ring-color)]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <SSAAnimalAvatar animal={household.animal} label={household.name} size="sm" />
+                      <span className="text-sm text-[var(--ssa-text-primary)]">{household.name}</span>
+                    </div>
+                    <SSABadge tone={household.status}>{household.status}</SSABadge>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
+        </motion.section>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function PostsPane({ seasonLabel, seasonKey }) {
+  return (
+    <>
+      <section className="relative overflow-hidden rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-default)] bg-[var(--ssa-surface-elevated)] p-4">
+        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[var(--ssa-surface-2)] opacity-40" aria-hidden="true" />
+        <div className="absolute -bottom-5 left-10 h-16 w-16 rounded-full bg-[var(--ssa-surface-1)] opacity-50" aria-hidden="true" />
+        <h2 className="ssa-hero-title text-lg">{seasonLabel} Collaboration Layer</h2>
+        <p className="ssa-hero-subtitle">Layered cards show shared agrarian flow across households.</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <SSASeasonalTaskHighlight
+            season={seasonKey}
+            title="Primary seasonal push"
+            detail="Align sowing windows with preservation and livestock support tasks."
+            urgency="high"
+          />
+          <SSASeasonalTaskHighlight
+            season={seasonKey}
+            title="Secondary support cycle"
+            detail="Prepare storage, labeling, and handoff tasks for weekly meal cycles."
+            urgency="medium"
           />
         </div>
-      </Collapsible>
+      </section>
 
-      <Collapsible title="Budget & Scheduling" icon={Icons.Donut}>
-        <div className="flex flex-wrap gap-2">
-          <FieldInput label="Budget / wk ($)" type="number" value={settings.budgetWeeklyUSD} onChange={(v)=>setSettings(s=>({...s, budgetWeeklyUSD: clampNumber(v,0,1e6)}))} width={140} />
-          <FieldInput label="Hours / wk" type="number" value={settings.weeklyHrsCapacity} onChange={(v)=>setSettings(s=>({...s, weeklyHrsCapacity: clampNumber(v,0,200)}))} width={120} />
-          <FieldInput label="Low-Stock (qty)" type="number" value={settings.lowStockDefault} onChange={(v)=>setSettings(s=>({...s, lowStockDefault: clampNumber(v,0,999)}))} width={120} />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <FieldInput label="Default Task (min)" type="number" value={sched.defaultTaskMinutes} onChange={(v)=>setSched({ defaultTaskMinutes: clampNumber(v,5,240) })} width={150} />
-          <FieldInput label="Rotation (days)" type="number" value={sched.cleaningRotationDays} onChange={(v)=>setSched({ cleaningRotationDays: clampNumber(v,1,30) })} width={140} />
-          <FieldInput label="Max Parallel" type="number" value={sched.maxParallelTasks} onChange={(v)=>setSched({ maxParallelTasks: clampNumber(v,1,10) })} width={130} />
-          <FieldInput label="Errands Window (d)" type="number" value={sched.errandsBatchWindowDays} onChange={(v)=>setSched({ errandsBatchWindowDays: clampNumber(v,1,30) })} width={160} />
-          <FieldSelect label="Week Starts On" value={sched.weekStartsOn} onChange={(v)=>setSched({ weekStartsOn: Number(v) })}
-            options={[{value:1,label:"Mon"},{value:0,label:"Sun"}]} width={120} />
-        </div>
-      </Collapsible>
+      <section className="space-y-3" aria-label="Household posts feed">
+        {FEED_ITEMS.map((item) => (
+          <article
+            key={item.id}
+            className="rounded-[var(--ssa-radius-card)] transition-all hover:-translate-y-[1px] hover:shadow-[var(--ssa-shadow-2)] focus-within:ring-2 focus-within:ring-[var(--ssa-focus-ring-color)]"
+          >
+            <SSACard
+              title={item.title}
+              subtitle={item.subtitle}
+              variant="feed"
+              household={item.household}
+              collaborationStatus={item.status}
+              season={item.season}
+              meta={item.meta}
+              actions={
+                <>
+                  <SSAButton variant="secondary">Coordinate</SSAButton>
+                  <SSAButton variant="primary">Open Thread</SSAButton>
+                </>
+              }
+            >
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <SSAAnimalAvatar animal={item.animal} size="sm" label={item.household} />
+                  <span className="text-sm text-[var(--ssa-text-secondary)]">{item.household}</span>
+                </div>
+                <p>{item.body}</p>
+                <div className="flex flex-wrap gap-2">
+                  {item.tags.map((tag) => (
+                    <SSABadge key={`${item.id}-${tag}`}>{tag}</SSABadge>
+                  ))}
+                </div>
+                <SSAHouseholdParticipation
+                  label="Household Participation"
+                  entries={item.participation}
+                />
+                <SSAGrowthOverlay label="Collaboration Progress" value={item.progress} />
+              </div>
+            </SSACard>
+          </article>
+        ))}
+      </section>
+    </>
+  );
+}
 
-      <Collapsible title="Managed Areas" icon={Icons.Home}>
-        <div className="flex flex-wrap gap-2">
-          {AREA_OPTIONS.map(a => {
-            const ActiveIcon = Icons?.[a.iconKey] || Icons.Sparkles;
-            const active = (settings.areas || []).includes(a.id);
+function MediaPane() {
+  const prefersReducedMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [hoveredStoryId, setHoveredStoryId] = useState(null);
+  const [expandedStoryId, setExpandedStoryId] = useState(null);
+  const [activityPulse, setActivityPulse] = useState({});
+  const [moduleActivityPulse, setModuleActivityPulse] = useState({});
+
+  const activeStory = MEDIA_STORIES[activeIndex] || MEDIA_STORIES[0];
+  const expandedStory =
+    MEDIA_STORIES.find((story) => story.id === expandedStoryId) || null;
+  const hoveredStory =
+    MEDIA_STORIES.find((story) => story.id === hoveredStoryId) || null;
+
+  function goNext() {
+    setActiveIndex((prev) => (prev + 1) % MEDIA_STORIES.length);
+  }
+
+  function goPrev() {
+    setActiveIndex((prev) =>
+      prev - 1 < 0 ? MEDIA_STORIES.length - 1 : prev - 1
+    );
+  }
+
+  function handleStorySwipe(_, info) {
+    if (info.offset.x < -70) {
+      goNext();
+      return;
+    }
+    if (info.offset.x > 70) {
+      goPrev();
+    }
+  }
+
+  function handleStoryKeyDown(event) {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      goNext();
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      goPrev();
+    }
+  }
+
+  function bumpActivity(storyId, activityLabel) {
+    const key = `${storyId}:${activityLabel}`;
+    setActivityPulse((prev) => ({
+      ...prev,
+      [key]: (prev[key] || 0) + 1,
+    }));
+  }
+
+  function bumpModuleActivity(storyId, moduleKey, actionType) {
+    const key = `${storyId}:${moduleKey}:${actionType}`;
+    setModuleActivityPulse((prev) => ({
+      ...prev,
+      [key]: (prev[key] || 0) + 1,
+    }));
+  }
+
+  return (
+    <section className="space-y-3" aria-label="Media tab">
+      <div className="ssa-hero-wrap p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="ssa-hero-title text-lg">Stories and Media</h2>
+            <p className="ssa-hero-subtitle">
+              Swipe through seasonal agrarian stories and expand each card for collaboration detail.
+            </p>
+          </div>
+          <div className="ssa-hero-actions" aria-label="Story navigation controls">
+            <SSAButton variant="secondary" onClick={goPrev} aria-label="Previous story">
+              Previous
+            </SSAButton>
+            <SSAButton variant="secondary" onClick={goNext} aria-label="Next story">
+              Next
+            </SSAButton>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeStory.id}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={handleStorySwipe}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 28 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -24 }}
+            transition={{ duration: prefersReducedMotion ? 0.12 : 0.24, ease: "easeOut" }}
+            className="mt-3"
+            role="group"
+            aria-label={`${activeStory.title} story card`}
+            tabIndex={0}
+            onKeyDown={handleStoryKeyDown}
+          >
+            <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.16 }}>
+              <SSACard
+                title={activeStory.title}
+                subtitle={activeStory.subtitle}
+                season={activeStory.season}
+                household={activeStory.household}
+                collaborationStatus={activeStory.status}
+                variant="media"
+                meta={activeStory.meta}
+                media={
+                  <StoryDepthMedia
+                    story={activeStory}
+                    onExpand={() => setExpandedStoryId(activeStory.id)}
+                  />
+                }
+                actions={
+                  <>
+                    <SSAButton
+                      variant="secondary"
+                      onClick={() => setExpandedStoryId(activeStory.id)}
+                    >
+                      Expand Story
+                    </SSAButton>
+                    <SSAButton variant="primary" onClick={goNext}>
+                      Next Story
+                    </SSAButton>
+                  </>
+                }
+              >
+                <div className="space-y-3">
+                  <p>{activeStory.body}</p>
+                  <SSAGrowthOverlay
+                    label="Story collaboration progress"
+                    value={activeStory.progress}
+                  />
+                  <ModuleParticipationGrid
+                    story={activeStory}
+                    moduleActivityPulse={moduleActivityPulse}
+                    onModuleAction={bumpModuleActivity}
+                  />
+                  <SSAHouseholdParticipation
+                    label="Household Participation"
+                    entries={activeStory.participants}
+                  />
+                  <div className="flex flex-wrap gap-2" aria-label="Shared activities">
+                    {activeStory.activities.map((activity) => {
+                      const activityKey = `${activeStory.id}:${activity}`;
+                      const count = activityPulse[activityKey] || 0;
+                      return (
+                        <motion.button
+                          key={activityKey}
+                          type="button"
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => bumpActivity(activeStory.id, activity)}
+                          className="rounded-[var(--ssa-radius-chip)] border border-[var(--ssa-border-default)] bg-[var(--ssa-surface-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--ssa-text-primary)] transition hover:bg-[var(--ssa-surface-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ssa-focus-ring-color)]"
+                          aria-label={`${activity} interaction count ${count}`}
+                        >
+                          {activity} {count > 0 ? `· ${count}` : ""}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </SSACard>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-3" aria-label="Story carousel index">
+          {MEDIA_STORIES.map((story, index) => {
+            const isActive = index === activeIndex;
             return (
-              <button key={a.id} className={`btn sm ${active ? "primary" : ""}`} onClick={()=>toggleArea(a.id)} aria-pressed={active} title={a.label}>
-                <ActiveIcon className="w-4 h-4" /><span className="label">{a.label}</span>
+              <button
+                key={story.id}
+                type="button"
+                className={`rounded-[var(--ssa-radius-chip)] border p-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ssa-focus-ring-color)] ${
+                  isActive
+                    ? "border-[var(--ssa-action-primary-bg)] bg-[var(--ssa-surface-1)]"
+                    : "border-[var(--ssa-border-subtle)] bg-[var(--ssa-surface-elevated)] hover:bg-[var(--ssa-surface-1)]"
+                }`}
+                onMouseEnter={() => setHoveredStoryId(story.id)}
+                onFocus={() => setHoveredStoryId(story.id)}
+                onMouseLeave={() => setHoveredStoryId(null)}
+                onBlur={() => setHoveredStoryId(null)}
+                onClick={() => setActiveIndex(index)}
+                aria-current={isActive ? "true" : undefined}
+                aria-label={`Show ${story.title}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-[var(--ssa-text-primary)]">
+                    {story.title}
+                  </span>
+                  <SSAAnimalAvatar animal={story.animal} size="sm" label={story.household} />
+                </div>
+                <p className="mt-1 text-xs text-[var(--ssa-text-secondary)]">
+                  {story.preview}
+                </p>
               </button>
             );
           })}
         </div>
-      </Collapsible>
 
-      <Collapsible title="Dietary Preferences" icon={Icons.Salad}>
-        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
-          <SwitchTiny
-            label="Torah Dietary Compliant"
-            checked={!!(settings.dietary?.torahCompliant)}
-            onChange={(v)=>setDietary({ torahCompliant: v })}
-          />
-          <DropdownMulti
-            label="Preferred Cuisines"
-            value={settings.dietary?.cuisineBias || []}
-            onChange={(list)=>setDietary({ cuisineBias: list })}
-            groups={CUISINES_GROUPED}
-            placeholder="Choose cuisines"
-          />
-          <DishesInput
-            label="Favorite Dishes"
-            value={settings.dietary?.favoriteDishes || []}
-            onChange={(list)=>setDietary({ favoriteDishes: list })}
-            cuisines={CUISINES_GROUPED.flatMap(g => g.items)}
-          />
-        </div>
-      </Collapsible>
-
-      <Collapsible title="Feast & Interpretation (advanced)" icon={Icons.BookOpen}>
-        <SettingToggle path="torahFood.shellfishAllowed" label="Shellfish Allowed" hint="If your household interpretation includes shellfish with fins and scales." />
-        <SettingToggle path="sabbath.guardActions" label="Sabbath Guard Enabled" hint="Pauses active work during Sabbath and Appointed Times; converts steps to hands-off holds." />
-        <SettingToggle path="cleanliness.ritualBathRequired" label="Ritual Cleansing Required" hint="Require cleansing before resuming specific food/community tasks." />
-        <SettingMultiCheck path="calendar.observedFeasts" label="Observed Feasts" hint="Select which days your household observes."
-          options={["Passover","Unleavened Bread","First Fruits","Shavuot","Trumpets","Atonement","Tabernacles/Sukkot"]} allowCustom />
-        <SettingToggle path="calendar.fullMoonMonthStart" label="Full Moon as Month Start" hint="Begin months at the full moon." />
-      </Collapsible>
-
-      <Collapsible title="Household Members & Rooms" icon={Icons.Users}>
-        <div className="space-y-3">
-          {(settings.members || []).length === 0 && <div className="subtitle">No members yet.</div>}
-          {(settings.members || []).map((m) => (
-            <div key={m.id} className="rounded-xl border p-3 bg-white/60">
-              <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 320px))" }}>
-                <FieldInput label="Name" value={m.name} onChange={(v)=>updateMember(m.id,{name:v})} placeholder="e.g., Alex" />
-                <FieldInput label="Age" type="number" value={m.age ?? ""} onChange={(v)=>updateMember(m.id,{age: v ? Number(v) : ""})} placeholder="e.g., 12" />
+        <AnimatePresence>
+          {hoveredStory && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.15 }}
+              className="mt-2 rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-default)] bg-[var(--ssa-surface-elevated)] p-3"
+              role="status"
+              aria-label="Story hover preview"
+            >
+              <div className="flex items-center gap-2">
+                <SSAAnimalAvatar animal={hoveredStory.animal} size="sm" label={hoveredStory.household} />
+                <strong className="text-sm text-[var(--ssa-text-primary)]">
+                  {hoveredStory.household} preview
+                </strong>
               </div>
-              <div className="mt-2">
-                <div className="text-sm font-medium mb-1">Rooms</div>
-                {(m.rooms || []).map((r, idx) => (
-                  <div key={idx} className="flex items-center gap-2 mb-1">
-                    <select className="btn" value={r.type} onChange={(e)=>updateRoom(m.id, idx, { type: e.target.value })} style={{ width: 140 }}>
-                      <option value="bedroom">Bedroom</option><option value="bathroom">Bathroom</option>
-                    </select>
-                    <input className="btn" value={r.name} onChange={(e)=>updateRoom(m.id, idx, { name: e.target.value })} placeholder="Label (e.g., Bedroom A)" style={{ flex:1, paddingBlock:6 }} />
-                    <button className="btn sm" onClick={()=>removeRoom(m.id, idx)}>Remove</button>
-                  </div>
+              <p className="mt-1 text-sm text-[var(--ssa-text-secondary)]">{hoveredStory.preview}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {hoveredStory.modules.slice(0, 3).map((module) => (
+                  <SSABadge key={`${hoveredStory.id}-${module.key}`}>
+                    {module.title}: {module.participation}%
+                  </SSABadge>
                 ))}
-                <div className="flex gap-2">
-                  <button className="btn sm" onClick={()=>addRoomToMember(m.id,"bedroom")}>+ Bedroom</button>
-                  <button className="btn sm" onClick={()=>addRoomToMember(m.id,"bathroom")}>+ Bathroom</button>
-                  <div style={{ flex:1 }} />
-                  <button className="btn sm" onClick={()=>removeMember(m.id)}>Remove Member</button>
-                </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <SSAModal
+        open={!!expandedStory}
+        title={expandedStory ? expandedStory.title : "Story"}
+        onClose={() => setExpandedStoryId(null)}
+      >
+        {expandedStory && (
+          <div className="space-y-3">
+            <StoryDepthMedia story={expandedStory} compact />
+            <p className="text-sm text-[var(--ssa-text-primary)]">{expandedStory.body}</p>
+            <SSAGrowthOverlay
+              label="Expanded story progress"
+              value={expandedStory.progress}
+            />
+            <ModuleParticipationGrid
+              story={expandedStory}
+              moduleActivityPulse={moduleActivityPulse}
+              onModuleAction={bumpModuleActivity}
+            />
+            <div className="rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-subtle)] p-3">
+              <h3 className="ssa-hero-title text-base">Household participants</h3>
+              <ul className="mt-2 space-y-2">
+                {expandedStory.participants.map((participant) => (
+                  <li
+                    key={`${expandedStory.id}-${participant.name}`}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <SSAAnimalAvatar
+                        animal={participant.animal}
+                        size="sm"
+                        label={participant.name}
+                      />
+                      <span className="text-sm text-[var(--ssa-text-primary)]">{participant.name}</span>
+                    </div>
+                    <SSABadge>{participant.value} shifts</SSABadge>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-          <div className="flex gap-2">
-            <button className="btn sm" onClick={() => addMember()}>+ Add Member</button>
-            <button className="btn sm" onClick={() =>
-              setSettings(s => ({
-                ...s, members: [
-                  ...(s.members||[]),
-                  { id: uid(), name: "Parent A", age: 35, rooms: [{ type:"bedroom", name:"Primary" }] },
-                  { id: uid(), name: "Parent B", age: 35, rooms: [] },
-                  { id: uid(), name: "Child",   age: 8,  rooms: [{ type:"bedroom", name:"Child Room" }] },
-                ]
-              }))
-            }>Add Family Preset</button>
           </div>
-        </div>
-      </Collapsible>
+        )}
+      </SSAModal>
+    </section>
+  );
+}
 
-      <Collapsible title="Data (export/import/reset)" icon={Icons.Database}>
-        <div className="flex gap-2 flex-wrap items-center">
-          <button className="btn sm" onClick={handleExport}>Export</button>
-          <button className="btn sm" onClick={handleImportClick}>Import</button>
-          <button className="btn sm" onClick={handleReset}>Reset</button>
-          <input ref={fileInputRef} type="file" accept="application/json" onChange={handleImport} style={{ display:"none" }} />
-        </div>
-      </Collapsible>
+function StoryDepthMedia({ story, onExpand, compact = false }) {
+  const layerItems = [
+    { key: "meals", label: "Meals", tone: "bg-[var(--ssa-status-info)]" },
+    { key: "storehouse", label: "Storehouse", tone: "bg-[var(--ssa-status-warning)]" },
+    { key: "gardens", label: "Gardens", tone: "bg-[var(--ssa-status-success)]" },
+    { key: "livestock", label: "Livestock", tone: "bg-[var(--ssa-collab-assigned)]" },
+  ];
 
-      {/* Save bar */}
-      <div className="flex items-center justify-end gap-3">
-        <button onClick={()=>{
-          try { Jobs.emit?.("jobs.undo.perform", { token: { source: "profile.settings" } }); } catch {}
-        }} className="btn sm">Undo Last</button>
-        <button onClick={handleSave} className="btn primary sm" aria-busy={busy}>
-          <Icons.Save className="w-4 h-4" /><span className="label">Save All</span>
-        </button>
+  return (
+    <div
+      className={`relative w-full overflow-hidden rounded-[var(--ssa-radius-card)] bg-[linear-gradient(120deg,var(--ssa-surface-1),var(--ssa-surface-2))] ${compact ? "h-44" : "h-36 sm:h-44"}`}
+    >
+      <motion.div
+        initial={{ opacity: 0.35, y: 18 }}
+        animate={{ opacity: 0.6, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="absolute bottom-0 left-0 right-0 h-20 bg-[linear-gradient(180deg,transparent,var(--ssa-surface-2))]"
+        aria-hidden="true"
+      />
+      <div className="absolute left-3 right-3 top-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {layerItems.map((layer, index) => (
+          <motion.div
+            key={`${story.id}-${layer.key}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 0.9, y: 0 }}
+            transition={{ delay: 0.05 + index * 0.04, duration: 0.3 }}
+            className={`rounded-full px-2 py-1 text-[10px] font-semibold text-[var(--ssa-text-on-accent)] ${layer.tone}`}
+          >
+            {layer.label} {story.layers[layer.key]}%
+          </motion.div>
+        ))}
+      </div>
+      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+        <div className="flex -space-x-2">
+          {story.participants.map((participant) => (
+            <span
+              key={`${story.id}-${participant.name}-avatar`}
+              className="rounded-full border-2 border-[var(--ssa-surface-elevated)]"
+            >
+              <SSAAnimalAvatar
+                animal={participant.animal}
+                size="sm"
+                label={participant.name}
+              />
+            </span>
+          ))}
+        </div>
+        <SSAButton
+          variant="secondary"
+          onClick={onExpand}
+          aria-label={`Expand ${story.title}`}
+        >
+          Expand
+        </SSAButton>
       </div>
     </div>
+  );
+}
+
+function ModuleParticipationGrid({ story, moduleActivityPulse, onModuleAction }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2" aria-label="Module participation grid">
+      {story.modules.map((module) => (
+        <SSACard
+          key={`${story.id}-${module.key}`}
+          title={module.title}
+          subtitle={module.detail}
+          variant="task"
+          actions={
+            <ModuleActionBar
+              storyId={story.id}
+              moduleKey={module.key}
+              moduleActivityPulse={moduleActivityPulse}
+              onModuleAction={onModuleAction}
+            />
+          }
+        >
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <SSABadge>{module.seasonalTag}</SSABadge>
+              {module.key === "storehouse" && module.stockAlert ? (
+                <SSAInlineAlert tone="warning">{module.stockAlert}</SSAInlineAlert>
+              ) : null}
+            </div>
+            {Array.isArray(module.seasonalItems) && module.seasonalItems.length > 0 ? (
+              <div className="flex flex-wrap gap-2" aria-label={`${module.title} seasonal context`}>
+                {module.seasonalItems.map((item) => (
+                  <SSABadge key={`${story.id}-${module.key}-${item}`}>{item}</SSABadge>
+                ))}
+              </div>
+            ) : null}
+            <SSAGrowthOverlay
+              label={`${module.title} participation`}
+              value={module.participation}
+            />
+          </div>
+        </SSACard>
+      ))}
+    </div>
+  );
+}
+
+function ModuleActionBar({
+  storyId,
+  moduleKey,
+  moduleActivityPulse,
+  onModuleAction,
+}) {
+  const actions = [
+    { key: "participation", label: "Mark Participation" },
+    { key: "assign", label: "Assign Task" },
+    { key: "log", label: "Log Activity" },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2" aria-label="Module microinteractions">
+      {actions.map((action) => {
+        const pulseKey = `${storyId}:${moduleKey}:${action.key}`;
+        const count = moduleActivityPulse[pulseKey] || 0;
+        return (
+          <motion.button
+            key={pulseKey}
+            type="button"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onModuleAction(storyId, moduleKey, action.key)}
+            className="rounded-[var(--ssa-radius-chip)] border border-[var(--ssa-border-default)] bg-[var(--ssa-surface-elevated)] px-2 py-1 text-xs font-semibold text-[var(--ssa-text-primary)] transition hover:bg-[var(--ssa-surface-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ssa-focus-ring-color)]"
+            aria-label={`${action.label} count ${count}`}
+          >
+            {action.label} {count > 0 ? `(${count})` : ""}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SavedPane() {
+  return (
+    <section className="space-y-3" aria-label="Saved tab">
+      {FEED_ITEMS.slice(0, 2).map((item) => (
+        <SSACard
+          key={`saved-${item.id}`}
+          title={`Saved: ${item.title}`}
+          subtitle="Bookmarked for recurring seasonal coordination"
+          season={item.season}
+          household={item.household}
+          collaborationStatus="assigned"
+          actions={<SSAButton variant="secondary">Reopen</SSAButton>}
+        >
+          <div className="space-y-2">
+            <p>{item.body}</p>
+            <SSAGrowthOverlay label="Reusable Playbook Readiness" value={item.progress} />
+          </div>
+        </SSACard>
+      ))}
+    </section>
+  );
+}
+
+function TasksPane() {
+  return (
+    <section className="space-y-3" aria-label="Collaborative Tasks tab">
+      <SSAInteractiveTaskList
+        tasks={[
+          { id: "ct-1", title: "Finalize spring sowing rota", done: false, household: "Willow" },
+          { id: "ct-2", title: "Publish canning checklist", done: true, household: "Oak" },
+          { id: "ct-3", title: "Assign coop lane inspection", done: false, household: "Stonefield" },
+        ]}
+      />
+      <SSACard
+        title="Task handoff lane"
+        subtitle="Quick actions for role assignment and escalation"
+        variant="task"
+        actions={
+          <>
+            <SSAButton variant="secondary">Assign Roles</SSAButton>
+            <SSAButton variant="primary">Escalate Blockers</SSAButton>
+          </>
+        }
+      >
+        Keep collaboration lanes explicit: assign owner, due window, and fallback household in one pass.
+      </SSACard>
+    </section>
+  );
+}
+
+function JobsPane({ seasonLabel }) {
+  return (
+    <section className="space-y-3" aria-label="Seasonal Work tab">
+      <SSACard
+        title={`${seasonLabel} Seasonal Work`}
+        subtitle="Seasonal work is managed on the Jobs page"
+        variant="alert"
+        actions={
+          <Link to="/tasks" className="inline-flex">
+            <SSAButton variant="primary">Open Jobs Page</SSAButton>
+          </Link>
+        }
+      >
+        This tab routes you to the full Jobs workflow where seasonal execution, replay, and assignment tracking live.
+      </SSACard>
+    </section>
+  );
+}
+
+function SettingsPane({
+  settingsDraft,
+  setSettingsDraft,
+  onSave,
+  onReset,
+  isDirty,
+  saveState,
+}) {
+  const saveStateMessage =
+    saveState === "saved"
+      ? "Saved to household profile service."
+      : saveState === "saving"
+      ? "Saving settings..."
+      : saveState === "error"
+      ? "Save failed. Try again."
+      : "Ready to save.";
+
+  return (
+    <section className="ssa-hero-wrap p-4" aria-label="Settings tab">
+      <h2 className="ssa-hero-title text-lg">Profile Settings</h2>
+      <p className="ssa-hero-subtitle">Update bio, collaboration preferences, and seasonal notification defaults.</p>
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <SSAField label="Display Name" hint="Visible to linked households">
+          <SSAInput
+            value={settingsDraft.displayName}
+            onChange={(event) =>
+              setSettingsDraft((prev) => ({
+                ...prev,
+                displayName: event.target.value,
+              }))
+            }
+          />
+        </SSAField>
+        <SSAField label="Primary Role" hint="Used in collaboration chips">
+          <SSASelect
+            value={settingsDraft.primaryRole}
+            onChange={(event) =>
+              setSettingsDraft((prev) => ({
+                ...prev,
+                primaryRole: event.target.value,
+              }))
+            }
+          >
+            <option value="coordinator">Household Coordinator</option>
+            <option value="planner">Planner Lead</option>
+            <option value="specialist">Seasonal Specialist</option>
+          </SSASelect>
+        </SSAField>
+        <SSAField label="Bio" hint="Context for collaboration requests">
+          <SSATextarea
+            value={settingsDraft.bio}
+            onChange={(event) =>
+              setSettingsDraft((prev) => ({
+                ...prev,
+                bio: event.target.value,
+              }))
+            }
+            rows={4}
+          />
+        </SSAField>
+        <div className="space-y-3 rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-subtle)] p-3">
+          <SSAToggle
+            checked={settingsDraft.receiveSeasonalAlerts}
+            onChange={(next) =>
+              setSettingsDraft((prev) => ({
+                ...prev,
+                receiveSeasonalAlerts: !!next,
+              }))
+            }
+            label="Receive seasonal alerts"
+          />
+          <SSAToggle
+            checked={settingsDraft.allowTaskInvitations}
+            onChange={(next) =>
+              setSettingsDraft((prev) => ({
+                ...prev,
+                allowTaskInvitations: !!next,
+              }))
+            }
+            label="Allow task invitations"
+          />
+          <SSAToggle
+            checked={settingsDraft.autoSharePlaybooks}
+            onChange={(next) =>
+              setSettingsDraft((prev) => ({
+                ...prev,
+                autoSharePlaybooks: !!next,
+              }))
+            }
+            label="Auto-share saved playbooks"
+          />
+        </div>
+      </div>
+      <p className="mt-3 text-sm text-[var(--ssa-text-secondary)]">{saveStateMessage}</p>
+      <div className="mt-4 ssa-hero-actions">
+        <SSAButton variant="primary" onClick={onSave} disabled={!isDirty || saveState === "saving"}>
+          Save Settings
+        </SSAButton>
+        <SSAButton variant="secondary" onClick={onReset} disabled={!isDirty || saveState === "saving"}>
+          Reset
+        </SSAButton>
+      </div>
+    </section>
   );
 }
