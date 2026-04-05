@@ -1,12 +1,621 @@
 "use strict";
 
 const express = require("express");
+const fs = require("fs/promises");
+const path = require("path");
 const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
 const {
   requireHouseholdAccessPolicy,
   requireCollaborationPolicy,
   requireEntitlementPolicy,
+  requirePlannerAdminRole,
 } = require("../middleware/accessPolicy.js");
+
+function isLocalDevRequest(req) {
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    return false;
+  }
+  const host = String(req?.hostname || req?.headers?.host || "").split(":")[0].toLowerCase();
+  return host === "localhost" || host === "127.0.0.1" || host === "::1";
+}
+
+function buildDevAssistantFallbackBundle(householdId, payload = {}) {
+  const cuisines = Array.isArray(payload?.preferences?.cuisines)
+    ? payload.preferences.cuisines.filter(Boolean)
+    : [];
+  const dietaryNeeds = Array.isArray(payload?.preferences?.dietaryNeeds)
+    ? payload.preferences.dietaryNeeds.filter(Boolean)
+    : [];
+
+  return {
+    generatedAt: new Date().toISOString(),
+    profile: {
+      householdSize: Number(payload?.history?.householdSize || 4),
+      skillLevel: String(payload?.history?.skillLevel || "novice"),
+    },
+    goals: {
+      cuisines,
+      dietaryNeeds,
+      nutrition: payload?.goals?.nutrition || {},
+    },
+    suggestions: {
+      meal: {
+        recipes: [
+          {
+            title: "Sheet-pan chicken and vegetables",
+            reason: "Balanced batch-friendly meal with simple cleanup.",
+          },
+          {
+            title: "Lentil skillet with seasonal greens",
+            reason: "Supports fiber and protein goals with pantry staples.",
+          },
+        ],
+        educationalHints: [
+          "Batch-cook proteins once and repurpose for 2-3 meals this week.",
+          "Use one preserved ingredient per meal to reduce pantry waste.",
+        ],
+      },
+      storehouse: {
+        categories: [
+          { bucket: "freezer", items: ["cooked chicken portions", "stock cubes"] },
+          { bucket: "dehydration", items: ["onion flakes", "herb blend"] },
+          { bucket: "fermentation", items: ["quick kraut base"] },
+        ],
+        educationalHints: [
+          "Label every preserved batch with date + intended meal use.",
+        ],
+      },
+      homestead: {
+        suggestedCrops: [
+          { name: "kale", purpose: "weekly meal greens" },
+          { name: "carrot", purpose: "storage crop for soups" },
+        ],
+        suggestedAnimals: [
+          { type: "chicken", targetCount: 6, outputs: ["eggs", "manure"] },
+        ],
+        productionForecast: { seasonKey: "current" },
+        educationalHints: [
+          "Stagger sowing every 2 weeks to smooth harvest volume.",
+        ],
+      },
+    },
+    context: { householdId },
+  };
+}
+
+const MEAL_CONTEXT_STATE_FILE = path.resolve(
+  __dirname,
+  "../../../data/meal-planner-context-state.json"
+);
+
+const HOMESTEAD_CONTEXT_STATE_FILE = path.resolve(
+  __dirname,
+  "../../../data/homestead-planner-context-state.json"
+);
+
+const PROFILE_MESSAGES_STATE_FILE = path.resolve(
+  __dirname,
+  "../../../data/profile-messages-context-state.json"
+);
+
+const MEAL_CONTEXT_ACTION_LOG_LIMIT = 25;
+const HOMESTEAD_ACTION_LOG_LIMIT = 40;
+
+const DEFAULT_PROFILE_MESSAGES_CONTEXT = Object.freeze({
+  conversations: [],
+  selectedConversationId: null,
+  lastUpdatedAt: null,
+});
+
+function cloneProfileMessagesContext(value) {
+  return JSON.parse(JSON.stringify(value || DEFAULT_PROFILE_MESSAGES_CONTEXT));
+}
+
+function normalizeProfileMessagesContext(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const conversations = Array.isArray(raw.conversations) ? raw.conversations : [];
+
+  return {
+    conversations,
+    selectedConversationId:
+      String(raw.selectedConversationId || "").trim() || conversations[0]?.id || null,
+    lastUpdatedAt: raw.lastUpdatedAt || new Date().toISOString(),
+  };
+}
+
+async function readProfileMessagesStateFile() {
+  try {
+    const raw = await fs.readFile(PROFILE_MESSAGES_STATE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return { version: 1, households: {} };
+    }
+    if (!parsed.households || typeof parsed.households !== "object") {
+      parsed.households = {};
+    }
+    return parsed;
+  } catch {
+    return { version: 1, households: {} };
+  }
+}
+
+async function writeProfileMessagesStateFile(state) {
+  await fs.mkdir(path.dirname(PROFILE_MESSAGES_STATE_FILE), { recursive: true });
+  await fs.writeFile(PROFILE_MESSAGES_STATE_FILE, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+}
+
+async function getProfileMessagesContextForHousehold(householdId) {
+  const state = await readProfileMessagesStateFile();
+  const current = normalizeProfileMessagesContext(state.households?.[householdId] || {});
+  return { state, current };
+}
+
+function appendMessageToConversation(context, conversationId, message, actorId) {
+  const next = normalizeProfileMessagesContext(context);
+  const targetId = String(conversationId || "").trim();
+  if (!targetId) {
+    throw new Error("conversation_id_required");
+  }
+
+  const nowIso = new Date().toISOString();
+  const nextMessage = {
+    id: String(message?.id || `dm-msg-${Date.now()}`),
+    from: String(message?.from || "me"),
+    body: String(message?.body || "").trim(),
+    moduleKey: String(message?.moduleKey || "meals"),
+    seasonalCue: String(message?.seasonalCue || "Seasonal collaboration"),
+    at: String(message?.at || new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })),
+    actionType: message?.actionType ? String(message.actionType) : undefined,
+    updatedBy: actorId,
+    updatedAt: nowIso,
+  };
+
+  const existing = next.conversations.find((conversation) => conversation.id === targetId);
+  if (existing) {
+    existing.thread = Array.isArray(existing.thread) ? [...existing.thread, nextMessage] : [nextMessage];
+    existing.lastMessage = nextMessage.body;
+    existing.lastAt = "just now";
+    existing.lastUpdatedAt = nowIso;
+  } else {
+    next.conversations.unshift({
+      id: targetId,
+      household: String(message?.household || "Household"),
+      animal: String(message?.animal || "sheep"),
+      unread: 0,
+      status: "assigned",
+      lastAt: "just now",
+      lastMessage: nextMessage.body,
+      moduleParticipation: [],
+      thread: [nextMessage],
+      lastUpdatedAt: nowIso,
+    });
+  }
+
+  next.selectedConversationId = targetId;
+  next.lastUpdatedAt = nowIso;
+  return next;
+}
+
+const DEFAULT_MEAL_CONTEXT = Object.freeze({
+  feed: [
+    {
+      id: "meal-feed-1",
+      author: "Meal Planning Team",
+      content:
+        "Cycle planning now aligns prep, procurement, and storehouse signals in one weekly rhythm.",
+      timestamp: "Today 08:21",
+      likes: 17,
+      comments: 4,
+      shares: 2,
+    },
+    {
+      id: "meal-feed-2",
+      author: "Homestead Coordinator",
+      household: true,
+      content:
+        "Seasonal produce constraints were applied to this cycle to reduce procurement drift.",
+      timestamp: "Today 07:09",
+      likes: 10,
+      comments: 3,
+      shares: 1,
+    },
+  ],
+  alerts: [
+    {
+      id: "meal-alert-1",
+      type: "info",
+      title: "Planning Context Synced",
+      message:
+        "Meal Planner now shares a unified Sacred visual language with Home and Storehouse.",
+      timestamp: "Now",
+    },
+    {
+      id: "meal-alert-2",
+      type: "success",
+      title: "Draft Workflow Ready",
+      message:
+        "Use Generate -> Draft to capture scenarios without overwriting current plan.",
+      timestamp: "5m ago",
+    },
+  ],
+});
+
+function cloneDefaultMealContext() {
+  return {
+    feed: DEFAULT_MEAL_CONTEXT.feed.map((item) => ({ ...item })),
+    alerts: DEFAULT_MEAL_CONTEXT.alerts.map((item) => ({ ...item })),
+  };
+}
+
+async function readMealContextStateFile() {
+  try {
+    const raw = await fs.readFile(MEAL_CONTEXT_STATE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return { version: 1, households: {} };
+    }
+    if (!parsed.households || typeof parsed.households !== "object") {
+      parsed.households = {};
+    }
+    return parsed;
+  } catch {
+    return { version: 1, households: {} };
+  }
+}
+
+async function writeMealContextStateFile(state) {
+  await fs.mkdir(path.dirname(MEAL_CONTEXT_STATE_FILE), { recursive: true });
+  await fs.writeFile(
+    MEAL_CONTEXT_STATE_FILE,
+    `${JSON.stringify(state, null, 2)}\n`,
+    "utf8"
+  );
+}
+
+function mergeMealContextWithState(householdState) {
+  const defaults = cloneDefaultMealContext();
+  const dismissed = new Set(
+    Array.isArray(householdState?.dismissedAlertIds)
+      ? householdState.dismissedAlertIds
+      : []
+  );
+  const statsByPost =
+    householdState?.postStats && typeof householdState.postStats === "object"
+      ? householdState.postStats
+      : {};
+  const alertAuditById =
+    householdState?.alertAudit && typeof householdState.alertAudit === "object"
+      ? householdState.alertAudit
+      : {};
+  const feedAuditById =
+    householdState?.feedAudit && typeof householdState.feedAudit === "object"
+      ? householdState.feedAudit
+      : {};
+
+  const alerts = defaults.alerts
+    .filter((item) => !dismissed.has(item.id))
+    .map((item) => {
+      const audit = alertAuditById[item.id] || {};
+      return {
+        ...item,
+        updatedBy: audit.updatedBy || null,
+        actionLog: Array.isArray(audit.actionLog) ? audit.actionLog : [],
+      };
+    });
+  const feed = defaults.feed.map((item) => {
+    const stats = statsByPost[item.id] || {};
+    const audit = feedAuditById[item.id] || {};
+    return {
+      ...item,
+      likes: Number.isFinite(Number(stats.likes)) ? Number(stats.likes) : item.likes,
+      comments: Number.isFinite(Number(stats.comments))
+        ? Number(stats.comments)
+        : item.comments,
+      shares: Number.isFinite(Number(stats.shares)) ? Number(stats.shares) : item.shares,
+      updatedBy: audit.updatedBy || null,
+      actionLog: Array.isArray(audit.actionLog) ? audit.actionLog : [],
+    };
+  });
+
+  return { alerts, feed };
+}
+
+function resolveMealContextActor(req, body = {}) {
+  const headerActor = String(req.headers["x-user-id"] || "").trim();
+  const bodyActor = String(body.updatedBy || body.userId || "").trim();
+  const userActor = String(req.user?.id || req.user?.userId || "").trim();
+  return bodyActor || userActor || headerActor || "unknown";
+}
+
+function appendMealContextActionLog(existingLog, entry) {
+  const base = Array.isArray(existingLog) ? existingLog : [];
+  const next = [...base, entry];
+  if (next.length <= MEAL_CONTEXT_ACTION_LOG_LIMIT) {
+    return next;
+  }
+  return next.slice(next.length - MEAL_CONTEXT_ACTION_LOG_LIMIT);
+}
+
+async function mirrorMealShareToHomesteadFeed({ householdId, postId, actor, actionAt }) {
+  const homesteadState = await readHomesteadContextStateFile();
+  const household = ensureHomesteadHouseholdState(homesteadState, householdId);
+  const feed = Array.isArray(household?.collaboration?.feed)
+    ? household.collaboration.feed
+    : [];
+
+  const handoffId = `meal-handoff-${postId}-${Date.now()}`;
+  feed.unshift({
+    id: handoffId,
+    author: "Meal Planner Handoff",
+    content:
+      "Meal planner shared an update for cross-module follow-up. Review and coordinate next actions.",
+    timestamp: "Now",
+    likes: 0,
+    coordinates: 0,
+    shares: 0,
+    source: "meal-planner",
+    sourcePostId: postId,
+    updatedBy: actor,
+    lastAction: "handoff_from_meal",
+    lastActionAt: actionAt,
+    actionLog: [
+      {
+        action: "handoff_from_meal",
+        at: actionAt,
+        updatedBy: actor,
+      },
+    ],
+  });
+
+  household.collaboration.feed = feed;
+  household.updatedAt = new Date().toISOString();
+  homesteadState.households[householdId] = household;
+  await writeHomesteadContextStateFile(homesteadState);
+}
+
+async function getMealContextForHousehold(householdId) {
+  const state = await readMealContextStateFile();
+  const householdState =
+    state.households && typeof state.households === "object"
+      ? state.households[householdId] || {}
+      : {};
+  const context = mergeMealContextWithState(householdState);
+  return {
+    context,
+    state,
+    householdState,
+  };
+}
+
+function generateHomesteadId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function cloneDefaultHomesteadContext(householdId) {
+  return {
+    householdId,
+    targets: [],
+    collaboration: {
+      needs: [],
+      offers: [],
+      assignments: [],
+      fulfillments: [],
+      feed: [
+        {
+          id: "homestead-feed-1",
+          author: "Homestead Coordination Team",
+          content:
+            "Coordinate planting windows with neighboring households to close animal feed and pantry gaps.",
+          timestamp: "Today 07:15",
+          likes: 9,
+          coordinates: 2,
+          shares: 3,
+          updatedBy: null,
+          actionLog: [],
+        },
+      ],
+    },
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+async function readHomesteadContextStateFile() {
+  try {
+    const raw = await fs.readFile(HOMESTEAD_CONTEXT_STATE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return { version: 1, households: {} };
+    }
+    if (!parsed.households || typeof parsed.households !== "object") {
+      parsed.households = {};
+    }
+    return parsed;
+  } catch {
+    return { version: 1, households: {} };
+  }
+}
+
+async function writeHomesteadContextStateFile(state) {
+  await fs.mkdir(path.dirname(HOMESTEAD_CONTEXT_STATE_FILE), { recursive: true });
+  await fs.writeFile(
+    HOMESTEAD_CONTEXT_STATE_FILE,
+    `${JSON.stringify(state, null, 2)}\n`,
+    "utf8"
+  );
+}
+
+function appendHomesteadActionLog(existingLog, entry) {
+  const base = Array.isArray(existingLog) ? existingLog : [];
+  const next = [...base, entry];
+  if (next.length <= HOMESTEAD_ACTION_LOG_LIMIT) {
+    return next;
+  }
+  return next.slice(next.length - HOMESTEAD_ACTION_LOG_LIMIT);
+}
+
+function resolveHomesteadContextActor(req, body = {}) {
+  const headerActor = String(req.headers["x-user-id"] || "").trim();
+  const bodyActor = String(body.updatedBy || body.userId || "").trim();
+  const userActor = String(req.user?.id || req.user?.userId || "").trim();
+  return bodyActor || userActor || headerActor || "unknown";
+}
+
+function ensureHomesteadHouseholdState(state, householdId) {
+  if (!state.households[householdId] || typeof state.households[householdId] !== "object") {
+    state.households[householdId] = cloneDefaultHomesteadContext(householdId);
+  }
+  const current = state.households[householdId];
+  if (!Array.isArray(current.targets)) {
+    current.targets = [];
+  }
+  if (!current.collaboration || typeof current.collaboration !== "object") {
+    current.collaboration = {
+      needs: [],
+      offers: [],
+      assignments: [],
+      fulfillments: [],
+      feed: [],
+    };
+  }
+  current.collaboration.needs = Array.isArray(current.collaboration.needs)
+    ? current.collaboration.needs
+    : [];
+  current.collaboration.offers = Array.isArray(current.collaboration.offers)
+    ? current.collaboration.offers
+    : [];
+  current.collaboration.assignments = Array.isArray(current.collaboration.assignments)
+    ? current.collaboration.assignments
+    : [];
+  current.collaboration.fulfillments = Array.isArray(current.collaboration.fulfillments)
+    ? current.collaboration.fulfillments
+    : [];
+  current.collaboration.feed = Array.isArray(current.collaboration.feed)
+    ? current.collaboration.feed
+    : [];
+  if (!current.resources || typeof current.resources !== "object") {
+    current.resources = {};
+  }
+  if (!Array.isArray(current.resources.components)) {
+    current.resources.components = [];
+  }
+  if (!Array.isArray(current.resources.inventory)) {
+    current.resources.inventory = [];
+  }
+  if (!Array.isArray(current.resources.batches)) {
+    current.resources.batches = [];
+  }
+  if (!Array.isArray(current.resources.animalTargets)) {
+    current.resources.animalTargets = [];
+  }
+  if (!Array.isArray(current.resources.gardenTargets)) {
+    current.resources.gardenTargets = [];
+  }
+  if (!current.resources.cuisines || typeof current.resources.cuisines !== "object") {
+    current.resources.cuisines = { profiles: [], rotations: [], prefs: {} };
+  }
+  if (!Array.isArray(current.resources.cuisines.profiles)) {
+    current.resources.cuisines.profiles = [];
+  }
+  if (!Array.isArray(current.resources.cuisines.rotations)) {
+    current.resources.cuisines.rotations = [];
+  }
+  if (!current.resources.cuisines.prefs || typeof current.resources.cuisines.prefs !== "object") {
+    current.resources.cuisines.prefs = {};
+  }
+  if (!current.resources.preferences || typeof current.resources.preferences !== "object") {
+    current.resources.preferences = {
+      household: {
+        id: "primary",
+        name: "Household",
+        timezone: "America/Chicago",
+        membersCount: 1,
+      },
+      profile: {
+        taste: {},
+        likes: {},
+        avoids: {},
+        allergies: {},
+        constraints: {},
+        rhythms: {},
+        notes: "",
+        tags: [],
+      },
+    };
+  }
+  if (!current.resources.skills || typeof current.resources.skills !== "object") {
+    current.resources.skills = { paths: [], progress: [] };
+  }
+  if (!Array.isArray(current.resources.skills.paths)) {
+    current.resources.skills.paths = [];
+  }
+  if (!Array.isArray(current.resources.skills.progress)) {
+    current.resources.skills.progress = [];
+  }
+  return current;
+}
+
+function upsertById(list, item) {
+  const id = String(item?.id || "").trim();
+  if (!id) {
+    return { list, item: null };
+  }
+  const nextItem = { ...item, id };
+  const index = list.findIndex((row) => String(row?.id) === id);
+  if (index >= 0) {
+    const next = [...list];
+    next[index] = nextItem;
+    return { list: next, item: nextItem };
+  }
+  return { list: [nextItem, ...list], item: nextItem };
+}
+
+function deleteById(list, id) {
+  return list.filter((row) => String(row?.id) !== String(id));
+}
+
+function normalizeHomesteadResourceItems(items, { prefix, actor, now }) {
+  const source = Array.isArray(items) ? items : [];
+  return source
+    .map((item) => {
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+      const id = String(item.id || generateHomesteadId(prefix));
+      return {
+        ...item,
+        id,
+        updatedBy: String(item.updatedBy || actor || "unknown"),
+        createdAt: String(item.createdAt || now),
+        updatedAt: now,
+      };
+    })
+    .filter(Boolean);
+}
+
+function upsertManyById(list, incoming) {
+  const base = Array.isArray(list) ? [...list] : [];
+  const indexById = new Map(base.map((item, index) => [String(item?.id), index]));
+  for (const item of incoming) {
+    const id = String(item?.id || "").trim();
+    if (!id) {
+      continue;
+    }
+    if (indexById.has(id)) {
+      const idx = indexById.get(id);
+      base[idx] = { ...base[idx], ...item };
+      continue;
+    }
+    indexById.set(id, base.length);
+    base.push(item);
+  }
+  return base;
+}
+
+async function getHomesteadContextForHousehold(householdId) {
+  const state = await readHomesteadContextStateFile();
+  const householdState = ensureHomesteadHouseholdState(state, householdId);
+  return { state, householdState };
+}
 
 function loadPlannerIntegrationService() {
   try {
@@ -56,9 +665,38 @@ function loadOperationalProjectionWorker() {
   }
 }
 
+function withAsyncTimeout(promise, timeoutMs, fallbackValue) {
+  const safeTimeout = Math.max(250, Number(timeoutMs || 5000));
+  let timer = null;
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((resolve) => {
+      timer = setTimeout(() => resolve(fallbackValue), safeTimeout);
+    }),
+  ]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 function loadOperationalOutboxObservability() {
   try {
     return require("../services/planners/OperationalOutboxObservability");
+  } catch {
+    return {};
+  }
+}
+
+function loadHouseholdPlanningIntelligenceService() {
+  try {
+    return require("../services/planners/HouseholdPlanningIntelligenceService");
+  } catch {
+    return {};
+  }
+}
+
+function loadHouseholdAutomationRecommendationModel() {
+  try {
+    return require("../db/models/HouseholdAutomationRecommendation");
   } catch {
     return {};
   }
@@ -81,6 +719,15 @@ router.get("/meal", async (req, res) => {
     const snapshot = await getMealPlannerSnapshot(householdId);
     return res.json({ ok: true, snapshot, meals: snapshot?.planner_output?.meals || [], preservationTasks: snapshot?.planner_output?.preservationTasks || [] });
   } catch (error) {
+    if (isLocalDevRequest(req)) {
+      return res.json({
+        ok: true,
+        snapshot: null,
+        meals: [],
+        preservationTasks: [],
+        warnings: [`meal_snapshot_dev_fallback:${String(error?.message || error)}`],
+      });
+    }
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
 });
@@ -141,6 +788,243 @@ router.post("/meal", express.json(), async (req, res) => {
 
     return res.json({ ok: true, ...out, orchestration, warnings });
   } catch (error) {
+    if (isLocalDevRequest(req)) {
+      const payload = req.body || {};
+      const fallbackMealId = String(payload.id || `meal-dev-${Date.now()}`);
+      const fallbackHouseholdId = String(
+        payload.householdId || req.query?.householdId || "default-household"
+      );
+
+      let orchestration = {
+        ok: false,
+        skipped: true,
+        reason: "meal_planner_orchestration_dev_fallback",
+      };
+
+      try {
+        const { orchestrateMealPlanFanout } = loadMealPlannerOrchestrationService();
+        const { syncMealPlannerFanoutContracts } = loadPlannerProjectionSync();
+
+        if (typeof orchestrateMealPlanFanout === "function") {
+          orchestration = await orchestrateMealPlanFanout({
+            mealPayload: {
+              ...payload,
+              id: fallbackMealId,
+              householdId: fallbackHouseholdId,
+            },
+            mealSaveResult: {
+              id: fallbackMealId,
+              householdId: fallbackHouseholdId,
+            },
+            persistContracts: ({ mealPlanId, householdId, contracts }) => {
+              const safeContracts = Array.isArray(contracts) ? contracts : [];
+              return {
+                ok: true,
+                queuedCount: safeContracts.length,
+                queuedContracts: safeContracts.map((item) => ({
+                  mealPlanId,
+                  householdId,
+                  eventType: item?.eventType || "planner.contract",
+                  status: "queued",
+                })),
+              };
+            },
+            syncProjection:
+              typeof syncMealPlannerFanoutContracts === "function"
+                ? (args) => syncMealPlannerFanoutContracts(args)
+                : null,
+          });
+        }
+      } catch (orchestrationError) {
+        orchestration = {
+          ok: false,
+          skipped: true,
+          reason: `meal_planner_orchestration_dev_fallback_failed:${String(
+            orchestrationError?.message || orchestrationError
+          )}`,
+        };
+      }
+
+      return res.json({
+        ok: true,
+        id: fallbackMealId,
+        householdId: fallbackHouseholdId,
+        orchestration,
+        warnings: [`meal_save_dev_fallback:${String(error?.message || error)}`],
+      });
+    }
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/meal/context", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { context } = await getMealContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, ...context });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/meal/context/alerts/:id/dismiss", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const alertId = String(req.params.id || "").trim();
+    if (!alertId) {
+      return res.status(400).json({ ok: false, error: "missing_alert_id" });
+    }
+
+    const dismiss = req.body?.dismiss !== false;
+    const updatedBy = resolveMealContextActor(req, req.body || {});
+    const actionAt = new Date().toISOString();
+    const { state, householdState } = await getMealContextForHousehold(householdId);
+    const dismissedSet = new Set(
+      Array.isArray(householdState.dismissedAlertIds)
+        ? householdState.dismissedAlertIds
+        : []
+    );
+    if (dismiss) dismissedSet.add(alertId);
+    else dismissedSet.delete(alertId);
+
+    const alertAudit =
+      householdState.alertAudit && typeof householdState.alertAudit === "object"
+        ? { ...householdState.alertAudit }
+        : {};
+    const currentAudit =
+      alertAudit[alertId] && typeof alertAudit[alertId] === "object"
+        ? { ...alertAudit[alertId] }
+        : {};
+    const actionLog = appendMealContextActionLog(currentAudit.actionLog, {
+      action: dismiss ? "dismiss" : "undismiss",
+      at: actionAt,
+      updatedBy,
+    });
+    alertAudit[alertId] = {
+      updatedBy,
+      lastAction: dismiss ? "dismiss" : "undismiss",
+      lastActionAt: actionAt,
+      actionLog,
+    };
+
+    const nextHouseholdState = {
+      ...householdState,
+      dismissedAlertIds: Array.from(dismissedSet),
+      postStats:
+        householdState.postStats && typeof householdState.postStats === "object"
+          ? householdState.postStats
+          : {},
+      alertAudit,
+      feedAudit:
+        householdState.feedAudit && typeof householdState.feedAudit === "object"
+          ? householdState.feedAudit
+          : {},
+      updatedAt: new Date().toISOString(),
+    };
+
+    state.households[householdId] = nextHouseholdState;
+    await writeMealContextStateFile(state);
+    const context = mergeMealContextWithState(nextHouseholdState);
+    return res.json({ ok: true, householdId, ...context });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/meal/context/feed/:id/action", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const postId = String(req.params.id || "").trim();
+    if (!postId) {
+      return res.status(400).json({ ok: false, error: "missing_post_id" });
+    }
+
+    const action = String(req.body?.action || "").toLowerCase();
+    const actionToKey = {
+      like: "likes",
+      comment: "comments",
+      share: "shares",
+    };
+    const statKey = actionToKey[action];
+    if (!statKey) {
+      return res.status(400).json({ ok: false, error: "unsupported_action" });
+    }
+
+    const deltaRaw = Number(req.body?.delta);
+    const delta = Number.isFinite(deltaRaw) && deltaRaw !== 0 ? deltaRaw : 1;
+    const updatedBy = resolveMealContextActor(req, req.body || {});
+    const actionAt = new Date().toISOString();
+
+    const { state, householdState } = await getMealContextForHousehold(householdId);
+    const postStats =
+      householdState.postStats && typeof householdState.postStats === "object"
+        ? { ...householdState.postStats }
+        : {};
+    const current =
+      postStats[postId] && typeof postStats[postId] === "object"
+        ? { ...postStats[postId] }
+        : {};
+
+    const nextValue = Math.max(0, Number(current[statKey] || 0) + delta);
+    current[statKey] = nextValue;
+    postStats[postId] = current;
+
+    const feedAudit =
+      householdState.feedAudit && typeof householdState.feedAudit === "object"
+        ? { ...householdState.feedAudit }
+        : {};
+    const currentAudit =
+      feedAudit[postId] && typeof feedAudit[postId] === "object"
+        ? { ...feedAudit[postId] }
+        : {};
+    const actionLog = appendMealContextActionLog(currentAudit.actionLog, {
+      action,
+      delta,
+      at: actionAt,
+      updatedBy,
+    });
+    feedAudit[postId] = {
+      updatedBy,
+      lastAction: action,
+      lastActionAt: actionAt,
+      actionLog,
+    };
+
+    const nextHouseholdState = {
+      ...householdState,
+      dismissedAlertIds: Array.isArray(householdState.dismissedAlertIds)
+        ? householdState.dismissedAlertIds
+        : [],
+      postStats,
+      alertAudit:
+        householdState.alertAudit && typeof householdState.alertAudit === "object"
+          ? householdState.alertAudit
+          : {},
+      feedAudit,
+      updatedAt: new Date().toISOString(),
+    };
+
+    state.households[householdId] = nextHouseholdState;
+    await writeMealContextStateFile(state);
+
+    // Slice B bridge: promote share activity into homestead collaboration feed.
+    if (action === "share") {
+      try {
+        await mirrorMealShareToHomesteadFeed({
+          householdId,
+          postId,
+          actor: updatedBy,
+          actionAt,
+        });
+      } catch {
+        // Do not fail meal context action path if cross-module mirror fails.
+      }
+    }
+
+    const context = mergeMealContextWithState(nextHouseholdState);
+    const updatedPost = context.feed.find((item) => item.id === postId) || null;
+    return res.json({ ok: true, householdId, updatedPost, ...context });
+  } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
 });
@@ -168,6 +1052,16 @@ router.get("/storehouse", async (req, res) => {
       warnings: Array.isArray(snapshot?.warnings) ? snapshot.warnings : [],
     });
   } catch (error) {
+    if (isLocalDevRequest(req)) {
+      const householdId = String(req.query.householdId || "default-household");
+      return res.json({
+        ok: true,
+        householdId,
+        inventory: [],
+        summary: { totalItems: 0, preservedItems: 0, lowStockItems: 0 },
+        warnings: [`storehouse_snapshot_dev_fallback:${String(error?.message || error)}`],
+      });
+    }
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
 });
@@ -191,6 +1085,23 @@ router.post("/storehouse/inventory", express.json(), async (req, res) => {
     });
     return res.json({ ok: true, upsert, projection });
   } catch (error) {
+    if (isLocalDevRequest(req)) {
+      const payload = req.body || {};
+      return res.json({
+        ok: true,
+        upsert: {
+          householdId: String(payload.householdId || req.query?.householdId || "default-household"),
+          inventory: Array.isArray(payload.inventory) ? payload.inventory : [],
+          mode: "dev-fallback",
+        },
+        projection: {
+          ok: false,
+          skipped: true,
+          reason: "planner_projection_dev_fallback",
+        },
+        warnings: [`storehouse_upsert_dev_fallback:${String(error?.message || error)}`],
+      });
+    }
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
 });
@@ -234,6 +1145,24 @@ router.get("/homestead", async (req, res) => {
       warnings: Array.isArray(snapshot?.warnings) ? snapshot.warnings : [],
     });
   } catch (error) {
+    if (isLocalDevRequest(req)) {
+      const householdId = String(req.query.householdId || "default-household");
+      return res.json({
+        ok: true,
+        householdId,
+        planId: null,
+        seasonKey: null,
+        gardenTasks: [],
+        animalPlan: {},
+        outputs: [],
+        preservationForecast: {
+          totalOutputs: 0,
+          preservationReadyCount: 0,
+          preservationReadyQty: 0,
+        },
+        warnings: [`homestead_snapshot_dev_fallback:${String(error?.message || error)}`],
+      });
+    }
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
 });
@@ -266,6 +1195,1002 @@ router.post("/homestead", express.json(), async (req, res) => {
   }
 });
 
+router.get("/homestead/targets", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      targets: householdState.targets,
+      updatedAt: householdState.updatedAt || null,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/targets", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const payload = req.body?.target && typeof req.body.target === "object" ? req.body.target : req.body || {};
+    const now = new Date().toISOString();
+    const targetId = String(payload.id || generateHomesteadId("target"));
+    const nextTarget = {
+      ...payload,
+      id: targetId,
+      householdId,
+      updatedBy: actor,
+      createdAt: String(payload.createdAt || now),
+      updatedAt: now,
+    };
+
+    const existingIndex = householdState.targets.findIndex((item) => String(item.id) === targetId);
+    if (existingIndex >= 0) {
+      householdState.targets[existingIndex] = {
+        ...householdState.targets[existingIndex],
+        ...nextTarget,
+      };
+    } else {
+      householdState.targets.push(nextTarget);
+    }
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+
+    return res.json({ ok: true, householdId, target: nextTarget, targets: householdState.targets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.delete("/homestead/targets/:id", async (req, res) => {
+  try {
+    const householdId = String(req.query?.householdId || req.body?.householdId || "default-household");
+    const targetId = String(req.params.id || "").trim();
+    if (!targetId) {
+      return res.status(400).json({ ok: false, error: "missing_target_id" });
+    }
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.targets = householdState.targets.filter((item) => String(item.id) !== targetId);
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, targets: householdState.targets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/collaboration", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, collaboration: householdState.collaboration });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/collaboration/:kind", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const kind = String(req.params.kind || "").toLowerCase();
+    const allowed = new Set(["needs", "offers", "assignments", "fulfillments"]);
+    if (!allowed.has(kind)) {
+      return res.status(400).json({ ok: false, error: "unsupported_collaboration_kind" });
+    }
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const item = {
+      ...(req.body?.item && typeof req.body.item === "object" ? req.body.item : req.body || {}),
+      id: String(req.body?.item?.id || req.body?.id || generateHomesteadId(kind.slice(0, -1) || "item")),
+      householdId,
+      updatedBy: actor,
+      updatedAt: now,
+    };
+
+    const list = householdState.collaboration[kind];
+    const existingIndex = list.findIndex((entry) => String(entry.id) === item.id);
+    if (existingIndex >= 0) {
+      list[existingIndex] = { ...list[existingIndex], ...item };
+    } else {
+      list.push(item);
+    }
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, kind, item, collaboration: householdState.collaboration });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/collaboration/feed/:id/action", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const postId = String(req.params.id || "").trim();
+    if (!postId) {
+      return res.status(400).json({ ok: false, error: "missing_post_id" });
+    }
+
+    const action = String(req.body?.action || "").toLowerCase();
+    const actionToKey = {
+      like: "likes",
+      coordinate: "coordinates",
+      share_information: "shares",
+      share: "shares",
+    };
+    const statKey = actionToKey[action];
+    if (!statKey) {
+      return res.status(400).json({ ok: false, error: "unsupported_action" });
+    }
+
+    const deltaRaw = Number(req.body?.delta);
+    const delta = Number.isFinite(deltaRaw) && deltaRaw !== 0 ? deltaRaw : 1;
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const feed = householdState.collaboration.feed;
+    const index = feed.findIndex((item) => String(item.id) === postId);
+    if (index < 0) {
+      return res.status(404).json({ ok: false, error: "feed_item_not_found" });
+    }
+
+    const current = { ...feed[index] };
+    const nextValue = Math.max(0, Number(current[statKey] || 0) + delta);
+    const actionLog = appendHomesteadActionLog(current.actionLog, {
+      action,
+      delta,
+      at: now,
+      updatedBy: actor,
+    });
+    feed[index] = {
+      ...current,
+      [statKey]: nextValue,
+      updatedBy: actor,
+      lastAction: action,
+      lastActionAt: now,
+      actionLog,
+    };
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({
+      ok: true,
+      householdId,
+      updatedPost: feed[index],
+      collaboration: householdState.collaboration,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/components", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, items: householdState.resources.components });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/components", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.item || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("component"));
+    const nextItem = {
+      ...incoming,
+      id,
+      updatedBy: actor,
+      createdAt: incoming.createdAt || now,
+      updatedAt: now,
+    };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.components, nextItem);
+    householdState.resources.components = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, item: upserted.item, items: householdState.resources.components });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.delete("/homestead/components/:id", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || req.body?.householdId || "default-household");
+    const id = String(req.params.id || "").trim();
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.components = deleteById(householdState.resources.components, id);
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, id, items: householdState.resources.components });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/components/export", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      exportedAt: new Date().toISOString(),
+      resource: "components",
+      count: householdState.resources.components.length,
+      items: householdState.resources.components,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/components/import", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const mode = String(req.body?.mode || "merge").toLowerCase() === "replace" ? "replace" : "merge";
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const incoming = normalizeHomesteadResourceItems(req.body?.items, {
+      prefix: "component",
+      actor,
+      now,
+    });
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.components =
+      mode === "replace"
+        ? incoming
+        : upsertManyById(householdState.resources.components, incoming);
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({
+      ok: true,
+      householdId,
+      mode,
+      importedCount: incoming.length,
+      items: householdState.resources.components,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/inventory", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, items: householdState.resources.inventory });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/inventory", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.item || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("inventory"));
+    const nextItem = {
+      ...incoming,
+      id,
+      updatedBy: actor,
+      createdAt: incoming.createdAt || now,
+      updatedAt: now,
+    };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.inventory, nextItem);
+    householdState.resources.inventory = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, item: upserted.item, items: householdState.resources.inventory });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.delete("/homestead/inventory/:id", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || req.body?.householdId || "default-household");
+    const id = String(req.params.id || "").trim();
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.inventory = deleteById(householdState.resources.inventory, id);
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, id, items: householdState.resources.inventory });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/inventory/export", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      exportedAt: new Date().toISOString(),
+      resource: "inventory",
+      count: householdState.resources.inventory.length,
+      items: householdState.resources.inventory,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/inventory/import", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const mode = String(req.body?.mode || "merge").toLowerCase() === "replace" ? "replace" : "merge";
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const incoming = normalizeHomesteadResourceItems(req.body?.items, {
+      prefix: "inventory",
+      actor,
+      now,
+    });
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.inventory =
+      mode === "replace"
+        ? incoming
+        : upsertManyById(householdState.resources.inventory, incoming);
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({
+      ok: true,
+      householdId,
+      mode,
+      importedCount: incoming.length,
+      items: householdState.resources.inventory,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/batches", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, items: householdState.resources.batches });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/batches", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.item || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("batch"));
+    const nextItem = {
+      ...incoming,
+      id,
+      updatedBy: actor,
+      createdAt: incoming.createdAt || now,
+      updatedAt: now,
+    };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.batches, nextItem);
+    householdState.resources.batches = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, item: upserted.item, items: householdState.resources.batches });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.delete("/homestead/batches/:id", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || req.body?.householdId || "default-household");
+    const id = String(req.params.id || "").trim();
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.batches = deleteById(householdState.resources.batches, id);
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, id, items: householdState.resources.batches });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/batches/export", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      exportedAt: new Date().toISOString(),
+      resource: "batches",
+      count: householdState.resources.batches.length,
+      items: householdState.resources.batches,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/batches/import", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const mode = String(req.body?.mode || "merge").toLowerCase() === "replace" ? "replace" : "merge";
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const incoming = normalizeHomesteadResourceItems(req.body?.items, {
+      prefix: "batch",
+      actor,
+      now,
+    });
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.batches =
+      mode === "replace"
+        ? incoming
+        : upsertManyById(householdState.resources.batches, incoming);
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({
+      ok: true,
+      householdId,
+      mode,
+      importedCount: incoming.length,
+      items: householdState.resources.batches,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/skills", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      paths: householdState.resources.skills.paths,
+      progress: householdState.resources.skills.progress,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/skills/path", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.path || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("skill-path"));
+    const nextItem = {
+      ...incoming,
+      id,
+      updatedBy: actor,
+      createdAt: incoming.createdAt || now,
+      updatedAt: now,
+    };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.skills.paths, nextItem);
+    householdState.resources.skills.paths = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, path: upserted.item, paths: householdState.resources.skills.paths });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/skills/progress", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.progress || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("skill-progress"));
+    const nextItem = {
+      ...incoming,
+      id,
+      updatedBy: actor,
+      createdAt: incoming.createdAt || now,
+      updatedAt: now,
+    };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.skills.progress, nextItem);
+    householdState.resources.skills.progress = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, progress: upserted.item, progressList: householdState.resources.skills.progress });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/skills/export", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      exportedAt: new Date().toISOString(),
+      resource: "skills",
+      paths: householdState.resources.skills.paths,
+      progress: householdState.resources.skills.progress,
+      counts: {
+        paths: householdState.resources.skills.paths.length,
+        progress: householdState.resources.skills.progress.length,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/skills/import", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const mode = String(req.body?.mode || "merge").toLowerCase() === "replace" ? "replace" : "merge";
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const incomingPaths = normalizeHomesteadResourceItems(req.body?.paths, {
+      prefix: "skill-path",
+      actor,
+      now,
+    });
+    const incomingProgress = normalizeHomesteadResourceItems(req.body?.progress, {
+      prefix: "skill-progress",
+      actor,
+      now,
+    });
+
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+
+    householdState.resources.skills.paths =
+      mode === "replace"
+        ? incomingPaths
+        : upsertManyById(householdState.resources.skills.paths, incomingPaths);
+
+    householdState.resources.skills.progress =
+      mode === "replace"
+        ? incomingProgress
+        : upsertManyById(householdState.resources.skills.progress, incomingProgress);
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      mode,
+      imported: {
+        paths: incomingPaths.length,
+        progress: incomingProgress.length,
+      },
+      paths: householdState.resources.skills.paths,
+      progress: householdState.resources.skills.progress,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/animal-targets", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, items: householdState.resources.animalTargets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/animal-targets", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.item || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("animal-target"));
+    const nextItem = { ...incoming, id, updatedBy: actor, createdAt: incoming.createdAt || now, updatedAt: now };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.animalTargets, nextItem);
+    householdState.resources.animalTargets = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, item: upserted.item, items: householdState.resources.animalTargets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.delete("/homestead/animal-targets/:id", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || req.body?.householdId || "default-household");
+    const id = String(req.params.id || "").trim();
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.animalTargets = deleteById(householdState.resources.animalTargets, id);
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, id, items: householdState.resources.animalTargets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/garden-targets", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, items: householdState.resources.gardenTargets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/garden-targets", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.item || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("garden-target"));
+    const nextItem = { ...incoming, id, updatedBy: actor, createdAt: incoming.createdAt || now, updatedAt: now };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    const upserted = upsertById(householdState.resources.gardenTargets, nextItem);
+    householdState.resources.gardenTargets = upserted.list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, item: upserted.item, items: householdState.resources.gardenTargets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.delete("/homestead/garden-targets/:id", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || req.body?.householdId || "default-household");
+    const id = String(req.params.id || "").trim();
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.gardenTargets = deleteById(householdState.resources.gardenTargets, id);
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, id, items: householdState.resources.gardenTargets });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/cuisines", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      profiles: householdState.resources.cuisines.profiles,
+      rotations: householdState.resources.cuisines.rotations,
+      prefs: householdState.resources.cuisines.prefs,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/cuisines/profile", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.profile || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("cuisine-profile"));
+    const nextItem = { ...incoming, id, updatedBy: actor, createdAt: incoming.createdAt || now, updatedAt: now };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.cuisines.profiles = upsertManyById(householdState.resources.cuisines.profiles, [nextItem]);
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, profile: nextItem, profiles: householdState.resources.cuisines.profiles });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/cuisines/rotation", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const incoming = req.body?.rotation || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const id = String(incoming.id || generateHomesteadId("cuisine-rotation"));
+    const nextItem = { ...incoming, id, updatedBy: actor, createdAt: incoming.createdAt || now, updatedAt: now };
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.cuisines.rotations = upsertManyById(householdState.resources.cuisines.rotations, [nextItem]);
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, rotation: nextItem, rotations: householdState.resources.cuisines.rotations });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/cuisines/prefs", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const prefs = req.body?.prefs && typeof req.body.prefs === "object" ? req.body.prefs : {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.cuisines.prefs = {
+      ...householdState.resources.cuisines.prefs,
+      ...prefs,
+      updatedBy: actor,
+      updatedAt: now,
+    };
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, prefs: householdState.resources.cuisines.prefs });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/homestead/preferences", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      household: householdState.resources.preferences.household,
+      profile: householdState.resources.preferences.profile,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/homestead/preferences", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const incomingHousehold = req.body?.household && typeof req.body.household === "object" ? req.body.household : {};
+    const incomingProfile = req.body?.profile && typeof req.body.profile === "object" ? req.body.profile : {};
+    const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+    householdState.resources.preferences = {
+      household: {
+        ...householdState.resources.preferences.household,
+        ...incomingHousehold,
+        updatedBy: actor,
+        updatedAt: now,
+      },
+      profile: {
+        ...householdState.resources.preferences.profile,
+        ...incomingProfile,
+        updatedBy: actor,
+        updatedAt: now,
+      },
+    };
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeHomesteadContextStateFile(state);
+    return res.json({ ok: true, householdId, ...householdState.resources.preferences });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post(
+  "/assistant/plan",
+  requireEntitlementPolicy({ feature: "planner.assistant" }),
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const householdId = String(payload.householdId || "default-household");
+
+    const {
+      getMealPlannerSnapshot,
+      getStorehousePlannerSnapshot,
+      getHomesteadPlannerSnapshot,
+    } = loadPlannerIntegrationService();
+    const { generateHouseholdPlannerBundle } = loadHouseholdPlanningIntelligenceService();
+    const { saveRecommendation } = loadHouseholdAutomationRecommendationModel();
+
+    if (typeof generateHouseholdPlannerBundle !== "function") {
+      return res.status(503).json({ ok: false, error: "planner_intelligence_unavailable" });
+    }
+
+    const warnings = [];
+
+    const [mealSnapshot, storehouseSnapshot, homesteadSnapshot] = await Promise.all([
+      typeof getMealPlannerSnapshot === "function"
+        ? getMealPlannerSnapshot(householdId).catch((error) => {
+            warnings.push(`meal_snapshot_unavailable:${String(error?.message || error)}`);
+            return null;
+          })
+        : Promise.resolve(null),
+      typeof getStorehousePlannerSnapshot === "function"
+        ? getStorehousePlannerSnapshot(householdId).catch((error) => {
+            warnings.push(`storehouse_snapshot_unavailable:${String(error?.message || error)}`);
+            return null;
+          })
+        : Promise.resolve(null),
+      typeof getHomesteadPlannerSnapshot === "function"
+        ? getHomesteadPlannerSnapshot(householdId).catch((error) => {
+            warnings.push(`homestead_snapshot_unavailable:${String(error?.message || error)}`);
+            return null;
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const bundle = generateHouseholdPlannerBundle({
+      householdId,
+      preferences: payload.preferences,
+      goals: payload.goals,
+      history: payload.history,
+      mealPlan: payload.mealPlan || mealSnapshot?.planner_output || {},
+      storehouse: payload.storehouse || storehouseSnapshot || {},
+      homestead: payload.homestead || homesteadSnapshot || {},
+    });
+
+    let persistence = null;
+    if (typeof saveRecommendation === "function") {
+      try {
+        persistence = await saveRecommendation({
+          householdId,
+          generatedAt: bundle.generatedAt,
+          source: "planners.assistant.plan",
+          profile: bundle.profile,
+          goals: bundle.goals,
+          bundle,
+        });
+      } catch (error) {
+        warnings.push(`assistant_bundle_persist_failed:${String(error?.message || error)}`);
+      }
+    }
+
+    return res.json({
+      ok: true,
+      householdId,
+      warnings,
+      bundle,
+      persistence,
+    });
+  } catch (error) {
+    if (isLocalDevRequest(req)) {
+      const payload = req.body || {};
+      const householdId = String(payload.householdId || req.query?.householdId || "default-household");
+      return res.json({
+        ok: true,
+        householdId,
+        warnings: [`assistant_plan_dev_fallback:${String(error?.message || error)}`],
+        bundle: buildDevAssistantFallbackBundle(householdId, payload),
+        persistence: null,
+      });
+    }
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+  }
+);
+
+router.get("/profile/messages", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household").trim() || "default-household";
+    const { current } = await getProfileMessagesContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      messages: cloneProfileMessagesContext(current),
+    });
+  } catch (error) {
+    if (isLocalDevRequest(req)) {
+      return res.json({
+        ok: true,
+        householdId: String(req.query.householdId || "default-household"),
+        warnings: [`profile_messages_dev_fallback:${String(error?.message || error)}`],
+        messages: cloneProfileMessagesContext(DEFAULT_PROFILE_MESSAGES_CONTEXT),
+      });
+    }
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/profile/messages", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household").trim() || "default-household";
+    const actorId = String(req.user?.id || req.user?.userId || req.headers["x-user-id"] || "unknown").trim() || "unknown";
+    const incomingMessages = normalizeProfileMessagesContext(req.body?.messages || {});
+
+    const { state } = await getProfileMessagesContextForHousehold(householdId);
+    state.households[householdId] = {
+      ...incomingMessages,
+      lastUpdatedBy: actorId,
+      lastUpdatedAt: new Date().toISOString(),
+    };
+    await writeProfileMessagesStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      messages: cloneProfileMessagesContext(state.households[householdId]),
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/profile/messages/append", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || "default-household").trim() || "default-household";
+    const conversationId = String(req.body?.conversationId || "").trim();
+    const message = req.body?.message || {};
+    const actorId = String(req.user?.id || req.user?.userId || req.headers["x-user-id"] || "unknown").trim() || "unknown";
+
+    if (!conversationId) {
+      return res.status(400).json({ ok: false, error: "conversation_id_required" });
+    }
+
+    const { state, current } = await getProfileMessagesContextForHousehold(householdId);
+    const next = appendMessageToConversation(current, conversationId, message, actorId);
+    state.households[householdId] = {
+      ...next,
+      lastUpdatedBy: actorId,
+      lastUpdatedAt: new Date().toISOString(),
+    };
+    await writeProfileMessagesStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      messages: cloneProfileMessagesContext(state.households[householdId]),
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
 router.get("/projection/status", async (req, res) => {
   try {
     const { getProjectionStatus } = loadPlannerProjectionSync();
@@ -280,9 +2205,17 @@ router.get("/projection/status", async (req, res) => {
   }
 });
 
-router.post("/projection/replay", express.json(), async (req, res) => {
+router.post(
+  "/projection/replay",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
-    const { replayProjectionJobs, processProjectionBacklog } = loadPlannerProjectionSync();
+    const {
+      replayProjectionJobs,
+      processProjectionBacklog,
+      processProjectionBacklogWithTimeout,
+    } = loadPlannerProjectionSync();
     if (
       typeof replayProjectionJobs !== "function" ||
       typeof processProjectionBacklog !== "function"
@@ -292,14 +2225,28 @@ router.post("/projection/replay", express.json(), async (req, res) => {
 
     const payload = req.body || {};
     const replayed = await replayProjectionJobs(payload);
-    const processed = await processProjectionBacklog({ limit: Number(payload.processLimit || 20) });
+    const processLimit = Number(payload.processLimit || 20);
+    const timeoutMs = Number(payload.processTimeoutMs || process.env.PLANNER_PROJECTION_ROUTE_TIMEOUT_MS || 6000);
+    const processed =
+      typeof processProjectionBacklogWithTimeout === "function"
+        ? await processProjectionBacklogWithTimeout({ limit: processLimit, timeoutMs })
+        : await withAsyncTimeout(
+            processProjectionBacklog({ limit: processLimit }),
+            timeoutMs,
+            { ok: false, timedOut: true, processed: 0, results: [], timeoutMs }
+          );
     return res.json({ ok: true, replayed, processed });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
-router.post("/projection/reconcile", express.json(), async (req, res) => {
+router.post(
+  "/projection/reconcile",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { reconcileHouseholdProjection } = loadPlannerProjectionSync();
     if (typeof reconcileHouseholdProjection !== "function") {
@@ -307,16 +2254,34 @@ router.post("/projection/reconcile", express.json(), async (req, res) => {
     }
 
     const payload = req.body || {};
-    const result = await reconcileHouseholdProjection({
-      householdId: payload.householdId,
-      planner: payload.planner || "all",
-      processNow: payload.processNow !== false,
-    });
+    const timeoutMs = Number(payload.processTimeoutMs || process.env.PLANNER_PROJECTION_ROUTE_TIMEOUT_MS || 6000);
+    const plannerMode = payload.planner || "all";
+    const timedOutQueued =
+      plannerMode === "all"
+        ? [{ planner: "storehouse", jobId: null }, { planner: "homestead", jobId: null }]
+        : [{ planner: plannerMode, jobId: null }];
+    const result = await withAsyncTimeout(
+      reconcileHouseholdProjection({
+        householdId: payload.householdId,
+        planner: plannerMode,
+        processNow: payload.processNow !== false,
+      }),
+      timeoutMs,
+      {
+        ok: true,
+        timedOut: true,
+        householdId: String(payload.householdId || "default-household"),
+        planner: plannerMode,
+        queued: timedOutQueued,
+        processed: { ok: false, timedOut: true, processed: 0, results: [], timeoutMs },
+      }
+    );
     return res.json({ ok: true, ...result });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
 router.get("/operational/readiness/meal", async (req, res) => {
   try {
@@ -522,7 +2487,11 @@ router.get("/operational/outbox/alerts", async (req, res) => {
   }
 });
 
-router.post("/operational/outbox/alerts/dispatch", express.json(), async (req, res) => {
+router.post(
+  "/operational/outbox/alerts/dispatch",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { getOutboxStatus, getOutboxHealthSignals } = loadOperationalOutboxService();
     const { evaluateAlerts, ensureThresholdOverridesLoaded, deliverAlerts } =
@@ -580,7 +2549,8 @@ router.post("/operational/outbox/alerts/dispatch", express.json(), async (req, r
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
 router.get("/operational/outbox/alert-deliveries", async (req, res) => {
   try {
@@ -629,7 +2599,11 @@ router.get("/operational/outbox/alert-thresholds", async (req, res) => {
   }
 });
 
-router.post("/operational/outbox/alert-thresholds", express.json(), async (req, res) => {
+router.post(
+  "/operational/outbox/alert-thresholds",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { setThresholdOverrides, clearThresholdOverrides, getThresholds } =
       loadOperationalOutboxObservability();
@@ -652,7 +2626,8 @@ router.post("/operational/outbox/alert-thresholds", express.json(), async (req, 
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
 router.get("/operational/outbox/observability", async (req, res) => {
   try {
@@ -707,7 +2682,11 @@ router.get("/operational/outbox/observability", async (req, res) => {
   }
 });
 
-router.post("/operational/outbox/claim", express.json(), async (req, res) => {
+router.post(
+  "/operational/outbox/claim",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { claimOutboxBatch } = loadOperationalOutboxService();
     if (typeof claimOutboxBatch !== "function") {
@@ -722,9 +2701,14 @@ router.post("/operational/outbox/claim", express.json(), async (req, res) => {
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
-router.post("/operational/outbox/retry", express.json(), async (req, res) => {
+router.post(
+  "/operational/outbox/retry",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { markOutboxRetry, markOutboxDeadLetter, getOutboxEventById } = loadOperationalOutboxService();
     if (typeof markOutboxRetry !== "function") {
@@ -766,9 +2750,14 @@ router.post("/operational/outbox/retry", express.json(), async (req, res) => {
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
-router.post("/operational/outbox/replay-dead-letter", express.json(), async (req, res) => {
+router.post(
+  "/operational/outbox/replay-dead-letter",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { replayDeadLetter, getDeadLetterSummary } = loadOperationalOutboxService();
     if (typeof replayDeadLetter !== "function") {
@@ -800,9 +2789,14 @@ router.post("/operational/outbox/replay-dead-letter", express.json(), async (req
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
-router.post("/operational/outbox/process", express.json(), async (req, res) => {
+router.post(
+  "/operational/outbox/process",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const { processOutboxBatch } = loadOperationalProjectionWorker();
     if (typeof processOutboxBatch !== "function") {
@@ -817,6 +2811,7 @@ router.post("/operational/outbox/process", express.json(), async (req, res) => {
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
 module.exports = router;
