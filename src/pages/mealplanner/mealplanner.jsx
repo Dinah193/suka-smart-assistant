@@ -1,5 +1,5 @@
 // src/pages/mealplanner.jsx
-import React, { useMemo, useState, useEffect, Suspense, useRef, useCallback } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CalendarDays, Leaf, ShoppingBasket } from "lucide-react";
 import {
@@ -34,6 +34,14 @@ import {
   FeedPost,
   Notification,
 } from "@/components/sacred";
+import { SSAButton, SSAInput } from "@/components/ssa";
+import {
+  recordProductActionClick,
+  recordProductActionImpression,
+} from "@/services/telemetry/productActionTelemetry";
+import { requestHouseholdAutomationPlan } from "@/pages/planners/HouseholdPlanningService";
+import { getToken } from "@/services/auth/tokenProvider";
+import LoadingBoundary from "@/components/common/LoadingBoundary";
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -50,7 +58,7 @@ async function getMealPlanningAgent() {
     // ignore
   }
 
-  // 2) Fallback alias path
+  // 2) Secondary alias path
   if (!_mealPlanningAgent) {
     try {
       const mod = await import("@/agents/shims/mealPlanningShim.js");
@@ -60,7 +68,7 @@ async function getMealPlanningAgent() {
     }
   }
 
-  // 3) Fallback: HouseholdOrchestrator shim – wrap it
+  // 3) HouseholdOrchestrator shim bridge
   if (!_mealPlanningAgent) {
     try {
       const mod = await import("../../agents/shims/HouseholdOrchestrator.js");
@@ -81,7 +89,7 @@ async function getMealPlanningAgent() {
     }
   }
 
-  // 4) Alias fallback for orchestrator
+  // 4) Alias bridge for orchestrator
   if (!_mealPlanningAgent) {
     try {
       const mod = await import("@/agents/shims/HouseholdOrchestrator.js");
@@ -430,7 +438,7 @@ const PRESETS = [
   },
 ];
 
-/* ---------------- Bundles (fallback if agent missing) --------------- */
+/* ---------------- Bundles ---------------- */
 async function fetchRecipeBundles() {
   if (mealBundleAgent?.handleCommand) {
     try {
@@ -440,23 +448,13 @@ async function fetchRecipeBundles() {
       console.warn("[MealPlanner] mealBundleAgent.listBundles failed", e);
     }
   }
-  return [
-    { id: "family-favorites", name: "Family Favorites (10 dinners)" },
-    { id: "soul-food-classics", name: "Soul Food Classics" },
-    { id: "caribbean-week", name: "Caribbean Week Pack" },
-    { id: "budget-batch", name: "Budget Batchers" },
-  ];
+  return [];
 }
 
 /* ---------------- Helpers ---------------- */
 async function tryAgent(agent, cmd, payload) {
-  if (!agent?.handleCommand) return null;
-  try {
-    return (await agent.handleCommand(cmd, payload)) ?? null;
-  } catch (e) {
-    console.warn(`[MealPlanner] ${cmd} failed`, e);
-    return null;
-  }
+  console.warn(`[MealPlanner] ${cmd} skipped: strict backend-only mode`);
+  return null;
 }
 const KCAL_PER_G_PROTEIN = 4,
   KCAL_PER_G_CARBS = 4,
@@ -533,7 +531,7 @@ function normalizePlan(raw) {
     };
   }
 
-  // Generic fallbacks
+  // Generic shape handling
   const o = raw || {};
   const meals = Array.isArray(o.meals)
     ? o.meals
@@ -570,7 +568,7 @@ function normalizePlan(raw) {
   };
 }
 
-/* ---------------- Full inline Plan Viewer (fallback when setPlan is absent) -------- */
+/* ---------------- Full inline Plan Viewer (when setPlan is absent) -------- */
 function coerceToEnvelope(normalized) {
   if (!normalized) return null;
   if (Array.isArray(normalized?._raw?.plan)) return normalized._raw;
@@ -683,7 +681,298 @@ const EMERGENCY_PLAN_RECIPES = [
   },
 ];
 
-function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" } = {}) {
+function resolvePlannerHouseholdId() {
+  if (typeof window === "undefined") return "default-household";
+  const fromGlobal =
+    window.__suka?.profile?.householdId ||
+    window.__suka?.profile?.homeId ||
+    window.__suka?.householdId ||
+    window.__suka?.homeId;
+  if (fromGlobal) return String(fromGlobal);
+
+  try {
+    const raw = window.localStorage?.getItem("suka.profile");
+    const parsed = raw ? JSON.parse(raw) : null;
+    return String(parsed?.householdId || parsed?.homeId || "default-household");
+  } catch {
+    return "default-household";
+  }
+}
+
+function plannerAuthHeaders(extra = {}) {
+  const token = String(getToken("access") || "").trim();
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+function pickFiniteNumber(...candidates) {
+  for (const value of candidates) {
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+}
+
+function pickFiniteNumberEntry(entries = []) {
+  for (const entry of entries) {
+    const n = Number(entry?.value);
+    if (Number.isFinite(n)) {
+      return { value: n, source: entry?.source || null };
+    }
+  }
+  return { value: null, source: null };
+}
+
+function pickDefinedEntry(entries = []) {
+  for (const entry of entries) {
+    const value = entry?.value;
+    if (value == null) continue;
+    const text = String(value).trim();
+    if (!text) continue;
+    return { value: text, source: entry?.source || null };
+  }
+  return { value: null, source: null };
+}
+
+function formatBackendToolStatus({ projectionStatus, readiness, warnings }) {
+  const pendingProjection = Number(
+    projectionStatus?.pendingJobs ?? projectionStatus?.queue?.pending ?? 0
+  );
+  if (Number.isFinite(pendingProjection) && pendingProjection > 0) {
+    return `Syncing (${pendingProjection} projection jobs pending)`;
+  }
+
+  const recentPlanCount = Number(readiness?.total_meal_plans_30d ?? 0);
+  if (Number.isFinite(recentPlanCount) && recentPlanCount > 0) {
+    return "Synced with backend planner records";
+  }
+
+  if (Array.isArray(warnings) && warnings.length) {
+    return "Connected (backend warnings present)";
+  }
+
+  return "Waiting for first backend run";
+}
+
+async function fetchMealPlannerBackendContext({ householdId }) {
+  const requests = await Promise.allSettled([
+    fetch(`/api/planners/meal?householdId=${encodeURIComponent(householdId)}`, {
+      headers: plannerAuthHeaders(),
+      credentials: "include",
+    }),
+    fetch(
+      `/api/planners/storehouse?householdId=${encodeURIComponent(householdId)}`,
+      {
+        headers: plannerAuthHeaders(),
+        credentials: "include",
+      }
+    ),
+    fetch(
+      `/api/planners/operational/readiness/meal?householdId=${encodeURIComponent(
+        householdId
+      )}`,
+      {
+        headers: plannerAuthHeaders(),
+        credentials: "include",
+      }
+    ),
+    fetch(`/api/planners/projection/status`, {
+      headers: plannerAuthHeaders(),
+      credentials: "include",
+    }),
+  ]);
+
+  const readJson = async (settledResult) => {
+    if (settledResult.status !== "fulfilled") return null;
+    const response = settledResult.value;
+    if (!response || !response.ok) return null;
+    return response.json().catch(() => null);
+  };
+
+  const [mealPayload, storehousePayload, readinessPayload, projectionPayload] =
+    await Promise.all(requests.map(readJson));
+
+  const warnings = [
+    ...(Array.isArray(mealPayload?.warnings) ? mealPayload.warnings : []),
+    ...(Array.isArray(storehousePayload?.warnings) ? storehousePayload.warnings : []),
+  ];
+
+  const snapshot = mealPayload?.snapshot || {};
+  const plannerOutput = snapshot?.planner_output || {};
+  const readiness = readinessPayload?.readiness || {};
+  const storehouseSummary = storehousePayload?.summary || {};
+
+  const foodSecurityEntry = pickFiniteNumberEntry([
+    { source: "snapshot.planner_output.foodSecurityPct", value: plannerOutput?.foodSecurityPct },
+    {
+      source: "snapshot.planner_output.estimates.gardenUsePct",
+      value: plannerOutput?.estimates?.gardenUsePct,
+    },
+    { source: "snapshot.planner_output.gardenUsePct", value: plannerOutput?.gardenUsePct },
+    { source: "readiness.food_security_pct", value: readiness?.food_security_pct },
+  ]);
+
+  const costDeltaEntry = pickFiniteNumberEntry([
+    {
+      source: "snapshot.planner_output.costDelta.shoppingCost",
+      value: plannerOutput?.costDelta?.shoppingCost,
+    },
+    {
+      source: "snapshot.planner_output.costDelta.shopping_cost",
+      value: plannerOutput?.costDelta?.shopping_cost,
+    },
+    {
+      source: "snapshot.planner_output.costDelta.projectedShoppingCost",
+      value: plannerOutput?.costDelta?.projectedShoppingCost,
+    },
+    {
+      source: "snapshot.planner_output.budget.projectedShoppingCost",
+      value: plannerOutput?.budget?.projectedShoppingCost,
+    },
+    {
+      source: "snapshot.planner_output.budget.shoppingCost",
+      value: plannerOutput?.budget?.shoppingCost,
+    },
+    { source: "snapshot.planner_output.shoppingCost", value: plannerOutput?.shoppingCost },
+  ]);
+
+  const plannerModeEntry = pickDefinedEntry([
+    { source: "snapshot.plannerMode", value: snapshot?.plannerMode },
+    { source: "snapshot.planner_mode", value: snapshot?.planner_mode },
+    { source: "snapshot.planner_output.plannerMode", value: plannerOutput?.plannerMode },
+    { source: "snapshot.planner_output.tool", value: plannerOutput?.tool },
+    { source: "projection.activeTool", value: projectionPayload?.activeTool },
+    { source: "projection.tool", value: projectionPayload?.tool },
+  ]);
+
+  const backendFoodSecurity = foodSecurityEntry.value;
+  const backendCostDelta = costDeltaEntry.value;
+  const plannerModeTool = plannerModeEntry.value;
+
+  const dataContractGaps = [];
+  if (!plannerModeTool) dataContractGaps.push("plannerMode.tool");
+  if (backendFoodSecurity == null) dataContractGaps.push("foodSecurityPct");
+  if (backendCostDelta == null) dataContractGaps.push("costDeltaShoppingCost");
+
+  const lastRunAt =
+    snapshot?.updated_at ||
+    snapshot?.updatedAt ||
+    readiness?.latest_meal_plan_at ||
+    projectionPayload?.updatedAt ||
+    null;
+
+  const checkedFields = [
+    {
+      key: "plannerMode.tool",
+      status: plannerModeTool ? "present" : "missing",
+      source: plannerModeEntry.source,
+      value: plannerModeTool,
+    },
+    {
+      key: "foodSecurityPct",
+      status: backendFoodSecurity == null ? "missing" : "present",
+      source: foodSecurityEntry.source,
+      value: backendFoodSecurity,
+    },
+    {
+      key: "costDeltaShoppingCost",
+      status: backendCostDelta == null ? "missing" : "present",
+      source: costDeltaEntry.source,
+      value: backendCostDelta,
+    },
+  ];
+
+  return {
+    householdId,
+    plannerMode: {
+      tool: plannerModeTool,
+      status: formatBackendToolStatus({
+        projectionStatus: projectionPayload,
+        readiness,
+        warnings,
+      }),
+      lastRunAt,
+    },
+    foodSecurityPct: backendFoodSecurity,
+    costDeltaShoppingCost: backendCostDelta,
+    dataContractGaps,
+    checkedFields,
+    backendSummary: {
+      mealReady: Boolean(mealPayload?.ok),
+      storehouseReady: Boolean(storehousePayload?.ok),
+      readinessReady: Boolean(readinessPayload?.ok),
+      projectionReady: Boolean(projectionPayload?.ok),
+    },
+    warnings,
+  };
+}
+
+async function fetchMealPlannerContext({ householdId }) {
+  const response = await fetch(
+    `/api/planners/meal/context?householdId=${encodeURIComponent(householdId)}`,
+    {
+      headers: plannerAuthHeaders(),
+      credentials: "include",
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`context_fetch_failed:${response.status}`);
+  }
+  const payload = await response.json();
+  return {
+    feed: Array.isArray(payload?.feed) ? payload.feed : [],
+    alerts: Array.isArray(payload?.alerts) ? payload.alerts : [],
+  };
+}
+
+async function dismissMealPlannerContextAlert({ householdId, alertId, dismiss = true }) {
+  const response = await fetch(
+    `/api/planners/meal/context/alerts/${encodeURIComponent(alertId)}/dismiss`,
+    {
+      method: "POST",
+      headers: plannerAuthHeaders({ "Content-Type": "application/json" }),
+      credentials: "include",
+      body: JSON.stringify({ householdId, dismiss }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`context_alert_dismiss_failed:${response.status}`);
+  }
+  const payload = await response.json();
+  return {
+    feed: Array.isArray(payload?.feed) ? payload.feed : [],
+    alerts: Array.isArray(payload?.alerts) ? payload.alerts : [],
+  };
+}
+
+async function applyMealPlannerFeedAction({ householdId, postId, action, delta = 1 }) {
+  const response = await fetch(
+    `/api/planners/meal/context/feed/${encodeURIComponent(postId)}/action`,
+    {
+      method: "POST",
+      headers: plannerAuthHeaders({ "Content-Type": "application/json" }),
+      credentials: "include",
+      body: JSON.stringify({ householdId, action, delta }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`context_feed_action_failed:${response.status}`);
+  }
+  const payload = await response.json();
+  return {
+    feed: Array.isArray(payload?.feed) ? payload.feed : [],
+    alerts: Array.isArray(payload?.alerts) ? payload.alerts : [],
+  };
+}
+
+function normalizeAssistantBundlePlan(bundle, duration = "7-day") {
+  const recipes = Array.isArray(bundle?.suggestions?.meal?.recipes)
+    ? bundle.suggestions.meal.recipes
+    : [];
+  if (!recipes.length) return null;
+
   const daysByDuration = {
     "1-day": 1,
     "7-day": 7,
@@ -693,60 +982,35 @@ function buildEmergencyFallbackNormalizedPlan({ duration = "7-day", reason = "" 
     "6-month": 180,
   };
   const totalDays = daysByDuration[duration] || 7;
-  const meals = [];
-  const groceryMap = new Map();
-  for (let i = 0; i < totalDays; i += 1) {
-    const recipe = EMERGENCY_PLAN_RECIPES[i % EMERGENCY_PLAN_RECIPES.length];
-    const title = recipe.title;
-    meals.push({
-      title,
+
+  const meals = Array.from({ length: totalDays }, (_, idx) => {
+    const recipe = recipes[idx % recipes.length] || {};
+    return {
+      title: String(recipe?.title || recipe?.name || `Meal ${idx + 1}`),
       slot: "dinner",
       time: "dinner",
-      day: i + 1,
-    });
+      day: idx + 1,
+      reason: String(recipe?.reason || ""),
+    };
+  });
 
-    for (const ing of recipe.ingredients || []) {
-      const key = String(ing?.name || "").trim().toLowerCase();
-      if (!key) continue;
-      const current = groceryMap.get(key);
-      const qty = Number(ing?.qty || 0) || 0;
-      if (!current) {
-        groceryMap.set(key, {
-          name: String(ing.name),
-          qty,
-          unit: ing.unit || "unit",
-        });
-      } else {
-        current.qty += qty;
-      }
-    }
-  }
+  const shoppingList = recipes.flatMap((recipe, idx) => {
+    const baseName = String(recipe?.title || recipe?.name || `Recipe ${idx + 1}`);
+    return [{ name: `${baseName} ingredients`, qty: 1, unit: "batch" }];
+  });
 
-  const groceryList = Array.from(groceryMap.values());
+  const summary =
+    String(bundle?.narrative?.explanation || "").trim() ||
+    "Generated from planner assistant backend recommendations.";
 
   return {
     title: "Meal Plan",
-    summary: reason
-      ? `${reason} Using local fallback recipes.`
-      : "Using local fallback recipes.",
+    summary,
     meals,
-    shoppingList: groceryList,
+    shoppingList,
     prepTasks: [],
     budget: {},
     macros: {},
-    _raw: {
-      title: "Meal Plan",
-      summary: reason
-        ? `${reason} Using local fallback recipes.`
-        : "Using local fallback recipes.",
-      plan: Array.from({ length: totalDays }, (_, idx) => ({
-        day: idx + 1,
-        meals: [{ title: EMERGENCY_PLAN_RECIPES[idx % EMERGENCY_PLAN_RECIPES.length].title, time: "dinner" }],
-      })),
-      groceryList,
-      prepSchedule: [],
-      _meta: { source: "mealplanner.emergencyFallback" },
-    },
   };
 }
 
@@ -977,25 +1241,21 @@ function DraftReview({ data, onViewPlan }) {
         </button>
         <button
           className="sv-btn sv-btn--outline"
-          onClick={() =>
-            window.dispatchEvent(
-              new CustomEvent("ui:navigate", {
-                detail: { route: "ZoneAwareCalendar", params: {} },
-              })
-            )
-          }
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              window.location.assign("/meal-planning?tool=calendar");
+            }
+          }}
         >
           <span className="label">Send to Calendar</span>
         </button>
         <button
           className="sv-btn sv-btn--outline"
-          onClick={() =>
-            window.dispatchEvent(
-              new CustomEvent("ui:navigate", {
-                detail: { route: "ProcurementReport", params: {} },
-              })
-            )
-          }
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              window.location.assign("/meal-planning?tool=procurement");
+            }
+          }}
         >
           <span className="label">Open Procurement</span>
         </button>
@@ -1004,7 +1264,7 @@ function DraftReview({ data, onViewPlan }) {
   );
 }
 
-function toPlannerMealsFromPlan(plan, fallbackMealCount = 0) {
+function toPlannerMealsFromPlan(plan, estimatedMealCount = 0) {
   const rawMeals = Array.isArray(plan?.meals) ? plan.meals : [];
   if (rawMeals.length) {
     return rawMeals.map((meal, idx) => ({
@@ -1016,7 +1276,7 @@ function toPlannerMealsFromPlan(plan, fallbackMealCount = 0) {
     }));
   }
 
-  const count = Math.max(0, Number(fallbackMealCount || 0));
+  const count = Math.max(0, Number(estimatedMealCount || 0));
   return Array.from({ length: count }, (_, idx) => ({
     id: `planner_meal_${idx + 1}`,
     title: `Planned meal ${idx + 1}`,
@@ -1348,8 +1608,10 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
 
   return (
     <div className="sv-grid-2" style={{ marginTop: 12, alignItems: "start" }}>
-      <div>
-        <div className="sv-row sv-wrap" style={{ marginBottom: 10 }}>
+      <div
+        className="sv-card sv-pad"
+        style={{ width: "100%", maxWidth: 1320, marginInline: "auto" }}
+      >
           <div className="sv-card-title">Your Drafts</div>
           <div className="sv-row sv-wrap" style={{ gap: 8 }}>
             <input
@@ -1379,7 +1641,6 @@ function DraftsPane({ onPublish, onQuickViewAsCurrent }) {
               </button>
             </label>
           </div>
-        </div>
 
         <div className="sv-grid-2" style={{ gap: 12 }}>
           {filteredDrafts.length ? (
@@ -1758,59 +2019,98 @@ export default function MealPlanningPage() {
   }, [location.search, knownToolIds]);
 
   const [activeTool, setActiveTool] = useState(() => toolFromQuery || "dashboard");
+  useEffect(() => {
+    recordProductActionImpression({
+      page: "planner.meal",
+      quickActionCount: 5,
+      meta: {
+        tool: activeTool || "dashboard",
+      },
+    });
+    // Impression tracked once per page mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const probeText = useMemo(
     () => buildMealPlannerProbeText(activeTool),
     [activeTool]
   );
-  const [sacredMealAlerts, setSacredMealAlerts] = useState([
-    {
-      id: "meal-alert-1",
-      type: "info",
-      title: "Planning context synced",
-      message:
-        "Meal Planner now shares a unified Sacred visual language with Home and Storehouse.",
-      timestamp: "Now",
-    },
-    {
-      id: "meal-alert-2",
-      type: "success",
-      title: "Draft workflow ready",
-      message:
-        "Use Generate -> Draft to capture scenarios without overwriting current plan.",
-      timestamp: "5m ago",
-    },
-  ]);
+  const [sacredMealAlerts, setSacredMealAlerts] = useState([]);
+  const [mealFeed, setMealFeed] = useState([]);
+  const [mealContextLoading, setMealContextLoading] = useState(true);
+  const [mealContextError, setMealContextError] = useState("");
+  const [mealContextActionBusy, setMealContextActionBusy] = useState({});
 
-  const mealFeed = useMemo(
-    () => [
-      {
-        id: "meal-feed-1",
-        author: "Meal Planning Team",
-        content:
-          "Cycle planning now aligns prep, procurement, and storehouse signals in one weekly rhythm.",
-        timestamp: "Today 08:21",
-        likes: 17,
-        comments: 4,
-        shares: 2,
-      },
-      {
-        id: "meal-feed-2",
-        author: "Homestead Coordinator",
-        household: true,
-        content:
-          "Seasonal produce constraints were applied to this cycle to reduce procurement drift.",
-        timestamp: "Today 07:09",
-        likes: 10,
-        comments: 3,
-        shares: 1,
-      },
-    ],
-    []
-  );
+  const refreshMealContext = useCallback(async () => {
+    const householdId = resolvePlannerHouseholdId();
+    setMealContextLoading(true);
+    setMealContextError("");
+    try {
+      const payload = await fetchMealPlannerContext({ householdId });
+      setMealFeed(payload.feed);
+      setSacredMealAlerts(payload.alerts);
+    } catch (error) {
+      setMealContextError(String(error?.message || error || "Failed to load planner context."));
+    } finally {
+      setMealContextLoading(false);
+    }
+  }, []);
 
-  const dismissMealAlert = (id) => {
-    setSacredMealAlerts((prev) => prev.filter((item) => item.id !== id));
-  };
+  useEffect(() => {
+    refreshMealContext();
+  }, [refreshMealContext]);
+
+  const dismissMealAlert = useCallback(async (id) => {
+    const householdId = resolvePlannerHouseholdId();
+    setMealContextActionBusy((prev) => ({ ...prev, [id]: true }));
+    try {
+      const payload = await dismissMealPlannerContextAlert({ householdId, alertId: id, dismiss: true });
+      setMealFeed(payload.feed);
+      setSacredMealAlerts(payload.alerts);
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: { type: "success", message: "Planner alert dismissed." },
+        })
+      );
+    } catch (error) {
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: {
+            type: "error",
+            message: `Dismiss failed: ${String(error?.message || error || "unknown")}`,
+          },
+        })
+      );
+    } finally {
+      setMealContextActionBusy((prev) => ({ ...prev, [id]: false }));
+    }
+  }, []);
+
+  const onMealFeedAction = useCallback(async (postId, action) => {
+    const householdId = resolvePlannerHouseholdId();
+    const busyKey = `${postId}:${action}`;
+    setMealContextActionBusy((prev) => ({ ...prev, [busyKey]: true }));
+    try {
+      const payload = await applyMealPlannerFeedAction({ householdId, postId, action, delta: 1 });
+      setMealFeed(payload.feed);
+      setSacredMealAlerts(payload.alerts);
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: { type: "success", message: `Saved ${action} to planner context.` },
+        })
+      );
+    } catch (error) {
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: {
+            type: "error",
+            message: `Action failed: ${String(error?.message || error || "unknown")}`,
+          },
+        })
+      );
+    } finally {
+      setMealContextActionBusy((prev) => ({ ...prev, [busyKey]: false }));
+    }
+  }, []);
 
   useEffect(() => {
     if (toolFromQuery && toolFromQuery !== activeTool) {
@@ -1864,7 +2164,7 @@ export default function MealPlanningPage() {
   const [ok, setOk] = useState(false);
   const [result, setResult] = useState(null);
 
-  /* When setPlan isn't available, show an inline viewer as a fallback */
+  /* When setPlan isn't available, show an inline viewer */
   const [inlineEnvelope, setInlineEnvelope] = useState(null);
   const inlineRef = useRef(null);
 
@@ -1877,6 +2177,163 @@ export default function MealPlanningPage() {
     cleaningImpact: null,
     suggestions: [],
   });
+  const [backendCardContext, setBackendCardContext] = useState({
+    loading: true,
+    error: "",
+    data: null,
+  });
+  const [lastAutoSyncAt, setLastAutoSyncAt] = useState(null);
+  const [nowTick, setNowTick] = useState(Date.now());
+  const [contractReportCopied, setContractReportCopied] = useState(false);
+
+  function formatTimeAgo(timestamp) {
+    if (!Number(timestamp)) return "Never";
+    const deltaMs = Math.max(0, nowTick - Number(timestamp));
+    const minutes = Math.floor(deltaMs / (60 * 1000));
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
+  const buildContractReport = useCallback(() => {
+    return {
+      exportedAt: new Date().toISOString(),
+      householdId: backendCardContext.data?.householdId || resolvePlannerHouseholdId(),
+      activeTool,
+      loading: backendCardContext.loading,
+      error: backendCardContext.error || null,
+      checkedFields: backendCardContext.data?.checkedFields || [],
+      dataContractGaps: backendCardContext.data?.dataContractGaps || [],
+    };
+  }, [activeTool, backendCardContext]);
+
+  const refreshBackendCardContext = useCallback(async () => {
+    const householdId = resolvePlannerHouseholdId();
+    setBackendCardContext((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      const data = await fetchMealPlannerBackendContext({ householdId });
+      setBackendCardContext({ loading: false, error: "", data });
+      setLastAutoSyncAt(Date.now());
+    } catch (error) {
+      setBackendCardContext({
+        loading: false,
+        error: String(error?.message || error || "Failed to load backend planner context."),
+        data: null,
+      });
+    }
+  }, [activeTool]);
+
+  useEffect(() => {
+    refreshBackendCardContext();
+  }, [refreshBackendCardContext]);
+
+  useEffect(() => {
+    const tickId = window.setInterval(() => {
+      setNowTick(Date.now());
+    }, 60 * 1000);
+    return () => {
+      window.clearInterval(tickId);
+    };
+  }, []);
+
+  const copyContractReport = useCallback(async () => {
+    const report = buildContractReport();
+    const payload = JSON.stringify(report, null, 2);
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(payload);
+      } else {
+        const node = document.createElement("textarea");
+        node.value = payload;
+        node.setAttribute("readonly", "");
+        node.style.position = "absolute";
+        node.style.left = "-9999px";
+        document.body.appendChild(node);
+        node.select();
+        document.execCommand("copy");
+        document.body.removeChild(node);
+      }
+
+      setContractReportCopied(true);
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: { type: "success", message: "Contract report copied." },
+        })
+      );
+      window.setTimeout(() => setContractReportCopied(false), 1400);
+      recordProductActionClick({
+        page: "planner.meal",
+        action: "contract_report_copy",
+        status: "success",
+        mode: activeTool,
+      });
+    } catch (error) {
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: {
+            type: "error",
+            message: `Copy failed: ${String(error?.message || error || "unknown")}`,
+          },
+        })
+      );
+      recordProductActionClick({
+        page: "planner.meal",
+        action: "contract_report_copy",
+        status: "error",
+        mode: activeTool,
+      });
+    }
+  }, [activeTool, buildContractReport]);
+
+  const exportContractReport = useCallback(() => {
+    const report = buildContractReport();
+    const payload = JSON.stringify(report, null, 2);
+    const householdSlug = String(report.householdId || "household").replace(/[^a-zA-Z0-9_-]/g, "-");
+    const fileName = `contract-report-${householdSlug}-${Date.now()}.json`;
+
+    try {
+      const blob = new Blob([payload], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: { type: "success", message: "Contract report exported." },
+        })
+      );
+      recordProductActionClick({
+        page: "planner.meal",
+        action: "contract_report_export",
+        status: "success",
+        mode: activeTool,
+      });
+    } catch (error) {
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: {
+            type: "error",
+            message: `Export failed: ${String(error?.message || error || "unknown")}`,
+          },
+        })
+      );
+      recordProductActionClick({
+        page: "planner.meal",
+        action: "contract_report_export",
+        status: "error",
+        mode: activeTool,
+      });
+    }
+  }, [activeTool, buildContractReport]);
 
   /* Current plan (for Quick View / publish checks) */
   const currentPlan = useMealPlanStore?.((s) => s.plan);
@@ -1997,66 +2454,44 @@ export default function MealPlanningPage() {
 
   /* Build companion estimates & suggestions */
   async function buildCompanions(payloadForPlan) {
-    const [cook, shop, gardenUse, animals, clean, tips] = await Promise.all([
-      tryAgent(cookingAgent, "estimatePrepTime", {
-        planContext: payloadForPlan,
-        horizonMonths,
-      }),
-      tryAgent(batchCookingAgent, "estimateShoppingCost", {
-        planContext: payloadForPlan,
-        horizonMonths,
-      }),
-      tryAgent(gardenAgent, "estimateGardenUtilization", {
-        planContext: payloadForPlan,
-        horizonMonths,
-      }),
-      tryAgent(animalAgent, "estimateOutputs", {
-        planContext: payloadForPlan,
-        horizonMonths,
-      }),
-      tryAgent(cleaningAgent, "predictCleaningRipple", {
-        planContext: payloadForPlan,
-        horizonMonths,
-      }),
-      tryAgent(cookingAgent, "planSuggestions", {
-        planContext: payloadForPlan,
-        horizonMonths,
-      }),
-    ]);
-
-    // Fallback suggestions if agents missing
-    const fallback = [];
-    if (!tips?.suggestions) {
-      if (horizonMonths >= 1)
-        fallback.push("Batch cook stews monthly; freeze in 2–3 meal portions.");
-      if (horizonMonths >= 3)
-        fallback.push(
-          "Plant quick-maturing greens to cover salads next quarter."
-        );
-      if (horizonMonths >= 6)
-        fallback.push("Schedule canning/dehydrating week when garden peaks.");
-      if (horizonMonths >= 12)
-        fallback.push(
-          "Rotate preserved staples (beans, grains) every 12 months."
-        );
-      if (horizonMonths >= 24)
-        fallback.push(
-          "Review animal breeding/harvest calendar for 2-year continuity."
-        );
-    }
+    const context = backendCardContext?.data || {};
+    const backendSuggestions = Array.isArray(context?.suggestions)
+      ? context.suggestions
+      : [];
+    const prepHours = pickFiniteNumber(
+      context?.readiness?.avg_prep_hours,
+      context?.projectionStatus?.avgPrepHours
+    );
+    const shoppingCost = pickFiniteNumber(
+      context?.costDeltaShoppingCost,
+      context?.mealSnapshot?.planner_output?.shoppingCost
+    );
+    const gardenUse = pickFiniteNumber(
+      context?.foodSecurityPct,
+      context?.storehouseSnapshot?.planner_output?.gardenUsePct
+    );
 
     setEstimates({
-      prepTimeHrs: cook?.hours ?? null,
-      shoppingCost: shop?.cost ?? null,
-      gardenUsePct: gardenUse?.percent ?? null,
-      animalOutputs: animals ?? null,
-      cleaningImpact: clean ?? null,
-      suggestions: tips?.suggestions ?? fallback,
+      prepTimeHrs: prepHours,
+      shoppingCost,
+      gardenUsePct: gardenUse,
+      animalOutputs: context?.homesteadSnapshot?.animalPlan || null,
+      cleaningImpact: null,
+      suggestions: backendSuggestions,
     });
   }
 
-  /* Generate → Save as Draft (agent-first, with local fallback) */
+  /* Generate → Save as Draft */
   async function onGenerate(saveAsDraft = false) {
+    recordProductActionClick({
+      page: "planner.meal",
+      action: saveAsDraft ? "generate_to_draft" : "generate_plan",
+      status: "click",
+      meta: {
+        activeTool,
+        duration,
+      },
+    });
     setBusy(true);
     setOk(false);
     setResult(null);
@@ -2088,51 +2523,74 @@ export default function MealPlanningPage() {
 
     try {
       buildCompanions(payload); // non-blocking
-      const agent = await getMealPlanningAgent();
-
       let res = null;
-      if (agent?.handleCommand) {
-        // Use the agent router so we benefit from store + drafts integration
-        res = await agent.handleCommand("generate", payload);
-      } else if (typeof agent?.generateMealPlan === "function") {
-        // Hard fallback: call direct export
-        const plan = await agent.generateMealPlan(payload);
-        res = { mealPlan: plan };
-      } else {
-        throw new Error(
-          "mealPlanningAgent not available. Ensure mealPlanningShim or HouseholdOrchestrator is bundled."
-        );
+
+      const householdId = resolvePlannerHouseholdId();
+      const backendOut = await requestHouseholdAutomationPlan({
+        householdId,
+        preferences: {
+          cuisines,
+          dietaryNeeds: restrictions
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+        },
+        goals: {
+          prompt,
+          duration,
+          calories: Number(dietaryForPayload?.calories || 0),
+        },
+        history: {
+          presets: selectedPresets,
+          bundles: selectedBundleIds,
+        },
+      });
+
+      const normalizedFromBackend = normalizeAssistantBundlePlan(
+        backendOut?.bundle,
+        duration
+      );
+      if (!normalizedFromBackend) {
+        throw new Error("Backend planner did not return a usable meal plan payload.");
       }
+
+      res = {
+        ok: true,
+        mealPlan: coerceToEnvelope(normalizedFromBackend),
+        data: {
+          source: "backend_assistant",
+          householdId,
+        },
+      };
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: {
+            type: "success",
+            message: "Generated via backend planner assistant.",
+          },
+        })
+      );
+
+      refreshBackendCardContext();
 
       const normalized = normalizePlan(res);
       const mealCount = Array.isArray(normalized?.meals) ? normalized.meals.length : 0;
       if (!res?.ok || mealCount < 1) {
-        const reason = buildGenerateFailureMessage(res, normalized);
-        const fallback = buildEmergencyFallbackNormalizedPlan({ duration, reason });
-        const fallbackCount = Array.isArray(fallback?.meals) ? fallback.meals.length : 0;
-        if (fallbackCount > 0) {
-          setResult(fallback);
-          setOk(true);
-          window.dispatchEvent(
-            new CustomEvent("toast", {
-              detail: {
-                type: "warning",
-                message: `${reason} Using local recipe fallback.`,
-              },
-            })
-          );
-        } else {
-          throw new Error(reason);
-        }
-      } else {
-        setResult(normalized);
-        setOk(true);
+        throw new Error(buildGenerateFailureMessage(res, normalized));
       }
+      setResult(normalized);
+      setOk(true);
+      recordProductActionClick({
+        page: "planner.meal",
+        action: saveAsDraft ? "generate_to_draft" : "generate_plan",
+        status: "success",
+        meta: {
+          activeTool,
+          mealCount,
+        },
+      });
 
-      const normalizedForDownstream =
-        Array.isArray(normalized?.meals) && normalized.meals.length
-          ? normalized
-          : buildEmergencyFallbackNormalizedPlan({ duration });
+      const normalizedForDownstream = normalized;
 
       // Auto-forward normalized generated plan into downstream estimate inputs.
       // This keeps animal/garden/preservation estimation grounded in final outputs.
@@ -2185,7 +2643,7 @@ export default function MealPlanningPage() {
       // Ensure a real local draft record exists whenever draft mode is used.
       // Some upstream flows may return draftId without persisting to MealPlanDraftStore.
       let ensuredDraftId = res?.data?.draftId || null;
-      let usedLocalDraftFallback = false;
+      let usedLocalDraftBridge = false;
       if (saveAsDraft) {
         const existing = ensuredDraftId ? getDraftAPI(ensuredDraftId) : null;
         if (!existing) {
@@ -2206,7 +2664,7 @@ export default function MealPlanningPage() {
               },
               tags: ["generated"],
             });
-            usedLocalDraftFallback = true;
+            usedLocalDraftBridge = true;
           }
         }
       }
@@ -2222,7 +2680,7 @@ export default function MealPlanningPage() {
         plannerGaps,
         estimateInputs,
         currentPlanId: currentPlan?.id || null,
-        fallbackPlanId: ensuredDraftId || res?.data?.draftId || null,
+        inferredPlanId: ensuredDraftId || res?.data?.draftId || null,
       });
       if (!persistenceResult?.ok && !persistenceResult?.skipped) {
         console.warn(
@@ -2250,11 +2708,11 @@ export default function MealPlanningPage() {
               duration,
             });
           } else if (envelope) {
-            // fallback: inline full viewer if store is missing
+            // Inline full viewer if store is missing
             setInlineEnvelope(envelope);
           }
         } catch (e) {
-          console.warn("[MealPlanner] setPlan fallback failed", e);
+          console.warn("[MealPlanner] setPlan bridge failed", e);
           try {
             const envelope = coerceToEnvelope(normalizedForDownstream);
             if (envelope) setInlineEnvelope(envelope);
@@ -2321,7 +2779,7 @@ export default function MealPlanningPage() {
         })
       );
 
-      if (saveAsDraft && usedLocalDraftFallback) {
+      if (saveAsDraft && usedLocalDraftBridge) {
         window.dispatchEvent(
           new CustomEvent("toast", {
             detail: {
@@ -2334,6 +2792,15 @@ export default function MealPlanningPage() {
 
       setTimeout(() => setOk(false), 900);
     } catch (e) {
+      recordProductActionClick({
+        page: "planner.meal",
+        action: saveAsDraft ? "generate_to_draft" : "generate_plan",
+        status: "error",
+        meta: {
+          activeTool,
+          message: String(e?.message || e || "unknown"),
+        },
+      });
       setResult({
         title: "Meal Plan",
         summary: e?.message || String(e),
@@ -2387,6 +2854,14 @@ export default function MealPlanningPage() {
   }
 
   async function onSaveCurrentAsDraft() {
+    recordProductActionClick({
+      page: "planner.meal",
+      action: "save_current_as_draft",
+      status: "click",
+      meta: {
+        activeTool,
+      },
+    });
     const current = currentPlan;
     if (!current?.plan?.length) {
       alert("No current plan found.");
@@ -2402,6 +2877,14 @@ export default function MealPlanningPage() {
         detail: { type: "success", message: "Current plan saved as draft." },
       })
     );
+    recordProductActionClick({
+      page: "planner.meal",
+      action: "save_current_as_draft",
+      status: "success",
+      meta: {
+        activeTool,
+      },
+    });
   }
 
   const quickAgents = [
@@ -2443,9 +2926,26 @@ export default function MealPlanningPage() {
     }
   };
 
+  const openMealThread = (prefill = "Need support coordinating the next meal planning cycle.") => {
+    try {
+      eventBus.emit("profile/messages/open-thread", {
+        type: "profile/messages/open-thread",
+        source: "mealplanner.page",
+        data: {
+          conversationId: "dm-1",
+          moduleKey: "meals",
+          actionType: "assist",
+          prefill,
+        },
+      });
+    } catch {
+      // Message intent should not block planner workflows.
+    }
+  };
+
   /* ---------------------------- Render ---------------------------- */
   return (
-    <div className="sv-container">
+    <div className="sv-container ssa-content-flow">
       <div
         data-testid="meal-planner-content-probe"
         style={{
@@ -2461,56 +2961,56 @@ export default function MealPlanningPage() {
         {probeText}
       </div>
 
-      <div className="sv-hero sv-pad">
+      <div className="sv-hero sv-pad ssa-hero-wrap">
         <div
           className="sv-row sv-wrap"
           style={{ justifyContent: "space-between", alignItems: "flex-end" }}
         >
           <div>
-            <div className="sv-pageTitle">Meal Planner</div>
-            <div className="sv-muted">
+            <div className="sv-row sv-wrap" style={{ gap: 8, alignItems: "center" }}>
+              <h1 className="sv-pageTitle m-0 text-[var(--ssa-text-primary)]">Meal Planner</h1>
+              <span className="ssa-hero-chip">
+                Last auto-sync: {formatTimeAgo(lastAutoSyncAt)}
+              </span>
+            </div>
+            <div className="sv-muted text-[var(--ssa-text-secondary)]">
               Organize cycles, prep tasks, drafts, and procurement with one
               click.
             </div>
           </div>
 
-          <div className="sv-actions" style={{ flexWrap: "wrap" }}>
-            <button
-              className="sv-btn sv-btn--primary"
+          <div className="sv-actions ssa-hero-actions">
+            <SSAButton
               aria-busy={busy}
               onClick={() => onGenerate(false)}
               title="Generate and publish to Current Plan"
               type="button"
             >
-              <span className="label">
-                {busy ? "Working…" : "Generate Plan"}
-              </span>
-            </button>
-            <button
-              className="sv-btn sv-btn--outline"
+              {busy ? "Working..." : "Generate Plan"}
+            </SSAButton>
+            <SSAButton
+              variant="secondary"
               aria-busy={busy}
               onClick={() => onGenerate(true)}
               title="Generate and store as a Draft (does not overwrite current plan)"
               type="button"
             >
-              <span className="label">
-                {busy ? "Working…" : "Generate → Draft"}
-              </span>
-            </button>
-            <button
-              className="sv-btn sv-btn--outline"
+              {busy ? "Working..." : "Generate -> Draft"}
+            </SSAButton>
+            <SSAButton
+              variant="secondary"
               onClick={onSaveCurrentAsDraft}
               type="button"
             >
-              <span className="label">Save Current as Draft</span>
-            </button>
-            <button
-              className="sv-btn sv-btn--outline"
+              Save Current as Draft
+            </SSAButton>
+            <SSAButton
+              variant="secondary"
               onClick={() => setResult(null)}
               type="button"
             >
-              <span className="label">Clear</span>
-            </button>
+              Clear
+            </SSAButton>
             <a
               className="sv-btn sv-btn--outline"
               href="/meal-planning/planner-dashboard"
@@ -2518,6 +3018,13 @@ export default function MealPlanningPage() {
             >
               <span className="label">Open Planner Dashboard</span>
             </a>
+            <SSAButton
+              variant="secondary"
+              onClick={() => openMealThread()}
+              type="button"
+            >
+              Message Team
+            </SSAButton>
             {ok ? (
               <span className="sv-muted" style={{ color: "var(--success)" }}>
                 ✓ Done
@@ -2527,7 +3034,7 @@ export default function MealPlanningPage() {
         </div>
       </div>
 
-      <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+      <div className="sv-card sv-pad ssa-panel-balanced ssa-interactive-panel" style={{ marginTop: 12 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
           <SacredAvatar
             name="Meal Planner Module"
@@ -2548,69 +3055,262 @@ export default function MealPlanningPage() {
           </div>
         </div>
 
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 12, width: "100%", maxWidth: 1420, marginInline: "auto" }}>
           <DashboardGrid columns={3}>
             <SacredCard
               kind="dashboard"
               title="Planner Mode"
-              subtitle="Active tool"
-              value={activeTool || "dashboard"}
+              subtitle="Backend planner context"
+              value={
+                backendCardContext.loading
+                  ? "Loading..."
+                  : backendCardContext.data?.plannerMode?.tool || "Contract gap"
+              }
               delta={3}
               icon={<CalendarDays className="h-5 w-5" />}
-              footer="Driven by URL tool param"
+              footer={
+                backendCardContext.error
+                  ? `Backend error: ${backendCardContext.error}`
+                  : backendCardContext.data?.dataContractGaps?.includes("plannerMode.tool")
+                  ? "Data contract gap: plannerMode.tool missing"
+                  : backendCardContext.data?.plannerMode?.status || "Planner mode unavailable"
+              }
             >
-              Keep focus between dashboard, cycle, prep, and procurement tools.
+              {backendCardContext.loading
+                ? "Loading planner mode from backend..."
+                : backendCardContext.data?.plannerMode?.lastRunAt
+                ? `Last backend run: ${new Date(
+                    backendCardContext.data.plannerMode.lastRunAt
+                  ).toLocaleString()}`
+                : "No backend run timestamp returned."}
             </SacredCard>
             <SacredCard
               kind="meal"
               title="Food Security"
-              subtitle="Garden utilization proxy"
+              subtitle="Backend estimator signal"
               value={
-                estimates.gardenUsePct != null
-                  ? `${Math.round(Number(estimates.gardenUsePct))}%`
-                  : "--"
+                backendCardContext.loading
+                  ? "Loading..."
+                  : backendCardContext.data?.foodSecurityPct != null
+                  ? `${Math.round(Number(backendCardContext.data.foodSecurityPct))}%`
+                  : "Contract gap"
               }
               delta={2}
               icon={<Leaf className="h-5 w-5" />}
-              footer="Current cycle confidence"
+              footer={
+                backendCardContext.error
+                  ? "Estimator unavailable in backend"
+                  : backendCardContext.data?.dataContractGaps?.includes("foodSecurityPct")
+                  ? "Data contract gap: foodSecurityPct missing"
+                  : "Current cycle confidence"
+              }
             >
-              Uses planning context and household inputs to estimate resilience.
+              {backendCardContext.loading
+                ? "Requesting food-security signal from backend planner endpoints..."
+                : backendCardContext.data?.dataContractGaps?.includes("foodSecurityPct")
+                ? "Backend did not return foodSecurityPct. Check planner_output contract."
+                : "Uses backend planner context to estimate resilience."}
             </SacredCard>
             <SacredCard
               kind="storehouse"
               title="Cost Delta"
-              subtitle="Projected shopping cost"
+              subtitle="Backend projected shopping cost"
               value={
-                estimates.shoppingCost != null
-                  ? `$${Number(estimates.shoppingCost).toFixed(2)}`
-                  : "--"
+                backendCardContext.loading
+                  ? "Loading..."
+                  : backendCardContext.data?.costDeltaShoppingCost != null
+                  ? `$${Number(backendCardContext.data.costDeltaShoppingCost).toFixed(2)}`
+                  : "Contract gap"
               }
               delta={1}
               icon={<ShoppingBasket className="h-5 w-5" />}
-              footer="Compared to baseline"
+              footer={
+                backendCardContext.error
+                  ? "Backend cost delta unavailable"
+                  : backendCardContext.data?.dataContractGaps?.includes("costDeltaShoppingCost")
+                  ? "Data contract gap: costDeltaShoppingCost missing"
+                  : "Compared to baseline"
+              }
+              interactionTitle="Open procurement view"
+              onClick={() => {
+                navigate({ pathname: "/meal-planning", search: "?tool=procurement" }, { replace: false });
+                recordProductActionClick({
+                  page: "planner.meal",
+                  action: "cost_delta_open_procurement",
+                  status: "click",
+                  mode: activeTool,
+                });
+              }}
             >
-              Watch this to keep budget drift visible before purchase runs.
+              {backendCardContext.data?.dataContractGaps?.includes("costDeltaShoppingCost")
+                ? "Backend did not return costDeltaShoppingCost. Check planner_output budget/costDelta fields."
+                : "Watch this to keep budget drift visible before purchase runs."}
             </SacredCard>
           </DashboardGrid>
+
+          <div
+            className="sv-card"
+            style={{
+              marginTop: 10,
+              padding: 12,
+              border: "1px solid var(--border)",
+              background: "var(--surface)",
+            }}
+          >
+            {/* Strict mode contract panel: makes missing backend keys explicit for the current run. */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              <strong style={{ color: "var(--fg)" }}>Contract Fields (Strict Backend)</strong>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span className="sv-muted" style={{ fontSize: 12 }}>
+                  Household: {backendCardContext.data?.householdId || resolvePlannerHouseholdId()}
+                </span>
+                <SSAButton
+                  type="button"
+                  variant="secondary"
+                  onClick={copyContractReport}
+                  title="Copy strict backend contract report to clipboard"
+                  className="min-h-[34px]"
+                >
+                  {contractReportCopied ? "Copied" : "Copy Contract Report"}
+                </SSAButton>
+                <SSAButton
+                  type="button"
+                  variant="secondary"
+                  onClick={exportContractReport}
+                  title="Download strict backend contract report as .json"
+                  className="min-h-[34px]"
+                >
+                  Export .json
+                </SSAButton>
+              </div>
+            </div>
+
+            {backendCardContext.loading ? (
+              <div className="sv-muted" style={{ marginTop: 8 }}>
+                Checking backend contract fields...
+              </div>
+            ) : backendCardContext.error ? (
+              <div style={{ marginTop: 8, color: "var(--danger)" }}>
+                Backend error: {backendCardContext.error}
+              </div>
+            ) : (
+              <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                {(backendCardContext.data?.checkedFields || []).map((field) => {
+                  const isMissing = field?.status === "missing";
+                  return (
+                    <div
+                      key={field?.key}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "180px 90px 1fr",
+                        gap: 10,
+                        alignItems: "center",
+                        padding: "6px 8px",
+                        borderRadius: 10,
+                        background: isMissing
+                          ? "color-mix(in srgb, var(--danger) 10%, var(--surface))"
+                          : "color-mix(in srgb, var(--success) 8%, var(--surface))",
+                        border: `1px solid ${isMissing ? "color-mix(in srgb, var(--danger) 45%, var(--border))" : "color-mix(in srgb, var(--success) 35%, var(--border))"}`,
+                        fontSize: 12,
+                      }}
+                    >
+                      <code style={{ color: "var(--fg)" }}>{field?.key}</code>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          color: isMissing ? "var(--danger)" : "var(--success)",
+                        }}
+                      >
+                        {isMissing ? "missing" : "present"}
+                      </span>
+                      <span className="sv-muted" style={{ overflowWrap: "anywhere" }}>
+                        {field?.source ? `source: ${field.source}` : "source: n/a"}
+                        {field?.value != null ? ` | value: ${String(field.value)}` : ""}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-          <div style={{ display: "grid", gap: 10 }}>
-            {mealFeed.map((item) => (
-              <FeedPost key={item.id} {...item} />
-            ))}
+          <div className="sv-card sv-pad">
+            <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <strong style={{ color: "var(--fg)" }}>Planner Activity Feed</strong>
+              <SSAButton type="button" variant="secondary" onClick={refreshMealContext}>
+                Refresh
+              </SSAButton>
+            </div>
+            {mealContextLoading ? (
+              <div className="sv-muted" style={{ marginTop: 8 }}>Loading planner context from backend...</div>
+            ) : mealContextError ? (
+              <>
+                <div className="sv-muted" style={{ marginTop: 6 }}>{mealContextError}</div>
+                <button type="button" className="sv-btn sv-btn--outline" onClick={refreshMealContext} style={{ marginTop: 10 }}>
+                  <span className="label">Retry</span>
+                </button>
+              </>
+            ) : (
+              <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                {mealFeed.length ? (
+                  mealFeed.map((item) => (
+                    <FeedPost
+                      key={item.id}
+                      {...item}
+                      onLike={() => onMealFeedAction(item.id, "like")}
+                      onComment={() => onMealFeedAction(item.id, "comment")}
+                      onShare={() => onMealFeedAction(item.id, "share")}
+                      busyLike={Boolean(mealContextActionBusy[`${item.id}:like`])}
+                      busyComment={Boolean(mealContextActionBusy[`${item.id}:comment`])}
+                      busyShare={Boolean(mealContextActionBusy[`${item.id}:share`])}
+                    />
+                  ))
+                ) : (
+                  <div className="sv-muted">No planning feed items returned from backend.</div>
+                )}
+              </div>
+            )}
           </div>
-          <div style={{ display: "grid", gap: 10 }}>
-            {sacredMealAlerts.map((item) => (
-              <Notification
-                key={item.id}
-                type={item.type}
-                title={item.title}
-                message={item.message}
-                timestamp={item.timestamp}
-                onDismiss={() => dismissMealAlert(item.id)}
-              />
-            ))}
+
+          <div className="sv-card sv-pad">
+            <strong style={{ color: "var(--fg)" }}>Planner Alerts</strong>
+            {mealContextLoading ? (
+              <div className="sv-muted" style={{ marginTop: 8 }}>Loading planner alerts...</div>
+            ) : mealContextError ? (
+              <div className="sv-muted" style={{ marginTop: 8 }}>Alerts unavailable while planner context is failing.</div>
+            ) : (
+              <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                {sacredMealAlerts.length ? (
+                  sacredMealAlerts.map((item) => (
+                    <Notification
+                      key={item.id}
+                      type={item.type}
+                      title={item.title}
+                      message={item.message}
+                      timestamp={item.timestamp}
+                      updatedBy={item.updatedBy}
+                      actionLog={item.actionLog}
+                      lastAction={item.lastAction}
+                      lastActionAt={item.lastActionAt}
+                      dismissing={Boolean(mealContextActionBusy[item.id])}
+                      onDismiss={() => dismissMealAlert(item.id)}
+                    />
+                  ))
+                ) : (
+                  <div className="sv-muted">No planner alerts returned from backend.</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -3079,11 +3779,9 @@ export default function MealPlanningPage() {
                     }
                   />
                 ) : (
-                  <Suspense
-                    fallback={<div className="sv-muted">Loading panel…</div>}
-                  >
+                  <LoadingBoundary placeholder={<div className="sv-muted">Loading panel…</div>}>
                     <SafeProps>{ActiveToolElement}</SafeProps>
-                  </Suspense>
+                  </LoadingBoundary>
                 )}
               </div>
             </ToolErrorBoundary>
@@ -3165,7 +3863,7 @@ export default function MealPlanningPage() {
                   return;
                 }
               }
-              // Fallback: render a full inline plan viewer on this page
+              // Render a full inline plan viewer on this page
               setInlineEnvelope(envelope);
               setActiveTool("dashboard");
               setTimeout(() => {
@@ -3179,7 +3877,7 @@ export default function MealPlanningPage() {
             }}
           />
 
-          {/* Inline fallback full-plan viewer */}
+          {/* Inline full-plan viewer */}
           <div ref={inlineRef}>
             {inlineEnvelope ? (
               <InlinePlanViewer envelope={inlineEnvelope} />
