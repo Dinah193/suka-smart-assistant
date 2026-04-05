@@ -83,6 +83,7 @@ Go/No-Go:
 - Notes:
 
 ## 8. Recent Release Log
+- 2026-04-04: Drafted merge-readiness snapshot for PR #41 (SSA meal planner integration slices). Evidence: commits `7ca8411` and `4632dcc`; quality lanes passed (`lint:ci`, `typecheck:ci`, `test:ssa:rollout:gate` 14/14 files, 27/27 tests, `smoke:consolidated`, `smoke:consolidated:check`, `smoke:e2e` 2/2 files, 5/5 tests); targeted planner tests passed (`_tests_/mealPlanner.toolProbe.contract.test.js`, `_tests_/mealPlannerBridge.ui.integration.test.js`, `_tests_/mealPlanView.slotAlerts.contract.test.js`, `_tests_/mealPlanner.controls.contract.test.jsx`). Manual QA on `/meal-planning?tool=dashboard` confirmed template/duration/budget/prompt control behavior and hero actions; known runtime caveat persists for assistant plan POST abort in local dev.
 - 2026-04-04: Closed SSA visual design-system hardening (showcase contract/snapshot + route smoke for `/design/ssa-showcase`); targeted suite PASSED (`_tests_/ssaShowcasePage.contract.snapshot.test.jsx`, `_tests_/ssaShowcase.route.smoke.contract.test.jsx`: 2 files, 3 tests), and broader confidence lane PASSED (`test:ssa:rollout:gate`, `lint:ci`, `typecheck:ci`, `smoke:consolidated`, `smoke:consolidated:check`).
 - 2026-04-04: Closed DM persistence and cross-module thread integration phase (assign action task/notification persistence + deep-link/open-thread/unread/retry integration coverage); `test:ssa:rollout:gate` PASSED (14 files, 27 tests), broader CI checks PASSED (`lint:ci`, `typecheck:ci`, `smoke:e2e` 5/5), and consolidated smoke artifact validation PASSED at `docs/qa/consolidated-smoke-contract-report-latest.json`.
 - 2026-04-04: Closed SSA notifications panel phase (module-wide seasonal alert/task integration + notifications contract/snapshot gate coverage); `gate:fast:logged` PASSED with archived evidence at `docs/qa/release-artifacts/gate-fast-latest-2026-04-04-notifications.log`.
@@ -96,3 +97,41 @@ Go/No-Go:
 - 2026-03-18: Merged PR #19 (UX polish pass: a11y/mobile refinements + interaction/accessibility contracts), merge commit `8d780ff`.
 - 2026-03-18: Interactive browser smoke evidence on `main`: Storehouse UI add/edit/remove/low-stock strip passed visually, Meal Planning collaboration controls rendered and were clickable, local runtime caveats observed (`/api/planners/storehouse/inventory` returned 404 and socket offline prevented realtime ack).
 - Task status: DONE - guardrails applied for formatter JSX extension regression prevention and ownership routing.
+
+## 9. Merge Readiness Snapshot (PR #41)
+
+Scope:
+- SSA meal planner integration slice 2: header/actions + draft controls (`7ca8411`).
+- SSA meal planner integration slice 3: template/duration/budget/prompt controls (`4632dcc`).
+
+### Gate Status
+
+- [x] `lint:ci` PASS
+- [x] `typecheck:ci` PASS
+- [x] `test:ssa:rollout:gate` PASS (14 files, 27 tests)
+- [x] `smoke:consolidated` PASS (with known non-fatal `act(...)` warning in bridge UI test stderr)
+- [x] `smoke:consolidated:check` PASS (`docs/qa/consolidated-smoke-contract-report-latest.json`)
+- [x] `smoke:e2e` PASS (2 files, 5 tests)
+- [x] Planner-targeted tests PASS:
+	- `_tests_/mealPlanner.toolProbe.contract.test.js` (3 tests)
+	- `_tests_/mealPlannerBridge.ui.integration.test.js` (1 test)
+	- `_tests_/mealPlanView.slotAlerts.contract.test.js` (1 test)
+	- `_tests_/mealPlanner.controls.contract.test.jsx` (1 test)
+
+### Manual QA Status
+
+- [x] `/meal-planning?tool=dashboard` loaded with local QA backend flags.
+- [x] `Template` control changed and persisted in UI state.
+- [x] `Duration` control changed and persisted in UI state.
+- [x] `Budget (USD)` control updated and persisted in UI state.
+- [x] `Prompt` control updated and persisted in UI state.
+- [x] Hero action interaction sanity: `Generate -> Draft`, `Clear`.
+
+### Known Issues / Risks
+
+- [ ] Local runtime caveat: `POST /api/planners/assistant/plan` can abort in dev during Generate flow (`AbortError`/`net::ERR_ABORTED`).
+- [ ] Local backend requires QA startup flags for auth/policy bypass and optional infra (`SSA_DEV_AUTH_BYPASS`, `SSA_DEV_POLICY_BYPASS`, `POSTGRES_REQUIRED=false`, `NEO4J_REQUIRED=false`, `PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED=true`).
+
+Decision:
+- Current merge recommendation: `READY WITH KNOWN DEV-RUNTIME CAVEAT`.
+- Promote to strict `READY` once assistant plan POST reliability is validated in target environment (or explicitly waived for this slice).
