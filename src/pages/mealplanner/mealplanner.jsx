@@ -34,7 +34,7 @@ import {
   FeedPost,
   Notification,
 } from "@/components/sacred";
-import { SSAButton, SSAInput } from "@/components/ssa";
+import { SSAButton, SSAField, SSAInput, SSASelect } from "@/components/ssa";
 import {
   recordProductActionClick,
   recordProductActionImpression,
@@ -3377,10 +3377,8 @@ export default function MealPlanningPage() {
                 gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
               }}
             >
-              <label>
-                <div style={{ fontWeight: 700 }}>Template</div>
-                <select
-                  className="sv-input"
+              <SSAField label="Template">
+                <SSASelect
                   value={templateId}
                   onChange={(e) => setTemplateId(e.target.value)}
                   style={{ width: "100%" }}
@@ -3394,15 +3392,13 @@ export default function MealPlanningPage() {
                   <option value="garden-forward">
                     Garden-Forward + Preservation
                   </option>
-                </select>
-              </label>
+                </SSASelect>
+              </SSAField>
 
-              <label>
-                <div style={{ fontWeight: 700 }}>Duration</div>
-                <select
+              <SSAField label="Duration">
+                <SSASelect
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="sv-input"
                   style={{ width: "100%" }}
                 >
                   <option>1-day</option>
@@ -3411,13 +3407,11 @@ export default function MealPlanningPage() {
                   <option>1-month</option>
                   <option>3-month</option>
                   <option>6-month</option>
-                </select>
-              </label>
+                </SSASelect>
+              </SSAField>
 
-              <label>
-                <div style={{ fontWeight: 700 }}>Budget (USD)</div>
-                <input
-                  className="sv-input"
+              <SSAField label="Budget (USD)">
+                <SSAInput
                   type="number"
                   min="0"
                   placeholder="e.g., 120"
@@ -3425,20 +3419,20 @@ export default function MealPlanningPage() {
                   onChange={(e) => setBudget(e.target.value)}
                   style={{ width: "100%" }}
                 />
-              </label>
+              </SSAField>
             </div>
 
             {/* Prompt */}
-            <label style={{ display: "block", marginTop: 12 }}>
-              <div style={{ fontWeight: 700 }}>Prompt</div>
-              <input
-                className="sv-input"
-                placeholder="What should the plan optimize for?"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                style={{ width: "100%" }}
-              />
-            </label>
+            <div style={{ marginTop: 12 }}>
+              <SSAField label="Prompt">
+                <SSAInput
+                  placeholder="What should the plan optimize for?"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  style={{ width: "100%" }}
+                />
+              </SSAField>
+            </div>
 
             {/* Cuisines */}
             <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
