@@ -233,6 +233,7 @@ describe("meal planner feed interaction UI contract", () => {
   let root;
   let fetchMock;
   let feedState;
+  let homesteadCollaborationState;
   let failLike;
   let toasts;
 
@@ -250,6 +251,21 @@ describe("meal planner feed interaction UI contract", () => {
         shares: 2,
       },
     ];
+    homesteadCollaborationState = {
+      feed: [
+        {
+          id: "homestead-feed-1",
+          author: "Homestead Coordination Team",
+          content: "Baseline homestead collaboration post",
+          timestamp: "Today 07:15",
+          likes: 9,
+          coordinates: 2,
+          shares: 3,
+          updatedBy: null,
+          actionLog: [],
+        },
+      ],
+    };
     failLike = false;
     toasts = [];
 
@@ -277,7 +293,44 @@ describe("meal planner feed interaction UI contract", () => {
             : item
         );
 
+        if (action === "share") {
+          homesteadCollaborationState = {
+            ...homesteadCollaborationState,
+            feed: [
+              {
+                id: `meal-handoff-meal-feed-1-${Date.now()}`,
+                author: "Meal Planner Handoff",
+                content:
+                  "Meal planner shared an update for cross-module follow-up. Review and coordinate next actions.",
+                timestamp: "Now",
+                likes: 0,
+                coordinates: 0,
+                shares: 0,
+                source: "meal-planner",
+                sourcePostId: "meal-feed-1",
+                updatedBy: "dev-local-user",
+                lastAction: "handoff_from_meal",
+                actionLog: [
+                  {
+                    action: "handoff_from_meal",
+                    updatedBy: "dev-local-user",
+                  },
+                ],
+              },
+              ...(homesteadCollaborationState.feed || []),
+            ],
+          };
+        }
+
         return jsonResponse({ ok: true, householdId: "default-household", feed: feedState, alerts: [] });
+      }
+
+      if (href.includes("/api/planners/homestead/collaboration")) {
+        return jsonResponse({
+          ok: true,
+          householdId: "default-household",
+          collaboration: homesteadCollaborationState,
+        });
       }
 
       if (href.includes("/api/planners/meal/context")) {
@@ -398,5 +451,37 @@ describe("meal planner feed interaction UI contract", () => {
     expect(container.querySelector('[data-testid="likes-meal-feed-1"]').textContent).toBe("17");
     expect(container.querySelector('[data-testid="busy-like-meal-feed-1"]').textContent).toBe("idle");
     expect(toasts.some((entry) => entry?.type === "error")).toBe(true);
+  });
+
+  it("verifies share interaction creates cross-module homestead handoff state", async () => {
+    await act(async () => {
+      root.render(
+        React.createElement(
+          MemoryRouter,
+          { initialEntries: ["/meal-planning?tool=dashboard"] },
+          React.createElement(MealPlanningPage)
+        )
+      );
+    });
+
+    await flush();
+
+    await act(async () => {
+      container.querySelector('[data-testid="share-meal-feed-1"]').click();
+    });
+    await flush();
+
+    const res = await fetch("/api/planners/homestead/collaboration?householdId=default-household");
+    expect(res.ok).toBe(true);
+    const payload = await res.json();
+    const topFeedEntry = payload?.collaboration?.feed?.[0] || null;
+
+    expect(topFeedEntry).toMatchObject({
+      author: "Meal Planner Handoff",
+      source: "meal-planner",
+      sourcePostId: "meal-feed-1",
+      updatedBy: "dev-local-user",
+      lastAction: "handoff_from_meal",
+    });
   });
 });
