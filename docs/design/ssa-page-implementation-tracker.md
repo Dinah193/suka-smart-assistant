@@ -17,7 +17,7 @@ Status key:
 
 | Route | Page File | DOET Matrix Status | SSA UI Scope | Owner | Status | Notes |
 |---|---|---|---|---|---|---|
-| `/meal-planning?tool=dashboard` | `src/pages/mealplanner/mealplanner.jsx` | Implemented | Apply mission-control layout, tokenized cards/actions, collaboration strip | TBD | In Progress | Slices landed for header/actions and template-duration-budget-prompt controls; regression coverage added in `_tests_/mealPlanner.controls.contract.test.jsx` |
+| `/meal-planning?tool=dashboard` | `src/pages/mealplanner/mealplanner.jsx` | Implemented | Apply mission-control layout, tokenized cards/actions, collaboration strip | TBD | Ready for QA | Slices landed for header/actions and template-duration-budget-prompt controls; Slice A/B social persistence + handoff coverage landed (`_tests_/mealPlanner.contextFeedActions.contract.test.js`, `_tests_/mealPlanner.feedInteractions.ui.contract.test.jsx`, `_tests_/mealPlanner.crossModuleHandoff.contract.test.js`) with startup hardening in `2d9974e` |
 | `/meal-planning/planner-dashboard` | `src/pages/mealplanner/PlannerScaffoldPage.jsx` | Implemented | Standardize planner dashboard cards and KPI hierarchy | TBD | Not Started | Must align with `PlannerDashboardCard` |
 | `/storehouse` | `src/pages/storehouse/storehouse.jsx` | Implemented | Tri-pane responsive structure and status token integration | TBD | Not Started | Tie low-stock and agreement strip into shared status model |
 | `/storehouse/planner` | `src/pages/storehouse/planner/StorehousePlanner.jsx` | Implemented | Inventory table + queue surfaces aligned to tokens/states | TBD | Not Started | Validate keyboard and focus behavior in table flows |
@@ -64,6 +64,7 @@ Status key:
 - 2026-04-04: Meal planner control regression test added at `_tests_/mealPlanner.controls.contract.test.jsx`.
 - Coverage confirms interactive behavior for `Template`, `Duration`, `Budget (USD)`, and `Prompt` controls on `/meal-planning?tool=dashboard`.
 - Validation run: `npm run test:ci -- _tests_/mealPlanner.controls.contract.test.jsx --reporter=dot` (pass).
+- 2026-04-04: Social feed phase verification complete for meal planner with final quality lanes green (`lint:ci`, `typecheck:ci`, `test:ssa:rollout:gate`, `smoke:consolidated`, `smoke:consolidated:check`, `smoke:e2e`) and targeted Slice A/B planner pack pass (3 files, 6 tests).
 
 ## Suggested Execution Order
 

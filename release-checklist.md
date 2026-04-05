@@ -83,6 +83,7 @@ Go/No-Go:
 - Notes:
 
 ## 8. Recent Release Log
+- 2026-04-04: Closed meal-planner social feed persistence + cross-module handoff phase for PR #41. Scope commits: `273dd84` (Slice A backend/UI contracts), `7b807f1` (Slice B backend bridge + handoff contract), `e7835a2` (Slice B UI handoff verification), `2d9974e` (targeted startup/stability hardening for feed action contracts). Final verification pass: `lint:ci` PASS, `typecheck:ci` PASS, `test:ssa:rollout:gate` PASS (14 files, 27 tests), `smoke:consolidated` PASS (3 passed, 2 skipped, known non-fatal `act(...)` warning in bridge UI test), `smoke:consolidated:check` PASS, `smoke:e2e` PASS (2 files, 5 tests), targeted Slice A/B planner pack PASS (3 files, 6 tests). Note: an earlier transient `health_timeout` was observed and then resolved after stabilization hardening + rerun.
 - 2026-04-04: Drafted merge-readiness snapshot for PR #41 (SSA meal planner integration slices). Evidence: commits `7ca8411` and `4632dcc`; quality lanes passed (`lint:ci`, `typecheck:ci`, `test:ssa:rollout:gate` 14/14 files, 27/27 tests, `smoke:consolidated`, `smoke:consolidated:check`, `smoke:e2e` 2/2 files, 5/5 tests); targeted planner tests passed (`_tests_/mealPlanner.toolProbe.contract.test.js`, `_tests_/mealPlannerBridge.ui.integration.test.js`, `_tests_/mealPlanView.slotAlerts.contract.test.js`, `_tests_/mealPlanner.controls.contract.test.jsx`). Manual QA on `/meal-planning?tool=dashboard` confirmed template/duration/budget/prompt control behavior and hero actions; known runtime caveat persists for assistant plan POST abort in local dev.
 - 2026-04-04: Closed SSA visual design-system hardening (showcase contract/snapshot + route smoke for `/design/ssa-showcase`); targeted suite PASSED (`_tests_/ssaShowcasePage.contract.snapshot.test.jsx`, `_tests_/ssaShowcase.route.smoke.contract.test.jsx`: 2 files, 3 tests), and broader confidence lane PASSED (`test:ssa:rollout:gate`, `lint:ci`, `typecheck:ci`, `smoke:consolidated`, `smoke:consolidated:check`).
 - 2026-04-04: Closed DM persistence and cross-module thread integration phase (assign action task/notification persistence + deep-link/open-thread/unread/retry integration coverage); `test:ssa:rollout:gate` PASSED (14 files, 27 tests), broader CI checks PASSED (`lint:ci`, `typecheck:ci`, `smoke:e2e` 5/5), and consolidated smoke artifact validation PASSED at `docs/qa/consolidated-smoke-contract-report-latest.json`.
@@ -131,6 +132,7 @@ Scope:
 
 - [ ] Local runtime caveat: `POST /api/planners/assistant/plan` can abort in dev during Generate flow (`AbortError`/`net::ERR_ABORTED`).
 - [ ] Local backend requires QA startup flags for auth/policy bypass and optional infra (`SSA_DEV_AUTH_BYPASS`, `SSA_DEV_POLICY_BYPASS`, `POSTGRES_REQUIRED=false`, `NEO4J_REQUIRED=false`, `PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED=true`).
+- [x] Transient planner feed-action `health_timeout` flake mitigated by startup diagnostics + timeout hardening in `_tests_/mealPlanner.contextFeedActions.contract.test.js` and `_tests_/mealPlanner.crossModuleHandoff.contract.test.js` (`2d9974e`).
 
 Decision:
 - Current merge recommendation: `READY WITH KNOWN DEV-RUNTIME CAVEAT`.

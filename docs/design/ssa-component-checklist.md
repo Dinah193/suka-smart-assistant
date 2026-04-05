@@ -48,7 +48,7 @@ Checklist status key:
 | [ ] | Progressive disclosure panel | `src/components/homestead/ProgressiveDisclosurePanel.jsx` | Apply accordion rules and reduced-motion behavior |
 | [ ] | Homestead planner subnav | `src/components/homestead/HomesteadPlannerSubnav.jsx` | Align active tab and unread/alert counters |
 | [ ] | Homestead readiness card | `src/components/homestead/HomesteadReadinessCard.jsx` | Use status and risk token mapping |
-| [~] | Meal planner dashboard | `src/components/meals/MealPlannerDashboard.jsx` | Enforce dual-pane collaboration + execution affordance; controls regression coverage added in `_tests_/mealPlanner.controls.contract.test.jsx` |
+| [~] | Meal planner dashboard | `src/components/meals/MealPlannerDashboard.jsx` | Enforce dual-pane collaboration + execution affordance; controls regression coverage added in `_tests_/mealPlanner.controls.contract.test.jsx`; social persistence/handoff coverage landed in `_tests_/mealPlanner.contextFeedActions.contract.test.js`, `_tests_/mealPlanner.feedInteractions.ui.contract.test.jsx`, and `_tests_/mealPlanner.crossModuleHandoff.contract.test.js` with startup hardening commit `2d9974e` |
 | [ ] | Grocery list panel | `src/components/meals/GroceryListPanel.jsx` | Add collaboration transfer actions and state chips |
 | [ ] | Storehouse queue planner | `src/components/storehouse/PreservationQueuePlanner.jsx` | Standardize warning and deadline visual language |
 
