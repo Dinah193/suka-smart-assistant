@@ -60,8 +60,10 @@ import {
 const _ROUTES = {
   // Core
   home: { path: "/" },
+  community: { path: "/community" },
   knowledge: { path: "/knowledge" },
   homestead: { path: "/homestead" },
+  design_ssa_showcase: { path: "/design/ssa-showcase" },
 
   // Knowledge panels
   knowledge_events: { path: "/knowledge/events" },
@@ -108,8 +110,13 @@ const _ROUTES = {
 };
 
 // Allow runtime extension without mutation (e.g., plugins can add names under window.__suka.routes)
-const runtimeExtraRoutes =
+const runtimeExtraRoutesRaw =
   (typeof window !== "undefined" && window.__suka?.routes) || {};
+const runtimeExtraRoutes = Object.fromEntries(
+  Object.entries(runtimeExtraRoutesRaw).filter(
+    ([, value]) => value && typeof value.path === "string" && value.path.trim().length > 0
+  )
+);
 export const ROUTES = Object.freeze({ ..._ROUTES, ...runtimeExtraRoutes });
 
 /** Build a query-string from a POJO (skips null/undefined) */
@@ -209,6 +216,7 @@ function lazyPage(candidates = [], stubName = "Page") {
 // ---------------------------------------------------------------------------
 // Core
 const HomePage = lazyPage(["@/pages/home.jsx", "@/pages/Home.jsx"], "Home");
+const CommunityPage = lazyPage(["@/pages/community.jsx"], "Community");
 const Knowledge = lazyPage(
   [
     "@/pages/knowledge.jsx",
@@ -381,6 +389,11 @@ const HubViewerPage = lazyPage(
   "Hub"
 );
 
+const SSAShowcasePage = lazyPage(
+  ["@/pages/design/ssa-showcase.jsx"],
+  "SSAShowcase"
+);
+
 // 404
 const NotFound = () => (
   <div className="p-6">
@@ -522,8 +535,13 @@ function AppRoutes() {
         <Routes>
           {/* CORE */}
           <Route path={ROUTES.home.path} element={<HomePage />} />
+          <Route path={ROUTES.community.path} element={<CommunityPage />} />
           <Route path={ROUTES.knowledge.path} element={<Knowledge />} />
           <Route path={ROUTES.homestead.path} element={<Homestead />} />
+          <Route
+            path={ROUTES.design_ssa_showcase.path}
+            element={<SSAShowcasePage />}
+          />
 
           {/* KNOWLEDGE PANELS */}
           <Route
