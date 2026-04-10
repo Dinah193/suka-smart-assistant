@@ -32,7 +32,8 @@
     "smoke:browser:check": "node tools/scripts/check-consolidated-browser-report.cjs",
     "smoke:browser:check:strict": "node tools/scripts/check-consolidated-browser-report.cjs --require-content-stable=1",
     "test:planner:stability": "vitest run _tests_/plannerEndToEndRegression.integration.test.jsx _tests_/plannerProjectionRealtimeBridge.test.js _tests_/mealPlannerPersistence.test.js --reporter=dot",
-    "test:ssa:rollout:gate": "vitest run _tests_/cleaningPage.ssa.contract.test.jsx _tests_/cleaningPage.seasonal.visual.snapshot.test.jsx _tests_/animalsPage.ssa.contract.test.jsx _tests_/animalsPage.seasonal.visual.snapshot.test.jsx _tests_/animalsPage.hero.section.visual.snapshot.test.jsx _tests_/homePage.ssaFeed.visual.snapshot.test.jsx _tests_/profileSettings.persistence.contract.test.jsx _tests_/profileSettings.media.contract.test.jsx _tests_/profileSettings.media.visual.snapshot.test.jsx _tests_/profileSettings.notifications.contract.test.jsx _tests_/profileSettings.notifications.visual.snapshot.test.jsx",
+    "test:social:platform:gate": "vitest run _tests_/mealPlanner.contextFeedActions.contract.test.js _tests_/storehouseContextFeedActions.contract.test.js _tests_/homesteadCollaboration.contract.test.js _tests_/plannerUnifiedFeed.contract.test.js",
+    "test:ssa:rollout:gate": "vitest run _tests_/cleaningPage.ssa.contract.test.jsx _tests_/cleaningPage.seasonal.visual.snapshot.test.jsx _tests_/animalsPage.ssa.contract.test.jsx _tests_/animalsPage.seasonal.visual.snapshot.test.jsx _tests_/animalsPage.hero.section.visual.snapshot.test.jsx _tests_/homePage.ssaFeed.visual.snapshot.test.jsx _tests_/profileSettings.persistence.contract.test.jsx _tests_/profileSettings.media.contract.test.jsx _tests_/profileSettings.media.visual.snapshot.test.jsx _tests_/profileSettings.notifications.contract.test.jsx _tests_/profileSettings.notifications.visual.snapshot.test.jsx _tests_/profileSettings.messages.contract.test.jsx _tests_/profileSettings.messages.visual.snapshot.test.jsx _tests_/householdProfileService.messages.contract.test.js",
     "gate:fast:logged": "node tools/scripts/run-gate-fast-logged.cjs",
     "gate:fast": "npm run smoke:e2e && npm run lint:ci && npm run guard:formatter-jsx && npm run test:ssa:rollout:gate && npm audit --audit-level=high",
     "server:start": "node ./src/server/index.js",
@@ -122,6 +123,7 @@
     "suncalc": "^1.9.0",
     "use-sound": "^5.0.0",
     "uuid": "^11.1.0",
+    "web-vitals": "^4.2.4",
     "zustand": "^5.0.6"
   }
 }
