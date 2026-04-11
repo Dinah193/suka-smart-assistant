@@ -685,6 +685,143 @@ describe("planner unified feed contract", () => {
     }
   }, 60000);
 
+  it("supports household task lifecycle with dependencies recurrence and conflict checks", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-task-lifecycle-${randomUUID()}`;
+    const now = new Date();
+    const dueSoonIso = new Date(now.getTime() + 60 * 60 * 1000).toISOString();
+    const dueLaterIso = new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString();
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const taskARes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          task: {
+            moduleKey: "meal",
+            title: "Prep grains",
+            ownerId: "member-alpha",
+            dueAt: dueSoonIso,
+            priority: "high",
+          },
+        }),
+      });
+      expect(taskARes.status).toBe(200);
+      const taskAPayload = await taskARes.json();
+      const taskAId = String(taskAPayload?.task?.id || "");
+      expect(taskAId.length).toBeGreaterThan(0);
+      expect(String(taskAPayload?.task?.workflowState || "")).toBe("active");
+
+      const conflictingTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          task: {
+            moduleKey: "storehouse",
+            title: "Stock jars",
+            ownerId: "member-alpha",
+            dueAt: dueSoonIso,
+          },
+        }),
+      });
+      expect(conflictingTaskRes.status).toBe(200);
+      const conflictingTaskPayload = await conflictingTaskRes.json();
+      expect(Array.isArray(conflictingTaskPayload?.task?.conflictsWithTaskIds)).toBe(true);
+      expect(conflictingTaskPayload.task.conflictsWithTaskIds.includes(taskAId)).toBe(true);
+
+      const dependentTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          task: {
+            moduleKey: "homestead",
+            title: "Run batching window",
+            ownerId: "member-beta",
+            dueAt: dueLaterIso,
+            dependsOn: [taskAId],
+            recurrence: {
+              enabled: true,
+              frequency: "daily",
+            },
+          },
+        }),
+      });
+      expect(dependentTaskRes.status).toBe(200);
+      const dependentTaskPayload = await dependentTaskRes.json();
+      const dependentTaskId = String(dependentTaskPayload?.task?.id || "");
+      expect(dependentTaskId.length).toBeGreaterThan(0);
+
+      const blockedTransitionRes = await fetch(
+        `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "completed",
+            reason: "Attempt before dependency",
+          }),
+        }
+      );
+      expect(blockedTransitionRes.status).toBe(409);
+      const blockedTransitionPayload = await blockedTransitionRes.json();
+      expect(String(blockedTransitionPayload?.error || "")).toBe("task_dependency_incomplete");
+      expect(Array.isArray(blockedTransitionPayload?.blockingTaskIds)).toBe(true);
+      expect(blockedTransitionPayload.blockingTaskIds.includes(taskAId)).toBe(true);
+
+      const taskACompleteRes = await fetch(
+        `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskAId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ householdId, nextState: "completed", reason: "Finished prep" }),
+        }
+      );
+      expect(taskACompleteRes.status).toBe(200);
+
+      const dependentCompleteRes = await fetch(
+        `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ householdId, nextState: "completed", reason: "Finished batch" }),
+        }
+      );
+      expect(dependentCompleteRes.status).toBe(200);
+      const dependentCompletePayload = await dependentCompleteRes.json();
+      expect(String(dependentCompletePayload?.task?.workflowState || "")).toBe("completed");
+      expect(dependentCompletePayload?.spawnedTask).toBeTruthy();
+      expect(String(dependentCompletePayload?.spawnedTask?.workflowState || "")).toBe("active");
+      expect(String(dependentCompletePayload?.spawnedTask?.sourceTaskId || "")).toBe(dependentTaskId);
+
+      const tasksRes = await fetch(
+        `${baseUrl}/api/planners/household/tasks?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(tasksRes.status).toBe(200);
+      const tasksPayload = await tasksRes.json();
+      expect(Array.isArray(tasksPayload?.tasks)).toBe(true);
+      expect(tasksPayload.tasks.length).toBeGreaterThanOrEqual(3);
+
+      const agendaRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&todayLimit=20&upcomingLimit=20`
+      );
+      expect(agendaRes.status).toBe(200);
+      const agendaPayload = await agendaRes.json();
+      expect(
+        agendaPayload.today.some((item) => String(item?.sourceType || "") === "task") ||
+          agendaPayload.upcoming.some((item) => String(item?.sourceType || "") === "task")
+      ).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
   it("supports semantic workflow actions beyond basic reactions", async () => {
     const { child, port, outputCapture } = startServer();
     const baseUrl = `http://127.0.0.1:${port}`;

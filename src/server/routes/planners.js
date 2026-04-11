@@ -131,6 +131,137 @@ const APPROVAL_WORKFLOW_TRANSITIONS = Object.freeze({
   [WORKFLOW_STATES.ARCHIVED]: [],
 });
 
+const TASK_WORKFLOW_TRANSITIONS = Object.freeze({
+  [WORKFLOW_STATES.DRAFT]: [WORKFLOW_STATES.ACTIVE, WORKFLOW_STATES.PENDING_APPROVAL, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.PENDING_APPROVAL]: [WORKFLOW_STATES.ACTIVE, WORKFLOW_STATES.BLOCKED, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.ACTIVE]: [WORKFLOW_STATES.COMPLETED, WORKFLOW_STATES.BLOCKED, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.BLOCKED]: [WORKFLOW_STATES.ACTIVE, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.COMPLETED]: [WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.ARCHIVED]: [],
+});
+
+const TASK_ALLOWED_MODULES = new Set(["meal", "cleaning", "storehouse", "homestead", "community"]);
+const TASK_ALLOWED_PRIORITIES = new Set(["low", "normal", "high", "critical"]);
+
+function normalizeTaskWorkflowState(value, fallback = WORKFLOW_STATES.ACTIVE) {
+  const key = String(value || "").trim().toLowerCase();
+  return TASK_WORKFLOW_TRANSITIONS[key] ? key : fallback;
+}
+
+function listAllowedTaskWorkflowTransitions(fromState) {
+  const key = normalizeTaskWorkflowState(fromState, WORKFLOW_STATES.ACTIVE);
+  return Array.isArray(TASK_WORKFLOW_TRANSITIONS[key])
+    ? [...TASK_WORKFLOW_TRANSITIONS[key]]
+    : [];
+}
+
+function canTransitionTaskWorkflowState(fromState, toState) {
+  const next = normalizeTaskWorkflowState(toState, "");
+  if (!next) return false;
+  return listAllowedTaskWorkflowTransitions(fromState).includes(next);
+}
+
+function normalizeTaskPriority(value, fallback = "normal") {
+  const key = String(value || "").trim().toLowerCase();
+  return TASK_ALLOWED_PRIORITIES.has(key) ? key : fallback;
+}
+
+function normalizeTaskModuleKey(value, fallback = "community") {
+  const key = String(value || "").trim().toLowerCase();
+  return TASK_ALLOWED_MODULES.has(key) ? key : fallback;
+}
+
+function normalizeTaskRecurrence(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const frequency = String(raw.frequency || "").trim().toLowerCase();
+  const enabled = raw.enabled === true && ["daily", "weekly", "custom"].includes(frequency);
+  const intervalDaysRaw = Number(raw.intervalDays);
+  const intervalDays = Number.isFinite(intervalDaysRaw) && intervalDaysRaw > 0
+    ? Math.min(365, Math.floor(intervalDaysRaw))
+    : frequency === "weekly"
+      ? 7
+      : 1;
+  return {
+    enabled,
+    frequency: enabled ? frequency : null,
+    intervalDays: enabled ? intervalDays : null,
+  };
+}
+
+function detectHouseholdTaskConflicts(rows, candidateTask) {
+  const list = Array.isArray(rows) ? rows : [];
+  const candidate = candidateTask && typeof candidateTask === "object" ? candidateTask : {};
+  const dueAt = Date.parse(String(candidate.dueAt || ""));
+  if (!Number.isFinite(dueAt)) return [];
+
+  const ownerId = String(candidate.ownerId || "").trim().toLowerCase();
+  if (!ownerId) return [];
+
+  return list
+    .filter((task) => {
+      if (!task || typeof task !== "object") return false;
+      if (String(task.id || "") === String(candidate.id || "")) return false;
+      if (String(task.ownerId || "").trim().toLowerCase() !== ownerId) return false;
+      const state = normalizeTaskWorkflowState(task.workflowState, WORKFLOW_STATES.ACTIVE);
+      if (state === WORKFLOW_STATES.COMPLETED || state === WORKFLOW_STATES.ARCHIVED) return false;
+      const taskDueAt = Date.parse(String(task.dueAt || ""));
+      if (!Number.isFinite(taskDueAt)) return false;
+      return Math.abs(taskDueAt - dueAt) <= 60 * 60 * 1000;
+    })
+    .map((task) => String(task.id || ""))
+    .filter(Boolean);
+}
+
+function computeNextRecurrenceDueAt(baseDueAt, recurrence, fallbackNowIso) {
+  const parsed = Date.parse(String(baseDueAt || ""));
+  const baseDate = Number.isFinite(parsed) ? new Date(parsed) : new Date(String(fallbackNowIso || new Date().toISOString()));
+  const rec = normalizeTaskRecurrence(recurrence);
+  if (!rec.enabled) return null;
+  const next = new Date(baseDate.getTime());
+  next.setUTCDate(next.getUTCDate() + Number(rec.intervalDays || 1));
+  return next.toISOString();
+}
+
+function normalizeHouseholdTaskRecord({ incoming, existing, householdId, actor, nowIso }) {
+  const raw = incoming && typeof incoming === "object" ? incoming : {};
+  const current = existing && typeof existing === "object" ? existing : null;
+  const id = String(raw.id || current?.id || generateHomesteadId("household-task"));
+  const recurrence = normalizeTaskRecurrence(raw.recurrence ?? current?.recurrence);
+  const workflowState = normalizeTaskWorkflowState(raw.workflowState ?? current?.workflowState, WORKFLOW_STATES.ACTIVE);
+  const dependsOn = Array.isArray(raw.dependsOn)
+    ? raw.dependsOn.map((value) => String(value || "").trim()).filter(Boolean)
+    : Array.isArray(current?.dependsOn)
+      ? current.dependsOn.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+
+  return {
+    id,
+    householdId,
+    moduleKey: normalizeTaskModuleKey(raw.moduleKey ?? current?.moduleKey),
+    title: String(raw.title ?? current?.title ?? "").trim(),
+    detail: String(raw.detail ?? current?.detail ?? "").trim(),
+    ownerId: String(raw.ownerId ?? current?.ownerId ?? "").trim() || null,
+    dueAt: coerceIsoDate(raw.dueAt ?? current?.dueAt, nowIso),
+    workflowState,
+    priority: normalizeTaskPriority(raw.priority ?? current?.priority),
+    dependsOn,
+    recurrence,
+    sourceTaskId: String(raw.sourceTaskId ?? current?.sourceTaskId ?? "").trim() || null,
+    createdAt: String(current?.createdAt || nowIso),
+    updatedAt: String(nowIso),
+    updatedBy: String(actor || current?.updatedBy || "unknown"),
+    completedAt:
+      workflowState === WORKFLOW_STATES.COMPLETED
+        ? String(raw.completedAt || current?.completedAt || nowIso)
+        : null,
+    archivedAt:
+      workflowState === WORKFLOW_STATES.ARCHIVED
+        ? String(raw.archivedAt || current?.archivedAt || nowIso)
+        : null,
+    auditLog: Array.isArray(current?.auditLog) ? [...current.auditLog] : [],
+  };
+}
+
 function normalizeApprovalWorkflowState(value, fallback = WORKFLOW_STATES.PENDING_APPROVAL) {
   const key = String(value || "").trim().toLowerCase();
   return APPROVAL_WORKFLOW_TRANSITIONS[key] ? key : fallback;
@@ -275,6 +406,7 @@ function cloneDefaultCommunityContext(householdId) {
     notifications: [],
     reports: [],
     approvals: [],
+    tasks: [],
     profileVisibility: {
       mode: "community",
       discoverable: true,
@@ -321,6 +453,7 @@ function ensureCommunityHouseholdState(state, householdId) {
   current.notifications = Array.isArray(current.notifications) ? current.notifications : [];
   current.reports = Array.isArray(current.reports) ? current.reports : [];
   current.approvals = Array.isArray(current.approvals) ? current.approvals : [];
+  current.tasks = Array.isArray(current.tasks) ? current.tasks : [];
   current.profileVisibility =
     current.profileVisibility && typeof current.profileVisibility === "object"
       ? {
@@ -1164,6 +1297,39 @@ function buildTodayAndUpcomingAgenda({
         })
       );
     });
+  });
+
+  const taskRows = Array.isArray(communityState?.tasks) ? communityState.tasks : [];
+  taskRows.forEach((task, index) => {
+    const workflowState = normalizeTaskWorkflowState(task?.workflowState, WORKFLOW_STATES.ACTIVE);
+    if (workflowState === WORKFLOW_STATES.COMPLETED || workflowState === WORKFLOW_STATES.ARCHIVED) {
+      return;
+    }
+
+    const dueAtIso = coerceIsoDate(task?.dueAt, nowIso);
+    const dueAtDate = new Date(dueAtIso);
+    const nowDate = new Date(nowIso);
+    const isSameDay =
+      dueAtDate.getUTCFullYear() === nowDate.getUTCFullYear() &&
+      dueAtDate.getUTCMonth() === nowDate.getUTCMonth() &&
+      dueAtDate.getUTCDate() === nowDate.getUTCDate();
+
+    const agendaItem = makeHouseholdAgendaItem({
+      id: `task-${task.id || index}`,
+      lane: normalizeTaskModuleKey(task?.moduleKey, "community"),
+      module: normalizeTaskModuleKey(task?.moduleKey, "community"),
+      title: toTrimmedString(task?.title || "Household task"),
+      detail: toTrimmedString(task?.detail || ""),
+      dueAt: dueAtIso,
+      state: workflowState,
+      sourceType: "task",
+    });
+
+    if (isSameDay || dueAtDate.getTime() < nowDate.getTime()) {
+      today.push(agendaItem);
+      return;
+    }
+    upcoming.push(agendaItem);
   });
 
   const todaySorted = sortUnifiedFeedItems(
@@ -3528,6 +3694,298 @@ router.post(
   }
   }
 );
+
+router.get("/household/tasks", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const moduleKeyFilter = String(req.query.moduleKey || "").trim().toLowerCase();
+    const ownerIdFilter = String(req.query.ownerId || "").trim().toLowerCase();
+    const workflowStateFilter = String(req.query.workflowState || "").trim().toLowerCase();
+    const includeArchived = String(req.query.includeArchived || "false").toLowerCase() === "true";
+
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    const tasks = (Array.isArray(householdState.tasks) ? householdState.tasks : [])
+      .map((task) => {
+        const normalizedState = normalizeTaskWorkflowState(task?.workflowState, WORKFLOW_STATES.ACTIVE);
+        return {
+          ...task,
+          workflowState: normalizedState,
+          allowedNextStates: listAllowedTaskWorkflowTransitions(normalizedState),
+        };
+      })
+      .filter((task) => (includeArchived ? true : task.workflowState !== WORKFLOW_STATES.ARCHIVED))
+      .filter((task) => (moduleKeyFilter ? task.moduleKey === moduleKeyFilter : true))
+      .filter((task) =>
+        ownerIdFilter ? String(task.ownerId || "").trim().toLowerCase() === ownerIdFilter : true
+      )
+      .filter((task) => (workflowStateFilter ? task.workflowState === workflowStateFilter : true))
+      .sort((a, b) => Date.parse(String(a?.dueAt || "")) - Date.parse(String(b?.dueAt || "")));
+
+    return res.json({
+      ok: true,
+      householdId,
+      total: tasks.length,
+      tasks,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/household/tasks", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const nowIso = new Date().toISOString();
+    const incomingTask = req.body?.task && typeof req.body.task === "object" ? req.body.task : req.body || {};
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const tasks = Array.isArray(householdState.tasks) ? [...householdState.tasks] : [];
+    const nextTask = normalizeHouseholdTaskRecord({
+      incoming: incomingTask,
+      existing: null,
+      householdId,
+      actor,
+      nowIso,
+    });
+    if (!nextTask.title) {
+      return res.status(400).json({ ok: false, error: "missing_task_title" });
+    }
+
+    const conflictsWithTaskIds = detectHouseholdTaskConflicts(tasks, nextTask);
+    nextTask.conflictsWithTaskIds = conflictsWithTaskIds;
+    nextTask.auditLog.push({
+      action: "created",
+      at: nowIso,
+      updatedBy: actor,
+    });
+
+    tasks.unshift(nextTask);
+    householdState.tasks = tasks;
+    householdState.updatedAt = nowIso;
+    appendHouseholdNotifications({
+      householdState,
+      entries: [
+        buildNotificationEntry({
+          idFactory: generateHomesteadId,
+          eventType: "ASSIGNMENT_CREATED",
+          createdAt: nowIso,
+          type: "task",
+          title: `Task created: ${nextTask.title}`,
+          message: `Task for ${nextTask.moduleKey} created by ${actor}.`,
+          module: "community",
+          sourceModule: nextTask.moduleKey,
+          sourceId: nextTask.id,
+          metadata: {
+            ownerId: nextTask.ownerId,
+            dueAt: nextTask.dueAt,
+            conflicts: conflictsWithTaskIds.length,
+          },
+        }),
+      ],
+      nowIso,
+    });
+
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      task: {
+        ...nextTask,
+        allowedNextStates: listAllowedTaskWorkflowTransitions(nextTask.workflowState),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.patch("/household/tasks/:id", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const taskId = String(req.params.id || "").trim();
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const nowIso = new Date().toISOString();
+    const updates = req.body?.task && typeof req.body.task === "object" ? req.body.task : req.body || {};
+
+    if (!taskId) {
+      return res.status(400).json({ ok: false, error: "missing_task_id" });
+    }
+    if (Object.prototype.hasOwnProperty.call(updates, "workflowState")) {
+      return res.status(400).json({ ok: false, error: "workflow_state_requires_transition_endpoint" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const tasks = Array.isArray(householdState.tasks) ? [...householdState.tasks] : [];
+    const index = tasks.findIndex((task) => String(task?.id || "") === taskId);
+    if (index < 0) {
+      return res.status(404).json({ ok: false, error: "task_not_found" });
+    }
+
+    const currentTask = tasks[index];
+    const nextTask = normalizeHouseholdTaskRecord({
+      incoming: { ...currentTask, ...updates, id: taskId },
+      existing: currentTask,
+      householdId,
+      actor,
+      nowIso,
+    });
+    if (!nextTask.title) {
+      return res.status(400).json({ ok: false, error: "missing_task_title" });
+    }
+
+    const conflictsWithTaskIds = detectHouseholdTaskConflicts(tasks, nextTask);
+    nextTask.conflictsWithTaskIds = conflictsWithTaskIds;
+    nextTask.auditLog.push({
+      action: "updated",
+      at: nowIso,
+      updatedBy: actor,
+      changes: Object.keys(updates || {}),
+    });
+
+    tasks[index] = nextTask;
+    householdState.tasks = tasks;
+    householdState.updatedAt = nowIso;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      task: {
+        ...nextTask,
+        allowedNextStates: listAllowedTaskWorkflowTransitions(nextTask.workflowState),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/household/tasks/:id/transition", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const taskId = String(req.params.id || "").trim();
+    const nextState = normalizeTaskWorkflowState(req.body?.nextState, "");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const reason = String(req.body?.reason || "").trim();
+    const nowIso = new Date().toISOString();
+
+    if (!taskId) {
+      return res.status(400).json({ ok: false, error: "missing_task_id" });
+    }
+    if (!nextState) {
+      return res.status(400).json({ ok: false, error: "missing_next_state" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const tasks = Array.isArray(householdState.tasks) ? [...householdState.tasks] : [];
+    const index = tasks.findIndex((task) => String(task?.id || "") === taskId);
+    if (index < 0) {
+      return res.status(404).json({ ok: false, error: "task_not_found" });
+    }
+
+    const currentTask = { ...tasks[index] };
+    const currentState = normalizeTaskWorkflowState(currentTask.workflowState, WORKFLOW_STATES.ACTIVE);
+    const allowedNextStates = listAllowedTaskWorkflowTransitions(currentState);
+    if (!canTransitionTaskWorkflowState(currentState, nextState)) {
+      return res.status(409).json({
+        ok: false,
+        error: "invalid_task_transition",
+        taskId,
+        fromState: currentState,
+        toState: nextState,
+        allowedNextStates,
+      });
+    }
+
+    if (nextState === WORKFLOW_STATES.COMPLETED) {
+      const blockingTaskIds = (Array.isArray(currentTask.dependsOn) ? currentTask.dependsOn : []).filter(
+        (dependencyId) => {
+          const dependencyTask = tasks.find((task) => String(task?.id || "") === String(dependencyId || ""));
+          if (!dependencyTask) return true;
+          return normalizeTaskWorkflowState(dependencyTask.workflowState, WORKFLOW_STATES.ACTIVE) !== WORKFLOW_STATES.COMPLETED;
+        }
+      );
+
+      if (blockingTaskIds.length) {
+        return res.status(409).json({
+          ok: false,
+          error: "task_dependency_incomplete",
+          taskId,
+          blockingTaskIds,
+        });
+      }
+    }
+
+    const nextTask = {
+      ...currentTask,
+      workflowState: nextState,
+      completedAt: nextState === WORKFLOW_STATES.COMPLETED ? nowIso : null,
+      archivedAt: nextState === WORKFLOW_STATES.ARCHIVED ? nowIso : null,
+      updatedAt: nowIso,
+      updatedBy: actor,
+      auditLog: Array.isArray(currentTask.auditLog) ? [...currentTask.auditLog] : [],
+    };
+    nextTask.auditLog.push({
+      action: "state_transition",
+      fromState: currentState,
+      toState: nextState,
+      at: nowIso,
+      updatedBy: actor,
+      reason: reason || null,
+    });
+    nextTask.conflictsWithTaskIds = detectHouseholdTaskConflicts(tasks, nextTask);
+    tasks[index] = nextTask;
+
+    let spawnedTask = null;
+    if (nextState === WORKFLOW_STATES.COMPLETED && normalizeTaskRecurrence(nextTask.recurrence).enabled) {
+      const nextDueAt = computeNextRecurrenceDueAt(nextTask.dueAt, nextTask.recurrence, nowIso);
+      if (nextDueAt) {
+        spawnedTask = normalizeHouseholdTaskRecord({
+          incoming: {
+            ...nextTask,
+            id: generateHomesteadId("household-task"),
+            workflowState: WORKFLOW_STATES.ACTIVE,
+            dueAt: nextDueAt,
+            sourceTaskId: nextTask.id,
+          },
+          existing: null,
+          householdId,
+          actor,
+          nowIso,
+        });
+        spawnedTask.auditLog.push({
+          action: "spawned_from_recurrence",
+          sourceTaskId: nextTask.id,
+          at: nowIso,
+          updatedBy: actor,
+        });
+        spawnedTask.conflictsWithTaskIds = detectHouseholdTaskConflicts(tasks, spawnedTask);
+        tasks.unshift(spawnedTask);
+      }
+    }
+
+    householdState.tasks = tasks;
+    householdState.updatedAt = nowIso;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      task: {
+        ...nextTask,
+        allowedNextStates: listAllowedTaskWorkflowTransitions(nextTask.workflowState),
+      },
+      spawnedTask,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
 
 router.get("/homestead/components", async (req, res) => {
   try {
