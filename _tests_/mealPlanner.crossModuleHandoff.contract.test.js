@@ -97,6 +97,7 @@ async function startServer(extraEnv = {}) {
       NEO4J_REQUIRED: "false",
       POSTGRES_REQUIRED: "false",
       MONGODB_REQUIRED: "false",
+      ALLOW_INSECURE_HEADER_AUTH: "true",
       SSA_DEV_AUTH_BYPASS: "true",
       SSA_DEV_POLICY_BYPASS: "true",
       PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED: "true",
@@ -142,12 +143,14 @@ describe("meal planner cross-module handoff contract", () => {
     const { child, port, outputCapture } = await startServer();
     const baseUrl = `http://127.0.0.1:${port}`;
     const householdId = `slice-b-household-${randomUUID()}`;
+    const authHeaders = { "x-user-id": "dev-local-user" };
 
     try {
       await waitForHealth(port, child, outputCapture);
 
       const beforeHomesteadRes = await fetch(
-        `${baseUrl}/api/planners/homestead/collaboration?householdId=${encodeURIComponent(householdId)}`
+        `${baseUrl}/api/planners/homestead/collaboration?householdId=${encodeURIComponent(householdId)}`,
+        { headers: authHeaders }
       );
       expect(beforeHomesteadRes.status).toBe(200);
       const beforeHomesteadBody = await beforeHomesteadRes.json();
@@ -159,7 +162,7 @@ describe("meal planner cross-module handoff contract", () => {
         `${baseUrl}/api/planners/meal/context/feed/meal-feed-1/action`,
         {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", ...authHeaders },
           body: JSON.stringify({ householdId, action: "share", delta: 1 }),
         }
       );
@@ -168,7 +171,8 @@ describe("meal planner cross-module handoff contract", () => {
       expect(shareBody.ok).toBe(true);
 
       const afterHomesteadRes = await fetch(
-        `${baseUrl}/api/planners/homestead/collaboration?householdId=${encodeURIComponent(householdId)}`
+        `${baseUrl}/api/planners/homestead/collaboration?householdId=${encodeURIComponent(householdId)}`,
+        { headers: authHeaders }
       );
       expect(afterHomesteadRes.status).toBe(200);
       const afterHomesteadBody = await afterHomesteadRes.json();
