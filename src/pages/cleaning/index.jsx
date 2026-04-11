@@ -87,6 +87,19 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "@/styles/household.css";
 import "../cooking/cooking.css"; // reuse Cooking page layout + cards
+import {
+  SSAAnimalAvatar,
+  SSAButton,
+  SSAGrowthOverlay,
+  SSAHouseholdParticipation,
+  SSASeasonalTaskHighlight,
+  CollaborationChip,
+} from "@/components/ssa";
+import { getSeasonKey, getSeasonLabel } from "@/utils/season";
+import {
+  findValueByCandidateKeys,
+  normalizeParticipationEntries,
+} from "@/utils/householdGlance";
 
 /* -------------------------------------------------------------------------- */
 /* Soft/defensive shared imports (REQUIRED)                                    */
@@ -203,6 +216,24 @@ function nowIso() {
 
 function makeId(prefix = "clean") {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function resolveCleaningHouseholdId() {
+  if (typeof window === "undefined") return "default-household";
+  const fromGlobal =
+    window.__suka?.profile?.householdId ||
+    window.__suka?.profile?.homeId ||
+    window.__suka?.householdId ||
+    window.__suka?.homeId;
+  if (fromGlobal) return String(fromGlobal);
+
+  try {
+    const raw = window.localStorage?.getItem("suka.profile");
+    const parsed = raw ? JSON.parse(raw) : null;
+    return String(parsed?.householdId || parsed?.homeId || "default-household");
+  } catch {
+    return "default-household";
+  }
 }
 
 /**
@@ -389,22 +420,18 @@ function Button({
   className = "",
   type = "button",
 }) {
-  const v =
-    variant === "ghost"
-      ? "sv-btn--ghost"
-      : variant === "outline"
-      ? "sv-btn--outline"
-      : "sv-btn--primary";
+  const mappedVariant = variant === "primary" ? "primary" : "secondary";
   return (
-    <button
+    <SSAButton
       type={type}
-      className={`sv-btn ${v} ${className}`}
+      variant={mappedVariant}
+      className={`sv-btn ${className}`}
       onClick={onClick}
       disabled={disabled}
       title={title}
     >
       {children}
-    </button>
+    </SSAButton>
   );
 }
 
@@ -785,6 +812,8 @@ export default function CleaningPage() {
 
   // Cross-domain glance (optional)
   const [householdGlance, setHouseholdGlance] = useState(null);
+  const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
+  const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
 
   // NEW: Plan Library state (interactive)
   const [plans, setPlans] = useState([]);
@@ -899,6 +928,48 @@ export default function CleaningPage() {
   useEffect(() => {
     fetchHouseholdGlance();
   }, []);
+
+  const fetchHouseholdAgenda = async () => {
+    setHouseholdAgendaBusy(true);
+    try {
+      const householdId = resolveCleaningHouseholdId();
+      const response = await fetch(
+        `/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&modules=meal,cleaning,storehouse,homestead,community&todayLimit=6&upcomingLimit=6`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!response.ok) return;
+      const payload = await response.json();
+      setHouseholdAgenda({
+        today: Array.isArray(payload?.today) ? payload.today : [],
+        upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
+      });
+    } catch {
+      // keep current agenda state
+    } finally {
+      setHouseholdAgendaBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHouseholdAgenda();
+  }, []);
+
+  const agendaCueLine = (item) =>
+    [
+      String(item?.module || item?.lane || "household"),
+      String(item?.workflowState || item?.state || "planned"),
+      item?.priority ? String(item.priority) : null,
+      item?.recurrenceEnabled ? "recurring" : null,
+      item?.hasDependencyBlock
+        ? `blocked by ${Number(item?.blockingDependencyCount || 0)} deps`
+        : null,
+      item?.hasConflict ? `conflicts ${Number(item?.conflictCount || 0)}` : null,
+      item?.overdue ? "overdue" : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
 
   // ---- Module context push (kept)
   useEffect(() => {
@@ -1631,6 +1702,70 @@ export default function CleaningPage() {
     [runnable, favoriteSessionIds]
   );
 
+  const glanceSeasonRaw = useMemo(
+    () =>
+      findValueByCandidateKeys(householdGlance, [
+        "season",
+        "seasonKey",
+        "currentSeason",
+      ]),
+    [householdGlance]
+  );
+
+  const seasonalKey = useMemo(() => {
+    const candidate = String(glanceSeasonRaw || "").toLowerCase();
+    if (["spring", "summer", "autumn", "winter"].includes(candidate)) {
+      return candidate;
+    }
+    return getSeasonKey(new Date());
+  }, [glanceSeasonRaw]);
+
+  const seasonalLabel = useMemo(() => getSeasonLabel(seasonalKey), [seasonalKey]);
+  const completedPlans = useMemo(
+    () => (plans || []).filter((p) => p?.lastCompletedAt).length,
+    [plans]
+  );
+  const glanceCompletion = useMemo(() => {
+    const n = Number(
+      findValueByCandidateKeys(householdGlance, [
+        "cleaningCompletionPct",
+        "completionPct",
+        "completionPercent",
+        "completion",
+      ])
+    );
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null;
+  }, [householdGlance]);
+
+  const completionPct = useMemo(() => {
+    if (Number.isFinite(glanceCompletion)) return glanceCompletion;
+    if (!plans.length) return 0;
+    return Math.round((completedPlans / plans.length) * 100);
+  }, [glanceCompletion, completedPlans, plans]);
+
+  const glanceParticipation = useMemo(
+    () =>
+      normalizeParticipationEntries(
+        findValueByCandidateKeys(householdGlance, [
+          "participation",
+          "participationEntries",
+          "householdParticipation",
+          "members",
+        ])
+      ),
+    [householdGlance]
+  );
+
+  const participationEntries = useMemo(
+    () =>
+      glanceParticipation || [
+        { name: "Plans", value: plans.length },
+        { name: "Ready Runs", value: runnable.length },
+        { name: "Favorites", value: favoriteSessionsFull.length },
+      ],
+    [glanceParticipation, plans.length, runnable.length, favoriteSessionsFull.length]
+  );
+
   /* ------------------------------------------------------------------------ */
   /* Render                                                                    */
   /* ------------------------------------------------------------------------ */
@@ -1639,14 +1774,15 @@ export default function CleaningPage() {
     <div className="cook-page cleaning-page">
       <div className="cook-page-inner sv-container">
         {/* Hero */}
-        <div className="sv-hero sv-pad">
+        <div className="sv-hero sv-pad ssa-hero-wrap">
           <div className="sv-row sv-justify-between sv-align-center">
             <div className="sv-row">
               <span className="sv-emoji">🧹</span>
-              <h1 className="sv-pageTitle">Cleaning</h1>
+              <h1 className="sv-pageTitle ssa-hero-title">Cleaning</h1>
+              <CollaborationChip household="Household" status="assigned" />
             </div>
 
-            <div className="sv-row sv-gap">
+            <div className="sv-row sv-gap ssa-hero-actions">
               <Button
                 onClick={handleNow}
                 title="Open SessionRunner now (hotkey: N)"
@@ -1661,7 +1797,12 @@ export default function CleaningPage() {
             </div>
           </div>
 
-          <p className="sv-muted">
+          <div className="sv-row sv-align-center" style={{ marginTop: 8, gap: 10 }}>
+            <SSAAnimalAvatar animal="goats" label="Homestead Rhythm" size="sm" />
+            <span className="sv-caption">Season: {seasonalLabel}</span>
+          </div>
+
+          <p className="sv-muted ssa-hero-subtitle">
             Generate cleaning plans with steps + timers, save them to your Plan
             Library, and run hands-free with the SessionRunner.
           </p>
@@ -1679,6 +1820,30 @@ export default function CleaningPage() {
             {b.content || b.text}
           </Banner>
         ))}
+
+        <div className="sv-row sv-gap sv-wrap" style={{ marginTop: 16 }}>
+          <div style={{ flex: "1 1 260px", minWidth: 240 }}>
+            <SSAGrowthOverlay
+              label="Seasonal Completion"
+              value={completionPct}
+              className="ssa-seasonal-card"
+            />
+          </div>
+          <div style={{ flex: "1 1 260px", minWidth: 240 }}>
+            <SSASeasonalTaskHighlight
+              season={seasonalKey}
+              title={`${seasonalLabel} Household Focus`}
+              detail="Keep high-traffic zones clean before meal prep and evening routines."
+              urgency={zones.length >= 4 ? "high" : "normal"}
+            />
+          </div>
+          <div style={{ flex: "1 1 260px", minWidth: 240 }}>
+            <SSAHouseholdParticipation
+              label="Cleaning Participation"
+              entries={participationEntries}
+            />
+          </div>
+        </div>
 
         {/* Plan Library + Favorites row */}
         <div
@@ -1812,7 +1977,7 @@ export default function CleaningPage() {
                             <div className="sv-strong sv-ellipsis">
                               {p.title || "Cleaning Plan"}
                             </div>
-                            <span className="sv-badge">
+                            <span className="sv-badge ssa-hero-chip">
                               {p.intensity || "standard"}
                             </span>
                             {busyFlag === "saving" ? (
@@ -2296,6 +2461,61 @@ export default function CleaningPage() {
             <MultiTimerPanel draft={draftToPlay(draft)} />
           </Card>
         ) : null}
+
+        <Card className="sv-pad sv-block" style={{ marginTop: 16 }}>
+          <SectionHeader
+            icon="🧭"
+            title="Household Today and Upcoming"
+            sub="Cross-module recurrence, dependency, and conflict cues."
+            right={
+              <Button variant="outline" onClick={fetchHouseholdAgenda}>
+                Refresh agenda
+              </Button>
+            }
+          />
+          {householdAgendaBusy &&
+          !householdAgenda.today.length &&
+          !householdAgenda.upcoming.length ? (
+            <div className="sv-muted sv-text-sm">Loading household agenda…</div>
+          ) : (
+            <div className="sv-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+              <div className="sv-stack-sm">
+                <div className="sv-caption caps">Today</div>
+                {householdAgenda.today.length ? (
+                  <ul className="sv-list sv-text-sm">
+                    {householdAgenda.today.slice(0, 4).map((item) => (
+                      <li key={item.id}>
+                        <div className="sv-strong">{item.title}</div>
+                        <div className="sv-muted" style={{ fontSize: 11 }}>
+                          {agendaCueLine(item)}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="sv-muted sv-text-sm">No items for today.</div>
+                )}
+              </div>
+              <div className="sv-stack-sm">
+                <div className="sv-caption caps">Upcoming</div>
+                {householdAgenda.upcoming.length ? (
+                  <ul className="sv-list sv-text-sm">
+                    {householdAgenda.upcoming.slice(0, 4).map((item) => (
+                      <li key={item.id}>
+                        <div className="sv-strong">{item.title}</div>
+                        <div className="sv-muted" style={{ fontSize: 11 }}>
+                          {agendaCueLine(item)}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="sv-muted sv-text-sm">No upcoming items.</div>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
 
         {/* Household Glance (optional kept) */}
         <Card className="sv-pad sv-block" style={{ marginTop: 16 }}>
