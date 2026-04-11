@@ -532,6 +532,91 @@ describe("planner unified feed contract", () => {
     }
   }, 60000);
 
+  it("enforces deterministic approval workflow transitions", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-approval-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const reportRes = await fetch(`${baseUrl}/api/planners/community/moderation/report`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          targetId: "feed-item-approval",
+          reason: "policy",
+          details: "Approval transition contract",
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(reportRes.status).toBe(200);
+      const reportPayload = await reportRes.json();
+      const approvalId = String(
+        reportPayload?.approvalRequest?.id || reportPayload?.report?.approvalRequestId || ""
+      );
+      expect(approvalId.length).toBeGreaterThan(0);
+      expect(String(reportPayload?.approvalRequest?.workflowState || "")).toBe("pending_approval");
+
+      const approvalsRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(approvalsRes.status).toBe(200);
+      const approvalsPayload = await approvalsRes.json();
+      expect(approvalsPayload.ok).toBe(true);
+      const seedApproval = Array.isArray(approvalsPayload?.approvals)
+        ? approvalsPayload.approvals.find((entry) => String(entry?.id || "") === approvalId)
+        : null;
+      expect(seedApproval).toBeTruthy();
+      expect(String(seedApproval?.workflowState || "")).toBe("pending_approval");
+      expect(Array.isArray(seedApproval?.allowedNextStates)).toBe(true);
+      expect(seedApproval.allowedNextStates.includes("active")).toBe(true);
+
+      const transitionToActiveRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "active",
+            reason: "Moderator accepted review",
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(transitionToActiveRes.status).toBe(200);
+      const transitionToActivePayload = await transitionToActiveRes.json();
+      expect(String(transitionToActivePayload?.approval?.workflowState || "")).toBe("active");
+      expect(String(transitionToActivePayload?.report?.workflowState || "")).toBe("active");
+      expect(String(transitionToActivePayload?.report?.status || "")).toBe("in_review");
+
+      const invalidTransitionRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "pending_approval",
+            reason: "Invalid rollback to pending",
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(invalidTransitionRes.status).toBe(409);
+      const invalidTransitionPayload = await invalidTransitionRes.json();
+      expect(String(invalidTransitionPayload?.error || "")).toBe("invalid_approval_transition");
+      expect(String(invalidTransitionPayload?.fromState || "")).toBe("active");
+      expect(String(invalidTransitionPayload?.toState || "")).toBe("pending_approval");
+      expect(Array.isArray(invalidTransitionPayload?.allowedNextStates)).toBe(true);
+      expect(invalidTransitionPayload.allowedNextStates.includes("completed")).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
   it("returns a unified household today and upcoming agenda", async () => {
     const { child, port, outputCapture } = startServer();
     const baseUrl = `http://127.0.0.1:${port}`;

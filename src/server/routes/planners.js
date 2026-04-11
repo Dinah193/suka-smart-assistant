@@ -19,6 +19,7 @@ const {
   buildUnifiedFeedMutationEvent,
   buildUnifiedFeedMutationResponse,
 } = require("../services/planners/HouseholdFeedEventEmitter.js");
+const { WORKFLOW_STATES } = require("../contracts/householdSocialContract.js");
 
 function isLocalDevRequest(req) {
   if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
@@ -120,6 +121,43 @@ const COMMUNITY_CONTEXT_STATE_FILE = path.resolve(
 const MEAL_CONTEXT_ACTION_LOG_LIMIT = 25;
 const HOMESTEAD_ACTION_LOG_LIMIT = 40;
 const STOREHOUSE_ACTION_LOG_LIMIT = 30;
+
+const APPROVAL_WORKFLOW_TRANSITIONS = Object.freeze({
+  [WORKFLOW_STATES.DRAFT]: [WORKFLOW_STATES.PENDING_APPROVAL, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.PENDING_APPROVAL]: [WORKFLOW_STATES.ACTIVE, WORKFLOW_STATES.BLOCKED, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.ACTIVE]: [WORKFLOW_STATES.COMPLETED, WORKFLOW_STATES.BLOCKED, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.BLOCKED]: [WORKFLOW_STATES.PENDING_APPROVAL, WORKFLOW_STATES.ARCHIVED],
+  [WORKFLOW_STATES.COMPLETED]: [],
+  [WORKFLOW_STATES.ARCHIVED]: [],
+});
+
+function normalizeApprovalWorkflowState(value, fallback = WORKFLOW_STATES.PENDING_APPROVAL) {
+  const key = String(value || "").trim().toLowerCase();
+  return APPROVAL_WORKFLOW_TRANSITIONS[key] ? key : fallback;
+}
+
+function listAllowedApprovalWorkflowTransitions(fromState) {
+  const key = normalizeApprovalWorkflowState(fromState, WORKFLOW_STATES.PENDING_APPROVAL);
+  return Array.isArray(APPROVAL_WORKFLOW_TRANSITIONS[key])
+    ? [...APPROVAL_WORKFLOW_TRANSITIONS[key]]
+    : [];
+}
+
+function canTransitionApprovalWorkflowState(fromState, toState) {
+  const next = normalizeApprovalWorkflowState(toState, "");
+  if (!next) return false;
+  const allowed = listAllowedApprovalWorkflowTransitions(fromState);
+  return allowed.includes(next);
+}
+
+function mapReportStatusFromWorkflowState(workflowState) {
+  const key = normalizeApprovalWorkflowState(workflowState, WORKFLOW_STATES.PENDING_APPROVAL);
+  if (key === WORKFLOW_STATES.ACTIVE) return "in_review";
+  if (key === WORKFLOW_STATES.BLOCKED) return "rejected";
+  if (key === WORKFLOW_STATES.COMPLETED) return "resolved";
+  if (key === WORKFLOW_STATES.ARCHIVED) return "archived";
+  return "queued";
+}
 
 const DEFAULT_PROFILE_MESSAGES_CONTEXT = Object.freeze({
   conversations: [],
@@ -236,6 +274,7 @@ function cloneDefaultCommunityContext(householdId) {
     ],
     notifications: [],
     reports: [],
+    approvals: [],
     profileVisibility: {
       mode: "community",
       discoverable: true,
@@ -281,6 +320,7 @@ function ensureCommunityHouseholdState(state, householdId) {
       : {};
   current.notifications = Array.isArray(current.notifications) ? current.notifications : [];
   current.reports = Array.isArray(current.reports) ? current.reports : [];
+  current.approvals = Array.isArray(current.approvals) ? current.approvals : [];
   current.profileVisibility =
     current.profileVisibility && typeof current.profileVisibility === "object"
       ? {
@@ -3283,12 +3323,37 @@ router.post("/community/moderation/report", express.json(), async (req, res) => 
       reason: String(req.body?.reason || "unspecified"),
       details: String(req.body?.details || ""),
       status: "queued",
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
       reportedBy: actor,
       createdAt: now,
     };
 
+    const approvalRequest = {
+      id: generateHomesteadId("approval-request"),
+      subjectType: "moderation_report",
+      subjectId: report.id,
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
+      requestedBy: actor,
+      requestedAt: now,
+      updatedAt: now,
+      updatedBy: actor,
+      reason: report.reason,
+      details: report.details,
+      auditLog: [
+        {
+          fromState: null,
+          toState: WORKFLOW_STATES.PENDING_APPROVAL,
+          at: now,
+          updatedBy: actor,
+          reason: "moderation_report_submitted",
+        },
+      ],
+    };
+    report.approvalRequestId = approvalRequest.id;
+
     const { state, householdState } = await getCommunityContextForHousehold(householdId);
     householdState.reports.unshift(report);
+    householdState.approvals.unshift(approvalRequest);
     appendHouseholdNotifications({
       householdState,
       entries: [
@@ -3313,7 +3378,147 @@ router.post("/community/moderation/report", express.json(), async (req, res) => 
     householdState.updatedAt = now;
     state.households[householdId] = householdState;
     await writeCommunityContextStateFile(state);
-    return res.json({ ok: true, householdId, report });
+    return res.json({ ok: true, householdId, report, approvalRequest });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/approvals", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    const approvals = (Array.isArray(householdState.approvals) ? householdState.approvals : []).map(
+      (entry) => {
+        const workflowState = normalizeApprovalWorkflowState(entry?.workflowState);
+        return {
+          ...entry,
+          workflowState,
+          allowedNextStates: listAllowedApprovalWorkflowTransitions(workflowState),
+        };
+      }
+    );
+    return res.json({
+      ok: true,
+      householdId,
+      transitions: APPROVAL_WORKFLOW_TRANSITIONS,
+      approvals,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/approvals/:id/transition", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const approvalId = String(req.params.id || "").trim();
+    const nextState = normalizeApprovalWorkflowState(req.body?.nextState, "");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const reason = String(req.body?.reason || "").trim();
+    const now = new Date().toISOString();
+
+    if (!approvalId) {
+      return res.status(400).json({ ok: false, error: "missing_approval_id" });
+    }
+    if (!nextState) {
+      return res.status(400).json({ ok: false, error: "missing_next_state" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const approvals = Array.isArray(householdState.approvals) ? [...householdState.approvals] : [];
+    const approvalIndex = approvals.findIndex((entry) => String(entry?.id || "") === approvalId);
+    if (approvalIndex < 0) {
+      return res.status(404).json({ ok: false, error: "approval_request_not_found" });
+    }
+
+    const currentApproval = { ...approvals[approvalIndex] };
+    const currentState = normalizeApprovalWorkflowState(currentApproval.workflowState);
+    const allowedNextStates = listAllowedApprovalWorkflowTransitions(currentState);
+    if (!canTransitionApprovalWorkflowState(currentState, nextState)) {
+      return res.status(409).json({
+        ok: false,
+        error: "invalid_approval_transition",
+        approvalId,
+        fromState: currentState,
+        toState: nextState,
+        allowedNextStates,
+      });
+    }
+
+    const nextAuditLog = Array.isArray(currentApproval.auditLog) ? [...currentApproval.auditLog] : [];
+    nextAuditLog.push({
+      fromState: currentState,
+      toState: nextState,
+      at: now,
+      updatedBy: actor,
+      reason: reason || null,
+    });
+
+    const nextApproval = {
+      ...currentApproval,
+      workflowState: nextState,
+      updatedAt: now,
+      updatedBy: actor,
+      reason: reason || currentApproval.reason || "",
+      auditLog: nextAuditLog,
+      allowedNextStates: listAllowedApprovalWorkflowTransitions(nextState),
+    };
+    approvals[approvalIndex] = nextApproval;
+    householdState.approvals = approvals;
+
+    const reports = Array.isArray(householdState.reports) ? [...householdState.reports] : [];
+    const reportIndex = reports.findIndex(
+      (entry) => String(entry?.approvalRequestId || "") === approvalId
+    );
+    if (reportIndex >= 0) {
+      reports[reportIndex] = {
+        ...reports[reportIndex],
+        workflowState: nextState,
+        status: mapReportStatusFromWorkflowState(nextState),
+        updatedAt: now,
+        updatedBy: actor,
+      };
+    }
+    householdState.reports = reports;
+
+    const linkedReport = reportIndex >= 0 ? reports[reportIndex] : null;
+    appendHouseholdNotifications({
+      householdState,
+      entries: [
+        buildNotificationEntry({
+          idFactory: generateHomesteadId,
+          eventType:
+            nextState === WORKFLOW_STATES.PENDING_APPROVAL ? "APPROVAL_REQUESTED" : "APPROVAL_DECIDED",
+          createdAt: now,
+          type: "moderation",
+          title: "Approval workflow updated",
+          message: `Approval ${approvalId} moved from ${currentState} to ${nextState}.`,
+          module: "moderation",
+          sourceModule: "community",
+          sourceId: linkedReport?.id || currentApproval.subjectId || approvalId,
+          metadata: {
+            approvalId,
+            fromState: currentState,
+            toState: nextState,
+            reason: reason || null,
+          },
+        }),
+      ],
+      nowIso: now,
+    });
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      approval: nextApproval,
+      report: linkedReport,
+      transitions: APPROVAL_WORKFLOW_TRANSITIONS,
+    });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
