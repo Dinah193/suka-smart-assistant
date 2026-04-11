@@ -1169,6 +1169,100 @@ function makeHouseholdAgendaItem({ id, lane, module, title, detail, dueAt, state
   };
 }
 
+const AGENDA_PRIORITY_RANK = Object.freeze({
+  critical: 4,
+  high: 3,
+  normal: 2,
+  low: 1,
+});
+
+const AGENDA_STATUS_RANK = Object.freeze({
+  blocked: 5,
+  pending_approval: 4,
+  active: 3,
+  draft: 2,
+  completed: 1,
+  archived: 0,
+  planned: 2,
+  pending: 2,
+  today: 2,
+});
+
+function normalizeAgendaSortBy(value) {
+  const key = String(value || "").trim().toLowerCase();
+  if (["priority", "status", "dueat"].includes(key)) return key;
+  return "dueat";
+}
+
+function normalizeAgendaSortDirection(value) {
+  const key = String(value || "").trim().toLowerCase();
+  return key === "asc" ? "asc" : "desc";
+}
+
+function normalizeAgendaFilters(query = {}) {
+  return {
+    ownerId: String(query.ownerId || query.person || "").trim().toLowerCase(),
+    moduleKey: String(query.moduleKey || query.module || "").trim().toLowerCase(),
+    priority: String(query.priority || "").trim().toLowerCase(),
+    workflowState: String(query.workflowState || query.status || "").trim().toLowerCase(),
+  };
+}
+
+function agendaItemMatchesFilters(item, filters = {}) {
+  const row = item && typeof item === "object" ? item : {};
+  const f = filters && typeof filters === "object" ? filters : {};
+  if (f.ownerId) {
+    const owner = String(row.ownerId || "").trim().toLowerCase();
+    if (owner !== f.ownerId) return false;
+  }
+  if (f.moduleKey) {
+    const moduleKey = String(row.module || row.lane || "").trim().toLowerCase();
+    if (moduleKey !== f.moduleKey) return false;
+  }
+  if (f.priority) {
+    const priority = String(row.priority || "").trim().toLowerCase();
+    if (priority !== f.priority) return false;
+  }
+  if (f.workflowState) {
+    const status = String(row.workflowState || row.state || "").trim().toLowerCase();
+    if (status !== f.workflowState) return false;
+  }
+  return true;
+}
+
+function compareAgendaItems(left, right, sortBy, sortDirection) {
+  const a = left && typeof left === "object" ? left : {};
+  const b = right && typeof right === "object" ? right : {};
+  const direction = sortDirection === "asc" ? 1 : -1;
+
+  if (sortBy === "priority") {
+    const aRank = Number(AGENDA_PRIORITY_RANK[String(a.priority || "").toLowerCase()] || 0);
+    const bRank = Number(AGENDA_PRIORITY_RANK[String(b.priority || "").toLowerCase()] || 0);
+    if (aRank !== bRank) return (aRank - bRank) * direction;
+  }
+
+  if (sortBy === "status") {
+    const aRank = Number(AGENDA_STATUS_RANK[String(a.workflowState || a.state || "").toLowerCase()] || 0);
+    const bRank = Number(AGENDA_STATUS_RANK[String(b.workflowState || b.state || "").toLowerCase()] || 0);
+    if (aRank !== bRank) return (aRank - bRank) * direction;
+  }
+
+  const aTime = Date.parse(String(a.dueAt || ""));
+  const bTime = Date.parse(String(b.dueAt || ""));
+  const aVal = Number.isFinite(aTime) ? aTime : 0;
+  const bVal = Number.isFinite(bTime) ? bTime : 0;
+  if (aVal !== bVal) return (aVal - bVal) * direction;
+  return String(a.id || "").localeCompare(String(b.id || "")) * direction;
+}
+
+function applyAgendaFiltersAndSort(items, { filters, sortBy, sortDirection, limit }) {
+  const rows = Array.isArray(items) ? items : [];
+  const filtered = rows.filter((item) => agendaItemMatchesFilters(item, filters));
+  const sorted = [...filtered].sort((a, b) => compareAgendaItems(a, b, sortBy, sortDirection));
+  const maxItems = Number.isFinite(Number(limit)) ? Number(limit) : sorted.length;
+  return sorted.slice(0, Math.max(0, maxItems));
+}
+
 function coerceIsoDate(value, fallbackIso) {
   const parsed = Date.parse(String(value || ""));
   if (Number.isFinite(parsed)) {
@@ -1187,6 +1281,9 @@ function buildTodayAndUpcomingAgenda({
   unifiedFeedItems,
   todayLimit,
   upcomingLimit,
+  filters,
+  sortBy,
+  sortDirection,
 }) {
   const today = [];
   const upcoming = [];
@@ -1300,6 +1397,12 @@ function buildTodayAndUpcomingAgenda({
   });
 
   const taskRows = Array.isArray(communityState?.tasks) ? communityState.tasks : [];
+  const workflowStateByTaskId = new Map(
+    taskRows.map((task) => [
+      String(task?.id || ""),
+      normalizeTaskWorkflowState(task?.workflowState, WORKFLOW_STATES.ACTIVE),
+    ])
+  );
   taskRows.forEach((task, index) => {
     const workflowState = normalizeTaskWorkflowState(task?.workflowState, WORKFLOW_STATES.ACTIVE);
     if (workflowState === WORKFLOW_STATES.COMPLETED || workflowState === WORKFLOW_STATES.ARCHIVED) {
@@ -1325,6 +1428,34 @@ function buildTodayAndUpcomingAgenda({
       sourceType: "task",
     });
 
+    const dependencyIds = Array.isArray(task?.dependsOn)
+      ? task.dependsOn.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const blockingDependencyIds = dependencyIds.filter((dependencyId) => {
+      const state = workflowStateByTaskId.get(dependencyId);
+      return state !== WORKFLOW_STATES.COMPLETED;
+    });
+    const conflictIds = Array.isArray(task?.conflictsWithTaskIds)
+      ? task.conflictsWithTaskIds.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const nowEpoch = Date.parse(String(nowIso || ""));
+    const dueEpoch = Date.parse(String(dueAtIso || ""));
+    const isOverdue = Number.isFinite(nowEpoch) && Number.isFinite(dueEpoch) && dueEpoch < nowEpoch;
+
+    Object.assign(agendaItem, {
+      ownerId: String(task?.ownerId || "").trim() || null,
+      priority: normalizeTaskPriority(task?.priority),
+      workflowState,
+      recurrenceEnabled: Boolean(task?.recurrence?.enabled),
+      dependencyCount: dependencyIds.length,
+      blockingDependencyCount: blockingDependencyIds.length,
+      hasDependencyBlock: blockingDependencyIds.length > 0,
+      conflictCount: conflictIds.length,
+      hasConflict: conflictIds.length > 0,
+      overdue: isOverdue,
+      moduleKey: normalizeTaskModuleKey(task?.moduleKey, "community"),
+    });
+
     if (isSameDay || dueAtDate.getTime() < nowDate.getTime()) {
       today.push(agendaItem);
       return;
@@ -1332,17 +1463,19 @@ function buildTodayAndUpcomingAgenda({
     upcoming.push(agendaItem);
   });
 
-  const todaySorted = sortUnifiedFeedItems(
-    today.map((item) => ({ ...item, id: `${item.module}:${item.id}`, lastActionAt: item.dueAt }))
-  )
-    .map(({ lastActionAt, ...item }) => item)
-    .slice(0, todayLimit);
+  const todaySorted = applyAgendaFiltersAndSort(today, {
+    filters,
+    sortBy,
+    sortDirection,
+    limit: todayLimit,
+  });
 
-  const upcomingSorted = sortUnifiedFeedItems(
-    upcoming.map((item) => ({ ...item, id: `${item.module}:${item.id}`, lastActionAt: item.dueAt }))
-  )
-    .map(({ lastActionAt, ...item }) => item)
-    .slice(0, upcomingLimit);
+  const upcomingSorted = applyAgendaFiltersAndSort(upcoming, {
+    filters,
+    sortBy,
+    sortDirection,
+    limit: upcomingLimit,
+  });
 
   return {
     householdId,
@@ -2483,6 +2616,14 @@ router.get("/household/today-upcoming", async (req, res) => {
   try {
     const householdId = String(req.query.householdId || "default-household");
     const requestedModules = normalizeRequestedFeedModules(req.query.modules);
+    const filters = normalizeAgendaFilters({
+      person: req.query.person,
+      module: req.query.module,
+      priority: req.query.priority,
+      status: req.query.status,
+    });
+    const sortBy = normalizeAgendaSortBy(req.query.sortBy);
+    const sortDirection = normalizeAgendaSortDirection(req.query.sortDirection);
     const todayLimitRaw = Number(req.query.todayLimit);
     const upcomingLimitRaw = Number(req.query.upcomingLimit);
     const todayLimit = Number.isFinite(todayLimitRaw) && todayLimitRaw > 0
@@ -2511,6 +2652,9 @@ router.get("/household/today-upcoming", async (req, res) => {
       unifiedFeedItems,
       todayLimit,
       upcomingLimit,
+      filters,
+      sortBy,
+      sortDirection,
     });
 
     return res.json({

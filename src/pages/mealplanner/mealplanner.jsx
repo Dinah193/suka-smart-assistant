@@ -3473,7 +3473,17 @@ export default function MealPlanningPage() {
                             <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 4 }}>
                               {householdAgenda.today.slice(0, 4).map((item) => (
                                 <li key={item.id} style={{ color: "var(--fg)", fontSize: 13 }}>
-                                  {item.title}
+                                  <div style={{ display: "grid", gap: 2 }}>
+                                    <span>{item.title}</span>
+                                    <span className="sv-muted" style={{ fontSize: 11 }}>
+                                      {String(item?.module || item?.lane || "household")} | {String(item?.workflowState || item?.state || "planned")}
+                                      {item?.priority ? ` | ${String(item.priority)}` : ""}
+                                      {item?.recurrenceEnabled ? " | recurring" : ""}
+                                      {item?.hasDependencyBlock ? ` | blocked by ${Number(item?.blockingDependencyCount || 0)} deps` : ""}
+                                      {item?.hasConflict ? ` | conflicts ${Number(item?.conflictCount || 0)}` : ""}
+                                      {item?.overdue ? " | overdue" : ""}
+                                    </span>
+                                  </div>
                                 </li>
                               ))}
                             </ul>
@@ -3487,7 +3497,17 @@ export default function MealPlanningPage() {
                             <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 4 }}>
                               {householdAgenda.upcoming.slice(0, 4).map((item) => (
                                 <li key={item.id} style={{ color: "var(--fg)", fontSize: 13 }}>
-                                  {item.title}
+                                  <div style={{ display: "grid", gap: 2 }}>
+                                    <span>{item.title}</span>
+                                    <span className="sv-muted" style={{ fontSize: 11 }}>
+                                      {String(item?.module || item?.lane || "household")} | {String(item?.workflowState || item?.state || "planned")}
+                                      {item?.priority ? ` | ${String(item.priority)}` : ""}
+                                      {item?.recurrenceEnabled ? " | recurring" : ""}
+                                      {item?.hasDependencyBlock ? ` | blocked by ${Number(item?.blockingDependencyCount || 0)} deps` : ""}
+                                      {item?.hasConflict ? ` | conflicts ${Number(item?.conflictCount || 0)}` : ""}
+                                      {item?.overdue ? " | overdue" : ""}
+                                    </span>
+                                  </div>
                                 </li>
                               ))}
                             </ul>

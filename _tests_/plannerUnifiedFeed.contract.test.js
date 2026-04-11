@@ -813,10 +813,189 @@ describe("planner unified feed contract", () => {
       );
       expect(agendaRes.status).toBe(200);
       const agendaPayload = await agendaRes.json();
+      const allAgendaItems = [
+        ...(Array.isArray(agendaPayload?.today) ? agendaPayload.today : []),
+        ...(Array.isArray(agendaPayload?.upcoming) ? agendaPayload.upcoming : []),
+      ];
+      const anyTaskAgendaItem = allAgendaItems.find((item) => String(item?.sourceType || "") === "task");
       expect(
         agendaPayload.today.some((item) => String(item?.sourceType || "") === "task") ||
           agendaPayload.upcoming.some((item) => String(item?.sourceType || "") === "task")
       ).toBe(true);
+      expect(anyTaskAgendaItem).toBeTruthy();
+      expect(Object.prototype.hasOwnProperty.call(anyTaskAgendaItem || {}, "recurrenceEnabled")).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(anyTaskAgendaItem || {}, "hasDependencyBlock")).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(anyTaskAgendaItem || {}, "hasConflict")).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(anyTaskAgendaItem || {}, "ownerId")).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(anyTaskAgendaItem || {}, "priority")).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(anyTaskAgendaItem || {}, "workflowState")).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("filters and sorts household today-upcoming agenda by person module priority and status", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-agenda-filters-${randomUUID()}`;
+    const now = Date.now();
+
+    const collectAgendaRows = (payload) => [
+      ...(Array.isArray(payload?.today) ? payload.today : []),
+      ...(Array.isArray(payload?.upcoming) ? payload.upcoming : []),
+    ];
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const highTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          task: {
+            moduleKey: "cleaning",
+            title: "Deep clean pantry",
+            ownerId: "member-alpha",
+            dueAt: new Date(now + 90 * 60 * 1000).toISOString(),
+            priority: "high",
+          },
+        }),
+      });
+      expect(highTaskRes.status).toBe(200);
+      const highTaskPayload = await highTaskRes.json();
+      const highTaskId = String(highTaskPayload?.task?.id || "");
+      expect(highTaskId.length).toBeGreaterThan(0);
+
+      const lowTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          task: {
+            moduleKey: "cleaning",
+            title: "Refill mop station",
+            ownerId: "member-alpha",
+            dueAt: new Date(now + 120 * 60 * 1000).toISOString(),
+            priority: "low",
+          },
+        }),
+      });
+      expect(lowTaskRes.status).toBe(200);
+      const lowTaskPayload = await lowTaskRes.json();
+      const lowTaskId = String(lowTaskPayload?.task?.id || "");
+      expect(lowTaskId.length).toBeGreaterThan(0);
+
+      const normalTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          task: {
+            moduleKey: "meal",
+            title: "Prep soup base",
+            ownerId: "member-beta",
+            dueAt: new Date(now + 150 * 60 * 1000).toISOString(),
+            priority: "normal",
+          },
+        }),
+      });
+      expect(normalTaskRes.status).toBe(200);
+      const normalTaskPayload = await normalTaskRes.json();
+      const normalTaskId = String(normalTaskPayload?.task?.id || "");
+      expect(normalTaskId.length).toBeGreaterThan(0);
+
+      const lowBlockedRes = await fetch(
+        `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(lowTaskId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ householdId, nextState: "blocked", reason: "Waiting on supplies" }),
+        }
+      );
+      expect(lowBlockedRes.status).toBe(200);
+
+      const ownerFilteredRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&person=${encodeURIComponent("member-alpha")}&todayLimit=50&upcomingLimit=50`
+      );
+      expect(ownerFilteredRes.status).toBe(200);
+      const ownerFilteredPayload = await ownerFilteredRes.json();
+      const ownerRows = collectAgendaRows(ownerFilteredPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      expect(ownerRows.length).toBeGreaterThan(0);
+      expect(ownerRows.every((item) => String(item?.ownerId || "") === "member-alpha")).toBe(true);
+
+      const moduleFilteredRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=cleaning&todayLimit=50&upcomingLimit=50`
+      );
+      expect(moduleFilteredRes.status).toBe(200);
+      const moduleFilteredPayload = await moduleFilteredRes.json();
+      const moduleRows = collectAgendaRows(moduleFilteredPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      expect(moduleRows.length).toBeGreaterThan(0);
+      expect(moduleRows.every((item) => String(item?.module || item?.lane || "") === "cleaning")).toBe(true);
+
+      const statusFilteredRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&status=blocked&todayLimit=50&upcomingLimit=50`
+      );
+      expect(statusFilteredRes.status).toBe(200);
+      const statusFilteredPayload = await statusFilteredRes.json();
+      const statusRows = collectAgendaRows(statusFilteredPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      expect(statusRows.length).toBeGreaterThan(0);
+      expect(statusRows.every((item) => String(item?.workflowState || item?.state || "") === "blocked")).toBe(true);
+
+      const priorityFilteredRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=cleaning&priority=high&todayLimit=50&upcomingLimit=50`
+      );
+      expect(priorityFilteredRes.status).toBe(200);
+      const priorityFilteredPayload = await priorityFilteredRes.json();
+      const priorityRows = collectAgendaRows(priorityFilteredPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      expect(priorityRows.length).toBeGreaterThan(0);
+      expect(priorityRows.every((item) => String(item?.priority || "") === "high")).toBe(true);
+
+      const prioritySortedRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=cleaning&sortBy=priority&sortDirection=desc&todayLimit=50&upcomingLimit=50`
+      );
+      expect(prioritySortedRes.status).toBe(200);
+      const prioritySortedPayload = await prioritySortedRes.json();
+      const priorityRowsSorted = collectAgendaRows(prioritySortedPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      const highIndex = priorityRowsSorted.findIndex((item) => String(item?.id || "") === `task-${highTaskId}`);
+      const lowIndex = priorityRowsSorted.findIndex((item) => String(item?.id || "") === `task-${lowTaskId}`);
+      expect(highIndex).toBeGreaterThanOrEqual(0);
+      expect(lowIndex).toBeGreaterThanOrEqual(0);
+      expect(highIndex).toBeLessThan(lowIndex);
+
+      const statusSortedRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=cleaning&sortBy=status&sortDirection=desc&todayLimit=50&upcomingLimit=50`
+      );
+      expect(statusSortedRes.status).toBe(200);
+      const statusSortedPayload = await statusSortedRes.json();
+      const statusRowsSorted = collectAgendaRows(statusSortedPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      const blockedIndex = statusRowsSorted.findIndex((item) => String(item?.id || "") === `task-${lowTaskId}`);
+      const activeIndex = statusRowsSorted.findIndex((item) => String(item?.id || "") === `task-${highTaskId}`);
+      expect(blockedIndex).toBeGreaterThanOrEqual(0);
+      expect(activeIndex).toBeGreaterThanOrEqual(0);
+      expect(blockedIndex).toBeLessThan(activeIndex);
+
+      const dueAscRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=meal&sortBy=dueAt&sortDirection=asc&todayLimit=50&upcomingLimit=50`
+      );
+      expect(dueAscRes.status).toBe(200);
+      const dueAscPayload = await dueAscRes.json();
+      const dueAscRows = collectAgendaRows(dueAscPayload).filter(
+        (item) => String(item?.sourceType || "") === "task"
+      );
+      expect(dueAscRows.some((item) => String(item?.id || "") === `task-${normalTaskId}`)).toBe(true);
     } finally {
       await stopServer(child);
     }
