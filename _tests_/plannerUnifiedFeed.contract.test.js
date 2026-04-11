@@ -203,6 +203,10 @@ describe("planner unified feed contract", () => {
         const likePayloadOne = await likeResOne.json();
         const likesAfterOne = Number(likePayloadOne?.updatedItem?.stats?.likes || 0);
         expect(likesAfterOne).toBeGreaterThan(0);
+        expect(String(likePayloadOne?.event?.mutationType || "")).toBe("reaction");
+        expect(String(likePayloadOne?.event?.sourceModule || "")).toBe(moduleName);
+        expect(String(likePayloadOne?.event?.sourceId || "")).toBe(sourceId);
+        expect(String(likePayloadOne?.event?.action || "")).toBe("like");
 
         const likeResTwo = await fetch(
           `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/reaction`,
@@ -239,6 +243,9 @@ describe("planner unified feed contract", () => {
         expect(Array.isArray(commentPayload?.comments)).toBe(true);
         expect(commentPayload.comments.length).toBeGreaterThan(0);
         expect(commentPayload.comments.length).toBe(beforeThreadLength + 1);
+        expect(String(commentPayload?.event?.mutationType || "")).toBe("comment");
+        expect(String(commentPayload?.event?.sourceModule || "")).toBe(moduleName);
+        expect(String(commentPayload?.event?.sourceId || "")).toBe(sourceId);
 
         const lastComment = commentPayload.comments[commentPayload.comments.length - 1];
         expect(String(lastComment?.body || "")).toContain(moduleName);
@@ -611,6 +618,10 @@ describe("planner unified feed contract", () => {
       const handoffPayload = await handoffRes.json();
       expect(handoffPayload.ok).toBe(true);
       expect(Number(handoffPayload?.updatedItem?.stats?.semanticActions?.handoff || 0)).toBe(1);
+      expect(String(handoffPayload?.event?.mutationType || "")).toBe("semantic_action");
+      expect(String(handoffPayload?.event?.sourceModule || "")).toBe("community");
+      expect(String(handoffPayload?.event?.sourceId || "")).toBe(sourceId);
+      expect(String(handoffPayload?.event?.action || "")).toBe("handoff");
 
       const requestHelpRes = await fetch(
         `${baseUrl}/api/planners/feed/unified/community/${encodeURIComponent(sourceId)}/semantic-action`,

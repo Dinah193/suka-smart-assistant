@@ -13,17 +13,8 @@ import "@/styles/household.css";
 import "@/pages/cooking/cooking.css";
 
 /* ---------------- Existing panels ---------------- */
-import MealPlannerDashboard from "../../components/meals/MealPlannerDashboard.jsx";
-import MealCyclePlannerCalendar from "./MealCyclePlannerCalendar.jsx";
-import MealPrepNeedsReport from "../../components/meals/MealPrepNeedsReport.jsx";
-import FoodProductionForecast from "../../components/meals/FoodProductionForecast.jsx";
-import ProcurementReport from "../../components/meals/ProcurementReport.jsx";
-import ShoppingListGenerator from "../../components/meals/ShoppingListGenerator.jsx";
-import MealToMarketScalePanel from "../../components/meals/MealToMarketScalePanel.jsx";
-import SeedAnimalInventoryForm from "../../components/meals/SeedAnimalInventoryForm.jsx";
-import ZoneAwareCalendar from "../../components/meals/ZoneAwareCalendar.jsx";
-import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
 import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
+import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
 import { useFoodSecurityEstimator } from "@/hooks/estimators/useFoodSecurityEstimator";
 import { useCostDeltaEstimator } from "@/hooks/estimators/useCostDeltaEstimator";
 import {
@@ -42,6 +33,30 @@ import {
 import { requestHouseholdAutomationPlan } from "@/pages/planners/HouseholdPlanningService";
 import { getToken } from "@/services/auth/tokenProvider";
 import LoadingBoundary from "@/components/common/LoadingBoundary";
+import ShoppingListGenerator from "../../components/meals/ShoppingListGenerator.jsx";
+
+const MealPlannerDashboard = React.lazy(() =>
+  import("../../components/meals/MealPlannerDashboard.jsx")
+);
+const MealCyclePlannerCalendar = React.lazy(() => import("./MealCyclePlannerCalendar.jsx"));
+const MealPrepNeedsReport = React.lazy(() =>
+  import("../../components/meals/MealPrepNeedsReport.jsx")
+);
+const FoodProductionForecast = React.lazy(() =>
+  import("../../components/meals/FoodProductionForecast.jsx")
+);
+const ProcurementReport = React.lazy(() =>
+  import("../../components/meals/ProcurementReport.jsx")
+);
+const MealToMarketScalePanel = React.lazy(() =>
+  import("../../components/meals/MealToMarketScalePanel.jsx")
+);
+const SeedAnimalInventoryForm = React.lazy(() =>
+  import("../../components/meals/SeedAnimalInventoryForm.jsx")
+);
+const ZoneAwareCalendar = React.lazy(() =>
+  import("../../components/meals/ZoneAwareCalendar.jsx")
+);
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -118,58 +133,6 @@ async function getMealPlanningAgent() {
 
   return _mealPlanningAgent;
 }
-
-/* ---- Optional agents (guarded imports so the page never crashes) ---- */
-// These point to *shims*, not raw agents.
-let cookingAgent = null;
-let batchCookingAgent = null;
-let animalAgent = null;
-let gardenAgent = null;
-let cleaningAgent = null;
-let mealBundleAgent = null;
-let soilWaterAgent = null;
-let wasteToCompostAgent = null;
-
-try {
-  cookingAgent =
-    require("../../agents/shims/cookingShim.js").default ||
-    require("../../agents/shims/cookingShim.js");
-} catch {}
-try {
-  batchCookingAgent =
-    require("../../agents/shims/batchCookingShim.js").default ||
-    require("../../agents/shims/batchCookingShim.js");
-} catch {}
-try {
-  animalAgent =
-    require("../../agents/shims/animalShim.js").default ||
-    require("../../agents/shims/animalShim.js");
-} catch {}
-try {
-  gardenAgent =
-    require("../../agents/shims/gardeningShim.js").default ||
-    require("../../agents/shims/gardeningShim.js");
-} catch {}
-try {
-  cleaningAgent =
-    require("../../agents/shims/cleaningShim.js").default ||
-    require("../../agents/shims/cleaningShim.js");
-} catch {}
-try {
-  mealBundleAgent =
-    require("../../agents/shims/mealBundleShim.js").default ||
-    require("../../agents/shims/mealBundleShim.js");
-} catch {}
-try {
-  soilWaterAgent =
-    require("../../agents/shims/soilAndWaterShim.js").default ||
-    require("../../agents/shims/soilAndWaterShim.js");
-} catch {}
-try {
-  wasteToCompostAgent =
-    require("../../agents/shims/wasteToCompostShim.js").default ||
-    require("../../agents/shims/wasteToCompostShim.js");
-} catch {}
 
 /* ---------------- Dev automations ---------------- */
 import AutomationPanel from "../../ui/AutomationPanel.jsx";
@@ -440,18 +403,38 @@ const PRESETS = [
 
 /* ---------------- Bundles ---------------- */
 async function fetchRecipeBundles() {
-  if (mealBundleAgent?.handleCommand) {
-    try {
+  try {
+    const mod = await import("../../agents/shims/mealBundleShim.js");
+    const mealBundleAgent = mod?.default || mod || null;
+    if (mealBundleAgent?.handleCommand) {
       const out = await mealBundleAgent.handleCommand("listBundles", {});
       if (Array.isArray(out?.bundles)) return out.bundles;
-    } catch (e) {
-      console.warn("[MealPlanner] mealBundleAgent.listBundles failed", e);
     }
+  } catch (e) {
+    console.warn("[MealPlanner] mealBundleAgent.listBundles failed", e);
   }
   return [];
 }
 
 /* ---------------- Helpers ---------------- */
+function isLikelyTestRuntime() {
+  if (typeof import.meta !== "undefined") {
+    if (import.meta.vitest || import.meta.env?.MODE === "test") return true;
+  }
+  if (typeof navigator === "undefined") return false;
+  return /jsdom|node\.js/i.test(String(navigator.userAgent || ""));
+}
+
+function runWhenBrowserIdle(task, timeoutMs = 1000) {
+  if (typeof window === "undefined") return () => {};
+  if (typeof window.requestIdleCallback === "function") {
+    const idleId = window.requestIdleCallback(() => task(), { timeout: timeoutMs });
+    return () => window.cancelIdleCallback?.(idleId);
+  }
+  const timerId = window.setTimeout(task, 250);
+  return () => window.clearTimeout(timerId);
+}
+
 async function tryAgent(agent, cmd, payload) {
   console.warn(`[MealPlanner] ${cmd} skipped: strict backend-only mode`);
   return null;
@@ -964,6 +947,25 @@ async function applyMealPlannerFeedAction({ householdId, postId, action, delta =
   return {
     feed: Array.isArray(payload?.feed) ? payload.feed : [],
     alerts: Array.isArray(payload?.alerts) ? payload.alerts : [],
+  };
+}
+
+async function fetchHouseholdTodayUpcomingAgenda({ householdId, todayLimit = 10, upcomingLimit = 10 }) {
+  const response = await fetch(
+    `/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&todayLimit=${encodeURIComponent(todayLimit)}&upcomingLimit=${encodeURIComponent(upcomingLimit)}`,
+    {
+      headers: plannerAuthHeaders(),
+      credentials: "include",
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`household_today_upcoming_failed:${response.status}`);
+  }
+  const payload = await response.json();
+  return {
+    metrics: payload?.metrics && typeof payload.metrics === "object" ? payload.metrics : {},
+    today: Array.isArray(payload?.today) ? payload.today : [],
+    upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
   };
 }
 
@@ -2001,6 +2003,7 @@ function MyAssignmentsStrip({ onOpenCoordination }) {
 /* ---------------- Main page ---------------- */
 export default function MealPlanningPage() {
   const coordinationRef = useRef(null);
+  const liveContextRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -2039,25 +2042,39 @@ export default function MealPlanningPage() {
   const [mealContextLoading, setMealContextLoading] = useState(true);
   const [mealContextError, setMealContextError] = useState("");
   const [mealContextActionBusy, setMealContextActionBusy] = useState({});
+  const [householdAgenda, setHouseholdAgenda] = useState({ metrics: {}, today: [], upcoming: [] });
+  const [householdAgendaError, setHouseholdAgendaError] = useState("");
+  const deferNonCriticalPanels = !isLikelyTestRuntime();
+  const [showLiveContextSection, setShowLiveContextSection] = useState(() => !deferNonCriticalPanels);
+  const [showContextPanels, setShowContextPanels] = useState(() => !deferNonCriticalPanels);
+  const [showCoordinationPanel, setShowCoordinationPanel] = useState(() => !deferNonCriticalPanels);
 
   const refreshMealContext = useCallback(async () => {
     const householdId = resolvePlannerHouseholdId();
     setMealContextLoading(true);
     setMealContextError("");
+    setHouseholdAgendaError("");
     try {
-      const payload = await fetchMealPlannerContext({ householdId });
+      const [payload, agendaPayload] = await Promise.all([
+        fetchMealPlannerContext({ householdId }),
+        fetchHouseholdTodayUpcomingAgenda({ householdId, todayLimit: 10, upcomingLimit: 10 }),
+      ]);
       setMealFeed(payload.feed);
       setSacredMealAlerts(payload.alerts);
+      setHouseholdAgenda(agendaPayload);
     } catch (error) {
       setMealContextError(String(error?.message || error || "Failed to load planner context."));
+      setHouseholdAgenda({ metrics: {}, today: [], upcoming: [] });
+      setHouseholdAgendaError("Household timeline unavailable.");
     } finally {
       setMealContextLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    if (!showContextPanels) return;
     refreshMealContext();
-  }, [refreshMealContext]);
+  }, [refreshMealContext, showContextPanels]);
 
   const dismissMealAlert = useCallback(async (id) => {
     const householdId = resolvePlannerHouseholdId();
@@ -2227,8 +2244,9 @@ export default function MealPlanningPage() {
   }, [activeTool]);
 
   useEffect(() => {
+    if (!showLiveContextSection) return;
     refreshBackendCardContext();
-  }, [refreshBackendCardContext]);
+  }, [refreshBackendCardContext, showLiveContextSection]);
 
   useEffect(() => {
     const tickId = window.setInterval(() => {
@@ -2893,7 +2911,7 @@ export default function MealPlanningPage() {
       label: "Irrigation Planner",
       note: "Creates rain-aware irrigation schedule.",
       run: async () =>
-        tryAgent(soilWaterAgent, "planIrrigation", {
+        tryAgent(null, "planIrrigation", {
           beds: [],
           irrigationHardware: {},
           weather: [],
@@ -2906,7 +2924,7 @@ export default function MealPlanningPage() {
       label: "Compost — Estimate Outputs",
       note: "Converts animal waste to compost estimates.",
       run: async () =>
-        tryAgent(wasteToCompostAgent, "estimateOutputs", {
+        tryAgent(null, "estimateOutputs", {
           animals: [],
           beddingInventory: [],
           compostSystem: {},
@@ -2990,40 +3008,14 @@ export default function MealPlanningPage() {
             </SSAButton>
             <SSAButton
               variant="secondary"
-              aria-busy={busy}
-              onClick={() => onGenerate(true)}
-              title="Generate and store as a Draft (does not overwrite current plan)"
+              onClick={() => {
+                setShowLiveContextSection(true);
+                setShowContextPanels(true);
+                liveContextRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
               type="button"
             >
-              {busy ? "Working..." : "Generate -> Draft"}
-            </SSAButton>
-            <SSAButton
-              variant="secondary"
-              onClick={onSaveCurrentAsDraft}
-              type="button"
-            >
-              Save Current as Draft
-            </SSAButton>
-            <SSAButton
-              variant="secondary"
-              onClick={() => setResult(null)}
-              type="button"
-            >
-              Clear
-            </SSAButton>
-            <a
-              className="sv-btn sv-btn--outline"
-              href="/meal-planning/planner-dashboard"
-              title="Open scaffolded preservation-aware planner dashboard"
-            >
-              <span className="label">Open Planner Dashboard</span>
-            </a>
-            <SSAButton
-              variant="secondary"
-              onClick={() => openMealThread()}
-              type="button"
-            >
-              Message Team
+              Load Live Context
             </SSAButton>
             {ok ? (
               <span className="sv-muted" style={{ color: "var(--success)" }}>
@@ -3035,294 +3027,417 @@ export default function MealPlanningPage() {
       </div>
 
       <div className="sv-card sv-pad ssa-panel-balanced ssa-interactive-panel" style={{ marginTop: 12 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
-          <SacredAvatar
-            name="Meal Planner Module"
-            type="household"
-            subtitle="Sacred Agrarian visual system"
-            online
-          />
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <SacredButton size="sm" onClick={() => onGenerate(false)} loading={busy}>
-              Generate Plan
-            </SacredButton>
-            <SacredButton size="sm" tone="secondary" onClick={() => onGenerate(true)}>
-              Generate to Draft
-            </SacredButton>
-            <SacredButton size="sm" tone="accent" onClick={onSaveCurrentAsDraft}>
-              Save Current Draft
-            </SacredButton>
+        <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+          <div>
+            <strong style={{ color: "var(--fg)" }}>First Paint Shell</strong>
+            <div className="sv-muted" style={{ marginTop: 4 }}>
+              Heavy coordination, contract, feed, alerts, and dashboard cards are deferred until requested.
+            </div>
           </div>
-        </div>
-
-        <div style={{ marginTop: 12, width: "100%", maxWidth: 1420, marginInline: "auto" }}>
-          <DashboardGrid columns={3}>
-            <SacredCard
-              kind="dashboard"
-              title="Planner Mode"
-              subtitle="Backend planner context"
-              value={
-                backendCardContext.loading
-                  ? "Loading..."
-                  : backendCardContext.data?.plannerMode?.tool || "Contract gap"
-              }
-              delta={3}
-              icon={<CalendarDays className="h-5 w-5" />}
-              footer={
-                backendCardContext.error
-                  ? `Backend error: ${backendCardContext.error}`
-                  : backendCardContext.data?.dataContractGaps?.includes("plannerMode.tool")
-                  ? "Data contract gap: plannerMode.tool missing"
-                  : backendCardContext.data?.plannerMode?.status || "Planner mode unavailable"
-              }
-            >
-              {backendCardContext.loading
-                ? "Loading planner mode from backend..."
-                : backendCardContext.data?.plannerMode?.lastRunAt
-                ? `Last backend run: ${new Date(
-                    backendCardContext.data.plannerMode.lastRunAt
-                  ).toLocaleString()}`
-                : "No backend run timestamp returned."}
-            </SacredCard>
-            <SacredCard
-              kind="meal"
-              title="Food Security"
-              subtitle="Backend estimator signal"
-              value={
-                backendCardContext.loading
-                  ? "Loading..."
-                  : backendCardContext.data?.foodSecurityPct != null
-                  ? `${Math.round(Number(backendCardContext.data.foodSecurityPct))}%`
-                  : "Contract gap"
-              }
-              delta={2}
-              icon={<Leaf className="h-5 w-5" />}
-              footer={
-                backendCardContext.error
-                  ? "Estimator unavailable in backend"
-                  : backendCardContext.data?.dataContractGaps?.includes("foodSecurityPct")
-                  ? "Data contract gap: foodSecurityPct missing"
-                  : "Current cycle confidence"
-              }
-            >
-              {backendCardContext.loading
-                ? "Requesting food-security signal from backend planner endpoints..."
-                : backendCardContext.data?.dataContractGaps?.includes("foodSecurityPct")
-                ? "Backend did not return foodSecurityPct. Check planner_output contract."
-                : "Uses backend planner context to estimate resilience."}
-            </SacredCard>
-            <SacredCard
-              kind="storehouse"
-              title="Cost Delta"
-              subtitle="Backend projected shopping cost"
-              value={
-                backendCardContext.loading
-                  ? "Loading..."
-                  : backendCardContext.data?.costDeltaShoppingCost != null
-                  ? `$${Number(backendCardContext.data.costDeltaShoppingCost).toFixed(2)}`
-                  : "Contract gap"
-              }
-              delta={1}
-              icon={<ShoppingBasket className="h-5 w-5" />}
-              footer={
-                backendCardContext.error
-                  ? "Backend cost delta unavailable"
-                  : backendCardContext.data?.dataContractGaps?.includes("costDeltaShoppingCost")
-                  ? "Data contract gap: costDeltaShoppingCost missing"
-                  : "Compared to baseline"
-              }
-              interactionTitle="Open procurement view"
+          <div className="sv-row sv-wrap" style={{ gap: 8 }}>
+            <SSAButton
+              type="button"
+              variant="secondary"
               onClick={() => {
-                navigate({ pathname: "/meal-planning", search: "?tool=procurement" }, { replace: false });
-                recordProductActionClick({
-                  page: "planner.meal",
-                  action: "cost_delta_open_procurement",
-                  status: "click",
-                  mode: activeTool,
-                });
+                setShowCoordinationPanel(true);
+                coordinationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >
-              {backendCardContext.data?.dataContractGaps?.includes("costDeltaShoppingCost")
-                ? "Backend did not return costDeltaShoppingCost. Check planner_output budget/costDelta fields."
-                : "Watch this to keep budget drift visible before purchase runs."}
-            </SacredCard>
-          </DashboardGrid>
-
-          <div
-            className="sv-card"
-            style={{
-              marginTop: 10,
-              padding: 12,
-              border: "1px solid var(--border)",
-              background: "var(--surface)",
-            }}
-          >
-            {/* Strict mode contract panel: makes missing backend keys explicit for the current run. */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: 8,
-                flexWrap: "wrap",
+              Load Coordination
+            </SSAButton>
+            <SSAButton
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setShowLiveContextSection(true);
+                setShowContextPanels(true);
+                liveContextRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >
-              <strong style={{ color: "var(--fg)" }}>Contract Fields (Strict Backend)</strong>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <span className="sv-muted" style={{ fontSize: 12 }}>
-                  Household: {backendCardContext.data?.householdId || resolvePlannerHouseholdId()}
-                </span>
-                <SSAButton
-                  type="button"
-                  variant="secondary"
-                  onClick={copyContractReport}
-                  title="Copy strict backend contract report to clipboard"
-                  className="min-h-[34px]"
-                >
-                  {contractReportCopied ? "Copied" : "Copy Contract Report"}
-                </SSAButton>
-                <SSAButton
-                  type="button"
-                  variant="secondary"
-                  onClick={exportContractReport}
-                  title="Download strict backend contract report as .json"
-                  className="min-h-[34px]"
-                >
-                  Export .json
-                </SSAButton>
-              </div>
-            </div>
-
-            {backendCardContext.loading ? (
-              <div className="sv-muted" style={{ marginTop: 8 }}>
-                Checking backend contract fields...
-              </div>
-            ) : backendCardContext.error ? (
-              <div style={{ marginTop: 8, color: "var(--danger)" }}>
-                Backend error: {backendCardContext.error}
-              </div>
-            ) : (
-              <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
-                {(backendCardContext.data?.checkedFields || []).map((field) => {
-                  const isMissing = field?.status === "missing";
-                  return (
-                    <div
-                      key={field?.key}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "180px 90px 1fr",
-                        gap: 10,
-                        alignItems: "center",
-                        padding: "6px 8px",
-                        borderRadius: 10,
-                        background: isMissing
-                          ? "color-mix(in srgb, var(--danger) 10%, var(--surface))"
-                          : "color-mix(in srgb, var(--success) 8%, var(--surface))",
-                        border: `1px solid ${isMissing ? "color-mix(in srgb, var(--danger) 45%, var(--border))" : "color-mix(in srgb, var(--success) 35%, var(--border))"}`,
-                        fontSize: 12,
-                      }}
-                    >
-                      <code style={{ color: "var(--fg)" }}>{field?.key}</code>
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          color: isMissing ? "var(--danger)" : "var(--success)",
-                        }}
-                      >
-                        {isMissing ? "missing" : "present"}
-                      </span>
-                      <span className="sv-muted" style={{ overflowWrap: "anywhere" }}>
-                        {field?.source ? `source: ${field.source}` : "source: n/a"}
-                        {field?.value != null ? ` | value: ${String(field.value)}` : ""}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-          <div className="sv-card sv-pad">
-            <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <strong style={{ color: "var(--fg)" }}>Planner Activity Feed</strong>
-              <SSAButton type="button" variant="secondary" onClick={refreshMealContext}>
-                Refresh
-              </SSAButton>
-            </div>
-            {mealContextLoading ? (
-              <div className="sv-muted" style={{ marginTop: 8 }}>Loading planner context from backend...</div>
-            ) : mealContextError ? (
-              <>
-                <div className="sv-muted" style={{ marginTop: 6 }}>{mealContextError}</div>
-                <button type="button" className="sv-btn sv-btn--outline" onClick={refreshMealContext} style={{ marginTop: 10 }}>
-                  <span className="label">Retry</span>
-                </button>
-              </>
-            ) : (
-              <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-                {mealFeed.length ? (
-                  mealFeed.map((item) => (
-                    <FeedPost
-                      key={item.id}
-                      {...item}
-                      onLike={() => onMealFeedAction(item.id, "like")}
-                      onComment={() => onMealFeedAction(item.id, "comment")}
-                      onShare={() => onMealFeedAction(item.id, "share")}
-                      busyLike={Boolean(mealContextActionBusy[`${item.id}:like`])}
-                      busyComment={Boolean(mealContextActionBusy[`${item.id}:comment`])}
-                      busyShare={Boolean(mealContextActionBusy[`${item.id}:share`])}
-                    />
-                  ))
-                ) : (
-                  <div className="sv-muted">No planning feed items returned from backend.</div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="sv-card sv-pad">
-            <strong style={{ color: "var(--fg)" }}>Planner Alerts</strong>
-            {mealContextLoading ? (
-              <div className="sv-muted" style={{ marginTop: 8 }}>Loading planner alerts...</div>
-            ) : mealContextError ? (
-              <div className="sv-muted" style={{ marginTop: 8 }}>Alerts unavailable while planner context is failing.</div>
-            ) : (
-              <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-                {sacredMealAlerts.length ? (
-                  sacredMealAlerts.map((item) => (
-                    <Notification
-                      key={item.id}
-                      type={item.type}
-                      title={item.title}
-                      message={item.message}
-                      timestamp={item.timestamp}
-                      updatedBy={item.updatedBy}
-                      actionLog={item.actionLog}
-                      lastAction={item.lastAction}
-                      lastActionAt={item.lastActionAt}
-                      dismissing={Boolean(mealContextActionBusy[item.id])}
-                      onDismiss={() => dismissMealAlert(item.id)}
-                    />
-                  ))
-                ) : (
-                  <div className="sv-muted">No planner alerts returned from backend.</div>
-                )}
-              </div>
-            )}
+              Load Live Context
+            </SSAButton>
+            <SSAButton
+              type="button"
+              variant="secondary"
+              onClick={() => liveContextRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            >
+              Jump to Live Context
+            </SSAButton>
           </div>
         </div>
       </div>
 
       <MyAssignmentsStrip
         onOpenCoordination={() => {
+          setShowCoordinationPanel(true);
           coordinationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         }}
       />
 
       <div style={{ marginTop: 12 }} ref={coordinationRef}>
-        <RealtimeCoordinationPanel />
+        {showCoordinationPanel ? (
+          <LoadingBoundary placeholder={<div className="sv-muted">Loading coordination panel...</div>}>
+            <RealtimeCoordinationPanel />
+          </LoadingBoundary>
+        ) : (
+          <div className="sv-card sv-pad ssa-panel-balanced ssa-interactive-panel">
+            <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+              <div>
+                <strong style={{ color: "var(--fg)" }}>Coordination</strong>
+                <div className="sv-muted" style={{ marginTop: 4 }}>
+                  Deferred until requested to keep first paint minimal.
+                </div>
+              </div>
+              <SSAButton type="button" variant="secondary" onClick={() => setShowCoordinationPanel(true)}>
+                Load coordination panel
+              </SSAButton>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: 12 }} ref={liveContextRef}>
+        <div className="sv-card sv-pad ssa-panel-balanced ssa-interactive-panel">
+          <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+            <strong style={{ color: "var(--fg)" }}>Live Planner Context</strong>
+            {!showLiveContextSection ? (
+              <SSAButton
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setShowLiveContextSection(true);
+                  setShowContextPanels(true);
+                  refreshBackendCardContext();
+                }}
+              >
+                Load dashboard context
+              </SSAButton>
+            ) : null}
+          </div>
+
+          {showLiveContextSection ? (
+            <>
+              <div style={{ marginTop: 12, width: "100%", maxWidth: 1420, marginInline: "auto" }}>
+                <DashboardGrid columns={3}>
+                  <SacredCard
+                    kind="dashboard"
+                    title="Planner Mode"
+                    subtitle="Backend planner context"
+                    value={
+                      backendCardContext.loading
+                        ? "Loading..."
+                        : backendCardContext.data?.plannerMode?.tool || "Contract gap"
+                    }
+                    delta={3}
+                    icon={<CalendarDays className="h-5 w-5" />}
+                    footer={
+                      backendCardContext.error
+                        ? `Backend error: ${backendCardContext.error}`
+                        : backendCardContext.data?.dataContractGaps?.includes("plannerMode.tool")
+                        ? "Data contract gap: plannerMode.tool missing"
+                        : backendCardContext.data?.plannerMode?.status || "Planner mode unavailable"
+                    }
+                  >
+                    {backendCardContext.loading
+                      ? "Loading planner mode from backend..."
+                      : backendCardContext.data?.plannerMode?.lastRunAt
+                      ? `Last backend run: ${new Date(
+                          backendCardContext.data.plannerMode.lastRunAt
+                        ).toLocaleString()}`
+                      : "No backend run timestamp returned."}
+                  </SacredCard>
+                  <SacredCard
+                    kind="meal"
+                    title="Food Security"
+                    subtitle="Backend estimator signal"
+                    value={
+                      backendCardContext.loading
+                        ? "Loading..."
+                        : backendCardContext.data?.foodSecurityPct != null
+                        ? `${Math.round(Number(backendCardContext.data.foodSecurityPct))}%`
+                        : "Contract gap"
+                    }
+                    delta={2}
+                    icon={<Leaf className="h-5 w-5" />}
+                    footer={
+                      backendCardContext.error
+                        ? "Estimator unavailable in backend"
+                        : backendCardContext.data?.dataContractGaps?.includes("foodSecurityPct")
+                        ? "Data contract gap: foodSecurityPct missing"
+                        : "Current cycle confidence"
+                    }
+                  >
+                    {backendCardContext.loading
+                      ? "Requesting food-security signal from backend planner endpoints..."
+                      : backendCardContext.data?.dataContractGaps?.includes("foodSecurityPct")
+                      ? "Backend did not return foodSecurityPct. Check planner_output contract."
+                      : "Uses backend planner context to estimate resilience."}
+                  </SacredCard>
+                  <SacredCard
+                    kind="storehouse"
+                    title="Cost Delta"
+                    subtitle="Backend projected shopping cost"
+                    value={
+                      backendCardContext.loading
+                        ? "Loading..."
+                        : backendCardContext.data?.costDeltaShoppingCost != null
+                        ? `$${Number(backendCardContext.data.costDeltaShoppingCost).toFixed(2)}`
+                        : "Contract gap"
+                    }
+                    delta={1}
+                    icon={<ShoppingBasket className="h-5 w-5" />}
+                    footer={
+                      backendCardContext.error
+                        ? "Backend cost delta unavailable"
+                        : backendCardContext.data?.dataContractGaps?.includes("costDeltaShoppingCost")
+                        ? "Data contract gap: costDeltaShoppingCost missing"
+                        : "Compared to baseline"
+                    }
+                    interactionTitle="Open procurement view"
+                    onClick={() => {
+                      navigate({ pathname: "/meal-planning", search: "?tool=procurement" }, { replace: false });
+                      recordProductActionClick({
+                        page: "planner.meal",
+                        action: "cost_delta_open_procurement",
+                        status: "click",
+                        mode: activeTool,
+                      });
+                    }}
+                  >
+                    {backendCardContext.data?.dataContractGaps?.includes("costDeltaShoppingCost")
+                      ? "Backend did not return costDeltaShoppingCost. Check planner_output budget/costDelta fields."
+                      : "Watch this to keep budget drift visible before purchase runs."}
+                  </SacredCard>
+                </DashboardGrid>
+
+                {showContextPanels ? (
+                  <div
+                    className="sv-card"
+                    style={{
+                      marginTop: 10,
+                      padding: 12,
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                    }}
+                  >
+                    {/* Strict mode contract panel: makes missing backend keys explicit for the current run. */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 8,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <strong style={{ color: "var(--fg)" }}>Contract Fields (Strict Backend)</strong>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <span className="sv-muted" style={{ fontSize: 12 }}>
+                          Household: {backendCardContext.data?.householdId || resolvePlannerHouseholdId()}
+                        </span>
+                        <SSAButton
+                          type="button"
+                          variant="secondary"
+                          onClick={copyContractReport}
+                          title="Copy strict backend contract report to clipboard"
+                          className="min-h-[34px]"
+                        >
+                          {contractReportCopied ? "Copied" : "Copy Contract Report"}
+                        </SSAButton>
+                        <SSAButton
+                          type="button"
+                          variant="secondary"
+                          onClick={exportContractReport}
+                          title="Download strict backend contract report as .json"
+                          className="min-h-[34px]"
+                        >
+                          Export .json
+                        </SSAButton>
+                      </div>
+                    </div>
+
+                    {backendCardContext.loading ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>
+                        Checking backend contract fields...
+                      </div>
+                    ) : backendCardContext.error ? (
+                      <div style={{ marginTop: 8, color: "var(--danger)" }}>
+                        Backend error: {backendCardContext.error}
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                        {(backendCardContext.data?.checkedFields || []).map((field) => {
+                          const isMissing = field?.status === "missing";
+                          return (
+                            <div
+                              key={field?.key}
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "180px 90px 1fr",
+                                gap: 10,
+                                alignItems: "center",
+                                padding: "6px 8px",
+                                borderRadius: 10,
+                                background: isMissing
+                                  ? "color-mix(in srgb, var(--danger) 10%, var(--surface))"
+                                  : "color-mix(in srgb, var(--success) 8%, var(--surface))",
+                                border: `1px solid ${isMissing ? "color-mix(in srgb, var(--danger) 45%, var(--border))" : "color-mix(in srgb, var(--success) 35%, var(--border))"}`,
+                                fontSize: 12,
+                              }}
+                            >
+                              <code style={{ color: "var(--fg)" }}>{field?.key}</code>
+                              <span
+                                style={{
+                                  fontWeight: 700,
+                                  color: isMissing ? "var(--danger)" : "var(--success)",
+                                }}
+                              >
+                                {isMissing ? "missing" : "present"}
+                              </span>
+                              <span className="sv-muted" style={{ overflowWrap: "anywhere" }}>
+                                {field?.source ? `source: ${field.source}` : "source: n/a"}
+                                {field?.value != null ? ` | value: ${String(field.value)}` : ""}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="sv-card sv-pad" style={{ marginTop: 10 }}>
+                    <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+                      <div className="sv-muted">Live planner context panels load after first paint.</div>
+                      <SSAButton type="button" variant="secondary" onClick={() => setShowContextPanels(true)}>
+                        Load now
+                      </SSAButton>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {showContextPanels ? (
+                <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+                  <div className="sv-card sv-pad">
+                    <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                      <strong style={{ color: "var(--fg)" }}>Planner Activity Feed</strong>
+                      <SSAButton type="button" variant="secondary" onClick={refreshMealContext}>
+                        Refresh
+                      </SSAButton>
+                    </div>
+                    {mealContextLoading ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>Loading planner context from backend...</div>
+                    ) : mealContextError ? (
+                      <>
+                        <div className="sv-muted" style={{ marginTop: 6 }}>{mealContextError}</div>
+                        <button type="button" className="sv-btn sv-btn--outline" onClick={refreshMealContext} style={{ marginTop: 10 }}>
+                          <span className="label">Retry</span>
+                        </button>
+                      </>
+                    ) : (
+                      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                        {mealFeed.length ? (
+                          mealFeed.map((item) => (
+                            <FeedPost
+                              key={item.id}
+                              {...item}
+                              onLike={() => onMealFeedAction(item.id, "like")}
+                              onComment={() => onMealFeedAction(item.id, "comment")}
+                              onShare={() => onMealFeedAction(item.id, "share")}
+                              busyLike={Boolean(mealContextActionBusy[`${item.id}:like`])}
+                              busyComment={Boolean(mealContextActionBusy[`${item.id}:comment`])}
+                              busyShare={Boolean(mealContextActionBusy[`${item.id}:share`])}
+                            />
+                          ))
+                        ) : (
+                          <div className="sv-muted">No planning feed items returned from backend.</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="sv-card sv-pad">
+                    <strong style={{ color: "var(--fg)" }}>Planner Alerts</strong>
+                    {mealContextLoading ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>Loading planner alerts...</div>
+                    ) : mealContextError ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>Alerts unavailable while planner context is failing.</div>
+                    ) : (
+                      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                        {sacredMealAlerts.length ? (
+                          sacredMealAlerts.map((item) => (
+                            <Notification
+                              key={item.id}
+                              type={item.type}
+                              title={item.title}
+                              message={item.message}
+                              timestamp={item.timestamp}
+                              updatedBy={item.updatedBy}
+                              actionLog={item.actionLog}
+                              lastAction={item.lastAction}
+                              lastActionAt={item.lastActionAt}
+                              dismissing={Boolean(mealContextActionBusy[item.id])}
+                              onDismiss={() => dismissMealAlert(item.id)}
+                            />
+                          ))
+                        ) : (
+                          <div className="sv-muted">No planner alerts returned from backend.</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="sv-card sv-pad">
+                    <strong style={{ color: "var(--fg)" }}>Household Today and Upcoming</strong>
+                    {mealContextLoading ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>Loading household timeline...</div>
+                    ) : householdAgendaError ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>{householdAgendaError}</div>
+                    ) : (
+                      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                        <div className="sv-muted" style={{ fontSize: 12 }}>
+                          Today: {Number(householdAgenda?.metrics?.todayCount || 0)} | Upcoming: {Number(householdAgenda?.metrics?.upcomingCount || 0)}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, marginBottom: 6 }}>Today</div>
+                          {householdAgenda.today.length ? (
+                            <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 4 }}>
+                              {householdAgenda.today.slice(0, 4).map((item) => (
+                                <li key={item.id} style={{ color: "var(--fg)", fontSize: 13 }}>
+                                  {item.title}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="sv-muted">No current today items.</div>
+                          )}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, marginBottom: 6 }}>Upcoming</div>
+                          {householdAgenda.upcoming.length ? (
+                            <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 4 }}>
+                              {householdAgenda.upcoming.slice(0, 4).map((item) => (
+                                <li key={item.id} style={{ color: "var(--fg)", fontSize: 13 }}>
+                                  {item.title}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="sv-muted">No upcoming items.</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div className="sv-muted" style={{ marginTop: 8 }}>
+              Live dashboard context is deferred until first paint settles.
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Two-column workbench: left = inputs, right = outputs */}
@@ -3773,9 +3888,11 @@ export default function MealPlanningPage() {
                     }
                   />
                 ) : (
-                  <LoadingBoundary placeholder={<div className="sv-muted">Loading panel…</div>}>
-                    <SafeProps>{ActiveToolElement}</SafeProps>
-                  </LoadingBoundary>
+                  <React.Suspense fallback={<div className="sv-muted">Loading panel…</div>}>
+                    <LoadingBoundary placeholder={<div className="sv-muted">Loading panel…</div>}>
+                      <SafeProps>{ActiveToolElement}</SafeProps>
+                    </LoadingBoundary>
+                  </React.Suspense>
                 )}
               </div>
             </ToolErrorBoundary>

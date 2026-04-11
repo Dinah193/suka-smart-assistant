@@ -15,6 +15,10 @@ const {
   buildMentionNotificationEntries: buildRoutedMentionNotificationEntries,
   buildNotificationEntry,
 } = require("../services/planners/HouseholdNotificationRouter.js");
+const {
+  buildUnifiedFeedMutationEvent,
+  buildUnifiedFeedMutationResponse,
+} = require("../services/planners/HouseholdFeedEventEmitter.js");
 
 function isLocalDevRequest(req) {
   if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
@@ -2402,12 +2406,26 @@ router.post("/feed/unified/:module/:id/reaction", express.json(), async (req, re
       await writer(state);
       const context = merger(nextHouseholdState);
       const updatedPost = context.feed.find((item) => item.id === sourceId) || null;
-      return res.json({
-        ok: true,
+      const updatedItem = normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId);
+      const event = buildUnifiedFeedMutationEvent({
         householdId,
-        module: moduleKey,
-        updatedItem: normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId),
+        moduleKey,
+        sourceId,
+        mutationType: "reaction",
+        action,
+        delta,
+        actor,
+        at: nowIso,
+        updatedItem,
       });
+      return res.json(
+        buildUnifiedFeedMutationResponse({
+          householdId,
+          moduleKey,
+          updatedItem,
+          event,
+        })
+      );
     }
 
     if (moduleKey === "homestead") {
@@ -2450,12 +2468,26 @@ router.post("/feed/unified/:module/:id/reaction", express.json(), async (req, re
       householdState.updatedAt = nowIso;
       state.households[householdId] = householdState;
       await writeHomesteadContextStateFile(state);
-      return res.json({
-        ok: true,
+      const updatedItem = normalizeUnifiedFeedItem(feed[index], moduleKey, householdId);
+      const event = buildUnifiedFeedMutationEvent({
         householdId,
-        module: moduleKey,
-        updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+        moduleKey,
+        sourceId,
+        mutationType: "reaction",
+        action,
+        delta,
+        actor,
+        at: nowIso,
+        updatedItem,
       });
+      return res.json(
+        buildUnifiedFeedMutationResponse({
+          householdId,
+          moduleKey,
+          updatedItem,
+          event,
+        })
+      );
     }
 
     const actionToKey = { like: "likes", comment: "comments", share: "shares" };
@@ -2492,12 +2524,26 @@ router.post("/feed/unified/:module/:id/reaction", express.json(), async (req, re
     householdState.updatedAt = nowIso;
     state.households[householdId] = householdState;
     await writeCommunityContextStateFile(state);
-    return res.json({
-      ok: true,
+    const updatedItem = normalizeUnifiedFeedItem(feed[index], moduleKey, householdId);
+    const event = buildUnifiedFeedMutationEvent({
       householdId,
-      module: moduleKey,
-      updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+      moduleKey,
+      sourceId,
+      mutationType: "reaction",
+      action,
+      delta,
+      actor,
+      at: nowIso,
+      updatedItem,
     });
+    return res.json(
+      buildUnifiedFeedMutationResponse({
+        householdId,
+        moduleKey,
+        updatedItem,
+        event,
+      })
+    );
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
@@ -2596,13 +2642,30 @@ router.post("/feed/unified/:module/:id/semantic-action", express.json(), async (
       await writer(state);
       const context = merger(nextHouseholdState);
       const updatedPost = context.feed.find((item) => item.id === sourceId) || null;
-      return res.json({
-        ok: true,
+      const updatedItem = normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId);
+      const event = buildUnifiedFeedMutationEvent({
         householdId,
-        module: moduleKey,
-        semanticAction: { actionType, detail, metadata, updatedBy: actor, updatedAt: nowIso },
-        updatedItem: normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId),
+        moduleKey,
+        sourceId,
+        mutationType: "semantic_action",
+        action: actionType,
+        actor,
+        at: nowIso,
+        detail,
+        metadata,
+        updatedItem,
       });
+      return res.json(
+        buildUnifiedFeedMutationResponse({
+          householdId,
+          moduleKey,
+          updatedItem,
+          event,
+          extra: {
+            semanticAction: { actionType, detail, metadata, updatedBy: actor, updatedAt: nowIso },
+          },
+        })
+      );
     }
 
     const getter = moduleKey === "homestead" ? getHomesteadContextForHousehold : getCommunityContextForHousehold;
@@ -2639,13 +2702,30 @@ router.post("/feed/unified/:module/:id/semantic-action", express.json(), async (
     householdState.updatedAt = nowIso;
     state.households[householdId] = householdState;
     await writer(state);
-    return res.json({
-      ok: true,
+    const updatedItem = normalizeUnifiedFeedItem(feed[index], moduleKey, householdId);
+    const event = buildUnifiedFeedMutationEvent({
       householdId,
-      module: moduleKey,
-      semanticAction: { actionType, detail, metadata, updatedBy: actor, updatedAt: nowIso },
-      updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+      moduleKey,
+      sourceId,
+      mutationType: "semantic_action",
+      action: actionType,
+      actor,
+      at: nowIso,
+      detail,
+      metadata,
+      updatedItem,
     });
+    return res.json(
+      buildUnifiedFeedMutationResponse({
+        householdId,
+        moduleKey,
+        updatedItem,
+        event,
+        extra: {
+          semanticAction: { actionType, detail, metadata, updatedBy: actor, updatedAt: nowIso },
+        },
+      })
+    );
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
@@ -2796,17 +2876,39 @@ router.post("/feed/unified/:module/:id/comments", express.json(), async (req, re
         actor,
         nowIso,
       });
-      return res.json({
-        ok: true,
+      const updatedItem = normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId);
+      const event = buildUnifiedFeedMutationEvent({
         householdId,
-        module: moduleKey,
+        moduleKey,
         sourceId,
-        comment,
-        comments: normalizeCommentThreadEntries(commentThreads[sourceId]),
-        threadedComments: buildThreadedCommentView(commentThreads[sourceId]),
-        updatedItem: normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId),
-        mentionNotifications,
+        mutationType: "comment",
+        action: "thread_comment",
+        delta: 1,
+        actor,
+        at: nowIso,
+        detail: comment?.body,
+        metadata: {
+          commentId: comment?.id,
+          parentCommentId: comment?.parentCommentId || null,
+          mentionCount: Array.isArray(comment?.mentions) ? comment.mentions.length : 0,
+        },
+        updatedItem,
       });
+      return res.json(
+        buildUnifiedFeedMutationResponse({
+          householdId,
+          moduleKey,
+          updatedItem,
+          event,
+          extra: {
+            sourceId,
+            comment,
+            comments: normalizeCommentThreadEntries(commentThreads[sourceId]),
+            threadedComments: buildThreadedCommentView(commentThreads[sourceId]),
+            mentionNotifications,
+          },
+        })
+      );
     }
 
     if (moduleKey === "homestead") {
@@ -2855,17 +2957,39 @@ router.post("/feed/unified/:module/:id/comments", express.json(), async (req, re
         nowIso,
       });
 
-      return res.json({
-        ok: true,
+      const updatedItem = normalizeUnifiedFeedItem(feed[index], moduleKey, householdId);
+      const event = buildUnifiedFeedMutationEvent({
         householdId,
-        module: moduleKey,
+        moduleKey,
         sourceId,
-        comment,
-        comments: normalizeCommentThreadEntries(threads[sourceId]),
-        threadedComments: buildThreadedCommentView(threads[sourceId]),
-        updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
-        mentionNotifications,
+        mutationType: "comment",
+        action: "thread_comment",
+        delta: 1,
+        actor,
+        at: nowIso,
+        detail: comment?.body,
+        metadata: {
+          commentId: comment?.id,
+          parentCommentId: comment?.parentCommentId || null,
+          mentionCount: Array.isArray(comment?.mentions) ? comment.mentions.length : 0,
+        },
+        updatedItem,
       });
+      return res.json(
+        buildUnifiedFeedMutationResponse({
+          householdId,
+          moduleKey,
+          updatedItem,
+          event,
+          extra: {
+            sourceId,
+            comment,
+            comments: normalizeCommentThreadEntries(threads[sourceId]),
+            threadedComments: buildThreadedCommentView(threads[sourceId]),
+            mentionNotifications,
+          },
+        })
+      );
     }
 
     const actor = resolveHomesteadContextActor(req, req.body || {});
@@ -2915,17 +3039,39 @@ router.post("/feed/unified/:module/:id/comments", express.json(), async (req, re
     state.households[householdId] = householdState;
     await writeCommunityContextStateFile(state);
 
-    return res.json({
-      ok: true,
+    const updatedItem = normalizeUnifiedFeedItem(feed[index], moduleKey, householdId);
+    const event = buildUnifiedFeedMutationEvent({
       householdId,
-      module: moduleKey,
+      moduleKey,
       sourceId,
-      comment,
-      comments: normalizeCommentThreadEntries(threads[sourceId]),
-      threadedComments: buildThreadedCommentView(threads[sourceId]),
-      updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
-      mentionNotifications,
+      mutationType: "comment",
+      action: "thread_comment",
+      delta: 1,
+      actor,
+      at: nowIso,
+      detail: comment?.body,
+      metadata: {
+        commentId: comment?.id,
+        parentCommentId: comment?.parentCommentId || null,
+        mentionCount: Array.isArray(comment?.mentions) ? comment.mentions.length : 0,
+      },
+      updatedItem,
     });
+    return res.json(
+      buildUnifiedFeedMutationResponse({
+        householdId,
+        moduleKey,
+        updatedItem,
+        event,
+        extra: {
+          sourceId,
+          comment,
+          comments: normalizeCommentThreadEntries(threads[sourceId]),
+          threadedComments: buildThreadedCommentView(threads[sourceId]),
+          mentionNotifications,
+        },
+      })
+    );
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
