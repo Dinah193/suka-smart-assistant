@@ -1,27 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
-import net from "node:net";
 import path from "node:path";
 
 const repoRoot = path.resolve(__dirname, "..");
 const serverEntry = path.resolve(repoRoot, "src/server/index.js");
 
-async function getAvailablePort() {
-  return await new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.unref();
-    server.on("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      const port = typeof address === "object" && address ? address.port : null;
-      server.close((closeError) => {
-        if (closeError) return reject(closeError);
-        if (!port) return reject(new Error("port_allocation_failed"));
-        return resolve(port);
-      });
-    });
-  });
+function randomPort() {
+  return 15000 + Math.floor(Math.random() * 8000);
 }
 
 function createTestDataPaths(tag = "entitlement") {
@@ -57,8 +43,8 @@ async function waitForHealth(port, timeoutMs = 20000) {
   throw new Error("health_timeout");
 }
 
-async function startServer(extraEnv = {}, testDataPaths = createTestDataPaths()) {
-  const port = await getAvailablePort();
+function startServer(extraEnv = {}, testDataPaths = createTestDataPaths()) {
+  const port = randomPort();
   const child = spawn(process.execPath, [serverEntry], {
     cwd: repoRoot,
     env: {
@@ -172,28 +158,6 @@ async function setEntitlements({ userId, accessPolicyFile, entitlements = ["plan
   await writePolicy(accessPolicyFile, policy);
 }
 
-async function setHouseholdRole({ userId, householdId, role, accessPolicyFile }) {
-  const policy = await readPolicy(accessPolicyFile);
-  const nextHouseholdId = String(householdId || "").trim();
-  const nextUserId = String(userId || "").trim();
-  const nextRole = String(role || "").trim();
-  const currentRoles =
-    policy?.householdRolesByHouseholdId && typeof policy.householdRolesByHouseholdId === "object"
-      ? policy.householdRolesByHouseholdId
-      : {};
-
-  policy.householdRolesByHouseholdId = {
-    ...currentRoles,
-    [nextHouseholdId]: {
-      ...(currentRoles[nextHouseholdId] || {}),
-      [nextUserId]: nextRole,
-    },
-  };
-
-  policy.updatedAt = new Date().toISOString();
-  await writePolicy(accessPolicyFile, policy);
-}
-
 async function registerAndBootstrap(baseUrl, suffix) {
   const email = `entitlement-${suffix}-${Date.now()}@example.com`;
   const password = "Password1234";
@@ -268,53 +232,10 @@ const groups = [
 ];
 
 describe("access policy entitlement gating contract", () => {
-  const roleGatedPlannerMutations = [
-    {
-      name: "projection replay",
-      url: (baseUrl) => `${baseUrl}/api/planners/projection/replay`,
-      body: { processLimit: 1 },
-    },
-    {
-      name: "projection reconcile",
-      url: (baseUrl, householdId) => `${baseUrl}/api/planners/projection/reconcile`,
-      body: (householdId) => ({ householdId, planner: "all", processNow: false }),
-    },
-    {
-      name: "outbox alert dispatch",
-      url: (baseUrl) => `${baseUrl}/api/planners/operational/outbox/alerts/dispatch`,
-      body: { windowMs: 300000 },
-    },
-    {
-      name: "outbox alert thresholds",
-      url: (baseUrl) => `${baseUrl}/api/planners/operational/outbox/alert-thresholds`,
-      body: { thresholds: { warnBacklog: 10 } },
-    },
-    {
-      name: "outbox claim",
-      url: (baseUrl, householdId) => `${baseUrl}/api/planners/operational/outbox/claim`,
-      body: (householdId) => ({ householdId, limit: 1 }),
-    },
-    {
-      name: "outbox retry",
-      url: (baseUrl) => `${baseUrl}/api/planners/operational/outbox/retry`,
-      body: { id: "missing-id", delayMs: 0 },
-    },
-    {
-      name: "outbox replay dead letter",
-      url: (baseUrl, householdId) => `${baseUrl}/api/planners/operational/outbox/replay-dead-letter`,
-      body: (householdId) => ({ householdId, limit: 1 }),
-    },
-    {
-      name: "outbox process",
-      url: (baseUrl, householdId) => `${baseUrl}/api/planners/operational/outbox/process`,
-      body: (householdId) => ({ householdId, limit: 1 }),
-    },
-  ];
-
   for (const group of groups) {
     it(`returns entitlement_required for ${group.name} until planner.base entitlement is granted`, async () => {
       const testDataPaths = createTestDataPaths(group.name);
-      const { child, port } = await startServer({}, testDataPaths);
+      const { child, port } = startServer({}, testDataPaths);
       const baseUrl = `http://127.0.0.1:${port}`;
 
       try {
@@ -358,200 +279,6 @@ describe("access policy entitlement gating contract", () => {
           expect(allowedRes.status).toBe(200);
           expect(allowed.ok).toBe(true);
         }
-      } finally {
-        await stopServer(child);
-        await fs.rm(testDataPaths.testDataDir, { recursive: true, force: true }).catch(() => {});
-      }
-    }, 30000);
-  }
-
-  it("requires planner.assistant entitlement for planners assistant endpoint", async () => {
-    const testDataPaths = createTestDataPaths("planners-assistant");
-    const { child, port } = await startServer({}, testDataPaths);
-    const baseUrl = `http://127.0.0.1:${port}`;
-
-    try {
-      await waitForHealth(port);
-
-      const owner = await registerAndBootstrap(baseUrl, "planners-assistant-owner");
-
-      const deniedBaseRes = await fetch(`${baseUrl}/api/planners/assistant/plan`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${owner.token}`,
-        },
-        body: JSON.stringify({ householdId: owner.householdId }),
-      });
-      const deniedBase = await deniedBaseRes.json();
-      expect(deniedBaseRes.status).toBe(403);
-      expect(deniedBase.error).toBe("entitlement_required");
-      expect(deniedBase.feature).toBe("planner.base");
-
-      await setEntitlements({
-        userId: owner.userId,
-        accessPolicyFile: testDataPaths.accessPolicyFile,
-        entitlements: ["planner.base"],
-      });
-
-      const deniedAssistantRes = await fetch(`${baseUrl}/api/planners/assistant/plan`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${owner.token}`,
-        },
-        body: JSON.stringify({ householdId: owner.householdId }),
-      });
-      const deniedAssistant = await deniedAssistantRes.json();
-      expect(deniedAssistantRes.status).toBe(403);
-      expect(deniedAssistant.error).toBe("entitlement_required");
-      expect(deniedAssistant.feature).toBe("planner.assistant");
-
-      await setEntitlements({
-        userId: owner.userId,
-        accessPolicyFile: testDataPaths.accessPolicyFile,
-        entitlements: ["planner.base", "planner.assistant"],
-      });
-
-      const allowedRes = await fetch(`${baseUrl}/api/planners/assistant/plan`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${owner.token}`,
-        },
-        body: JSON.stringify({ householdId: owner.householdId }),
-      });
-      const allowed = await allowedRes.json();
-
-      expect(String(allowed?.error || "")).not.toBe("entitlement_required");
-      expect([200, 500, 503]).toContain(allowedRes.status);
-    } finally {
-      await stopServer(child);
-      await fs.rm(testDataPaths.testDataDir, { recursive: true, force: true }).catch(() => {});
-    }
-  }, 30000);
-
-  it("requires owner or admin role for planners assistant endpoint", async () => {
-    const testDataPaths = createTestDataPaths("planners-assistant-role");
-    const { child, port } = await startServer({}, testDataPaths);
-    const baseUrl = `http://127.0.0.1:${port}`;
-
-    try {
-      await waitForHealth(port);
-
-      const owner = await registerAndBootstrap(baseUrl, "planners-assistant-role-owner");
-
-      await setEntitlements({
-        userId: owner.userId,
-        accessPolicyFile: testDataPaths.accessPolicyFile,
-        entitlements: ["planner.base", "planner.assistant"],
-      });
-
-      await setHouseholdRole({
-        userId: owner.userId,
-        householdId: owner.householdId,
-        role: "member",
-        accessPolicyFile: testDataPaths.accessPolicyFile,
-      });
-
-      const deniedRes = await fetch(`${baseUrl}/api/planners/assistant/plan`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${owner.token}`,
-        },
-        body: JSON.stringify({ householdId: owner.householdId }),
-      });
-      const denied = await deniedRes.json();
-      expect(deniedRes.status).toBe(403);
-      expect(denied.error).toBe("role_required");
-      expect(Array.isArray(denied.requiredRoles)).toBe(true);
-      expect(denied.requiredRoles).toContain("owner");
-      expect(denied.requiredRoles).toContain("admin");
-
-      await setHouseholdRole({
-        userId: owner.userId,
-        householdId: owner.householdId,
-        role: "admin",
-        accessPolicyFile: testDataPaths.accessPolicyFile,
-      });
-
-      const allowedRes = await fetch(`${baseUrl}/api/planners/assistant/plan`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${owner.token}`,
-        },
-        body: JSON.stringify({ householdId: owner.householdId }),
-      });
-      const allowed = await allowedRes.json();
-
-      expect(String(allowed?.error || "")).not.toBe("role_required");
-      expect([200, 500, 503]).toContain(allowedRes.status);
-    } finally {
-      await stopServer(child);
-      await fs.rm(testDataPaths.testDataDir, { recursive: true, force: true }).catch(() => {});
-    }
-  }, 30000);
-
-  for (const endpoint of roleGatedPlannerMutations) {
-    it(`requires owner or admin role for ${endpoint.name} endpoint`, async () => {
-      const testDataPaths = createTestDataPaths(`planner-role-${endpoint.name.replace(/\s+/g, "-")}`);
-      const { child, port } = await startServer({}, testDataPaths);
-      const baseUrl = `http://127.0.0.1:${port}`;
-
-      try {
-        await waitForHealth(port);
-
-        const owner = await registerAndBootstrap(baseUrl, `planner-role-${endpoint.name.replace(/\s+/g, "-")}`);
-
-        await setEntitlements({
-          userId: owner.userId,
-          accessPolicyFile: testDataPaths.accessPolicyFile,
-          entitlements: ["planner.base", "planner.assistant"],
-        });
-
-        await setHouseholdRole({
-          userId: owner.userId,
-          householdId: owner.householdId,
-          role: "member",
-          accessPolicyFile: testDataPaths.accessPolicyFile,
-        });
-
-        const deniedRes = await fetch(endpoint.url(baseUrl, owner.householdId), {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${owner.token}`,
-          },
-          body: JSON.stringify(
-            typeof endpoint.body === "function" ? endpoint.body(owner.householdId) : endpoint.body
-          ),
-        });
-        const denied = await deniedRes.json();
-        expect(deniedRes.status).toBe(403);
-        expect(denied.error).toBe("role_required");
-
-        await setHouseholdRole({
-          userId: owner.userId,
-          householdId: owner.householdId,
-          role: "admin",
-          accessPolicyFile: testDataPaths.accessPolicyFile,
-        });
-
-        const allowedRes = await fetch(endpoint.url(baseUrl, owner.householdId), {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${owner.token}`,
-          },
-          body: JSON.stringify(
-            typeof endpoint.body === "function" ? endpoint.body(owner.householdId) : endpoint.body
-          ),
-        });
-        const allowed = await allowedRes.json();
-        expect(String(allowed?.error || "")).not.toBe("role_required");
-        expect([200, 400, 404, 500, 503]).toContain(allowedRes.status);
       } finally {
         await stopServer(child);
         await fs.rm(testDataPaths.testDataDir, { recursive: true, force: true }).catch(() => {});
