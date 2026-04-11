@@ -379,6 +379,15 @@ try {
   }
 } catch (e) {
   console.warn("[routes] compatibility mount failed for planners:", e?.message || e);
+  try {
+    const fallbackRouter = require("./routes/plannersFallbackRouter.js");
+    if (fallbackRouter && typeof fallbackRouter.use === "function") {
+      app.use("/api/planners", fallbackRouter);
+      console.warn("[routes] mounted fallback router at /api/planners from ./routes/plannersFallbackRouter.js");
+    }
+  } catch (fallbackError) {
+    console.warn("[routes] planners fallback mount failed:", fallbackError?.message || fallbackError);
+  }
 }
 
 const routesReadyPromise = (async () => {
