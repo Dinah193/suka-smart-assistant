@@ -368,6 +368,19 @@ const candidates = [
   "./routes/uploadsController.js",
 ];
 
+// Defensive compatibility mount for planners endpoints used by contract suites.
+// This avoids regressions if dynamic route loading is affected by merge-order drift.
+try {
+  const plannersMod = require("./routes/planners.js");
+  const plannersRouter = plannersMod?.router || plannersMod?.default || plannersMod;
+  if (plannersRouter && typeof plannersRouter.use === "function") {
+    app.use("/api/planners", plannersRouter);
+    console.log("[routes] mounted compatibility router at /api/planners from ./routes/planners.js");
+  }
+} catch (e) {
+  console.warn("[routes] compatibility mount failed for planners:", e?.message || e);
+}
+
 const routesReadyPromise = (async () => {
   let mountedCount = 0;
   for (const candidate of candidates) {
