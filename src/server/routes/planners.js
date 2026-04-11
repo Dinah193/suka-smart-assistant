@@ -3384,7 +3384,7 @@ router.post("/community/moderation/report", express.json(), async (req, res) => 
   }
 });
 
-router.get("/community/approvals", async (req, res) => {
+router.get("/community/approvals", requirePlannerAdminRole(), async (req, res) => {
   try {
     const householdId = String(req.query.householdId || "default-household");
     const { householdState } = await getCommunityContextForHousehold(householdId);
@@ -3409,7 +3409,11 @@ router.get("/community/approvals", async (req, res) => {
   }
 });
 
-router.post("/community/approvals/:id/transition", express.json(), async (req, res) => {
+router.post(
+  "/community/approvals/:id/transition",
+  requirePlannerAdminRole(),
+  express.json(),
+  async (req, res) => {
   try {
     const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
     const approvalId = String(req.params.id || "").trim();
@@ -3522,7 +3526,8 @@ router.post("/community/approvals/:id/transition", express.json(), async (req, r
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
-});
+  }
+);
 
 router.get("/homestead/components", async (req, res) => {
   try {

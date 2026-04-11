@@ -969,6 +969,38 @@ async function fetchHouseholdTodayUpcomingAgenda({ householdId, todayLimit = 10,
   };
 }
 
+async function fetchCommunityApprovals({ householdId }) {
+  const response = await fetch(
+    `/api/planners/community/approvals?householdId=${encodeURIComponent(householdId)}`,
+    {
+      headers: plannerAuthHeaders(),
+      credentials: "include",
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`community_approvals_fetch_failed:${response.status}`);
+  }
+  const payload = await response.json();
+  return Array.isArray(payload?.approvals) ? payload.approvals : [];
+}
+
+async function transitionCommunityApproval({ householdId, approvalId, nextState, reason }) {
+  const response = await fetch(
+    `/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
+    {
+      method: "POST",
+      headers: plannerAuthHeaders({ "Content-Type": "application/json" }),
+      credentials: "include",
+      body: JSON.stringify({ householdId, nextState, reason }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`community_approval_transition_failed:${response.status}`);
+  }
+  const payload = await response.json();
+  return payload?.approval || null;
+}
+
 function normalizeAssistantBundlePlan(bundle, duration = "7-day") {
   const recipes = Array.isArray(bundle?.suggestions?.meal?.recipes)
     ? bundle.suggestions.meal.recipes
@@ -2044,6 +2076,8 @@ export default function MealPlanningPage() {
   const [mealContextActionBusy, setMealContextActionBusy] = useState({});
   const [householdAgenda, setHouseholdAgenda] = useState({ metrics: {}, today: [], upcoming: [] });
   const [householdAgendaError, setHouseholdAgendaError] = useState("");
+  const [communityApprovals, setCommunityApprovals] = useState([]);
+  const [communityApprovalsError, setCommunityApprovalsError] = useState("");
   const deferNonCriticalPanels = !isLikelyTestRuntime();
   const [showLiveContextSection, setShowLiveContextSection] = useState(() => !deferNonCriticalPanels);
   const [showContextPanels, setShowContextPanels] = useState(() => !deferNonCriticalPanels);
@@ -2054,18 +2088,23 @@ export default function MealPlanningPage() {
     setMealContextLoading(true);
     setMealContextError("");
     setHouseholdAgendaError("");
+    setCommunityApprovalsError("");
     try {
-      const [payload, agendaPayload] = await Promise.all([
+      const [payload, agendaPayload, approvalsPayload] = await Promise.all([
         fetchMealPlannerContext({ householdId }),
         fetchHouseholdTodayUpcomingAgenda({ householdId, todayLimit: 10, upcomingLimit: 10 }),
+        fetchCommunityApprovals({ householdId }).catch(() => []),
       ]);
       setMealFeed(payload.feed);
       setSacredMealAlerts(payload.alerts);
       setHouseholdAgenda(agendaPayload);
+      setCommunityApprovals(approvalsPayload);
     } catch (error) {
       setMealContextError(String(error?.message || error || "Failed to load planner context."));
       setHouseholdAgenda({ metrics: {}, today: [], upcoming: [] });
       setHouseholdAgendaError("Household timeline unavailable.");
+      setCommunityApprovals([]);
+      setCommunityApprovalsError("Approvals inbox unavailable.");
     } finally {
       setMealContextLoading(false);
     }
@@ -2128,6 +2167,36 @@ export default function MealPlanningPage() {
       setMealContextActionBusy((prev) => ({ ...prev, [busyKey]: false }));
     }
   }, []);
+
+  const onApprovalTransition = useCallback(
+    async (approvalId, nextState, reason) => {
+      const householdId = resolvePlannerHouseholdId();
+      const busyKey = `approval:${approvalId}:${nextState}`;
+      setMealContextActionBusy((prev) => ({ ...prev, [busyKey]: true }));
+      try {
+        await transitionCommunityApproval({ householdId, approvalId, nextState, reason });
+        const refreshed = await fetchCommunityApprovals({ householdId });
+        setCommunityApprovals(refreshed);
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: { type: "success", message: `Approval moved to ${nextState}.` },
+          })
+        );
+      } catch (error) {
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: {
+              type: "error",
+              message: `Approval update failed: ${String(error?.message || error || "unknown")}`,
+            },
+          })
+        );
+      } finally {
+        setMealContextActionBusy((prev) => ({ ...prev, [busyKey]: false }));
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (toolFromQuery && toolFromQuery !== activeTool) {
@@ -3426,6 +3495,87 @@ export default function MealPlanningPage() {
                             <div className="sv-muted">No upcoming items.</div>
                           )}
                         </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="sv-card sv-pad">
+                    <strong style={{ color: "var(--fg)" }}>Approvals Inbox</strong>
+                    {mealContextLoading ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>Loading approvals...</div>
+                    ) : communityApprovalsError ? (
+                      <div className="sv-muted" style={{ marginTop: 8 }}>{communityApprovalsError}</div>
+                    ) : (
+                      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                        {communityApprovals.length ? (
+                          communityApprovals.slice(0, 6).map((approval) => {
+                            const approvalId = String(approval?.id || "");
+                            const workflowState = String(approval?.workflowState || "pending_approval");
+                            const allow = new Set(
+                              Array.isArray(approval?.allowedNextStates)
+                                ? approval.allowedNextStates
+                                : []
+                            );
+                            return (
+                              <div
+                                key={approvalId}
+                                style={{
+                                  border: "1px solid var(--border)",
+                                  borderRadius: 12,
+                                  padding: 10,
+                                  display: "grid",
+                                  gap: 8,
+                                }}
+                              >
+                                <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 8 }}>
+                                  <div style={{ fontWeight: 700, color: "var(--fg)" }}>
+                                    {String(approval?.subjectType || "approval").replace(/_/g, " ")}
+                                  </div>
+                                  <div className="sv-muted" style={{ fontSize: 12 }}>
+                                    State: {workflowState}
+                                  </div>
+                                </div>
+                                <div className="sv-muted" style={{ fontSize: 12 }}>
+                                  Reason: {String(approval?.reason || "unspecified")}
+                                </div>
+                                <div className="sv-row sv-wrap" style={{ gap: 8 }}>
+                                  <SSAButton
+                                    type="button"
+                                    variant="secondary"
+                                    disabled={!allow.has("active") || Boolean(mealContextActionBusy[`approval:${approvalId}:active`])}
+                                    onClick={() =>
+                                      onApprovalTransition(approvalId, "active", "Approved from meal planner inbox")
+                                    }
+                                  >
+                                    Approve
+                                  </SSAButton>
+                                  <SSAButton
+                                    type="button"
+                                    variant="secondary"
+                                    disabled={!allow.has("blocked") || Boolean(mealContextActionBusy[`approval:${approvalId}:blocked`])}
+                                    onClick={() =>
+                                      onApprovalTransition(approvalId, "blocked", "Rejected from meal planner inbox")
+                                    }
+                                  >
+                                    Reject
+                                  </SSAButton>
+                                  <SSAButton
+                                    type="button"
+                                    variant="secondary"
+                                    disabled={!allow.has("archived") || Boolean(mealContextActionBusy[`approval:${approvalId}:archived`])}
+                                    onClick={() =>
+                                      onApprovalTransition(approvalId, "archived", "Archived from meal planner inbox")
+                                    }
+                                  >
+                                    Archive
+                                  </SSAButton>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="sv-muted">No pending approvals for this household.</div>
+                        )}
                       </div>
                     )}
                   </div>

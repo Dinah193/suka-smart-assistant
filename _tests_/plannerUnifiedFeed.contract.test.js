@@ -592,6 +592,25 @@ describe("planner unified feed contract", () => {
       expect(String(transitionToActivePayload?.report?.workflowState || "")).toBe("active");
       expect(String(transitionToActivePayload?.report?.status || "")).toBe("in_review");
 
+      const transitionToCompletedRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "completed",
+            reason: "Review completed",
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(transitionToCompletedRes.status).toBe(200);
+      const transitionToCompletedPayload = await transitionToCompletedRes.json();
+      expect(String(transitionToCompletedPayload?.approval?.workflowState || "")).toBe("completed");
+      expect(String(transitionToCompletedPayload?.report?.workflowState || "")).toBe("completed");
+      expect(String(transitionToCompletedPayload?.report?.status || "")).toBe("resolved");
+
       const invalidTransitionRes = await fetch(
         `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
         {
@@ -599,8 +618,8 @@ describe("planner unified feed contract", () => {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             householdId,
-            nextState: "pending_approval",
-            reason: "Invalid rollback to pending",
+            nextState: "blocked",
+            reason: "Invalid move after completion",
             updatedBy: "contract-test",
           }),
         }
@@ -608,10 +627,10 @@ describe("planner unified feed contract", () => {
       expect(invalidTransitionRes.status).toBe(409);
       const invalidTransitionPayload = await invalidTransitionRes.json();
       expect(String(invalidTransitionPayload?.error || "")).toBe("invalid_approval_transition");
-      expect(String(invalidTransitionPayload?.fromState || "")).toBe("active");
-      expect(String(invalidTransitionPayload?.toState || "")).toBe("pending_approval");
+      expect(String(invalidTransitionPayload?.fromState || "")).toBe("completed");
+      expect(String(invalidTransitionPayload?.toState || "")).toBe("blocked");
       expect(Array.isArray(invalidTransitionPayload?.allowedNextStates)).toBe(true);
-      expect(invalidTransitionPayload.allowedNextStates.includes("completed")).toBe(true);
+      expect(invalidTransitionPayload.allowedNextStates.length).toBe(0);
     } finally {
       await stopServer(child);
     }
