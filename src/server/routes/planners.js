@@ -10,6 +10,11 @@ const {
   requireEntitlementPolicy,
   requirePlannerAdminRole,
 } = require("../middleware/accessPolicy.js");
+const {
+  appendHouseholdNotifications,
+  buildMentionNotificationEntries: buildRoutedMentionNotificationEntries,
+  buildNotificationEntry,
+} = require("../services/planners/HouseholdNotificationRouter.js");
 
 function isLocalDevRequest(req) {
   if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
@@ -93,13 +98,24 @@ const HOMESTEAD_CONTEXT_STATE_FILE = path.resolve(
   "../../../data/homestead-planner-context-state.json"
 );
 
+const STOREHOUSE_CONTEXT_STATE_FILE = path.resolve(
+  __dirname,
+  "../../../data/storehouse-planner-context-state.json"
+);
+
 const PROFILE_MESSAGES_STATE_FILE = path.resolve(
   __dirname,
   "../../../data/profile-messages-context-state.json"
 );
 
+const COMMUNITY_CONTEXT_STATE_FILE = path.resolve(
+  __dirname,
+  "../../../data/community-context-state.json"
+);
+
 const MEAL_CONTEXT_ACTION_LOG_LIMIT = 25;
 const HOMESTEAD_ACTION_LOG_LIMIT = 40;
+const STOREHOUSE_ACTION_LOG_LIMIT = 30;
 
 const DEFAULT_PROFILE_MESSAGES_CONTEXT = Object.freeze({
   conversations: [],
@@ -194,6 +210,92 @@ function appendMessageToConversation(context, conversationId, message, actorId) 
   next.selectedConversationId = targetId;
   next.lastUpdatedAt = nowIso;
   return next;
+}
+
+function cloneDefaultCommunityContext(householdId) {
+  return {
+    householdId,
+    sharedPlans: [],
+    gardenPlans: [],
+    animalPlans: [],
+    feed: [
+      {
+        id: "community-feed-1",
+        author: "Community Board",
+        content:
+          "Share your household plan updates to coordinate swaps and seasonal labor.",
+        timestamp: "Today 09:00",
+        likes: 0,
+        comments: 0,
+        shares: 0,
+      },
+    ],
+    notifications: [],
+    reports: [],
+    profileVisibility: {
+      mode: "community",
+      discoverable: true,
+      showHouseholdName: true,
+    },
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+async function readCommunityContextStateFile() {
+  try {
+    const raw = await fs.readFile(COMMUNITY_CONTEXT_STATE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return { version: 1, households: {} };
+    }
+    if (!parsed.households || typeof parsed.households !== "object") {
+      parsed.households = {};
+    }
+    return parsed;
+  } catch {
+    return { version: 1, households: {} };
+  }
+}
+
+async function writeCommunityContextStateFile(state) {
+  await fs.mkdir(path.dirname(COMMUNITY_CONTEXT_STATE_FILE), { recursive: true });
+  await fs.writeFile(COMMUNITY_CONTEXT_STATE_FILE, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+}
+
+function ensureCommunityHouseholdState(state, householdId) {
+  if (!state.households[householdId] || typeof state.households[householdId] !== "object") {
+    state.households[householdId] = cloneDefaultCommunityContext(householdId);
+  }
+  const current = state.households[householdId];
+  current.sharedPlans = Array.isArray(current.sharedPlans) ? current.sharedPlans : [];
+  current.gardenPlans = Array.isArray(current.gardenPlans) ? current.gardenPlans : [];
+  current.animalPlans = Array.isArray(current.animalPlans) ? current.animalPlans : [];
+  current.feed = Array.isArray(current.feed) ? current.feed : [];
+  current.commentThreads =
+    current.commentThreads && typeof current.commentThreads === "object"
+      ? current.commentThreads
+      : {};
+  current.notifications = Array.isArray(current.notifications) ? current.notifications : [];
+  current.reports = Array.isArray(current.reports) ? current.reports : [];
+  current.profileVisibility =
+    current.profileVisibility && typeof current.profileVisibility === "object"
+      ? {
+          mode: toTrimmedString(current.profileVisibility.mode || "community") || "community",
+          discoverable: current.profileVisibility.discoverable !== false,
+          showHouseholdName: current.profileVisibility.showHouseholdName !== false,
+        }
+      : {
+          mode: "community",
+          discoverable: true,
+          showHouseholdName: true,
+        };
+  return current;
+}
+
+async function getCommunityContextForHousehold(householdId) {
+  const state = await readCommunityContextStateFile();
+  const householdState = ensureCommunityHouseholdState(state, householdId);
+  return { state, householdState };
 }
 
 const DEFAULT_MEAL_CONTEXT = Object.freeze({
@@ -305,6 +407,10 @@ function mergeMealContextWithState(householdState) {
   const feed = defaults.feed.map((item) => {
     const stats = statsByPost[item.id] || {};
     const audit = feedAuditById[item.id] || {};
+    const semanticActions =
+      stats.semanticActions && typeof stats.semanticActions === "object"
+        ? stats.semanticActions
+        : {};
     return {
       ...item,
       likes: Number.isFinite(Number(stats.likes)) ? Number(stats.likes) : item.likes,
@@ -312,6 +418,7 @@ function mergeMealContextWithState(householdState) {
         ? Number(stats.comments)
         : item.comments,
       shares: Number.isFinite(Number(stats.shares)) ? Number(stats.shares) : item.shares,
+      semanticActions,
       updatedBy: audit.updatedBy || null,
       actionLog: Array.isArray(audit.actionLog) ? audit.actionLog : [],
     };
@@ -334,6 +441,165 @@ function appendMealContextActionLog(existingLog, entry) {
     return next;
   }
   return next.slice(next.length - MEAL_CONTEXT_ACTION_LOG_LIMIT);
+}
+
+const DEFAULT_STOREHOUSE_CONTEXT = Object.freeze({
+  feed: [
+    {
+      id: "store-feed-1",
+      author: "Storehouse Coordinator",
+      content:
+        "Weekly projection updated from garden + animal queues. Prioritize grain and legumes procurement.",
+      timestamp: "Today 07:50",
+      likes: 11,
+      comments: 2,
+      shares: 1,
+    },
+    {
+      id: "store-feed-2",
+      author: "Willow Household",
+      household: true,
+      content:
+        "Preservation queue aligned with incoming produce peaks for this cycle.",
+      timestamp: "Today 06:35",
+      likes: 8,
+      comments: 1,
+      shares: 0,
+    },
+  ],
+  alerts: [
+    {
+      id: "store-alert-1",
+      type: "info",
+      title: "Forecast loop active",
+      message: "Storehouse projections are synced with current household profile inputs.",
+      timestamp: "Now",
+    },
+    {
+      id: "store-alert-2",
+      type: "warning",
+      title: "Replenishment watch",
+      message:
+        "Review low-stock items before next batch-cooking window for smoother flow.",
+      timestamp: "12m ago",
+    },
+  ],
+});
+
+function cloneDefaultStorehouseContext() {
+  return {
+    feed: DEFAULT_STOREHOUSE_CONTEXT.feed.map((item) => ({ ...item })),
+    alerts: DEFAULT_STOREHOUSE_CONTEXT.alerts.map((item) => ({ ...item })),
+  };
+}
+
+async function readStorehouseContextStateFile() {
+  try {
+    const raw = await fs.readFile(STOREHOUSE_CONTEXT_STATE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return { version: 1, households: {} };
+    }
+    if (!parsed.households || typeof parsed.households !== "object") {
+      parsed.households = {};
+    }
+    return parsed;
+  } catch {
+    return { version: 1, households: {} };
+  }
+}
+
+async function writeStorehouseContextStateFile(state) {
+  await fs.mkdir(path.dirname(STOREHOUSE_CONTEXT_STATE_FILE), { recursive: true });
+  await fs.writeFile(
+    STOREHOUSE_CONTEXT_STATE_FILE,
+    `${JSON.stringify(state, null, 2)}\n`,
+    "utf8"
+  );
+}
+
+function mergeStorehouseContextWithState(householdState) {
+  const defaults = cloneDefaultStorehouseContext();
+  const dismissed = new Set(
+    Array.isArray(householdState?.dismissedAlertIds)
+      ? householdState.dismissedAlertIds
+      : []
+  );
+  const statsByPost =
+    householdState?.postStats && typeof householdState.postStats === "object"
+      ? householdState.postStats
+      : {};
+  const alertAuditById =
+    householdState?.alertAudit && typeof householdState.alertAudit === "object"
+      ? householdState.alertAudit
+      : {};
+  const feedAuditById =
+    householdState?.feedAudit && typeof householdState.feedAudit === "object"
+      ? householdState.feedAudit
+      : {};
+
+  const alerts = defaults.alerts
+    .filter((item) => !dismissed.has(item.id))
+    .map((item) => {
+      const audit = alertAuditById[item.id] || {};
+      return {
+        ...item,
+        updatedBy: audit.updatedBy || null,
+        actionLog: Array.isArray(audit.actionLog) ? audit.actionLog : [],
+      };
+    });
+
+  const feed = defaults.feed.map((item) => {
+    const stats = statsByPost[item.id] || {};
+    const audit = feedAuditById[item.id] || {};
+    const semanticActions =
+      stats.semanticActions && typeof stats.semanticActions === "object"
+        ? stats.semanticActions
+        : {};
+    return {
+      ...item,
+      likes: Number.isFinite(Number(stats.likes)) ? Number(stats.likes) : item.likes,
+      comments: Number.isFinite(Number(stats.comments))
+        ? Number(stats.comments)
+        : item.comments,
+      shares: Number.isFinite(Number(stats.shares)) ? Number(stats.shares) : item.shares,
+      semanticActions,
+      updatedBy: audit.updatedBy || null,
+      actionLog: Array.isArray(audit.actionLog) ? audit.actionLog : [],
+    };
+  });
+
+  return { alerts, feed };
+}
+
+function resolveStorehouseContextActor(req, body = {}) {
+  const headerActor = String(req.headers["x-user-id"] || "").trim();
+  const bodyActor = String(body.updatedBy || body.userId || "").trim();
+  const userActor = String(req.user?.id || req.user?.userId || "").trim();
+  return bodyActor || userActor || headerActor || "unknown";
+}
+
+function appendStorehouseActionLog(existingLog, entry) {
+  const base = Array.isArray(existingLog) ? existingLog : [];
+  const next = [...base, entry];
+  if (next.length <= STOREHOUSE_ACTION_LOG_LIMIT) {
+    return next;
+  }
+  return next.slice(next.length - STOREHOUSE_ACTION_LOG_LIMIT);
+}
+
+async function getStorehouseContextForHousehold(householdId) {
+  const state = await readStorehouseContextStateFile();
+  const householdState =
+    state.households && typeof state.households === "object"
+      ? state.households[householdId] || {}
+      : {};
+  const context = mergeStorehouseContextWithState(householdState);
+  return {
+    context,
+    state,
+    householdState,
+  };
 }
 
 async function mirrorMealShareToHomesteadFeed({ householdId, postId, actor, actionAt }) {
@@ -475,6 +741,7 @@ function ensureHomesteadHouseholdState(state, householdId) {
       assignments: [],
       fulfillments: [],
       feed: [],
+      commentThreads: {},
     };
   }
   current.collaboration.needs = Array.isArray(current.collaboration.needs)
@@ -492,6 +759,11 @@ function ensureHomesteadHouseholdState(state, householdId) {
   current.collaboration.feed = Array.isArray(current.collaboration.feed)
     ? current.collaboration.feed
     : [];
+  current.collaboration.commentThreads =
+    current.collaboration.commentThreads &&
+    typeof current.collaboration.commentThreads === "object"
+      ? current.collaboration.commentThreads
+      : {};
   if (!current.resources || typeof current.resources !== "object") {
     current.resources = {};
   }
@@ -615,6 +887,417 @@ async function getHomesteadContextForHousehold(householdId) {
   const state = await readHomesteadContextStateFile();
   const householdState = ensureHomesteadHouseholdState(state, householdId);
   return { state, householdState };
+}
+
+function normalizeUnifiedFeedItem(item, moduleKey, householdId, index = 0) {
+  const normalized = item && typeof item === "object" ? item : {};
+  const semanticActions =
+    normalized.semanticActions && typeof normalized.semanticActions === "object"
+      ? Object.fromEntries(
+          Object.entries(normalized.semanticActions)
+            .map(([key, value]) => [
+              toTrimmedString(key).toLowerCase(),
+              Math.max(0, Number(value || 0)),
+            ])
+            .filter(([key]) => Boolean(key))
+        )
+      : {};
+  return {
+    id: `${moduleKey}:${String(normalized.id || `${moduleKey}-${index}`)}`,
+    sourceId: String(normalized.id || `${moduleKey}-${index}`),
+    sourceModule: moduleKey,
+    householdId,
+    author: String(normalized.author || "Household"),
+    content: String(normalized.content || ""),
+    timestamp: String(normalized.timestamp || "Now"),
+    stats: {
+      likes: Number(normalized.likes || 0),
+      comments: Number(normalized.comments || 0),
+      shares: Number(normalized.shares || 0),
+      coordinates: Number(normalized.coordinates || 0),
+      semanticActions,
+    },
+    updatedBy: normalized.updatedBy || null,
+    lastAction: normalized.lastAction || null,
+    lastActionAt: normalized.lastActionAt || normalized.updatedAt || null,
+  };
+}
+
+function sortUnifiedFeedItems(items) {
+  return [...items].sort((a, b) => {
+    const aTime = a?.lastActionAt ? Date.parse(a.lastActionAt) : 0;
+    const bTime = b?.lastActionAt ? Date.parse(b.lastActionAt) : 0;
+    if (bTime !== aTime) return bTime - aTime;
+    return String(a.id).localeCompare(String(b.id));
+  });
+}
+
+const UNIFIED_FEED_MODULES = new Set(["meal", "storehouse", "homestead", "community"]);
+const DEFAULT_UNIFIED_FEED_MODULES = ["meal", "storehouse", "homestead", "community"];
+
+function normalizeRequestedFeedModules(modulesRaw) {
+  const requestedModules = String(modulesRaw || DEFAULT_UNIFIED_FEED_MODULES.join(","))
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter((item) => UNIFIED_FEED_MODULES.has(item));
+  return requestedModules.length ? Array.from(new Set(requestedModules)) : [...DEFAULT_UNIFIED_FEED_MODULES];
+}
+
+async function collectUnifiedFeedItemsForHousehold({ householdId, requestedModules }) {
+  const modules = Array.isArray(requestedModules) && requestedModules.length
+    ? requestedModules
+    : [...DEFAULT_UNIFIED_FEED_MODULES];
+  const selected = new Set(modules);
+  const items = [];
+
+  if (selected.has("meal")) {
+    const { context } = await getMealContextForHousehold(householdId);
+    const feed = Array.isArray(context?.feed) ? context.feed : [];
+    items.push(...feed.map((item, index) => normalizeUnifiedFeedItem(item, "meal", householdId, index)));
+  }
+
+  if (selected.has("storehouse")) {
+    const { context } = await getStorehouseContextForHousehold(householdId);
+    const feed = Array.isArray(context?.feed) ? context.feed : [];
+    items.push(...feed.map((item, index) => normalizeUnifiedFeedItem(item, "storehouse", householdId, index)));
+  }
+
+  if (selected.has("homestead")) {
+    const { householdState } = await getHomesteadContextForHousehold(householdId);
+    const feed = Array.isArray(householdState?.collaboration?.feed)
+      ? householdState.collaboration.feed
+      : [];
+    items.push(...feed.map((item, index) => normalizeUnifiedFeedItem(item, "homestead", householdId, index)));
+  }
+
+  if (selected.has("community")) {
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    const feed = Array.isArray(householdState?.feed) ? householdState.feed : [];
+    items.push(...feed.map((item, index) => normalizeUnifiedFeedItem(item, "community", householdId, index)));
+  }
+
+  return sortUnifiedFeedItems(items);
+}
+
+function makeHouseholdAgendaItem({ id, lane, module, title, detail, dueAt, state, sourceType }) {
+  return {
+    id,
+    lane,
+    module,
+    title,
+    detail,
+    dueAt,
+    state,
+    sourceType,
+  };
+}
+
+function coerceIsoDate(value, fallbackIso) {
+  const parsed = Date.parse(String(value || ""));
+  if (Number.isFinite(parsed)) {
+    return new Date(parsed).toISOString();
+  }
+  return fallbackIso;
+}
+
+function buildTodayAndUpcomingAgenda({
+  householdId,
+  nowIso,
+  mealContext,
+  storehouseContext,
+  homesteadState,
+  communityState,
+  unifiedFeedItems,
+  todayLimit,
+  upcomingLimit,
+}) {
+  const today = [];
+  const upcoming = [];
+
+  const mealAlerts = Array.isArray(mealContext?.alerts) ? mealContext.alerts : [];
+  const storehouseAlerts = Array.isArray(storehouseContext?.alerts) ? storehouseContext.alerts : [];
+  mealAlerts.forEach((alert) => {
+    today.push(
+      makeHouseholdAgendaItem({
+        id: `today-meal-alert-${alert.id || today.length}`,
+        lane: "meal",
+        module: "meal",
+        title: toTrimmedString(alert.title || "Meal alert"),
+        detail: toTrimmedString(alert.message || ""),
+        dueAt: nowIso,
+        state: "today",
+        sourceType: "alert",
+      })
+    );
+  });
+  storehouseAlerts.forEach((alert) => {
+    today.push(
+      makeHouseholdAgendaItem({
+        id: `today-storehouse-alert-${alert.id || today.length}`,
+        lane: "storehouse",
+        module: "storehouse",
+        title: toTrimmedString(alert.title || "Storehouse alert"),
+        detail: toTrimmedString(alert.message || ""),
+        dueAt: nowIso,
+        state: "today",
+        sourceType: "alert",
+      })
+    );
+  });
+
+  const unreadNotifications = (Array.isArray(communityState?.notifications) ? communityState.notifications : [])
+    .filter((item) => item?.read !== true)
+    .slice(0, 8);
+  unreadNotifications.forEach((notification, index) => {
+    today.push(
+      makeHouseholdAgendaItem({
+        id: `today-notification-${notification.id || index}`,
+        lane: "community",
+        module: "community",
+        title: toTrimmedString(notification.title || "Community notification"),
+        detail: toTrimmedString(notification.message || ""),
+        dueAt: coerceIsoDate(notification.createdAt, nowIso),
+        state: "today",
+        sourceType: "notification",
+      })
+    );
+  });
+
+  const recentFeed = Array.isArray(unifiedFeedItems) ? unifiedFeedItems.slice(0, 8) : [];
+  recentFeed.forEach((item, index) => {
+    today.push(
+      makeHouseholdAgendaItem({
+        id: `today-feed-${item.sourceModule}-${item.sourceId || index}`,
+        lane: item.sourceModule,
+        module: item.sourceModule,
+        title: `Feed update from ${item.sourceModule}`,
+        detail: toTrimmedString(item.content || ""),
+        dueAt: coerceIsoDate(item.lastActionAt || item.updatedAt, nowIso),
+        state: "today",
+        sourceType: "feed",
+      })
+    );
+  });
+
+  const assignmentRows = Array.isArray(homesteadState?.collaboration?.assignments)
+    ? homesteadState.collaboration.assignments
+    : [];
+  assignmentRows.forEach((assignment, index) => {
+    const status = toTrimmedString(assignment.status || "pending").toLowerCase();
+    if (status === "done" || status === "completed") return;
+    upcoming.push(
+      makeHouseholdAgendaItem({
+        id: `upcoming-assignment-${assignment.id || index}`,
+        lane: "homestead",
+        module: "homestead",
+        title: toTrimmedString(assignment.title || assignment.name || "Homestead assignment"),
+        detail: toTrimmedString(assignment.notes || "Coordination task awaiting execution."),
+        dueAt: coerceIsoDate(assignment.dueAt || assignment.updatedAt, nowIso),
+        state: status || "pending",
+        sourceType: "assignment",
+      })
+    );
+  });
+
+  const planGroups = [
+    { lane: "community", sourceType: "shared_plan", rows: communityState?.sharedPlans },
+    { lane: "community", sourceType: "garden_plan", rows: communityState?.gardenPlans },
+    { lane: "community", sourceType: "animal_plan", rows: communityState?.animalPlans },
+  ];
+  planGroups.forEach((group) => {
+    const rows = Array.isArray(group.rows) ? group.rows : [];
+    rows.forEach((plan, index) => {
+      upcoming.push(
+        makeHouseholdAgendaItem({
+          id: `upcoming-${group.sourceType}-${plan.id || index}`,
+          lane: group.lane,
+          module: "community",
+          title: toTrimmedString(plan.title || "Community plan"),
+          detail: toTrimmedString(plan.description || plan.lane || "Upcoming community planning item."),
+          dueAt: coerceIsoDate(plan.targetAt || plan.updatedAt, nowIso),
+          state: toTrimmedString(plan.status || "planned") || "planned",
+          sourceType: group.sourceType,
+        })
+      );
+    });
+  });
+
+  const todaySorted = sortUnifiedFeedItems(
+    today.map((item) => ({ ...item, id: `${item.module}:${item.id}`, lastActionAt: item.dueAt }))
+  )
+    .map(({ lastActionAt, ...item }) => item)
+    .slice(0, todayLimit);
+
+  const upcomingSorted = sortUnifiedFeedItems(
+    upcoming.map((item) => ({ ...item, id: `${item.module}:${item.id}`, lastActionAt: item.dueAt }))
+  )
+    .map(({ lastActionAt, ...item }) => item)
+    .slice(0, upcomingLimit);
+
+  return {
+    householdId,
+    generatedAt: nowIso,
+    metrics: {
+      todayCount: todaySorted.length,
+      upcomingCount: upcomingSorted.length,
+      unreadNotifications: unreadNotifications.length,
+      activeAssignments: assignmentRows.length,
+    },
+    today: todaySorted,
+    upcoming: upcomingSorted,
+  };
+}
+
+function toTrimmedString(value) {
+  return String(value || "").trim();
+}
+
+function extractMentionHandles(input) {
+  const text = String(input || "");
+  const matches = text.match(/(^|\s)@([a-zA-Z0-9_.-]{2,32})/g) || [];
+  const unique = new Set();
+  for (const token of matches) {
+    const handle = String(token).trim().replace(/^@/, "").replace(/^\s*@/, "").trim();
+    if (handle) unique.add(handle.toLowerCase());
+  }
+  return Array.from(unique);
+}
+
+function buildFeedCommentEntry({ body, actor, nowIso, parentCommentId = null }) {
+  const text = String(body || "").trim();
+  return {
+    id: generateHomesteadId("feed-comment"),
+    body: text,
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    parentCommentId: parentCommentId ? String(parentCommentId) : null,
+    mentions: extractMentionHandles(text),
+    actor: {
+      id: String(actor || "household-user"),
+      name: String(actor || "household-user"),
+    },
+    author: actor,
+  };
+}
+
+function normalizeCommentThreadEntries(rawThread) {
+  if (!Array.isArray(rawThread)) return [];
+  return rawThread.map((entry) => {
+    const item = entry && typeof entry === "object" ? entry : {};
+    const actorId = toTrimmedString(item.actor?.id || item.author || "household-user");
+    const actorName = toTrimmedString(item.actor?.name || item.author || actorId || "household-user");
+    return {
+      id: toTrimmedString(item.id || generateHomesteadId("feed-comment")),
+      body: toTrimmedString(item.body),
+      createdAt: toTrimmedString(item.createdAt || new Date().toISOString()),
+      updatedAt: toTrimmedString(item.updatedAt || item.createdAt || new Date().toISOString()),
+      parentCommentId: item.parentCommentId ? toTrimmedString(item.parentCommentId) : null,
+      mentions: Array.isArray(item.mentions)
+        ? item.mentions.map((value) => toTrimmedString(value).toLowerCase()).filter(Boolean)
+        : extractMentionHandles(item.body),
+      actor: {
+        id: actorId || "household-user",
+        name: actorName || "household-user",
+      },
+      author: toTrimmedString(item.author || actorName || "household-user"),
+    };
+  });
+}
+
+function buildThreadedCommentView(comments) {
+  const rows = normalizeCommentThreadEntries(comments);
+  const byParent = new Map();
+  for (const row of rows) {
+    const key = row.parentCommentId || "ROOT";
+    const current = byParent.get(key) || [];
+    current.push({ ...row, replies: [] });
+    byParent.set(key, current);
+  }
+
+  const attach = (parentId) => {
+    const nodes = byParent.get(parentId) || [];
+    return nodes.map((node) => ({
+      ...node,
+      replies: attach(node.id),
+    }));
+  };
+
+  return attach("ROOT");
+}
+
+function buildMentionProfileHref(handle) {
+  const safe = toTrimmedString(handle).toLowerCase();
+  return `/settings/profile?handle=${encodeURIComponent(safe)}`;
+}
+
+async function appendMentionNotificationsForHousehold({
+  householdId,
+  moduleKey,
+  sourceId,
+  comment,
+  actor,
+  nowIso,
+}) {
+  const entries = buildRoutedMentionNotificationEntries({
+    moduleKey,
+    sourceId,
+    comment,
+    actor,
+    nowIso,
+    idFactory: generateHomesteadId,
+    profileHrefBuilder: buildMentionProfileHref,
+  });
+  if (!entries.length) return [];
+
+  const { state, householdState } = await getCommunityContextForHousehold(householdId);
+  appendHouseholdNotifications({ householdState, entries, nowIso });
+  state.households[householdId] = householdState;
+  await writeCommunityContextStateFile(state);
+  return entries;
+}
+
+function normalizeCommentThreadMap(raw) {
+  return raw && typeof raw === "object" ? { ...raw } : {};
+}
+
+function normalizeDiscoveryHandle(value) {
+  return toTrimmedString(value)
+    .toLowerCase()
+    .replace(/^@+/, "")
+    .replace(/[^a-z0-9_.-]/g, "")
+    .slice(0, 32);
+}
+
+function buildProfileHrefFromHandle(handle) {
+  return `/settings/profile?handle=${encodeURIComponent(normalizeDiscoveryHandle(handle))}`;
+}
+
+function collectCommunityDiscoveryProfiles({ householdId, query = "" }) {
+  const normalizedQuery = normalizeDiscoveryHandle(query);
+  const rows = [];
+  const seen = new Set();
+
+  const push = (rawHandle, rawName, source) => {
+    const handle = normalizeDiscoveryHandle(rawHandle || rawName);
+    if (!handle || seen.has(handle)) return;
+    if (normalizedQuery && !handle.includes(normalizedQuery) && !String(rawName || "").toLowerCase().includes(normalizedQuery)) {
+      return;
+    }
+    seen.add(handle);
+    rows.push({
+      id: `profile-${handle}`,
+      handle,
+      displayName: toTrimmedString(rawName || rawHandle || handle) || handle,
+      href: buildProfileHrefFromHandle(handle),
+      source,
+      householdId,
+    });
+  };
+
+  const wellKnown = ["meal", "storehouse", "homestead", "community"];
+  wellKnown.forEach((name) => push(name, name, "well_known"));
+
+  return { push, rows };
 }
 
 function loadPlannerIntegrationService() {
@@ -1066,6 +1749,164 @@ router.get("/storehouse", async (req, res) => {
   }
 });
 
+router.get("/storehouse/context", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { context } = await getStorehouseContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, ...context });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/storehouse/context/alerts/:id/dismiss", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const alertId = String(req.params.id || "").trim();
+    if (!alertId) {
+      return res.status(400).json({ ok: false, error: "missing_alert_id" });
+    }
+
+    const dismiss = req.body?.dismiss !== false;
+    const updatedBy = resolveStorehouseContextActor(req, req.body || {});
+    const actionAt = new Date().toISOString();
+    const { state, householdState } = await getStorehouseContextForHousehold(householdId);
+    const dismissedSet = new Set(
+      Array.isArray(householdState.dismissedAlertIds)
+        ? householdState.dismissedAlertIds
+        : []
+    );
+    if (dismiss) dismissedSet.add(alertId);
+    else dismissedSet.delete(alertId);
+
+    const alertAudit =
+      householdState.alertAudit && typeof householdState.alertAudit === "object"
+        ? { ...householdState.alertAudit }
+        : {};
+    const currentAudit =
+      alertAudit[alertId] && typeof alertAudit[alertId] === "object"
+        ? { ...alertAudit[alertId] }
+        : {};
+    const actionLog = appendStorehouseActionLog(currentAudit.actionLog, {
+      action: dismiss ? "dismiss" : "undismiss",
+      at: actionAt,
+      updatedBy,
+    });
+    alertAudit[alertId] = {
+      updatedBy,
+      lastAction: dismiss ? "dismiss" : "undismiss",
+      lastActionAt: actionAt,
+      actionLog,
+    };
+
+    const nextHouseholdState = {
+      ...householdState,
+      dismissedAlertIds: Array.from(dismissedSet),
+      postStats:
+        householdState.postStats && typeof householdState.postStats === "object"
+          ? householdState.postStats
+          : {},
+      alertAudit,
+      feedAudit:
+        householdState.feedAudit && typeof householdState.feedAudit === "object"
+          ? householdState.feedAudit
+          : {},
+      updatedAt: new Date().toISOString(),
+    };
+
+    state.households[householdId] = nextHouseholdState;
+    await writeStorehouseContextStateFile(state);
+    const context = mergeStorehouseContextWithState(nextHouseholdState);
+    return res.json({ ok: true, householdId, ...context });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/storehouse/context/feed/:id/action", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const postId = String(req.params.id || "").trim();
+    if (!postId) {
+      return res.status(400).json({ ok: false, error: "missing_post_id" });
+    }
+
+    const action = String(req.body?.action || "").toLowerCase();
+    const actionToKey = {
+      like: "likes",
+      comment: "comments",
+      share: "shares",
+    };
+    const statKey = actionToKey[action];
+    if (!statKey) {
+      return res.status(400).json({ ok: false, error: "unsupported_action" });
+    }
+
+    const deltaRaw = Number(req.body?.delta);
+    const delta = Number.isFinite(deltaRaw) && deltaRaw !== 0 ? deltaRaw : 1;
+    const updatedBy = resolveStorehouseContextActor(req, req.body || {});
+    const actionAt = new Date().toISOString();
+
+    const { state, householdState } = await getStorehouseContextForHousehold(householdId);
+    const postStats =
+      householdState.postStats && typeof householdState.postStats === "object"
+        ? { ...householdState.postStats }
+        : {};
+    const current =
+      postStats[postId] && typeof postStats[postId] === "object"
+        ? { ...postStats[postId] }
+        : {};
+
+    const nextValue = Math.max(0, Number(current[statKey] || 0) + delta);
+    current[statKey] = nextValue;
+    postStats[postId] = current;
+
+    const feedAudit =
+      householdState.feedAudit && typeof householdState.feedAudit === "object"
+        ? { ...householdState.feedAudit }
+        : {};
+    const currentAudit =
+      feedAudit[postId] && typeof feedAudit[postId] === "object"
+        ? { ...feedAudit[postId] }
+        : {};
+    const actionLog = appendStorehouseActionLog(currentAudit.actionLog, {
+      action,
+      delta,
+      at: actionAt,
+      updatedBy,
+    });
+    feedAudit[postId] = {
+      updatedBy,
+      lastAction: action,
+      lastActionAt: actionAt,
+      actionLog,
+    };
+
+    const nextHouseholdState = {
+      ...householdState,
+      dismissedAlertIds: Array.isArray(householdState.dismissedAlertIds)
+        ? householdState.dismissedAlertIds
+        : [],
+      postStats,
+      alertAudit:
+        householdState.alertAudit && typeof householdState.alertAudit === "object"
+          ? householdState.alertAudit
+          : {},
+      feedAudit,
+      updatedAt: new Date().toISOString(),
+    };
+
+    state.households[householdId] = nextHouseholdState;
+    await writeStorehouseContextStateFile(state);
+
+    const context = mergeStorehouseContextWithState(nextHouseholdState);
+    const updatedPost = context.feed.find((item) => item.id === postId) || null;
+    return res.json({ ok: true, householdId, updatedPost, ...context });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
 router.post("/storehouse/inventory", express.json(), async (req, res) => {
   try {
     const { upsertStorehouseInventory } = loadPlannerIntegrationService();
@@ -1369,6 +2210,964 @@ router.post("/homestead/collaboration/feed/:id/action", express.json(), async (r
       updatedPost: feed[index],
       collaboration: householdState.collaboration,
     });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/feed/unified", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const requestedModules = normalizeRequestedFeedModules(req.query.modules);
+    const limitRaw = Number(req.query.limit);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 40;
+    const sorted = (await collectUnifiedFeedItemsForHousehold({ householdId, requestedModules })).slice(0, limit);
+    return res.json({
+      ok: true,
+      householdId,
+      modules: requestedModules,
+      total: sorted.length,
+      items: sorted,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/feed/unified/search", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const query = toTrimmedString(req.query.q || req.query.query || "").toLowerCase();
+    const requestedModules = normalizeRequestedFeedModules(req.query.modules);
+    const limitRaw = Number(req.query.limit);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 40;
+    const feedResponse = await collectUnifiedFeedItemsForHousehold({ householdId, requestedModules });
+
+    const filtered = query
+      ? feedResponse.filter((item) => {
+          const haystack = [
+            item?.author,
+            item?.content,
+            item?.sourceModule,
+            item?.sourceId,
+          ]
+            .map((value) => toTrimmedString(value).toLowerCase())
+            .join(" ");
+          return haystack.includes(query);
+        })
+      : feedResponse;
+
+    return res.json({
+      ok: true,
+      householdId,
+      query,
+      total: filtered.length,
+      items: filtered.slice(0, limit),
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/household/today-upcoming", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const requestedModules = normalizeRequestedFeedModules(req.query.modules);
+    const todayLimitRaw = Number(req.query.todayLimit);
+    const upcomingLimitRaw = Number(req.query.upcomingLimit);
+    const todayLimit = Number.isFinite(todayLimitRaw) && todayLimitRaw > 0
+      ? Math.min(todayLimitRaw, 100)
+      : 16;
+    const upcomingLimit = Number.isFinite(upcomingLimitRaw) && upcomingLimitRaw > 0
+      ? Math.min(upcomingLimitRaw, 100)
+      : 16;
+
+    const nowIso = new Date().toISOString();
+    const [{ context: mealContext }, { context: storehouseContext }, { householdState: homesteadState }, { householdState: communityState }, unifiedFeedItems] = await Promise.all([
+      getMealContextForHousehold(householdId),
+      getStorehouseContextForHousehold(householdId),
+      getHomesteadContextForHousehold(householdId),
+      getCommunityContextForHousehold(householdId),
+      collectUnifiedFeedItemsForHousehold({ householdId, requestedModules }),
+    ]);
+
+    const payload = buildTodayAndUpcomingAgenda({
+      householdId,
+      nowIso,
+      mealContext,
+      storehouseContext,
+      homesteadState,
+      communityState,
+      unifiedFeedItems,
+      todayLimit,
+      upcomingLimit,
+    });
+
+    return res.json({
+      ok: true,
+      householdId,
+      modules: requestedModules,
+      ...payload,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/feed/unified/:module/:id/reaction", express.json(), async (req, res) => {
+  try {
+    const moduleKey = toTrimmedString(req.params.module).toLowerCase();
+    const sourceId = toTrimmedString(req.params.id);
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const action = toTrimmedString(req.body?.action).toLowerCase();
+    const deltaRaw = Number(req.body?.delta);
+    const delta = Number.isFinite(deltaRaw) && deltaRaw !== 0 ? deltaRaw : 1;
+    const nowIso = new Date().toISOString();
+
+    if (!UNIFIED_FEED_MODULES.has(moduleKey)) {
+      return res.status(400).json({ ok: false, error: "unsupported_module" });
+    }
+    if (!sourceId) {
+      return res.status(400).json({ ok: false, error: "missing_feed_id" });
+    }
+
+    if (moduleKey === "meal" || moduleKey === "storehouse") {
+      const actionToKey = { like: "likes", comment: "comments", share: "shares" };
+      const statKey = actionToKey[action];
+      if (!statKey) {
+        return res.status(400).json({ ok: false, error: "unsupported_action" });
+      }
+
+      const actor =
+        moduleKey === "meal"
+          ? resolveMealContextActor(req, req.body || {})
+          : resolveStorehouseContextActor(req, req.body || {});
+
+      const getter = moduleKey === "meal" ? getMealContextForHousehold : getStorehouseContextForHousehold;
+      const writer = moduleKey === "meal" ? writeMealContextStateFile : writeStorehouseContextStateFile;
+      const merger = moduleKey === "meal" ? mergeMealContextWithState : mergeStorehouseContextWithState;
+      const appendLog =
+        moduleKey === "meal" ? appendMealContextActionLog : appendStorehouseActionLog;
+
+      const { state, householdState } = await getter(householdId);
+      const postStats =
+        householdState.postStats && typeof householdState.postStats === "object"
+          ? { ...householdState.postStats }
+          : {};
+      const current =
+        postStats[sourceId] && typeof postStats[sourceId] === "object"
+          ? { ...postStats[sourceId] }
+          : {};
+
+      current[statKey] = Math.max(0, Number(current[statKey] || 0) + delta);
+      postStats[sourceId] = current;
+
+      const feedAudit =
+        householdState.feedAudit && typeof householdState.feedAudit === "object"
+          ? { ...householdState.feedAudit }
+          : {};
+      const currentAudit =
+        feedAudit[sourceId] && typeof feedAudit[sourceId] === "object"
+          ? { ...feedAudit[sourceId] }
+          : {};
+      const actionLog = appendLog(currentAudit.actionLog, {
+        action,
+        delta,
+        at: nowIso,
+        updatedBy: actor,
+      });
+      feedAudit[sourceId] = {
+        updatedBy: actor,
+        lastAction: action,
+        lastActionAt: nowIso,
+        actionLog,
+      };
+
+      const nextHouseholdState = {
+        ...householdState,
+        dismissedAlertIds: Array.isArray(householdState.dismissedAlertIds)
+          ? householdState.dismissedAlertIds
+          : [],
+        postStats,
+        commentThreads: normalizeCommentThreadMap(householdState.commentThreads),
+        alertAudit:
+          householdState.alertAudit && typeof householdState.alertAudit === "object"
+            ? householdState.alertAudit
+            : {},
+        feedAudit,
+        updatedAt: nowIso,
+      };
+
+      state.households[householdId] = nextHouseholdState;
+      await writer(state);
+      const context = merger(nextHouseholdState);
+      const updatedPost = context.feed.find((item) => item.id === sourceId) || null;
+      return res.json({
+        ok: true,
+        householdId,
+        module: moduleKey,
+        updatedItem: normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId),
+      });
+    }
+
+    if (moduleKey === "homestead") {
+      const actionToKey = {
+        like: "likes",
+        coordinate: "coordinates",
+        share_information: "shares",
+        share: "shares",
+      };
+      const statKey = actionToKey[action];
+      if (!statKey) {
+        return res.status(400).json({ ok: false, error: "unsupported_action" });
+      }
+
+      const actor = resolveHomesteadContextActor(req, req.body || {});
+      const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+      const feed = householdState.collaboration.feed;
+      const index = feed.findIndex((item) => String(item.id) === sourceId);
+      if (index < 0) {
+        return res.status(404).json({ ok: false, error: "feed_item_not_found" });
+      }
+
+      const current = { ...feed[index] };
+      const nextValue = Math.max(0, Number(current[statKey] || 0) + delta);
+      const actionLog = appendHomesteadActionLog(current.actionLog, {
+        action,
+        delta,
+        at: nowIso,
+        updatedBy: actor,
+      });
+      feed[index] = {
+        ...current,
+        [statKey]: nextValue,
+        updatedBy: actor,
+        lastAction: action,
+        lastActionAt: nowIso,
+        actionLog,
+      };
+
+      householdState.updatedAt = nowIso;
+      state.households[householdId] = householdState;
+      await writeHomesteadContextStateFile(state);
+      return res.json({
+        ok: true,
+        householdId,
+        module: moduleKey,
+        updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+      });
+    }
+
+    const actionToKey = { like: "likes", comment: "comments", share: "shares" };
+    const statKey = actionToKey[action];
+    if (!statKey) {
+      return res.status(400).json({ ok: false, error: "unsupported_action" });
+    }
+
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const feed = householdState.feed;
+    const index = feed.findIndex((item) => String(item.id) === sourceId);
+    if (index < 0) {
+      return res.status(404).json({ ok: false, error: "feed_item_not_found" });
+    }
+
+    const current = { ...feed[index] };
+    const nextValue = Math.max(0, Number(current[statKey] || 0) + delta);
+    const actionLog = appendHomesteadActionLog(current.actionLog, {
+      action,
+      delta,
+      at: nowIso,
+      updatedBy: actor,
+    });
+    feed[index] = {
+      ...current,
+      [statKey]: nextValue,
+      updatedBy: actor,
+      lastAction: action,
+      lastActionAt: nowIso,
+      actionLog,
+    };
+
+    householdState.updatedAt = nowIso;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+    return res.json({
+      ok: true,
+      householdId,
+      module: moduleKey,
+      updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/feed/unified/:module/:id/semantic-action", express.json(), async (req, res) => {
+  try {
+    const moduleKey = toTrimmedString(req.params.module).toLowerCase();
+    const sourceId = toTrimmedString(req.params.id);
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const actionType = toTrimmedString(req.body?.actionType).toLowerCase();
+    const detail = toTrimmedString(req.body?.detail || "");
+    const metadata = req.body?.metadata && typeof req.body.metadata === "object" ? req.body.metadata : {};
+    const nowIso = new Date().toISOString();
+
+    if (!UNIFIED_FEED_MODULES.has(moduleKey)) {
+      return res.status(400).json({ ok: false, error: "unsupported_module" });
+    }
+    if (!sourceId) {
+      return res.status(400).json({ ok: false, error: "missing_feed_id" });
+    }
+
+    const allowedActionTypes = new Set(["handoff", "request_help", "acknowledge", "bookmark"]);
+    if (!allowedActionTypes.has(actionType)) {
+      return res.status(400).json({ ok: false, error: "unsupported_semantic_action" });
+    }
+
+    const actor =
+      moduleKey === "meal"
+        ? resolveMealContextActor(req, req.body || {})
+        : moduleKey === "storehouse"
+          ? resolveStorehouseContextActor(req, req.body || {})
+          : resolveHomesteadContextActor(req, req.body || {});
+
+    if (moduleKey === "meal" || moduleKey === "storehouse") {
+      const getter = moduleKey === "meal" ? getMealContextForHousehold : getStorehouseContextForHousehold;
+      const writer = moduleKey === "meal" ? writeMealContextStateFile : writeStorehouseContextStateFile;
+      const merger = moduleKey === "meal" ? mergeMealContextWithState : mergeStorehouseContextWithState;
+      const appendLog = moduleKey === "meal" ? appendMealContextActionLog : appendStorehouseActionLog;
+
+      const { state, householdState } = await getter(householdId);
+      const postStats =
+        householdState.postStats && typeof householdState.postStats === "object"
+          ? { ...householdState.postStats }
+          : {};
+      const current =
+        postStats[sourceId] && typeof postStats[sourceId] === "object"
+          ? { ...postStats[sourceId] }
+          : {};
+      const semanticActions =
+        current.semanticActions && typeof current.semanticActions === "object"
+          ? { ...current.semanticActions }
+          : {};
+      semanticActions[actionType] = Math.max(0, Number(semanticActions[actionType] || 0) + 1);
+      current.semanticActions = semanticActions;
+      postStats[sourceId] = current;
+
+      const feedAudit =
+        householdState.feedAudit && typeof householdState.feedAudit === "object"
+          ? { ...householdState.feedAudit }
+          : {};
+      const currentAudit =
+        feedAudit[sourceId] && typeof feedAudit[sourceId] === "object"
+          ? { ...feedAudit[sourceId] }
+          : {};
+      const actionLog = appendLog(currentAudit.actionLog, {
+        action: `semantic:${actionType}`,
+        detail,
+        metadata,
+        at: nowIso,
+        updatedBy: actor,
+      });
+      feedAudit[sourceId] = {
+        updatedBy: actor,
+        lastAction: `semantic:${actionType}`,
+        lastActionAt: nowIso,
+        actionLog,
+      };
+
+      const nextHouseholdState = {
+        ...householdState,
+        dismissedAlertIds: Array.isArray(householdState.dismissedAlertIds)
+          ? householdState.dismissedAlertIds
+          : [],
+        postStats,
+        commentThreads: normalizeCommentThreadMap(householdState.commentThreads),
+        alertAudit:
+          householdState.alertAudit && typeof householdState.alertAudit === "object"
+            ? householdState.alertAudit
+            : {},
+        feedAudit,
+        updatedAt: nowIso,
+      };
+
+      state.households[householdId] = nextHouseholdState;
+      await writer(state);
+      const context = merger(nextHouseholdState);
+      const updatedPost = context.feed.find((item) => item.id === sourceId) || null;
+      return res.json({
+        ok: true,
+        householdId,
+        module: moduleKey,
+        semanticAction: { actionType, detail, metadata, updatedBy: actor, updatedAt: nowIso },
+        updatedItem: normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId),
+      });
+    }
+
+    const getter = moduleKey === "homestead" ? getHomesteadContextForHousehold : getCommunityContextForHousehold;
+    const writer = moduleKey === "homestead" ? writeHomesteadContextStateFile : writeCommunityContextStateFile;
+    const { state, householdState } = await getter(householdId);
+    const feed = moduleKey === "homestead" ? householdState.collaboration.feed : householdState.feed;
+    const index = feed.findIndex((item) => String(item.id) === sourceId);
+    if (index < 0) {
+      return res.status(404).json({ ok: false, error: "feed_item_not_found" });
+    }
+
+    const current = { ...feed[index] };
+    const semanticActions =
+      current.semanticActions && typeof current.semanticActions === "object"
+        ? { ...current.semanticActions }
+        : {};
+    semanticActions[actionType] = Math.max(0, Number(semanticActions[actionType] || 0) + 1);
+    const actionLog = appendHomesteadActionLog(current.actionLog, {
+      action: `semantic:${actionType}`,
+      detail,
+      metadata,
+      at: nowIso,
+      updatedBy: actor,
+    });
+    feed[index] = {
+      ...current,
+      semanticActions,
+      updatedBy: actor,
+      lastAction: `semantic:${actionType}`,
+      lastActionAt: nowIso,
+      actionLog,
+    };
+
+    householdState.updatedAt = nowIso;
+    state.households[householdId] = householdState;
+    await writer(state);
+    return res.json({
+      ok: true,
+      householdId,
+      module: moduleKey,
+      semanticAction: { actionType, detail, metadata, updatedBy: actor, updatedAt: nowIso },
+      updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/feed/unified/:module/:id/comments", async (req, res) => {
+  try {
+    const moduleKey = toTrimmedString(req.params.module).toLowerCase();
+    const sourceId = toTrimmedString(req.params.id);
+    const householdId = String(req.query.householdId || "default-household");
+
+    if (!UNIFIED_FEED_MODULES.has(moduleKey)) {
+      return res.status(400).json({ ok: false, error: "unsupported_module" });
+    }
+    if (!sourceId) {
+      return res.status(400).json({ ok: false, error: "missing_feed_id" });
+    }
+
+    let comments = [];
+    if (moduleKey === "meal") {
+      const { householdState } = await getMealContextForHousehold(householdId);
+      const map = normalizeCommentThreadMap(householdState.commentThreads);
+      comments = Array.isArray(map[sourceId]) ? map[sourceId] : [];
+    } else if (moduleKey === "storehouse") {
+      const { householdState } = await getStorehouseContextForHousehold(householdId);
+      const map = normalizeCommentThreadMap(householdState.commentThreads);
+      comments = Array.isArray(map[sourceId]) ? map[sourceId] : [];
+    } else if (moduleKey === "homestead") {
+      const { householdState } = await getHomesteadContextForHousehold(householdId);
+      const map = normalizeCommentThreadMap(householdState.collaboration.commentThreads);
+      comments = Array.isArray(map[sourceId]) ? map[sourceId] : [];
+    } else {
+      const { householdState } = await getCommunityContextForHousehold(householdId);
+      const map = normalizeCommentThreadMap(householdState.commentThreads);
+      comments = Array.isArray(map[sourceId]) ? map[sourceId] : [];
+    }
+
+    const normalizedComments = normalizeCommentThreadEntries(comments);
+    return res.json({
+      ok: true,
+      householdId,
+      module: moduleKey,
+      sourceId,
+      comments: normalizedComments,
+      threadedComments: buildThreadedCommentView(normalizedComments),
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/feed/unified/:module/:id/comments", express.json(), async (req, res) => {
+  try {
+    const moduleKey = toTrimmedString(req.params.module).toLowerCase();
+    const sourceId = toTrimmedString(req.params.id);
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const body = toTrimmedString(req.body?.body || req.body?.comment);
+    const parentCommentId = toTrimmedString(req.body?.parentCommentId);
+    const nowIso = new Date().toISOString();
+
+    if (!UNIFIED_FEED_MODULES.has(moduleKey)) {
+      return res.status(400).json({ ok: false, error: "unsupported_module" });
+    }
+    if (!sourceId) {
+      return res.status(400).json({ ok: false, error: "missing_feed_id" });
+    }
+    if (!body) {
+      return res.status(400).json({ ok: false, error: "missing_comment_body" });
+    }
+
+    if (moduleKey === "meal" || moduleKey === "storehouse") {
+      const actor =
+        moduleKey === "meal"
+          ? resolveMealContextActor(req, req.body || {})
+          : resolveStorehouseContextActor(req, req.body || {});
+      const getter = moduleKey === "meal" ? getMealContextForHousehold : getStorehouseContextForHousehold;
+      const writer = moduleKey === "meal" ? writeMealContextStateFile : writeStorehouseContextStateFile;
+      const merger = moduleKey === "meal" ? mergeMealContextWithState : mergeStorehouseContextWithState;
+      const appendLog =
+        moduleKey === "meal" ? appendMealContextActionLog : appendStorehouseActionLog;
+
+      const { state, householdState } = await getter(householdId);
+      const commentThreads = normalizeCommentThreadMap(householdState.commentThreads);
+      const currentThread = normalizeCommentThreadEntries(commentThreads[sourceId]);
+      if (parentCommentId && !currentThread.some((entry) => String(entry.id) === parentCommentId)) {
+        return res.status(400).json({ ok: false, error: "comment_parent_not_found" });
+      }
+
+      const comment = buildFeedCommentEntry({ body, actor, nowIso, parentCommentId: parentCommentId || null });
+      commentThreads[sourceId] = [...currentThread, comment];
+
+      const postStats =
+        householdState.postStats && typeof householdState.postStats === "object"
+          ? { ...householdState.postStats }
+          : {};
+      const current =
+        postStats[sourceId] && typeof postStats[sourceId] === "object"
+          ? { ...postStats[sourceId] }
+          : {};
+      current.comments = Math.max(0, Number(current.comments || 0) + 1);
+      postStats[sourceId] = current;
+
+      const feedAudit =
+        householdState.feedAudit && typeof householdState.feedAudit === "object"
+          ? { ...householdState.feedAudit }
+          : {};
+      const currentAudit =
+        feedAudit[sourceId] && typeof feedAudit[sourceId] === "object"
+          ? { ...feedAudit[sourceId] }
+          : {};
+      const actionLog = appendLog(currentAudit.actionLog, {
+        action: "thread_comment",
+        delta: 1,
+        at: nowIso,
+        updatedBy: actor,
+      });
+      feedAudit[sourceId] = {
+        updatedBy: actor,
+        lastAction: "thread_comment",
+        lastActionAt: nowIso,
+        actionLog,
+      };
+
+      const nextHouseholdState = {
+        ...householdState,
+        dismissedAlertIds: Array.isArray(householdState.dismissedAlertIds)
+          ? householdState.dismissedAlertIds
+          : [],
+        postStats,
+        commentThreads,
+        alertAudit:
+          householdState.alertAudit && typeof householdState.alertAudit === "object"
+            ? householdState.alertAudit
+            : {},
+        feedAudit,
+        updatedAt: nowIso,
+      };
+
+      state.households[householdId] = nextHouseholdState;
+      await writer(state);
+      const context = merger(nextHouseholdState);
+      const updatedPost = context.feed.find((item) => item.id === sourceId) || null;
+      const mentionNotifications = await appendMentionNotificationsForHousehold({
+        householdId,
+        moduleKey,
+        sourceId,
+        comment,
+        actor,
+        nowIso,
+      });
+      return res.json({
+        ok: true,
+        householdId,
+        module: moduleKey,
+        sourceId,
+        comment,
+        comments: normalizeCommentThreadEntries(commentThreads[sourceId]),
+        threadedComments: buildThreadedCommentView(commentThreads[sourceId]),
+        updatedItem: normalizeUnifiedFeedItem(updatedPost || {}, moduleKey, householdId),
+        mentionNotifications,
+      });
+    }
+
+    if (moduleKey === "homestead") {
+      const actor = resolveHomesteadContextActor(req, req.body || {});
+      const { state, householdState } = await getHomesteadContextForHousehold(householdId);
+      const feed = householdState.collaboration.feed;
+      const index = feed.findIndex((item) => String(item.id) === sourceId);
+      if (index < 0) {
+        return res.status(404).json({ ok: false, error: "feed_item_not_found" });
+      }
+
+      const comment = buildFeedCommentEntry({ body, actor, nowIso, parentCommentId: parentCommentId || null });
+      const threads = normalizeCommentThreadMap(householdState.collaboration.commentThreads);
+      const currentThread = normalizeCommentThreadEntries(threads[sourceId]);
+      if (parentCommentId && !currentThread.some((entry) => String(entry.id) === parentCommentId)) {
+        return res.status(400).json({ ok: false, error: "comment_parent_not_found" });
+      }
+      threads[sourceId] = [...currentThread, comment];
+
+      const current = { ...feed[index] };
+      const actionLog = appendHomesteadActionLog(current.actionLog, {
+        action: "thread_comment",
+        delta: 1,
+        at: nowIso,
+        updatedBy: actor,
+      });
+      feed[index] = {
+        ...current,
+        comments: Math.max(0, Number(current.comments || 0) + 1),
+        updatedBy: actor,
+        lastAction: "thread_comment",
+        lastActionAt: nowIso,
+        actionLog,
+      };
+      householdState.collaboration.commentThreads = threads;
+      householdState.updatedAt = nowIso;
+      state.households[householdId] = householdState;
+      await writeHomesteadContextStateFile(state);
+
+      const mentionNotifications = await appendMentionNotificationsForHousehold({
+        householdId,
+        moduleKey,
+        sourceId,
+        comment,
+        actor,
+        nowIso,
+      });
+
+      return res.json({
+        ok: true,
+        householdId,
+        module: moduleKey,
+        sourceId,
+        comment,
+        comments: normalizeCommentThreadEntries(threads[sourceId]),
+        threadedComments: buildThreadedCommentView(threads[sourceId]),
+        updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+        mentionNotifications,
+      });
+    }
+
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const feed = householdState.feed;
+    const index = feed.findIndex((item) => String(item.id) === sourceId);
+    if (index < 0) {
+      return res.status(404).json({ ok: false, error: "feed_item_not_found" });
+    }
+
+    const comment = buildFeedCommentEntry({ body, actor, nowIso, parentCommentId: parentCommentId || null });
+    const threads = normalizeCommentThreadMap(householdState.commentThreads);
+    const currentThread = normalizeCommentThreadEntries(threads[sourceId]);
+    if (parentCommentId && !currentThread.some((entry) => String(entry.id) === parentCommentId)) {
+      return res.status(400).json({ ok: false, error: "comment_parent_not_found" });
+    }
+    threads[sourceId] = [...currentThread, comment];
+
+    const current = { ...feed[index] };
+    const actionLog = appendHomesteadActionLog(current.actionLog, {
+      action: "thread_comment",
+      delta: 1,
+      at: nowIso,
+      updatedBy: actor,
+    });
+    feed[index] = {
+      ...current,
+      comments: Math.max(0, Number(current.comments || 0) + 1),
+      updatedBy: actor,
+      lastAction: "thread_comment",
+      lastActionAt: nowIso,
+      actionLog,
+    };
+
+    householdState.commentThreads = threads;
+    const mentionNotifications = buildRoutedMentionNotificationEntries({
+      moduleKey,
+      sourceId,
+      comment,
+      actor,
+      nowIso,
+      idFactory: generateHomesteadId,
+      profileHrefBuilder: buildMentionProfileHref,
+    });
+    appendHouseholdNotifications({ householdState, entries: mentionNotifications, nowIso });
+    householdState.updatedAt = nowIso;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      module: moduleKey,
+      sourceId,
+      comment,
+      comments: normalizeCommentThreadEntries(threads[sourceId]),
+      threadedComments: buildThreadedCommentView(threads[sourceId]),
+      updatedItem: normalizeUnifiedFeedItem(feed[index], moduleKey, householdId),
+      mentionNotifications,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/context", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, context: householdState });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/shared-plans", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const plan = req.body?.plan && typeof req.body.plan === "object" ? req.body.plan : req.body || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const nextPlan = {
+      ...plan,
+      id: String(plan.id || generateHomesteadId("community-plan")),
+      householdId,
+      updatedBy: actor,
+      updatedAt: now,
+    };
+    householdState.sharedPlans = upsertById(householdState.sharedPlans, nextPlan).list;
+    appendHouseholdNotifications({
+      householdState,
+      entries: [
+        buildNotificationEntry({
+          idFactory: generateHomesteadId,
+          eventType: "COMMUNITY_INVITED",
+          createdAt: now,
+          type: "shared_plan",
+          title: "Shared plan updated",
+          message: `A shared community plan was updated by ${actor}.`,
+          module: "community",
+          metadata: {
+            planId: nextPlan.id,
+          },
+        }),
+      ],
+      nowIso: now,
+    });
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+    return res.json({ ok: true, householdId, plan: nextPlan, context: householdState });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/garden-plans", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const plan = req.body?.plan && typeof req.body.plan === "object" ? req.body.plan : req.body || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const nextPlan = {
+      ...plan,
+      id: String(plan.id || generateHomesteadId("community-garden")),
+      householdId,
+      updatedBy: actor,
+      updatedAt: now,
+    };
+    householdState.gardenPlans = upsertById(householdState.gardenPlans, nextPlan).list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+    return res.json({ ok: true, householdId, plan: nextPlan, context: householdState });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/animal-plans", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const plan = req.body?.plan && typeof req.body.plan === "object" ? req.body.plan : req.body || {};
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const nextPlan = {
+      ...plan,
+      id: String(plan.id || generateHomesteadId("community-animal")),
+      householdId,
+      updatedBy: actor,
+      updatedAt: now,
+    };
+    householdState.animalPlans = upsertById(householdState.animalPlans, nextPlan).list;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+    return res.json({ ok: true, householdId, plan: nextPlan, context: householdState });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/notifications", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    return res.json({ ok: true, householdId, notifications: householdState.notifications });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/discovery/profiles", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const query = toTrimmedString(req.query.q || req.query.query || "");
+    const limitRaw = Number(req.query.limit);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 24;
+
+    const collector = collectCommunityDiscoveryProfiles({ householdId, query });
+
+    const { householdState: communityState } = await getCommunityContextForHousehold(householdId);
+    (Array.isArray(communityState.feed) ? communityState.feed : []).forEach((item) => {
+      collector.push(item?.author, item?.author, "community_feed");
+    });
+    Object.values(normalizeCommentThreadMap(communityState.commentThreads)).forEach((thread) => {
+      normalizeCommentThreadEntries(thread).forEach((comment) => {
+        collector.push(comment?.actor?.id || comment?.author, comment?.actor?.name || comment?.author, "community_thread");
+        (Array.isArray(comment?.mentions) ? comment.mentions : []).forEach((mention) => {
+          collector.push(mention, mention, "mention");
+        });
+      });
+    });
+
+    const { context: mealContext } = await getMealContextForHousehold(householdId);
+    (Array.isArray(mealContext.feed) ? mealContext.feed : []).forEach((item) => {
+      collector.push(item?.author, item?.author, "meal_feed");
+    });
+
+    const { context: storehouseContext } = await getStorehouseContextForHousehold(householdId);
+    (Array.isArray(storehouseContext.feed) ? storehouseContext.feed : []).forEach((item) => {
+      collector.push(item?.author, item?.author, "storehouse_feed");
+    });
+
+    const { householdState: homesteadState } = await getHomesteadContextForHousehold(householdId);
+    (Array.isArray(homesteadState?.collaboration?.feed) ? homesteadState.collaboration.feed : []).forEach(
+      (item) => {
+        collector.push(item?.author, item?.author, "homestead_feed");
+      }
+    );
+
+    const rows = collector.rows.slice(0, limit);
+    return res.json({ ok: true, householdId, query: normalizeDiscoveryHandle(query), profiles: rows });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/profile-visibility", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    return res.json({
+      ok: true,
+      householdId,
+      profileVisibility: householdState.profileVisibility,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/profile-visibility", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const mode = toTrimmedString(req.body?.mode || "community") || "community";
+    const discoverable = req.body?.discoverable !== false;
+    const showHouseholdName = req.body?.showHouseholdName !== false;
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    householdState.profileVisibility = {
+      mode,
+      discoverable,
+      showHouseholdName,
+    };
+    householdState.updatedAt = new Date().toISOString();
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+    return res.json({
+      ok: true,
+      householdId,
+      profileVisibility: householdState.profileVisibility,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/moderation/report", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const report = {
+      id: generateHomesteadId("community-report"),
+      targetId: String(req.body?.targetId || "unknown"),
+      reason: String(req.body?.reason || "unspecified"),
+      details: String(req.body?.details || ""),
+      status: "queued",
+      reportedBy: actor,
+      createdAt: now,
+    };
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    householdState.reports.unshift(report);
+    appendHouseholdNotifications({
+      householdState,
+      entries: [
+        buildNotificationEntry({
+          idFactory: generateHomesteadId,
+          eventType: "APPROVAL_REQUESTED",
+          createdAt: now,
+          type: "moderation",
+          title: "Moderation report submitted",
+          message: "Your report has been queued for review.",
+          module: "moderation",
+          sourceModule: "community",
+          sourceId: report.id,
+          metadata: {
+            reason: report.reason,
+            targetId: report.targetId,
+          },
+        }),
+      ],
+      nowIso: now,
+    });
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+    return res.json({ ok: true, householdId, report });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }

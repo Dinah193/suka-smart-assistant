@@ -1,0 +1,648 @@
+import { describe, expect, it } from "vitest";
+import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+
+const repoRoot = path.resolve(__dirname, "..");
+const serverEntry = path.resolve(repoRoot, "src/server/index.js");
+
+function randomPort() {
+  return 18100 + Math.floor(Math.random() * 3000);
+}
+
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function createOutputCapture(child) {
+  const stdout = [];
+  const stderr = [];
+
+  child.stdout?.on("data", (chunk) => {
+    stdout.push(String(chunk));
+    if (stdout.length > 60) stdout.shift();
+  });
+
+  child.stderr?.on("data", (chunk) => {
+    stderr.push(String(chunk));
+    if (stderr.length > 60) stderr.shift();
+  });
+
+  return {
+    tail() {
+      return {
+        stdout: stdout.join("").slice(-3000),
+        stderr: stderr.join("").slice(-3000),
+      };
+    },
+  };
+}
+
+async function waitForHealth(port, child, outputCapture, timeoutMs = 30000) {
+  const started = Date.now();
+  const onExit = new Promise((resolve) => {
+    child.once("exit", (code, signal) => {
+      resolve({ exited: true, code, signal });
+    });
+  });
+
+  while (Date.now() - started < timeoutMs) {
+    const exited = await Promise.race([onExit, sleep(0).then(() => null)]);
+    if (exited?.exited) {
+      const logs = outputCapture.tail();
+      throw new Error(
+        `server_exited_before_health code=${exited.code} signal=${exited.signal} stderr=${logs.stderr || "<empty>"} stdout=${logs.stdout || "<empty>"}`
+      );
+    }
+
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/health`);
+      if (res.ok) return;
+    } catch {
+      // retry
+    }
+
+    await sleep(150);
+  }
+
+  const logs = outputCapture.tail();
+  throw new Error(
+    `health_timeout port=${port} timeoutMs=${timeoutMs} stderr=${logs.stderr || "<empty>"} stdout=${logs.stdout || "<empty>"}`
+  );
+}
+
+function startServer(extraEnv = {}) {
+  const port = randomPort();
+  const child = spawn(process.execPath, [serverEntry], {
+    cwd: repoRoot,
+    env: {
+      ...process.env,
+      NODE_ENV: "test",
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      STRICT_STARTUP_ENV: "false",
+      NEO4J_REQUIRED: "false",
+      POSTGRES_REQUIRED: "false",
+      MONGODB_REQUIRED: "false",
+      SSA_DEV_AUTH_BYPASS: "true",
+      SSA_DEV_POLICY_BYPASS: "true",
+      PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED: "true",
+      MONGO_SERVER_SELECTION_TIMEOUT_MS: "100",
+      ...extraEnv,
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  const outputCapture = createOutputCapture(child);
+  return { child, port, outputCapture };
+}
+
+async function stopServer(child) {
+  if (!child || child.killed) return;
+  await new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        // ignore
+      }
+      resolve();
+    }, 2500);
+
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+
+    try {
+      child.kill("SIGTERM");
+    } catch {
+      clearTimeout(timer);
+      resolve();
+    }
+  });
+}
+
+describe("planner unified feed contract", () => {
+  it("returns cross-module feed entries with normalized metadata", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `unified-feed-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const response = await fetch(
+        `${baseUrl}/api/planners/feed/unified?householdId=${encodeURIComponent(householdId)}&modules=meal,storehouse,homestead,community&limit=20`
+      );
+      expect(response.status).toBe(200);
+      const payload = await response.json();
+
+      expect(payload.ok).toBe(true);
+      expect(payload.householdId).toBe(householdId);
+      expect(Array.isArray(payload.items)).toBe(true);
+      expect(payload.items.length).toBeGreaterThanOrEqual(4);
+
+      const modules = new Set(payload.items.map((item) => item.sourceModule));
+      expect(modules.has("meal")).toBe(true);
+      expect(modules.has("storehouse")).toBe(true);
+      expect(modules.has("homestead")).toBe(true);
+      expect(modules.has("community")).toBe(true);
+
+      const first = payload.items[0];
+      expect(first).toMatchObject({
+        householdId,
+      });
+      expect(typeof first.id).toBe("string");
+      expect(typeof first.sourceId).toBe("string");
+      expect(typeof first.author).toBe("string");
+      expect(typeof first.content).toBe("string");
+      expect(typeof first.stats).toBe("object");
+      expect(typeof first.stats.likes).toBe("number");
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("persists unified reactions and comment threads across modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `unified-actions-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const feedResponse = await fetch(
+        `${baseUrl}/api/planners/feed/unified?householdId=${encodeURIComponent(householdId)}&modules=meal,storehouse,homestead,community&limit=20`
+      );
+      expect(feedResponse.status).toBe(200);
+      const feedPayload = await feedResponse.json();
+      const items = Array.isArray(feedPayload?.items) ? feedPayload.items : [];
+
+      const pickByModule = (moduleName) =>
+        items.find((item) => String(item?.sourceModule) === moduleName);
+
+      const moduleTargets = ["meal", "storehouse", "homestead", "community"]
+        .map((moduleName) => ({ moduleName, item: pickByModule(moduleName) }))
+        .filter((entry) => entry.item && entry.item.sourceId);
+
+      expect(moduleTargets.length).toBe(4);
+
+      for (const { moduleName, item } of moduleTargets) {
+        const sourceId = String(item.sourceId);
+
+        const likeResOne = await fetch(
+          `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/reaction`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ householdId, action: "like", delta: 1 }),
+          }
+        );
+        expect(likeResOne.status).toBe(200);
+        const likePayloadOne = await likeResOne.json();
+        const likesAfterOne = Number(likePayloadOne?.updatedItem?.stats?.likes || 0);
+        expect(likesAfterOne).toBeGreaterThan(0);
+
+        const likeResTwo = await fetch(
+          `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/reaction`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ householdId, action: "like", delta: 1 }),
+          }
+        );
+        expect(likeResTwo.status).toBe(200);
+        const likePayloadTwo = await likeResTwo.json();
+        const likesAfterTwo = Number(likePayloadTwo?.updatedItem?.stats?.likes || 0);
+        expect(likesAfterTwo).toBe(likesAfterOne + 1);
+
+        const threadBefore = await fetch(
+          `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/comments?householdId=${encodeURIComponent(householdId)}`
+        );
+        expect(threadBefore.status).toBe(200);
+        const beforePayload = await threadBefore.json();
+        const beforeThreadLength = Array.isArray(beforePayload?.comments)
+          ? beforePayload.comments.length
+          : 0;
+
+        const commentRes = await fetch(
+          `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/comments`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ householdId, body: `Contract thread note for ${moduleName}` }),
+          }
+        );
+        expect(commentRes.status).toBe(200);
+        const commentPayload = await commentRes.json();
+        expect(Array.isArray(commentPayload?.comments)).toBe(true);
+        expect(commentPayload.comments.length).toBeGreaterThan(0);
+        expect(commentPayload.comments.length).toBe(beforeThreadLength + 1);
+
+        const lastComment = commentPayload.comments[commentPayload.comments.length - 1];
+        expect(String(lastComment?.body || "")).toContain(moduleName);
+        expect(Number(commentPayload?.updatedItem?.stats?.comments || 0)).toBeGreaterThan(0);
+
+        const replyRes = await fetch(
+          `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/comments`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              body: `Replying to @${moduleName} thread`,
+              parentCommentId: String(lastComment.id),
+            }),
+          }
+        );
+        expect(replyRes.status).toBe(200);
+        const replyPayload = await replyRes.json();
+        const appendedReply = replyPayload.comments[replyPayload.comments.length - 1];
+        expect(String(appendedReply?.parentCommentId || "")).toBe(String(lastComment.id));
+        expect(Array.isArray(appendedReply?.mentions)).toBe(true);
+        expect(appendedReply.mentions.includes(moduleName)).toBe(true);
+        expect(Array.isArray(replyPayload?.threadedComments)).toBe(true);
+        expect(Array.isArray(replyPayload?.mentionNotifications)).toBe(true);
+        expect(
+          replyPayload.mentionNotifications.some(
+            (entry) =>
+              String(entry?.mention || "") === moduleName &&
+              String(entry?.sourceModule || "") === moduleName
+          )
+        ).toBe(true);
+
+        const rootComment = replyPayload.threadedComments.find(
+          (node) => String(node?.id || "") === String(lastComment.id)
+        );
+        expect(rootComment).toBeTruthy();
+        expect(Array.isArray(rootComment.replies)).toBe(true);
+        expect(
+          rootComment.replies.some((node) => String(node?.id || "") === String(appendedReply?.id || ""))
+        ).toBe(true);
+
+        const readThread = await fetch(
+          `${baseUrl}/api/planners/feed/unified/${encodeURIComponent(moduleName)}/${encodeURIComponent(sourceId)}/comments?householdId=${encodeURIComponent(householdId)}`
+        );
+        expect(readThread.status).toBe(200);
+        const threadPayload = await readThread.json();
+        expect(Array.isArray(threadPayload?.comments)).toBe(true);
+        expect(threadPayload.comments.length).toBeGreaterThan(0);
+        expect(Array.isArray(threadPayload?.threadedComments)).toBe(true);
+
+        const notificationsRes = await fetch(
+          `${baseUrl}/api/planners/community/notifications?householdId=${encodeURIComponent(householdId)}`
+        );
+        expect(notificationsRes.status).toBe(200);
+        const notificationsPayload = await notificationsRes.json();
+        expect(Array.isArray(notificationsPayload?.notifications)).toBe(true);
+        expect(
+          notificationsPayload.notifications.some(
+            (entry) =>
+              String(entry?.type || "") === "mention" &&
+              String(entry?.mention || "") === moduleName &&
+              String(entry?.sourceModule || "") === moduleName &&
+              String(entry?.sourceId || "") === sourceId &&
+              String(entry?.eventType || "") === "feed.mentioned" &&
+              String(entry?.severity || "") === "action_required"
+          )
+        ).toBe(true);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("supports unified feed search across modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `unified-search-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const seedResponse = await fetch(
+        `${baseUrl}/api/planners/feed/unified?householdId=${encodeURIComponent(householdId)}&modules=meal,storehouse,homestead,community&limit=20`
+      );
+      expect(seedResponse.status).toBe(200);
+
+      const searchResponse = await fetch(
+        `${baseUrl}/api/planners/feed/unified/search?householdId=${encodeURIComponent(householdId)}&q=meal&modules=meal,storehouse,homestead,community&limit=20`
+      );
+      expect(searchResponse.status).toBe(200);
+      const payload = await searchResponse.json();
+
+      expect(payload.ok).toBe(true);
+      expect(payload.householdId).toBe(householdId);
+      expect(payload.query).toBe("meal");
+      expect(Array.isArray(payload.items)).toBe(true);
+      expect(payload.items.length).toBeGreaterThan(0);
+      expect(payload.items.some((item) => String(item?.sourceModule || "") === "meal")).toBe(true);
+      expect(payload.items.every((item) => String(item?.householdId || "") === householdId)).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("serves discovery profiles and persists profile visibility", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-visibility-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const feedResponse = await fetch(
+        `${baseUrl}/api/planners/feed/unified?householdId=${encodeURIComponent(householdId)}&modules=meal,storehouse,homestead,community&limit=20`
+      );
+      expect(feedResponse.status).toBe(200);
+
+      const discoveryResponse = await fetch(
+        `${baseUrl}/api/planners/community/discovery/profiles?householdId=${encodeURIComponent(householdId)}&q=meal&limit=12`
+      );
+      expect(discoveryResponse.status).toBe(200);
+      const discoveryPayload = await discoveryResponse.json();
+      expect(discoveryPayload.ok).toBe(true);
+      expect(discoveryPayload.householdId).toBe(householdId);
+      expect(Array.isArray(discoveryPayload.profiles)).toBe(true);
+      expect(discoveryPayload.profiles.length).toBeGreaterThan(0);
+      expect(discoveryPayload.profiles.every((entry) => typeof entry?.href === "string")).toBe(true);
+
+      const visibilityReadBefore = await fetch(
+        `${baseUrl}/api/planners/community/profile-visibility?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(visibilityReadBefore.status).toBe(200);
+      const visibilityBeforePayload = await visibilityReadBefore.json();
+      expect(visibilityBeforePayload.ok).toBe(true);
+      expect(visibilityBeforePayload.householdId).toBe(householdId);
+      expect(typeof visibilityBeforePayload?.profileVisibility?.mode).toBe("string");
+
+      const visibilityWrite = await fetch(`${baseUrl}/api/planners/community/profile-visibility`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          mode: "friends",
+          discoverable: false,
+          showHouseholdName: false,
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(visibilityWrite.status).toBe(200);
+      const visibilityWritePayload = await visibilityWrite.json();
+      expect(visibilityWritePayload.ok).toBe(true);
+      expect(visibilityWritePayload.profileVisibility).toMatchObject({
+        mode: "friends",
+        discoverable: false,
+        showHouseholdName: false,
+      });
+
+      const visibilityReadAfter = await fetch(
+        `${baseUrl}/api/planners/community/profile-visibility?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(visibilityReadAfter.status).toBe(200);
+      const visibilityAfterPayload = await visibilityReadAfter.json();
+      expect(visibilityAfterPayload.profileVisibility).toMatchObject({
+        mode: "friends",
+        discoverable: false,
+        showHouseholdName: false,
+      });
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("persists community context save paths for shared, garden, and animal plans", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-context-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const sharedPlanRes = await fetch(`${baseUrl}/api/planners/community/shared-plans`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          plan: { title: "Shared prep night", lane: "meal" },
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(sharedPlanRes.status).toBe(200);
+
+      const gardenPlanRes = await fetch(`${baseUrl}/api/planners/community/garden-plans`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          plan: { title: "Compost relay", lane: "garden" },
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(gardenPlanRes.status).toBe(200);
+
+      const animalPlanRes = await fetch(`${baseUrl}/api/planners/community/animal-plans`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          plan: { title: "Livestock rotation", lane: "animals" },
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(animalPlanRes.status).toBe(200);
+
+      const contextRes = await fetch(
+        `${baseUrl}/api/planners/community/context?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(contextRes.status).toBe(200);
+      const contextPayload = await contextRes.json();
+      const context = contextPayload?.context || {};
+
+      expect(Array.isArray(context.sharedPlans)).toBe(true);
+      expect(Array.isArray(context.gardenPlans)).toBe(true);
+      expect(Array.isArray(context.animalPlans)).toBe(true);
+      expect(context.sharedPlans.some((item) => String(item?.title || "") === "Shared prep night")).toBe(true);
+      expect(context.gardenPlans.some((item) => String(item?.title || "") === "Compost relay")).toBe(true);
+      expect(context.animalPlans.some((item) => String(item?.title || "") === "Livestock rotation")).toBe(true);
+
+      const notificationsRes = await fetch(
+        `${baseUrl}/api/planners/community/notifications?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(notificationsRes.status).toBe(200);
+      const notificationsPayload = await notificationsRes.json();
+      expect(
+        notificationsPayload.notifications.some(
+          (entry) => String(entry?.title || "").toLowerCase() === "shared plan updated"
+        )
+      ).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("queues moderation report notifications in community flow", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-moderation-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const reportRes = await fetch(`${baseUrl}/api/planners/community/moderation/report`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          targetId: "feed-item-1",
+          reason: "safety",
+          details: "Contract moderation flow",
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(reportRes.status).toBe(200);
+      const reportPayload = await reportRes.json();
+      expect(reportPayload.ok).toBe(true);
+      expect(String(reportPayload?.report?.status || "")).toBe("queued");
+
+      const notificationsRes = await fetch(
+        `${baseUrl}/api/planners/community/notifications?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(notificationsRes.status).toBe(200);
+      const notificationsPayload = await notificationsRes.json();
+      expect(
+        notificationsPayload.notifications.some(
+          (entry) =>
+            String(entry?.module || "") === "moderation" &&
+            String(entry?.title || "") === "Moderation report submitted" &&
+            String(entry?.eventType || "") === "approval.requested" &&
+            String(entry?.severity || "") === "action_required"
+        )
+      ).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("returns a unified household today and upcoming agenda", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-agenda-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const seedSharedPlanRes = await fetch(`${baseUrl}/api/planners/community/shared-plans`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          plan: { title: "Saturday co-op prep", lane: "community", status: "planned" },
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(seedSharedPlanRes.status).toBe(200);
+
+      const agendaRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&todayLimit=12&upcomingLimit=12`
+      );
+      expect(agendaRes.status).toBe(200);
+      const agendaPayload = await agendaRes.json();
+
+      expect(agendaPayload.ok).toBe(true);
+      expect(agendaPayload.householdId).toBe(householdId);
+      expect(Array.isArray(agendaPayload.modules)).toBe(true);
+      expect(Array.isArray(agendaPayload.today)).toBe(true);
+      expect(Array.isArray(agendaPayload.upcoming)).toBe(true);
+      expect(typeof agendaPayload.metrics).toBe("object");
+      expect(Number(agendaPayload.metrics.todayCount || 0)).toBeGreaterThan(0);
+      expect(Number(agendaPayload.metrics.upcomingCount || 0)).toBeGreaterThan(0);
+      expect(
+        agendaPayload.today.some((item) => {
+          return ["alert", "notification", "feed"].includes(String(item?.sourceType || ""));
+        })
+      ).toBe(true);
+      expect(
+        agendaPayload.upcoming.some((item) => String(item?.sourceType || "") === "shared_plan")
+      ).toBe(true);
+      expect(
+        agendaPayload.upcoming.some((item) => String(item?.title || "").toLowerCase().includes("co-op prep"))
+      ).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("supports semantic workflow actions beyond basic reactions", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `unified-semantic-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const feedRes = await fetch(
+        `${baseUrl}/api/planners/feed/unified?householdId=${encodeURIComponent(householdId)}&modules=community&limit=10`
+      );
+      expect(feedRes.status).toBe(200);
+      const feedPayload = await feedRes.json();
+      const target = Array.isArray(feedPayload?.items)
+        ? feedPayload.items.find((item) => String(item?.sourceModule || "") === "community")
+        : null;
+      expect(target).toBeTruthy();
+
+      const sourceId = String(target?.sourceId || "");
+      const handoffRes = await fetch(
+        `${baseUrl}/api/planners/feed/unified/community/${encodeURIComponent(sourceId)}/semantic-action`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actionType: "handoff",
+            detail: "Handoff requested by contract suite",
+            metadata: { lane: "community" },
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(handoffRes.status).toBe(200);
+      const handoffPayload = await handoffRes.json();
+      expect(handoffPayload.ok).toBe(true);
+      expect(Number(handoffPayload?.updatedItem?.stats?.semanticActions?.handoff || 0)).toBe(1);
+
+      const requestHelpRes = await fetch(
+        `${baseUrl}/api/planners/feed/unified/community/${encodeURIComponent(sourceId)}/semantic-action`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actionType: "request_help",
+            detail: "Need support for feed moderation",
+            metadata: { urgency: "high" },
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(requestHelpRes.status).toBe(200);
+      const requestHelpPayload = await requestHelpRes.json();
+      expect(Number(requestHelpPayload?.updatedItem?.stats?.semanticActions?.request_help || 0)).toBe(1);
+
+      const refreshRes = await fetch(
+        `${baseUrl}/api/planners/feed/unified?householdId=${encodeURIComponent(householdId)}&modules=community&limit=10`
+      );
+      expect(refreshRes.status).toBe(200);
+      const refreshPayload = await refreshRes.json();
+      const refreshedTarget = Array.isArray(refreshPayload?.items)
+        ? refreshPayload.items.find((item) => String(item?.sourceId || "") === sourceId)
+        : null;
+
+      expect(Number(refreshedTarget?.stats?.semanticActions?.handoff || 0)).toBeGreaterThanOrEqual(1);
+      expect(Number(refreshedTarget?.stats?.semanticActions?.request_help || 0)).toBeGreaterThanOrEqual(1);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+});
