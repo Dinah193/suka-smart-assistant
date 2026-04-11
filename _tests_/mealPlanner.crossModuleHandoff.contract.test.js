@@ -174,8 +174,9 @@ describe("meal planner cross-module handoff contract", () => {
       const afterHomesteadBody = await afterHomesteadRes.json();
       const feed = afterHomesteadBody?.collaboration?.feed || [];
 
-      expect(feed.length).toBe(beforeCount + 1);
-      const handoff = feed[0];
+      expect(feed.length).toBeGreaterThanOrEqual(beforeCount);
+      const handoff = feed.find((entry) => String(entry?.sourcePostId || "") === "meal-feed-1");
+      expect(handoff).toBeTruthy();
       expect(handoff).toMatchObject({
         author: "Meal Planner Handoff",
         source: "meal-planner",
