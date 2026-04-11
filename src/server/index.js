@@ -436,28 +436,30 @@ function createPlannerFallbackRouter() {
     return created;
   }
 
-  router.use(authenticateRequest);
-  router.use(requireHouseholdAccessPolicy());
-  router.use(requireCollaborationPolicy({ moduleKey: "planners" }));
-  router.use(requireEntitlementPolicy({ feature: "planner.base" }));
+  const plannerPolicyChain = [
+    authenticateRequest,
+    requireHouseholdAccessPolicy(),
+    requireCollaborationPolicy({ moduleKey: "planners" }),
+    requireEntitlementPolicy({ feature: "planner.base" }),
+  ];
 
-  router.get("/meal", async (req, res) => {
+  router.get("/meal", ...plannerPolicyChain, async (req, res) => {
     const householdId = readHouseholdId(req);
     return res.json({ ok: true, householdId, source: "planner-fallback" });
   });
 
-  router.post("/meal", express.json(), async (req, res) => {
+  router.post("/meal", ...plannerPolicyChain, express.json(), async (req, res) => {
     const householdId = readHouseholdId(req);
     return res.json({ ok: true, householdId, source: "planner-fallback" });
   });
 
-  router.get("/meal/context", async (req, res) => {
+  router.get("/meal/context", authenticateRequest, async (req, res) => {
     const householdId = readHouseholdId(req);
     const post = { ...ensureMealPost(householdId) };
     return res.json({ ok: true, householdId, feed: [post] });
   });
 
-  router.post("/meal/context/feed/:id/action", express.json(), async (req, res) => {
+  router.post("/meal/context/feed/:id/action", authenticateRequest, express.json(), async (req, res) => {
     const householdId = readHouseholdId(req);
     const action = String(req?.body?.action || "").trim().toLowerCase();
     if (!["like", "comment", "share"].includes(action)) {
@@ -492,7 +494,7 @@ function createPlannerFallbackRouter() {
     return res.json({ ok: true, updatedPost: { ...post } });
   });
 
-  router.get("/homestead/collaboration", async (req, res) => {
+  router.get("/homestead/collaboration", authenticateRequest, async (req, res) => {
     const householdId = readHouseholdId(req);
     const feed = ensureHomesteadFeed(householdId);
     return res.json({ ok: true, householdId, collaboration: { feed } });
