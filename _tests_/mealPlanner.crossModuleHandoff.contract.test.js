@@ -1,13 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import net from "node:net";
 import path from "node:path";
 
 const repoRoot = path.resolve(__dirname, "..");
 const serverEntry = path.resolve(repoRoot, "src/server/index.js");
 
-function randomPort() {
-  return 16000 + Math.floor(Math.random() * 6000);
+async function getAvailablePort() {
+  return await new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      const port = typeof address === "object" && address ? address.port : null;
+      server.close((closeError) => {
+        if (closeError) return reject(closeError);
+        if (!port) return reject(new Error("port_allocation_failed"));
+        return resolve(port);
+      });
+    });
+  });
 }
 
 async function sleep(ms) {
@@ -70,8 +84,8 @@ async function waitForHealth(port, child, outputCapture, timeoutMs = 30000) {
   );
 }
 
-function startServer(extraEnv = {}) {
-  const port = randomPort();
+async function startServer(extraEnv = {}) {
+  const port = await getAvailablePort();
   const child = spawn(process.execPath, [serverEntry], {
     cwd: repoRoot,
     env: {
@@ -125,7 +139,7 @@ async function stopServer(child) {
 
 describe("meal planner cross-module handoff contract", () => {
   it("mirrors meal feed share actions into homestead collaboration feed", async () => {
-    const { child, port, outputCapture } = startServer();
+    const { child, port, outputCapture } = await startServer();
     const baseUrl = `http://127.0.0.1:${port}`;
     const householdId = `slice-b-household-${randomUUID()}`;
 

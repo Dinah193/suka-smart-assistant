@@ -1,13 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
+import net from "node:net";
 import path from "node:path";
 
 const repoRoot = path.resolve(__dirname, "..");
 const serverEntry = path.resolve(repoRoot, "src/server/index.js");
 
-function randomPort() {
-  return 15000 + Math.floor(Math.random() * 8000);
+async function getAvailablePort() {
+  return await new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      const port = typeof address === "object" && address ? address.port : null;
+      server.close((closeError) => {
+        if (closeError) return reject(closeError);
+        if (!port) return reject(new Error("port_allocation_failed"));
+        return resolve(port);
+      });
+    });
+  });
 }
 
 function createTestDataPaths(tag = "entitlement") {
@@ -43,8 +57,8 @@ async function waitForHealth(port, timeoutMs = 20000) {
   throw new Error("health_timeout");
 }
 
-function startServer(extraEnv = {}, testDataPaths = createTestDataPaths()) {
-  const port = randomPort();
+async function startServer(extraEnv = {}, testDataPaths = createTestDataPaths()) {
+  const port = await getAvailablePort();
   const child = spawn(process.execPath, [serverEntry], {
     cwd: repoRoot,
     env: {
@@ -235,7 +249,7 @@ describe("access policy entitlement gating contract", () => {
   for (const group of groups) {
     it(`returns entitlement_required for ${group.name} until planner.base entitlement is granted`, async () => {
       const testDataPaths = createTestDataPaths(group.name);
-      const { child, port } = startServer({}, testDataPaths);
+      const { child, port } = await startServer({}, testDataPaths);
       const baseUrl = `http://127.0.0.1:${port}`;
 
       try {
