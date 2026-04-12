@@ -89,6 +89,23 @@ function writeLatestArtifacts(workspaceRoot) {
   return { summary, latestLogRel };
 }
 
+function writeLatestArtifactsWithFailure(workspaceRoot) {
+  const { summary } = writeLatestArtifacts(workspaceRoot);
+  summary.status = "failed";
+  summary.steps[1].exitCode = 1;
+  summary.steps[1].durationMs = 2300;
+  summary.steps[2].durationMs = 4100;
+  summary.steps[3].durationMs = 1800;
+
+  fs.writeFileSync(
+    path.join(workspaceRoot, ".tmp", "household-agenda-suites-latest.json"),
+    `${JSON.stringify(summary, null, 2)}\n`,
+    "utf8"
+  );
+
+  return { summary };
+}
+
 describe("household agenda triage scripts", () => {
   it("artifact checker passes on valid latest summary", () => {
     const workspaceRoot = makeTempWorkspace();
@@ -140,7 +157,32 @@ describe("household agenda triage scripts", () => {
     const markdown = fs.readFileSync(latestMdPath, "utf8");
     expect(markdown).toContain("## Household Agenda Gate Summary");
     expect(markdown).toContain("Status: **PASSED**");
+    expect(markdown).toContain("Suites: 7/7 passed");
+    expect(markdown).toContain("Total Runtime: 7.00s");
+    expect(markdown).toContain("Slowest Suites:");
     expect(markdown).toContain("suite:_tests_/cleaningPage.ssa.contract.test.jsx");
+  });
+
+  it("summary renderer includes failed-suite details when present", () => {
+    const workspaceRoot = makeTempWorkspace();
+    writeLatestArtifactsWithFailure(workspaceRoot);
+
+    const result = spawnSync(process.execPath, [RENDER_SCRIPT], {
+      cwd: workspaceRoot,
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+
+    const markdown = fs.readFileSync(
+      path.join(workspaceRoot, ".tmp", "household-agenda-suites-latest.md"),
+      "utf8"
+    );
+    expect(markdown).toContain("Status: **FAILED**");
+    expect(markdown).toContain("Suites: 6/7 passed");
+    expect(markdown).toContain("Failed Suites: 1");
+    expect(markdown).toContain("### Failed Suites");
+    expect(markdown).toContain("suite:_tests_/householdAgendaQueryParams.unit.test.js");
   });
 
   it("summary renderer fails without --allow-missing when summary artifact is missing", () => {

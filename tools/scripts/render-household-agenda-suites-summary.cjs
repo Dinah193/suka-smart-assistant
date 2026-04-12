@@ -17,6 +17,17 @@ function formatDuration(ms) {
 }
 
 function buildMarkdown(summary, summaryRelPath) {
+  const steps = Array.isArray(summary.steps) ? summary.steps : [];
+  const totalDurationMs = steps.reduce(
+    (acc, step) => acc + (Number.isFinite(Number(step?.durationMs)) ? Number(step.durationMs) : 0),
+    0
+  );
+  const passedCount = steps.filter((step) => Number(step?.exitCode) === 0).length;
+  const failedSteps = steps.filter((step) => Number(step?.exitCode) !== 0);
+  const slowestSteps = [...steps]
+    .sort((a, b) => Number(b?.durationMs || 0) - Number(a?.durationMs || 0))
+    .slice(0, 3);
+
   const lines = [];
   lines.push("## Household Agenda Gate Summary");
   lines.push("");
@@ -25,13 +36,35 @@ function buildMarkdown(summary, summaryRelPath) {
   lines.push(`- Finished: ${String(summary.finishedAt || "")}`);
   lines.push(`- Summary JSON: ${summaryRelPath}`);
   lines.push(`- Log: ${String(summary.logFile || "")}`);
+  lines.push(`- Suites: ${passedCount}/${steps.length} passed`);
+  lines.push(`- Total Runtime: ${formatDuration(totalDurationMs)}`);
+  if (failedSteps.length) {
+    lines.push(`- Failed Suites: ${failedSteps.length}`);
+  }
+  if (slowestSteps.length) {
+    lines.push(
+      `- Slowest Suites: ${slowestSteps
+        .map((step) => `${String(step?.label || "") } (${formatDuration(Number(step?.durationMs))})`)
+        .join(", ")}`
+    );
+  }
   lines.push("");
   lines.push("| Suite | Exit | Duration |");
   lines.push("|---|---:|---:|");
-  for (const step of Array.isArray(summary.steps) ? summary.steps : []) {
+  for (const step of steps) {
     lines.push(
       `| ${String(step?.label || "") } | ${String(step?.exitCode ?? "") } | ${formatDuration(Number(step?.durationMs))} |`
     );
+  }
+  if (failedSteps.length) {
+    lines.push("");
+    lines.push("### Failed Suites");
+    lines.push("");
+    for (const step of failedSteps) {
+      lines.push(
+        `- ${String(step?.label || "") } (exit ${String(step?.exitCode ?? "") }, ${formatDuration(Number(step?.durationMs))})`
+      );
+    }
   }
   lines.push("");
   return `${lines.join("\n")}\n`;
