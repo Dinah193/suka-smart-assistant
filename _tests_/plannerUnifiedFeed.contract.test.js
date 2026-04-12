@@ -839,6 +839,11 @@ describe("planner unified feed contract", () => {
     const baseUrl = `http://127.0.0.1:${port}`;
     const householdId = `household-agenda-filters-${randomUUID()}`;
     const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
 
     const collectAgendaRows = (payload) => [
       ...(Array.isArray(payload?.today) ? payload.today : []),
@@ -857,7 +862,7 @@ describe("planner unified feed contract", () => {
             moduleKey: "cleaning",
             title: "Deep clean pantry",
             ownerId: "member-alpha",
-            dueAt: new Date(now + 90 * 60 * 1000).toISOString(),
+            dueAt: new Date(dueAnchor.getTime() + 90 * 60 * 1000).toISOString(),
             priority: "high",
           },
         }),
@@ -876,7 +881,7 @@ describe("planner unified feed contract", () => {
             moduleKey: "cleaning",
             title: "Refill mop station",
             ownerId: "member-alpha",
-            dueAt: new Date(now + 120 * 60 * 1000).toISOString(),
+            dueAt: new Date(dueAnchor.getTime() + 120 * 60 * 1000).toISOString(),
             priority: "low",
           },
         }),
@@ -895,7 +900,7 @@ describe("planner unified feed contract", () => {
             moduleKey: "meal",
             title: "Prep soup base",
             ownerId: "member-beta",
-            dueAt: new Date(now + 150 * 60 * 1000).toISOString(),
+            dueAt: new Date(dueAnchor.getTime() + 150 * 60 * 1000).toISOString(),
             priority: "normal",
           },
         }),
