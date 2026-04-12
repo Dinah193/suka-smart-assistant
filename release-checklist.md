@@ -3,7 +3,7 @@
 Use this checklist before promoting a build to public launch. A release is `GO` only if all required gates pass.
 
 ## 1. Required CI Gates (Blocking)
-- [ ] Branch protection enabled on default branch with required checks (pending verification: [docs/planning/closeout-ci-blockers-status-2026-04-05.md](docs/planning/closeout-ci-blockers-status-2026-04-05.md), revalidated in [docs/planning/closeout-ci-pr41-stabilization-2026-04-12.md](docs/planning/closeout-ci-pr41-stabilization-2026-04-12.md)).
+- [ ] Branch protection enabled on default branch with required checks (pending verification: [docs/planning/closeout-ci-blockers-status-2026-04-05.md](docs/planning/closeout-ci-blockers-status-2026-04-05.md), revalidated in [docs/planning/closeout-ci-pr41-stabilization-2026-04-12.md](docs/planning/closeout-ci-pr41-stabilization-2026-04-12.md), enablement runbook: [docs/planning/closeout-branch-protection-enablement-2026-04-12.md](docs/planning/closeout-branch-protection-enablement-2026-04-12.md)).
 - [x] `db:preflight` check is green before running broader runtime/contract suites ([docs/planning/closeout-ci-blockers-status-2026-04-05.md](docs/planning/closeout-ci-blockers-status-2026-04-05.md)).
 - [x] `build` check is green on the release commit ([docs/planning/closeout-ci-gates-evidence-2026-04-05.md](docs/planning/closeout-ci-gates-evidence-2026-04-05.md)).
 - [x] `db-runtime-contracts` check is green (Postgres + Mongo service lane, includes nutrition Mongo adapter contract) ([docs/planning/closeout-ci-blockers-status-2026-04-05.md](docs/planning/closeout-ci-blockers-status-2026-04-05.md)).
