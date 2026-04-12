@@ -66,7 +66,7 @@ async function authenticateRequest(req, res, next) {
     }
 
     const insecureHeaderAuthAllowed =
-      String(process.env.ALLOW_INSECURE_HEADER_AUTH || "")
+      String(process.env.ALLOW_INSECURE_HEADER_AUTH || (process.env.NODE_ENV === "production" ? "false" : "true"))
         .toLowerCase() === "true";
 
     const fallbackUserId = req.headers["x-user-id"];
