@@ -47,8 +47,8 @@ describe("household agenda surface parity", () => {
 
     for (const relativeFilePath of EXPECTED_SURFACE_FILES) {
       const content = fs.readFileSync(path.join(REPO_ROOT, relativeFilePath), "utf8");
-      expect(content).toContain("Applied:");
-      expect(content).toContain("sort ");
+      expect(content).toContain("buildAppliedAgendaSummary");
+      expect(content).toContain("householdAgenda?.applied");
     }
   });
 });
