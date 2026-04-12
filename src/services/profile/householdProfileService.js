@@ -22,6 +22,14 @@ try { Events = require("@/services/automation/events"); } catch { Events = { emi
 const STORAGE_KEY = "suka.householdProfile.v2";
 const SCHEMA_VERSION = 2;
 
+const DEFAULT_DIRECT_MESSAGING = Object.freeze({
+  conversations: [],
+  selectedConversationId: null,
+  taskAssignments: [],
+  moduleNotifications: [],
+  lastUpdatedAt: null,
+});
+
 /* -------------------------------------------------------------------------------------------------
  * Defaults (Torah-aligned; no Talmud/Mishna references)
  * ------------------------------------------------------------------------------------------------- */
@@ -72,6 +80,13 @@ const DEFAULTS = Object.freeze({
     delivery: ["dashboard"], // "sms" | "push" | "email" | "dashboard"
     alerts: ["low stock", "feast prep", "animal health", "chore reminders"],
   },
+  directMessaging: {
+    conversations: [],
+    selectedConversationId: null,
+    taskAssignments: [],
+    moduleNotifications: [],
+    lastUpdatedAt: null,
+  },
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -98,6 +113,9 @@ function migrateIfNeeded(raw) {
   if (v === SCHEMA_VERSION) {
     // Backfill new fields if missing (e.g., cuisineBias)
     if (!raw?.household?.cuisineBias) raw.household = { ...(raw.household || {}), cuisineBias: ["african-american"] };
+    if (!raw?.directMessaging || typeof raw.directMessaging !== "object") {
+      raw.directMessaging = clone(DEFAULT_DIRECT_MESSAGING);
+    }
     return raw;
   }
 
@@ -113,6 +131,9 @@ function migrateIfNeeded(raw) {
     };
     // ensure cuisineBias exists
     if (!withDefaults?.household?.cuisineBias) withDefaults.household.cuisineBias = ["african-american"];
+    if (!withDefaults?.directMessaging || typeof withDefaults.directMessaging !== "object") {
+      withDefaults.directMessaging = clone(DEFAULT_DIRECT_MESSAGING);
+    }
     working = withDefaults;
   }
 
@@ -156,6 +177,49 @@ function getByPath(obj, path, fallback) {
 }
 
 const isHouseholdRelatedPath = (p) => p === "*" || p === "household" || p.startsWith("household.");
+
+function resolveHouseholdId(profile) {
+  const fromProfile = String(profile?.household?.id || profile?.household?.householdId || "").trim();
+  if (fromProfile) return fromProfile;
+
+  try {
+    const fromWindow = String(globalThis?.__suka?.profile?.householdId || "").trim();
+    if (fromWindow) return fromWindow;
+  } catch {
+    // no-op
+  }
+
+  return "default-household";
+}
+
+async function fetchJson(url, init = {}) {
+  if (typeof fetch !== "function") throw new Error("fetch_unavailable");
+  const response = await fetch(url, {
+    credentials: "include",
+    ...init,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data?.ok === false) {
+    throw new Error(String(data?.error || `request_failed:${response.status}`));
+  }
+  return data;
+}
+
+function normalizeDirectMessagingState(input) {
+  const base = clone(DEFAULT_DIRECT_MESSAGING);
+  if (!input || typeof input !== "object") return base;
+
+  const conversations = Array.isArray(input.conversations) ? input.conversations : [];
+  const taskAssignments = Array.isArray(input.taskAssignments) ? input.taskAssignments : [];
+  const moduleNotifications = Array.isArray(input.moduleNotifications) ? input.moduleNotifications : [];
+  return {
+    conversations,
+    selectedConversationId: input.selectedConversationId || conversations[0]?.id || null,
+    taskAssignments,
+    moduleNotifications,
+    lastUpdatedAt: input.lastUpdatedAt || null,
+  };
+}
 
 /* -------------------------------------------------------------------------------------------------
  * In-memory cache + subscribers + undo ring
@@ -369,6 +433,70 @@ export function selectGardenAnimals(p = loadProfile())    { return clone(p.garde
 export function selectStorehouse(p = loadProfile())       { return clone(p.storehouse); }
 export function selectHealthMeals(p = loadProfile())      { return clone(p.healthMeals); }
 export function selectNotifications(p = loadProfile())    { return clone(p.notifications); }
+export function selectDirectMessaging(p = loadProfile())   {
+  return normalizeDirectMessagingState(clone(p.directMessaging || DEFAULT_DIRECT_MESSAGING));
+}
+
+export async function loadDirectMessaging({ householdId } = {}) {
+  const profile = loadProfile();
+  const resolvedHouseholdId = String(householdId || resolveHouseholdId(profile)).trim() || "default-household";
+
+  try {
+    const result = await fetchJson(
+      `/api/planners/profile/messages?householdId=${encodeURIComponent(resolvedHouseholdId)}`
+    );
+    const normalized = normalizeDirectMessagingState(result?.messages || {});
+    setAtPath("directMessaging", normalized);
+    return normalized;
+  } catch {
+    return selectDirectMessaging(profile);
+  }
+}
+
+export async function patchDirectMessaging(partial = {}, { householdId } = {}) {
+  const profile = loadProfile();
+  const current = selectDirectMessaging(profile);
+  const next = normalizeDirectMessagingState(deepMerge(current, partial || {}));
+  setAtPath("directMessaging", next);
+
+  const resolvedHouseholdId = String(householdId || resolveHouseholdId(profile)).trim() || "default-household";
+  try {
+    await fetchJson("/api/planners/profile/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        householdId: resolvedHouseholdId,
+        messages: next,
+      }),
+    });
+    return { ok: true, messages: next };
+  } catch (error) {
+    return { ok: false, error: String(error?.message || error || "messages_save_failed"), messages: next };
+  }
+}
+
+export async function appendDirectMessage({ householdId, conversationId, message }) {
+  const profile = loadProfile();
+  const resolvedHouseholdId = String(householdId || resolveHouseholdId(profile)).trim() || "default-household";
+
+  try {
+    const result = await fetchJson("/api/planners/profile/messages/append", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        householdId: resolvedHouseholdId,
+        conversationId,
+        message,
+      }),
+    });
+
+    const normalized = normalizeDirectMessagingState(result?.messages || {});
+    setAtPath("directMessaging", normalized);
+    return { ok: true, messages: normalized };
+  } catch (error) {
+    return { ok: false, error: String(error?.message || error || "message_append_failed") };
+  }
+}
 
 /* -------------------------------------------------------------------------------------------------
  * Convenience helpers for capsules/agents (checkbox-first APIs)

@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useRef,
   useState,
-  Suspense,
   lazy,
 } from "react";
 
@@ -22,6 +21,18 @@ import {
   FeedPost,
   Notification,
 } from "@/components/sacred";
+import {
+  recordProductActionClick,
+  recordProductActionImpression,
+} from "@/services/telemetry/productActionTelemetry";
+import {
+  areAgendaFiltersEqual,
+  buildAppliedAgendaSummary,
+  normalizeAppliedAgendaFilters,
+} from "@/utils/householdAgendaControls";
+import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
+import { fetchStorehousePlannerData } from "@/pages/storehouse/planner/InventoryEstimatorService";
+import LoadingBoundary from "@/components/common/LoadingBoundary";
 
 /* ────────────────────────────────────────────────────────────────────────────
   Safe imports & helpers (avoid hard crashes if a module isn't present)
@@ -63,6 +74,33 @@ function JsonBlock({ data }) {
   );
 }
 
+function resolveStorehouseHouseholdId() {
+  if (typeof window === "undefined") return "default-household";
+  const fromGlobal =
+    window.__suka?.profile?.householdId ||
+    window.__suka?.profile?.homeId ||
+    window.__suka?.householdId ||
+    window.__suka?.homeId;
+  if (fromGlobal) return String(fromGlobal);
+
+  try {
+    const raw = window.localStorage?.getItem("suka.profile");
+    const parsed = raw ? JSON.parse(raw) : null;
+    return String(parsed?.householdId || parsed?.homeId || "default-household");
+  } catch {
+    return "default-household";
+  }
+}
+
+function emitUiToast(type, message) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent("toast", {
+      detail: { type, message },
+    })
+  );
+}
+
 /* ────────────────────────────────────────────────────────────────────────────
   Inputs fetchers (defensive)
 ──────────────────────────────────────────────────────────────────────────── */
@@ -86,64 +124,6 @@ async function getGardenQueueSafe() {
   const q =
     (await safeCall(Promise.resolve(api), "getQueue")) || api.queue || [];
   return Array.isArray(q) ? q : [];
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
-  Simple projection fallback (if no template available)
-  - Chickens: 5 eggs/hen/week
-  - Ducks: 4 eggs/hen/week
-  - Goats: 2 L milk/doe/day (14 L/week)
-  - Cows: 12 L milk/cow/day (84 L/week)
-  - Gardens: try "count*yieldPerPlant" or "area*yieldPerSqm" if present,
-             otherwise guess 0.5kg per plant / 1kg per sqm per week in season.
-──────────────────────────────────────────────────────────────────────────── */
-function simpleProjections({ animals = [], gardens = [] }) {
-  const weekly = {
-    eggs: 0,
-    milkLiters: 0,
-    produceKg: 0,
-    meatKg: 0,
-  };
-
-  // Animals
-  animals.forEach((a) => {
-    const kind = String(a.type || a.species || a.name || "").toLowerCase();
-    const count = Number(a.count || a.qty || a.headcount || 0);
-    if (!count) return;
-
-    if (kind.includes("chicken") || kind.includes("layer")) {
-      weekly.eggs += count * 5;
-    } else if (kind.includes("duck")) {
-      weekly.eggs += count * 4;
-    } else if (kind.includes("goat")) {
-      weekly.milkLiters += count * 14; // 2L/day
-    } else if (kind.includes("cow")) {
-      weekly.milkLiters += count * 84; // 12L/day
-    }
-
-    if (kind.includes("broiler") || kind.includes("meat")) {
-      // naive rolling average toward harvest
-      weekly.meatKg += count * 0.5; // placeholder weekly growth contribution
-    }
-  });
-
-  // Gardens
-  gardens.forEach((g) => {
-    const crops = Array.isArray(g.crops) ? g.crops : [];
-    crops.forEach((c) => {
-      const count = Number(c.count || c.plants || 0);
-      const ypp = Number(c.yieldPerPlant || 0);
-      const area = Number(c.area || 0);
-      const yps = Number(c.yieldPerSqm || 0);
-
-      if (count && ypp) weekly.produceKg += count * ypp;
-      else if (area && yps) weekly.produceKg += area * yps;
-      else if (count) weekly.produceKg += count * 0.5;
-      else if (area) weekly.produceKg += area * 1;
-    });
-  });
-
-  return { weekly, notes: "Fallback projections (simple heuristics)" };
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -360,6 +340,7 @@ export default function StorehousePage() {
   const [autoForecast, setAutoForecast] = useState(true);
   const runningRef = useRef(false);
   const [lastRun, setLastRun] = useState(null);
+  const [nowTick, setNowTick] = useState(Date.now());
   const [sacredStorehouseAlerts, setSacredStorehouseAlerts] = useState([
     {
       id: "store-alert-1",
@@ -378,9 +359,39 @@ export default function StorehousePage() {
       timestamp: "12m ago",
     },
   ]);
+  const [storehouseFeedState, setStorehouseFeedState] = useState([]);
+  const [feedBusyById, setFeedBusyById] = useState({});
+  const [alertsBusyById, setAlertsBusyById] = useState({});
+  const [householdAgenda, setHouseholdAgenda] = useState({
+    applied: {
+      filters: {
+        person: "",
+        module: "",
+        priority: "",
+        status: "",
+      },
+      sortBy: "dueAt",
+      sortDirection: "desc",
+    },
+    today: [],
+    upcoming: [],
+  });
+  const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
+  const [agendaFilters, setAgendaFilters] = useState({
+    person: "",
+    module: "",
+    priority: "",
+    status: "",
+    sortBy: "dueAt",
+    sortDirection: "desc",
+  });
+  const [agendaPersonDraft, setAgendaPersonDraft] = useState("");
 
-  const storehouseFeed = useMemo(
-    () => [
+  const storehouseFeed = useMemo(() => {
+    if (Array.isArray(storehouseFeedState) && storehouseFeedState.length) {
+      return storehouseFeedState;
+    }
+    return [
       {
         id: "store-feed-1",
         author: "Storehouse Coordinator",
@@ -402,13 +413,177 @@ export default function StorehousePage() {
         comments: 1,
         shares: 0,
       },
-    ],
-    []
-  );
+    ];
+  }, [storehouseFeedState]);
 
-  const dismissStorehouseAlert = (id) => {
-    setSacredStorehouseAlerts((prev) => prev.filter((item) => item.id !== id));
-  };
+  const loadStorehouseContext = useCallback(async () => {
+    try {
+      const householdId = resolveStorehouseHouseholdId();
+      const response = await fetch(
+        `/api/planners/storehouse/context?householdId=${encodeURIComponent(householdId)}`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!response.ok) return;
+      const payload = await response.json();
+      if (Array.isArray(payload?.feed)) {
+        setStorehouseFeedState(payload.feed);
+      }
+      if (Array.isArray(payload?.alerts)) {
+        setSacredStorehouseAlerts(payload.alerts);
+      }
+    } catch {
+      // keep local fallback context
+    }
+  }, []);
+
+  const loadHouseholdAgenda = useCallback(async () => {
+    setHouseholdAgendaBusy(true);
+    try {
+      const householdId = resolveStorehouseHouseholdId();
+      const params = buildHouseholdTodayUpcomingQuery({
+        householdId,
+        modules: "meal,cleaning,storehouse,homestead,community",
+        todayLimit: 6,
+        upcomingLimit: 6,
+        filters: agendaFilters,
+      });
+      const response = await fetch(
+        `/api/planners/household/today-upcoming?${params.toString()}`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!response.ok) return;
+      const payload = await response.json();
+      setHouseholdAgenda({
+        applied: payload?.applied && typeof payload.applied === "object"
+          ? payload.applied
+          : {
+              filters: {
+                person: String(agendaFilters.person || ""),
+                module: String(agendaFilters.module || ""),
+                priority: String(agendaFilters.priority || ""),
+                status: String(agendaFilters.status || ""),
+              },
+              sortBy: String(agendaFilters.sortBy || "dueAt"),
+              sortDirection: String(agendaFilters.sortDirection || "desc"),
+            },
+        today: Array.isArray(payload?.today) ? payload.today : [],
+        upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
+      });
+      const normalizedAppliedFilters = normalizeAppliedAgendaFilters(payload?.applied);
+      setAgendaFilters((previous) => {
+        if (areAgendaFiltersEqual(previous, normalizedAppliedFilters)) {
+          return previous;
+        }
+        return normalizedAppliedFilters;
+      });
+      setAgendaPersonDraft((previous) => {
+        if (previous === normalizedAppliedFilters.person) {
+          return previous;
+        }
+        return normalizedAppliedFilters.person;
+      });
+    } catch {
+      // keep existing agenda state
+    } finally {
+      setHouseholdAgendaBusy(false);
+    }
+  }, [agendaFilters]);
+
+  const dismissStorehouseAlert = useCallback(async (id) => {
+    setAlertsBusyById((prev) => ({ ...prev, [id]: true }));
+    try {
+      const householdId = resolveStorehouseHouseholdId();
+      const response = await fetch(
+        `/api/planners/storehouse/context/alerts/${encodeURIComponent(id)}/dismiss`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ householdId }),
+        }
+      );
+      if (response.ok) {
+        const payload = await response.json();
+        if (Array.isArray(payload?.alerts)) {
+          setSacredStorehouseAlerts(payload.alerts);
+        } else {
+          setSacredStorehouseAlerts((prev) => prev.filter((item) => item.id !== id));
+        }
+      } else {
+        setSacredStorehouseAlerts((prev) => prev.filter((item) => item.id !== id));
+      }
+    } catch {
+      setSacredStorehouseAlerts((prev) => prev.filter((item) => item.id !== id));
+    } finally {
+      setAlertsBusyById((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+  }, []);
+
+  const reactToStorehouseFeed = useCallback(async (postId, action) => {
+    setFeedBusyById((prev) => ({ ...prev, [postId]: action }));
+    try {
+      const householdId = resolveStorehouseHouseholdId();
+      const response = await fetch(
+        `/api/planners/storehouse/context/feed/${encodeURIComponent(postId)}/action`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ householdId, action, delta: 1 }),
+        }
+      );
+      if (response.ok) {
+        const payload = await response.json();
+        if (Array.isArray(payload?.feed)) {
+          setStorehouseFeedState(payload.feed);
+        }
+      }
+    } catch {
+      // preserve existing UI state
+    } finally {
+      setFeedBusyById((prev) => {
+        const next = { ...prev };
+        delete next[postId];
+        return next;
+      });
+    }
+  }, []);
+
+  function formatTimeAgo(timestamp) {
+    if (!Number(new Date(timestamp).getTime())) return "Never";
+    const deltaMs = Math.max(0, nowTick - Number(new Date(timestamp).getTime()));
+    const minutes = Math.floor(deltaMs / (60 * 1000));
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
+  function agendaCueLine(item) {
+    return [
+      String(item?.module || item?.lane || "household"),
+      String(item?.workflowState || item?.state || "planned"),
+      item?.priority ? String(item.priority) : null,
+      item?.recurrenceEnabled ? "recurring" : null,
+      item?.hasDependencyBlock
+        ? `blocked by ${Number(item?.blockingDependencyCount || 0)} deps`
+        : null,
+      item?.hasConflict ? `conflicts ${Number(item?.conflictCount || 0)}` : null,
+      item?.overdue ? "overdue" : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+  }
 
   const emitForecastSignals = useCallback((forecast) => {
     const weekly = forecast?.weekly || {};
@@ -456,6 +631,18 @@ export default function StorehousePage() {
     [activeTool]
   );
 
+  useEffect(() => {
+    recordProductActionImpression({
+      page: "planner.storehouse",
+      quickActionCount: 4,
+      meta: {
+        tool: activeTool || "overview",
+      },
+    });
+    // Impression tracked once per mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Load inputs once (and when user opens the page again)
   const loadInputs = useCallback(async () => {
     const [animals, gardens] = await Promise.all([
@@ -467,12 +654,17 @@ export default function StorehousePage() {
     return { animals, gardens };
   }, []);
 
-  // Compute projections via template, fallback to heuristics
+  // Compute projections via template, then backend snapshot
   const computeProjections = useCallback(
     async (inputs) => {
       setBusy(true);
       setDebug(null);
       try {
+        const householdId = resolveStorehouseHouseholdId();
+        const backendSnapshot = await fetchStorehousePlannerData(householdId).catch(
+          () => null
+        );
+
         const payload = {
           invokedBy: "ui/storehouse",
           vision: vision || {},
@@ -489,20 +681,46 @@ export default function StorehousePage() {
               .catch(() => null)) || null
           : null;
 
+        const backendWeekly =
+          backendSnapshot?.projection?.weekly || backendSnapshot?.weekly || null;
         if (res && typeof res === "object" && res.weekly) {
           setProject(res);
-          setDebug({ via: "template" });
-          emitForecastSignals(res);
-        } else {
-          const fb = simpleProjections({
-            animals: payload.animals,
-            gardens: payload.gardens,
+          setDebug({
+            via: "template",
+            backendInventoryCount: Array.isArray(backendSnapshot?.inventory)
+              ? backendSnapshot.inventory.length
+              : 0,
           });
-          setProject(fb);
-          setDebug({ via: "fallback" });
-          emitForecastSignals(fb);
+          emitForecastSignals(res);
+        } else if (backendWeekly && typeof backendWeekly === "object") {
+          const backendProjection = {
+            weekly: {
+              eggs: Number(backendWeekly.eggs || 0),
+              milkLiters: Number(backendWeekly.milkLiters || 0),
+              produceKg: Number(backendWeekly.produceKg || 0),
+              meatKg: Number(backendWeekly.meatKg || 0),
+            },
+            notes: "Backend projection snapshot",
+          };
+          setProject(backendProjection);
+          setDebug({
+            via: "backend",
+            backendInventoryCount: Array.isArray(backendSnapshot?.inventory)
+              ? backendSnapshot.inventory.length
+              : 0,
+          });
+          emitForecastSignals(backendProjection);
+        } else {
+          throw new Error("Backend/storehouse projection unavailable in strict mode.");
         }
         setLastRun(new Date().toISOString());
+        emitUiToast("success", "Storehouse forecast updated from backend snapshot.");
+      } catch (error) {
+        emitUiToast(
+          "error",
+          `Storehouse forecast failed: ${String(error?.message || "unknown error")}`
+        );
+        throw error;
       } finally {
         setBusy(false);
       }
@@ -535,10 +753,35 @@ export default function StorehousePage() {
     vision?.budget,
   ]);
 
+  useEffect(() => {
+    const tickId = window.setInterval(() => {
+      setNowTick(Date.now());
+    }, 60 * 1000);
+    return () => {
+      window.clearInterval(tickId);
+    };
+  }, []);
+
   // Manual refresh
   const refreshNow = async () => {
+    recordProductActionClick({
+      page: "planner.storehouse",
+      action: "refresh_projections",
+      status: "click",
+      meta: {
+        activeTool: activeTool || "overview",
+      },
+    });
     const inputs = await loadInputs();
     await computeProjections(inputs);
+    recordProductActionClick({
+      page: "planner.storehouse",
+      action: "refresh_projections",
+      status: "success",
+      meta: {
+        activeTool: activeTool || "overview",
+      },
+    });
   };
 
   // Initial load
@@ -547,15 +790,33 @@ export default function StorehousePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div>
-      <h1>🏚️ Storehouse Tools</h1>
-      <p className="subtitle">
-        See upcoming inputs from animals and gardens, and forecast what flows
-        into your storehouse. Automations run quietly based on your Home setup.
-      </p>
+  useEffect(() => {
+    loadStorehouseContext();
+  }, [loadStorehouseContext]);
 
-      <div className="card" style={{ marginBottom: 12 }}>
+  useEffect(() => {
+    loadHouseholdAgenda();
+  }, [loadHouseholdAgenda]);
+
+  return (
+    <div className="sv-container ssa-content-flow">
+      <div className="ssa-hero-wrap p-4">
+        <div className="sv-row sv-wrap" style={{ gap: 8, alignItems: "center", marginBottom: 4 }}>
+          <h1 className="ssa-hero-title text-2xl">🏚️ Storehouse Tools</h1>
+          <span className="ssa-hero-chip">
+            Last auto-sync: {formatTimeAgo(lastRun)}
+          </span>
+        </div>
+        <p className="subtitle ssa-hero-subtitle">
+          See upcoming inputs from animals and gardens, and forecast what flows
+          into your storehouse. Automations run quietly based on your Home setup.
+        </p>
+      </div>
+
+      <div
+        className="card ssa-panel-balanced ssa-interactive-panel"
+        style={{ marginBottom: 12, width: "100%", maxWidth: 1440, marginInline: "auto" }}
+      >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
           <SacredAvatar
             name="Storehouse Module"
@@ -567,12 +828,38 @@ export default function StorehousePage() {
             <SacredButton size="sm" onClick={refreshNow} loading={busy}>
               Refresh Projections
             </SacredButton>
-            <SacredButton size="sm" tone="secondary" onClick={() => setActiveTool("auto-fill")}>Auto-Fill</SacredButton>
-            <SacredButton size="sm" tone="accent" onClick={() => setActiveTool("preserve-queue")}>Preservation Queue</SacredButton>
+            <SacredButton
+              size="sm"
+              tone="secondary"
+              onClick={() => {
+                recordProductActionClick({
+                  page: "planner.storehouse",
+                  action: "open_auto_fill",
+                  status: "click",
+                });
+                setActiveTool("auto-fill");
+              }}
+            >
+              Auto-Fill
+            </SacredButton>
+            <SacredButton
+              size="sm"
+              tone="accent"
+              onClick={() => {
+                recordProductActionClick({
+                  page: "planner.storehouse",
+                  action: "open_preservation_queue",
+                  status: "click",
+                });
+                setActiveTool("preserve-queue");
+              }}
+            >
+              Preservation Queue
+            </SacredButton>
           </div>
         </div>
 
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 12, width: "100%", maxWidth: 1440, marginInline: "auto" }}>
           <DashboardGrid columns={3}>
             <SacredCard
               kind="storehouse"
@@ -584,7 +871,9 @@ export default function StorehousePage() {
             >
               {debug?.via === "template"
                 ? "Template projection active with runtime signals emitted."
-                : "Fallback heuristics active until richer runtime template output is available."}
+                : debug?.via === "backend"
+                  ? "Backend projection snapshot active with runtime signals emitted."
+                  : "Awaiting backend projection data."}
             </SacredCard>
             <SacredCard
               kind="meal"
@@ -612,7 +901,16 @@ export default function StorehousePage() {
         <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
           <div style={{ display: "grid", gap: 10 }}>
             {storehouseFeed.map((item) => (
-              <FeedPost key={item.id} {...item} />
+              <FeedPost
+                key={item.id}
+                {...item}
+                onLike={() => reactToStorehouseFeed(item.id, "like")}
+                onComment={() => reactToStorehouseFeed(item.id, "comment")}
+                onShare={() => reactToStorehouseFeed(item.id, "share")}
+                busyLike={feedBusyById[item.id] === "like"}
+                busyComment={feedBusyById[item.id] === "comment"}
+                busyShare={feedBusyById[item.id] === "share"}
+              />
             ))}
           </div>
           <div style={{ display: "grid", gap: 10 }}>
@@ -624,6 +922,7 @@ export default function StorehousePage() {
                 message={item.message}
                 timestamp={item.timestamp}
                 onDismiss={() => dismissStorehouseAlert(item.id)}
+                dismissing={Boolean(alertsBusyById[item.id])}
               />
             ))}
           </div>
@@ -632,6 +931,198 @@ export default function StorehousePage() {
 
       <div style={{ marginBottom: 12 }}>
         <RealtimeCoordinationPanel scopeOverrides={{ scope: "household" }} />
+      </div>
+
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div className="subtitle" style={{ fontWeight: 700 }}>
+          Household Today and Upcoming
+        </div>
+        <div
+          style={{
+            marginTop: 8,
+            display: "grid",
+            gap: 8,
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          }}
+        >
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Module</span>
+            <select
+              value={agendaFilters.module}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, module: String(event.target.value || "") }))
+              }
+            >
+              <option value="">All</option>
+              <option value="meal">meal</option>
+              <option value="cleaning">cleaning</option>
+              <option value="storehouse">storehouse</option>
+              <option value="homestead">homestead</option>
+              <option value="community">community</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Priority</span>
+            <select
+              value={agendaFilters.priority}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, priority: String(event.target.value || "") }))
+              }
+            >
+              <option value="">All</option>
+              <option value="critical">critical</option>
+              <option value="high">high</option>
+              <option value="normal">normal</option>
+              <option value="low">low</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Status</span>
+            <select
+              value={agendaFilters.status}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, status: String(event.target.value || "") }))
+              }
+            >
+              <option value="">All</option>
+              <option value="blocked">blocked</option>
+              <option value="pending_approval">pending_approval</option>
+              <option value="active">active</option>
+              <option value="draft">draft</option>
+              <option value="planned">planned</option>
+              <option value="completed">completed</option>
+              <option value="archived">archived</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Sort</span>
+            <select
+              value={agendaFilters.sortBy}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, sortBy: String(event.target.value || "dueAt") }))
+              }
+            >
+              <option value="dueAt">dueAt</option>
+              <option value="priority">priority</option>
+              <option value="status">status</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Direction</span>
+            <select
+              value={agendaFilters.sortDirection}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, sortDirection: String(event.target.value || "desc") }))
+              }
+            >
+              <option value="desc">desc</option>
+              <option value="asc">asc</option>
+            </select>
+          </label>
+        </div>
+        <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <input
+            type="text"
+            value={agendaPersonDraft}
+            onChange={(event) => setAgendaPersonDraft(String(event.target.value || ""))}
+            placeholder="Filter by person handle"
+            style={{ flex: "1 1 240px" }}
+          />
+          <SacredButton
+            size="sm"
+            tone="secondary"
+            onClick={() =>
+              setAgendaFilters((prev) => ({
+                ...prev,
+                person: String(agendaPersonDraft || "").trim().toLowerCase(),
+              }))
+            }
+          >
+            Apply Person
+          </SacredButton>
+          <SacredButton
+            size="sm"
+            tone="secondary"
+            onClick={() => {
+              setAgendaPersonDraft("");
+              setAgendaFilters({
+                person: "",
+                module: "",
+                priority: "",
+                status: "",
+                sortBy: "dueAt",
+                sortDirection: "desc",
+              });
+            }}
+          >
+            Reset Filters
+          </SacredButton>
+          <SacredButton size="sm" onClick={loadHouseholdAgenda} loading={householdAgendaBusy}>
+            Refresh Agenda
+          </SacredButton>
+        </div>
+        {householdAgendaBusy &&
+        !householdAgenda.today.length &&
+        !householdAgenda.upcoming.length ? (
+          <div className="subtitle">Loading household agenda…</div>
+        ) : (
+          <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+            <div className="subtitle" style={{ fontSize: 12 }}>
+              {buildAppliedAgendaSummary(householdAgenda?.applied)}
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              }}
+            >
+            <section>
+              <div className="subtitle" style={{ fontWeight: 600 }}>
+                Today
+              </div>
+              {householdAgenda.today.length ? (
+                <ul style={{ margin: "6px 0 0", paddingLeft: 18, display: "grid", gap: 6 }}>
+                  {householdAgenda.today.slice(0, 4).map((item) => (
+                    <li key={item.id} style={{ color: "var(--fg)", fontSize: 13 }}>
+                      <div style={{ display: "grid", gap: 2 }}>
+                        <span>{item.title}</span>
+                        <span className="sv-muted" style={{ fontSize: 11 }}>
+                          {agendaCueLine(item)}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="subtitle">No items for today.</div>
+              )}
+            </section>
+
+            <section>
+              <div className="subtitle" style={{ fontWeight: 600 }}>
+                Upcoming
+              </div>
+              {householdAgenda.upcoming.length ? (
+                <ul style={{ margin: "6px 0 0", paddingLeft: 18, display: "grid", gap: 6 }}>
+                  {householdAgenda.upcoming.slice(0, 4).map((item) => (
+                    <li key={item.id} style={{ color: "var(--fg)", fontSize: 13 }}>
+                      <div style={{ display: "grid", gap: 2 }}>
+                        <span>{item.title}</span>
+                        <span className="sv-muted" style={{ fontSize: 11 }}>
+                          {agendaCueLine(item)}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="subtitle">No upcoming items.</div>
+              )}
+            </section>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Background controls */}
@@ -829,9 +1320,9 @@ export default function StorehousePage() {
 
       <div className="card" style={{ minHeight: 80 }}>
         {activeTool ? (
-          <Suspense fallback={<div className="subtitle">Loading…</div>}>
+          <LoadingBoundary placeholder={<div className="subtitle">Loading…</div>}>
             <ToolComp />
-          </Suspense>
+          </LoadingBoundary>
         ) : (
           <p className="subtitle">Open a tool if you need to fine-tune.</p>
         )}

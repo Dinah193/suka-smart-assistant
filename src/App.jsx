@@ -850,6 +850,11 @@ const KnowledgeDocs = lazyPage(
   "Docs",
 );
 
+const SSAShowcasePage = lazyPage(
+  ["@/pages/design/ssa-showcase.jsx", "./pages/design/ssa-showcase.jsx"],
+  "SSAShowcase",
+);
+
 /** Import Settings + Scan/Extreme couponing + Tools */
 const ImportSettings = lazyPage(
   ["@/features/import/ImportSettings.jsx", "./pages/import/settings.jsx"],
@@ -1187,6 +1192,7 @@ function EnsureContent({ children, fallback }) {
 /* -------------------------- Sidebar Nav -------------------------- */
 const ACTIVE_BG = "#3b82f6";
 const ACTIVE_FG = "#ffffff";
+const NAV_RAIL_PREF_KEY = "ssa:nav-rail-compact";
 
 function NavItem({ to, icon, label, end = false }) {
   return (
@@ -1194,6 +1200,8 @@ function NavItem({ to, icon, label, end = false }) {
       <NavLink
         to={to}
         end={end}
+        title={label}
+        aria-label={label}
         className={({ isActive }) =>
           `nav-pill${isActive ? " active is-active" : ""}`
         }
@@ -1227,8 +1235,10 @@ function NavItem({ to, icon, label, end = false }) {
           };
         }}
       >
-        <span className="shrink-0">{icon}</span>
-        <span>{label}</span>
+        <span className="shrink-0 nav-icon" aria-hidden="true">
+          {icon}
+        </span>
+        <span className="nav-label">{label}</span>
       </NavLink>
     </li>
   );
@@ -1701,10 +1711,24 @@ function AppChrome({ children }) {
     pathname === "/signup" ||
     pathname === "/register";
 
+  const [isCompactRail, setIsCompactRail] = React.useState(() => {
+    try {
+      return window.localStorage.getItem(NAV_RAIL_PREF_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem(NAV_RAIL_PREF_KEY, isCompactRail ? "1" : "0");
+    } catch {}
+  }, [isCompactRail]);
+
   if (isAuthRoute) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <main className="min-h-screen overflow-auto">
+        <main className="min-h-screen overflow-auto ssa-shell-main">
           <ErrorBoundary>
             <Suspense fallback={<Loader />}>{children}</Suspense>
           </ErrorBoundary>
@@ -1714,7 +1738,8 @@ function AppChrome({ children }) {
   }
 
   return (
-    <div className="min-h-screen grid bg-background text-foreground">
+    <AuthRouteGuard requireAdmin>
+      <div className="min-h-screen grid bg-background text-foreground ssa-shell-main">
       <style>{`
         .menu :where(li > .active:hover),
         .menu :where(li > a[aria-current="page"]:hover) {
@@ -1723,20 +1748,18 @@ function AppChrome({ children }) {
       `}</style>
 
       <div
-        className="app app--with-rightbar grid"
+        className={`app app--with-rightbar grid${isCompactRail ? " app--compact-rail" : ""}`}
         style={{
           minHeight: "100%",
           display: "grid",
-          gridTemplateColumns: "260px 1fr 320px",
-          gridTemplateRows: "auto",
           gap: 0,
         }}
       >
         {/* LEFT SIDEBAR */}
         <aside
-          className="sidebar bg-white"
+          className="sidebar ssa-shell-panel"
           style={{
-            borderRight: "1px solid #e5e7eb",
+            borderRight: "1px solid hsl(var(--border))",
             padding: 12,
             overflow: "auto",
           }}
@@ -1757,10 +1780,22 @@ function AppChrome({ children }) {
                 background: "#111827",
               }}
             />
-            <div style={{ fontWeight: 600 }}>Suka Smart Assistant</div>
+            <div className="brand-text" style={{ fontWeight: 600 }}>
+              Suka Smart Assistant
+            </div>
+            <button
+              type="button"
+              className="btn icon sm rail-toggle"
+              aria-label={isCompactRail ? "Expand navigation rail" : "Collapse navigation rail"}
+              title={isCompactRail ? "Expand navigation rail" : "Collapse navigation rail"}
+              onClick={() => setIsCompactRail((prev) => !prev)}
+              style={{ marginLeft: "auto" }}
+            >
+              {isCompactRail ? "»" : "«"}
+            </button>
           </div>
 
-          <div className="px-3 pt-1 text-[11px] uppercase tracking-wide text-neutral-500">
+          <div className="px-3 pt-1 text-[11px] uppercase tracking-wide text-neutral-500 nav-section-label">
             Home
           </div>
 
@@ -1792,7 +1827,7 @@ function AppChrome({ children }) {
             <NavItem to="/settings" icon="⚙️" label="Settings" />
           </ul>
 
-          <div className="px-3 pt-3 text-[11px] uppercase tracking-wide text-neutral-500">
+          <div className="px-3 pt-3 text-[11px] uppercase tracking-wide text-neutral-500 nav-section-label">
             Household
           </div>
 
@@ -1818,7 +1853,7 @@ function AppChrome({ children }) {
         </aside>
 
         {/* MAIN CONTENT */}
-        <main className="min-h-screen overflow-auto p-3">
+        <main className="main min-h-screen overflow-auto ssa-shell-main">
           <ErrorBoundary>
             <Suspense fallback={<Loader />}>{children}</Suspense>
           </ErrorBoundary>
@@ -1826,10 +1861,10 @@ function AppChrome({ children }) {
 
         {/* RIGHT SIDEBAR */}
         <div
-          className="rightbar bg-white"
+          className="rightbar ssa-shell-panel"
           style={{
-            borderLeft: "1px solid #e5e7eb",
-            padding: 8,
+            borderLeft: "1px solid hsl(var(--border))",
+            padding: 10,
             overflow: "auto",
           }}
         >
@@ -1871,20 +1906,44 @@ function AppChrome({ children }) {
 
       <UndoNbaDock />
       <FloatingAutomationPanel />
-    </div>
+      </div>
+    </AuthRouteGuard>
   );
 }
 
-function AuthRouteGuard({ children }) {
+function hasAdminPrivileges(session) {
+  const user = session?.user || {};
+  const roles = [
+    ...(Array.isArray(user?.roles) ? user.roles : []),
+    user?.role,
+    user?.householdRole,
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+
+  return roles.some((role) => ["admin", "owner", "household_admin"].includes(role));
+}
+
+function isLocalhostRuntime() {
+  if (typeof window === "undefined") return false;
+  const host = String(window.location?.hostname || "").toLowerCase();
+  return host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+}
+
+function AuthRouteGuard({ children, requireAdmin = false }) {
   const location = useLocation();
-  const [state, setState] = React.useState({ loading: true, allowed: false });
+  const [state, setState] = React.useState({
+    loading: true,
+    allowed: false,
+    adminAllowed: false,
+  });
   const smokeAuthBypass =
     import.meta.env.VITE_SSA_SMOKE_AUTH_BYPASS === "1" ||
     (typeof window !== "undefined" && window.__SSA_SMOKE_AUTH_BYPASS__ === true);
 
   React.useEffect(() => {
     if (smokeAuthBypass) {
-      setState({ loading: false, allowed: true });
+      setState({ loading: false, allowed: true, adminAllowed: true });
       return () => {};
     }
 
@@ -1895,11 +1954,19 @@ function AuthRouteGuard({ children }) {
         const session = await resolveSession();
 
         if (!controller.signal.aborted) {
-          setState({ loading: false, allowed: Boolean(session?.ok && session?.user) });
+          const allowed = Boolean(session?.ok && session?.user);
+          const localAdminBootstrapEnabled =
+            import.meta.env.DEV &&
+            isLocalhostRuntime() &&
+            String(import.meta.env.VITE_SSA_LOCAL_ADMIN_BOOTSTRAP ?? "1") !== "0";
+          const adminAllowed = allowed
+            ? hasAdminPrivileges(session) || localAdminBootstrapEnabled
+            : false;
+          setState({ loading: false, allowed, adminAllowed });
         }
       } catch {
         if (!controller.signal.aborted) {
-          setState({ loading: false, allowed: false });
+          setState({ loading: false, allowed: false, adminAllowed: false });
         }
       }
     })();
@@ -1914,6 +1981,16 @@ function AuthRouteGuard({ children }) {
   if (!state.allowed) {
     const returnTo = `${location.pathname || "/"}${location.search || ""}`;
     return <Navigate to={`/login?returnTo=${encodeURIComponent(returnTo)}`} replace />;
+  }
+
+  if (requireAdmin && !state.adminAllowed) {
+    const returnTo = `${location.pathname || "/"}${location.search || ""}`;
+    return (
+      <Navigate
+        to={`/login?returnTo=${encodeURIComponent(returnTo)}&reason=admin_required`}
+        replace
+      />
+    );
   }
 
   return children;
@@ -2025,6 +2102,7 @@ export default function App() {
               </EnsureContent>
             }
           />
+          <Route path="/design/ssa-showcase" element={<SSAShowcasePage />} />
 
           {/* Household */}
           <Route path="/inventory" element={<Inventory />} />

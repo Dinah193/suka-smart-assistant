@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import * as ProfileService from "@/services/profile/householdProfileService";
+import eventBus from "@/services/events/eventBus";
 import {
   SSAAnimalAvatar,
   SSABadge,
@@ -29,6 +30,7 @@ const TAB_MEDIA = "media";
 const TAB_SAVED = "saved";
 const TAB_TASKS = "tasks";
 const TAB_JOBS = "jobs";
+const TAB_MESSAGES = "messages";
 const TAB_SETTINGS = "settings";
 
 const TAB_ITEMS = [
@@ -37,6 +39,7 @@ const TAB_ITEMS = [
   { key: TAB_SAVED, label: "Saved" },
   { key: TAB_TASKS, label: "Collaborative Tasks" },
   { key: TAB_JOBS, label: "Seasonal Work" },
+  { key: TAB_MESSAGES, label: "Messages" },
   { key: TAB_SETTINGS, label: "Settings" },
 ];
 
@@ -171,6 +174,115 @@ const MODULE_TASKS = [
   { id: "mod-task-2", title: "Replenish preserve shelf lane", done: false, household: "Storehouse" },
   { id: "mod-task-3", title: "Log orchard thinning checkpoint", done: true, household: "Gardens" },
   { id: "mod-task-4", title: "Assign milking and butchery handoff", done: false, household: "Husbandry" },
+];
+
+const DM_MODULES = [
+  {
+    key: "meals",
+    label: "Meals and Batch Cooking",
+    seasonalHighlight: "Seasonal recipes: nettle omelet, root broth, herb porridge",
+  },
+  {
+    key: "storehouse",
+    label: "Storehouse and Inventory",
+    seasonalHighlight: "Seasonal stock alert: berry preserves below summer target",
+  },
+  {
+    key: "gardens",
+    label: "Gardens and Orchards",
+    seasonalHighlight: "Seasonal crops: peas, spinach, early strawberries",
+  },
+  {
+    key: "animals",
+    label: "Animal Husbandry",
+    seasonalHighlight: "Seasonal care: milking rota, feed checks, butchery prep",
+  },
+];
+
+const DM_CONVERSATIONS = [
+  {
+    id: "dm-1",
+    household: "Willow Collective",
+    animal: "chickens",
+    unread: 2,
+    status: "assigned",
+    lastAt: "2m ago",
+    lastMessage: "Can we shift evening batch prep after orchard pass?",
+    moduleParticipation: [
+      { name: "Meals", value: 5 },
+      { name: "Storehouse", value: 3 },
+      { name: "Gardens", value: 4 },
+      { name: "Husbandry", value: 2 },
+    ],
+    thread: [
+      {
+        id: "dm-1-msg-1",
+        from: "other",
+        body: "Can we shift evening batch prep after orchard pass?",
+        moduleKey: "meals",
+        seasonalCue: "Spring herb menu closes tonight",
+        at: "5:44 PM",
+      },
+      {
+        id: "dm-1-msg-2",
+        from: "me",
+        body: "Yes, and we can assign preserve replenishment right after.",
+        moduleKey: "storehouse",
+        seasonalCue: "Low berry preserve jars",
+        at: "5:46 PM",
+      },
+    ],
+  },
+  {
+    id: "dm-2",
+    household: "Oak and Hearth",
+    animal: "goats",
+    unread: 1,
+    status: "request",
+    lastAt: "14m ago",
+    lastMessage: "Need orchard milestone update before canning run.",
+    moduleParticipation: [
+      { name: "Meals", value: 2 },
+      { name: "Storehouse", value: 5 },
+      { name: "Gardens", value: 5 },
+      { name: "Husbandry", value: 1 },
+    ],
+    thread: [
+      {
+        id: "dm-2-msg-1",
+        from: "other",
+        body: "Need orchard milestone update before canning run.",
+        moduleKey: "gardens",
+        seasonalCue: "Summer orchard ladder cycle",
+        at: "5:30 PM",
+      },
+    ],
+  },
+  {
+    id: "dm-3",
+    household: "Stonefield Home",
+    animal: "deer",
+    unread: 0,
+    status: "complete",
+    lastAt: "1h ago",
+    lastMessage: "Milking and butchery handoff finalized for autumn lane.",
+    moduleParticipation: [
+      { name: "Meals", value: 4 },
+      { name: "Storehouse", value: 4 },
+      { name: "Gardens", value: 3 },
+      { name: "Husbandry", value: 6 },
+    ],
+    thread: [
+      {
+        id: "dm-3-msg-1",
+        from: "other",
+        body: "Milking and butchery handoff finalized for autumn lane.",
+        moduleKey: "animals",
+        seasonalCue: "Autumn husbandry readiness",
+        at: "4:49 PM",
+      },
+    ],
+  },
 ];
 
 const MEDIA_STORIES = [
@@ -350,6 +462,69 @@ const DEFAULT_PROFILE_SETTINGS = Object.freeze({
   autoSharePlaybooks: false,
 });
 
+const DEFAULT_DM_STATE = Object.freeze({
+  conversations: DM_CONVERSATIONS,
+  selectedConversationId: DM_CONVERSATIONS[0]?.id || null,
+  taskAssignments: [],
+  moduleNotifications: [],
+  lastUpdatedAt: null,
+});
+
+function profileToDirectMessaging(profile) {
+  const incoming = profile?.directMessaging;
+  if (!incoming || typeof incoming !== "object") return DEFAULT_DM_STATE;
+
+  const conversations = Array.isArray(incoming.conversations)
+    ? incoming.conversations
+    : DM_CONVERSATIONS;
+  const taskAssignments = Array.isArray(incoming.taskAssignments)
+    ? incoming.taskAssignments
+    : [];
+  const moduleNotifications = Array.isArray(incoming.moduleNotifications)
+    ? incoming.moduleNotifications
+    : [];
+
+  return {
+    conversations,
+    selectedConversationId: incoming.selectedConversationId || conversations[0]?.id || null,
+    taskAssignments,
+    moduleNotifications,
+    lastUpdatedAt: incoming.lastUpdatedAt || null,
+  };
+}
+
+function buildOpenThreadRequestFromSearch(search) {
+  try {
+    const params = new URLSearchParams(String(search || ""));
+    const conversationId = String(params.get("dmConversation") || "").trim();
+    const moduleKey = String(params.get("dmModule") || "").trim();
+    const actionType = String(params.get("dmAction") || "").trim();
+    const prefill = String(params.get("dmPrefill") || "").trim();
+
+    if (!conversationId && !moduleKey && !actionType && !prefill) return null;
+
+    return {
+      conversationId: conversationId || null,
+      moduleKey: moduleKey || null,
+      actionType: actionType || null,
+      prefill: prefill || null,
+      source: "query",
+      nonce: Date.now(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getProfileServiceMethod(methodName) {
+  try {
+    const candidate = ProfileService?.[methodName];
+    return typeof candidate === "function" ? candidate : null;
+  } catch {
+    return null;
+  }
+}
+
 function toBoolean(value, fallback) {
   if (typeof value === "boolean") return value;
   return fallback;
@@ -397,6 +572,8 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
   const [alertsMuted, setAlertsMuted] = useState(false);
   const [settingsDraft, setSettingsDraft] = useState(DEFAULT_PROFILE_SETTINGS);
   const [savedSettings, setSavedSettings] = useState(DEFAULT_PROFILE_SETTINGS);
+  const [dmState, setDmState] = useState(DEFAULT_DM_STATE);
+  const [openThreadRequest, setOpenThreadRequest] = useState(null);
   const [saveState, setSaveState] = useState("idle");
 
   const seasonKey = useMemo(() => getSeasonKey(new Date()), []);
@@ -411,14 +588,29 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
 
     const loaded = ProfileService.loadProfile();
     const mapped = profileToSettings(loaded);
+    const mappedDirectMessaging = profileToDirectMessaging(loaded);
     setSettingsDraft(mapped);
     setSavedSettings(mapped);
+    setDmState(mappedDirectMessaging);
+
+    const loadDirectMessaging = getProfileServiceMethod("loadDirectMessaging");
+    if (loadDirectMessaging) {
+      loadDirectMessaging().then((messages) => {
+        if (messages && typeof messages === "object") {
+          setDmState(profileToDirectMessaging({ directMessaging: messages }));
+        }
+      }).catch(() => {
+        // local profile fallback already loaded
+      });
+    }
 
     if (!ProfileService?.subscribe) return;
     const unsubscribe = ProfileService.subscribe((profile) => {
       const next = profileToSettings(profile);
+      const nextDirectMessaging = profileToDirectMessaging(profile);
       setSettingsDraft(next);
       setSavedSettings(next);
+      setDmState(nextDirectMessaging);
       setSaveState("idle");
     });
 
@@ -426,6 +618,67 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
       if (typeof unsubscribe === "function") unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const request = buildOpenThreadRequestFromSearch(globalThis?.location?.search || "");
+    if (!request) return;
+    setActiveTab(TAB_MESSAGES);
+    setOpenThreadRequest(request);
+  }, []);
+
+  useEffect(() => {
+    const offOpenThread = eventBus?.on?.("profile/messages/open-thread", (payload) => {
+      const data = payload?.data || payload || {};
+      setActiveTab(TAB_MESSAGES);
+      setOpenThreadRequest({
+        conversationId: data?.conversationId || null,
+        moduleKey: data?.moduleKey || null,
+        actionType: data?.actionType || null,
+        prefill: data?.prefill || null,
+        source: "eventBus",
+        nonce: Date.now(),
+      });
+    });
+
+    return () => {
+      if (typeof offOpenThread === "function") offOpenThread();
+    };
+  }, []);
+
+  async function persistDirectMessaging(nextMessages) {
+    setDmState(nextMessages);
+    const patchDirectMessaging = getProfileServiceMethod("patchDirectMessaging");
+    if (!patchDirectMessaging) return { ok: true };
+    return patchDirectMessaging(nextMessages);
+  }
+
+  async function appendDirectMessage(payload) {
+    const appendDirectMessageMethod = getProfileServiceMethod("appendDirectMessage");
+    if (!appendDirectMessageMethod) {
+      return {
+        ok: true,
+        messages: {
+          conversations: dmState.conversations,
+          selectedConversationId: dmState.selectedConversationId,
+        },
+      };
+    }
+    return appendDirectMessageMethod(payload);
+  }
+
+  function openThreadByHousehold(household, moduleKey = null) {
+    const target = (dmState.conversations || []).find(
+      (conversation) => String(conversation?.household || "").toLowerCase() === String(household || "").toLowerCase()
+    );
+
+    setActiveTab(TAB_MESSAGES);
+    setOpenThreadRequest({
+      conversationId: target?.id || null,
+      moduleKey: moduleKey || null,
+      source: "profile",
+      nonce: Date.now(),
+    });
+  }
 
   async function handleSaveSettings() {
     if (!ProfileService?.patchProfile) return;
@@ -482,7 +735,7 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
             <div className="ssa-hero-actions">
               <SSAButton variant="primary">Follow Household</SSAButton>
               <SSAButton variant="secondary">Invite to Collaboration</SSAButton>
-              <SSAButton variant="secondary">Message</SSAButton>
+              <SSAButton variant="secondary" onClick={() => openThreadByHousehold("Willow Collective", "meals")}>Message</SSAButton>
             </div>
           </div>
 
@@ -521,7 +774,7 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
         >
           <div className="space-y-4">
             {activeTab === TAB_POSTS && (
-              <PostsPane seasonLabel={seasonLabel} seasonKey={seasonKey} />
+              <PostsPane seasonLabel={seasonLabel} seasonKey={seasonKey} onOpenThread={openThreadByHousehold} />
             )}
 
             {activeTab === TAB_MEDIA && (
@@ -538,6 +791,17 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
 
             {activeTab === TAB_JOBS && (
               <JobsPane seasonLabel={seasonLabel} />
+            )}
+
+            {activeTab === TAB_MESSAGES && (
+              <MessagesPane
+                seasonLabel={seasonLabel}
+                dmState={dmState}
+                onPersistMessages={persistDirectMessaging}
+                onAppendMessage={appendDirectMessage}
+                openThreadRequest={openThreadRequest}
+                onHandledOpenRequest={() => setOpenThreadRequest(null)}
+              />
             )}
 
             {activeTab === TAB_SETTINGS && (
@@ -557,6 +821,7 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
               alertsMuted={alertsMuted}
               setAlertsMuted={setAlertsMuted}
               seasonLabel={seasonLabel}
+              onOpenThread={openThreadByHousehold}
             />
           </aside>
         </motion.section>
@@ -565,7 +830,7 @@ export default function ProfileSettingsPage({ initialTab = TAB_POSTS }) {
   );
 }
 
-function PostsPane({ seasonLabel, seasonKey }) {
+function PostsPane({ seasonLabel, seasonKey, onOpenThread }) {
   return (
     <>
       <section className="relative overflow-hidden rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-default)] bg-[var(--ssa-surface-elevated)] p-4">
@@ -606,7 +871,7 @@ function PostsPane({ seasonLabel, seasonKey }) {
               actions={
                 <>
                   <SSAButton variant="secondary">Coordinate</SSAButton>
-                  <SSAButton variant="primary">Open Thread</SSAButton>
+                  <SSAButton variant="primary" onClick={() => onOpenThread?.(item.household, "meals")}>Open Thread</SSAButton>
                 </>
               }
             >
@@ -970,7 +1235,7 @@ function StoryDepthMedia({ story, onExpand, compact = false }) {
   );
 }
 
-function NotificationsPanel({ alertsMuted, setAlertsMuted, seasonLabel }) {
+function NotificationsPanel({ alertsMuted, setAlertsMuted, seasonLabel, onOpenThread }) {
   const [activeAlerts, setActiveAlerts] = useState(MODULE_NOTIFICATIONS);
   const [selectedAlertId, setSelectedAlertId] = useState(null);
   const [toastSeed, setToastSeed] = useState(0);
@@ -1104,6 +1369,12 @@ function NotificationsPanel({ alertsMuted, setAlertsMuted, seasonLabel }) {
                           Mark Unread
                         </SSAButton>
                       )}
+                      <SSAButton
+                        variant="secondary"
+                        onClick={() => onOpenThread?.(alert.household, alert.module)}
+                      >
+                        Open Thread
+                      </SSAButton>
                     </>
                   }
                 >
@@ -1316,6 +1587,587 @@ function JobsPane({ seasonLabel }) {
       >
         This tab routes you to the full Jobs workflow where seasonal execution, replay, and assignment tracking live.
       </SSACard>
+    </section>
+  );
+}
+
+function MessagesPane({
+  seasonLabel,
+  dmState,
+  onPersistMessages,
+  onAppendMessage,
+  openThreadRequest,
+  onHandledOpenRequest,
+}) {
+  const prefersReducedMotion = useReducedMotion();
+  const [conversations, setConversations] = useState(dmState?.conversations || DM_CONVERSATIONS);
+  const [activeConversationId, setActiveConversationId] = useState(
+    dmState?.selectedConversationId || dmState?.conversations?.[0]?.id || DM_CONVERSATIONS[0]?.id || null
+  );
+  const [composerText, setComposerText] = useState("");
+  const [selectedModule, setSelectedModule] = useState("meals");
+  const [composerAction, setComposerAction] = useState("send");
+  const [isTyping, setIsTyping] = useState(false);
+  const [deliveryToastItems, setDeliveryToastItems] = useState([]);
+  const [composerError, setComposerError] = useState("");
+  const [failedMessages, setFailedMessages] = useState([]);
+  const [liveStatus, setLiveStatus] = useState("");
+  const [taskAssignments, setTaskAssignments] = useState(
+    Array.isArray(dmState?.taskAssignments) ? dmState.taskAssignments : []
+  );
+  const [moduleNotifications, setModuleNotifications] = useState(
+    Array.isArray(dmState?.moduleNotifications) ? dmState.moduleNotifications : []
+  );
+  const threadEndRef = useRef(null);
+
+  const activeConversation = useMemo(
+    () => conversations.find((conversation) => conversation.id === activeConversationId) || conversations[0],
+    [conversations, activeConversationId]
+  );
+
+  const moduleMap = useMemo(
+    () => Object.fromEntries(DM_MODULES.map((module) => [module.key, module])),
+    []
+  );
+
+  useEffect(() => {
+    const incomingConversations = Array.isArray(dmState?.conversations) && dmState.conversations.length
+      ? dmState.conversations
+      : DM_CONVERSATIONS;
+    const preferredConversationId = dmState?.selectedConversationId || incomingConversations[0]?.id || null;
+    setConversations(incomingConversations);
+    setActiveConversationId((previousConversationId) => {
+      if (
+        previousConversationId
+        && incomingConversations.some((conversation) => conversation.id === previousConversationId)
+      ) {
+        return previousConversationId;
+      }
+      return preferredConversationId;
+    });
+    setTaskAssignments(Array.isArray(dmState?.taskAssignments) ? dmState.taskAssignments : []);
+    setModuleNotifications(Array.isArray(dmState?.moduleNotifications) ? dmState.moduleNotifications : []);
+  }, [
+    dmState?.conversations,
+    dmState?.selectedConversationId,
+    dmState?.taskAssignments,
+    dmState?.moduleNotifications,
+  ]);
+
+  useEffect(() => {
+    if (!threadEndRef.current) return;
+    if (typeof threadEndRef.current.scrollIntoView === "function") {
+      threadEndRef.current.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
+    }
+  }, [activeConversation?.thread, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!openThreadRequest) return;
+
+    if (openThreadRequest.conversationId) {
+      setActiveConversationId(openThreadRequest.conversationId);
+    }
+    if (openThreadRequest.moduleKey && moduleMap[openThreadRequest.moduleKey]) {
+      setSelectedModule(openThreadRequest.moduleKey);
+    }
+    if (openThreadRequest.actionType) {
+      setComposerAction(openThreadRequest.actionType);
+    }
+    if (openThreadRequest.prefill) {
+      setComposerText(openThreadRequest.prefill);
+    }
+
+    if (typeof onHandledOpenRequest === "function") {
+      onHandledOpenRequest();
+    }
+  }, [openThreadRequest, moduleMap, onHandledOpenRequest]);
+
+  useEffect(() => {
+    const unsubscribeIncoming = eventBus?.on?.("profile/messages/incoming", (payload) => {
+      const data = payload?.data || payload || {};
+      if (!data?.conversationId || !data?.message) return;
+
+      setConversations((prev) => {
+        const next = prev.map((conversation) => {
+          if (conversation.id !== data.conversationId) return conversation;
+
+          const existingThread = Array.isArray(conversation.thread) ? conversation.thread : [];
+          if (existingThread.some((item) => item.id === data.message.id)) {
+            return conversation;
+          }
+
+          const nextThread = [...existingThread, data.message];
+          return {
+            ...conversation,
+            thread: nextThread,
+            lastMessage: data.message.body,
+            lastAt: data.message.at || "just now",
+            unread:
+              conversation.id === activeConversationId
+                ? conversation.unread
+                : Number(conversation.unread || 0) + 1,
+          };
+        });
+        Promise.resolve().then(() => {
+          persistSnapshot(next, activeConversationId);
+        });
+        return next;
+      });
+
+      setLiveStatus("New message received");
+    });
+
+    const unsubscribeTyping = eventBus?.on?.("profile/messages/typing", (payload) => {
+      const data = payload?.data || payload || {};
+      if (!data?.conversationId || data.conversationId !== activeConversationId) return;
+      setIsTyping(Boolean(data.isTyping));
+    });
+
+    return () => {
+      if (typeof unsubscribeIncoming === "function") unsubscribeIncoming();
+      if (typeof unsubscribeTyping === "function") unsubscribeTyping();
+    };
+  }, [activeConversationId]);
+
+  async function persistSnapshot(nextConversations, nextActiveConversationId, extras = {}) {
+    if (typeof onPersistMessages !== "function") return;
+    await onPersistMessages({
+      conversations: nextConversations,
+      selectedConversationId: nextActiveConversationId,
+      taskAssignments: Array.isArray(extras.taskAssignments) ? extras.taskAssignments : taskAssignments,
+      moduleNotifications: Array.isArray(extras.moduleNotifications)
+        ? extras.moduleNotifications
+        : moduleNotifications,
+      lastUpdatedAt: new Date().toISOString(),
+    });
+  }
+
+  function updateConversation(conversationId, updater) {
+    setConversations((prev) =>
+      prev.map((conversation) =>
+        conversation.id === conversationId ? updater(conversation) : conversation
+      )
+    );
+  }
+
+  function markConversationRead(conversationId) {
+    const next = conversations.map((conversation) =>
+      conversation.id === conversationId
+        ? {
+            ...conversation,
+            unread: 0,
+          }
+        : conversation
+    );
+    setConversations(next);
+    persistSnapshot(next, conversationId);
+
+    eventBus?.emit?.("profile/messages/read", {
+      conversationId,
+      at: new Date().toISOString(),
+    });
+  }
+
+  async function sendMessage() {
+    const text = String(composerText || "").trim();
+    if (!text || !activeConversation) return;
+    setComposerError("");
+
+    const now = new Date();
+    const sentAt = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const optimisticMessageId = `${activeConversation.id}-msg-${Date.now()}`;
+    const newMessage = {
+      id: optimisticMessageId,
+      from: "me",
+      body: text,
+      moduleKey: selectedModule,
+      seasonalCue: moduleMap[selectedModule]?.seasonalHighlight || "Seasonal collaboration",
+      at: sentAt,
+      actionType: composerAction,
+    };
+
+    const previousConversations = conversations;
+    const previousTaskAssignments = taskAssignments;
+    const previousModuleNotifications = moduleNotifications;
+    const nextConversations = conversations.map((conversation) =>
+      conversation.id === activeConversation.id
+        ? {
+            ...conversation,
+            thread: [...conversation.thread, newMessage],
+            lastMessage: text,
+            lastAt: "now",
+          }
+        : conversation
+    );
+
+    const createdAt = new Date().toISOString();
+    const nextTaskAssignments =
+      composerAction === "assign"
+        ? [
+            {
+              id: `task-assign-${Date.now()}`,
+              conversationId: activeConversation.id,
+              household: activeConversation.household,
+              moduleKey: selectedModule,
+              title: text,
+              createdAt,
+              status: "assigned",
+            },
+            ...taskAssignments,
+          ].slice(0, 30)
+        : taskAssignments;
+
+    const nextModuleNotifications =
+      composerAction === "assign"
+        ? [
+            {
+              id: `notif-assign-${Date.now()}`,
+              conversationId: activeConversation.id,
+              moduleKey: selectedModule,
+              message: `Assigned task: ${text}`,
+              unread: true,
+              createdAt,
+            },
+            ...moduleNotifications,
+          ].slice(0, 30)
+        : moduleNotifications;
+
+    setConversations(nextConversations);
+    if (composerAction === "assign") {
+      setTaskAssignments(nextTaskAssignments);
+      setModuleNotifications(nextModuleNotifications);
+    }
+    await persistSnapshot(nextConversations, activeConversation.id, {
+      taskAssignments: nextTaskAssignments,
+      moduleNotifications: nextModuleNotifications,
+    });
+
+    setComposerText("");
+    setDeliveryToastItems((prev) => [
+      {
+        id: `toast-delivered-${Date.now()}`,
+        message: `${moduleMap[selectedModule]?.label || "Module"} message delivered`,
+      },
+      ...prev,
+    ].slice(0, 3));
+
+    eventBus?.emit?.("profile/messages/sent", {
+      conversationId: activeConversation.id,
+      message: newMessage,
+      at: new Date().toISOString(),
+    });
+
+    if (composerAction === "assign") {
+      eventBus?.emit?.("profile/messages/task-assigned", {
+        conversationId: activeConversation.id,
+        taskTitle: text,
+        moduleKey: selectedModule,
+      });
+    }
+
+    if (typeof onAppendMessage === "function") {
+      const persisted = await onAppendMessage({
+        conversationId: activeConversation.id,
+        message: newMessage,
+      });
+
+      if (!persisted?.ok) {
+        setConversations(previousConversations);
+        if (composerAction === "assign") {
+          setTaskAssignments(previousTaskAssignments);
+          setModuleNotifications(previousModuleNotifications);
+        }
+        await persistSnapshot(previousConversations, activeConversation.id, {
+          taskAssignments: previousTaskAssignments,
+          moduleNotifications: previousModuleNotifications,
+        });
+        setComposerText(text);
+        setComposerError("Message send failed. Retry when connection is available.");
+        setFailedMessages((prev) => [
+          {
+            id: `failed-${optimisticMessageId}`,
+            conversationId: activeConversation.id,
+            body: text,
+            moduleKey: selectedModule,
+            actionType: composerAction,
+          },
+          ...prev,
+        ].slice(0, 3));
+        return;
+      }
+
+      if (persisted?.messages) {
+        setConversations(persisted.messages.conversations || nextConversations);
+      }
+    }
+
+    setIsTyping(true);
+    setTimeout(() => {
+      const replyMessage = {
+        id: `${activeConversation.id}-reply-${Date.now()}`,
+        from: "other",
+        body: `Acknowledged. We'll sync ${moduleMap[selectedModule]?.label || "module"} lane and update assignments.`,
+        moduleKey: selectedModule,
+        seasonalCue: moduleMap[selectedModule]?.seasonalHighlight || "Seasonal context synced",
+        at: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+      };
+
+      const next = conversations.map((conversation) =>
+        conversation.id === activeConversation.id
+          ? {
+              ...conversation,
+              thread: [...conversation.thread, replyMessage],
+              lastMessage: replyMessage.body,
+              lastAt: "just now",
+              unread:
+                conversation.id === activeConversationId
+                  ? conversation.unread
+                  : Number(conversation.unread || 0) + 1,
+            }
+          : conversation
+      );
+
+      setConversations(next);
+      persistSnapshot(next, activeConversation.id);
+      setIsTyping(false);
+    }, 900);
+  }
+
+  async function retryFailedMessage(failedMessage) {
+    setComposerText(failedMessage.body);
+    setSelectedModule(failedMessage.moduleKey || "meals");
+    setComposerAction(failedMessage.actionType || "send");
+    setActiveConversationId(failedMessage.conversationId);
+    setFailedMessages((prev) => prev.filter((item) => item.id !== failedMessage.id));
+  }
+
+  return (
+    <section className="space-y-3" aria-label="Direct messaging panel">
+      <div className="sr-only" aria-live="polite">{liveStatus}</div>
+      <div className="ssa-hero-wrap p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="ssa-hero-title text-lg">Direct Messaging</h2>
+            <p className="ssa-hero-subtitle">
+              {seasonLabel} collaboration across meals, storehouse, gardens, and husbandry.
+            </p>
+          </div>
+          <SSABadge tone="assigned">{conversations.reduce((sum, item) => sum + item.unread, 0)} unread</SSABadge>
+        </div>
+
+        <div className="mt-3 grid gap-3 xl:grid-cols-[290px_minmax(0,1fr)]">
+          <div className="space-y-2" aria-label="Conversation list">
+            {conversations.map((conversation) => {
+              const isActive = conversation.id === activeConversation.id;
+              return (
+                <button
+                  key={conversation.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveConversationId(conversation.id);
+                    markConversationRead(conversation.id);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      const currentIndex = conversations.findIndex((item) => item.id === conversation.id);
+                      const nextConversation = conversations[(currentIndex + 1) % conversations.length];
+                      if (nextConversation) {
+                        setActiveConversationId(nextConversation.id);
+                        markConversationRead(nextConversation.id);
+                      }
+                    }
+                    if (event.key === "ArrowUp") {
+                      event.preventDefault();
+                      const currentIndex = conversations.findIndex((item) => item.id === conversation.id);
+                      const prevConversation = conversations[(currentIndex - 1 + conversations.length) % conversations.length];
+                      if (prevConversation) {
+                        setActiveConversationId(prevConversation.id);
+                        markConversationRead(prevConversation.id);
+                      }
+                    }
+                  }}
+                  className={`w-full rounded-[var(--ssa-radius-card)] border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ssa-focus-ring-color)] ${
+                    isActive
+                      ? "border-[var(--ssa-action-primary-bg)] bg-[var(--ssa-surface-1)]"
+                      : "border-[var(--ssa-border-subtle)] bg-[var(--ssa-surface-elevated)] hover:bg-[var(--ssa-surface-1)] active:translate-y-[1px]"
+                  }`}
+                  aria-label={"Open conversation: " + conversation.household}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <SSAAnimalAvatar animal={conversation.animal} size="sm" label={conversation.household} />
+                      <span className="text-sm font-semibold text-[var(--ssa-text-primary)]">
+                        {conversation.household}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {conversation.unread > 0 ? <SSABadge tone="request">{conversation.unread}</SSABadge> : null}
+                      <SSABadge tone={conversation.status}>{conversation.status}</SSABadge>
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--ssa-text-secondary)]">{conversation.lastMessage}</p>
+                  <p className="mt-1 text-[11px] text-[var(--ssa-text-secondary)]">{conversation.lastAt}</p>
+                  <div className="mt-2">
+                    <SSAHouseholdParticipation
+                      label="Module Participation"
+                      entries={conversation.moduleParticipation}
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-default)] bg-[var(--ssa-surface-elevated)] p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <SSAAnimalAvatar animal={activeConversation.animal} size="sm" label={activeConversation.household} />
+                <h3 className="ssa-hero-title text-base">{activeConversation.household} Thread</h3>
+              </div>
+              <SSABadge>{activeConversation.lastAt}</SSABadge>
+            </div>
+
+            <div className="mb-3 grid gap-2 sm:grid-cols-2" aria-label="Module seasonal highlights">
+              {DM_MODULES.map((module) => (
+                <SSACard
+                  key={`dm-module-${module.key}`}
+                  title={module.label}
+                  subtitle="Seasonal context"
+                  variant="task"
+                >
+                  <div className="space-y-2">
+                    <p className="text-xs">{module.seasonalHighlight}</p>
+                    <SSABadge>{module.key}</SSABadge>
+                  </div>
+                </SSACard>
+              ))}
+            </div>
+
+            <div
+              className="max-h-[360px] space-y-2 overflow-y-auto rounded-[var(--ssa-radius-card)] border border-[var(--ssa-border-subtle)] p-2"
+              aria-label="Chat thread"
+            >
+              <AnimatePresence initial={false}>
+                {activeConversation.thread.map((message) => {
+                  const moduleMeta = moduleMap[message.moduleKey] || null;
+                  const isMine = message.from === "me";
+                  return (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.18 }}
+                      className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                    >
+                      <div className={`max-w-[92%] sm:max-w-[80%] ${isMine ? "" : ""}`}>
+                        <SSACard
+                          title={isMine ? "You" : activeConversation.household}
+                          subtitle={moduleMeta?.label || "Module update"}
+                          variant={isMine ? "task" : "feed"}
+                          actions={<SSABadge>{message.at}</SSABadge>}
+                        >
+                          <div className="space-y-2">
+                            <p>{message.body}</p>
+                            <div className="flex flex-wrap gap-2">
+                              <SSABadge>{message.seasonalCue}</SSABadge>
+                              {message.actionType ? <SSABadge>{message.actionType}</SSABadge> : null}
+                            </div>
+                          </div>
+                        </SSACard>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+              {isTyping ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="inline-flex items-center gap-2 rounded-[var(--ssa-radius-chip)] border border-[var(--ssa-border-subtle)] bg-[var(--ssa-surface-1)] px-2 py-1 text-xs text-[var(--ssa-text-secondary)]"
+                  role="status"
+                  aria-label="Typing indicator"
+                >
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ssa-text-secondary)]" aria-hidden="true" />
+                  <span>{activeConversation.household} is typing...</span>
+                </motion.div>
+              ) : null}
+              <div ref={threadEndRef} />
+            </div>
+
+            <div className="mt-3 space-y-2" aria-label="Message composer">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <SSASelect
+                  value={selectedModule}
+                  onChange={(event) => setSelectedModule(event.target.value)}
+                >
+                  {DM_MODULES.map((module) => (
+                    <option key={module.key} value={module.key}>
+                      {module.label}
+                    </option>
+                  ))}
+                </SSASelect>
+                <SSASelect
+                  value={composerAction}
+                  onChange={(event) => setComposerAction(event.target.value)}
+                >
+                  <option value="send">Send message</option>
+                  <option value="attach">Attach context</option>
+                  <option value="assign">Assign task</option>
+                  <option value="log">Log module activity</option>
+                </SSASelect>
+                <div className="flex items-center gap-2">
+                  <SSAButton variant="secondary" onClick={() => setComposerText((prev) => `${prev} [Attachment]`.trim())}>
+                    Attach
+                  </SSAButton>
+                  <SSAButton variant="primary" onClick={sendMessage}>
+                    Send
+                  </SSAButton>
+                </div>
+              </div>
+              <SSAInput
+                value={composerText}
+                onChange={(event) => setComposerText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder="Message, assign, or log module activity..."
+                aria-label="Message input"
+              />
+              {composerError ? (
+                <SSAInlineAlert tone="danger">{composerError}</SSAInlineAlert>
+              ) : null}
+              {failedMessages.length ? (
+                <div className="rounded-[var(--ssa-radius-card)] border border-[var(--ssa-status-warning)] p-2">
+                  <p className="text-xs font-semibold text-[var(--ssa-status-warning)]">Failed sends</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {failedMessages.map((failedMessage) => (
+                      <SSAButton
+                        key={failedMessage.id}
+                        variant="secondary"
+                        onClick={() => retryFailedMessage(failedMessage)}
+                      >
+                        Retry: {failedMessage.body.slice(0, 18)}
+                      </SSAButton>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <SSABadge>{moduleMap[selectedModule]?.seasonalHighlight}</SSABadge>
+                <SSABadge tone="assigned">Collaborative prompt: confirm shared handoff window</SSABadge>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SSAToastHost initial={deliveryToastItems} />
     </section>
   );
 }

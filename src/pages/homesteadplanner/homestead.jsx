@@ -3,9 +3,19 @@
 import React, { useCallback, useEffect, useMemo, useState, useId } from "react";
 import "@/styles/bridge.scan.css";
 import {
+  fetchHomesteadCollaboration,
   loadHomesteadPlannerPlan,
+  resolveHomesteadPlannerIdentity,
+  sendHomesteadCollaborationAction,
   saveHomesteadPlannerPlan,
+  upsertHomesteadCollaborationItem,
 } from "./HomesteadPlannerService";
+import {
+  areAgendaFiltersEqual,
+  buildAppliedAgendaSummary,
+  normalizeAppliedAgendaFilters,
+} from "@/utils/householdAgendaControls";
+import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
 
 /**
  * Homestead Planner — seasonal goals → domain sessions
@@ -261,6 +271,10 @@ async function loadLastPlan() {
 
 // ------------------------------- Component -----------------------------------
 export default function HomesteadPlannerPage() {
+  const householdId = useMemo(
+    () => resolveHomesteadPlannerIdentity().householdId,
+    []
+  );
   const [plan, setPlan] = useState(() => ({
     id: `plan-${Math.random().toString(36).slice(2, 8)}`,
     season: currentSeason(),
@@ -283,6 +297,41 @@ export default function HomesteadPlannerPage() {
     updatedAt: NOW_ISO(),
   }));
   const [suggested, setSuggested] = useState([]);
+  const [collaboration, setCollaboration] = useState({
+    needs: [],
+    offers: [],
+    assignments: [],
+    fulfillments: [],
+    feed: [],
+  });
+  const [collaborationBusy, setCollaborationBusy] = useState(false);
+  const [feedBusyById, setFeedBusyById] = useState({});
+  const [draftNeed, setDraftNeed] = useState("");
+  const [draftOffer, setDraftOffer] = useState("");
+  const [householdAgenda, setHouseholdAgenda] = useState({
+    applied: {
+      filters: {
+        person: "",
+        module: "",
+        priority: "",
+        status: "",
+      },
+      sortBy: "dueAt",
+      sortDirection: "desc",
+    },
+    today: [],
+    upcoming: [],
+  });
+  const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
+  const [agendaFilters, setAgendaFilters] = useState({
+    person: "",
+    module: "",
+    priority: "",
+    status: "",
+    sortBy: "dueAt",
+    sortDirection: "desc",
+  });
+  const [agendaPersonDraft, setAgendaPersonDraft] = useState("");
   const [status, setStatus] = useState({ kind: "idle", msg: "" });
 
   const { exportToHub } = useHubExport({ source: "HomesteadPlanner" });
@@ -292,7 +341,7 @@ export default function HomesteadPlannerPage() {
     (async () => {
       try {
         const remote = await loadHomesteadPlannerPlan({
-          fallbackPlan: plan,
+          seedPlan: plan,
         });
         if (alive && remote?.plan) {
           setPlan((p) => ({ ...p, ...remote.plan }));
@@ -308,6 +357,114 @@ export default function HomesteadPlannerPage() {
     return () => {
       alive = false;
     };
+  }, []);
+
+  const loadCollaboration = useCallback(async () => {
+    setCollaborationBusy(true);
+    try {
+      const payload = await fetchHomesteadCollaboration(householdId);
+      if (payload?.collaboration && typeof payload.collaboration === "object") {
+        setCollaboration({
+          needs: Array.isArray(payload.collaboration.needs)
+            ? payload.collaboration.needs
+            : [],
+          offers: Array.isArray(payload.collaboration.offers)
+            ? payload.collaboration.offers
+            : [],
+          assignments: Array.isArray(payload.collaboration.assignments)
+            ? payload.collaboration.assignments
+            : [],
+          fulfillments: Array.isArray(payload.collaboration.fulfillments)
+            ? payload.collaboration.fulfillments
+            : [],
+          feed: Array.isArray(payload.collaboration.feed)
+            ? payload.collaboration.feed
+            : [],
+        });
+      }
+    } catch {
+      setStatus({ kind: "error", msg: "Could not load collaboration context." });
+    } finally {
+      setCollaborationBusy(false);
+    }
+  }, [householdId]);
+
+  useEffect(() => {
+    loadCollaboration();
+  }, [loadCollaboration]);
+
+  const loadHouseholdAgenda = useCallback(async () => {
+    setHouseholdAgendaBusy(true);
+    try {
+      const params = buildHouseholdTodayUpcomingQuery({
+        householdId,
+        modules: "meal,cleaning,storehouse,homestead,community",
+        todayLimit: 6,
+        upcomingLimit: 6,
+        filters: agendaFilters,
+      });
+      const response = await fetch(
+        `/api/planners/household/today-upcoming?${params.toString()}`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!response.ok) return;
+      const payload = await response.json();
+      setHouseholdAgenda({
+        applied: payload?.applied && typeof payload.applied === "object"
+          ? payload.applied
+          : {
+              filters: {
+                person: String(agendaFilters.person || ""),
+                module: String(agendaFilters.module || ""),
+                priority: String(agendaFilters.priority || ""),
+                status: String(agendaFilters.status || ""),
+              },
+              sortBy: String(agendaFilters.sortBy || "dueAt"),
+              sortDirection: String(agendaFilters.sortDirection || "desc"),
+            },
+        today: Array.isArray(payload?.today) ? payload.today : [],
+        upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
+      });
+      const normalizedAppliedFilters = normalizeAppliedAgendaFilters(payload?.applied);
+      setAgendaFilters((previous) => {
+        if (areAgendaFiltersEqual(previous, normalizedAppliedFilters)) {
+          return previous;
+        }
+        return normalizedAppliedFilters;
+      });
+      setAgendaPersonDraft((previous) => {
+        if (previous === normalizedAppliedFilters.person) {
+          return previous;
+        }
+        return normalizedAppliedFilters.person;
+      });
+    } catch {
+      // keep existing agenda state
+    } finally {
+      setHouseholdAgendaBusy(false);
+    }
+  }, [agendaFilters, householdId]);
+
+  useEffect(() => {
+    loadHouseholdAgenda();
+  }, [loadHouseholdAgenda]);
+
+  const agendaCueLine = useCallback((item) => {
+    return [
+      String(item?.module || item?.lane || "household"),
+      String(item?.workflowState || item?.state || "planned"),
+      item?.priority ? String(item.priority) : null,
+      item?.recurrenceEnabled ? "recurring" : null,
+      item?.hasDependencyBlock
+        ? `blocked by ${Number(item?.blockingDependencyCount || 0)} deps`
+        : null,
+      item?.hasConflict ? `conflicts ${Number(item?.conflictCount || 0)}` : null,
+      item?.overdue ? "overdue" : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
   }, []);
 
   const kpis = useMemo(() => {
@@ -398,6 +555,63 @@ export default function HomesteadPlannerPage() {
       URL.revokeObjectURL(url);
     } catch {}
   }, [plan]);
+
+  const upsertCollaboration = useCallback(
+    async (kind, title) => {
+      const normalized = String(title || "").trim();
+      if (!normalized) return;
+      try {
+        const payload = await upsertHomesteadCollaborationItem(
+          kind,
+          {
+            title: normalized,
+            status: "active",
+          },
+          householdId
+        );
+        if (payload?.collaboration) {
+          setCollaboration(payload.collaboration);
+        } else {
+          await loadCollaboration();
+        }
+        if (kind === "needs") setDraftNeed("");
+        if (kind === "offers") setDraftOffer("");
+        setStatus({ kind: "ok", msg: `Saved ${kind.slice(0, -1)} item.` });
+      } catch {
+        setStatus({ kind: "error", msg: `Could not save ${kind} item.` });
+      }
+    },
+    [householdId, loadCollaboration]
+  );
+
+  const reactToFeed = useCallback(
+    async (postId, action) => {
+      if (!postId) return;
+      setFeedBusyById((prev) => ({ ...prev, [postId]: action }));
+      try {
+        const payload = await sendHomesteadCollaborationAction(
+          postId,
+          action,
+          householdId,
+          1
+        );
+        if (payload?.collaboration) {
+          setCollaboration(payload.collaboration);
+        } else {
+          await loadCollaboration();
+        }
+      } catch {
+        setStatus({ kind: "error", msg: "Feed action failed." });
+      } finally {
+        setFeedBusyById((prev) => {
+          const next = { ...prev };
+          delete next[postId];
+          return next;
+        });
+      }
+    },
+    [householdId, loadCollaboration]
+  );
 
   const update = (path, value) => {
     setPlan((p) => setAtPath(p, path, value));
@@ -687,6 +901,315 @@ export default function HomesteadPlannerPage() {
                     </pre>
                   </div>
                 ))}
+              </div>
+            )}
+          </Card>
+        </section>
+
+        {/* COLLABORATION */}
+        <section>
+          <Card
+            title="🤝 Household collaboration"
+            subtitle="Sync needs/offers and react to cross-household feed activity."
+          >
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-[hsl(var(--text-primary))]">
+                  Needs
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+                    value={draftNeed}
+                    onChange={(e) => setDraftNeed(e.target.value)}
+                    placeholder="Post a household need"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn--ghost"
+                    onClick={() => upsertCollaboration("needs", draftNeed)}
+                    disabled={collaborationBusy}
+                  >
+                    Add
+                  </button>
+                </div>
+                <ul className="mt-3 space-y-2 text-sm text-[hsl(var(--text-primary))]">
+                  {(collaboration.needs || []).slice(0, 6).map((item) => (
+                    <li key={item.id} className="rounded-lg border border-slate-200 px-2 py-1">
+                      {item.title || item.label || item.id}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-[hsl(var(--text-primary))]">
+                  Offers
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+                    value={draftOffer}
+                    onChange={(e) => setDraftOffer(e.target.value)}
+                    placeholder="Post a household offer"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn--ghost"
+                    onClick={() => upsertCollaboration("offers", draftOffer)}
+                    disabled={collaborationBusy}
+                  >
+                    Add
+                  </button>
+                </div>
+                <ul className="mt-3 space-y-2 text-sm text-[hsl(var(--text-primary))]">
+                  {(collaboration.offers || []).slice(0, 6).map((item) => (
+                    <li key={item.id} className="rounded-lg border border-slate-200 px-2 py-1">
+                      {item.title || item.label || item.id}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3">
+              <div className="mb-2 text-xs font-semibold text-[hsl(var(--text-primary))]">
+                Collaboration feed
+              </div>
+              {collaborationBusy ? (
+                <div className="text-sm text-[hsl(var(--text-subtle))]">Loading collaboration…</div>
+              ) : (collaboration.feed || []).length ? (
+                <ul className="space-y-2">
+                  {(collaboration.feed || []).slice(0, 8).map((post) => (
+                    <li key={post.id} className="rounded-lg border border-slate-200 p-2">
+                      <div className="text-sm font-medium text-[hsl(var(--text-primary))]">
+                        {post.author || "Household"}
+                      </div>
+                      <div className="mt-1 text-sm text-[hsl(var(--text-primary))]">
+                        {post.content || "No content"}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => reactToFeed(post.id, "like")}
+                          disabled={feedBusyById[post.id] === "like"}
+                        >
+                          ❤ {Number(post.likes || 0)}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => reactToFeed(post.id, "coordinate")}
+                          disabled={feedBusyById[post.id] === "coordinate"}
+                        >
+                          ◎ {Number(post.coordinates || 0)}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          onClick={() => reactToFeed(post.id, "share")}
+                          disabled={feedBusyById[post.id] === "share"}
+                        >
+                          ↗ {Number(post.shares || 0)}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-sm text-[hsl(var(--text-subtle))]">
+                  No collaboration posts yet for this household.
+                </div>
+              )}
+            </div>
+          </Card>
+        </section>
+
+        <section>
+          <Card
+            title="Household Today and Upcoming"
+            subtitle="Cross-module recurrence, dependency, and conflict cues."
+          >
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Module</span>
+                <select
+                  value={agendaFilters.module}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, module: String(event.target.value || "") }))
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="meal">meal</option>
+                  <option value="cleaning">cleaning</option>
+                  <option value="storehouse">storehouse</option>
+                  <option value="homestead">homestead</option>
+                  <option value="community">community</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Priority</span>
+                <select
+                  value={agendaFilters.priority}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, priority: String(event.target.value || "") }))
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="critical">critical</option>
+                  <option value="high">high</option>
+                  <option value="normal">normal</option>
+                  <option value="low">low</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Status</span>
+                <select
+                  value={agendaFilters.status}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, status: String(event.target.value || "") }))
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="blocked">blocked</option>
+                  <option value="pending_approval">pending_approval</option>
+                  <option value="active">active</option>
+                  <option value="draft">draft</option>
+                  <option value="planned">planned</option>
+                  <option value="completed">completed</option>
+                  <option value="archived">archived</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Sort</span>
+                <select
+                  value={agendaFilters.sortBy}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, sortBy: String(event.target.value || "dueAt") }))
+                  }
+                >
+                  <option value="dueAt">dueAt</option>
+                  <option value="priority">priority</option>
+                  <option value="status">status</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Direction</span>
+                <select
+                  value={agendaFilters.sortDirection}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, sortDirection: String(event.target.value || "desc") }))
+                  }
+                >
+                  <option value="desc">desc</option>
+                  <option value="asc">asc</option>
+                </select>
+              </label>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <input
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm md:w-auto md:flex-1"
+                value={agendaPersonDraft}
+                onChange={(event) => setAgendaPersonDraft(String(event.target.value || ""))}
+                placeholder="Filter by person handle"
+              />
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() =>
+                  setAgendaFilters((prev) => ({
+                    ...prev,
+                    person: String(agendaPersonDraft || "").trim().toLowerCase(),
+                  }))
+                }
+              >
+                Apply Person
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => {
+                  setAgendaPersonDraft("");
+                  setAgendaFilters({
+                    person: "",
+                    module: "",
+                    priority: "",
+                    status: "",
+                    sortBy: "dueAt",
+                    sortDirection: "desc",
+                  });
+                }}
+              >
+                Reset Filters
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => loadHouseholdAgenda()}
+                disabled={householdAgendaBusy}
+              >
+                Refresh Agenda
+              </button>
+            </div>
+            {householdAgendaBusy &&
+            !householdAgenda.today.length &&
+            !householdAgenda.upcoming.length ? (
+              <div className="text-sm text-[hsl(var(--text-subtle))]">Loading household agenda…</div>
+            ) : (
+              <div className="grid grid-cols-1 gap-2">
+                <div className="text-xs text-[hsl(var(--text-subtle))]">
+                  {buildAppliedAgendaSummary(householdAgenda?.applied)}
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <div className="text-xs font-semibold text-[hsl(var(--text-primary))]">
+                    Today
+                  </div>
+                  {(householdAgenda.today || []).length ? (
+                    <ul className="mt-2 space-y-2">
+                      {(householdAgenda.today || []).slice(0, 4).map((item) => (
+                        <li key={item.id} className="rounded-lg border border-slate-200 p-2">
+                          <div className="text-sm font-medium text-[hsl(var(--text-primary))]">
+                            {item.title}
+                          </div>
+                          <div className="mt-1 text-xs text-[hsl(var(--text-subtle))]">
+                            {agendaCueLine(item)}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="mt-2 text-sm text-[hsl(var(--text-subtle))]">
+                      No items for today.
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <div className="text-xs font-semibold text-[hsl(var(--text-primary))]">
+                    Upcoming
+                  </div>
+                  {(householdAgenda.upcoming || []).length ? (
+                    <ul className="mt-2 space-y-2">
+                      {(householdAgenda.upcoming || []).slice(0, 4).map((item) => (
+                        <li key={item.id} className="rounded-lg border border-slate-200 p-2">
+                          <div className="text-sm font-medium text-[hsl(var(--text-primary))]">
+                            {item.title}
+                          </div>
+                          <div className="mt-1 text-xs text-[hsl(var(--text-subtle))]">
+                            {agendaCueLine(item)}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="mt-2 text-sm text-[hsl(var(--text-subtle))]">
+                      No upcoming items.
+                    </div>
+                  )}
+                </div>
+                </div>
               </div>
             )}
           </Card>
