@@ -29,6 +29,7 @@ jobs:
         run: npm run build
 
   household-agenda-gate:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -55,7 +56,10 @@ jobs:
           path: |
             .tmp/household-agenda-suites-latest.log
             .tmp/household-agenda-suites-latest.json
+            .tmp/household-agenda-suites-*.log
+            .tmp/household-agenda-suites-*.json
           if-no-files-found: error
+          retention-days: 14
 
   db-runtime-contracts:
     runs-on: ubuntu-latest
