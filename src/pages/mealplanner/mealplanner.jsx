@@ -986,6 +986,22 @@ async function fetchHouseholdTodayUpcomingAgenda({
   const payload = await response.json();
   return {
     metrics: payload?.metrics && typeof payload.metrics === "object" ? payload.metrics : {},
+    applied: payload?.applied && typeof payload.applied === "object"
+      ? payload.applied
+      : {
+          filters: {
+            person: String(person || ""),
+            module: String(module || ""),
+            priority: String(priority || ""),
+            status: String(status || ""),
+          },
+          sortBy: String(sortBy || "dueAt"),
+          sortDirection: String(sortDirection || "desc"),
+          limits: {
+            today: Number(todayLimit) || 10,
+            upcoming: Number(upcomingLimit) || 10,
+          },
+        },
     today: Array.isArray(payload?.today) ? payload.today : [],
     upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
   };
@@ -2096,7 +2112,25 @@ export default function MealPlanningPage() {
   const [mealContextLoading, setMealContextLoading] = useState(true);
   const [mealContextError, setMealContextError] = useState("");
   const [mealContextActionBusy, setMealContextActionBusy] = useState({});
-  const [householdAgenda, setHouseholdAgenda] = useState({ metrics: {}, today: [], upcoming: [] });
+  const [householdAgenda, setHouseholdAgenda] = useState({
+    metrics: {},
+    applied: {
+      filters: {
+        person: "",
+        module: "",
+        priority: "",
+        status: "",
+      },
+      sortBy: "dueAt",
+      sortDirection: "desc",
+      limits: {
+        today: 10,
+        upcoming: 10,
+      },
+    },
+    today: [],
+    upcoming: [],
+  });
   const [householdAgendaError, setHouseholdAgendaError] = useState("");
   const [agendaFilters, setAgendaFilters] = useState({
     person: "",
@@ -2142,7 +2176,25 @@ export default function MealPlanningPage() {
       setCommunityApprovals(approvalsPayload);
     } catch (error) {
       setMealContextError(String(error?.message || error || "Failed to load planner context."));
-      setHouseholdAgenda({ metrics: {}, today: [], upcoming: [] });
+      setHouseholdAgenda({
+        metrics: {},
+        applied: {
+          filters: {
+            person: "",
+            module: "",
+            priority: "",
+            status: "",
+          },
+          sortBy: "dueAt",
+          sortDirection: "desc",
+          limits: {
+            today: 10,
+            upcoming: 10,
+          },
+        },
+        today: [],
+        upcoming: [],
+      });
       setHouseholdAgendaError("Household timeline unavailable.");
       setCommunityApprovals([]);
       setCommunityApprovalsError("Approvals inbox unavailable.");
@@ -3628,6 +3680,19 @@ export default function MealPlanningPage() {
                       <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
                         <div className="sv-muted" style={{ fontSize: 12 }}>
                           Today: {Number(householdAgenda?.metrics?.todayCount || 0)} | Upcoming: {Number(householdAgenda?.metrics?.upcomingCount || 0)}
+                        </div>
+                        <div className="sv-muted" style={{ fontSize: 12 }}>
+                          Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
+                          {householdAgenda?.applied?.filters?.priority
+                            ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
+                            : ""}
+                          {householdAgenda?.applied?.filters?.status
+                            ? ` | ${String(householdAgenda.applied.filters.status)} status`
+                            : ""}
+                          {householdAgenda?.applied?.filters?.person
+                            ? ` | person ${String(householdAgenda.applied.filters.person)}`
+                            : ""}
+                          {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
                         </div>
                         <div>
                           <div style={{ fontWeight: 700, marginBottom: 6 }}>Today</div>
