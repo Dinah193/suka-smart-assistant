@@ -48,6 +48,26 @@ vi.mock("@/components/common/LoadingBoundary", () => ({
 
 import StorehousePage from "../src/pages/storehouse/storehouse.jsx";
 
+function setInputValue(input, value) {
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value"
+  )?.set;
+  setter?.call(input, value);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function setSelectValue(select, value) {
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLSelectElement.prototype,
+    "value"
+  )?.set;
+  setter?.call(select, value);
+  select.dispatchEvent(new Event("input", { bubbles: true }));
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 describe("storehouse household agenda cue contract", () => {
   let container;
   let root;
@@ -152,5 +172,47 @@ describe("storehouse household agenda cue contract", () => {
       expect.stringContaining("/api/planners/household/today-upcoming"),
       expect.objectContaining({ credentials: "include" })
     );
+
+    const agendaCard = Array.from(container.querySelectorAll("div")).find((node) =>
+      String(node.textContent || "").includes("Household Today and Upcoming")
+    );
+    expect(agendaCard).toBeTruthy();
+
+    const selects = Array.from(agendaCard.querySelectorAll("select"));
+    expect(selects.length).toBeGreaterThanOrEqual(5);
+    const [moduleSelect, prioritySelect, statusSelect, sortBySelect, sortDirectionSelect] = selects;
+    const personInput = agendaCard.querySelector('input[placeholder="Filter by person handle"]');
+    const applyButton = Array.from(agendaCard.querySelectorAll("button")).find(
+      (node) => String(node.textContent || "").trim() === "Apply Person"
+    );
+
+    expect(personInput).toBeTruthy();
+    expect(applyButton).toBeTruthy();
+
+    await act(async () => {
+      setSelectValue(moduleSelect, "storehouse");
+      setSelectValue(prioritySelect, "high");
+      setSelectValue(statusSelect, "blocked");
+      setSelectValue(sortBySelect, "status");
+      setSelectValue(sortDirectionSelect, "asc");
+      setInputValue(personInput, "member-alpha");
+      applyButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const agendaRequestUrls = global.fetch.mock.calls
+      .map(([url]) => String(url || ""))
+      .filter((url) => url.includes("/api/planners/household/today-upcoming"));
+    expect(agendaRequestUrls.length).toBeGreaterThan(0);
+    const latestAgendaRequest = agendaRequestUrls[agendaRequestUrls.length - 1];
+    expect(latestAgendaRequest).toContain("module=storehouse");
+    expect(latestAgendaRequest).toContain("priority=high");
+    expect(latestAgendaRequest).toContain("status=blocked");
+    expect(latestAgendaRequest).toContain("sortBy=status");
+    expect(latestAgendaRequest).toContain("sortDirection=asc");
+    expect(latestAgendaRequest).toContain("person=member-alpha");
   });
 });

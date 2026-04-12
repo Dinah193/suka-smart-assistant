@@ -358,6 +358,15 @@ export default function StorehousePage() {
   const [alertsBusyById, setAlertsBusyById] = useState({});
   const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
   const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
+  const [agendaFilters, setAgendaFilters] = useState({
+    person: "",
+    module: "",
+    priority: "",
+    status: "",
+    sortBy: "dueAt",
+    sortDirection: "desc",
+  });
+  const [agendaPersonDraft, setAgendaPersonDraft] = useState("");
 
   const storehouseFeed = useMemo(() => {
     if (Array.isArray(storehouseFeedState) && storehouseFeedState.length) {
@@ -414,8 +423,20 @@ export default function StorehousePage() {
     setHouseholdAgendaBusy(true);
     try {
       const householdId = resolveStorehouseHouseholdId();
+      const params = new URLSearchParams({
+        householdId,
+        modules: "meal,cleaning,storehouse,homestead,community",
+        todayLimit: "6",
+        upcomingLimit: "6",
+        sortBy: String(agendaFilters.sortBy || "dueAt"),
+        sortDirection: String(agendaFilters.sortDirection || "desc"),
+      });
+      if (agendaFilters.person) params.set("person", String(agendaFilters.person));
+      if (agendaFilters.module) params.set("module", String(agendaFilters.module));
+      if (agendaFilters.priority) params.set("priority", String(agendaFilters.priority));
+      if (agendaFilters.status) params.set("status", String(agendaFilters.status));
       const response = await fetch(
-        `/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&modules=meal,cleaning,storehouse,homestead,community&todayLimit=6&upcomingLimit=6`,
+        `/api/planners/household/today-upcoming?${params.toString()}`,
         {
           credentials: "include",
         }
@@ -431,7 +452,7 @@ export default function StorehousePage() {
     } finally {
       setHouseholdAgendaBusy(false);
     }
-  }, []);
+  }, [agendaFilters]);
 
   const dismissStorehouseAlert = useCallback(async (id) => {
     setAlertsBusyById((prev) => ({ ...prev, [id]: true }));
@@ -876,6 +897,130 @@ export default function StorehousePage() {
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="subtitle" style={{ fontWeight: 700 }}>
           Household Today and Upcoming
+        </div>
+        <div
+          style={{
+            marginTop: 8,
+            display: "grid",
+            gap: 8,
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          }}
+        >
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Module</span>
+            <select
+              value={agendaFilters.module}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, module: String(event.target.value || "") }))
+              }
+            >
+              <option value="">All</option>
+              <option value="meal">meal</option>
+              <option value="cleaning">cleaning</option>
+              <option value="storehouse">storehouse</option>
+              <option value="homestead">homestead</option>
+              <option value="community">community</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Priority</span>
+            <select
+              value={agendaFilters.priority}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, priority: String(event.target.value || "") }))
+              }
+            >
+              <option value="">All</option>
+              <option value="critical">critical</option>
+              <option value="high">high</option>
+              <option value="normal">normal</option>
+              <option value="low">low</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Status</span>
+            <select
+              value={agendaFilters.status}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, status: String(event.target.value || "") }))
+              }
+            >
+              <option value="">All</option>
+              <option value="blocked">blocked</option>
+              <option value="pending_approval">pending_approval</option>
+              <option value="active">active</option>
+              <option value="draft">draft</option>
+              <option value="planned">planned</option>
+              <option value="completed">completed</option>
+              <option value="archived">archived</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Sort</span>
+            <select
+              value={agendaFilters.sortBy}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, sortBy: String(event.target.value || "dueAt") }))
+              }
+            >
+              <option value="dueAt">dueAt</option>
+              <option value="priority">priority</option>
+              <option value="status">status</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+            <span className="subtitle">Direction</span>
+            <select
+              value={agendaFilters.sortDirection}
+              onChange={(event) =>
+                setAgendaFilters((prev) => ({ ...prev, sortDirection: String(event.target.value || "desc") }))
+              }
+            >
+              <option value="desc">desc</option>
+              <option value="asc">asc</option>
+            </select>
+          </label>
+        </div>
+        <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <input
+            type="text"
+            value={agendaPersonDraft}
+            onChange={(event) => setAgendaPersonDraft(String(event.target.value || ""))}
+            placeholder="Filter by person handle"
+            style={{ flex: "1 1 240px" }}
+          />
+          <SacredButton
+            size="sm"
+            tone="secondary"
+            onClick={() =>
+              setAgendaFilters((prev) => ({
+                ...prev,
+                person: String(agendaPersonDraft || "").trim().toLowerCase(),
+              }))
+            }
+          >
+            Apply Person
+          </SacredButton>
+          <SacredButton
+            size="sm"
+            tone="secondary"
+            onClick={() => {
+              setAgendaPersonDraft("");
+              setAgendaFilters({
+                person: "",
+                module: "",
+                priority: "",
+                status: "",
+                sortBy: "dueAt",
+                sortDirection: "desc",
+              });
+            }}
+          >
+            Reset Filters
+          </SacredButton>
+          <SacredButton size="sm" onClick={loadHouseholdAgenda} loading={householdAgendaBusy}>
+            Refresh Agenda
+          </SacredButton>
         </div>
         {householdAgendaBusy &&
         !householdAgenda.today.length &&

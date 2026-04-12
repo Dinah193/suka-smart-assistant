@@ -304,6 +304,15 @@ export default function HomesteadPlannerPage() {
   const [draftOffer, setDraftOffer] = useState("");
   const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
   const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
+  const [agendaFilters, setAgendaFilters] = useState({
+    person: "",
+    module: "",
+    priority: "",
+    status: "",
+    sortBy: "dueAt",
+    sortDirection: "desc",
+  });
+  const [agendaPersonDraft, setAgendaPersonDraft] = useState("");
   const [status, setStatus] = useState({ kind: "idle", msg: "" });
 
   const { exportToHub } = useHubExport({ source: "HomesteadPlanner" });
@@ -368,8 +377,20 @@ export default function HomesteadPlannerPage() {
   const loadHouseholdAgenda = useCallback(async () => {
     setHouseholdAgendaBusy(true);
     try {
+      const params = new URLSearchParams({
+        householdId,
+        modules: "meal,cleaning,storehouse,homestead,community",
+        todayLimit: "6",
+        upcomingLimit: "6",
+        sortBy: String(agendaFilters.sortBy || "dueAt"),
+        sortDirection: String(agendaFilters.sortDirection || "desc"),
+      });
+      if (agendaFilters.person) params.set("person", String(agendaFilters.person));
+      if (agendaFilters.module) params.set("module", String(agendaFilters.module));
+      if (agendaFilters.priority) params.set("priority", String(agendaFilters.priority));
+      if (agendaFilters.status) params.set("status", String(agendaFilters.status));
       const response = await fetch(
-        `/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&modules=meal,cleaning,storehouse,homestead,community&todayLimit=6&upcomingLimit=6`,
+        `/api/planners/household/today-upcoming?${params.toString()}`,
         {
           credentials: "include",
         }
@@ -385,7 +406,7 @@ export default function HomesteadPlannerPage() {
     } finally {
       setHouseholdAgendaBusy(false);
     }
-  }, [householdId]);
+  }, [agendaFilters, householdId]);
 
   useEffect(() => {
     loadHouseholdAgenda();
@@ -971,6 +992,127 @@ export default function HomesteadPlannerPage() {
             title="Household Today and Upcoming"
             subtitle="Cross-module recurrence, dependency, and conflict cues."
           >
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Module</span>
+                <select
+                  value={agendaFilters.module}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, module: String(event.target.value || "") }))
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="meal">meal</option>
+                  <option value="cleaning">cleaning</option>
+                  <option value="storehouse">storehouse</option>
+                  <option value="homestead">homestead</option>
+                  <option value="community">community</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Priority</span>
+                <select
+                  value={agendaFilters.priority}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, priority: String(event.target.value || "") }))
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="critical">critical</option>
+                  <option value="high">high</option>
+                  <option value="normal">normal</option>
+                  <option value="low">low</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Status</span>
+                <select
+                  value={agendaFilters.status}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, status: String(event.target.value || "") }))
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="blocked">blocked</option>
+                  <option value="pending_approval">pending_approval</option>
+                  <option value="active">active</option>
+                  <option value="draft">draft</option>
+                  <option value="planned">planned</option>
+                  <option value="completed">completed</option>
+                  <option value="archived">archived</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Sort</span>
+                <select
+                  value={agendaFilters.sortBy}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, sortBy: String(event.target.value || "dueAt") }))
+                  }
+                >
+                  <option value="dueAt">dueAt</option>
+                  <option value="priority">priority</option>
+                  <option value="status">status</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs">
+                <span className="text-[hsl(var(--text-subtle))]">Direction</span>
+                <select
+                  value={agendaFilters.sortDirection}
+                  onChange={(event) =>
+                    setAgendaFilters((prev) => ({ ...prev, sortDirection: String(event.target.value || "desc") }))
+                  }
+                >
+                  <option value="desc">desc</option>
+                  <option value="asc">asc</option>
+                </select>
+              </label>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <input
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm md:w-auto md:flex-1"
+                value={agendaPersonDraft}
+                onChange={(event) => setAgendaPersonDraft(String(event.target.value || ""))}
+                placeholder="Filter by person handle"
+              />
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() =>
+                  setAgendaFilters((prev) => ({
+                    ...prev,
+                    person: String(agendaPersonDraft || "").trim().toLowerCase(),
+                  }))
+                }
+              >
+                Apply Person
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => {
+                  setAgendaPersonDraft("");
+                  setAgendaFilters({
+                    person: "",
+                    module: "",
+                    priority: "",
+                    status: "",
+                    sortBy: "dueAt",
+                    sortDirection: "desc",
+                  });
+                }}
+              >
+                Reset Filters
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => loadHouseholdAgenda()}
+                disabled={householdAgendaBusy}
+              >
+                Refresh Agenda
+              </button>
+            </div>
             {householdAgendaBusy &&
             !householdAgenda.today.length &&
             !householdAgenda.upcoming.length ? (
