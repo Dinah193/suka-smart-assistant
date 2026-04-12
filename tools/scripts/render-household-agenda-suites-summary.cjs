@@ -7,6 +7,10 @@ function fail(message) {
   process.exit(1);
 }
 
+function hasArg(flag) {
+  return process.argv.includes(flag);
+}
+
 function formatDuration(ms) {
   if (!Number.isFinite(ms) || ms < 0) return "n/a";
   return `${(ms / 1000).toFixed(2)}s`;
@@ -36,9 +40,44 @@ function buildMarkdown(summary, summaryRelPath) {
 function run() {
   const repoRoot = process.cwd();
   const latestSummaryPath = path.join(repoRoot, ".tmp", "household-agenda-suites-latest.json");
+  const allowMissing = hasArg("--allow-missing");
+
+  const stepSummaryFile = process.env.GITHUB_STEP_SUMMARY;
 
   if (!fs.existsSync(latestSummaryPath)) {
-    fail(`Missing artifact: ${path.relative(repoRoot, latestSummaryPath)}`);
+    if (!allowMissing) {
+      fail(`Missing artifact: ${path.relative(repoRoot, latestSummaryPath)}`);
+    }
+
+    const markdown = [
+      "## Household Agenda Gate Summary",
+      "",
+      "- Status: **UNAVAILABLE**",
+      `- Summary JSON: ${path.relative(repoRoot, latestSummaryPath).replace(/\\/g, "/")}`,
+      "- Note: summary artifact was not found for this run.",
+      "",
+    ].join("\n");
+
+    const latestMarkdownPath = path.join(repoRoot, ".tmp", "household-agenda-suites-latest.md");
+    fs.writeFileSync(latestMarkdownPath, `${markdown}\n`, "utf8");
+
+    const timestampSuffix = new Date().toISOString().replace(/[.:]/g, "-");
+    const stampedMarkdownPath = path.join(
+      repoRoot,
+      ".tmp",
+      `household-agenda-suites-${timestampSuffix}.md`
+    );
+    fs.writeFileSync(stampedMarkdownPath, `${markdown}\n`, "utf8");
+
+    if (stepSummaryFile) {
+      fs.appendFileSync(stepSummaryFile, `${markdown}\n`, "utf8");
+      console.log(`[household-agenda:summary] wrote GitHub step summary: ${stepSummaryFile}`);
+    }
+
+    console.log(
+      `[household-agenda:summary] missing summary artifact; generated fallback markdown ${path.relative(repoRoot, latestMarkdownPath)}`
+    );
+    return;
   }
 
   let summary;
@@ -64,7 +103,6 @@ function run() {
   );
   fs.writeFileSync(stampedMarkdownPath, markdown, "utf8");
 
-  const stepSummaryFile = process.env.GITHUB_STEP_SUMMARY;
   if (stepSummaryFile) {
     fs.appendFileSync(stepSummaryFile, markdown, "utf8");
     console.log(`[household-agenda:summary] wrote GitHub step summary: ${stepSummaryFile}`);

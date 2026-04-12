@@ -142,4 +142,39 @@ describe("household agenda triage scripts", () => {
     expect(markdown).toContain("Status: **PASSED**");
     expect(markdown).toContain("suite:_tests_/cleaningPage.ssa.contract.test.jsx");
   });
+
+  it("summary renderer fails without --allow-missing when summary artifact is missing", () => {
+    const workspaceRoot = makeTempWorkspace();
+
+    const result = spawnSync(process.execPath, [RENDER_SCRIPT], {
+      cwd: workspaceRoot,
+      encoding: "utf8",
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(String(result.stderr || "")).toContain("Missing artifact");
+  });
+
+  it("summary renderer writes fallback markdown with --allow-missing", () => {
+    const workspaceRoot = makeTempWorkspace();
+
+    const result = spawnSync(process.execPath, [RENDER_SCRIPT, "--allow-missing"], {
+      cwd: workspaceRoot,
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    expect(String(result.stdout || "")).toContain("missing summary artifact");
+
+    const latestMdPath = path.join(
+      workspaceRoot,
+      ".tmp",
+      "household-agenda-suites-latest.md"
+    );
+    expect(fs.existsSync(latestMdPath)).toBe(true);
+
+    const markdown = fs.readFileSync(latestMdPath, "utf8");
+    expect(markdown).toContain("Status: **UNAVAILABLE**");
+    expect(markdown).toContain("summary artifact was not found");
+  });
 });
