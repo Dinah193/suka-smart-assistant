@@ -66,7 +66,7 @@ async function authenticateRequest(req, res, next) {
     }
 
     const insecureHeaderAuthAllowed =
-      String(process.env.ALLOW_INSECURE_HEADER_AUTH || (process.env.NODE_ENV === "production" ? "false" : "true"))
+      String(process.env.ALLOW_INSECURE_HEADER_AUTH || "")
         .toLowerCase() === "true";
 
     const fallbackUserId = req.headers["x-user-id"];
@@ -79,6 +79,22 @@ async function authenticateRequest(req, res, next) {
           .split(",")
           .map((x) => x.trim())
           .filter(Boolean),
+      };
+      return next();
+    }
+
+    const host = String(req?.hostname || req?.headers?.host || "").split(":")[0].toLowerCase();
+    const localHost = host === "localhost" || host === "127.0.0.1" || host === "::1";
+    const localBypassEnabled =
+      String(process.env.NODE_ENV || "").toLowerCase() !== "production" &&
+      String(process.env.SSA_DEV_AUTH_BYPASS || "").toLowerCase() === "true";
+
+    if (localHost && localBypassEnabled) {
+      req.user = {
+        id: "dev-local-user",
+        homeId: "default-household",
+        familyId: null,
+        roles: ["owner", "admin"],
       };
       return next();
     }
