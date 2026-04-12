@@ -10,6 +10,18 @@ Artifact ID: CLOSEOUT-BRANCH-PROTECTION-ENABLEMENT-2026-04-12
 - Revalidation command:
   - `gh api repos/Dinah193/suka-smart-assistant/branches/main --jq '{name:.name,protected:.protected}'`
 
+## Latest Enablement Attempt (2026-04-12)
+Command executed:
+- `gh api -X PUT repos/Dinah193/suka-smart-assistant/branches/main/protection ...`
+
+Observed API result:
+- HTTP `403`
+- Message: `Upgrade to GitHub Pro or make this repository public to enable this feature.`
+
+Interpretation:
+- Branch protection cannot be enabled from CLI in the current repository plan/visibility context.
+- Final blocker remains external to application code changes.
+
 ## Required Outcome
 Enable branch protection for `main` with required status checks aligned to PR lanes.
 
