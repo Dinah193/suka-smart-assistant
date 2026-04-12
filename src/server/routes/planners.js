@@ -2661,6 +2661,20 @@ router.get("/household/today-upcoming", async (req, res) => {
       ok: true,
       householdId,
       modules: requestedModules,
+      applied: {
+        filters: {
+          person: String(filters?.ownerId || ""),
+          module: String(filters?.moduleKey || ""),
+          priority: String(filters?.priority || ""),
+          status: String(filters?.workflowState || ""),
+        },
+        sortBy,
+        sortDirection,
+        limits: {
+          today: todayLimit,
+          upcoming: upcomingLimit,
+        },
+      },
       ...payload,
     });
   } catch (error) {

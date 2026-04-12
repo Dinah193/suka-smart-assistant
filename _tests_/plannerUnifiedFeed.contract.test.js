@@ -931,6 +931,13 @@ describe("planner unified feed contract", () => {
       );
       expect(moduleFilteredRes.status).toBe(200);
       const moduleFilteredPayload = await moduleFilteredRes.json();
+      expect(moduleFilteredPayload?.applied?.filters).toMatchObject({
+        module: "cleaning",
+      });
+      expect(moduleFilteredPayload?.applied?.limits).toMatchObject({
+        today: 50,
+        upcoming: 50,
+      });
       const moduleRows = collectAgendaRows(moduleFilteredPayload).filter(
         (item) => String(item?.sourceType || "") === "task"
       );
@@ -978,6 +985,10 @@ describe("planner unified feed contract", () => {
       );
       expect(statusSortedRes.status).toBe(200);
       const statusSortedPayload = await statusSortedRes.json();
+      expect(statusSortedPayload?.applied).toMatchObject({
+        sortBy: "status",
+        sortDirection: "desc",
+      });
       const statusRowsSorted = collectAgendaRows(statusSortedPayload).filter(
         (item) => String(item?.sourceType || "") === "task"
       );
