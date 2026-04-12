@@ -48,6 +48,10 @@ jobs:
       - name: Household agenda gate (logged + checked)
         run: npm run test:household:agenda:gate:ci
 
+      - name: Publish household agenda gate summary
+        if: always()
+        run: npm run test:household:agenda:gate:summary
+
       - name: Upload household agenda gate artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,8 +60,10 @@ jobs:
           path: |
             .tmp/household-agenda-suites-latest.log
             .tmp/household-agenda-suites-latest.json
+            .tmp/household-agenda-suites-latest.md
             .tmp/household-agenda-suites-*.log
             .tmp/household-agenda-suites-*.json
+            .tmp/household-agenda-suites-*.md
           if-no-files-found: error
           retention-days: 14
 
