@@ -100,6 +100,10 @@ import {
   findValueByCandidateKeys,
   normalizeParticipationEntries,
 } from "@/utils/householdGlance";
+import {
+  areAgendaFiltersEqual,
+  normalizeAppliedAgendaFilters,
+} from "@/utils/householdAgendaControls";
 
 /* -------------------------------------------------------------------------- */
 /* Soft/defensive shared imports (REQUIRED)                                    */
@@ -966,23 +970,9 @@ export default function CleaningPage() {
         today: Array.isArray(payload?.today) ? payload.today : [],
         upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
       });
-      const normalizedAppliedFilters = {
-        person: String(payload?.applied?.filters?.person || "").trim().toLowerCase(),
-        module: String(payload?.applied?.filters?.module || ""),
-        priority: String(payload?.applied?.filters?.priority || ""),
-        status: String(payload?.applied?.filters?.status || ""),
-        sortBy: String(payload?.applied?.sortBy || "dueAt"),
-        sortDirection: String(payload?.applied?.sortDirection || "desc"),
-      };
+      const normalizedAppliedFilters = normalizeAppliedAgendaFilters(payload?.applied);
       setAgendaFilters((previous) => {
-        if (
-          previous.person === normalizedAppliedFilters.person
-          && previous.module === normalizedAppliedFilters.module
-          && previous.priority === normalizedAppliedFilters.priority
-          && previous.status === normalizedAppliedFilters.status
-          && previous.sortBy === normalizedAppliedFilters.sortBy
-          && previous.sortDirection === normalizedAppliedFilters.sortDirection
-        ) {
+        if (areAgendaFiltersEqual(previous, normalizedAppliedFilters)) {
           return previous;
         }
         return normalizedAppliedFilters;

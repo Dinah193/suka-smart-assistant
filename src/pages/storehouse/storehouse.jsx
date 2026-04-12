@@ -25,6 +25,10 @@ import {
   recordProductActionClick,
   recordProductActionImpression,
 } from "@/services/telemetry/productActionTelemetry";
+import {
+  areAgendaFiltersEqual,
+  normalizeAppliedAgendaFilters,
+} from "@/utils/householdAgendaControls";
 import { fetchStorehousePlannerData } from "@/pages/storehouse/planner/InventoryEstimatorService";
 import LoadingBoundary from "@/components/common/LoadingBoundary";
 
@@ -447,23 +451,9 @@ export default function StorehousePage() {
         today: Array.isArray(payload?.today) ? payload.today : [],
         upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
       });
-      const normalizedAppliedFilters = {
-        person: String(payload?.applied?.filters?.person || "").trim().toLowerCase(),
-        module: String(payload?.applied?.filters?.module || ""),
-        priority: String(payload?.applied?.filters?.priority || ""),
-        status: String(payload?.applied?.filters?.status || ""),
-        sortBy: String(payload?.applied?.sortBy || "dueAt"),
-        sortDirection: String(payload?.applied?.sortDirection || "desc"),
-      };
+      const normalizedAppliedFilters = normalizeAppliedAgendaFilters(payload?.applied);
       setAgendaFilters((previous) => {
-        if (
-          previous.person === normalizedAppliedFilters.person
-          && previous.module === normalizedAppliedFilters.module
-          && previous.priority === normalizedAppliedFilters.priority
-          && previous.status === normalizedAppliedFilters.status
-          && previous.sortBy === normalizedAppliedFilters.sortBy
-          && previous.sortDirection === normalizedAppliedFilters.sortDirection
-        ) {
+        if (areAgendaFiltersEqual(previous, normalizedAppliedFilters)) {
           return previous;
         }
         return normalizedAppliedFilters;
