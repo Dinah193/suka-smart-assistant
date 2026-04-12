@@ -102,6 +102,7 @@ import {
 } from "@/utils/householdGlance";
 import {
   areAgendaFiltersEqual,
+  buildAppliedAgendaSummary,
   normalizeAppliedAgendaFilters,
 } from "@/utils/householdAgendaControls";
 import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
@@ -2654,17 +2655,7 @@ export default function CleaningPage() {
           ) : (
             <div className="sv-stack-sm">
               <div className="sv-muted" style={{ fontSize: 12 }}>
-                Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
-                {householdAgenda?.applied?.filters?.priority
-                  ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
-                  : ""}
-                {householdAgenda?.applied?.filters?.status
-                  ? ` | ${String(householdAgenda.applied.filters.status)} status`
-                  : ""}
-                {householdAgenda?.applied?.filters?.person
-                  ? ` | person ${String(householdAgenda.applied.filters.person)}`
-                  : ""}
-                {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
+                {buildAppliedAgendaSummary(householdAgenda?.applied)}
               </div>
               <div className="sv-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
                 <div className="sv-stack-sm">

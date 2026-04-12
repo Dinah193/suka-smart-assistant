@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   areAgendaFiltersEqual,
+  buildAppliedAgendaSummary,
   normalizeAppliedAgendaFilters,
 } from "../src/utils/householdAgendaControls.js";
 
@@ -93,6 +94,31 @@ describe("householdAgendaControls", () => {
     it("returns false when either side is missing", () => {
       expect(areAgendaFiltersEqual(null, {})).toBe(false);
       expect(areAgendaFiltersEqual({}, undefined)).toBe(false);
+    });
+  });
+
+  describe("buildAppliedAgendaSummary", () => {
+    it("formats summary with defaults when applied payload is missing", () => {
+      expect(buildAppliedAgendaSummary(undefined)).toBe(
+        "Applied: all modules | sort dueAt:desc"
+      );
+    });
+
+    it("formats summary with all provided applied fields", () => {
+      expect(
+        buildAppliedAgendaSummary({
+          filters: {
+            person: "  Member-Alpha  ",
+            module: "cleaning",
+            priority: "high",
+            status: "blocked",
+          },
+          sortBy: "status",
+          sortDirection: "asc",
+        })
+      ).toBe(
+        "Applied: cleaning | high priority | blocked status | person member-alpha | sort status:asc"
+      );
     });
   });
 });

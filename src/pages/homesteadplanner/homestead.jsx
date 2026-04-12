@@ -12,6 +12,7 @@ import {
 } from "./HomesteadPlannerService";
 import {
   areAgendaFiltersEqual,
+  buildAppliedAgendaSummary,
   normalizeAppliedAgendaFilters,
 } from "@/utils/householdAgendaControls";
 import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
@@ -1158,17 +1159,7 @@ export default function HomesteadPlannerPage() {
             ) : (
               <div className="grid grid-cols-1 gap-2">
                 <div className="text-xs text-[hsl(var(--text-subtle))]">
-                  Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
-                  {householdAgenda?.applied?.filters?.priority
-                    ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
-                    : ""}
-                  {householdAgenda?.applied?.filters?.status
-                    ? ` | ${String(householdAgenda.applied.filters.status)} status`
-                    : ""}
-                  {householdAgenda?.applied?.filters?.person
-                    ? ` | person ${String(householdAgenda.applied.filters.person)}`
-                    : ""}
-                  {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
+                  {buildAppliedAgendaSummary(householdAgenda?.applied)}
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-white p-3">

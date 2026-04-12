@@ -21,3 +21,19 @@ export function areAgendaFiltersEqual(left, right) {
       && left.sortDirection === right.sortDirection
   );
 }
+
+export function buildAppliedAgendaSummary(applied) {
+  const normalized = normalizeAppliedAgendaFilters(applied);
+  let summary = `Applied: ${String(normalized.module || "all modules")}`;
+  if (normalized.priority) {
+    summary += ` | ${String(normalized.priority)} priority`;
+  }
+  if (normalized.status) {
+    summary += ` | ${String(normalized.status)} status`;
+  }
+  if (normalized.person) {
+    summary += ` | person ${String(normalized.person)}`;
+  }
+  summary += ` | sort ${String(normalized.sortBy)}:${String(normalized.sortDirection)}`;
+  return summary;
+}

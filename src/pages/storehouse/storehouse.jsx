@@ -27,6 +27,7 @@ import {
 } from "@/services/telemetry/productActionTelemetry";
 import {
   areAgendaFiltersEqual,
+  buildAppliedAgendaSummary,
   normalizeAppliedAgendaFilters,
 } from "@/utils/householdAgendaControls";
 import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
@@ -1067,17 +1068,7 @@ export default function StorehousePage() {
         ) : (
           <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
             <div className="subtitle" style={{ fontSize: 12 }}>
-              Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
-              {householdAgenda?.applied?.filters?.priority
-                ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
-                : ""}
-              {householdAgenda?.applied?.filters?.status
-                ? ` | ${String(householdAgenda.applied.filters.status)} status`
-                : ""}
-              {householdAgenda?.applied?.filters?.person
-                ? ` | person ${String(householdAgenda.applied.filters.person)}`
-                : ""}
-              {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
+              {buildAppliedAgendaSummary(householdAgenda?.applied)}
             </div>
             <div
               style={{
