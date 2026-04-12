@@ -222,9 +222,30 @@ describe("meal planner controls contract", () => {
 
     fetchMock = vi.fn(async (url, options = {}) => {
       const href = String(url);
+      const parsedUrl = new URL(href, "http://localhost");
 
       if (href.includes("/api/planners/meal/context")) {
         return jsonResponse({ ok: true, feed: [], alerts: [] });
+      }
+      if (href.includes("/api/planners/household/today-upcoming")) {
+        const moduleValue = String(parsedUrl.searchParams.get("module") || "");
+        return jsonResponse({
+          ok: true,
+          metrics: { todayCount: 0, upcomingCount: 0 },
+          applied: {
+            filters: {
+              person: String(parsedUrl.searchParams.get("person") || ""),
+              module: moduleValue === "cleaning" ? "storehouse" : moduleValue,
+              priority: String(parsedUrl.searchParams.get("priority") || ""),
+              status: String(parsedUrl.searchParams.get("status") || ""),
+            },
+            sortBy: String(parsedUrl.searchParams.get("sortBy") || "dueAt"),
+            sortDirection: String(parsedUrl.searchParams.get("sortDirection") || "desc"),
+            limits: { today: 10, upcoming: 10 },
+          },
+          today: [],
+          upcoming: [],
+        });
       }
       if (href.includes("/api/planners/meal?")) {
         return jsonResponse({ ok: true, snapshot: {} });
@@ -358,12 +379,28 @@ describe("meal planner controls contract", () => {
       .filter((url) => url.includes("/api/planners/household/today-upcoming"));
     expect(agendaRequestUrls.length).toBeGreaterThan(0);
 
-    const lastAgendaUrl = agendaRequestUrls[agendaRequestUrls.length - 1];
-    expect(lastAgendaUrl).toContain("module=cleaning");
-    expect(lastAgendaUrl).toContain("priority=high");
-    expect(lastAgendaUrl).toContain("status=blocked");
-    expect(lastAgendaUrl).toContain("sortBy=status");
-    expect(lastAgendaUrl).toContain("sortDirection=asc");
-    expect(lastAgendaUrl).toContain("person=member-alpha");
+    expect(
+      agendaRequestUrls.some(
+        (url) => url.includes("module=cleaning")
+          && url.includes("priority=high")
+          && url.includes("status=blocked")
+          && url.includes("sortBy=status")
+          && url.includes("sortDirection=asc")
+          && url.includes("person=member-alpha")
+      )
+    ).toBe(true);
+    expect(agendaRequestUrls.some((url) => url.includes("module=storehouse"))).toBe(true);
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(moduleSelect.value).toBe("storehouse");
+    expect(prioritySelect.value).toBe("high");
+    expect(statusSelect.value).toBe("blocked");
+    expect(sortBySelect.value).toBe("status");
+    expect(sortDirectionSelect.value).toBe("asc");
+    expect(personInput.value).toBe("member-alpha");
   });
 });

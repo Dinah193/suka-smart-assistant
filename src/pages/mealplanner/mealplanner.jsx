@@ -2173,6 +2173,33 @@ export default function MealPlanningPage() {
       setMealFeed(payload.feed);
       setSacredMealAlerts(payload.alerts);
       setHouseholdAgenda(agendaPayload);
+      const normalizedAppliedFilters = {
+        person: String(agendaPayload?.applied?.filters?.person || "").trim().toLowerCase(),
+        module: String(agendaPayload?.applied?.filters?.module || ""),
+        priority: String(agendaPayload?.applied?.filters?.priority || ""),
+        status: String(agendaPayload?.applied?.filters?.status || ""),
+        sortBy: String(agendaPayload?.applied?.sortBy || "dueAt"),
+        sortDirection: String(agendaPayload?.applied?.sortDirection || "desc"),
+      };
+      setAgendaFilters((previous) => {
+        if (
+          previous.person === normalizedAppliedFilters.person
+          && previous.module === normalizedAppliedFilters.module
+          && previous.priority === normalizedAppliedFilters.priority
+          && previous.status === normalizedAppliedFilters.status
+          && previous.sortBy === normalizedAppliedFilters.sortBy
+          && previous.sortDirection === normalizedAppliedFilters.sortDirection
+        ) {
+          return previous;
+        }
+        return normalizedAppliedFilters;
+      });
+      setAgendaPersonDraft((previous) => {
+        if (previous === normalizedAppliedFilters.person) {
+          return previous;
+        }
+        return normalizedAppliedFilters.person;
+      });
       setCommunityApprovals(approvalsPayload);
     } catch (error) {
       setMealContextError(String(error?.message || error || "Failed to load planner context."));
