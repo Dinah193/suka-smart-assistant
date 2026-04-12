@@ -83,7 +83,7 @@
  * - No TypeScript
  */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "@/styles/household.css";
 import "../cooking/cooking.css"; // reuse Cooking page layout + cards
@@ -814,6 +814,15 @@ export default function CleaningPage() {
   const [householdGlance, setHouseholdGlance] = useState(null);
   const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
   const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
+  const [agendaFilters, setAgendaFilters] = useState({
+    person: "",
+    module: "",
+    priority: "",
+    status: "",
+    sortBy: "dueAt",
+    sortDirection: "desc",
+  });
+  const [agendaPersonDraft, setAgendaPersonDraft] = useState("");
 
   // NEW: Plan Library state (interactive)
   const [plans, setPlans] = useState([]);
@@ -929,12 +938,24 @@ export default function CleaningPage() {
     fetchHouseholdGlance();
   }, []);
 
-  const fetchHouseholdAgenda = async () => {
+  const fetchHouseholdAgenda = useCallback(async () => {
     setHouseholdAgendaBusy(true);
     try {
       const householdId = resolveCleaningHouseholdId();
+      const params = new URLSearchParams({
+        householdId,
+        modules: "meal,cleaning,storehouse,homestead,community",
+        todayLimit: "6",
+        upcomingLimit: "6",
+        sortBy: String(agendaFilters.sortBy || "dueAt"),
+        sortDirection: String(agendaFilters.sortDirection || "desc"),
+      });
+      if (agendaFilters.person) params.set("person", String(agendaFilters.person));
+      if (agendaFilters.module) params.set("module", String(agendaFilters.module));
+      if (agendaFilters.priority) params.set("priority", String(agendaFilters.priority));
+      if (agendaFilters.status) params.set("status", String(agendaFilters.status));
       const response = await fetch(
-        `/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&modules=meal,cleaning,storehouse,homestead,community&todayLimit=6&upcomingLimit=6`,
+        `/api/planners/household/today-upcoming?${params.toString()}`,
         {
           credentials: "include",
         }
@@ -950,11 +971,11 @@ export default function CleaningPage() {
     } finally {
       setHouseholdAgendaBusy(false);
     }
-  };
+  }, [agendaFilters]);
 
   useEffect(() => {
     fetchHouseholdAgenda();
-  }, []);
+  }, [fetchHouseholdAgenda]);
 
   const agendaCueLine = (item) =>
     [
@@ -2473,6 +2494,121 @@ export default function CleaningPage() {
               </Button>
             }
           />
+          <div
+            className="sv-grid"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", marginBottom: 8 }}
+          >
+            <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+              <span className="sv-muted">Module</span>
+              <select
+                value={agendaFilters.module}
+                onChange={(event) =>
+                  setAgendaFilters((prev) => ({ ...prev, module: String(event.target.value || "") }))
+                }
+              >
+                <option value="">All</option>
+                <option value="meal">meal</option>
+                <option value="cleaning">cleaning</option>
+                <option value="storehouse">storehouse</option>
+                <option value="homestead">homestead</option>
+                <option value="community">community</option>
+              </select>
+            </label>
+            <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+              <span className="sv-muted">Priority</span>
+              <select
+                value={agendaFilters.priority}
+                onChange={(event) =>
+                  setAgendaFilters((prev) => ({ ...prev, priority: String(event.target.value || "") }))
+                }
+              >
+                <option value="">All</option>
+                <option value="critical">critical</option>
+                <option value="high">high</option>
+                <option value="normal">normal</option>
+                <option value="low">low</option>
+              </select>
+            </label>
+            <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+              <span className="sv-muted">Status</span>
+              <select
+                value={agendaFilters.status}
+                onChange={(event) =>
+                  setAgendaFilters((prev) => ({ ...prev, status: String(event.target.value || "") }))
+                }
+              >
+                <option value="">All</option>
+                <option value="blocked">blocked</option>
+                <option value="pending_approval">pending_approval</option>
+                <option value="active">active</option>
+                <option value="draft">draft</option>
+                <option value="planned">planned</option>
+                <option value="completed">completed</option>
+                <option value="archived">archived</option>
+              </select>
+            </label>
+            <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+              <span className="sv-muted">Sort</span>
+              <select
+                value={agendaFilters.sortBy}
+                onChange={(event) =>
+                  setAgendaFilters((prev) => ({ ...prev, sortBy: String(event.target.value || "dueAt") }))
+                }
+              >
+                <option value="dueAt">dueAt</option>
+                <option value="priority">priority</option>
+                <option value="status">status</option>
+              </select>
+            </label>
+            <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+              <span className="sv-muted">Direction</span>
+              <select
+                value={agendaFilters.sortDirection}
+                onChange={(event) =>
+                  setAgendaFilters((prev) => ({ ...prev, sortDirection: String(event.target.value || "desc") }))
+                }
+              >
+                <option value="desc">desc</option>
+                <option value="asc">asc</option>
+              </select>
+            </label>
+          </div>
+          <div className="sv-row sv-gap sv-wrap" style={{ marginBottom: 8 }}>
+            <input
+              type="text"
+              value={agendaPersonDraft}
+              onChange={(event) => setAgendaPersonDraft(String(event.target.value || ""))}
+              placeholder="Filter by person handle"
+              style={{ flex: "1 1 220px" }}
+            />
+            <Button
+              variant="outline"
+              onClick={() =>
+                setAgendaFilters((prev) => ({
+                  ...prev,
+                  person: String(agendaPersonDraft || "").trim().toLowerCase(),
+                }))
+              }
+            >
+              Apply Person
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAgendaPersonDraft("");
+                setAgendaFilters({
+                  person: "",
+                  module: "",
+                  priority: "",
+                  status: "",
+                  sortBy: "dueAt",
+                  sortDirection: "desc",
+                });
+              }}
+            >
+              Reset Filters
+            </Button>
+          </div>
           {householdAgendaBusy &&
           !householdAgenda.today.length &&
           !householdAgenda.upcoming.length ? (
