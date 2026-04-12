@@ -28,6 +28,35 @@ jobs:
       - name: Build
         run: npm run build
 
+  household-agenda-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Household agenda gate (logged + checked)
+        run: npm run test:household:agenda:gate:ci
+
+      - name: Upload household agenda gate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: household-agenda-gate-latest
+          path: |
+            .tmp/household-agenda-suites-latest.log
+            .tmp/household-agenda-suites-latest.json
+          if-no-files-found: error
+
   db-runtime-contracts:
     runs-on: ubuntu-latest
     services:
