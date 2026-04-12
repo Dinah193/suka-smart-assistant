@@ -34,6 +34,7 @@ import {
   areAgendaFiltersEqual,
   normalizeAppliedAgendaFilters,
 } from "@/utils/householdAgendaControls";
+import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
 import { requestHouseholdAutomationPlan } from "@/pages/planners/HouseholdPlanningService";
 import { getToken } from "@/services/auth/tokenProvider";
 import LoadingBoundary from "@/components/common/LoadingBoundary";
@@ -965,17 +966,19 @@ async function fetchHouseholdTodayUpcomingAgenda({
   sortBy = "dueAt",
   sortDirection = "desc",
 }) {
-  const query = new URLSearchParams({
+  const query = buildHouseholdTodayUpcomingQuery({
     householdId,
-    todayLimit: String(todayLimit),
-    upcomingLimit: String(upcomingLimit),
-    sortBy: String(sortBy || "dueAt"),
-    sortDirection: String(sortDirection || "desc"),
+    todayLimit,
+    upcomingLimit,
+    filters: {
+      person,
+      module,
+      priority,
+      status,
+      sortBy,
+      sortDirection,
+    },
   });
-  if (person) query.set("person", String(person));
-  if (module) query.set("module", String(module));
-  if (priority) query.set("priority", String(priority));
-  if (status) query.set("status", String(status));
 
   const response = await fetch(
     `/api/planners/household/today-upcoming?${query.toString()}`,

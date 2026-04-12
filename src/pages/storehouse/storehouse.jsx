@@ -29,6 +29,7 @@ import {
   areAgendaFiltersEqual,
   normalizeAppliedAgendaFilters,
 } from "@/utils/householdAgendaControls";
+import { buildHouseholdTodayUpcomingQuery } from "@/utils/householdAgendaQueryParams";
 import { fetchStorehousePlannerData } from "@/pages/storehouse/planner/InventoryEstimatorService";
 import LoadingBoundary from "@/components/common/LoadingBoundary";
 
@@ -427,18 +428,13 @@ export default function StorehousePage() {
     setHouseholdAgendaBusy(true);
     try {
       const householdId = resolveStorehouseHouseholdId();
-      const params = new URLSearchParams({
+      const params = buildHouseholdTodayUpcomingQuery({
         householdId,
         modules: "meal,cleaning,storehouse,homestead,community",
-        todayLimit: "6",
-        upcomingLimit: "6",
-        sortBy: String(agendaFilters.sortBy || "dueAt"),
-        sortDirection: String(agendaFilters.sortDirection || "desc"),
+        todayLimit: 6,
+        upcomingLimit: 6,
+        filters: agendaFilters,
       });
-      if (agendaFilters.person) params.set("person", String(agendaFilters.person));
-      if (agendaFilters.module) params.set("module", String(agendaFilters.module));
-      if (agendaFilters.priority) params.set("priority", String(agendaFilters.priority));
-      if (agendaFilters.status) params.set("status", String(agendaFilters.status));
       const response = await fetch(
         `/api/planners/household/today-upcoming?${params.toString()}`,
         {
