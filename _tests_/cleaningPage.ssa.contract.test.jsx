@@ -51,9 +51,11 @@ describe("cleaning page SSA migration contract", () => {
   let container;
   let root;
   let originalWorker;
+  let appliedPerson;
 
   beforeEach(() => {
     globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+    appliedPerson = "";
     originalWorker = globalThis.Worker;
     globalThis.Worker = class WorkerMock {
       constructor() {
@@ -65,11 +67,28 @@ describe("cleaning page SSA migration contract", () => {
     localStorage.clear();
     global.fetch = vi.fn(async (url) => {
       const key = String(url || "");
+      const parsedUrl = new URL(key, "http://localhost");
       if (key.includes("/api/planners/household/today-upcoming")) {
+        const moduleValue = String(parsedUrl.searchParams.get("module") || "");
+        const requestedPerson = String(parsedUrl.searchParams.get("person") || "").trim().toLowerCase();
+        if (requestedPerson) {
+          appliedPerson = requestedPerson;
+        }
         return {
           ok: true,
           json: async () => ({
             ok: true,
+            applied: {
+              filters: {
+                person: appliedPerson,
+                module: moduleValue === "cleaning" ? "homestead" : moduleValue,
+                priority: String(parsedUrl.searchParams.get("priority") || ""),
+                status: String(parsedUrl.searchParams.get("status") || ""),
+              },
+              sortBy: String(parsedUrl.searchParams.get("sortBy") || "dueAt"),
+              sortDirection: String(parsedUrl.searchParams.get("sortDirection") || "desc"),
+              limits: { today: 6, upcoming: 6 },
+            },
             today: [
               {
                 id: "clean-agenda-1",
@@ -203,13 +222,29 @@ describe("cleaning page SSA migration contract", () => {
       .map(([url]) => String(url || ""))
       .filter((url) => url.includes("/api/planners/household/today-upcoming"));
     expect(agendaRequestUrls.length).toBeGreaterThan(0);
-    const latestAgendaRequest = agendaRequestUrls[agendaRequestUrls.length - 1];
-    expect(latestAgendaRequest).toContain("module=cleaning");
-    expect(latestAgendaRequest).toContain("priority=high");
-    expect(latestAgendaRequest).toContain("status=blocked");
-    expect(latestAgendaRequest).toContain("sortBy=status");
-    expect(latestAgendaRequest).toContain("sortDirection=asc");
-    expect(latestAgendaRequest).toContain("person=member-alpha");
+    expect(
+      agendaRequestUrls.some(
+        (url) => url.includes("module=cleaning")
+          && url.includes("priority=high")
+          && url.includes("status=blocked")
+          && url.includes("sortBy=status")
+          && url.includes("sortDirection=asc")
+          && url.includes("person=member-alpha")
+      )
+    ).toBe(true);
+    expect(agendaRequestUrls.some((url) => url.includes("module=homestead"))).toBe(true);
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(moduleSelect.value).toBe("homestead");
+    expect(prioritySelect.value).toBe("high");
+    expect(statusSelect.value).toBe("blocked");
+    expect(sortBySelect.value).toBe("status");
+    expect(sortDirectionSelect.value).toBe("asc");
+    expect(personInput.value).toBe("member-alpha");
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/planners/household/today-upcoming"),

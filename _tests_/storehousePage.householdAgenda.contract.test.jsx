@@ -71,9 +71,11 @@ function setSelectValue(select, value) {
 describe("storehouse household agenda cue contract", () => {
   let container;
   let root;
+  let appliedPerson;
 
   beforeEach(() => {
     globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+    appliedPerson = "";
     fetchStorehousePlannerDataMock.mockReset();
     fetchStorehousePlannerDataMock.mockResolvedValue({
       projection: {
@@ -95,6 +97,7 @@ describe("storehouse household agenda cue contract", () => {
 
     global.fetch = vi.fn(async (url) => {
       const key = String(url || "");
+      const parsedUrl = new URL(key, "http://localhost");
       if (key.includes("/api/planners/storehouse/context")) {
         return {
           ok: true,
@@ -105,10 +108,26 @@ describe("storehouse household agenda cue contract", () => {
         };
       }
       if (key.includes("/api/planners/household/today-upcoming")) {
+        const moduleValue = String(parsedUrl.searchParams.get("module") || "");
+        const requestedPerson = String(parsedUrl.searchParams.get("person") || "").trim().toLowerCase();
+        if (requestedPerson) {
+          appliedPerson = requestedPerson;
+        }
         return {
           ok: true,
           json: async () => ({
             ok: true,
+            applied: {
+              filters: {
+                person: appliedPerson,
+                module: moduleValue === "storehouse" ? "community" : moduleValue,
+                priority: String(parsedUrl.searchParams.get("priority") || ""),
+                status: String(parsedUrl.searchParams.get("status") || ""),
+              },
+              sortBy: String(parsedUrl.searchParams.get("sortBy") || "dueAt"),
+              sortDirection: String(parsedUrl.searchParams.get("sortDirection") || "desc"),
+              limits: { today: 6, upcoming: 6 },
+            },
             today: [
               {
                 id: "agenda-storehouse-1",
@@ -207,12 +226,28 @@ describe("storehouse household agenda cue contract", () => {
       .map(([url]) => String(url || ""))
       .filter((url) => url.includes("/api/planners/household/today-upcoming"));
     expect(agendaRequestUrls.length).toBeGreaterThan(0);
-    const latestAgendaRequest = agendaRequestUrls[agendaRequestUrls.length - 1];
-    expect(latestAgendaRequest).toContain("module=storehouse");
-    expect(latestAgendaRequest).toContain("priority=high");
-    expect(latestAgendaRequest).toContain("status=blocked");
-    expect(latestAgendaRequest).toContain("sortBy=status");
-    expect(latestAgendaRequest).toContain("sortDirection=asc");
-    expect(latestAgendaRequest).toContain("person=member-alpha");
+    expect(
+      agendaRequestUrls.some(
+        (url) => url.includes("module=storehouse")
+          && url.includes("priority=high")
+          && url.includes("status=blocked")
+          && url.includes("sortBy=status")
+          && url.includes("sortDirection=asc")
+          && url.includes("person=member-alpha")
+      )
+    ).toBe(true);
+    expect(agendaRequestUrls.some((url) => url.includes("module=community"))).toBe(true);
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(moduleSelect.value).toBe("community");
+    expect(prioritySelect.value).toBe("high");
+    expect(statusSelect.value).toBe("blocked");
+    expect(sortBySelect.value).toBe("status");
+    expect(sortDirectionSelect.value).toBe("asc");
+    expect(personInput.value).toBe("member-alpha");
   });
 });
