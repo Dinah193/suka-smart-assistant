@@ -249,5 +249,12 @@ describe("storehouse household agenda cue contract", () => {
     expect(sortBySelect.value).toBe("status");
     expect(sortDirectionSelect.value).toBe("asc");
     expect(personInput.value).toBe("member-alpha");
+
+    const agendaText = String(agendaCard.textContent || "");
+    expect(agendaText).toContain("Applied: community");
+    expect(agendaText).toContain("high priority");
+    expect(agendaText).toContain("blocked status");
+    expect(agendaText).toContain("person member-alpha");
+    expect(agendaText).toContain("sort status:asc");
   });
 });

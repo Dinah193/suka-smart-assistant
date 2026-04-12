@@ -361,7 +361,20 @@ export default function StorehousePage() {
   const [storehouseFeedState, setStorehouseFeedState] = useState([]);
   const [feedBusyById, setFeedBusyById] = useState({});
   const [alertsBusyById, setAlertsBusyById] = useState({});
-  const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
+  const [householdAgenda, setHouseholdAgenda] = useState({
+    applied: {
+      filters: {
+        person: "",
+        module: "",
+        priority: "",
+        status: "",
+      },
+      sortBy: "dueAt",
+      sortDirection: "desc",
+    },
+    today: [],
+    upcoming: [],
+  });
   const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
   const [agendaFilters, setAgendaFilters] = useState({
     person: "",
@@ -444,6 +457,18 @@ export default function StorehousePage() {
       if (!response.ok) return;
       const payload = await response.json();
       setHouseholdAgenda({
+        applied: payload?.applied && typeof payload.applied === "object"
+          ? payload.applied
+          : {
+              filters: {
+                person: String(agendaFilters.person || ""),
+                module: String(agendaFilters.module || ""),
+                priority: String(agendaFilters.priority || ""),
+                status: String(agendaFilters.status || ""),
+              },
+              sortBy: String(agendaFilters.sortBy || "dueAt"),
+              sortDirection: String(agendaFilters.sortDirection || "desc"),
+            },
         today: Array.isArray(payload?.today) ? payload.today : [],
         upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
       });
@@ -1040,14 +1065,27 @@ export default function StorehousePage() {
         !householdAgenda.upcoming.length ? (
           <div className="subtitle">Loading household agenda…</div>
         ) : (
-          <div
-            style={{
-              marginTop: 8,
-              display: "grid",
-              gap: 12,
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            }}
-          >
+          <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+            <div className="subtitle" style={{ fontSize: 12 }}>
+              Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
+              {householdAgenda?.applied?.filters?.priority
+                ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
+                : ""}
+              {householdAgenda?.applied?.filters?.status
+                ? ` | ${String(householdAgenda.applied.filters.status)} status`
+                : ""}
+              {householdAgenda?.applied?.filters?.person
+                ? ` | person ${String(householdAgenda.applied.filters.person)}`
+                : ""}
+              {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              }}
+            >
             <section>
               <div className="subtitle" style={{ fontWeight: 600 }}>
                 Today
@@ -1091,6 +1129,7 @@ export default function StorehousePage() {
                 <div className="subtitle">No upcoming items.</div>
               )}
             </section>
+            </div>
           </div>
         )}
       </div>

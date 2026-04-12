@@ -307,7 +307,20 @@ export default function HomesteadPlannerPage() {
   const [feedBusyById, setFeedBusyById] = useState({});
   const [draftNeed, setDraftNeed] = useState("");
   const [draftOffer, setDraftOffer] = useState("");
-  const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
+  const [householdAgenda, setHouseholdAgenda] = useState({
+    applied: {
+      filters: {
+        person: "",
+        module: "",
+        priority: "",
+        status: "",
+      },
+      sortBy: "dueAt",
+      sortDirection: "desc",
+    },
+    today: [],
+    upcoming: [],
+  });
   const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
   const [agendaFilters, setAgendaFilters] = useState({
     person: "",
@@ -398,6 +411,18 @@ export default function HomesteadPlannerPage() {
       if (!response.ok) return;
       const payload = await response.json();
       setHouseholdAgenda({
+        applied: payload?.applied && typeof payload.applied === "object"
+          ? payload.applied
+          : {
+              filters: {
+                person: String(agendaFilters.person || ""),
+                module: String(agendaFilters.module || ""),
+                priority: String(agendaFilters.priority || ""),
+                status: String(agendaFilters.status || ""),
+              },
+              sortBy: String(agendaFilters.sortBy || "dueAt"),
+              sortDirection: String(agendaFilters.sortDirection || "desc"),
+            },
         today: Array.isArray(payload?.today) ? payload.today : [],
         upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
       });
@@ -1131,7 +1156,21 @@ export default function HomesteadPlannerPage() {
             !householdAgenda.upcoming.length ? (
               <div className="text-sm text-[hsl(var(--text-subtle))]">Loading household agenda…</div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2">
+                <div className="text-xs text-[hsl(var(--text-subtle))]">
+                  Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
+                  {householdAgenda?.applied?.filters?.priority
+                    ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
+                    : ""}
+                  {householdAgenda?.applied?.filters?.status
+                    ? ` | ${String(householdAgenda.applied.filters.status)} status`
+                    : ""}
+                  {householdAgenda?.applied?.filters?.person
+                    ? ` | person ${String(householdAgenda.applied.filters.person)}`
+                    : ""}
+                  {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-white p-3">
                   <div className="text-xs font-semibold text-[hsl(var(--text-primary))]">
                     Today
@@ -1178,6 +1217,7 @@ export default function HomesteadPlannerPage() {
                       No upcoming items.
                     </div>
                   )}
+                </div>
                 </div>
               </div>
             )}

@@ -817,7 +817,20 @@ export default function CleaningPage() {
 
   // Cross-domain glance (optional)
   const [householdGlance, setHouseholdGlance] = useState(null);
-  const [householdAgenda, setHouseholdAgenda] = useState({ today: [], upcoming: [] });
+  const [householdAgenda, setHouseholdAgenda] = useState({
+    applied: {
+      filters: {
+        person: "",
+        module: "",
+        priority: "",
+        status: "",
+      },
+      sortBy: "dueAt",
+      sortDirection: "desc",
+    },
+    today: [],
+    upcoming: [],
+  });
   const [householdAgendaBusy, setHouseholdAgendaBusy] = useState(false);
   const [agendaFilters, setAgendaFilters] = useState({
     person: "",
@@ -963,6 +976,18 @@ export default function CleaningPage() {
       if (!response.ok) return;
       const payload = await response.json();
       setHouseholdAgenda({
+        applied: payload?.applied && typeof payload.applied === "object"
+          ? payload.applied
+          : {
+              filters: {
+                person: String(agendaFilters.person || ""),
+                module: String(agendaFilters.module || ""),
+                priority: String(agendaFilters.priority || ""),
+                status: String(agendaFilters.status || ""),
+              },
+              sortBy: String(agendaFilters.sortBy || "dueAt"),
+              sortDirection: String(agendaFilters.sortDirection || "desc"),
+            },
         today: Array.isArray(payload?.today) ? payload.today : [],
         upcoming: Array.isArray(payload?.upcoming) ? payload.upcoming : [],
       });
@@ -2627,40 +2652,55 @@ export default function CleaningPage() {
           !householdAgenda.upcoming.length ? (
             <div className="sv-muted sv-text-sm">Loading household agenda…</div>
           ) : (
-            <div className="sv-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
-              <div className="sv-stack-sm">
-                <div className="sv-caption caps">Today</div>
-                {householdAgenda.today.length ? (
-                  <ul className="sv-list sv-text-sm">
-                    {householdAgenda.today.slice(0, 4).map((item) => (
-                      <li key={item.id}>
-                        <div className="sv-strong">{item.title}</div>
-                        <div className="sv-muted" style={{ fontSize: 11 }}>
-                          {agendaCueLine(item)}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="sv-muted sv-text-sm">No items for today.</div>
-                )}
+            <div className="sv-stack-sm">
+              <div className="sv-muted" style={{ fontSize: 12 }}>
+                Applied: {String(householdAgenda?.applied?.filters?.module || "all modules")}
+                {householdAgenda?.applied?.filters?.priority
+                  ? ` | ${String(householdAgenda.applied.filters.priority)} priority`
+                  : ""}
+                {householdAgenda?.applied?.filters?.status
+                  ? ` | ${String(householdAgenda.applied.filters.status)} status`
+                  : ""}
+                {householdAgenda?.applied?.filters?.person
+                  ? ` | person ${String(householdAgenda.applied.filters.person)}`
+                  : ""}
+                {` | sort ${String(householdAgenda?.applied?.sortBy || "dueAt")}:${String(householdAgenda?.applied?.sortDirection || "desc")}`}
               </div>
-              <div className="sv-stack-sm">
-                <div className="sv-caption caps">Upcoming</div>
-                {householdAgenda.upcoming.length ? (
-                  <ul className="sv-list sv-text-sm">
-                    {householdAgenda.upcoming.slice(0, 4).map((item) => (
-                      <li key={item.id}>
-                        <div className="sv-strong">{item.title}</div>
-                        <div className="sv-muted" style={{ fontSize: 11 }}>
-                          {agendaCueLine(item)}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="sv-muted sv-text-sm">No upcoming items.</div>
-                )}
+              <div className="sv-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+                <div className="sv-stack-sm">
+                  <div className="sv-caption caps">Today</div>
+                  {householdAgenda.today.length ? (
+                    <ul className="sv-list sv-text-sm">
+                      {householdAgenda.today.slice(0, 4).map((item) => (
+                        <li key={item.id}>
+                          <div className="sv-strong">{item.title}</div>
+                          <div className="sv-muted" style={{ fontSize: 11 }}>
+                            {agendaCueLine(item)}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="sv-muted sv-text-sm">No items for today.</div>
+                  )}
+                </div>
+                <div className="sv-stack-sm">
+                  <div className="sv-caption caps">Upcoming</div>
+                  {householdAgenda.upcoming.length ? (
+                    <ul className="sv-list sv-text-sm">
+                      {householdAgenda.upcoming.slice(0, 4).map((item) => (
+                        <li key={item.id}>
+                          <div className="sv-strong">{item.title}</div>
+                          <div className="sv-muted" style={{ fontSize: 11 }}>
+                            {agendaCueLine(item)}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="sv-muted sv-text-sm">No upcoming items.</div>
+                  )}
+                </div>
               </div>
             </div>
           )}

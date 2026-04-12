@@ -254,5 +254,12 @@ describe("homestead household agenda cue contract", () => {
     expect(sortBySelect.value).toBe("status");
     expect(sortDirectionSelect.value).toBe("asc");
     expect(personInput.value).toBe("member-beta");
+
+    const agendaText = String(agendaCard.textContent || "");
+    expect(agendaText).toContain("Applied: meal");
+    expect(agendaText).toContain("high priority");
+    expect(agendaText).toContain("blocked status");
+    expect(agendaText).toContain("person member-beta");
+    expect(agendaText).toContain("sort status:asc");
   });
 });

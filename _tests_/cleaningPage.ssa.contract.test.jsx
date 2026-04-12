@@ -246,6 +246,13 @@ describe("cleaning page SSA migration contract", () => {
     expect(sortDirectionSelect.value).toBe("asc");
     expect(personInput.value).toBe("member-alpha");
 
+    const agendaText = String(agendaCard.textContent || "");
+    expect(agendaText).toContain("Applied: homestead");
+    expect(agendaText).toContain("high priority");
+    expect(agendaText).toContain("blocked status");
+    expect(agendaText).toContain("person member-alpha");
+    expect(agendaText).toContain("sort status:asc");
+
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/planners/household/today-upcoming"),
       expect.objectContaining({ credentials: "include" })
