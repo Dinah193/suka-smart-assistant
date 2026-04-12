@@ -64,6 +64,7 @@ jobs:
             .tmp/household-agenda-suites-*.log
             .tmp/household-agenda-suites-*.json
             .tmp/household-agenda-suites-*.md
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
 
