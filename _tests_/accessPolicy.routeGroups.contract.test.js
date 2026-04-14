@@ -163,6 +163,44 @@ async function grantReadCollaboration({ userId, householdId, moduleKey, accessPo
   await fs.writeFile(accessPolicyFile, JSON.stringify(parsed, null, 2), "utf8");
 }
 
+async function setHouseholdRole({ userId, householdId, role, accessPolicyFile }) {
+  let parsed = defaultPolicyStore();
+  try {
+    const raw = await fs.readFile(accessPolicyFile, "utf8");
+    const json = JSON.parse(raw || "{}");
+    parsed = {
+      ...defaultPolicyStore(),
+      ...json,
+      householdRolesByHouseholdId:
+        json?.householdRolesByHouseholdId && typeof json.householdRolesByHouseholdId === "object"
+          ? json.householdRolesByHouseholdId
+          : {},
+    };
+  } catch {
+    // use default
+  }
+
+  const normalizedUserId = String(userId || "").trim();
+  const normalizedHouseholdId = String(householdId || "").trim();
+  const normalizedRole = String(role || "").trim().toLowerCase();
+  if (!normalizedUserId || !normalizedHouseholdId || !normalizedRole) {
+    throw new Error("invalid_household_role_input");
+  }
+
+  const nextRolesByHouseholdId = {
+    ...(parsed.householdRolesByHouseholdId || {}),
+    [normalizedHouseholdId]: {
+      ...((parsed.householdRolesByHouseholdId || {})[normalizedHouseholdId] || {}),
+      [normalizedUserId]: normalizedRole,
+    },
+  };
+
+  parsed.householdRolesByHouseholdId = nextRolesByHouseholdId;
+  parsed.updatedAt = new Date().toISOString();
+  await fs.mkdir(path.dirname(accessPolicyFile), { recursive: true });
+  await fs.writeFile(accessPolicyFile, JSON.stringify(parsed, null, 2), "utf8");
+}
+
 async function registerAndBootstrap(baseUrl, suffix) {
   const email = `policy-${suffix}-${Date.now()}@example.com`;
   const password = "Password1234";
@@ -285,4 +323,55 @@ describe("access policy protected route groups contract", () => {
       }
     }, 30000);
   }
+
+  it("enforces approvals route role contract for member denied and admin allowed", async () => {
+    const testDataPaths = createTestDataPaths("approvals-role-contract");
+    const backup = await readPolicyBackup(testDataPaths.accessPolicyFile);
+    const { child, port } = startServer({}, testDataPaths);
+    const baseUrl = `http://127.0.0.1:${port}`;
+
+    try {
+      await waitForHealth(port);
+
+      const owner = await registerAndBootstrap(baseUrl, "approvals-owner");
+      await setHouseholdRole({
+        userId: owner.userId,
+        householdId: owner.householdId,
+        role: "member",
+        accessPolicyFile: testDataPaths.accessPolicyFile,
+      });
+
+      const memberRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals?householdId=${encodeURIComponent(owner.householdId)}`,
+        {
+          headers: { authorization: `Bearer ${owner.token}` },
+        }
+      );
+      const memberBody = await memberRes.json();
+      expect(memberRes.status).toBe(403);
+      expect(String(memberBody?.error || "")).toBe("role_required");
+
+      await setHouseholdRole({
+        userId: owner.userId,
+        householdId: owner.householdId,
+        role: "admin",
+        accessPolicyFile: testDataPaths.accessPolicyFile,
+      });
+
+      const adminRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals?householdId=${encodeURIComponent(owner.householdId)}`,
+        {
+          headers: { authorization: `Bearer ${owner.token}` },
+        }
+      );
+      const adminBody = await adminRes.json();
+      expect(adminRes.status).toBe(200);
+      expect(adminBody?.ok).toBe(true);
+      expect(Array.isArray(adminBody?.approvals)).toBe(true);
+    } finally {
+      await stopServer(child);
+      await restorePolicyBackup(backup, testDataPaths.accessPolicyFile);
+      await fs.rm(testDataPaths.testDataDir, { recursive: true, force: true }).catch(() => {});
+    }
+  }, 30000);
 });

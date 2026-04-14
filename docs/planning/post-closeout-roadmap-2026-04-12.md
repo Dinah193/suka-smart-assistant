@@ -80,3 +80,9 @@ Definition of done:
 - Cross-module action language remains consistent.
 - Community project lifecycle is complete and governed.
 - Core product metrics show repeat collaborative usage.
+
+## Execution Update - 2026-04-14
+- Sprint A closed: parity artifacts merged via PR #47 with post-merge main CI success.
+- Sprint B slice started: added deterministic notification severity/escalation coverage for collaboration inbox routing in `_tests_/householdNotificationRouter.unit.test.js` (approval-required/action-required, overdue-alerted/critical, unknown/informational).
+- Sprint B role gate slice: extended planner-admin role preset contract coverage in `_tests_/accessPolicy.rolePreset.unit.test.js` for explicit deny behavior when neither household-role nor account-role matches owner/admin.
+- Sprint B integration role contract: added approvals-route integration coverage in `_tests_/accessPolicy.routeGroups.contract.test.js` to assert `member` is denied and `admin` is allowed on `/api/planners/community/approvals`.
