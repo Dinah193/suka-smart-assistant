@@ -60,4 +60,30 @@ describe("household notification router", () => {
     expect(next[0].eventType).toBe("approval.requested");
     expect(next[0].severity).toBe("action_required");
   });
+
+  it("routes severity deterministically for overdue escalation and unknown events", () => {
+    const overdueEntry = buildNotificationEntry({
+      idFactory: (prefix) => `${prefix}-overdue`,
+      eventType: "OVERDUE_ALERTED",
+      createdAt: "2026-04-11T13:00:00.000Z",
+      title: "Overdue alert",
+      message: "Task is overdue and requires escalation.",
+      module: "community",
+    });
+
+    expect(overdueEntry.eventType).toBe("overdue.alerted");
+    expect(overdueEntry.severity).toBe("critical");
+
+    const unknownEntry = buildNotificationEntry({
+      idFactory: (prefix) => `${prefix}-unknown`,
+      eventType: "custom.event.not-mapped",
+      createdAt: "2026-04-11T13:00:00.000Z",
+      title: "Custom event",
+      message: "No explicit severity mapping.",
+      module: "community",
+    });
+
+    expect(unknownEntry.eventType).toBe("custom.event.not-mapped");
+    expect(unknownEntry.severity).toBe("informational");
+  });
 });
