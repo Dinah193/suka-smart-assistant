@@ -701,6 +701,107 @@ describe("planner unified feed contract", () => {
     }
   }, 60000);
 
+  it("persists approval audit trail and decision notifications deterministically", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-approval-audit-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const reportRes = await fetch(`${baseUrl}/api/planners/community/moderation/report`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          targetId: "feed-item-audit",
+          reason: "policy",
+          details: "Approval audit trail contract",
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(reportRes.status).toBe(200);
+      const reportPayload = await reportRes.json();
+      const approvalId = String(
+        reportPayload?.approvalRequest?.id || reportPayload?.report?.approvalRequestId || ""
+      );
+      expect(approvalId.length).toBeGreaterThan(0);
+
+      const transitionToActiveRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "active",
+            reason: "Begin review",
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(transitionToActiveRes.status).toBe(200);
+
+      const transitionToCompletedRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(approvalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "completed",
+            reason: "Finish review",
+            updatedBy: "contract-test",
+          }),
+        }
+      );
+      expect(transitionToCompletedRes.status).toBe(200);
+
+      const approvalsRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(approvalsRes.status).toBe(200);
+      const approvalsPayload = await approvalsRes.json();
+      const approvalRow = Array.isArray(approvalsPayload?.approvals)
+        ? approvalsPayload.approvals.find((entry) => String(entry?.id || "") === approvalId)
+        : null;
+      expect(approvalRow).toBeTruthy();
+      expect(String(approvalRow?.workflowState || "")).toBe("completed");
+      expect(Array.isArray(approvalRow?.auditLog)).toBe(true);
+      expect((approvalRow?.auditLog || []).length).toBeGreaterThanOrEqual(3);
+
+      const terminalAuditSteps = (approvalRow?.auditLog || [])
+        .map((step) => `${String(step?.fromState || "")}->${String(step?.toState || "")}`)
+        .filter(Boolean);
+      expect(terminalAuditSteps).toContain("pending_approval->active");
+      expect(terminalAuditSteps).toContain("active->completed");
+
+      const notificationsRes = await fetch(
+        `${baseUrl}/api/planners/community/notifications?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(notificationsRes.status).toBe(200);
+      const notificationsPayload = await notificationsRes.json();
+      const notifications = Array.isArray(notificationsPayload?.notifications)
+        ? notificationsPayload.notifications
+        : [];
+
+      const requestedIndex = notifications.findIndex(
+        (entry) => String(entry?.eventType || "") === "approval.requested"
+      );
+      const decidedIndex = notifications.findIndex(
+        (entry) => String(entry?.eventType || "") === "approval.decided"
+      );
+
+      expect(requestedIndex).toBeGreaterThanOrEqual(0);
+      expect(decidedIndex).toBeGreaterThanOrEqual(0);
+      expect(String(notifications[requestedIndex]?.severity || "")).toBe("action_required");
+      expect(String(notifications[decidedIndex]?.severity || "")).toBe("informational");
+      expect(requestedIndex).toBeLessThan(decidedIndex);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
   it("returns a unified household today and upcoming agenda", async () => {
     const { child, port, outputCapture } = startServer();
     const baseUrl = `http://127.0.0.1:${port}`;
