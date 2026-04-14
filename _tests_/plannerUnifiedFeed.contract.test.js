@@ -536,6 +536,67 @@ describe("planner unified feed contract", () => {
     }
   }, 60000);
 
+  it("keeps escalation visibility deterministic in community inbox aggregation", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-inbox-severity-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const reportRes = await fetch(`${baseUrl}/api/planners/community/moderation/report`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          targetId: "feed-item-severity-order",
+          reason: "safety",
+          details: "Escalation visibility ordering contract",
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(reportRes.status).toBe(200);
+
+      await sleep(20);
+
+      const sharedPlanRes = await fetch(`${baseUrl}/api/planners/community/shared-plans`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          plan: { title: "Info-level update after escalation", lane: "community" },
+          updatedBy: "contract-test",
+        }),
+      });
+      expect(sharedPlanRes.status).toBe(200);
+
+      const notificationsRes = await fetch(
+        `${baseUrl}/api/planners/community/notifications?householdId=${encodeURIComponent(householdId)}`
+      );
+      expect(notificationsRes.status).toBe(200);
+      const notificationsPayload = await notificationsRes.json();
+      const notifications = Array.isArray(notificationsPayload?.notifications)
+        ? notificationsPayload.notifications
+        : [];
+
+      expect(notifications.length).toBeGreaterThanOrEqual(2);
+      expect(String(notifications[0]?.eventType || "")).toBe("approval.requested");
+      expect(String(notifications[0]?.severity || "")).toBe("action_required");
+
+      const escalationIndex = notifications.findIndex(
+        (entry) => String(entry?.eventType || "") === "approval.requested"
+      );
+      const informationalIndex = notifications.findIndex(
+        (entry) => String(entry?.eventType || "") === "community.invited"
+      );
+      expect(escalationIndex).toBeGreaterThanOrEqual(0);
+      expect(informationalIndex).toBeGreaterThanOrEqual(0);
+      expect(escalationIndex).toBeLessThan(informationalIndex);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
   it("enforces deterministic approval workflow transitions", async () => {
     const { child, port, outputCapture } = startServer();
     const baseUrl = `http://127.0.0.1:${port}`;

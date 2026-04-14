@@ -1188,6 +1188,12 @@ const AGENDA_STATUS_RANK = Object.freeze({
   today: 2,
 });
 
+const NOTIFICATION_SEVERITY_RANK = Object.freeze({
+  critical: 3,
+  action_required: 2,
+  informational: 1,
+});
+
 function normalizeAgendaSortBy(value) {
   const key = String(value || "").trim().toLowerCase();
   if (["priority", "status", "dueat"].includes(key)) return key;
@@ -1269,6 +1275,40 @@ function coerceIsoDate(value, fallbackIso) {
     return new Date(parsed).toISOString();
   }
   return fallbackIso;
+}
+
+function sortCommunityNotificationsForInbox(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  return [...list].sort((left, right) => {
+    const a = left && typeof left === "object" ? left : {};
+    const b = right && typeof right === "object" ? right : {};
+
+    const aUnread = a.read !== true;
+    const bUnread = b.read !== true;
+    if (aUnread !== bUnread) {
+      return aUnread ? -1 : 1;
+    }
+
+    const aSeverity = Number(
+      NOTIFICATION_SEVERITY_RANK[String(a.severity || "").trim().toLowerCase()] || 0
+    );
+    const bSeverity = Number(
+      NOTIFICATION_SEVERITY_RANK[String(b.severity || "").trim().toLowerCase()] || 0
+    );
+    if (aSeverity !== bSeverity) {
+      return bSeverity - aSeverity;
+    }
+
+    const aCreatedAt = Date.parse(String(a.createdAt || ""));
+    const bCreatedAt = Date.parse(String(b.createdAt || ""));
+    const aEpoch = Number.isFinite(aCreatedAt) ? aCreatedAt : 0;
+    const bEpoch = Number.isFinite(bCreatedAt) ? bCreatedAt : 0;
+    if (aEpoch !== bEpoch) {
+      return bEpoch - aEpoch;
+    }
+
+    return String(a.id || "").localeCompare(String(b.id || ""));
+  });
 }
 
 function buildTodayAndUpcomingAgenda({
@@ -3545,7 +3585,11 @@ router.get("/community/notifications", async (req, res) => {
   try {
     const householdId = String(req.query.householdId || "default-household");
     const { householdState } = await getCommunityContextForHousehold(householdId);
-    return res.json({ ok: true, householdId, notifications: householdState.notifications });
+    return res.json({
+      ok: true,
+      householdId,
+      notifications: sortCommunityNotificationsForInbox(householdState.notifications),
+    });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
