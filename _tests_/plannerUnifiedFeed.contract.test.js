@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
+import {
+  buildHouseholdParityFixture,
+  HOUSEHOLD_PARITY_MODULES,
+} from "./fixtures/householdParityFixtures.js";
 
 const repoRoot = path.resolve(__dirname, "..");
 const serverEntry = path.resolve(repoRoot, "src/server/index.js");
@@ -1012,6 +1016,1009 @@ describe("planner unified feed contract", () => {
         (item) => String(item?.sourceType || "") === "task"
       );
       expect(dueAscRows.some((item) => String(item?.id || "") === `task-${normalTaskId}`)).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("applies recurrence and dependency parity across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-parity-${randomUUID()}`;
+    const moduleFixture = buildHouseholdParityFixture();
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const taskIdsByModule = new Map();
+
+      for (const fixture of moduleFixture) {
+        const baseTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: fixture.baseTask,
+          }),
+        });
+        expect(baseTaskRes.status).toBe(200);
+        const baseTaskPayload = await baseTaskRes.json();
+        const baseTaskId = String(baseTaskPayload?.task?.id || "");
+        expect(baseTaskId.length).toBeGreaterThan(0);
+
+        const dependentTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              ...fixture.dependentTask,
+              dependsOn: [baseTaskId],
+            },
+          }),
+        });
+        expect(dependentTaskRes.status).toBe(200);
+        const dependentTaskPayload = await dependentTaskRes.json();
+        const dependentTaskId = String(dependentTaskPayload?.task?.id || "");
+        expect(dependentTaskId.length).toBeGreaterThan(0);
+
+        taskIdsByModule.set(fixture.moduleKey, {
+          baseTaskId,
+          dependentTaskId,
+        });
+      }
+
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES) {
+        const taskIds = taskIdsByModule.get(moduleKey);
+        expect(taskIds).toBeTruthy();
+
+        const blockedTransitionRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskIds.dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `dependency check ${moduleKey}`,
+            }),
+          }
+        );
+        expect(blockedTransitionRes.status).toBe(409);
+        const blockedTransitionPayload = await blockedTransitionRes.json();
+        expect(String(blockedTransitionPayload?.error || "")).toBe("task_dependency_incomplete");
+        expect(Array.isArray(blockedTransitionPayload?.blockingTaskIds)).toBe(true);
+        expect(blockedTransitionPayload.blockingTaskIds.includes(taskIds.baseTaskId)).toBe(true);
+
+        const completeBaseRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskIds.baseTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ householdId, nextState: "completed", reason: `complete base ${moduleKey}` }),
+          }
+        );
+        expect(completeBaseRes.status).toBe(200);
+
+        const completeDependentRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskIds.dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `complete dependent ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeDependentRes.status).toBe(200);
+        const completeDependentPayload = await completeDependentRes.json();
+        expect(String(completeDependentPayload?.task?.workflowState || "")).toBe("completed");
+        expect(completeDependentPayload?.spawnedTask).toBeTruthy();
+        expect(String(completeDependentPayload?.spawnedTask?.workflowState || "")).toBe("active");
+        expect(String(completeDependentPayload?.spawnedTask?.sourceTaskId || "")).toBe(taskIds.dependentTaskId);
+      }
+
+      const agendaRes = await fetch(
+        `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&todayLimit=80&upcomingLimit=80`
+      );
+      expect(agendaRes.status).toBe(200);
+      const agendaPayload = await agendaRes.json();
+      const taskRows = [
+        ...(Array.isArray(agendaPayload?.today) ? agendaPayload.today : []),
+        ...(Array.isArray(agendaPayload?.upcoming) ? agendaPayload.upcoming : []),
+      ].filter((item) => String(item?.sourceType || "") === "task");
+
+      expect(taskRows.length).toBeGreaterThan(0);
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES) {
+        const moduleRows = taskRows.filter(
+          (item) => String(item?.module || item?.lane || item?.moduleKey || "") === moduleKey
+        );
+        expect(moduleRows.length).toBeGreaterThan(0);
+      }
+
+      expect(taskRows.some((item) => item?.recurrenceEnabled === true)).toBe(true);
+      expect(taskRows.every((item) => Object.prototype.hasOwnProperty.call(item || {}, "hasDependencyBlock"))).toBe(
+        true
+      );
+      expect(taskRows.every((item) => Object.prototype.hasOwnProperty.call(item || {}, "workflowState"))).toBe(true);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps blocked-to-active transition parity across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-blocked-active-parity-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const transitionSnapshotByModule = new Map();
+
+      for (const [index, moduleKey] of HOUSEHOLD_PARITY_MODULES.entries()) {
+        const taskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Blocked-active parity ${moduleKey}`,
+              ownerId: `member-blocked-${moduleKey}`,
+              dueAt: new Date(dueAnchor.getTime() + (index + 1) * 35 * 60 * 1000).toISOString(),
+              priority: "normal",
+            },
+          }),
+        });
+        expect(taskRes.status).toBe(200);
+        const taskPayload = await taskRes.json();
+        const taskId = String(taskPayload?.task?.id || "");
+        expect(taskId.length).toBeGreaterThan(0);
+
+        const blockRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "blocked",
+              reason: `blocked state parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(blockRes.status).toBe(200);
+        const blockPayload = await blockRes.json();
+        expect(String(blockPayload?.task?.workflowState || "")).toBe("blocked");
+
+        const activateRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "active",
+              reason: `active state parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(activateRes.status).toBe(200);
+        const activatePayload = await activateRes.json();
+        expect(String(activatePayload?.task?.workflowState || "")).toBe("active");
+
+        transitionSnapshotByModule.set(moduleKey, {
+          postBlockState: String(blockPayload?.task?.workflowState || ""),
+          postActiveState: String(activatePayload?.task?.workflowState || ""),
+          moduleKey: String(activatePayload?.task?.moduleKey || ""),
+          priority: String(activatePayload?.task?.priority || ""),
+          hasCompletedAt: Boolean(activatePayload?.task?.completedAt),
+          hasArchivedAt: Boolean(activatePayload?.task?.archivedAt),
+        });
+      }
+
+      const baseline = transitionSnapshotByModule.get(HOUSEHOLD_PARITY_MODULES[0]);
+      expect(baseline).toBeTruthy();
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = transitionSnapshotByModule.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot.postBlockState).toBe(baseline.postBlockState);
+        expect(snapshot.postActiveState).toBe(baseline.postActiveState);
+        expect(snapshot.priority).toBe(baseline.priority);
+        expect(snapshot.hasCompletedAt).toBe(baseline.hasCompletedAt);
+        expect(snapshot.hasArchivedAt).toBe(baseline.hasArchivedAt);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps dependency unblock transition parity from blocked state across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-dependency-unblock-parity-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const snapshotByModule = new Map();
+
+      for (const [index, moduleKey] of HOUSEHOLD_PARITY_MODULES.entries()) {
+        const baseTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Dependency base ${moduleKey}`,
+              ownerId: `member-dependency-${moduleKey}`,
+              dueAt: new Date(dueAnchor.getTime() + (index + 1) * 40 * 60 * 1000).toISOString(),
+              priority: "normal",
+            },
+          }),
+        });
+        expect(baseTaskRes.status).toBe(200);
+        const baseTaskPayload = await baseTaskRes.json();
+        const baseTaskId = String(baseTaskPayload?.task?.id || "");
+        expect(baseTaskId.length).toBeGreaterThan(0);
+
+        const dependentTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Dependency child ${moduleKey}`,
+              ownerId: `member-dependency-${moduleKey}`,
+              dueAt: new Date(dueAnchor.getTime() + (index + 1) * 55 * 60 * 1000).toISOString(),
+              priority: "normal",
+              dependsOn: [baseTaskId],
+            },
+          }),
+        });
+        expect(dependentTaskRes.status).toBe(200);
+        const dependentTaskPayload = await dependentTaskRes.json();
+        const dependentTaskId = String(dependentTaskPayload?.task?.id || "");
+        expect(dependentTaskId.length).toBeGreaterThan(0);
+
+        const blockDependentRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "blocked",
+              reason: `dependency blocked parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(blockDependentRes.status).toBe(200);
+        const blockDependentPayload = await blockDependentRes.json();
+        expect(String(blockDependentPayload?.task?.workflowState || "")).toBe("blocked");
+
+        const completeBlockedDependentRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `dependency completion guard parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeBlockedDependentRes.status).toBe(409);
+        const completeBlockedDependentPayload = await completeBlockedDependentRes.json();
+        expect(String(completeBlockedDependentPayload?.error || "")).toBe("invalid_task_transition");
+        expect(String(completeBlockedDependentPayload?.fromState || "")).toBe("blocked");
+        expect(String(completeBlockedDependentPayload?.toState || "")).toBe("completed");
+        expect(Array.isArray(completeBlockedDependentPayload?.allowedNextStates)).toBe(true);
+        expect(completeBlockedDependentPayload.allowedNextStates.includes("active")).toBe(true);
+
+        const activateDependentRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "active",
+              reason: `dependency active parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(activateDependentRes.status).toBe(200);
+        const activateDependentPayload = await activateDependentRes.json();
+        expect(String(activateDependentPayload?.task?.workflowState || "")).toBe("active");
+
+        const completeActiveDependentRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `dependency guard parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeActiveDependentRes.status).toBe(409);
+        const completeActiveDependentPayload = await completeActiveDependentRes.json();
+        expect(String(completeActiveDependentPayload?.error || "")).toBe("task_dependency_incomplete");
+        expect(Array.isArray(completeActiveDependentPayload?.blockingTaskIds)).toBe(true);
+        expect(completeActiveDependentPayload.blockingTaskIds.includes(baseTaskId)).toBe(true);
+
+        const completeBaseRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(baseTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `dependency base complete ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeBaseRes.status).toBe(200);
+
+        const completeDependentRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(dependentTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `dependency dependent complete ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeDependentRes.status).toBe(200);
+        const completeDependentPayload = await completeDependentRes.json();
+        expect(String(completeDependentPayload?.task?.workflowState || "")).toBe("completed");
+
+        snapshotByModule.set(moduleKey, {
+          blockedState: String(blockDependentPayload?.task?.workflowState || ""),
+          blockedCompletionError: String(completeBlockedDependentPayload?.error || ""),
+          activatedState: String(activateDependentPayload?.task?.workflowState || ""),
+          dependencyGuardError: String(completeActiveDependentPayload?.error || ""),
+          completedState: String(completeDependentPayload?.task?.workflowState || ""),
+        });
+      }
+
+      const baseline = snapshotByModule.get(HOUSEHOLD_PARITY_MODULES[0]);
+      expect(baseline).toBeTruthy();
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = snapshotByModule.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot).toEqual(baseline);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps owner-overlap conflict detection parity across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-conflict-parity-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const conflictSnapshotByModule = new Map();
+
+      for (const [index, moduleKey] of HOUSEHOLD_PARITY_MODULES.entries()) {
+        const ownerId = `member-conflict-${moduleKey}`;
+        const baseDueAt = new Date(dueAnchor.getTime() + (index + 1) * 50 * 60 * 1000).toISOString();
+        const overlapDueAt = new Date(dueAnchor.getTime() + (index + 1) * 55 * 60 * 1000).toISOString();
+
+        const baseTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Conflict base ${moduleKey}`,
+              ownerId,
+              dueAt: baseDueAt,
+              priority: "normal",
+            },
+          }),
+        });
+        expect(baseTaskRes.status).toBe(200);
+        const baseTaskPayload = await baseTaskRes.json();
+        const baseTaskId = String(baseTaskPayload?.task?.id || "");
+        expect(baseTaskId.length).toBeGreaterThan(0);
+
+        const overlapTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Conflict overlap ${moduleKey}`,
+              ownerId,
+              dueAt: overlapDueAt,
+              priority: "normal",
+            },
+          }),
+        });
+        expect(overlapTaskRes.status).toBe(200);
+        const overlapTaskPayload = await overlapTaskRes.json();
+        const overlapTaskId = String(overlapTaskPayload?.task?.id || "");
+        expect(overlapTaskId.length).toBeGreaterThan(0);
+        expect(Array.isArray(overlapTaskPayload?.task?.conflictsWithTaskIds)).toBe(true);
+        expect(overlapTaskPayload.task.conflictsWithTaskIds.includes(baseTaskId)).toBe(true);
+
+        const agendaRes = await fetch(
+          `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=${encodeURIComponent(moduleKey)}&person=${encodeURIComponent(ownerId)}&todayLimit=50&upcomingLimit=50`
+        );
+        expect(agendaRes.status).toBe(200);
+        const agendaPayload = await agendaRes.json();
+        const moduleRows = [
+          ...(Array.isArray(agendaPayload?.today) ? agendaPayload.today : []),
+          ...(Array.isArray(agendaPayload?.upcoming) ? agendaPayload.upcoming : []),
+        ].filter((item) => String(item?.sourceType || "") === "task");
+
+        expect(moduleRows.length).toBeGreaterThanOrEqual(2);
+        const overlapAgendaRow = moduleRows.find((item) => String(item?.id || "") === `task-${overlapTaskId}`);
+        expect(overlapAgendaRow).toBeTruthy();
+        expect(Boolean(overlapAgendaRow?.hasConflict)).toBe(true);
+
+        conflictSnapshotByModule.set(moduleKey, {
+          overlapConflictCount: Number(overlapTaskPayload?.task?.conflictsWithTaskIds?.length || 0),
+          agendaConflictFlag: Boolean(overlapAgendaRow?.hasConflict),
+        });
+      }
+
+      const baseline = conflictSnapshotByModule.get(HOUSEHOLD_PARITY_MODULES[0]);
+      expect(baseline).toBeTruthy();
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = conflictSnapshotByModule.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot).toEqual(baseline);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps lifecycle transition parity across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-lifecycle-parity-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const lifecycleSnapshotByModule = new Map();
+
+      for (const [index, moduleKey] of HOUSEHOLD_PARITY_MODULES.entries()) {
+        const createRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Lifecycle parity ${moduleKey}`,
+              ownerId: `member-lifecycle-${moduleKey}`,
+              dueAt: new Date(dueAnchor.getTime() + (index + 1) * 30 * 60 * 1000).toISOString(),
+              priority: "normal",
+            },
+          }),
+        });
+        expect(createRes.status).toBe(200);
+        const createPayload = await createRes.json();
+        const taskId = String(createPayload?.task?.id || "");
+        expect(taskId.length).toBeGreaterThan(0);
+        expect(String(createPayload?.task?.workflowState || "")).toBe("active");
+        expect(Array.isArray(createPayload?.task?.allowedNextStates)).toBe(true);
+        expect(createPayload.task.allowedNextStates.includes("completed")).toBe(true);
+        expect(createPayload.task.allowedNextStates.includes("blocked")).toBe(true);
+
+        const blockRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "blocked",
+              reason: `lifecycle blocked ${moduleKey}`,
+            }),
+          }
+        );
+        expect(blockRes.status).toBe(200);
+        const blockPayload = await blockRes.json();
+        expect(String(blockPayload?.task?.workflowState || "")).toBe("blocked");
+        expect(Array.isArray(blockPayload?.task?.allowedNextStates)).toBe(true);
+        expect(blockPayload.task.allowedNextStates.includes("active")).toBe(true);
+
+        const activeRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "active",
+              reason: `lifecycle active ${moduleKey}`,
+            }),
+          }
+        );
+        expect(activeRes.status).toBe(200);
+        const activePayload = await activeRes.json();
+        expect(String(activePayload?.task?.workflowState || "")).toBe("active");
+
+        const completeRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `lifecycle completed ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeRes.status).toBe(200);
+        const completePayload = await completeRes.json();
+        expect(String(completePayload?.task?.workflowState || "")).toBe("completed");
+        expect(Boolean(completePayload?.task?.completedAt)).toBe(true);
+        expect(Array.isArray(completePayload?.task?.allowedNextStates)).toBe(true);
+        expect(completePayload.task.allowedNextStates.includes("archived")).toBe(true);
+
+        const archiveRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "archived",
+              reason: `lifecycle archived ${moduleKey}`,
+            }),
+          }
+        );
+        expect(archiveRes.status).toBe(200);
+        const archivePayload = await archiveRes.json();
+        expect(String(archivePayload?.task?.workflowState || "")).toBe("archived");
+        expect(Boolean(archivePayload?.task?.archivedAt)).toBe(true);
+        expect(Array.isArray(archivePayload?.task?.allowedNextStates)).toBe(true);
+        expect(archivePayload.task.allowedNextStates.length).toBe(0);
+
+        lifecycleSnapshotByModule.set(moduleKey, {
+          createdState: String(createPayload?.task?.workflowState || ""),
+          blockedState: String(blockPayload?.task?.workflowState || ""),
+          activeState: String(activePayload?.task?.workflowState || ""),
+          completedState: String(completePayload?.task?.workflowState || ""),
+          archivedState: String(archivePayload?.task?.workflowState || ""),
+          completedHasTimestamp: Boolean(completePayload?.task?.completedAt),
+          archivedHasTimestamp: Boolean(archivePayload?.task?.archivedAt),
+          archivedNextStatesCount: Number(archivePayload?.task?.allowedNextStates?.length || 0),
+        });
+      }
+
+      const baseline = lifecycleSnapshotByModule.get(HOUSEHOLD_PARITY_MODULES[0]);
+      expect(baseline).toBeTruthy();
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = lifecycleSnapshotByModule.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot).toEqual(baseline);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps weekly recurrence spawn parity across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-weekly-recurrence-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const recurrenceShapeByModule = new Map();
+
+      for (const [index, moduleKey] of HOUSEHOLD_PARITY_MODULES.entries()) {
+        const dueAtIso = new Date(dueAnchor.getTime() + (index + 1) * 60 * 60 * 1000).toISOString();
+
+        const taskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Weekly parity ${moduleKey}`,
+              ownerId: `member-weekly-${moduleKey}`,
+              dueAt: dueAtIso,
+              priority: "normal",
+              recurrence: {
+                enabled: true,
+                frequency: "weekly",
+              },
+            },
+          }),
+        });
+        expect(taskRes.status).toBe(200);
+        const taskPayload = await taskRes.json();
+        const taskId = String(taskPayload?.task?.id || "");
+        expect(taskId.length).toBeGreaterThan(0);
+
+        const completeRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `weekly recurrence parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeRes.status).toBe(200);
+        const completePayload = await completeRes.json();
+        const spawnedTask = completePayload?.spawnedTask;
+        expect(spawnedTask).toBeTruthy();
+        expect(String(spawnedTask?.moduleKey || "")).toBe(moduleKey);
+        expect(String(spawnedTask?.sourceTaskId || "")).toBe(taskId);
+        expect(Boolean(spawnedTask?.recurrence?.enabled)).toBe(true);
+        expect(String(spawnedTask?.recurrence?.frequency || "")).toBe("weekly");
+        expect(Number(spawnedTask?.recurrence?.intervalDays || 0)).toBe(7);
+
+        const originalDueAt = Date.parse(dueAtIso);
+        const spawnedDueAt = Date.parse(String(spawnedTask?.dueAt || ""));
+        expect(Number.isFinite(originalDueAt)).toBe(true);
+        expect(Number.isFinite(spawnedDueAt)).toBe(true);
+        const dueDeltaDays = (spawnedDueAt - originalDueAt) / (24 * 60 * 60 * 1000);
+        expect(dueDeltaDays).toBeGreaterThanOrEqual(6.95);
+        expect(dueDeltaDays).toBeLessThanOrEqual(7.05);
+
+        recurrenceShapeByModule.set(moduleKey, {
+          recurrence: {
+            enabled: Boolean(spawnedTask?.recurrence?.enabled),
+            frequency: String(spawnedTask?.recurrence?.frequency || ""),
+            intervalDays: Number(spawnedTask?.recurrence?.intervalDays || 0),
+          },
+          dueDeltaDays: Number(dueDeltaDays.toFixed(2)),
+        });
+      }
+
+      const baseline = recurrenceShapeByModule.get(HOUSEHOLD_PARITY_MODULES[0]);
+      expect(baseline).toBeTruthy();
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = recurrenceShapeByModule.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot.recurrence).toEqual(baseline.recurrence);
+        expect(snapshot.dueDeltaDays).toBe(baseline.dueDeltaDays);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps custom recurrence spawn parity across household modules", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-custom-recurrence-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const recurrenceShapeByModule = new Map();
+
+      for (const [index, moduleKey] of HOUSEHOLD_PARITY_MODULES.entries()) {
+        const dueAtIso = new Date(dueAnchor.getTime() + (index + 1) * 50 * 60 * 1000).toISOString();
+
+        const taskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey,
+              title: `Custom parity ${moduleKey}`,
+              ownerId: `member-custom-${moduleKey}`,
+              dueAt: dueAtIso,
+              priority: "normal",
+              recurrence: {
+                enabled: true,
+                frequency: "custom",
+                intervalDays: 3,
+              },
+            },
+          }),
+        });
+        expect(taskRes.status).toBe(200);
+        const taskPayload = await taskRes.json();
+        const taskId = String(taskPayload?.task?.id || "");
+        expect(taskId.length).toBeGreaterThan(0);
+
+        const completeRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(taskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "completed",
+              reason: `custom recurrence parity ${moduleKey}`,
+            }),
+          }
+        );
+        expect(completeRes.status).toBe(200);
+        const completePayload = await completeRes.json();
+        const spawnedTask = completePayload?.spawnedTask;
+        expect(spawnedTask).toBeTruthy();
+        expect(String(spawnedTask?.moduleKey || "")).toBe(moduleKey);
+        expect(String(spawnedTask?.sourceTaskId || "")).toBe(taskId);
+        expect(Boolean(spawnedTask?.recurrence?.enabled)).toBe(true);
+        expect(String(spawnedTask?.recurrence?.frequency || "")).toBe("custom");
+        expect(Number(spawnedTask?.recurrence?.intervalDays || 0)).toBe(3);
+
+        const originalDueAt = Date.parse(dueAtIso);
+        const spawnedDueAt = Date.parse(String(spawnedTask?.dueAt || ""));
+        expect(Number.isFinite(originalDueAt)).toBe(true);
+        expect(Number.isFinite(spawnedDueAt)).toBe(true);
+        const dueDeltaDays = (spawnedDueAt - originalDueAt) / (24 * 60 * 60 * 1000);
+        expect(dueDeltaDays).toBeGreaterThanOrEqual(2.95);
+        expect(dueDeltaDays).toBeLessThanOrEqual(3.05);
+
+        recurrenceShapeByModule.set(moduleKey, {
+          recurrence: {
+            enabled: Boolean(spawnedTask?.recurrence?.enabled),
+            frequency: String(spawnedTask?.recurrence?.frequency || ""),
+            intervalDays: Number(spawnedTask?.recurrence?.intervalDays || 0),
+          },
+          dueDeltaDays: Number(dueDeltaDays.toFixed(2)),
+        });
+      }
+
+      const baseline = recurrenceShapeByModule.get(HOUSEHOLD_PARITY_MODULES[0]);
+      expect(baseline).toBeTruthy();
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = recurrenceShapeByModule.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot.recurrence).toEqual(baseline.recurrence);
+        expect(snapshot.dueDeltaDays).toBe(baseline.dueDeltaDays);
+      }
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
+
+  it("keeps today-upcoming comparator parity across module filter permutations", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `household-parity-comparator-${randomUUID()}`;
+    const now = Date.now();
+    const dueAnchor = new Date(now);
+    dueAnchor.setUTCHours(12, 0, 0, 0);
+    if (dueAnchor.getTime() <= now) {
+      dueAnchor.setUTCDate(dueAnchor.getUTCDate() + 1);
+    }
+
+    const collectTaskRows = (payload) =>
+      [
+        ...(Array.isArray(payload?.today) ? payload.today : []),
+        ...(Array.isArray(payload?.upcoming) ? payload.upcoming : []),
+      ].filter((item) => String(item?.sourceType || "") === "task");
+
+    const assertAscendingDueAt = (rows) => {
+      for (let index = 1; index < rows.length; index += 1) {
+        const prev = Date.parse(String(rows[index - 1]?.dueAt || ""));
+        const next = Date.parse(String(rows[index]?.dueAt || ""));
+        expect(Number.isFinite(prev)).toBe(true);
+        expect(Number.isFinite(next)).toBe(true);
+        expect(prev).toBeLessThanOrEqual(next);
+      }
+    };
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const moduleSnapshots = new Map();
+
+      for (const [moduleIndex, fixture] of buildHouseholdParityFixture(now).entries()) {
+        const highTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey: fixture.moduleKey,
+              title: `Comparator high ${fixture.moduleKey}`,
+              ownerId: fixture.ownerId,
+              dueAt: new Date(dueAnchor.getTime() + (moduleIndex * 300 + 90) * 60 * 1000).toISOString(),
+              priority: "high",
+            },
+          }),
+        });
+        expect(highTaskRes.status).toBe(200);
+        const highTaskPayload = await highTaskRes.json();
+        const highTaskId = String(highTaskPayload?.task?.id || "");
+        expect(highTaskId.length).toBeGreaterThan(0);
+
+        const normalTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey: fixture.moduleKey,
+              title: `Comparator normal ${fixture.moduleKey}`,
+              ownerId: fixture.ownerId,
+              dueAt: new Date(dueAnchor.getTime() + (moduleIndex * 300 + 120) * 60 * 1000).toISOString(),
+              priority: "normal",
+            },
+          }),
+        });
+        expect(normalTaskRes.status).toBe(200);
+        const normalTaskPayload = await normalTaskRes.json();
+        const normalTaskId = String(normalTaskPayload?.task?.id || "");
+        expect(normalTaskId.length).toBeGreaterThan(0);
+
+        const lowTaskRes = await fetch(`${baseUrl}/api/planners/household/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            task: {
+              moduleKey: fixture.moduleKey,
+              title: `Comparator blocked ${fixture.moduleKey}`,
+              ownerId: fixture.ownerId,
+              dueAt: new Date(dueAnchor.getTime() + (moduleIndex * 300 + 150) * 60 * 1000).toISOString(),
+              priority: "low",
+            },
+          }),
+        });
+        expect(lowTaskRes.status).toBe(200);
+        const lowTaskPayload = await lowTaskRes.json();
+        const lowTaskId = String(lowTaskPayload?.task?.id || "");
+        expect(lowTaskId.length).toBeGreaterThan(0);
+
+        const lowBlockedRes = await fetch(
+          `${baseUrl}/api/planners/household/tasks/${encodeURIComponent(lowTaskId)}/transition`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              householdId,
+              nextState: "blocked",
+              reason: `Comparator blocked ${fixture.moduleKey}`,
+            }),
+          }
+        );
+        expect(lowBlockedRes.status).toBe(200);
+
+        const priorityRes = await fetch(
+          `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=${encodeURIComponent(fixture.moduleKey)}&sortBy=priority&sortDirection=desc&todayLimit=80&upcomingLimit=80`
+        );
+        expect(priorityRes.status).toBe(200);
+        const priorityPayload = await priorityRes.json();
+        const priorityRows = collectTaskRows(priorityPayload);
+        expect(priorityRows.length).toBeGreaterThanOrEqual(3);
+        expect(priorityRows.every((item) => String(item?.module || item?.lane || "") === fixture.moduleKey)).toBe(
+          true
+        );
+        expect(String(priorityRows[0]?.priority || "")).toBe("high");
+
+        const statusRes = await fetch(
+          `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=${encodeURIComponent(fixture.moduleKey)}&sortBy=status&sortDirection=desc&todayLimit=80&upcomingLimit=80`
+        );
+        expect(statusRes.status).toBe(200);
+        const statusPayload = await statusRes.json();
+        const statusRows = collectTaskRows(statusPayload);
+        expect(statusRows.length).toBeGreaterThanOrEqual(3);
+        expect(String(statusRows[0]?.workflowState || statusRows[0]?.state || "")).toBe("blocked");
+
+        const blockedRes = await fetch(
+          `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=${encodeURIComponent(fixture.moduleKey)}&status=blocked&todayLimit=80&upcomingLimit=80`
+        );
+        expect(blockedRes.status).toBe(200);
+        const blockedPayload = await blockedRes.json();
+        const blockedRows = collectTaskRows(blockedPayload);
+        expect(blockedRows.length).toBe(1);
+        expect(String(blockedRows[0]?.workflowState || blockedRows[0]?.state || "")).toBe("blocked");
+
+        const ownerRes = await fetch(
+          `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=${encodeURIComponent(fixture.moduleKey)}&person=${encodeURIComponent(fixture.ownerId)}&sortBy=dueAt&sortDirection=asc&todayLimit=80&upcomingLimit=80`
+        );
+        expect(ownerRes.status).toBe(200);
+        const ownerPayload = await ownerRes.json();
+        const ownerRows = collectTaskRows(ownerPayload);
+        expect(ownerRows.length).toBeGreaterThanOrEqual(3);
+        expect(ownerRows.every((item) => String(item?.ownerId || "") === fixture.ownerId)).toBe(true);
+        assertAscendingDueAt(ownerRows);
+
+        moduleSnapshots.set(fixture.moduleKey, {
+          priorityPattern: priorityRows.slice(0, 3).map((item) => String(item?.priority || "")),
+          statusPattern: statusRows
+            .slice(0, 3)
+            .map((item) => String(item?.workflowState || item?.state || "")),
+          blockedCount: blockedRows.length,
+          ownerCount: ownerRows.length,
+          ownerDueAtPattern: ownerRows.slice(0, 3).map((item) => String(item?.dueAt || "")),
+          flagsShape: ownerRows.slice(0, 3).map((item) => ({
+            recurrenceEnabled: Object.prototype.hasOwnProperty.call(item || {}, "recurrenceEnabled"),
+            hasDependencyBlock: Object.prototype.hasOwnProperty.call(item || {}, "hasDependencyBlock"),
+            hasConflict: Object.prototype.hasOwnProperty.call(item || {}, "hasConflict"),
+            workflowState: Object.prototype.hasOwnProperty.call(item || {}, "workflowState"),
+          })),
+        });
+
+        expect(priorityRows.some((item) => String(item?.id || "") === `task-${highTaskId}`)).toBe(true);
+        expect(priorityRows.some((item) => String(item?.id || "") === `task-${normalTaskId}`)).toBe(true);
+        expect(priorityRows.some((item) => String(item?.id || "") === `task-${lowTaskId}`)).toBe(true);
+      }
+
+      const baselineModuleKey = HOUSEHOLD_PARITY_MODULES[0];
+      const baseline = moduleSnapshots.get(baselineModuleKey);
+      expect(baseline).toBeTruthy();
+
+      for (const moduleKey of HOUSEHOLD_PARITY_MODULES.slice(1)) {
+        const snapshot = moduleSnapshots.get(moduleKey);
+        expect(snapshot).toBeTruthy();
+        expect(snapshot.priorityPattern).toEqual(baseline.priorityPattern);
+        expect(snapshot.statusPattern).toEqual(baseline.statusPattern);
+        expect(snapshot.blockedCount).toBe(baseline.blockedCount);
+        expect(snapshot.ownerCount).toBe(baseline.ownerCount);
+        expect(snapshot.ownerDueAtPattern.length).toBe(baseline.ownerDueAtPattern.length);
+        expect(snapshot.flagsShape).toEqual(baseline.flagsShape);
+      }
     } finally {
       await stopServer(child);
     }
