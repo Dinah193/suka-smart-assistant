@@ -430,10 +430,15 @@ function normalizeCommunityProjectDisputes(value, { nowIso, householdId }) {
         projectId: toTrimmedString(row.projectId),
         householdId: toTrimmedString(row.householdId) || householdId,
         reportedBy: toTrimmedString(row.reportedBy),
+        reporterHouseholdId: toTrimmedString(row.reporterHouseholdId),
         summary,
         details: toTrimmedString(row.details),
         status: toTrimmedString(row.status) || "queued",
+        workflowState: normalizeApprovalWorkflowState(row.workflowState, WORKFLOW_STATES.PENDING_APPROVAL),
         approvalRequestId: toTrimmedString(row.approvalRequestId) || null,
+        escalationCount: Math.max(0, Number(row.escalationCount || 0) || 0),
+        escalatedBy: toTrimmedString(row.escalatedBy),
+        lastEscalatedAt: row.lastEscalatedAt ? coerceIsoDate(row.lastEscalatedAt, nowIso) : null,
         createdAt: coerceIsoDate(row.createdAt, nowIso),
         updatedAt: coerceIsoDate(row.updatedAt, nowIso),
         updatedBy: toTrimmedString(row.updatedBy),
@@ -4152,7 +4157,11 @@ router.post("/community/projects/:id/disputes/report", express.json(), async (re
       summary,
       details,
       status: "queued",
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
       approvalRequestId: approvalRequest.id,
+      escalationCount: 0,
+      escalatedBy: null,
+      lastEscalatedAt: null,
       createdAt: now,
       updatedAt: now,
       updatedBy: actor,
@@ -4219,6 +4228,161 @@ router.post("/community/projects/:id/disputes/report", express.json(), async (re
     await writeCommunityContextStateFile(state);
 
     return res.json({ ok: true, householdId, project: nextProject, dispute, report, approvalRequest });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/projects/:id/disputes/:disputeId/escalate", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const projectId = toTrimmedString(req.params.id);
+    const disputeId = toTrimmedString(req.params.disputeId);
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const actorHouseholdId =
+      toTrimmedString(req.body?.actorHouseholdId || req.query?.actorHouseholdId || householdId) || householdId;
+    const reason = toTrimmedString(req.body?.reason || "Dispute escalation requested");
+    const details = toTrimmedString(req.body?.details);
+    const now = new Date().toISOString();
+
+    if (!projectId) {
+      return res.status(400).json({ ok: false, error: "missing_project_id" });
+    }
+    if (!disputeId) {
+      return res.status(400).json({ ok: false, error: "missing_dispute_id" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    const projectIndex = projectSpaces.findIndex((entry) => String(entry?.id || "") === projectId);
+    if (projectIndex < 0) {
+      return res.status(404).json({ ok: false, error: "community_project_not_found" });
+    }
+
+    const currentProject = projectSpaces[projectIndex];
+    if (!canMutateCommunityProjectMembership(currentProject, actorHouseholdId, householdId)) {
+      return res.status(403).json({ ok: false, error: "community_project_dispute_escalation_forbidden" });
+    }
+
+    const disputes = Array.isArray(currentProject.disputes) ? [...currentProject.disputes] : [];
+    const disputeIndex = disputes.findIndex((entry) => String(entry?.id || "") === disputeId);
+    if (disputeIndex < 0) {
+      return res.status(404).json({ ok: false, error: "community_project_dispute_not_found" });
+    }
+
+    const currentDispute = { ...disputes[disputeIndex] };
+    const currentWorkflowState = normalizeApprovalWorkflowState(
+      currentDispute.workflowState,
+      WORKFLOW_STATES.PENDING_APPROVAL
+    );
+    if (currentWorkflowState === WORKFLOW_STATES.COMPLETED || currentWorkflowState === WORKFLOW_STATES.ARCHIVED) {
+      return res.status(409).json({ ok: false, error: "community_project_dispute_terminal" });
+    }
+
+    const escalationApprovalRequest = {
+      id: generateHomesteadId("approval-request"),
+      subjectType: "community_project_dispute_escalation",
+      subjectId: disputeId,
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
+      requestedBy: actor,
+      requestedAt: now,
+      updatedAt: now,
+      updatedBy: actor,
+      reason,
+      details,
+      auditLog: [
+        {
+          fromState: null,
+          toState: WORKFLOW_STATES.PENDING_APPROVAL,
+          at: now,
+          updatedBy: actor,
+          reason: "community_project_dispute_escalated",
+        },
+      ],
+    };
+
+    const nextDispute = {
+      ...currentDispute,
+      status: "escalated",
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
+      approvalRequestId: escalationApprovalRequest.id,
+      escalationCount: Math.max(0, Number(currentDispute.escalationCount || 0) || 0) + 1,
+      escalatedBy: actor,
+      lastEscalatedAt: now,
+      updatedAt: now,
+      updatedBy: actor,
+      escalationReason: reason,
+    };
+    disputes[disputeIndex] = nextDispute;
+
+    const report = {
+      id: generateHomesteadId("community-report"),
+      targetId: projectId,
+      reason,
+      details,
+      status: "queued",
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
+      reportedBy: actor,
+      createdAt: now,
+      approvalRequestId: escalationApprovalRequest.id,
+      category: "community_project_dispute_escalation",
+      disputeId,
+    };
+
+    const nextProject = normalizeCommunityProjectRecord({
+      incoming: { ...currentProject, disputes },
+      existing: currentProject,
+      householdId,
+      actor,
+      nowIso: now,
+    });
+    projectSpaces[projectIndex] = nextProject;
+
+    householdState.projectSpaces = projectSpaces;
+    householdState.reports = Array.isArray(householdState.reports)
+      ? [report, ...householdState.reports]
+      : [report];
+    householdState.approvals = Array.isArray(householdState.approvals)
+      ? [escalationApprovalRequest, ...householdState.approvals]
+      : [escalationApprovalRequest];
+    appendHouseholdNotifications({
+      householdState,
+      entries: [
+        buildNotificationEntry({
+          idFactory: generateHomesteadId,
+          eventType: "APPROVAL_REQUESTED",
+          createdAt: now,
+          type: "moderation",
+          title: "Community dispute escalated",
+          message: `Dispute ${disputeId} was escalated for approval review.`,
+          module: "moderation",
+          sourceModule: "community",
+          sourceId: disputeId,
+          metadata: {
+            approvalRequestId: escalationApprovalRequest.id,
+            projectId,
+            disputeId,
+            reason,
+          },
+        }),
+      ],
+      nowIso: now,
+    });
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({
+      ok: true,
+      householdId,
+      project: nextProject,
+      dispute: nextDispute,
+      report,
+      approvalRequest: escalationApprovalRequest,
+    });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }

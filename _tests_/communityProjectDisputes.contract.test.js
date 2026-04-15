@@ -230,4 +230,141 @@ describe("community project disputes contract", () => {
       await stopServer(child);
     }
   }, 60000);
+
+  it("enforces owner/admin dispute escalation path and rejects contributor escalation", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-dispute-escalation-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const projectCreateRes = await fetch(`${baseUrl}/api/planners/community/projects`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          project: {
+            title: "Escalation governance lane",
+            visibilityScope: "trusted",
+            trustMode: "trusted_only",
+            memberships: [
+              { householdId: "admin-household", role: "admin", trustStatus: "trusted" },
+              { householdId: "contrib-household", role: "contributor", trustStatus: "trusted" },
+              { householdId: "observer-household", role: "viewer", trustStatus: "trusted" },
+            ],
+          },
+        }),
+      });
+      expect(projectCreateRes.status).toBe(200);
+      const projectCreatePayload = await projectCreateRes.json();
+      const projectId = String(projectCreatePayload?.project?.id || "");
+      expect(projectId.length).toBeGreaterThan(0);
+
+      const disputeRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(projectId)}/disputes/report`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            reporterHouseholdId: "observer-household",
+            summary: "Escalation path contract dispute",
+            details: "Requires admin escalation for resolution queue.",
+          }),
+        }
+      );
+      expect(disputeRes.status).toBe(200);
+      const disputePayload = await disputeRes.json();
+      const disputeId = String(disputePayload?.dispute?.id || "");
+      const initialApprovalId = String(disputePayload?.approvalRequest?.id || "");
+      expect(disputeId.length).toBeGreaterThan(0);
+      expect(initialApprovalId.length).toBeGreaterThan(0);
+
+      const contributorEscalateRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(
+          projectId
+        )}/disputes/${encodeURIComponent(disputeId)}/escalate`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "contrib-household",
+            reason: "Contributor attempted escalation",
+          }),
+        }
+      );
+      expect(contributorEscalateRes.status).toBe(403);
+
+      const adminEscalateRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(
+          projectId
+        )}/disputes/${encodeURIComponent(disputeId)}/escalate`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "admin-household",
+            reason: "Admin escalation to moderation queue",
+          }),
+        }
+      );
+      expect(adminEscalateRes.status).toBe(200);
+      const adminEscalatePayload = await adminEscalateRes.json();
+      const escalatedApprovalId = String(adminEscalatePayload?.approvalRequest?.id || "");
+      expect(escalatedApprovalId.length).toBeGreaterThan(0);
+      expect(escalatedApprovalId).not.toBe(initialApprovalId);
+      expect(String(adminEscalatePayload?.dispute?.status || "")).toBe("escalated");
+      expect(Number(adminEscalatePayload?.dispute?.escalationCount || 0)).toBe(1);
+
+      const transitionToActiveRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(escalatedApprovalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "active",
+            reason: "Escalated dispute active review",
+          }),
+        }
+      );
+      expect(transitionToActiveRes.status).toBe(200);
+
+      const transitionToCompletedRes = await fetch(
+        `${baseUrl}/api/planners/community/approvals/${encodeURIComponent(escalatedApprovalId)}/transition`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            nextState: "completed",
+            reason: "Escalated dispute resolved",
+          }),
+        }
+      );
+      expect(transitionToCompletedRes.status).toBe(200);
+
+      const listAfterRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(
+          projectId
+        )}/disputes?householdId=${encodeURIComponent(householdId)}&viewerHouseholdId=${encodeURIComponent(
+          "observer-household"
+        )}`
+      );
+      expect(listAfterRes.status).toBe(200);
+      const listAfterPayload = await listAfterRes.json();
+      const afterEntry = (Array.isArray(listAfterPayload?.disputes) ? listAfterPayload.disputes : []).find(
+        (entry) => String(entry?.id || "") === disputeId
+      );
+      expect(String(afterEntry?.status || "")).toBe("resolved");
+      expect(String(afterEntry?.workflowState || "")).toBe("completed");
+      expect(String(afterEntry?.approvalRequestId || "")).toBe(escalatedApprovalId);
+      expect(Number(afterEntry?.escalationCount || 0)).toBe(1);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
 });
