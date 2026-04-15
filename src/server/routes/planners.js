@@ -326,6 +326,15 @@ function normalizeCommunityProjectMilestoneState(value, fallback = "planned") {
   return COMMUNITY_PROJECT_MILESTONE_STATES.has(key) ? key : fallback;
 }
 
+function mapCommunityProjectDisputeStatusFromWorkflowState(workflowState) {
+  const key = normalizeApprovalWorkflowState(workflowState, WORKFLOW_STATES.PENDING_APPROVAL);
+  if (key === WORKFLOW_STATES.ACTIVE) return "in_review";
+  if (key === WORKFLOW_STATES.BLOCKED) return "rejected";
+  if (key === WORKFLOW_STATES.COMPLETED) return "resolved";
+  if (key === WORKFLOW_STATES.ARCHIVED) return "archived";
+  return "queued";
+}
+
 function normalizeCommunityProjectMilestones(value, { nowIso }) {
   const rows = Array.isArray(value) ? value : [];
   return rows
@@ -409,6 +418,86 @@ function normalizeCommunityProjectMemberships(value, { nowIso, householdId }) {
   return [...deduped.values()];
 }
 
+function normalizeCommunityProjectDisputes(value, { nowIso, householdId }) {
+  const rows = Array.isArray(value) ? value : [];
+  return rows
+    .map((row) => {
+      if (!row || typeof row !== "object") return null;
+      const summary = toTrimmedString(row.summary || row.reason);
+      if (!summary) return null;
+      return {
+        id: toTrimmedString(row.id) || generateHomesteadId("community-dispute"),
+        projectId: toTrimmedString(row.projectId),
+        householdId: toTrimmedString(row.householdId) || householdId,
+        reportedBy: toTrimmedString(row.reportedBy),
+        summary,
+        details: toTrimmedString(row.details),
+        status: toTrimmedString(row.status) || "queued",
+        approvalRequestId: toTrimmedString(row.approvalRequestId) || null,
+        createdAt: coerceIsoDate(row.createdAt, nowIso),
+        updatedAt: coerceIsoDate(row.updatedAt, nowIso),
+        updatedBy: toTrimmedString(row.updatedBy),
+      };
+    })
+    .filter(Boolean);
+}
+
+function findCommunityProjectMembership(project, householdId) {
+  const normalizedHouseholdId = toTrimmedString(householdId);
+  if (!normalizedHouseholdId) return null;
+  const memberships = Array.isArray(project?.memberships) ? project.memberships : [];
+  return memberships.find((member) => String(member?.householdId || "") === normalizedHouseholdId) || null;
+}
+
+function canViewCommunityProject(project, viewerHouseholdId, hostHouseholdId) {
+  const viewer = toTrimmedString(viewerHouseholdId);
+  const host = toTrimmedString(hostHouseholdId);
+  if (!viewer || !host) return false;
+  if (viewer === host) return true;
+
+  const visibilityScope = normalizeCommunityProjectVisibilityScope(project?.visibilityScope, "household_only");
+  if (visibilityScope === "public") return true;
+  if (visibilityScope === "household_only") return false;
+
+  const membership = findCommunityProjectMembership(project, viewer);
+  return String(membership?.trustStatus || "") === "trusted";
+}
+
+function canMutateCommunityProjectMembership(project, actorHouseholdId, hostHouseholdId) {
+  const actor = toTrimmedString(actorHouseholdId);
+  const host = toTrimmedString(hostHouseholdId);
+  if (!actor || !host) return false;
+  if (actor === host) return true;
+
+  const membership = findCommunityProjectMembership(project, actor);
+  if (!membership) return false;
+  const role = normalizeCommunityProjectMemberRole(membership.role, "viewer");
+  const trustStatus = normalizeCommunityProjectMemberTrust(membership.trustStatus, "pending");
+  return trustStatus === "trusted" && (role === "owner" || role === "admin");
+}
+
+function canContributeToCommunityProject(project, actorHouseholdId, hostHouseholdId) {
+  const actor = toTrimmedString(actorHouseholdId);
+  const host = toTrimmedString(hostHouseholdId);
+  if (!actor || !host) return false;
+  if (actor === host) return true;
+
+  const trustMode = normalizeCommunityProjectTrustMode(project?.trustMode, "invite_only");
+  const membership = findCommunityProjectMembership(project, actor);
+  const trustStatus = normalizeCommunityProjectMemberTrust(membership?.trustStatus, "pending");
+
+  if (membership && trustStatus === "blocked") {
+    return false;
+  }
+  if (trustMode === "open") {
+    return true;
+  }
+  if (trustMode === "invite_only") {
+    return Boolean(membership);
+  }
+  return Boolean(membership) && trustStatus === "trusted";
+}
+
 function normalizeCommunityProjectRecord({ incoming, existing, householdId, actor, nowIso }) {
   const raw = incoming && typeof incoming === "object" ? incoming : {};
   const current = existing && typeof existing === "object" ? existing : null;
@@ -431,6 +520,10 @@ function normalizeCommunityProjectRecord({ incoming, existing, householdId, acto
     workflowState,
     milestones: normalizeCommunityProjectMilestones(raw.milestones ?? current?.milestones, { nowIso }),
     contributions: normalizeCommunityProjectContributions(raw.contributions ?? current?.contributions, {
+      nowIso,
+      householdId,
+    }),
+    disputes: normalizeCommunityProjectDisputes(raw.disputes ?? current?.disputes, {
       nowIso,
       householdId,
     }),
@@ -3653,6 +3746,7 @@ router.get("/community/context", async (req, res) => {
 router.get("/community/projects", async (req, res) => {
   try {
     const householdId = String(req.query.householdId || "default-household");
+    const viewerHouseholdId = toTrimmedString(req.query.viewerHouseholdId || householdId) || householdId;
     const visibilityFilter = normalizeCommunityProjectVisibilityScope(req.query.visibility, "");
     const trustFilter = normalizeCommunityProjectMemberTrust(req.query.trustStatus, "");
     const memberHouseholdIdFilter = toTrimmedString(req.query.memberHouseholdId || "");
@@ -3662,6 +3756,7 @@ router.get("/community/projects", async (req, res) => {
     const projects = (Array.isArray(householdState.projectSpaces) ? householdState.projectSpaces : []).filter(
       (project) => {
         if (!project || typeof project !== "object") return false;
+        if (!canViewCommunityProject(project, viewerHouseholdId, householdId)) return false;
         if (visibilityFilter && String(project.visibilityScope || "") !== visibilityFilter) return false;
         if (workflowStateFilter && String(project.workflowState || "") !== workflowStateFilter) return false;
 
@@ -3684,7 +3779,7 @@ router.get("/community/projects", async (req, res) => {
       }
     );
 
-    return res.json({ ok: true, householdId, projects });
+    return res.json({ ok: true, householdId, viewerHouseholdId, projects });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
@@ -3738,6 +3833,8 @@ router.post("/community/projects/:id/memberships", express.json(), async (req, r
     const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
     const projectId = toTrimmedString(req.params.id);
     const actor = resolveHomesteadContextActor(req, req.body || {});
+    const actorHouseholdId =
+      toTrimmedString(req.body?.actorHouseholdId || req.query?.actorHouseholdId || householdId) || householdId;
     const now = new Date().toISOString();
     const member = req.body?.member && typeof req.body.member === "object" ? req.body.member : req.body || {};
 
@@ -3759,6 +3856,10 @@ router.post("/community/projects/:id/memberships", express.json(), async (req, r
     }
 
     const currentProject = projectSpaces[projectIndex];
+    if (!canMutateCommunityProjectMembership(currentProject, actorHouseholdId, householdId)) {
+      return res.status(403).json({ ok: false, error: "community_project_membership_forbidden" });
+    }
+
     const existingMemberships = Array.isArray(currentProject.memberships)
       ? currentProject.memberships
       : [];
@@ -3820,6 +3921,8 @@ router.post("/community/projects/:id/milestones", express.json(), async (req, re
     const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
     const projectId = toTrimmedString(req.params.id);
     const actor = resolveHomesteadContextActor(req, req.body || {});
+    const actorHouseholdId =
+      toTrimmedString(req.body?.actorHouseholdId || req.query?.actorHouseholdId || householdId) || householdId;
     const now = new Date().toISOString();
     const milestone =
       req.body?.milestone && typeof req.body.milestone === "object" ? req.body.milestone : req.body || {};
@@ -3841,6 +3944,10 @@ router.post("/community/projects/:id/milestones", express.json(), async (req, re
     }
 
     const currentProject = projectSpaces[projectIndex];
+    if (!canContributeToCommunityProject(currentProject, actorHouseholdId, householdId)) {
+      return res.status(403).json({ ok: false, error: "community_project_trust_mode_forbidden" });
+    }
+
     const normalizedMilestones = normalizeCommunityProjectMilestones(
       [
         ...(Array.isArray(currentProject.milestones) ? currentProject.milestones : []),
@@ -3882,6 +3989,8 @@ router.post("/community/projects/:id/contributions", express.json(), async (req,
     const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
     const projectId = toTrimmedString(req.params.id);
     const actor = resolveHomesteadContextActor(req, req.body || {});
+    const actorHouseholdId =
+      toTrimmedString(req.body?.actorHouseholdId || req.query?.actorHouseholdId || householdId) || householdId;
     const now = new Date().toISOString();
     const contribution =
       req.body?.contribution && typeof req.body.contribution === "object"
@@ -3905,6 +4014,10 @@ router.post("/community/projects/:id/contributions", express.json(), async (req,
     }
 
     const currentProject = projectSpaces[projectIndex];
+    if (!canContributeToCommunityProject(currentProject, actorHouseholdId, householdId)) {
+      return res.status(403).json({ ok: false, error: "community_project_trust_mode_forbidden" });
+    }
+
     const normalizedContributions = normalizeCommunityProjectContributions(
       [
         ...(Array.isArray(currentProject.contributions) ? currentProject.contributions : []),
@@ -3938,6 +4051,174 @@ router.post("/community/projects/:id/contributions", express.json(), async (req,
 
     const nextContribution = nextProject.contributions[nextProject.contributions.length - 1] || null;
     return res.json({ ok: true, householdId, project: nextProject, contribution: nextContribution });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/projects/:id/disputes", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const viewerHouseholdId = toTrimmedString(req.query.viewerHouseholdId || householdId) || householdId;
+    const projectId = toTrimmedString(req.params.id);
+    if (!projectId) {
+      return res.status(400).json({ ok: false, error: "missing_project_id" });
+    }
+
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+    const project = (Array.isArray(householdState.projectSpaces) ? householdState.projectSpaces : []).find(
+      (entry) => String(entry?.id || "") === projectId
+    );
+    if (!project) {
+      return res.status(404).json({ ok: false, error: "community_project_not_found" });
+    }
+    if (!canViewCommunityProject(project, viewerHouseholdId, householdId)) {
+      return res.status(403).json({ ok: false, error: "community_project_visibility_forbidden" });
+    }
+
+    return res.json({
+      ok: true,
+      householdId,
+      projectId,
+      viewerHouseholdId,
+      disputes: Array.isArray(project.disputes) ? project.disputes : [],
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/projects/:id/disputes/report", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const reporterHouseholdId =
+      toTrimmedString(req.body?.reporterHouseholdId || req.query?.reporterHouseholdId || householdId) ||
+      householdId;
+    const projectId = toTrimmedString(req.params.id);
+    const summary = toTrimmedString(req.body?.summary || req.body?.reason);
+    const details = toTrimmedString(req.body?.details);
+    const now = new Date().toISOString();
+
+    if (!projectId) {
+      return res.status(400).json({ ok: false, error: "missing_project_id" });
+    }
+    if (!summary) {
+      return res.status(400).json({ ok: false, error: "missing_dispute_summary" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    const projectIndex = projectSpaces.findIndex((entry) => String(entry?.id || "") === projectId);
+    if (projectIndex < 0) {
+      return res.status(404).json({ ok: false, error: "community_project_not_found" });
+    }
+
+    const currentProject = projectSpaces[projectIndex];
+    if (!canViewCommunityProject(currentProject, reporterHouseholdId, householdId)) {
+      return res.status(403).json({ ok: false, error: "community_project_visibility_forbidden" });
+    }
+
+    const approvalRequest = {
+      id: generateHomesteadId("approval-request"),
+      subjectType: "community_project_dispute",
+      subjectId: projectId,
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
+      requestedBy: actor,
+      requestedAt: now,
+      updatedAt: now,
+      updatedBy: actor,
+      reason: summary,
+      details,
+      auditLog: [
+        {
+          fromState: null,
+          toState: WORKFLOW_STATES.PENDING_APPROVAL,
+          at: now,
+          updatedBy: actor,
+          reason: "community_project_dispute_submitted",
+        },
+      ],
+    };
+
+    const dispute = {
+      id: generateHomesteadId("community-dispute"),
+      projectId,
+      householdId,
+      reportedBy: actor,
+      reporterHouseholdId,
+      summary,
+      details,
+      status: "queued",
+      approvalRequestId: approvalRequest.id,
+      createdAt: now,
+      updatedAt: now,
+      updatedBy: actor,
+    };
+
+    const report = {
+      id: generateHomesteadId("community-report"),
+      targetId: projectId,
+      reason: summary,
+      details,
+      status: "queued",
+      workflowState: WORKFLOW_STATES.PENDING_APPROVAL,
+      reportedBy: actor,
+      createdAt: now,
+      approvalRequestId: approvalRequest.id,
+      category: "community_project_dispute",
+      disputeId: dispute.id,
+    };
+
+    const nextDisputes = Array.isArray(currentProject.disputes)
+      ? [dispute, ...currentProject.disputes]
+      : [dispute];
+    const nextProject = normalizeCommunityProjectRecord({
+      incoming: { ...currentProject, disputes: nextDisputes },
+      existing: currentProject,
+      householdId,
+      actor,
+      nowIso: now,
+    });
+    projectSpaces[projectIndex] = nextProject;
+
+    householdState.projectSpaces = projectSpaces;
+    householdState.reports = Array.isArray(householdState.reports)
+      ? [report, ...householdState.reports]
+      : [report];
+    householdState.approvals = Array.isArray(householdState.approvals)
+      ? [approvalRequest, ...householdState.approvals]
+      : [approvalRequest];
+    appendHouseholdNotifications({
+      householdState,
+      entries: [
+        buildNotificationEntry({
+          idFactory: generateHomesteadId,
+          eventType: "APPROVAL_REQUESTED",
+          createdAt: now,
+          type: "moderation",
+          title: "Community dispute submitted",
+          message: `Dispute submitted for project ${projectId}.`,
+          module: "moderation",
+          sourceModule: "community",
+          sourceId: dispute.id,
+          metadata: {
+            approvalRequestId: approvalRequest.id,
+            projectId,
+            disputeId: dispute.id,
+          },
+        }),
+      ],
+      nowIso: now,
+    });
+
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({ ok: true, householdId, project: nextProject, dispute, report, approvalRequest });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
@@ -4305,6 +4586,36 @@ router.post(
       };
     }
     householdState.reports = reports;
+
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    householdState.projectSpaces = projectSpaces.map((project) => {
+      if (!project || typeof project !== "object") return project;
+      const disputes = Array.isArray(project.disputes) ? project.disputes : [];
+      const disputeIndex = disputes.findIndex(
+        (entry) => String(entry?.approvalRequestId || "") === approvalId
+      );
+      if (disputeIndex < 0) {
+        return project;
+      }
+
+      const nextDisputes = [...disputes];
+      nextDisputes[disputeIndex] = {
+        ...nextDisputes[disputeIndex],
+        status: mapCommunityProjectDisputeStatusFromWorkflowState(nextState),
+        workflowState: nextState,
+        updatedAt: now,
+        updatedBy: actor,
+      };
+
+      return {
+        ...project,
+        disputes: nextDisputes,
+        updatedAt: now,
+        updatedBy: actor,
+      };
+    });
 
     const linkedReport = reportIndex >= 0 ? reports[reportIndex] : null;
     appendHouseholdNotifications({
