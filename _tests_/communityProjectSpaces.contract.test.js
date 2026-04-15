@@ -257,4 +257,169 @@ describe("community project spaces contract", () => {
       await stopServer(child);
     }
   }, 60000);
+
+  it("enforces privacy matrix and trust modes across household_only trusted and public spaces", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-governance-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const createProject = async ({ title, visibilityScope, trustMode, memberships = [] }) => {
+        const response = await fetch(`${baseUrl}/api/planners/community/projects`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            project: {
+              title,
+              visibilityScope,
+              trustMode,
+              memberships,
+            },
+          }),
+        });
+        expect(response.status).toBe(200);
+        const payload = await response.json();
+        return String(payload?.project?.id || "");
+      };
+
+      const householdOnlyId = await createProject({
+        title: "Household-only canning plan",
+        visibilityScope: "household_only",
+        trustMode: "invite_only",
+      });
+      const trustedId = await createProject({
+        title: "Trusted orchard coordination",
+        visibilityScope: "trusted",
+        trustMode: "trusted_only",
+        memberships: [
+          { householdId: "trusted-household", role: "contributor", trustStatus: "trusted" },
+          { householdId: "pending-household", role: "contributor", trustStatus: "pending" },
+        ],
+      });
+      const publicId = await createProject({
+        title: "Public seed exchange",
+        visibilityScope: "public",
+        trustMode: "open",
+      });
+
+      expect(householdOnlyId.length).toBeGreaterThan(0);
+      expect(trustedId.length).toBeGreaterThan(0);
+      expect(publicId.length).toBeGreaterThan(0);
+
+      const ownerListRes = await fetch(
+        `${baseUrl}/api/planners/community/projects?householdId=${encodeURIComponent(
+          householdId
+        )}&viewerHouseholdId=${encodeURIComponent(householdId)}`
+      );
+      expect(ownerListRes.status).toBe(200);
+      const ownerListPayload = await ownerListRes.json();
+      expect(Array.isArray(ownerListPayload?.projects)).toBe(true);
+      expect(ownerListPayload.projects.length).toBeGreaterThanOrEqual(3);
+
+      const outsiderListRes = await fetch(
+        `${baseUrl}/api/planners/community/projects?householdId=${encodeURIComponent(
+          householdId
+        )}&viewerHouseholdId=${encodeURIComponent("outsider-household")}`
+      );
+      expect(outsiderListRes.status).toBe(200);
+      const outsiderListPayload = await outsiderListRes.json();
+      const outsiderIds = (Array.isArray(outsiderListPayload?.projects)
+        ? outsiderListPayload.projects
+        : []
+      ).map((project) => String(project?.id || ""));
+      expect(outsiderIds.includes(publicId)).toBe(true);
+      expect(outsiderIds.includes(trustedId)).toBe(false);
+      expect(outsiderIds.includes(householdOnlyId)).toBe(false);
+
+      const trustedViewerRes = await fetch(
+        `${baseUrl}/api/planners/community/projects?householdId=${encodeURIComponent(
+          householdId
+        )}&viewerHouseholdId=${encodeURIComponent("trusted-household")}`
+      );
+      expect(trustedViewerRes.status).toBe(200);
+      const trustedViewerPayload = await trustedViewerRes.json();
+      const trustedViewerIds = (Array.isArray(trustedViewerPayload?.projects)
+        ? trustedViewerPayload.projects
+        : []
+      ).map((project) => String(project?.id || ""));
+      expect(trustedViewerIds.includes(publicId)).toBe(true);
+      expect(trustedViewerIds.includes(trustedId)).toBe(true);
+      expect(trustedViewerIds.includes(householdOnlyId)).toBe(false);
+
+      const pendingContributionRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(trustedId)}/contributions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "pending-household",
+            contribution: {
+              summary: "Pending member attempted contribution",
+              type: "worklog",
+              units: 1,
+            },
+          }),
+        }
+      );
+      expect(pendingContributionRes.status).toBe(403);
+
+      const trustedContributionRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(trustedId)}/contributions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "trusted-household",
+            contribution: {
+              summary: "Trusted member contribution",
+              type: "materials",
+              units: 3,
+            },
+          }),
+        }
+      );
+      expect(trustedContributionRes.status).toBe(200);
+
+      const inviteOnlyContributionRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(householdOnlyId)}/contributions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "outsider-household",
+            contribution: {
+              summary: "Outsider attempt on invite-only",
+            },
+          }),
+        }
+      );
+      expect(inviteOnlyContributionRes.status).toBe(403);
+
+      const openContributionRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(publicId)}/contributions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "outsider-household",
+            contribution: {
+              summary: "Open-mode contribution",
+              type: "worklog",
+              units: 2,
+            },
+          }),
+        }
+      );
+      expect(openContributionRes.status).toBe(200);
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
 });
