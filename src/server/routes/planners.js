@@ -142,6 +142,12 @@ const TASK_WORKFLOW_TRANSITIONS = Object.freeze({
 
 const TASK_ALLOWED_MODULES = new Set(["meal", "cleaning", "storehouse", "homestead", "community"]);
 const TASK_ALLOWED_PRIORITIES = new Set(["low", "normal", "high", "critical"]);
+const COMMUNITY_PROJECT_WORKFLOW_STATES = new Set(["active", "paused", "completed", "archived"]);
+const COMMUNITY_PROJECT_VISIBILITY_SCOPES = new Set(["household_only", "trusted", "public"]);
+const COMMUNITY_PROJECT_TRUST_MODES = new Set(["invite_only", "trusted_only", "open"]);
+const COMMUNITY_PROJECT_MEMBER_ROLES = new Set(["owner", "admin", "contributor", "viewer"]);
+const COMMUNITY_PROJECT_MEMBER_TRUST = new Set(["trusted", "pending", "blocked"]);
+const COMMUNITY_PROJECT_MILESTONE_STATES = new Set(["planned", "active", "completed", "blocked"]);
 
 function normalizeTaskWorkflowState(value, fallback = WORKFLOW_STATES.ACTIVE) {
   const key = String(value || "").trim().toLowerCase();
@@ -290,6 +296,157 @@ function mapReportStatusFromWorkflowState(workflowState) {
   return "queued";
 }
 
+function normalizeCommunityProjectWorkflowState(value, fallback = "active") {
+  const key = String(value || "").trim().toLowerCase();
+  return COMMUNITY_PROJECT_WORKFLOW_STATES.has(key) ? key : fallback;
+}
+
+function normalizeCommunityProjectVisibilityScope(value, fallback = "household_only") {
+  const key = String(value || "").trim().toLowerCase();
+  return COMMUNITY_PROJECT_VISIBILITY_SCOPES.has(key) ? key : fallback;
+}
+
+function normalizeCommunityProjectTrustMode(value, fallback = "invite_only") {
+  const key = String(value || "").trim().toLowerCase();
+  return COMMUNITY_PROJECT_TRUST_MODES.has(key) ? key : fallback;
+}
+
+function normalizeCommunityProjectMemberRole(value, fallback = "viewer") {
+  const key = String(value || "").trim().toLowerCase();
+  return COMMUNITY_PROJECT_MEMBER_ROLES.has(key) ? key : fallback;
+}
+
+function normalizeCommunityProjectMemberTrust(value, fallback = "pending") {
+  const key = String(value || "").trim().toLowerCase();
+  return COMMUNITY_PROJECT_MEMBER_TRUST.has(key) ? key : fallback;
+}
+
+function normalizeCommunityProjectMilestoneState(value, fallback = "planned") {
+  const key = String(value || "").trim().toLowerCase();
+  return COMMUNITY_PROJECT_MILESTONE_STATES.has(key) ? key : fallback;
+}
+
+function normalizeCommunityProjectMilestones(value, { nowIso }) {
+  const rows = Array.isArray(value) ? value : [];
+  return rows
+    .map((row) => {
+      if (!row || typeof row !== "object") return null;
+      const title = toTrimmedString(row.title);
+      if (!title) return null;
+      const workflowState = normalizeCommunityProjectMilestoneState(row.workflowState, "planned");
+      return {
+        id: toTrimmedString(row.id) || generateHomesteadId("community-milestone"),
+        title,
+        detail: toTrimmedString(row.detail),
+        workflowState,
+        dueAt: coerceIsoDate(row.dueAt, nowIso),
+        completedAt:
+          workflowState === "completed" ? coerceIsoDate(row.completedAt, nowIso) : null,
+        updatedAt: coerceIsoDate(row.updatedAt, nowIso),
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeCommunityProjectContributions(value, { nowIso, householdId }) {
+  const rows = Array.isArray(value) ? value : [];
+  return rows
+    .map((row) => {
+      if (!row || typeof row !== "object") return null;
+      const summary = toTrimmedString(row.summary);
+      if (!summary) return null;
+      const unitsRaw = Number(row.units);
+      const units = Number.isFinite(unitsRaw) ? Math.max(0, unitsRaw) : 0;
+      return {
+        id: toTrimmedString(row.id) || generateHomesteadId("community-contribution"),
+        actorHouseholdId: toTrimmedString(row.actorHouseholdId) || householdId,
+        actor: toTrimmedString(row.actor),
+        type: toTrimmedString(row.type) || "worklog",
+        summary,
+        units,
+        occurredAt: coerceIsoDate(row.occurredAt, nowIso),
+        updatedAt: coerceIsoDate(row.updatedAt, nowIso),
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeCommunityProjectMemberships(value, { nowIso, householdId }) {
+  const rows = Array.isArray(value) ? value : [];
+  const deduped = new Map();
+
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const memberHouseholdId = toTrimmedString(row.householdId);
+    if (!memberHouseholdId) continue;
+
+    deduped.set(memberHouseholdId, {
+      id: toTrimmedString(row.id) || generateHomesteadId("community-member"),
+      householdId: memberHouseholdId,
+      displayName: toTrimmedString(row.displayName),
+      role: normalizeCommunityProjectMemberRole(row.role),
+      trustStatus: normalizeCommunityProjectMemberTrust(
+        row.trustStatus,
+        memberHouseholdId === householdId ? "trusted" : "pending"
+      ),
+      joinedAt: coerceIsoDate(row.joinedAt, nowIso),
+      updatedAt: coerceIsoDate(row.updatedAt, nowIso),
+    });
+  }
+
+  if (!deduped.has(householdId)) {
+    deduped.set(householdId, {
+      id: generateHomesteadId("community-member"),
+      householdId,
+      displayName: "Host household",
+      role: "owner",
+      trustStatus: "trusted",
+      joinedAt: nowIso,
+      updatedAt: nowIso,
+    });
+  }
+
+  return [...deduped.values()];
+}
+
+function normalizeCommunityProjectRecord({ incoming, existing, householdId, actor, nowIso }) {
+  const raw = incoming && typeof incoming === "object" ? incoming : {};
+  const current = existing && typeof existing === "object" ? existing : null;
+  const id =
+    toTrimmedString(raw.id) || toTrimmedString(current?.id) || generateHomesteadId("community-project");
+  const workflowState = normalizeCommunityProjectWorkflowState(
+    raw.workflowState ?? current?.workflowState,
+    "active"
+  );
+  return {
+    id,
+    householdId,
+    title: toTrimmedString(raw.title ?? current?.title),
+    detail: toTrimmedString(raw.detail ?? current?.detail),
+    visibilityScope: normalizeCommunityProjectVisibilityScope(
+      raw.visibilityScope ?? current?.visibilityScope,
+      "household_only"
+    ),
+    trustMode: normalizeCommunityProjectTrustMode(raw.trustMode ?? current?.trustMode, "invite_only"),
+    workflowState,
+    milestones: normalizeCommunityProjectMilestones(raw.milestones ?? current?.milestones, { nowIso }),
+    contributions: normalizeCommunityProjectContributions(raw.contributions ?? current?.contributions, {
+      nowIso,
+      householdId,
+    }),
+    memberships: normalizeCommunityProjectMemberships(raw.memberships ?? current?.memberships, {
+      nowIso,
+      householdId,
+    }),
+    createdAt: toTrimmedString(current?.createdAt) || nowIso,
+    createdBy: toTrimmedString(current?.createdBy) || actor,
+    updatedAt: nowIso,
+    updatedBy: actor,
+    completedAt: workflowState === "completed" ? coerceIsoDate(raw.completedAt ?? current?.completedAt, nowIso) : null,
+    archivedAt: workflowState === "archived" ? coerceIsoDate(raw.archivedAt ?? current?.archivedAt, nowIso) : null,
+  };
+}
+
 const DEFAULT_PROFILE_MESSAGES_CONTEXT = Object.freeze({
   conversations: [],
   selectedConversationId: null,
@@ -388,6 +545,7 @@ function appendMessageToConversation(context, conversationId, message, actorId) 
 function cloneDefaultCommunityContext(householdId) {
   return {
     householdId,
+    projectSpaces: [],
     sharedPlans: [],
     gardenPlans: [],
     animalPlans: [],
@@ -442,6 +600,7 @@ function ensureCommunityHouseholdState(state, householdId) {
     state.households[householdId] = cloneDefaultCommunityContext(householdId);
   }
   const current = state.households[householdId];
+  current.projectSpaces = Array.isArray(current.projectSpaces) ? current.projectSpaces : [];
   current.sharedPlans = Array.isArray(current.sharedPlans) ? current.sharedPlans : [];
   current.gardenPlans = Array.isArray(current.gardenPlans) ? current.gardenPlans : [];
   current.animalPlans = Array.isArray(current.animalPlans) ? current.animalPlans : [];
@@ -3486,6 +3645,299 @@ router.get("/community/context", async (req, res) => {
     const householdId = String(req.query.householdId || "default-household");
     const { householdState } = await getCommunityContextForHousehold(householdId);
     return res.json({ ok: true, householdId, context: householdState });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.get("/community/projects", async (req, res) => {
+  try {
+    const householdId = String(req.query.householdId || "default-household");
+    const visibilityFilter = normalizeCommunityProjectVisibilityScope(req.query.visibility, "");
+    const trustFilter = normalizeCommunityProjectMemberTrust(req.query.trustStatus, "");
+    const memberHouseholdIdFilter = toTrimmedString(req.query.memberHouseholdId || "");
+    const workflowStateFilter = normalizeCommunityProjectWorkflowState(req.query.workflowState, "");
+    const { householdState } = await getCommunityContextForHousehold(householdId);
+
+    const projects = (Array.isArray(householdState.projectSpaces) ? householdState.projectSpaces : []).filter(
+      (project) => {
+        if (!project || typeof project !== "object") return false;
+        if (visibilityFilter && String(project.visibilityScope || "") !== visibilityFilter) return false;
+        if (workflowStateFilter && String(project.workflowState || "") !== workflowStateFilter) return false;
+
+        const memberships = Array.isArray(project.memberships) ? project.memberships : [];
+        if (
+          memberHouseholdIdFilter &&
+          !memberships.some((member) =>
+            String(member?.householdId || "") === memberHouseholdIdFilter
+          )
+        ) {
+          return false;
+        }
+        if (
+          trustFilter &&
+          !memberships.some((member) => String(member?.trustStatus || "") === trustFilter)
+        ) {
+          return false;
+        }
+        return true;
+      }
+    );
+
+    return res.json({ ok: true, householdId, projects });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/projects", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const incoming = req.body?.project && typeof req.body.project === "object" ? req.body.project : req.body || {};
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    const existingIndex = projectSpaces.findIndex(
+      (project) => String(project?.id || "") === String(incoming?.id || "")
+    );
+    const normalized = normalizeCommunityProjectRecord({
+      incoming,
+      existing: existingIndex >= 0 ? projectSpaces[existingIndex] : null,
+      householdId,
+      actor,
+      nowIso: now,
+    });
+
+    if (!normalized.title) {
+      return res.status(400).json({ ok: false, error: "missing_project_title" });
+    }
+
+    if (existingIndex >= 0) {
+      projectSpaces[existingIndex] = normalized;
+    } else {
+      projectSpaces.unshift(normalized);
+    }
+
+    householdState.projectSpaces = projectSpaces;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({ ok: true, householdId, project: normalized });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/projects/:id/memberships", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const projectId = toTrimmedString(req.params.id);
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const member = req.body?.member && typeof req.body.member === "object" ? req.body.member : req.body || {};
+
+    const memberHouseholdId = toTrimmedString(member.householdId);
+    if (!projectId) {
+      return res.status(400).json({ ok: false, error: "missing_project_id" });
+    }
+    if (!memberHouseholdId) {
+      return res.status(400).json({ ok: false, error: "missing_member_household_id" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    const projectIndex = projectSpaces.findIndex((project) => String(project?.id || "") === projectId);
+    if (projectIndex < 0) {
+      return res.status(404).json({ ok: false, error: "community_project_not_found" });
+    }
+
+    const currentProject = projectSpaces[projectIndex];
+    const existingMemberships = Array.isArray(currentProject.memberships)
+      ? currentProject.memberships
+      : [];
+    const membershipIndex = existingMemberships.findIndex(
+      (entry) => String(entry?.householdId || "") === memberHouseholdId
+    );
+    const nextMembership = {
+      id:
+        toTrimmedString(member.id) ||
+        (membershipIndex >= 0 ? toTrimmedString(existingMemberships[membershipIndex]?.id) : "") ||
+        generateHomesteadId("community-member"),
+      householdId: memberHouseholdId,
+      displayName: toTrimmedString(member.displayName),
+      role: normalizeCommunityProjectMemberRole(
+        member.role,
+        membershipIndex >= 0 ? existingMemberships[membershipIndex]?.role : "viewer"
+      ),
+      trustStatus: normalizeCommunityProjectMemberTrust(
+        member.trustStatus,
+        membershipIndex >= 0 ? existingMemberships[membershipIndex]?.trustStatus : "pending"
+      ),
+      joinedAt: coerceIsoDate(
+        member.joinedAt,
+        membershipIndex >= 0 ? existingMemberships[membershipIndex]?.joinedAt : now
+      ),
+      updatedAt: now,
+      updatedBy: actor,
+    };
+
+    const mergedMemberships = [...existingMemberships];
+    if (membershipIndex >= 0) {
+      mergedMemberships[membershipIndex] = nextMembership;
+    } else {
+      mergedMemberships.unshift(nextMembership);
+    }
+
+    const nextProject = normalizeCommunityProjectRecord({
+      incoming: { ...currentProject, memberships: mergedMemberships },
+      existing: currentProject,
+      householdId,
+      actor,
+      nowIso: now,
+    });
+
+    projectSpaces[projectIndex] = nextProject;
+    householdState.projectSpaces = projectSpaces;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    return res.json({ ok: true, householdId, project: nextProject, membership: nextMembership });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/projects/:id/milestones", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const projectId = toTrimmedString(req.params.id);
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const milestone =
+      req.body?.milestone && typeof req.body.milestone === "object" ? req.body.milestone : req.body || {};
+
+    if (!projectId) {
+      return res.status(400).json({ ok: false, error: "missing_project_id" });
+    }
+    if (!toTrimmedString(milestone.title)) {
+      return res.status(400).json({ ok: false, error: "missing_milestone_title" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    const projectIndex = projectSpaces.findIndex((project) => String(project?.id || "") === projectId);
+    if (projectIndex < 0) {
+      return res.status(404).json({ ok: false, error: "community_project_not_found" });
+    }
+
+    const currentProject = projectSpaces[projectIndex];
+    const normalizedMilestones = normalizeCommunityProjectMilestones(
+      [
+        ...(Array.isArray(currentProject.milestones) ? currentProject.milestones : []),
+        {
+          id: toTrimmedString(milestone.id) || generateHomesteadId("community-milestone"),
+          title: toTrimmedString(milestone.title),
+          detail: toTrimmedString(milestone.detail),
+          workflowState: normalizeCommunityProjectMilestoneState(milestone.workflowState, "planned"),
+          dueAt: coerceIsoDate(milestone.dueAt, now),
+          updatedAt: now,
+        },
+      ],
+      { nowIso: now }
+    );
+
+    const nextProject = normalizeCommunityProjectRecord({
+      incoming: { ...currentProject, milestones: normalizedMilestones },
+      existing: currentProject,
+      householdId,
+      actor,
+      nowIso: now,
+    });
+
+    projectSpaces[projectIndex] = nextProject;
+    householdState.projectSpaces = projectSpaces;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    const nextMilestone = nextProject.milestones[nextProject.milestones.length - 1] || null;
+    return res.json({ ok: true, householdId, project: nextProject, milestone: nextMilestone });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: String(error?.message || error) });
+  }
+});
+
+router.post("/community/projects/:id/contributions", express.json(), async (req, res) => {
+  try {
+    const householdId = String(req.body?.householdId || req.query?.householdId || "default-household");
+    const projectId = toTrimmedString(req.params.id);
+    const actor = resolveHomesteadContextActor(req, req.body || {});
+    const now = new Date().toISOString();
+    const contribution =
+      req.body?.contribution && typeof req.body.contribution === "object"
+        ? req.body.contribution
+        : req.body || {};
+
+    if (!projectId) {
+      return res.status(400).json({ ok: false, error: "missing_project_id" });
+    }
+    if (!toTrimmedString(contribution.summary)) {
+      return res.status(400).json({ ok: false, error: "missing_contribution_summary" });
+    }
+
+    const { state, householdState } = await getCommunityContextForHousehold(householdId);
+    const projectSpaces = Array.isArray(householdState.projectSpaces)
+      ? [...householdState.projectSpaces]
+      : [];
+    const projectIndex = projectSpaces.findIndex((project) => String(project?.id || "") === projectId);
+    if (projectIndex < 0) {
+      return res.status(404).json({ ok: false, error: "community_project_not_found" });
+    }
+
+    const currentProject = projectSpaces[projectIndex];
+    const normalizedContributions = normalizeCommunityProjectContributions(
+      [
+        ...(Array.isArray(currentProject.contributions) ? currentProject.contributions : []),
+        {
+          id: toTrimmedString(contribution.id) || generateHomesteadId("community-contribution"),
+          actorHouseholdId: toTrimmedString(contribution.actorHouseholdId) || householdId,
+          actor: toTrimmedString(contribution.actor) || actor,
+          type: toTrimmedString(contribution.type) || "worklog",
+          summary: toTrimmedString(contribution.summary),
+          units: Number.isFinite(Number(contribution.units)) ? Number(contribution.units) : 0,
+          occurredAt: coerceIsoDate(contribution.occurredAt, now),
+          updatedAt: now,
+        },
+      ],
+      { nowIso: now, householdId }
+    );
+
+    const nextProject = normalizeCommunityProjectRecord({
+      incoming: { ...currentProject, contributions: normalizedContributions },
+      existing: currentProject,
+      householdId,
+      actor,
+      nowIso: now,
+    });
+
+    projectSpaces[projectIndex] = nextProject;
+    householdState.projectSpaces = projectSpaces;
+    householdState.updatedAt = now;
+    state.households[householdId] = householdState;
+    await writeCommunityContextStateFile(state);
+
+    const nextContribution = nextProject.contributions[nextProject.contributions.length - 1] || null;
+    return res.json({ ok: true, householdId, project: nextProject, contribution: nextContribution });
   } catch (error) {
     return res.status(500).json({ ok: false, error: String(error?.message || error) });
   }
