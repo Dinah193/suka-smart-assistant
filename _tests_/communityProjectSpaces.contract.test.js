@@ -422,4 +422,133 @@ describe("community project spaces contract", () => {
       await stopServer(child);
     }
   }, 60000);
+
+  it("enforces owner/admin-only authority for membership trust and role changes", async () => {
+    const { child, port, outputCapture } = startServer();
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const householdId = `community-roles-${randomUUID()}`;
+
+    try {
+      await waitForHealth(port, child, outputCapture);
+
+      const createRes = await fetch(`${baseUrl}/api/planners/community/projects`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          householdId,
+          project: {
+            title: "Role-governance relay",
+            visibilityScope: "trusted",
+            trustMode: "trusted_only",
+            memberships: [
+              { householdId: "admin-household", role: "admin", trustStatus: "trusted" },
+              { householdId: "contrib-household", role: "contributor", trustStatus: "trusted" },
+              { householdId: "viewer-household", role: "viewer", trustStatus: "trusted" },
+              { householdId: "candidate-household", role: "viewer", trustStatus: "pending" },
+            ],
+          },
+        }),
+      });
+      expect(createRes.status).toBe(200);
+      const createPayload = await createRes.json();
+      const projectId = String(createPayload?.project?.id || "");
+      expect(projectId.length).toBeGreaterThan(0);
+
+      const contributorMutateRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(projectId)}/memberships`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "contrib-household",
+            member: {
+              householdId: "candidate-household",
+              role: "contributor",
+              trustStatus: "trusted",
+            },
+          }),
+        }
+      );
+      expect(contributorMutateRes.status).toBe(403);
+
+      const viewerMutateRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(projectId)}/memberships`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "viewer-household",
+            member: {
+              householdId: "candidate-household",
+              role: "contributor",
+              trustStatus: "trusted",
+            },
+          }),
+        }
+      );
+      expect(viewerMutateRes.status).toBe(403);
+
+      const adminMutateRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(projectId)}/memberships`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: "admin-household",
+            member: {
+              householdId: "candidate-household",
+              role: "contributor",
+              trustStatus: "trusted",
+            },
+          }),
+        }
+      );
+      expect(adminMutateRes.status).toBe(200);
+      const adminMutatePayload = await adminMutateRes.json();
+      expect(String(adminMutatePayload?.membership?.role || "")).toBe("contributor");
+      expect(String(adminMutatePayload?.membership?.trustStatus || "")).toBe("trusted");
+
+      const ownerMutateRes = await fetch(
+        `${baseUrl}/api/planners/community/projects/${encodeURIComponent(projectId)}/memberships`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            householdId,
+            actorHouseholdId: householdId,
+            member: {
+              householdId: "candidate-household",
+              role: "admin",
+              trustStatus: "trusted",
+            },
+          }),
+        }
+      );
+      expect(ownerMutateRes.status).toBe(200);
+      const ownerMutatePayload = await ownerMutateRes.json();
+      expect(String(ownerMutatePayload?.membership?.role || "")).toBe("admin");
+
+      const projectListRes = await fetch(
+        `${baseUrl}/api/planners/community/projects?householdId=${encodeURIComponent(
+          householdId
+        )}&viewerHouseholdId=${encodeURIComponent(householdId)}`
+      );
+      expect(projectListRes.status).toBe(200);
+      const projectListPayload = await projectListRes.json();
+      const updatedProject = (Array.isArray(projectListPayload?.projects)
+        ? projectListPayload.projects
+        : []).find((project) => String(project?.id || "") === projectId);
+
+      const candidateMembership = (Array.isArray(updatedProject?.memberships)
+        ? updatedProject.memberships
+        : []).find((member) => String(member?.householdId || "") === "candidate-household");
+      expect(String(candidateMembership?.trustStatus || "")).toBe("trusted");
+      expect(String(candidateMembership?.role || "")).toBe("admin");
+    } finally {
+      await stopServer(child);
+    }
+  }, 60000);
 });
