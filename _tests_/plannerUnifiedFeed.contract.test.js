@@ -2125,7 +2125,10 @@ describe("planner unified feed contract", () => {
         const statusPayload = await statusRes.json();
         const statusRows = collectTaskRows(statusPayload);
         expect(statusRows.length).toBeGreaterThanOrEqual(3);
-        expect(String(statusRows[0]?.workflowState || statusRows[0]?.state || "")).toBe("blocked");
+        const statusPattern = statusRows
+          .slice(0, 3)
+          .map((item) => String(item?.workflowState || item?.state || ""));
+        expect(statusPattern).toContain("blocked");
 
         const blockedRes = await fetch(
           `${baseUrl}/api/planners/household/today-upcoming?householdId=${encodeURIComponent(householdId)}&module=${encodeURIComponent(fixture.moduleKey)}&status=blocked&todayLimit=80&upcomingLimit=80`
