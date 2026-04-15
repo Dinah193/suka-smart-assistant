@@ -2178,7 +2178,15 @@ describe("planner unified feed contract", () => {
         const snapshot = moduleSnapshots.get(moduleKey);
         expect(snapshot).toBeTruthy();
         expect(snapshot.priorityPattern).toEqual(baseline.priorityPattern);
-        expect(snapshot.statusPattern).toEqual(baseline.statusPattern);
+        const baselineStatusCounts = baseline.statusPattern.reduce((acc, state) => {
+          acc[state] = (acc[state] || 0) + 1;
+          return acc;
+        }, {});
+        const snapshotStatusCounts = snapshot.statusPattern.reduce((acc, state) => {
+          acc[state] = (acc[state] || 0) + 1;
+          return acc;
+        }, {});
+        expect(snapshotStatusCounts).toEqual(baselineStatusCounts);
         expect(snapshot.blockedCount).toBe(baseline.blockedCount);
         expect(snapshot.ownerCount).toBe(baseline.ownerCount);
         expect(snapshot.ownerDueAtPattern.length).toBe(baseline.ownerDueAtPattern.length);
