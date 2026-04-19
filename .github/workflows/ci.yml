@@ -123,6 +123,46 @@ jobs:
       - name: Startup health payload contract
         run: npx vitest run _tests_/serverStartup.dbmode.contract.test.js --reporter=verbose
 
+      - name: Capture flaky trend window 1
+        run: >-
+          node tools/scripts/capture-flaky-trend.cjs
+          --iterations=2
+          --window=ci-window-1
+          --out=docs/qa/integration-reliability-flaky-trend-ci-window1.json
+
+      - name: Capture flaky trend window 2
+        run: >-
+          node tools/scripts/capture-flaky-trend.cjs
+          --iterations=2
+          --window=ci-window-2
+          --out=docs/qa/integration-reliability-flaky-trend-ci-window2.json
+
+      - name: Capture flaky trend window 3
+        run: >-
+          node tools/scripts/capture-flaky-trend.cjs
+          --iterations=2
+          --window=ci-window-3
+          --out=docs/qa/integration-reliability-flaky-trend-ci-window3.json
+
+      - name: Evaluate flaky trend 3-window gate
+        run: >-
+          node tools/scripts/check-flaky-trend-windows.cjs
+          --required-windows=3
+          --prefix=integration-reliability-flaky-trend-ci-
+          --out=docs/qa/integration-reliability-flaky-trend-ci-gate.json
+
+      - name: Upload flaky trend artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-reliability-flaky-trend-ci
+          path: |
+            docs/qa/integration-reliability-flaky-trend-ci-window1.json
+            docs/qa/integration-reliability-flaky-trend-ci-window2.json
+            docs/qa/integration-reliability-flaky-trend-ci-window3.json
+            docs/qa/integration-reliability-flaky-trend-ci-gate.json
+          if-no-files-found: error
+
   runtime-contracts:
     runs-on: ubuntu-latest
     services:
@@ -399,6 +439,42 @@ jobs:
           path: docs/qa/consolidated-smoke-report-rerun-latest.json
           if-no-files-found: error
 
+  planner-social-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Planner/social context feed gate
+        run: npm run test:social:platform:gate
+
+      - name: Dashboard feed performance gate (S6-T1)
+        run: npm run test:dashboard:feed:performance:gate
+
+      - name: Offline draft + retry guarantees gate (S6-T2)
+        run: npm run test:mealplanner:offline-draft-retry:gate
+
+      - name: API error envelope gate (S6-T3)
+        run: npm run test:api:error-envelope:contract
+
+      - name: Launch metrics and thresholds gate (S6-T4)
+        run: npm run test:metrics:launch-gates:contract
+
+      - name: Collaboration attachment + realtime fallback contracts
+        run: npm run test:collaboration:attachments:contract && npm run test:collaboration:realtime-fallback:contract
+
+      - name: Onboarding full-cycle contract
+        run: npm run test:onboarding:full-cycle:contract
+
   post-merge-runtime-smoke:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs:
@@ -413,6 +489,7 @@ jobs:
       - lint
       - typecheck
       - smoke-e2e
+      - planner-social-gates
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

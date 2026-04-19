@@ -1,0 +1,147 @@
+{
+  "ok": true,
+  "reportType": "integration_reliability_flaky_trend_capture",
+  "generatedAt": "2026-04-19T00:58:59.666Z",
+  "iterationsPerTest": 5,
+  "tests": [
+    "_tests_/serverStartup.dbmode.contract.test.js",
+    "_tests_/integrationPreflight.neo4j.contract.test.js"
+  ],
+  "summary": {
+    "testsTracked": 2,
+    "testsWithFailures": 0,
+    "flakyTestsCount": 0,
+    "flakyTests": [],
+    "failedTests": []
+  },
+  "details": [
+    {
+      "summary": {
+        "testFile": "_tests_/serverStartup.dbmode.contract.test.js",
+        "totalRuns": 5,
+        "passedRuns": 5,
+        "failedRuns": 0,
+        "passRate": 1,
+        "failureRate": 0,
+        "flaky": false,
+        "averageDurationMs": 11489
+      },
+      "runs": [
+        {
+          "iteration": 1,
+          "ok": true,
+          "startedAt": "2026-04-19T00:57:19.735Z",
+          "endedAt": "2026-04-19T00:57:29.230Z",
+          "durationMs": 9495,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 2,
+          "ok": true,
+          "startedAt": "2026-04-19T00:57:29.231Z",
+          "endedAt": "2026-04-19T00:57:39.709Z",
+          "durationMs": 10478,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 3,
+          "ok": true,
+          "startedAt": "2026-04-19T00:57:39.709Z",
+          "endedAt": "2026-04-19T00:57:51.946Z",
+          "durationMs": 12237,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 4,
+          "ok": true,
+          "startedAt": "2026-04-19T00:57:51.946Z",
+          "endedAt": "2026-04-19T00:58:04.716Z",
+          "durationMs": 12770,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 5,
+          "ok": true,
+          "startedAt": "2026-04-19T00:58:04.717Z",
+          "endedAt": "2026-04-19T00:58:17.180Z",
+          "durationMs": 12463,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "summary": {
+        "testFile": "_tests_/integrationPreflight.neo4j.contract.test.js",
+        "totalRuns": 5,
+        "passedRuns": 5,
+        "failedRuns": 0,
+        "passRate": 1,
+        "failureRate": 0,
+        "flaky": false,
+        "averageDurationMs": 8497
+      },
+      "runs": [
+        {
+          "iteration": 1,
+          "ok": true,
+          "startedAt": "2026-04-19T00:58:17.181Z",
+          "endedAt": "2026-04-19T00:58:25.067Z",
+          "durationMs": 7886,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 2,
+          "ok": true,
+          "startedAt": "2026-04-19T00:58:25.067Z",
+          "endedAt": "2026-04-19T00:58:34.499Z",
+          "durationMs": 9432,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 3,
+          "ok": true,
+          "startedAt": "2026-04-19T00:58:34.500Z",
+          "endedAt": "2026-04-19T00:58:43.041Z",
+          "durationMs": 8541,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 4,
+          "ok": true,
+          "startedAt": "2026-04-19T00:58:43.041Z",
+          "endedAt": "2026-04-19T00:58:50.935Z",
+          "durationMs": 7894,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 5,
+          "ok": true,
+          "startedAt": "2026-04-19T00:58:50.935Z",
+          "endedAt": "2026-04-19T00:58:59.666Z",
+          "durationMs": 8731,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        }
+      ]
+    }
+  ]
+}

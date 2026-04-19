@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "reportType": "integration_reliability_flaky_window_gate",
+  "generatedAt": "2026-04-19T01:05:58.555Z",
+  "requiredWindows": 3,
+  "capturePrefix": "integration-reliability-flaky-trend-",
+  "inputDir": "docs/qa",
+  "totalCaptureFiles": 3,
+  "trailingWindows": [
+    {
+      "file": "docs\\qa\\integration-reliability-flaky-trend-2026-04-18-initial.json",
+      "generatedAt": "2026-04-19T00:58:59.666Z",
+      "windowId": null,
+      "testsTracked": 2,
+      "failingTests": [],
+      "pass": true
+    },
+    {
+      "file": "docs\\qa\\integration-reliability-flaky-trend-2026-04-18-window2.json",
+      "generatedAt": "2026-04-19T01:04:04.342Z",
+      "windowId": "window-2",
+      "testsTracked": 2,
+      "failingTests": [],
+      "pass": true
+    },
+    {
+      "file": "docs\\qa\\integration-reliability-flaky-trend-2026-04-18-window3.json",
+      "generatedAt": "2026-04-19T01:05:04.799Z",
+      "windowId": "window-3",
+      "testsTracked": 2,
+      "failingTests": [],
+      "pass": true
+    }
+  ],
+  "perTestTrailing": {
+    "_tests_/serverStartup.dbmode.contract.test.js": {
+      "windowsObserved": 3,
+      "consecutivePasses": 3,
+      "passAllObserved": true
+    },
+    "_tests_/integrationPreflight.neo4j.contract.test.js": {
+      "windowsObserved": 3,
+      "consecutivePasses": 3,
+      "passAllObserved": true
+    }
+  },
+  "gate": {
+    "pass": true,
+    "hasEnoughWindows": true,
+    "allPassAcrossRequired": true,
+    "reason": "trailing_windows_stable"
+  }
+}
