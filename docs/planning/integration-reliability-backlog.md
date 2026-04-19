@@ -12,9 +12,10 @@ This backlog tracks near-term hardening tasks for the multi-DB integration path.
 - Exit criteria:
   - No repeated flaky failures across three consecutive CI windows.
 - Status:
-  - In progress. Initial baseline captured 2026-04-18. Evidence: [closeout-flaky-trend-baseline-2026-04-18.md](closeout-flaky-trend-baseline-2026-04-18.md), [../qa/integration-reliability-flaky-trend-2026-04-18-initial.json](../qa/integration-reliability-flaky-trend-2026-04-18-initial.json).
+  - Completed 2026-04-19. Initial baseline captured 2026-04-18. Evidence: [closeout-flaky-trend-baseline-2026-04-18.md](closeout-flaky-trend-baseline-2026-04-18.md), [../qa/integration-reliability-flaky-trend-2026-04-18-initial.json](../qa/integration-reliability-flaky-trend-2026-04-18-initial.json).
   - Added trailing-window gate automation and recorded a passing three-window local trend set. Evidence: [closeout-flaky-trend-window-gate-2026-04-18.md](closeout-flaky-trend-window-gate-2026-04-18.md), [../qa/integration-reliability-flaky-trend-gate-2026-04-18.json](../qa/integration-reliability-flaky-trend-gate-2026-04-18.json), [../qa/integration-reliability-flaky-trend-2026-04-18-window2.json](../qa/integration-reliability-flaky-trend-2026-04-18-window2.json), [../qa/integration-reliability-flaky-trend-2026-04-18-window3.json](../qa/integration-reliability-flaky-trend-2026-04-18-window3.json).
   - CI wiring complete in `.github/workflows/ci.yml` so every `db-runtime-contracts` run captures three windows, evaluates the 3-window policy, and uploads evidence artifacts.
+  - Live CI validation complete on PR #55 with required checks green and `db-runtime-contracts` passing. Evidence: [closeout-flaky-trend-ci-live-validation-2026-04-19.md](closeout-flaky-trend-ci-live-validation-2026-04-19.md).
 
 2. Preflight timeout tuning
 - Scope: reduce false negatives from environment startup timing variance.
