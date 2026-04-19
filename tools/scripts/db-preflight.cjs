@@ -55,6 +55,10 @@ function parseMsEnv(name, fallback, min = 1000) {
   return Math.floor(value);
 }
 
+function shouldDryRun() {
+  return String(process.env.DB_PREFLIGHT_DRY_RUN || "false").toLowerCase() === "true";
+}
+
 function terminateChild(child, graceMs = 1200) {
   return new Promise((resolve) => {
     if (!child || child.killed || child.exitCode != null) {
@@ -183,18 +187,57 @@ async function waitForHealth(port, timeoutMs = 12000) {
 
 function classifyDbPreflightError(error) {
   const message = String(error?.message || error || "unknown_error");
+  const lower = message.toLowerCase();
 
-  if (message.startsWith("invalid_")) return { category: "config", reason: message };
-  if (message.includes("Missing DB connection")) return { category: "config", reason: "missing_database_connection" };
-  if (message.includes("mongo_uri_missing")) return { category: "config", reason: "missing_mongo_uri" };
-  if (message.includes("mongo_connect_failed")) return { category: "dependency", reason: "mongo_connect_failed" };
-  if (message.includes("mongo_check_timeout")) return { category: "timeout", reason: "mongo_check_timeout" };
-  if (message.includes("health_timeout")) return { category: "timeout", reason: "health_probe_timeout" };
-  if (message.startsWith("timeout:")) return { category: "timeout", reason: "script_timeout" };
-  if (message.startsWith("failed:")) return { category: "dependency", reason: "script_failed" };
-  if (message.startsWith("preflight_runtime_exceeded")) return { category: "timeout", reason: "runtime_exceeded" };
+  const authPattern = /auth|authentication|invalid credential|password|unauthorized/i;
+  const networkPattern = /econnrefused|enotfound|eai_again|econnreset|etimedout|network|connect/i;
 
-  return { category: "unknown", reason: "unclassified" };
+  if (authPattern.test(message)) {
+    return { category: "auth", reason: "authentication_failed", subsystem: "credential" };
+  }
+  if (networkPattern.test(message)) {
+    return { category: "network", reason: "service_connectivity_failure", subsystem: "transport" };
+  }
+
+  if (message.startsWith("invalid_")) {
+    return { category: "config", reason: message, subsystem: "config" };
+  }
+  if (message.includes("Missing DB connection")) {
+    return { category: "config", reason: "missing_database_connection", subsystem: "postgres" };
+  }
+  if (message.includes("mongo_uri_missing")) {
+    return { category: "config", reason: "missing_mongo_uri", subsystem: "mongo" };
+  }
+  if (message.includes("mongo_connect_failed")) {
+    if (authPattern.test(lower)) {
+      return { category: "auth", reason: "authentication_failed", subsystem: "mongo" };
+    }
+    if (networkPattern.test(lower)) {
+      return { category: "network", reason: "service_connectivity_failure", subsystem: "mongo" };
+    }
+    return { category: "dependency", reason: "mongo_connect_failed", subsystem: "mongo" };
+  }
+  if (message.includes("mongo_check_timeout")) {
+    return { category: "timeout", reason: "mongo_check_timeout", subsystem: "mongo" };
+  }
+  if (message.includes("health_timeout")) {
+    return { category: "timeout", reason: "health_probe_timeout", subsystem: "server_health" };
+  }
+  if (message.startsWith("timeout:")) {
+    return { category: "timeout", reason: "script_timeout", subsystem: "script" };
+  }
+  if (message.startsWith("failed:")) {
+    return { category: "dependency", reason: "script_failed", subsystem: "script" };
+  }
+  if (message.startsWith("preflight_runtime_exceeded")) {
+    return { category: "timeout", reason: "runtime_exceeded", subsystem: "db_preflight" };
+  }
+
+  if (lower.includes("required") || lower.includes("missing") || lower.includes("not configured")) {
+    return { category: "dependency", reason: "required_service_unavailable", subsystem: "config" };
+  }
+
+  return { category: "unknown", reason: "unclassified", subsystem: "db_preflight" };
 }
 
 async function probeServerHealth(baseEnv, timeoutMs = 16000) {
@@ -292,14 +335,41 @@ async function checkMongoConnectivity(baseEnv) {
 
 async function main() {
   const startedAt = Date.now();
-  const maxRuntimeMs = parseMsEnv("DB_PREFLIGHT_TIMEOUT_MS", 55000, 10000);
-  const migrateTimeoutMs = parseMsEnv("DB_PREFLIGHT_MIGRATE_TIMEOUT_MS", 22000, 2000);
-  const bootstrapTimeoutMs = parseMsEnv("DB_PREFLIGHT_BOOTSTRAP_TIMEOUT_MS", 16000, 2000);
-  const mongoCheckTimeoutMs = parseMsEnv("DB_PREFLIGHT_MONGO_TIMEOUT_MS", 9000, 1000);
-  const serverProbeTimeoutMs = parseMsEnv("DB_PREFLIGHT_SERVER_PROBE_TIMEOUT_MS", 14000, 2000);
-  const healthPollTimeoutMs = parseMsEnv("DB_PREFLIGHT_HEALTH_TIMEOUT_MS", 12000, 2000);
+  const maxRuntimeMs = parseMsEnv("DB_PREFLIGHT_TIMEOUT_MS", 70000, 10000);
+  const migrateTimeoutMs = parseMsEnv("DB_PREFLIGHT_MIGRATE_TIMEOUT_MS", 30000, 2000);
+  const bootstrapTimeoutMs = parseMsEnv("DB_PREFLIGHT_BOOTSTRAP_TIMEOUT_MS", 24000, 2000);
+  const mongoCheckTimeoutMs = parseMsEnv("DB_PREFLIGHT_MONGO_TIMEOUT_MS", 12000, 1000);
+  const serverProbeTimeoutMs = parseMsEnv("DB_PREFLIGHT_SERVER_PROBE_TIMEOUT_MS", 22000, 2000);
+  const healthPollTimeoutMs = parseMsEnv("DB_PREFLIGHT_HEALTH_TIMEOUT_MS", 18000, 2000);
 
   loadWorkspaceEnv();
+
+  if (shouldDryRun()) {
+    console.log(
+      JSON.stringify({
+        ok: true,
+        dryRun: true,
+        ranAt: new Date().toISOString(),
+        timeoutConfig: {
+          maxRuntimeMs,
+          migrateTimeoutMs,
+          bootstrapTimeoutMs,
+          mongoCheckTimeoutMs,
+          serverProbeTimeoutMs,
+          healthPollTimeoutMs,
+        },
+        timeoutEnv: {
+          maxRuntime: "DB_PREFLIGHT_TIMEOUT_MS",
+          migrate: "DB_PREFLIGHT_MIGRATE_TIMEOUT_MS",
+          bootstrap: "DB_PREFLIGHT_BOOTSTRAP_TIMEOUT_MS",
+          mongo: "DB_PREFLIGHT_MONGO_TIMEOUT_MS",
+          serverProbe: "DB_PREFLIGHT_SERVER_PROBE_TIMEOUT_MS",
+          health: "DB_PREFLIGHT_HEALTH_TIMEOUT_MS",
+        },
+      })
+    );
+    return;
+  }
 
   const connectionString = resolveConnectionString();
   if (!connectionString) {
@@ -395,6 +465,7 @@ main().catch((error) => {
       script: "db:preflight",
       category: classification.category,
       reason: classification.reason,
+      subsystem: classification.subsystem,
       error: message,
       failedAt: new Date().toISOString(),
     })

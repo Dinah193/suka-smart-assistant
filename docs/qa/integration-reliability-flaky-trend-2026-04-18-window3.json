@@ -1,0 +1,88 @@
+{
+  "ok": true,
+  "reportType": "integration_reliability_flaky_trend_capture",
+  "generatedAt": "2026-04-19T01:05:04.799Z",
+  "windowId": "window-3",
+  "iterationsPerTest": 2,
+  "tests": [
+    "_tests_/serverStartup.dbmode.contract.test.js",
+    "_tests_/integrationPreflight.neo4j.contract.test.js"
+  ],
+  "summary": {
+    "testsTracked": 2,
+    "testsWithFailures": 0,
+    "flakyTestsCount": 0,
+    "flakyTests": [],
+    "failedTests": []
+  },
+  "details": [
+    {
+      "summary": {
+        "testFile": "_tests_/serverStartup.dbmode.contract.test.js",
+        "totalRuns": 2,
+        "passedRuns": 2,
+        "failedRuns": 0,
+        "passRate": 1,
+        "failureRate": 0,
+        "flaky": false,
+        "averageDurationMs": 9445
+      },
+      "runs": [
+        {
+          "iteration": 1,
+          "ok": true,
+          "startedAt": "2026-04-19T01:04:32.104Z",
+          "endedAt": "2026-04-19T01:04:41.693Z",
+          "durationMs": 9589,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 2,
+          "ok": true,
+          "startedAt": "2026-04-19T01:04:41.693Z",
+          "endedAt": "2026-04-19T01:04:50.993Z",
+          "durationMs": 9300,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "summary": {
+        "testFile": "_tests_/integrationPreflight.neo4j.contract.test.js",
+        "totalRuns": 2,
+        "passedRuns": 2,
+        "failedRuns": 0,
+        "passRate": 1,
+        "failureRate": 0,
+        "flaky": false,
+        "averageDurationMs": 6903
+      },
+      "runs": [
+        {
+          "iteration": 1,
+          "ok": true,
+          "startedAt": "2026-04-19T01:04:50.993Z",
+          "endedAt": "2026-04-19T01:04:58.513Z",
+          "durationMs": 7520,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "iteration": 2,
+          "ok": true,
+          "startedAt": "2026-04-19T01:04:58.513Z",
+          "endedAt": "2026-04-19T01:05:04.799Z",
+          "durationMs": 6286,
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        }
+      ]
+    }
+  ]
+}
